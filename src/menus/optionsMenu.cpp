@@ -76,23 +76,23 @@ OptionsMenu::OptionsMenu()
     // Helms rotation lock.
     (new GuiToggleButton(interface_page, "HEMS_RADAR_LOCK", tr("Helms Radar Lock"), [](bool value)
     {
-        PreferencesManager::set("helms_radar_lock", value ? "1" : "");
-        PreferencesManager::set("tactical_radar_lock", value ? "1" : "");
-        PreferencesManager::set("single_pilot_radar_lock", value ? "1" : "");
-    }))->setValue(PreferencesManager::get("helms_radar_lock", "0") == "1")->setSize(GuiElement::GuiSizeMax, 50);
+        PreferencesManager::set("helms_radar_lock", value ? "1" : "0");
+        PreferencesManager::set("tactical_radar_lock", value ? "1" : "0");
+        PreferencesManager::set("single_pilot_radar_lock", value ? "1" : "0");
+    }))->setValue(PreferencesManager::get("helms_radar_lock", "1") == "1")->setSize(GuiElement::GuiSizeMax, 50);
 
     // Weapons rotation lock.
     (new GuiToggleButton(interface_page, "WEAPONS_RADAR_LOCK", tr("Weapons Radar Lock"), [](bool value)
     {
-        PreferencesManager::set("weapons_radar_lock", value ? "1" : "");
-    }))->setValue(PreferencesManager::get("weapons_radar_lock", "0") == "1")->setSize(GuiElement::GuiSizeMax, 50);
+        PreferencesManager::set("weapons_radar_lock", value ? "1" : "0");
+    }))->setValue(PreferencesManager::get("weapons_radar_lock", "1") == "1")->setSize(GuiElement::GuiSizeMax, 50);
 
     // Science rotation lock.
     (new GuiToggleButton(interface_page, "SCIENCE_RADAR_LOCK", tr("Science Radar Lock"), [](bool value)
     {
-        PreferencesManager::set("science_radar_lock", value ? "1" : "");
-        PreferencesManager::set("operations_radar_lock", value ? "1" : "");
-    }))->setValue(PreferencesManager::get("science_radar_lock", "0") == "1")->setSize(GuiElement::GuiSizeMax, 50);
+        PreferencesManager::set("science_radar_lock", value ? "1" : "0");
+        PreferencesManager::set("operations_radar_lock", value ? "1" : "0");
+    }))->setValue(PreferencesManager::get("science_radar_lock", "1") == "1")->setSize(GuiElement::GuiSizeMax, 50);
 
     // Control configuration
     (new GuiLabel(interface_page, "CONTROL_OPTIONS_LABEL", tr("Control Options"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->layout.margin.top = 20;

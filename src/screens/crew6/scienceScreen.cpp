@@ -66,7 +66,7 @@ ScienceScreen::ScienceScreen(GuiContainer* owner, CrewPosition crew_position)
             targets.setToClosestTo(position, 1000, TargetsContainer::Selectable);
         }, nullptr, nullptr
     );
-    science_radar->setAutoRotating(PreferencesManager::get("science_radar_lock","0")=="1");
+    science_radar->setAutoRotating(PreferencesManager::get("science_radar_lock","1")=="1");
     new RawScannerDataRadarOverlay(science_radar, "");
 
     // Draw and hide the probe radar.

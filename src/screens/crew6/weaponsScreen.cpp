@@ -51,7 +51,7 @@ WeaponsScreen::WeaponsScreen(GuiContainer* owner)
                 my_player_info->commandSetTarget({});
         }, nullptr, nullptr
     );
-    radar->setAutoRotating(PreferencesManager::get("weapons_radar_lock","0")=="1");
+    radar->setAutoRotating(PreferencesManager::get("weapons_radar_lock","1")=="1");
 
     missile_aim = new AimLock(this, "MISSILE_AIM", radar, -90, 360 - 90, 0, [this](float value){
         tube_controls->setMissileTargetAngle(value);

@@ -75,7 +75,7 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
             drag_rotate=false;
         }
     );
-    radar->setAutoRotating(PreferencesManager::get("tactical_radar_lock","0")=="1");
+    radar->setAutoRotating(PreferencesManager::get("tactical_radar_lock","1")=="1");
 
     auto stats = new GuiElement(this, "STATS");
     stats->setPosition(20, 100, sp::Alignment::TopLeft)->setSize(240, 160)->setAttribute("layout", "vertical");

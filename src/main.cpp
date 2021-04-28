@@ -179,6 +179,7 @@ int main(int argc, char** argv)
     if (PreferencesManager::get("headless") != "")
         textureManager.setDisabled(true);
 
+    new DirectoryResourceProvider("mod_spacelan/");	// scripts or other resources in the mod directory take precedence before resources in other directories, since this provider is added first. Notice that other resources with the same name are not used anymore!
     if (PreferencesManager::get("mod") != "")
     {
         string mod = PreferencesManager::get("mod");
@@ -198,7 +199,7 @@ int main(int argc, char** argv)
     if (getenv("HOME"))
     {
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/");
-        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts-piglit/");
+        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts/");
         PackResourceProvider::addPackResourcesForDirectory(string(getenv("HOME")) + "/.emptyepsilon/packs/");
     }
 #ifdef RESOURCE_BASE_DIR

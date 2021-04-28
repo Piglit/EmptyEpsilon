@@ -1,0 +1,614 @@
+-- Name: Skirmish
+-- Short Description: A quick and easy battle scenario
+-- Objective: Defend the space stations and destroy all enemy ships
+-- Duration: 30 minutes time limit
+-- Difficulty: normal/selectable
+-- Description: A few stations are under attack by enemies, with some terrain around them.
+---
+-- Type: Basic
+-- Setting[Enemies]: Configures the amount of enemies spawned in the scenario.
+-- Enemies[Easy]: Fewer enemies. Recommended for inexperienced crews.
+-- Enemies[Normal|Default]: Normal amount of enemies. Recommended for a normal crew.
+-- Enemies[Hard]: More enemies. Recommended if you have multiple player-controlled ships.
+-- Enemies[Extreme]: Many enemies. Inexperienced player crews will pretty surely be overwhelmed.
+-- Setting[Time]: Sets up how much time the players have for the scenario
+-- Time[Unlimited|Default]: No time limit
+-- Time[20min]: Automatic loss after 20 minutes
+-- Time[30min]: Automatic loss after 30 minutes
+-- Time[60min]: Automatic loss after 60 minutes
+
+--- Scenario
+-- @script scenario_00_basic
+
+require("utils.lua")
+-- For this scenario, utils.lua provides:
+--   vectorFromAngle(angle, length)
+--      Returns a relative vector (x, y coordinates)
+--   setCirclePos(obj, x, y, angle, distance)
+--      Returns the object with its position set to the resulting coordinates.
+--   distance(a, b, c, d)
+--      Returns the distance between two objects/coordinates
+--   angleRotation(a, b, c, d)
+--      Returns the bearing between first object/coordinate and second object/coordinate. 
+
+require("plots/campaign.lua")
+
+-- Global variables for this scenario
+local enemyList
+local friendlyList
+local stationList
+local playerList
+local addWavesToGMPosition      -- If set to true, add wave will require GM to click on the map to position, where the wave should be spawned. 
+local startEnemyCount = nil
+
+local gametimeleft = nil -- Maximum game time in seconds.
+local timewarning = nil -- Used for checking when to give a warning, and to update it so the warning happens once.
+
+local enemy_faction = "Criminals"
+
+local ship_names = {
+    "SS Epsilon",
+    "Ironic Gentleman",
+    "Binary Sunset",
+    "USS Roddenberry",
+    "Earthship Sagan",
+    "Explorer",
+    "ISV Phantom",
+    "Keelhaul",
+    "Peacekeeper",
+    "WarMonger",
+    "Death Bringer",
+    "Executor",
+    "Excaliber",
+    "Voyager",
+    "Khan's Wrath",
+    "Kronos' Savior",
+    "HMS Captor",
+    "Imperial Stature",
+    "ESS Hellfire",
+    "Helen's Fury",
+    "Venus' Light",
+    "Blackbeard's Way",
+    "ISV Monitor",
+    "Argent",
+    "Echo One",
+    "Earth's Might",
+    "ESS Tomahawk",
+    "Sabretooth",
+    "Hiro-maru",
+    "USS Nimoy",
+    "Earthship Tyson",
+    "Destiny's Tear",
+    "HMS SuperNova",
+    "Alma del Terra",
+    "DreadHeart",
+    "Devil's Maw",
+    "Cougar's Claw",
+    "Blood-oath",
+    "Imperial Fist",
+    "HMS Promise",
+    "ESS Catalyst",
+    "Hercules Ascendant",
+    "Heavens Mercy",
+    "HMS Adams",
+    "Explorer",
+    "Discovery",
+    "Stratosphere",
+    "USS Kelly",
+    "HMS Honour",
+    "Devilfish",
+    "Minnow",
+    "Earthship Nye",
+    "Starcruiser Solo",
+    "Starcruiser Reynolds",
+    "Starcruiser Hunt",
+    "Starcruiser Lipinski",
+    "Starcruiser Tylor",
+    "Starcruiser Kato",
+    "Starcruiser Picard",
+    "Starcruiser Janeway",
+    "Starcruiser Archer",
+    "Starcruiser Sisko",
+    "Starcruiser Kirk",
+    "Aluminum Falcon",
+    "SS Essess",
+    "Jenny"
+}
+
+--- Wrapper to adding an enemy wavE
+--
+-- This wrapper either calls addWaveInner directly (when on random wave positioning)
+-- or after onGMClick (when set to GM wave positioning).
+--
+-- @tparam table list A table containing enemy ship objects.
+-- @tparam integer kind A number; at each integer, determines a different wave of ships to add
+--  to the list. Any number is valid, but only 0.99-9.0 are meaningful.
+-- @tparam number a The spawned wave's heading relative to the players' spawn point (ignored when on GM positioning).
+-- @tparam number d The spawned wave's distance from the players' spawn point (ignored when on GM positioning).
+function addWave(list, kind, a, d)
+    if addWavesToGMPosition then
+        onGMClick(function(x,y) 
+            onGMClick(nil)
+            addWaveInner(list, kind, angleRotation(0, 0, x, y), distance(0, 0, x, y))
+        end)
+    else
+        addWaveInner(list, kind, a, d)
+    end
+end
+
+--- Add an enemy wave.
+--
+-- That is, create enemy wave and add all its ships to `list`.
+--
+-- @tparam table list A table containing enemy ship objects.
+-- @tparam integer kind A number; at each integer, determines a different wave of ships to add
+--  to the list. Any number is valid, but only 0.99-9.0 are meaningful.
+-- @tparam number a The spawned wave's heading relative to the players' spawn point.
+-- @tparam number d The spawned wave's distance from the players' spawn point.
+function addWaveInner(list, kind, a, d)
+    if kind < 1.0 then
+        -- striker
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Hunter"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a, d))
+    elseif kind < 2.0 then
+        -- fighter
+        leader = setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-1, 1), d + random(-100, 100))
+        table.insert(list, leader)
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+    elseif kind < 3.0 then
+        -- gunship
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    elseif kind < 4.0 then
+        -- gunship
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    elseif kind < 5.0 then
+        -- dreadnought
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Atlantis X23"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    elseif kind < 6.0 then
+        -- missile
+        leader = setCirclePos(CpuShip():setTemplate("Piranha F12"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100))
+        table.insert(list, leader)
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+    elseif kind < 7.0 then
+        -- cruiser
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    elseif kind < 8.0 then
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Nirvana R5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    elseif kind < 9.0 then
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MU52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    else
+        -- adv striker
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+    end
+end
+
+--- Returns a semi-random heading.
+--
+-- @tparam number cnt A counter, generally between 1 and the number of enemy groups.
+-- @tparam number enemy_group_count A number of enemy groups, generally set by the scenario variation.
+-- @treturn number a random angle (between 0-60 and 360+60)
+function randomWaveAngle(cnt, enemy_group_count)
+    return cnt * 360 / enemy_group_count + random(-60, 60)
+end
+
+--- Returns a semi-random distance.
+--
+-- `enemy_group_count` is multiplied by 3 u and increases the distance.
+--
+-- @tparam number enemy_group_count A number of enemy groups, generally set by the scenario variation.
+-- @treturn number a distance
+function randomWaveDistance(enemy_group_count)
+    return random(35000, 40000 + enemy_group_count * 3000)
+end
+
+--- Initializes main GM Menu
+function gmButtons()
+    clearGMFunctions()
+    addGMFunction(_("buttonGM", "+Named Waves"),namedWaves)
+    addGMFunction(_("buttonGM", "Random wave"),function()
+        addWave(
+            enemyList,
+            random(0,10),
+            randomWaveAngle(math.random(20),math.random(20)),
+            randomWaveDistance(math.random(20))
+        )
+    end)
+    
+    -- Let the GM spawn random reinforcements. Their distance from the
+    -- players' spawn point is about half that of enemy waves.
+    addGMFunction(_("buttonGM", "Random friendly"), function()
+        local friendlyShip = {"Phobos T3", "MU52 Hornet", "Piranha F12"}
+        local friendlyShipIndex = math.random(#friendlyShip)
+        
+        if addWavesToGMPosition then
+            onGMClick(function(x,y) 
+                onGMClick(nil)
+                local a = angleRotation(0, 0, x, y)
+                local d = distance(0, 0, x, y)
+                table.insert(friendlyList, setCirclePos(CpuShip():setTemplate(friendlyShip[friendlyShipIndex]):setRotation(a):setFaction("Human Navy"):orderRoaming():setScanned(true), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+            end)
+        else
+            local a = randomWaveAngle(math.random(20), math.random(20))
+            local d = random(15000, 20000 + math.random(20) * 1500)
+            table.insert(friendlyList, setCirclePos(CpuShip():setTemplate(friendlyShip[friendlyShipIndex]):setRotation(a):setFaction("Human Navy"):orderRoaming():setScanned(true), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        end
+    end)
+        
+    addGMPositionToggle()
+    
+    -- End scenario with Human Navy (players) victorious.
+    addGMFunction(_("buttonGM", "Win"),gmVictoryYesNo)
+end
+
+--- Shows Yes/No question dialogue GM submenu with question if Human Navy should win. 
+function gmVictoryYesNo()
+    clearGMFunctions()
+    addGMFunction(_("buttonGM", "Victory?"), function() string.format("") end)
+    addGMFunction(_("buttonGM", "Yes"), function() 
+        victory("Human Navy")
+        clearGMFunctions()
+        addGMMessage(_("msgGM", [[Players have won.
+Scenario ended.]]))
+    end)
+    addGMFunction(_("buttonGM", "No"), gmButtons)
+end
+
+--- Generate GM Toggle button for changing wave positioning variant. 
+function addGMPositionToggle()
+    local name = _("buttonGM", "Position: ")
+
+    if(addWavesToGMPosition) then
+        name = name.._("buttonGM", "GM")
+    else
+        name = name.._("buttonGM", "Random")
+    end
+
+    addGMFunction(name, function()
+        string.format("")   -- Provides global context for SeriousProton
+        addWavesToGMPosition = not addWavesToGMPosition
+        gmButtons()
+    end)
+end
+
+--- Shows "Named waves" GM submenu (that allows spawning more waves).
+function namedWaves()
+    local wave_names = {
+        [0] = _("buttonGM", "Strikeship"),
+        [1] = _("buttonGM", "Fighter"),
+        [2] = _("buttonGM", "Gunship"),
+        [4] = _("buttonGM", "Dreadnought"),
+        [5] = _("buttonGM", "Missile Cruiser"),
+        [6] = _("buttonGM", "Cruiser"),
+        [9] = _("buttonGM", "Adv. striker"),
+    }
+    clearGMFunctions()
+    addGMFunction(_("buttonGM", "-From Named Waves"),gmButtons)
+    for index, name in pairs(wave_names) do
+        addGMFunction(name,function()
+            string.format("")
+            addWave(enemyList,index,randomWaveAngle(math.random(20), math.random(20)), randomWaveDistance(math.random(5)))
+        end)
+    end
+end
+
+--- Initialize scenario.
+function init()
+    --[[
+    -- Spawn a player Atlantis.
+    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate(getScenarioSetting("PlayerShip"))
+    player:setCallSign(ship_names[irandom(1, #ship_names)])
+    if not player:hasWarpDrive() and not player:hasJumpDrive() then
+        player:setWarpDrive(true)
+    end
+    --]]
+
+    enemyList = {}
+    friendlyList = {}
+    stationList = {}
+    playerList = {}
+
+    onNewPlayerShip(function(ship)
+        table.insert(playerList, ship)
+        local station = friendlyList[1]
+        if station:isValid() then
+            if gametimeleft ~= nil then
+                station:sendCommsMessage(
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming pirate attack.
+
+    Please inform your Captain and crew that you have a total of %d minutes for this mission.
+
+    The mission started at the arrival of this message.
+
+    Good luck.]]), ship:getCallSign(), math.ceil(gametimeleft / 60))
+                )
+            else
+                station:sendCommsMessage(
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming pirate attack.
+
+    Good luck.]]), ship:getCallSign())
+                )
+            end
+        end
+		campaign:requestReputation()
+		allowNewPlayerShips(false)
+    end)
+    
+    addWavesToGMPosition = false
+
+    -- Randomly distribute 3 allied stations throughout the region.
+    local n
+    n = 0
+    -- station_X.comms_data are not yet used, it is here for time when Defense Fleet functionality is implemented to comms_station.lua
+    station_1 = SpaceStation():setTemplate("Small Station"):setRotation(random(0, 360)):setFaction("Human Navy")
+    setCirclePos(station_1, 0, 0, n * 360 / 3 + random(-30, 30), random(10000, 22000))
+    station_1.comms_data = {
+        idle_defense_fleet = {
+            DF1 = "MT52 Hornet",
+            DF2 = "MT52 Hornet",
+            DF3 = "MT52 Hornet",
+        }
+    }
+    table.insert(stationList, station_1)
+    table.insert(friendlyList, station_1)
+    n = 1
+    station_2 = SpaceStation():setTemplate("Medium Station"):setRotation(random(0, 360)):setFaction("Human Navy")
+    setCirclePos(station_2, 0, 0, n * 360 / 3 + random(-30, 30), random(10000, 22000))
+    station_2.comms_data = {
+        idle_defense_fleet = {
+            DF1 = "Adder MK5",
+            DF2 = "Adder MK5",
+            DF3 = "Adder MK5",
+        }
+    }
+    table.insert(stationList, station_2)
+    table.insert(friendlyList, station_2)
+    n = 2
+    station_3 = SpaceStation():setTemplate("Large Station"):setRotation(random(0, 360)):setFaction("Human Navy")
+    setCirclePos(station_3, 0, 0, n * 360 / 3 + random(-30, 30), random(10000, 22000))
+    station_3.comms_data = {
+        idle_defense_fleet = {
+            DF1 = "Phobos T3",
+            DF2 = "Phobos T3",
+            DF3 = "Phobos T3",
+        }
+    }
+    table.insert(stationList, station_3)
+    table.insert(friendlyList, station_3)
+
+    -- Start the players with 300 reputation.
+    friendlyList[1]:addReputationPoints(300.0)
+
+    -- Randomly scatter nebulae near the players' spawn point.
+    local cx, cy = friendlyList[1]:getPosition()
+    setCirclePos(Nebula(), cx, cy, random(0, 360), 6000)
+
+    for idx = 1, 5 do
+        setCirclePos(Nebula(), 0, 0, random(0, 360), random(20000, 45000))
+    end
+    gmButtons()
+
+    -- Set the number of enemy waves based on the scenario variation.
+    local counts = {
+        ["Extreme"] = 20,
+        ["Hard"] = 8,
+        ["Normal"] = 5,
+        ["Easy"] = 3,
+        ["Empty"] = 0
+    }
+    local enemy_group_count = counts[getScenarioSetting("Enemies")]
+    assert(enemy_group_count, "unknown enemies setting: " .. getScenarioSetting("Enemies") .. " could not set enemy_group_count")
+	campaign:initScore(getScenarioSetting("Enemies"))
+
+    local timesetting = {
+        ["Unlimited"] = nil,
+        ["20min"] = 20 * 60,
+        ["30min"] = 30 * 60,
+        ["60min"] = 60 * 60,
+    }
+    gametimeleft = timesetting[getScenarioSetting("Time")]
+    if gametimeleft ~= nil then
+        timewarning = gametimeleft - 5 * 60
+    end
+
+    -- If not in the Empty variation, spawn the corresponding number of random
+    -- enemy waves at distributed random headings and semi-random distances
+    -- relative to the players' spawn point.
+    for cnt = 1, enemy_group_count do
+        local a = randomWaveAngle(cnt, enemy_group_count)
+        local d = randomWaveDistance(enemy_group_count)
+        local kind = random(0, 10)
+        addWaveInner(enemyList, kind, a, d)
+    end
+
+    -- Spawn 2-5 random asteroid belts.
+	-- place an artifact in the belt
+	local art = nil
+    for i_ = 1, irandom(2, 5) do
+        local a = random(0, 360)
+        local a2 = random(0, 360)
+        local d = random(3000, 40000)
+        local x, y = vectorFromAngle(a, d)
+
+        for j_ = 1, 50 do
+            local dx1, dy1 = vectorFromAngle(a2, random(-1000, 1000))
+            local dx2, dy2 = vectorFromAngle(a2 + 90, random(-20000, 20000))
+            local posx = x + dx1 + dx2
+            local posy = y + dy1 + dy2
+            -- Avoid spawning asteroids within 1U of the player start position or
+            -- 2U of any station.
+            if math.abs(posx) > 1000 and math.abs(posy) > 1000 then
+                for k_, station in ipairs(stationList) do
+                    if distance(station, posx, posy) > 2000 then
+						if art == nil then
+							art = campaign:placeArtifact(x,y, "Pirate Beacon", "A beacon transmitted a signal, that attracted a group of pirate mercenaries. The beacon appears to be Exuari-made.")
+						else	
+							Asteroid():setPosition(posx, posy):setSize(random(100, 500))
+						end
+                    end
+                end
+            end
+        end
+
+        for j_ = 1, 50 do
+            local dx1, dy1 = vectorFromAngle(a2, random(-1500, 1500))
+            local dx2, dy2 = vectorFromAngle(a2 + 90, random(-20000, 20000))
+            VisualAsteroid():setPosition(x + dx1 + dx2, y + dy1 + dy2)
+        end
+    end
+
+    -- Spawn 0-3 random mine fields.
+    for i_ = 1, irandom(0, 3) do
+        local a = random(0, 360)
+        local a2 = random(0, 360)
+        local d = random(20000, 40000)
+        local x, y = vectorFromAngle(a, d)
+
+        for nx = -1, 1 do
+            for ny = -5, 5 do
+                if random(0, 100) < 90 then
+                    local dx1, dy1 = vectorFromAngle(a2, (nx * 1000) + random(-100, 100))
+                    local dx2, dy2 = vectorFromAngle(a2 + 90, (ny * 1000) + random(-100, 100))
+                    Mine():setPosition(x + dx1 + dx2, y + dy1 + dy2)
+                end
+            end
+        end
+    end
+
+    -- Spawn a random black hole.
+    local x, y
+    local spawn_hole = false
+
+    -- Avoid spawning black holes too close to stations.
+    while not spawn_hole do
+        -- Generate random coordinates between 10U and 45U from the origin.
+        local a = random(0, 360)
+        local d = random(10000, 45000)
+        x, y = vectorFromAngle(a, d)
+
+        -- Check station distance from possible black hole locations.
+        -- If it's too close to a station, generate new coordinates.
+        for i_, station in ipairs(stationList) do
+            if distance(station, x, y) > 5000 then
+                spawn_hole = true
+            else
+                spawn_hole = false
+            end
+        end
+    end
+
+    BlackHole():setPosition(x, y)
+    
+    -- Spawn random neutral transports.
+    Script():run("util_random_transports.lua")
+
+
+
+end
+
+function countValid(objectList)
+    local object_count = 0
+    for i_, object in ipairs(objectList) do
+        if object:isValid() then
+            object_count = object_count + 1
+        end
+    end
+    return object_count
+end
+
+--- Update.
+--
+-- @tparam number delta the time delta (in seconds)
+function update(delta)
+    -- Count all surviving enemies and allies.
+    --local enemy_count = countValid(enemyList)
+	local enemy_count = campaign:progressEnemyCount(enemyList)
+    local friendly_count = countValid(friendlyList)
+    local player_count = countValid(playerList)
+
+    -- If not playing the Empty variation, declare victory for the
+    -- Humans (players) once all enemies are destroyed. Note that players can win
+    -- even if they destroy the enemies by blowing themselves up.
+    --
+    -- In the Empty variation, the GM must use the Win button to declare
+    -- a Human victory.
+    if (enemy_count == 0 and getScenarioSetting("Enemies") ~= "Empty") then
+		campaign:victoryScore()
+        victory("Human Navy")
+        if gametimeleft ~= nil then
+            local text = string.format(_("msgMainscreen&Spectbanner", "Mission: SUCCESS (%d seconds left)"), math.floor(gametimeleft))
+            globalMessage(text)
+            setBanner(text)
+            return
+        end
+    end
+
+    if gametimeleft ~= nil then
+        gametimeleft = gametimeleft - delta
+        if gametimeleft < 0 then
+            victory("Kraylor")
+            local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (time has run out)")
+            globalMessage(text)
+            setBanner(text)
+            return
+        end
+        if gametimeleft < timewarning then
+            if timewarning <= 1 * 60 then -- Less then 1 minutes left.
+                for idx, player in ipairs(playerList) do
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minute remaining.]]), player:getCallSign(), math.ceil(timewarning / 60)))
+                end
+                timewarning = timewarning - 2 * 60
+            elseif timewarning <= 5 * 60 then -- Less then 5 minutes left. Warn ever 2 minutes instead of every 5.
+                for idx, player in ipairs(playerList) do
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining.]]), player:getCallSign(), math.ceil(timewarning / 60)))
+                end
+                timewarning = timewarning - 2 * 60
+            else
+                for idx, player in ipairs(playerList) do
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining of mission time.]]), player:getCallSign(), math.ceil(timewarning / 60)))
+                end
+                timewarning = timewarning - 5 * 60
+            end
+        end
+    end
+
+    -- If all allies are destroyed, the Humans (players) lose.
+    if friendly_count == 0 then
+        victory("Kraylor")
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (no friendlies left)")
+        globalMessage(text)
+        setBanner(text)
+        return
+    else
+        -- As the battle continues, award reputation based on
+        -- the players' progress and number of surviving allies.
+        for i_, friendly in ipairs(friendlyList) do
+            if friendly:isValid() then
+                friendly:addReputationPoints(delta * friendly_count * 0.1)
+            end
+        end
+    end
+
+    --[[
+    -- If last player ship is destroyed, the Humans (players) lose.
+    if player_count == 0 then
+        victory("Kraylor")
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (all your ships destroyed)")
+        globalMessage(text)
+        setBanner(text)
+        return
+    end
+    --]]
+    
+    -- Set banner for cinematic and top down views.
+    if gametimeleft ~= nil then
+        setBanner(string.format(_("msgSpectbanner", "Mission in progress - Time left: %d:%02d - Enemies: %d"), math.floor(gametimeleft / 60), math.floor(gametimeleft % 60), enemy_count))
+    end
+end

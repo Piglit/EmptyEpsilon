@@ -153,6 +153,7 @@ set(SOURCES
     src/menus/joinServerMenu.cpp
     src/menus/serverBrowseMenu.cpp
     src/menus/mainMenus.cpp
+    src/menus/colorScheme.cpp
     src/menus/serverCreationScreen.cpp
     src/menus/tutorialMenu.cpp
     src/menus/optionsMenu.cpp

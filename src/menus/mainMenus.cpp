@@ -10,6 +10,7 @@
 #include "mouseCalibrator.h"
 #include "menus/serverCreationScreen.h"
 #include "menus/optionsMenu.h"
+#include "menus/colorScheme.h"
 #include "menus/tutorialMenu.h"
 #include "menus/serverBrowseMenu.h"
 #include "screens/gm/gameMasterScreen.h"
@@ -95,6 +96,12 @@ MainMenu::MainMenu()
         new OptionsMenu();
         destroy();
     }))->setPosition(sf::Vector2f(50, -110), ABottomLeft)->setSize(300, 50);
+
+    (new GuiButton(this, "COLOR", tr("COLOR"), [this]() {
+        new ColorSchemeMenu();
+        destroy();
+    }))->setPosition(sf::Vector2f(370, -110), ABottomLeft)->setSize(300, 50);
+
 
     (new GuiButton(this, "QUIT", tr("Quit"), [this]() {
         engine->shutdown();

@@ -1,4 +1,8 @@
 #include <unordered_map>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <iostream>
+#include <fstream>
 #include "colorConfig.h"
 #include "resources.h"
 
@@ -30,10 +34,8 @@
 
 ColorConfig colorConfig;
 
-void ColorConfig::load()
+void ColorConfig::populate_color_mapping()
 {
-    std::unordered_map<string, std::vector<sf::Color*>> color_mapping;
-
     DEF_COLOR(background);
     DEF_COLOR(radar_outline);
     DEF_COLOR(log_generic);
@@ -59,13 +61,9 @@ void ColorConfig::load()
 
     DEF_COLOR(ship_waypoint_background);
     DEF_COLOR(ship_waypoint_text);
+}
 
-    P<ResourceStream> stream = getResourceStream("gui/colors.ini");
-    if(!stream)
-        return;
-    while(stream->tell() < stream->getSize())
-    {
-        string line = stream->readLine();
+void ColorConfig::parse_line(string line){
         if (line.find("//") > -1)
             line = line.substr(0, line.find("//")).strip();
         if (line.find("=") > -1)
@@ -91,6 +89,58 @@ void ColorConfig::load()
             }else{
                 LOG(WARNING) << "Unknown color definition: " << key;
             }
+    }
+}
+
+void ColorConfig::load()
+{
+    populate_color_mapping();
+
+    /* sigh... the Resource manager can only load in the resource dir. Thus we have to handle the stream with basic c++ */
+    string usercolorpath = string(getenv("HOME")) + "/.emptyepsilon/usercolors.ini";
+    std::ifstream userstream(usercolorpath.c_str());
+    if (userstream.is_open()){
+        //printf("using USER colors\n");
+        string line;
+        while (std::getline(userstream, line)) parse_line(line);
+        userstream.close();
+    } else {
+        //printf("using DEFAULT colors\n");
+        P<ResourceStream> stream = getResourceStream("gui/colors.ini");
+
+        if(!stream)
+            return;
+        while(stream->tell() < stream->getSize())
+        {
+            string line = stream->readLine();
+            parse_line(line);
         }
     }
+}
+
+void ColorConfig::save()
+{
+#ifdef __WIN32__
+    mkdir((string(getenv("HOME")) + "/.usercolor.ini").c_str());
+#else
+    mkdir((string(getenv("HOME")) + "/.usercolor.ini").c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#endif
+    string fpath = string(getenv("HOME")) + "/.emptyepsilon/usercolors.ini";
+    //printf("trying to save usercolors to %s\n", fpath.c_str());
+    FILE* f = fopen(fpath.c_str(), "w");
+    if (f)
+    {
+        fprintf(f, "// *** User color overrides ***\n");
+        fprintf(f, "// If this file is missing, the game will default to the default colors\n");
+        std::vector<string> keys;
+        for(std::unordered_map<std::string, std::vector<sf::Color*>>::iterator i = color_mapping.begin(); i != color_mapping.end(); i++)
+        {
+            if (i->second.size() != 1) continue;
+            sf::Color* col = i->second[0];
+            fprintf(f, "%s = #%02X%02X%02X%02X\n", i->first.c_str(), col->r, col->g, col->b, col->a);
+        }
+    } else {
+        printf("unable to save usercolors.\n");
+    }
+    fclose(f);
 }

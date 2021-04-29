@@ -1,6 +1,12 @@
 #ifndef COLOR_CONFIG_H
 #define COLOR_CONFIG_H
 
+#include "resources.h"
+
+#include <unordered_map>
+#include <string>
+#include <vector>
+
 #include <SFML/Graphics/Color.hpp>
 
 class ColorSet
@@ -52,6 +58,12 @@ public:
     sf::Color ship_waypoint_text;
 
     void load();
+    void save();
+    void populate_color_mapping();
+
+    std::unordered_map<std::string, std::vector<sf::Color*>> color_mapping;
+private:
+    void parse_line(string);
 };
 extern ColorConfig colorConfig;
 

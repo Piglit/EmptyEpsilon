@@ -123,7 +123,7 @@ variation:setTubeSize(0, "large")
 -- The Strikeship is a warp-drive equipped figher build for quick strikes, it's fast, it's agile, but does not do an extreme amount of damage, and lacks in rear shields.
 template = ShipTemplate():setName("Racer"):setClass("Exuari","Striker")
 template:setModel("small_frigate_1"):setRadarTrace("radar_exuari_1.png")
-template:setDescription("The Exuari alpha striker 'Racer' is a warp-drive equipped Figter build for quick strikes. This spacecraft runs on a small crew and is often used as scout, interceptor or to perform preemptive attacks. It's fast, it's agile, but the striker beams do not cause an extreme amount of damage. Like all strikers, it lacks in rear shields.")
+template:setDescription("The Exuari alpha striker 'Racer' is a warp-drive equipped fighter build for quick strikes. This spacecraft runs on a small crew and is often used as scout, interceptor or to perform preemptive attacks. It's fast, it's agile, but the striker beams do not cause an extreme amount of damage. Like all strikers, it lacks in rear shields.")
 --                  Arc, Dir, Range, CycleTime, Dmg
 template:setBeam(0, 40,-5, 1000.0, 6.0, 6)
 template:setBeam(1, 40, 5, 1000.0, 6.0, 6)
@@ -162,7 +162,7 @@ variation:setWarpSpeed(200)
 
 --[[ Frigates--]]
 --Frigates are non-warp capable ships, mostly used to defend bases or to build the rear line in an assault.
---TODO: replace models (transorts should not be used here)
+--TODO: replace models (transports should not be used here)
 template = ShipTemplate():setName("Guard"):setClass("Exuari", "Frigate")
 template:setModel("transport_1_1"):setRadarTrace("radar_exuari_frigate_1.png")
 template:setDescription([[The Exuari Guard is not impressive, trying to be a alround escort or defense vessel. It has powering problems, causing the reload cycle of beams and missiles to take longer than expected. The Guard is equipped with turret beams and a large stock of different missiles, including homing missiles and mines.]])

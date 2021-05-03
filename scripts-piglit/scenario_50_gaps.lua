@@ -4021,7 +4021,7 @@ function waves(delta)
 			end
 		end
 		if homeStation:areEnemiesInRange(2000) then
-			wakeEnemyFleet = getObjectsInRange(2000)
+			wakeEnemyFleet = comms_target:getObjectsInRange(2000)
 			for _, enemy in ipairs(wakeEnemyFleet) do
 				if enemy:isEnemy(homeStation) then
 					enemy:orderRoaming()

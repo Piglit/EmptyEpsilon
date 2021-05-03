@@ -20,7 +20,21 @@ function update(delta)
 	local x, y = my_ship:getPosition()
 	if state == 0 then
 		if math.abs(x - target_x) < 300 and math.abs(y - target_y) < 300 then
-			SpaceStation():setFactionId(faction_id):setPosition(target_x + random(-300, 300), target_y + random(-300, 300))
+			SpaceStation():setTemplate("Small Station"):setFactionId(faction_id):setPosition(target_x + random(-300, 300), target_y + random(-300, 300)).comms_data = {
+				weapons = {
+					Homing = "no",
+					HVLI = "no",
+					Mine = "no",
+					Nuke = "no",
+					EMP = "no"
+				},
+				services = {
+					supplydrop = "no",
+					reinforcements = "no",
+					fighters = "no",
+					refitDrive = "no"
+				}
+			}
 			my_ship:orderFlyTowardsBlind(position_x, position_y)
 			state = 1
 		end

@@ -38,12 +38,12 @@ class Campaign:
 		if not os.path.exists(missionFile):
 			with open(missionFile, "w") as file:
 				file.write("training1\n")
-		missions = {}
+		missions = []
 		with open(missionFile,"r") as file:
 			for line in file:
 				missionName = line.strip()
 				mission = MISSIONS[missionName]
-				missions[missionName] = mission
+				missions.append(mission)
 		return missions
 
 	@Pyro4.oneway

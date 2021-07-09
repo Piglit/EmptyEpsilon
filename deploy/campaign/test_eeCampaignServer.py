@@ -210,7 +210,6 @@ def _test_fuzzy_workflow():
 		scenarios = response.json()["scenarios"]
 	servers.storeData()
 
-
 if __name__ == "__main__":
 	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=False, port=8888)
 

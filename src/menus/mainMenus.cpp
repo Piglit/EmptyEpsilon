@@ -71,7 +71,7 @@ MainMenu::MainMenu()
     (new GuiOverlay(this, "", sf::Color::White))->setTextureTiled("gui/BackgroundCrosses");
 
     (new GuiImage(this, "LOGO", "logo_full"))->setPosition(0, title_y, ATopCenter)->setSize(logo_size_x, logo_size_y);
-    (new GuiLabel(this, "VERSION", tr("Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size, ATopCenter)->setSize(0, 20);
+    (new GuiLabel(this, "VERSION", tr("Space LAN Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size, ATopCenter)->setSize(0, 20);
 
     (new GuiLabel(this, "", tr("Your name:"), 30))->setAlignment(ACenterLeft)->setPosition(sf::Vector2f(50, -400), ABottomLeft)->setSize(300, 50);
     (new GuiTextEntry(this, "USERNAME", PreferencesManager::get("username")))->callback([](string text) {

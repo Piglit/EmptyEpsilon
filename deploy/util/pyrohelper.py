@@ -7,6 +7,7 @@ from time import sleep
 
 IP = None
 NS = None
+daemons = []
 
 def get_ip():
 	if IP:
@@ -81,6 +82,7 @@ def host_named_server(register_class, name, port=0):
 def host(exposed_class, port=0, objectId=None):
 	ip = get_ip()
 	daemon = Pyro4.Daemon(host=ip, port=port)
+	daemons.append(daemon)
 	uri = daemon.register(exposed_class, objectId=objectId)
 	threading.Thread(target=daemon.requestLoop).start()	# start the event loop of the server to wait for calls
 	return uri
@@ -93,3 +95,8 @@ def connect(uri):
 def connect_to_named(name):
 	return connect("PYRONAME:"+name)
 	
+def cleanup():
+	for daemon in daemons:
+		daemon.shutdown()
+		daemon.close()
+		del daemon

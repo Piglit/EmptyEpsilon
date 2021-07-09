@@ -21,10 +21,8 @@ def missionSelect():
 	missions = campaign.getMissionsFor(hostname)
 	missionNames = []
 	missionsByName = {}
-	for missionId in missions:
-		mission = missions[missionId]
+	for mission in missions:
 		missionNames.append(mission["name"])
-		mission["id"] = missionId
 		missionsByName[mission["name"]] = mission
 	mission = missionsByName[missionNames[0]]["id"]
 

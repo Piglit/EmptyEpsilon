@@ -17,7 +17,7 @@ _starts_x = False # global, depends on machine
 with open("/proc/sys/net/ipv4/tcp_fin_timeout","r") as file:
 	_socket_timeout = datetime.timedelta(seconds=int(file.read()))
 
-# Notice: When server or proxy are cloesed, the listen socket remains in TIMED_WAIT state.
+# Notice: When server or proxy are closed, the listen socket remains in TIMED_WAIT state.
 # The duration is configured in the os in /proc/sys/net/ipv4/tcp_fin_timeout.
 # Until this timeout, starting a server or proxy will fail to listen on the socket!
 

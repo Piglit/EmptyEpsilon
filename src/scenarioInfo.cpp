@@ -1,39 +1,53 @@
 #include "scenarioInfo.h"
 #include "resources.h"
+#include "campaign_client.h"
+#include "preferenceManager.h"
 
 ScenarioInfo::ScenarioInfo(string filename)
 {
     this->filename = filename;
     name = filename.substr(9, -4);
 
-    P<ResourceStream> stream = getResourceStream(filename);
-    if (!stream) return;
-
-    string key;
-    string value;
-    while(stream->tell() < stream->getSize())
+    if (campaign_client && PreferencesManager::get("alternative_server").toInt())
     {
-        string line = stream->readLine().strip();
-        // Get the scenario meta-data.
-        if (!line.startswith("--"))
-            break;
-        if (line.startswith("---"))
-        {
-            line = line.substr(3).strip();
-            value = value + "\n" + line;
-        }else{
-            line = line.substr(2).strip();
-            if (line.find(":") < 0)
-            {
-                key = "";
-                continue;
-            }
+        // get scenario info from server
+        auto info = campaign_client->getScenarioInfo(filename);
+        for (auto [key,value] : info){
             addKeyValue(key, value);
-            key = line.substr(0, line.find(":")).strip();
-            value = line.substr(line.find(":") + 1).strip();
         }
     }
-    addKeyValue(key, value);
+    else
+    {
+        // load scenario from file
+        P<ResourceStream> stream = getResourceStream(filename);
+        if (!stream) return;
+
+        string key;
+        string value;
+        while(stream->tell() < stream->getSize())
+        {
+            string line = stream->readLine().strip();
+            // Get the scenario meta-data.
+            if (!line.startswith("--"))
+                break;
+            if (line.startswith("---"))
+            {
+                line = line.substr(3).strip();
+                value = value + "\n" + line;
+            }else{
+                line = line.substr(2).strip();
+                if (line.find(":") < 0)
+                {
+                    key = "";
+                    continue;
+                }
+                addKeyValue(key, value);
+                key = line.substr(0, line.find(":")).strip();
+                value = line.substr(line.find(":") + 1).strip();
+            }
+        }
+        addKeyValue(key, value);
+    }
     if (type == "")
         LOG(WARNING) << "No scenario type for: " << filename;
 }
@@ -57,6 +71,10 @@ void ScenarioInfo::addKeyValue(string key, string value)
     else if (key.lower() == "type")
     {
         type = value;
+    }
+    else if (key.lower() == "proxy")
+    {
+        proxy = value;
     }
     else if (key.lower().startswith("variation[") && key.endswith("]"))
     {

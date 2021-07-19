@@ -300,6 +300,9 @@ void GameMasterScreen::update(float delta)
     // Update mission clock
     info_clock->setValue(string(gameGlobalInfo->elapsed_time, 0));
 
+	// Update pause button
+	pause_button->setValue(engine->getGameSpeed() == 0.0f);
+
     std::unordered_map<string, string> selection_info;
 
     // For each selected object, determine and report their type.

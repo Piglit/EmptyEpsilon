@@ -69,6 +69,7 @@ public:
     string gm_control_code;
     float elapsed_time;
     string scenario;
+    string scenario_filename;
     string variation = "None";
 
     //List of script functions that can be called from the GM interface (Server only!)
@@ -89,6 +90,7 @@ public:
     P<PlayerSpaceship> getPlayerShip(int index);
     void setPlayerShip(int index, P<PlayerSpaceship> ship);
 
+	int getPlayerShipIndexByName(string callsign);
     int findPlayerShip(P<PlayerSpaceship> ship);
     int insertPlayerShip(P<PlayerSpaceship> ship);
     /*!

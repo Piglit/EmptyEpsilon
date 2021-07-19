@@ -2,6 +2,7 @@
 #include <string.h>
 #include <i18n.h>
 #include <multiplayer_proxy.h>
+#include <campaign_client.h>
 #ifndef _MSC_VER
 #include <unistd.h>
 #include <sys/stat.h>
@@ -15,6 +16,7 @@
 #include "menus/mainMenus.h"
 #include "menus/autoConnectScreen.h"
 #include "menus/shipSelectionScreen.h"
+#include "menus/campaignMenu.h"
 #include "menus/optionsMenu.h"
 #include "mouseCalibrator.h"
 #include "factionInfo.h"
@@ -140,6 +142,7 @@ int main(int argc, char** argv)
             new GameServerProxy(password, listenPort, proxyName);
         else
             new GameServerProxy(host, port, password, listenPort, proxyName);
+        //game_proxy->setShutdownOnDisconnect(true);
         engine->runMainLoop();
         return 0;
     }
@@ -160,18 +163,18 @@ int main(int argc, char** argv)
     }
 
     new DirectoryResourceProvider("resources/");
-    new DirectoryResourceProvider("scripts/");
+    new DirectoryResourceProvider("scripts-piglit/");
     new DirectoryResourceProvider("packs/SolCommand/");
     PackResourceProvider::addPackResourcesForDirectory("packs/");
     if (getenv("HOME"))
     {
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/");
-        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts/");
+        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts-piglit/");
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/packs/SolCommand/");
     }
 #ifdef RESOURCE_BASE_DIR
     new DirectoryResourceProvider(RESOURCE_BASE_DIR "resources/");
-    new DirectoryResourceProvider(RESOURCE_BASE_DIR "scripts/");
+    new DirectoryResourceProvider(RESOURCE_BASE_DIR "scripts-piglit/");
     new DirectoryResourceProvider(RESOURCE_BASE_DIR "packs/SolCommand/");
     PackResourceProvider::addPackResourcesForDirectory(RESOURCE_BASE_DIR "packs");
 #endif
@@ -327,6 +330,11 @@ int main(int argc, char** argv)
     }
 #endif // WITH_DISCORD
 
+    if (PreferencesManager::get("campaign_server") != "")
+	{
+		new CampaignClient(PreferencesManager::get("campaign_server"));
+	}
+
     returnToMainMenu();
     engine->runMainLoop();
 
@@ -405,6 +413,10 @@ void returnToMainMenu()
     else if (PreferencesManager::get("tutorial").toInt())
     {
         new TutorialGame(true);
+    }
+    else if (PreferencesManager::get("alternative_server").toInt())
+    {
+		new CampaignMenu();
     }else{
         new MainMenu();
     }

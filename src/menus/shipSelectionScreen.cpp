@@ -4,6 +4,7 @@
 #include "glObjects.h"
 
 #include "serverCreationScreen.h"
+#include "scenarioSelectionScreen.h"
 #include "epsilonServer.h"
 #include "main.h"
 #include "playerInfo.h"
@@ -218,7 +219,10 @@ ShipSelectionScreen::ShipSelectionScreen()
         // selection/server creation screen.
         (new GuiButton(left_container, "DISCONNECT", tr("Scenario selection"), [this]() {
             destroy();
-            new ServerCreationScreen();
+			if (PreferencesManager::get("alternative_server").toInt())
+				new ScenarioSelectionScreen();
+			else
+				new ServerCreationScreen();
         }))->setPosition(0, -50, ABottomCenter)->setSize(300, 50);
     }else{
         // If this is a client, the "back" button disconnects from the server

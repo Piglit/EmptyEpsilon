@@ -90,6 +90,7 @@ public:
     P<PlayerSpaceship> getPlayerShip(int index);
     void setPlayerShip(int index, P<PlayerSpaceship> ship);
 
+	P<PlayerSpaceship> getPlayerShipByName(string callsign);
     int findPlayerShip(P<PlayerSpaceship> ship);
     int insertPlayerShip(P<PlayerSpaceship> ship);
     /*!

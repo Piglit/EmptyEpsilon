@@ -81,6 +81,14 @@ void GameGlobalInfo::setPlayerShip(int index, P<PlayerSpaceship> ship)
         playerShipId[index] = -1;
 }
 
+P<PlayerSpaceship> GameGlobalInfo::getPlayerShipByName(string callsign)
+{
+    for(int n=0; n<max_player_ships; n++)
+        if (getPlayerShip(n)->getCallSign() == callsign)
+            return getPlayerShip(n);
+    return getPlayerShip(-1);
+}
+
 int GameGlobalInfo::findPlayerShip(P<PlayerSpaceship> ship)
 {
     for(int n=0; n<max_player_ships; n++)

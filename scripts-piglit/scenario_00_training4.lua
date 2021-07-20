@@ -5,37 +5,66 @@
 --- Objective: Destroy all enemy ships in the area.
 ---
 --- Description:
---- In this training you will use mines to defeat a carrier ship launching fighters.
+--- In this training you will use mines...TODO
 ---
 --- Your ship is a Nautilus Mine Layer - a jump-driven cruiser without missiles but multiple mine tubes.
 ---
 --- This is a short mission for players who like to lay mines.
 
--- secondary goal: test and example for script_hangar (configuratioin
+-- secondary goal: test and example for script_hangar (with configuration)
 
 
 require "utils.lua"
 require "script_hangar.lua"
 
+function createFreighter()
+    return CpuShip():setTemplate("Goods Freighter 3"):setFaction("Exuari")
+end
+
+function createCarrier()
+    return CpuShip():setTemplate("Ryder"):setFaction("Exuari")
+end
+
+function createRevenge()
+    return CpuShip():setTemplate("Flash"):setFaction("Exuari")
+end
+
+function createWingman()
+    return CpuShip():setFaction("Human Navy"):setTemplate("Phobos T3"):setScannedByFaction("Human Navy", true)
+end
+
+function createPlayerShip()
+    return PlayerSpaceship():setTemplate("Nautilus"):setFaction("Human Navy")
+end
+
 function init()
     allowNewPlayerShips(false)
-
-    player = PlayerSpaceship():setTemplate("Nautilus"):setCallSign("Rookie 1"):setFaction("Human Navy"):setPosition(0, 0):setHeading(90)
-    rr = player:getLongRangeRadarRange()
-    player:addReputationPoints(100.0)
-
     enemyList = {}
-    
+    revenge_active = false
+
     timer = 0
     finishedTimer = 5
     finishedFlag = false
 
-    station = SpaceStation():setTemplate('Medium Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Human Navy"):setPosition(-800, 1200)
-    wingman = CpuShip():setTemplate("Nirvana R5M"):setCallSign("Wingman"):setFaction("Human Navy"):setPosition(-800, -1700):setHeading(250):setScannedByFaction("Human Navy", true):orderDefendTarget(station)
+    gu = 5000   -- grid unit for enemy spawns
 
-    station2 = SpaceStation():setTemplate('Small Station'):setCallSign("Civilian Station"):setRotation(random(0, 360)):setFaction("Human Navy"):setPosition(800, -rr*0.5)
-    enemy_station = CpuShip():setTemplate("Ryder"):setFaction("Exuari"):orderDefendLocation(0, -rr*0.9)
-    enemy_station:setPosition(0, -rr):setRotation(90):setCallSign("Omega")
+    player = createPlayerShip():setCallSign("Rookie 1"):setPosition(0, 0):setHeading(90)
+    player:setLongRangeRadarRange(30000)
+    player:addReputationPoints(100.0)
+
+    station = SpaceStation():setTemplate('Medium Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Human Navy"):setPosition(-800, 1200)
+    wingman = createWingman():setCallSign("June"):orderIdle():setPosition(400, 400)
+
+    freighter = createFreighter()
+    freighter:setPosition(0, 5*gu):setRotation(-90):orderFlyTowardsBlind(0, -4*gu):setCallSign("Lambda")
+    table.insert(enemyList, freighter)
+
+    revenge = createRevenge()
+    revenge:setPosition(0, 6*gu):setRotation(-90):orderDefendTarget(freighter):setCallSign("Kappa")
+    table.insert(enemyList, revenge)
+
+    enemy_station = createCarrier()
+    enemy_station:setPosition(0, -5*gu):setRotation(90):orderDefendLocation(0, -4*gu):setCallSign("Omega")
 
     script_hangar.create(enemy_station, "Dagger", 3)
     script_hangar.append(enemy_station, "Blade", 3)
@@ -46,7 +75,7 @@ function init()
     script_hangar.create(enemy_station, "Gunner", 3)
     script_hangar.append(enemy_station, "Shooter", 3)
     script_hangar.append(enemy_station, "Jagger", 3)
-    script_hangar.config(enemy_station, "triggerRange", rr*0.5)
+    script_hangar.config(enemy_station, "triggerRange", gu*2)
     script_hangar.config(enemy_station, "onLaunch", addToEnemiesList)
     script_hangar.config(enemy_station, "callSignPrefix", "Gamma-")
     script_hangar.config(enemy_station, "launchDistance", 900)
@@ -55,7 +84,10 @@ function init()
     --createObjectsOnLine(rr/2, rr/4, rr/4, rr/2, 1000, Mine, 2)
     --createRandomAlongArc(Asteroid, 100, 0, 0, rr-2000, 180, 270, 1000)
     --createRandomAlongArc(VisualAsteroid, 100, 0, 0, rr-2000, 180, 270, 1000)
-    --placeRandomAroundPoint(Nebula, 4, 10000, 10000, rr*0.75, -rr*0.75)
+    placeRandomAroundPoint(Asteroid, 50, 0, gu, -gu, 0)
+    placeRandomAroundPoint(VisualAsteroid, 50, 0, gu, -gu, 0)
+    placeRandomAroundPoint(Asteroid, 50, 0, gu,  gu, 0)
+    placeRandomAroundPoint(VisualAsteroid, 50, 0, gu,  gu, 0)
     
     --spwanNextWave()
     --instructions()
@@ -107,6 +139,16 @@ function update(delta)
 	end
     if #enemyList == 0 then
         finished(delta)
+    end
+    if revenge:isValid() and not revenge_active then
+        if not freighter:isValid() or not enemy_station:isValid() then
+            revenge_active = true
+            revenge:orderAttack(player)
+        end
+        if enemy_station:isValid() and enemy_station:getHull() < enemy_station:getHullMax() then
+            revenge_active = true
+            revenge:orderAttack(player)
+        end
     end
 end
 

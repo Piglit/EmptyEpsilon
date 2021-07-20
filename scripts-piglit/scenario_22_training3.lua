@@ -30,7 +30,7 @@ function createKraylorDreadnought()
 end
 
 function createPlayerShip()
-	return PlayerSpaceship():setTemplate("Piranha M5P"):setFaction("Human Navy")
+    return PlayerSpaceship():setTemplate("Piranha M5P"):setFaction("Human Navy")
 end
 
 function createWingman()
@@ -63,8 +63,8 @@ function init()
     command = createWingman():setCallSign("April"):setPosition(-gu/6, gu/6):setHeading(90):orderIdle()
 
     --target station
-	stationPosx = 2*gu
-	stationPosy = 0
+    stationPosx = 2*gu
+    stationPosy = 0
     station = SpaceStation():setTemplate('Small Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Kraylor"):setPosition(stationPosx,stationPosy)
     station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80}
 
@@ -195,9 +195,9 @@ function update(delta)
     for i, enemy in ipairs(enemyList) do
         if not enemy:isValid() then
             table.remove(enemyList, i)
-			-- Note: table.remove() inside iteration causes the next element to be skipped.
-			-- This means in each update-cycle max half of the elements are removed.
-			-- It does not matter here, since update is called regulary.
+            -- Note: table.remove() inside iteration causes the next element to be skipped.
+            -- This means in each update-cycle max half of the elements are removed.
+            -- It does not matter here, since update is called regulary.
         end
     end
 

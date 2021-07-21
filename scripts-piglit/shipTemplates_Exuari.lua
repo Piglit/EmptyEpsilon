@@ -132,6 +132,7 @@ template:setShields(50, 30)
 --Reputation Score: 13
 template:setSpeed(70, 12, 12)
 template:setWarpSpeed(600)
+template:setWarpDrive(true)
 
 variation = template:copy("Hunter")
 variation:setDescription("The Exuari beta striker 'Hunter' is a warp-drive equipped reinforement fighter. This spacecraft runs on a small crew and is often sent into battle to aid other Exuari ships when they engage in combat. It has an extra pair of striker beams and improved front shields. It's fast, it's agile, and can clean up what is left of the enemies fleet after an initial strike.")
@@ -141,6 +142,7 @@ variation:setBeam(3, 50, 15, 1000.0, 6.0, 6)
 variation:setShields(80, 30)
 --Reputation Score: 16
 variation:setWarpSpeed(400)
+variation:setWarpDrive(true)
 
 variation = template:copy("Strike")
 variation:setDescription("The Exuari gamma striker 'Strike' is a warp-drive equipped tactical bomber build for quick strikes against strong shielded targets. This spacecraft runs on a small crew and is equipped with HVLIs and an EMP. It's fast, it's agile, and can do a great amount of damage in short time.")
@@ -149,6 +151,7 @@ variation:setTubes(1, 10.0)
 variation:setWeaponStorage("EMP", 1)
 variation:setWeaponStorage("HVLI", 2)
 variation:setWarpSpeed(300)
+variation:setWarpDrive(true)
 
 variation = template:copy("Dash")
 variation:setDescription("The Exuari delta striker 'Dash' is a warp-drive equipped endurance bomber build for prolonged strikes. This spacecraft runs on a small crew and combines reinforced front shields with a good amount of HVLIs. It's fast, it's agile, and can take some damage.")
@@ -159,6 +162,7 @@ variation:setHull(70)
 variation:setShields(80, 30)
 --Reputation Score: 18
 variation:setWarpSpeed(200)
+variation:setWarpDrive(true)
 
 --[[ Frigates--]]
 --Frigates are non-warp capable ships, mostly used to defend bases or to build the rear line in an assault.

@@ -279,6 +279,7 @@ variation = template:copy("Elara P2")
 variation:setModel(model_phobos..color_milit)
 variation:setDescription(_([[Inspired by the Phobos T3 design, the Elara P2 is nearly identical. With the addition of a warp drive and stronger front shields, the Elara P2 poses a greater threat than the Phobos]]))
 variation:setWarpSpeed(800)
+variation:setWarpDrive(true)
 variation:setShields(70, 40)
 --Reputation Score: 19
 

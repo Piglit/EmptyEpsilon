@@ -5,18 +5,52 @@ import time
 with open("/proc/sys/net/ipv4/tcp_fin_timeout","w") as file:
 	file.write("20")
 
-print("starting launcher")
-command = ["./serverLauncher.py"]
-launcher = subprocess.Popen(command)
+state = None
+try: 
+	with open("state","r") as file:
+		state = file.readline().strip()
+except:
+	pass
 
-time.sleep(2)
+if state is None:
+	print("starting ee")
+	command = ["./EmptyEpsilon"]
+	process = subprocess.Popen(command, cwd="../..")
+	process.wait()
 
-print("starting selector")
-command = ["./missionSelector.py"]
-selector = subprocess.Popen(command)
+if state == "escpae":
+	print("starting escape")
+	pass
 
-selector.wait()
-launcher.wait()
+if state == "server":
+	print("starting server")
+	command = ["./EmptyEpsilon", "campaign_server=192.168.2.3:8888", "alternative_server=1"]
+	process = subprocess.Popen(command, cwd="../..")
+	process.wait()
+
+if state == "proxy":
+	print("starting proxy")
+	pass
+
+if state == "client":
+	print("starting client")
+	command = ["./EmptyEpsilon", "campaign_server=''", "alternative_server=0"]
+	process = subprocess.Popen(command, cwd="../..")
+	process.wait()
+
+#print("starting launcher")
+#command = ["./serverLauncher.py"]
+#launcher = subprocess.Popen(command)
+
+#time.sleep(2)
+#
+#print("starting selector")
+#command = ["./missionSelector.py"]
+#selector = subprocess.Popen(command)
+
+#selector.wait()
+
+
 
 #scenario:
 	# since i can not terminate a scenario after victory, the server controller must be able to stop the server

@@ -1,6 +1,6 @@
 -- Name: Training: Cruiser
 -- Type: Mission
--- Description: Basic Training Cource
+-- Description: Basic Training Course
 ---
 --- Objective: Destroy all enemy ships in the area.
 ---

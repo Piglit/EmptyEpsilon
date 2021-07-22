@@ -88,7 +88,6 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
 
     // If this is a proxied multi-ship mission, add ship type selection.
     // TODO positioning
-    GuiElement* ship_container = new GuiElement(right_container, "");
     ship_container = new GuiAutoLayout(right_panel, "SHIP_CONTAINER", GuiAutoLayout::LayoutVerticalTopToBottom);
     ship_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
@@ -131,14 +130,16 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
     }))->setPosition(0, -50, ABottomCenter)->setSize(300, 50);
 
     // Start server button.
-    (new GuiButton(right_container, "START_SERVER", tr("Start scenario"), [this]() {
+    start_scenario = new GuiButton(right_container, "START_SERVER", tr("Start scenario"), [this]() {
         startScenario();
-    }))->setPosition(0, -50, ABottomCenter)->setSize(300, 50);
+    });
+    start_scenario->setPosition(0, -50, ABottomCenter)->setSize(300, 50);
 
     // Join server via proxy button.
-    (new GuiButton(right_container, "JOIN_SERVER", tr("Join scenario"), [this]() {
+    join_server = new GuiButton(right_container, "JOIN_SERVER", tr("Join scenario"), [this]() {
         joinScenario(); 
-    }))->setPosition(0, -50, ABottomCenter)->setSize(300, 50)->hide();
+    });
+    join_server->setPosition(0, -50, ABottomCenter)->setSize(300, 50)->hide();
 
 
     // We select the same mission as we had previously selected
@@ -225,8 +226,20 @@ void ScenarioSelectionScreen::selectScenario(string filename)
     variation_selection->setSelectionIndex(selected_variation);
     variation_description->setText(variation_descriptions_list[selected_variation]);
 
-    // Show the variation information only if there's more than 1.
-    variation_container->setVisible(variation_names_list.size() > 1);
+    proxy_addr = info.proxy;
+    if (proxy_addr != "")
+    {
+        variation_container->setVisible(false);
+        start_scenario->setVisible(false);
+        ship_container->setVisible(true);
+        join_server->setVisible(true);
+    } else {
+        // Show the variation information only if there's more than 1.
+        variation_container->setVisible(variation_names_list.size() > 1);
+        start_scenario->setVisible(true);
+        ship_container->setVisible(false);
+        join_server->setVisible(false);
+    }   
 }
 
 void ScenarioSelectionScreen::startScenario()
@@ -252,10 +265,9 @@ void ScenarioSelectionScreen::startScenario()
 
 void ScenarioSelectionScreen::joinScenario()
 {
-    string hostname = "192.168.2.3";    // TODO testing; get from scenario info
+    LOG(INFO) << "starting proxy" << proxy_addr;
     disconnectFromServer(); // Test if socket is released immediately
-    new GameServerProxy(hostname, defaultServerPort, PreferencesManager::get("password"), defaultServerPort, PreferencesManager::get("shipname"));
+    new GameServerProxy(proxy_addr, defaultServerPort, PreferencesManager::get("password"), defaultServerPort, PreferencesManager::get("shipname"));
     //destroy();
     //new ProxyObservationScreen();
-    
 }

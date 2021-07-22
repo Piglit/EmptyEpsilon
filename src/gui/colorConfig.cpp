@@ -1,4 +1,4 @@
-#include <unordered_map>
+#include <map>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <iostream>
@@ -133,7 +133,7 @@ void ColorConfig::save()
         fprintf(f, "// *** User color overrides ***\n");
         fprintf(f, "// If this file is missing, the game will default to the default colors\n");
         std::vector<string> keys;
-        for(std::unordered_map<std::string, std::vector<sf::Color*>>::iterator i = color_mapping.begin(); i != color_mapping.end(); i++)
+        for(std::map<std::string, std::vector<sf::Color*>>::iterator i = color_mapping.begin(); i != color_mapping.end(); i++)
         {
             if (i->second.size() != 1) continue;
             sf::Color* col = i->second[0];

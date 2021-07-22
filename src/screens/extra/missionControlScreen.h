@@ -27,6 +27,7 @@ private:
     GuiLabel* info_clock;
     GuiLabel* gm_script_label;
     GuiListbox* gm_script_options;
+    float gm_script_button_response_time;
 public:
     MissionControlScreen();
     virtual void update(float delta);

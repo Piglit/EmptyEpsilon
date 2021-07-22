@@ -72,7 +72,9 @@ MissionControlScreen::MissionControlScreen()
         {
             if (n == index)
             {
-                //callback.callback.call();
+                gm_script_options->setSelectionIndex(n);
+                gm_script_button_response_time = 0.1;
+                callback.callback.call<void>();
                 return;
             }
             n++;
@@ -84,6 +86,7 @@ MissionControlScreen::MissionControlScreen()
         gm_script_options->hide();
         gm_script_label->hide();
     }
+    gm_script_button_response_time = 0.0;
 /*
     log_text = new GuiAdvancedScrollText(mission_control_layout, "SHIP_LOG");
     log_text->enableAutoScrollDown();
@@ -107,6 +110,14 @@ void MissionControlScreen::update(float delta)
             gm_functions_changed = true;
         it++;
     }
+    if (gm_script_button_response_time > 0.0)
+    {
+        gm_script_button_response_time -= delta;
+        if (gm_script_button_response_time <= 0.0)
+        {
+            gm_functions_changed = true;
+        }
+    }
     if (gm_functions_changed)
     {
         gm_script_options->setOptions({});
@@ -114,6 +125,7 @@ void MissionControlScreen::update(float delta)
         {
             gm_script_options->addEntry(callback.name, callback.name);
         }
+        gm_script_options->setSelectionIndex(-1);
     }
 
     // upate log

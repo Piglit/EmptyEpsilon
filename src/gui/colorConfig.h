@@ -3,7 +3,7 @@
 
 #include "resources.h"
 
-#include <unordered_map>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -61,7 +61,7 @@ public:
     void save();
     void populate_color_mapping();
 
-    std::unordered_map<std::string, std::vector<sf::Color*>> color_mapping;
+    std::map<std::string, std::vector<sf::Color*>> color_mapping;
 private:
     void parse_line(string);
 };

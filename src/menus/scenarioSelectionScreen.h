@@ -24,6 +24,7 @@ public:
 private:
     void selectScenario(string filename);
     void startScenario();   //Server only
+    void joinScenario();    //Starts Proxy
 };
 
 #endif//SCENARIO_SELECTION_SCREEN_H

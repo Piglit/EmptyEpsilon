@@ -4,6 +4,7 @@
 #include "shipSelectionScreen.h"
 #include "gameGlobalInfo.h"
 #include "epsilonServer.h"
+#include "multiplayer_proxy.h"
 #include "campaign_client.h"
 #include "screens/extra/missionControlScreen.h"
 #include "gui/scriptError.h"
@@ -36,7 +37,7 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
     gameGlobalInfo->allow_main_screen_tactical_radar = PreferencesManager::get("server_config_allow_main_screen_tactical_radar", "1").toInt();
     gameGlobalInfo->allow_main_screen_long_range_radar = PreferencesManager::get("server_config_allow_main_screen_long_range_radar", "1").toInt();
     gameGlobalInfo->gm_control_code = PreferencesManager::get("server_config_gm_control_code", "").upper();
-	game_server->setServerName(PreferencesManager::get("shipname", "Server").lower());
+    game_server->setServerName(PreferencesManager::get("shipname", "Server").lower());
 
     // Create a two-column layout.
     GuiElement* container = new GuiAutoLayout(this, "", GuiAutoLayout::ELayoutMode::LayoutVerticalColumns);
@@ -59,7 +60,7 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
     });
     scenario_list->setSize(GuiElement::GuiSizeMax, 700);
 
-	// Right column contents.
+    // Right column contents.
     (new GuiLabel(right_panel, "BRIEFING_LABEL", tr("Briefing"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     // Show the scenario description text.
     GuiPanel* panel = new GuiPanel(right_panel, "SCENARIO_DESCRIPTION_BOX");
@@ -67,11 +68,11 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
     scenario_description = new GuiScrollText(panel, "SCENARIO_DESCRIPTION", "");
     scenario_description->setTextSize(24)->setMargins(15)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
-	// If the scenario has variations, show and select from them.
+    // If the scenario has variations, show and select from them.
     variation_container = new GuiAutoLayout(right_panel, "VARIATION_CONTAINER", GuiAutoLayout::LayoutVerticalTopToBottom);
     variation_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
-	GuiElement* row = new GuiAutoLayout(variation_container, "", GuiAutoLayout::LayoutHorizontalLeftToRight);
+    GuiElement* row = new GuiAutoLayout(variation_container, "", GuiAutoLayout::LayoutHorizontalLeftToRight);
     row->setSize(GuiElement::GuiSizeMax, 50);
     (new GuiLabel(row, "VARIATION_LABEL", tr("Variation: "), 30))->setAlignment(ACenterRight)->setSize(250, GuiElement::GuiSizeMax);
     variation_selection = new GuiSelector(row, "VARIATION_SELECT", [this](int index, string value) {
@@ -105,7 +106,7 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
         ship_template_selector->show();
 */
 
-	GuiElement* ship_row = new GuiAutoLayout(ship_container, "", GuiAutoLayout::LayoutHorizontalLeftToRight);
+    GuiElement* ship_row = new GuiAutoLayout(ship_container, "", GuiAutoLayout::LayoutHorizontalLeftToRight);
     ship_row->setSize(GuiElement::GuiSizeMax, 50);
     (new GuiLabel(ship_row, "SHIP_LABEL", tr("ship type: "), 30))->setAlignment(ACenterRight)->setSize(250, GuiElement::GuiSizeMax);
     GuiSelector* ship_selection= new GuiSelector(ship_row, "SHIP_TEMPLATE_SELECTOR", [this](int index, string value) {
@@ -136,7 +137,7 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
 
     // Join server via proxy button.
     (new GuiButton(right_container, "JOIN_SERVER", tr("Join scenario"), [this]() {
-        //joinScenario(); TODO
+        joinScenario(); 
     }))->setPosition(0, -50, ABottomCenter)->setSize(300, 50)->hide();
 
 
@@ -144,37 +145,37 @@ ScenarioSelectionScreen::ScenarioSelectionScreen()
     // unless that one doesnt exist in which case we select the first by default
     int mission_selected = 0;
 
-	if (campaign_client)
-	{
-		// Fetch list of available scenario filenames from campaign server
-		for (string filename: campaign_client->getScenarios())
-		{
-			ScenarioInfo info(filename);
-			scenario_list->addEntry(info.name, filename);
-			if (info.name == gameGlobalInfo->scenario)
-			{
-				mission_selected=scenario_list->entryCount()-1;
-			}
-		}
-	}
-	else
-	{
-		// Fetch and sort all Lua files starting with "scenario_".
-		std::vector<string> scenario_filenames = findResources("scenario_*.lua");
-		std::sort(scenario_filenames.begin(), scenario_filenames.end());
-		// remove duplicates
-		scenario_filenames.erase(std::unique(scenario_filenames.begin(), scenario_filenames.end()), scenario_filenames.end());
-		// For each scenario file, extract its name, then add it to the list.
-		for(string filename : scenario_filenames)
-		{
-			ScenarioInfo info(filename);
-			scenario_list->addEntry(info.name, filename);
-			if (info.name == gameGlobalInfo->scenario)
-			{
-				mission_selected=scenario_list->entryCount()-1;
-			}
-		}
-	}
+    if (campaign_client)
+    {
+        // Fetch list of available scenario filenames from campaign server
+        for (string filename: campaign_client->getScenarios())
+        {
+            ScenarioInfo info(filename);
+            scenario_list->addEntry(info.name, filename);
+            if (info.name == gameGlobalInfo->scenario)
+            {
+                mission_selected=scenario_list->entryCount()-1;
+            }
+        }
+    }
+    else
+    {
+        // Fetch and sort all Lua files starting with "scenario_".
+        std::vector<string> scenario_filenames = findResources("scenario_*.lua");
+        std::sort(scenario_filenames.begin(), scenario_filenames.end());
+        // remove duplicates
+        scenario_filenames.erase(std::unique(scenario_filenames.begin(), scenario_filenames.end()), scenario_filenames.end());
+        // For each scenario file, extract its name, then add it to the list.
+        for(string filename : scenario_filenames)
+        {
+            ScenarioInfo info(filename);
+            scenario_list->addEntry(info.name, filename);
+            if (info.name == gameGlobalInfo->scenario)
+            {
+                mission_selected=scenario_list->entryCount()-1;
+            }
+        }
+    }
 
     scenario_list->setSelectionIndex(mission_selected);
     scenario_list->scrollTo(mission_selected);
@@ -243,8 +244,18 @@ void ScenarioSelectionScreen::startScenario()
     // Start the selected scenario.
     gameGlobalInfo->startScenario(selected_scenario_filename);
 
-    // Destroy this screen and move on to ship selection.
+    // Destroy this screen and move on.
     destroy();
-	new MissionControlScreen();
+    new MissionControlScreen();
     new ScriptErrorRenderer();
+}
+
+void ScenarioSelectionScreen::joinScenario()
+{
+    string hostname = "192.168.2.3";    // TODO testing; get from scenario info
+    disconnectFromServer(); // Test if socket is released immediately
+    new GameServerProxy(hostname, defaultServerPort, PreferencesManager::get("password"), defaultServerPort, PreferencesManager::get("shipname"));
+    //destroy();
+    //new ProxyObservationScreen();
+    
 }

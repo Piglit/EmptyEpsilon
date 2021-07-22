@@ -23,6 +23,21 @@ def scenario_info():
 		"server_name": "Server",
 	}
 
+@pytest.fixture()
+def scenario_info_proxy():
+	return {
+		"scenario_info": {
+			"filename": "scenario_59_border.lua",
+			"name": "Test",
+			"variation": "None",
+		},
+		"ship": {
+			"callsign": "Testship",
+			"template": "Phobos",
+			"password": "testi"
+		}
+	}
+
 @pytest.fixture(autouse=True)
 def cleanup():
 	servers.clearData()
@@ -40,6 +55,11 @@ def test_scenario_start(scenario_info):
 	response = testClient.post("/scenario_start", json = scenario_info)
 	assert response.status_code == 200, response.reason
 	assert "01_test2" in servers.getScenarios(scenario_info["server_name"])
+
+def test_scenario_join(scenario_info_proxy):
+	scenario_info_proxy["ship_template"] = "Phobos"
+	response = testClient.post("/scenario_join", json = scenario_info_proxy)
+	assert response.status_code == 200, response.reason
 
 def test_scenario_end(scenario_info):
 	response = testClient.post("/scenario_end", json = scenario_info)
@@ -105,6 +125,13 @@ def test_getScenarioInfo():
 	servers.unlockScenario(missionId, server_name, "var1")
 	response = testClient.get("/scenario_info/"+server_name+"/"+missionId)
 	assert "variation[var1]" in response.json()["scenarioInfo"]
+	# proxy
+	missionId = "59_border"
+	servers.unlockScenario(missionId, server_name)
+	response = testClient.get("/scenario_info/"+server_name+"/"+missionId)
+	assert response.status_code == 200, response.reason
+	assert "Proxy" in response.json()["scenarioInfo"]
+	assert response.json()["scenarioInfo"]["Proxy"] == "192.168.2.3"
 
 def test_fuzzy_workflow():
 	server_name = "Testserver"

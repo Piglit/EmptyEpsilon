@@ -14,6 +14,11 @@ CS handles @victory event
 EE-Srv sends end event
 CS handles @end event
 
+With Proxy:
+For now: only privileged can host
+Other EE-Srv can not start but join
+Other EE-Srv does not call other endpoints
+
 Clever Datastructures:
 
 scenarios are addressed by filename
@@ -53,12 +58,14 @@ scenarioInfos = {
 	"53_escape":			{},
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
+	"59_border":			{"info": {"Proxy": "192.168.2.3"}},
 }
 
 for key in scenarioInfos:
 	filename = "scenario_"+key+".lua"
 	path = "../../scripts-piglit/"+filename
-	scenarioInfos[key]["info"] = {}
+	if "info" not in scenarioInfos[key]:
+		scenarioInfos[key]["info"] = {}
 	scenarioInfos[key]["variations"] = {}
 	assert "@victory" not in scenarioInfos[key], "keyword @victory is not allowed without a faction"
 	

@@ -63,25 +63,35 @@ class EEServerScenarioInfo(BaseModel):
 			readable += " ("+self.getId() + "; " + self.filename+")"
 		return readable
 
+class EEProxyShipInfo(BaseModel):
+	callsign: str
+	password: str
+	template: str
+
 class ScenarioInfoVictory(EEServerScenarioInfo):
 	faction: str
 
 class ScenarioInfoScriptMessage(EEServerScenarioInfo):
 	script_message: str
 
-def runScenarioInfoCallback(scenario_id, callback_name, server_name):
+def runScenarioInfoCallback(scenario_id, callback_name, server_name, **kwargs):
 	info = scenarioInfos.get(scenario_id)
 	if info and callback_name in info:
 		if isinstance(info[callback_name], list):
 			for cb in info[callback_name]:
-				cb(server_name)
+				cb(server_name, **kwargs)
 		else:
-			info[callback_name](server_name)
+			info[callback_name](server_name, **kwargs)
 
 @app.post("/scenario_start")
 async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str = Body(...)):
 	log.info(server_name + "\tstarted scenario" + str(scenario_info))
 	runScenarioInfoCallback(scenario_info.getId(), "@start", server_name)
+
+@app.post("/scenario_join")
+async def scenario_start(scenario_info: EEServerScenarioInfo, ship: EEProxyShipInfo):
+	log.info(ship.callsign + "\tjoined scenario" + str(scenario_info))
+	runScenarioInfoCallback(scenario_info.getId(), "@join", ship.callsign, **ship.__dict__)
 
 @app.post("/scenario_end")
 async def scenario_end(scenario_info: EEServerScenarioInfo, server_name: str = Body(...)):

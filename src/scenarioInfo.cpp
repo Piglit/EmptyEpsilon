@@ -71,6 +71,10 @@ void ScenarioInfo::addKeyValue(string key, string value)
     {
         type = value;
     }
+    else if (key.lower() == "proxy")
+    {
+        proxy = value;
+    }
     else if (key.lower().startswith("variation[") && key.endswith("]"))
     {
         variations.emplace_back(key.substr(10, -1), value);

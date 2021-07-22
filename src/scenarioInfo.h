@@ -11,6 +11,7 @@ public:
     string description;
     string type;
     string author;
+    string proxy;
     std::vector<std::pair<string, string> > variations;
 
     ScenarioInfo(string filename);

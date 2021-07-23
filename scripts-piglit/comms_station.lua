@@ -30,7 +30,6 @@ function mainMenu()
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = 150,
-            --reinforcements_factor = math.random(16,24),
             fighterInterceptor = math.random(125,175),
             fighterBomber = math.random(150,200),
             fighterScout = math.random(175,225),
@@ -73,34 +72,38 @@ function handleDockedState()
         setCommsMessage("Welcome to our lovely station " .. comms_target:getCallSign() .. ".")
     end
 
-    if player:getWeaponStorageMax("Homing") > 0 then
-        addCommsReply("Do you have spare homing missiles for us? ("..getWeaponCost("Homing").."rep each)", function()
-            handleWeaponRestock("Homing")
-        end)
-    end
-    if player:getWeaponStorageMax("HVLI") > 0 then
-        addCommsReply("Can you restock us with HVLI? ("..getWeaponCost("HVLI").."rep each)", function()
-            handleWeaponRestock("HVLI")
-        end)
-    end
-    if player:getWeaponStorageMax("Mine") > 0 then
-        addCommsReply("Please re-stock our mines. ("..getWeaponCost("Mine").."rep each)", function()
-            handleWeaponRestock("Mine")
-        end)
-    end
-    if player:getWeaponStorageMax("Nuke") > 0 then
-        addCommsReply("Can you supply us with some nukes? ("..getWeaponCost("Nuke").."rep each)", function()
-            handleWeaponRestock("Nuke")
-        end)
-    end
-    if player:getWeaponStorageMax("EMP") > 0 then
-        addCommsReply("Please re-stock our EMP missiles. ("..getWeaponCost("EMP").."rep each)", function()
-            handleWeaponRestock("EMP")
-        end)
-    end
+	addCommsReply("Restock us with weapons", function()
+        setCommsMessage("In what kind of weapons are you interested?")
+		if player:getWeaponStorageMax("Homing") > 0 then
+			addCommsReply("Do you have spare homing missiles for us? ("..getWeaponCost("Homing").."rep each)", function()
+				handleWeaponRestock("Homing")
+			end)
+		end
+		if player:getWeaponStorageMax("HVLI") > 0 then
+			addCommsReply("Can you restock us with HVLI? ("..getWeaponCost("HVLI").."rep each)", function()
+				handleWeaponRestock("HVLI")
+			end)
+		end
+		if player:getWeaponStorageMax("Mine") > 0 then
+			addCommsReply("Please re-stock our mines. ("..getWeaponCost("Mine").."rep each)", function()
+				handleWeaponRestock("Mine")
+			end)
+		end
+		if player:getWeaponStorageMax("Nuke") > 0 then
+			addCommsReply("Can you supply us with some nukes? ("..getWeaponCost("Nuke").."rep each)", function()
+				handleWeaponRestock("Nuke")
+			end)
+		end
+		if player:getWeaponStorageMax("EMP") > 0 then
+			addCommsReply("Please re-stock our EMP missiles. ("..getWeaponCost("EMP").."rep each)", function()
+				handleWeaponRestock("EMP")
+			end)
+		end
+		addCommsReply("Back", mainMenu)
+	end)
     local ptype = player:getTypeName()
     local stype = comms_target:getTypeName()
-    if isAllowedTo(comms_data.fighters) then
+    if isAllowedTo(comms_target.comms_data.services.fighters) then
         if stype == "Large Station" or stype == "Huge Station" then
             if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
                 addCommsReply("Visit fighter bay", function()
@@ -109,7 +112,7 @@ function handleDockedState()
             end
         end
     end
-    if isAllowedTo(comms_data.refitDrive) then
+    if isAllowedTo(comms_target.comms_data.services.refitDrive) then
         if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
             -- logical XOR with hasWarpDrive and hasJumpDrive
             addCommsReply("Refit your ships drive", function()

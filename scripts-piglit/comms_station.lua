@@ -30,7 +30,6 @@ function mainMenu()
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = 150,
-            --reinforcements_factor = math.random(16,24),
             fighterInterceptor = math.random(125,175),
             fighterBomber = math.random(150,200),
             fighterScout = math.random(175,225),

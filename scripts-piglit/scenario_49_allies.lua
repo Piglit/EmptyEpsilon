@@ -14,7 +14,7 @@
 require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
-
+MAX_PLAYER_SHIPS = 8 --due to cargo inventory and auto coolant functions
 
 --[[-----------------------------------------------------------------
       Initialization 
@@ -3268,12 +3268,17 @@ function commsStation()
         services = {
             supplydrop = "friend",
             reinforcements = "friend",
+            fighters = "friend",
+            refitDrive = "friend"
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = math.random(125,175),
             phobosReinforcements = math.random(200,250),
-            stalkerReinforcements = math.random(275,325)
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -3776,6 +3781,25 @@ function handleDockedState()
 			end)
 		end
 	end
+	local ptype = player:getTypeName()
+	local stype = comms_target:getTypeName()
+	if isAllowedTo(comms_target.comms_data.fighters) then
+		if stype == "Large Station" or stype == "Huge Station" then
+			if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+				addCommsReply("Visit fighter bay", function()
+					handleBuyShips()
+				end)
+			end
+		end
+	end
+	if isAllowedTo(comma_target.comms_data.refitDrive) then
+		if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
+			-- logical XOR with hasWarpDrive and hasJumpDrive
+			addCommsReply("Refit your ships drive", function()
+				handleChangeDrive()
+			end)
+		end
+	end
 	if comms_target:getFaction() == "Arlenians" then
 		if scarceResources then
 			addCommsReply("Where is Bespin?", function()
@@ -3976,6 +4000,82 @@ function handleDockedState()
 		end	
 	end	--end of goods present on comms target if branch
 end	--end of handleDockedState function
+
+function handleChangeDrive()
+	if player:hasWarpDrive() and not player:hasJumpDrive() then
+		setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(false)
+				player:setJumpDrive(true)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	if player:hasJumpDrive() and not player:hasWarpDrive() then
+		setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(true)
+				player:setJumpDrive(false)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	addCommsReply("Back", mainMenu)
+end
+
+function handleBuyShips()
+	setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+	addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterScout")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply("Back", mainMenu)
+end
+
+
 function setOptionalOrders()
 	optionalOrders = ""
 end
@@ -4345,27 +4445,6 @@ function handleUndockedState()
                     addCommsReply("WP" .. n, function()
 						if player:takeReputationPoints(getServiceCost("phobosReinforcements")) then
 							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Phobos T3"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
-							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
-							table.insert(friendlyHelperFleet,ship)
-							setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
-						else
-							setCommsMessage("Not enough reputation!");
-						end
-                        addCommsReply("Back", commsStation)
-                    end)
-                end
-            end
-            addCommsReply("Back", commsStation)
-        end)
-        addCommsReply("Please send Stalker Q7 reinforcements! ("..getServiceCost("stalkerReinforcements").."rep)", function()
-            if player:getWaypointCount() < 1 then
-                setCommsMessage("You need to set a waypoint before you can request reinforcements.");
-            else
-                setCommsMessage("To which waypoint should we dispatch the reinforcements?");
-                for n=1,player:getWaypointCount() do
-                    addCommsReply("WP" .. n, function()
-						if player:takeReputationPoints(getServiceCost("stalkerReinforcements")) then
-							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Stalker Q7"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
 							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
 							table.insert(friendlyHelperFleet,ship)
 							setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);

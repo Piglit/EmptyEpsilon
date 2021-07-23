@@ -2590,7 +2590,7 @@ end
 function placeMaverick()
 	--Maverick
 	stationMaverick = SpaceStation():setTemplate(szt()):setFaction(stationFaction):setCommsScript(""):setCommsFunction(commsStation)
-	stationMaverick:setPosition(psx,psy):setCallSign("Moverick"):setDescription("Gambling and resupply")
+	stationMaverick:setPosition(psx,psy):setCallSign("Maverick"):setDescription("Gambling and resupply")
 	stationGoodChoice = math.random(1,3)
 	if stationGoodChoice == 1 then
 		goods[stationMaverick] = {{"luxury",5,math.random(68,81)}}
@@ -3212,43 +3212,32 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 		danger = 1
 	end
 	enemyStrength = math.max(power * danger * difficulty, 5)
-	enemyPosition = 0
-	sp = irandom(400,900)			--random spacing of spawned group
-	deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	enemyList = {}
-	fleetPower = 0
-	while enemyStrength > 0 do
-		shipTemplateType = irandom(1,#stsl)
-		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
-			shipTemplateType = irandom(1,#stsl)
-		end
-		fleetPower = fleetPower + stsl[shipTemplateType]
-		ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
-		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + stsl[shipTemplateType]
+	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(kraylorVesselDestroyed)
-		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(humanVesselDestroyed)
-		elseif enemyFaction == "Exuari" then
-			rawExuariShipStrength = rawExuariShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Exuari" then
+		rawExuariShipStrength = rawExuariShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(exuariVesselDestroyed)
-		elseif enemyFaction == "Arlenians" then
-			rawArlenianShipStrength = rawArlenianShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Arlenians" then
+		rawArlenianShipStrength = rawArlenianShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(arlenianVesselDestroyed)
-		elseif enemyFaction == "Independent" then
-			rawNeutralShipStrength = rawNeutralShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Independent" then
+		rawNeutralShipStrength = rawNeutralShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(neutralVesselDestroyed)
 		end
-		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 then
-			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		else
-			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		enemyStrength = enemyStrength - stsl[shipTemplateType]
 	end
 	fleetPower = math.max(fleetPower/danger/difficulty, 5)
 	return enemyList, fleetPower

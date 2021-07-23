@@ -5,6 +5,7 @@ function init_constants_xansta()
 	-- called during or instead of setConstants()
 	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
 	--Ship Template Name List
+	--every faction must have at least one ship with value 5 or lower to prevent endless loops
 	stl = {
 		["Human Navy"]= {
 			["MU52 Hornet"]= 5,
@@ -499,6 +500,7 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	local smallFormations = {}
 
 	-- Reminder: stsl and stnl are ship template score and name list
+	enemyStrength = math.max(enemyStrength, 5) 
 	while enemyStrength > 0 do
 		local shipTemplateType = enemyFactionNameList[ irandom(1,#enemyFactionNameList) ]
 		while enemyFactionScoreList[shipTemplateType] > enemyStrength * 1.1 + 5 do

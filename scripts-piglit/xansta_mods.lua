@@ -303,6 +303,7 @@ function init_constants_xansta()
 	feature_autoCoolant = true
 	feature_crewFate = true
 	--Damage to ship can kill repair crew members
+	feature_coolantNebulae = false
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 end
@@ -636,6 +637,16 @@ function xanstas_player_update(delta)
 		assert resetPreviousSystemHealth == nil
 		assert crewFate == nil
 	end
+	if feature_coolantNebulae then
+		assert coolantNebulae == nil
+		assert updateCoolantGivenPlayer == nil
+		assert getCoolantGivenPlayer == nil
+		assert coolant_nebulae ~= nil	--table
+		assert coolant_loss ~= nil
+		assert adverseEffect ~= nil
+		assert coolant_gain ~= nil
+
+	end
 	for pidx=1,32 do	-- or use MAX_PLAYERS constant?
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
@@ -647,6 +658,9 @@ function xanstas_player_update(delta)
 			end
 			if feature_crewFate then
 				x_healthCheck(delta, p)
+			end
+			if feature_coolantNebulae then
+				x_coolantNebulae(delta, p)
 			end
 end
 
@@ -1004,5 +1018,121 @@ function x_crewFate(p, fatalityChance)
 			end	--coolant loss branch
 		end
 	end
+end
+
+--		Gain or lose coolant from nebula functions
+-- TODO check coolant_nebula is filled correctly
+function x_coolantNebulae(delta, p)
+	local inside_gain_coolant_nebula = false
+	for i=1,#coolant_nebula do
+		if distance(p,coolant_nebula[i]) < 5000 then
+			if coolant_nebula[i].lose then
+				p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
+			end
+			if coolant_nebula[i].gain then
+				inside_gain_coolant_nebula = true
+			end
+		end
+	end
+	if inside_gain_coolant_nebula then
+		if p.get_coolant then
+			if p.coolant_trigger then
+				x_updateCoolantGivenPlayer(p, delta)
+			end
+		else
+			if p:hasPlayerAtPosition("Engineering") then
+				p.get_coolant_button = "get_coolant_button"
+				p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",function() x_getCoolantGivenPlayer(p) end)
+				p.get_coolant = true
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.get_coolant_button_plus = "get_coolant_button_plus"
+				p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",function() x_getCoolantGivenPlayer(p) end)
+				p.get_coolant = true
+			end
+		end
+	else
+		p.get_coolant = false
+		p.coolant_trigger = false
+		p.configure_coolant_timer = nil
+		p.deploy_coolant_timer = nil
+		if p:hasPlayerAtPosition("Engineering") then
+			if p.get_coolant_button ~= nil then
+				p:removeCustom(p.get_coolant_button)
+				p.get_coolant_button = nil
+			end
+			if p.gather_coolant ~= nil then
+				p:removeCustom(p.gather_coolant)
+				p.gather_coolant = nil
+			end
+		end
+		if p:hasPlayerAtPosition("Engineering+") then
+			if p.get_coolant_button_plus ~= nil then
+				p:removeCustom(p.get_coolant_button_plus)
+				p.get_coolant_button_plus = nil
+			end
+			if p.gather_coolant_plus ~= nil then
+				p:removeCustom(p.gather_coolant_plus)
+				p.gather_coolant_plus = nil
+			end
+		end
+	end
+end
+function x_updateCoolantGivenPlayer(p, delta)
+	if p.configure_coolant_timer == nil then
+		p.configure_coolant_timer = delta + 5
+	end
+	p.configure_coolant_timer = p.configure_coolant_timer - delta
+	if p.configure_coolant_timer < 0 then
+		if p.deploy_coolant_timer == nil then
+			p.deploy_coolant_timer = delta + 5
+		end
+		p.deploy_coolant_timer = p.deploy_coolant_timer - delta
+		if p.deploy_coolant_timer < 0 then
+			gather_coolant_status = "Gathering Coolant"
+			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain)
+			if p:getMaxCoolant() > 50 and random(1,100) <= 13 then
+				local engine_choice = math.random(1,3)
+				if engine_choice == 1 then
+					p:setSystemHealth("impulse",p:getSystemHealth("impulse")*adverseEffect)
+				elseif engine_choice == 2 then
+					if p:hasWarpDrive() then
+						p:setSystemHealth("warp",p:getSystemHealth("warp")*adverseEffect)
+					end
+				else
+					if p:hasJumpDrive() then
+						p:setSystemHealth("jumpdrive",p:getSystemHealth("jumpdrive")*adverseEffect)
+					end
+				end
+			end
+		else
+			gather_coolant_status = string.format("Deploying Collectors %i",math.ceil(p.deploy_coolant_timer - delta))
+		end
+	else
+		gather_coolant_status = string.format("Configuring Collectors %i",math.ceil(p.configure_coolant_timer - delta))
+	end
+	if p:hasPlayerAtPosition("Engineering") then
+		p.gather_coolant = "gather_coolant"
+		p:addCustomInfo("Engineering",p.gather_coolant,gather_coolant_status)
+	end
+	if p:hasPlayerAtPosition("Engineering+") then
+		p.gather_coolant_plus = "gather_coolant_plus"
+		p:addCustomInfo("Engineering",p.gather_coolant_plus,gather_coolant_status)
+	end
+end
+function x_getCoolantGivenPlayer(p)
+	if p:hasPlayerAtPosition("Engineering") then
+		if p.get_coolant_button ~= nil then
+			p:removeCustom(p.get_coolant_button)
+			p.get_coolant_button = nil
+		end
+	end
+	if p:hasPlayerAtPosition("Engineering+") then
+		if p.get_coolant_button_plus ~= nil then
+			p:removeCustom(p.get_coolant_button_plus)
+			p.get_coolant_button_plus = nil
+		end
+	end
+	p.coolant_trigger = true
 end
 

@@ -14,7 +14,6 @@
 require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
-MAX_PLAYER_SHIPS = 8 --due to cargo inventory and auto coolant functions
 
 --[[-----------------------------------------------------------------
       Initialization 
@@ -55,11 +54,7 @@ function init()
 	setPlots()
 	plotManager = plotDelay
 	plotM = movingObjects
-	plotCI = cargoInventory
 	plotCN = coolantNebulae
-	plotH = healthCheck		--Damage to ship can kill repair crew members
-	healthCheckTimer = 5
-	healthCheckTimerInterval = 5
 	scarceResources = false
 	doctorSearch = false
 	GMMining = "Mining"
@@ -3792,7 +3787,7 @@ function handleDockedState()
 			end
 		end
 	end
-	if isAllowedTo(comma_target.comms_data.refitDrive) then
+	if isAllowedTo(player.comms_data.refitDrive) then
 		if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
 			-- logical XOR with hasWarpDrive and hasJumpDrive
 			addCommsReply("Refit your ships drive", function()
@@ -5105,342 +5100,7 @@ function playerPower()
 	end
 	return playerShipScore
 end
---[[-----------------------------------------------------------------
-      Inventory button for relay/operations 
------------------------------------------------------------------]]--
-function cargoInventory(delta)
-	if cargoInventoryList == nil then
-		cargoInventoryList = {}
-		table.insert(cargoInventoryList,cargoInventory1)
-		table.insert(cargoInventoryList,cargoInventory2)
-		table.insert(cargoInventoryList,cargoInventory3)
-		table.insert(cargoInventoryList,cargoInventory4)
-		table.insert(cargoInventoryList,cargoInventory5)
-		table.insert(cargoInventoryList,cargoInventory6)
-		table.insert(cargoInventoryList,cargoInventory7)
-		table.insert(cargoInventoryList,cargoInventory8)
-	end
-	for pidx=1, MAX_PLAYER_SHIPS do
-		p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			gi = 1
-			cargoHoldEmpty = true
-			repeat
-				playerGoodsType = goods[p][gi][1]
-				playerGoodsQuantity = goods[p][gi][2]
-				if playerGoodsQuantity > 0 then
-					cargoHoldEmpty = false
-				end
-				gi = gi + 1
-			until(gi > #goods[p])
-			if not cargoHoldEmpty then
-				if p:hasPlayerAtPosition("Relay") then
-					if p.inventoryButton == nil then
-						local tbi = "inventory" .. p:getCallSign()
-						p:addCustomButton("Relay",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-				if p:hasPlayerAtPosition("Operations") then
-					if p.inventoryButton == nil then
-						local tbi = "inventoryOp" .. p:getCallSign()
-						p:addCustomButton("Operations",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-			end
-		end
-	end
-end
-function cargoInventory1()
-	local p = getPlayerShip(1)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory2()
-	local p = getPlayerShip(2)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory3()
-	local p = getPlayerShip(3)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory4()
-	local p = getPlayerShip(4)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory5()
-	local p = getPlayerShip(5)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory6()
-	local p = getPlayerShip(6)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory7()
-	local p = getPlayerShip(7)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory8()
-	local p = getPlayerShip(8)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
---		Coolant buttons and functions
-function coolantNebulae(delta)
-	for pidx=1, MAX_PLAYER_SHIPS do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local inside_gain_coolant_nebula = false
-			for i=1,#coolant_nebula do
-				if distance(p,coolant_nebula[i]) < 5000 then
-					if coolant_nebula[i].lose then
-						p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
-					end
-					if coolant_nebula[i].gain then
-						inside_gain_coolant_nebula = true
-					end
-				end
-			end
-			if inside_gain_coolant_nebula then
-				if p.get_coolant then
-					if p.coolant_trigger then
-						updateCoolantGivenPlayer(p, delta)
-					end
-				else
-					if p:hasPlayerAtPosition("Engineering") then
-						p.get_coolant_button = "get_coolant_button"
-						p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-					if p:hasPlayerAtPosition("Engineering+") then
-						p.get_coolant_button_plus = "get_coolant_button_plus"
-						p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-				end
-			else
-				p.get_coolant = false
-				p.coolant_trigger = false
-				p.configure_coolant_timer = nil
-				p.deploy_coolant_timer = nil
-				if p:hasPlayerAtPosition("Engineering") then
-					if p.get_coolant_button ~= nil then
-						p:removeCustom(p.get_coolant_button)
-						p.get_coolant_button = nil
-					end
-					if p.gather_coolant ~= nil then
-						p:removeCustom(p.gather_coolant)
-						p.gather_coolant = nil
-					end
-				end
-				if p:hasPlayerAtPosition("Engineering+") then
-					if p.get_coolant_button_plus ~= nil then
-						p:removeCustom(p.get_coolant_button_plus)
-						p.get_coolant_button_plus = nil
-					end
-					if p.gather_coolant_plus ~= nil then
-						p:removeCustom(p.gather_coolant_plus)
-						p.gather_coolant_plus = nil
-					end
-				end
-			end
-		end
-	end
-end
-function updateCoolantGivenPlayer(p, delta)
-	if p.configure_coolant_timer == nil then
-		p.configure_coolant_timer = delta + 5
-	end
-	p.configure_coolant_timer = p.configure_coolant_timer - delta
-	if p.configure_coolant_timer < 0 then
-		if p.deploy_coolant_timer == nil then
-			p.deploy_coolant_timer = delta + 5
-		end
-		p.deploy_coolant_timer = p.deploy_coolant_timer - delta
-		if p.deploy_coolant_timer < 0 then
-			gather_coolant_status = "Gathering Coolant"
-			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain)
-		else
-			gather_coolant_status = string.format("Deploying Collectors %i",math.ceil(p.deploy_coolant_timer - delta))
-		end
-	else
-		gather_coolant_status = string.format("Configuring Collectors %i",math.ceil(p.configure_coolant_timer - delta))
-	end
-	if p:hasPlayerAtPosition("Engineering") then
-		p.gather_coolant = "gather_coolant"
-		p:addCustomInfo("Engineering",p.gather_coolant,gather_coolant_status)
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		p.gather_coolant_plus = "gather_coolant_plus"
-		p:addCustomInfo("Engineering",p.gather_coolant_plus,gather_coolant_status)
-	end
-end
-function getCoolantGivenPlayer(p)
-	if p:hasPlayerAtPosition("Engineering") then
-		if p.get_coolant_button ~= nil then
-			p:removeCustom(p.get_coolant_button)
-			p.get_coolant_button = nil
-		end
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		if p.get_coolant_button_plus ~= nil then
-			p:removeCustom(p.get_coolant_button_plus)
-			p.get_coolant_button_plus = nil
-		end
-	end
-	p.coolant_trigger = true
-end
-function getCoolant1()
-	local p = getPlayerShip(1)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant2()
-	local p = getPlayerShip(2)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant3()
-	local p = getPlayerShip(3)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant4()
-	local p = getPlayerShip(4)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant5()
-	local p = getPlayerShip(5)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant6()
-	local p = getPlayerShip(6)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant7()
-	local p = getPlayerShip(7)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant8()
-	local p = getPlayerShip(8)
-	getCoolantGivenPlayer(p)
-end
+
 --[[-----------------------------------------------------------------
     Timed game plot
 -----------------------------------------------------------------]]--
@@ -6136,7 +5796,7 @@ function movingObjects(delta)
 		end	
 	end
 end
-function healthCheck(delta)
+--[[function healthCheck(delta)
 	healthCheckTimer = healthCheckTimer - delta
 	if healthCheckTimer < 0 then
 		if healthDiagnostic then print("health check timer expired") end
@@ -6230,7 +5890,9 @@ function crewFate(p, fatalityChance)
 			p:addCustomMessage("Engineering+",repairCrewFatalityPlus,"One of your repair crew has perished")
 		end
 	end
-end--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
+end
+--]]
+--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
 function setPlayers()
 	local concurrentPlayerCount = 0
 	if setPlayerDiagnostic then print("local concurrent player count: " .. concurrentPlayerCount) end
@@ -6566,10 +6228,6 @@ function update(delta)
 	if plotM ~= nil then	--moving objects
 		plotM(delta)
 	end
-	if updateDiagnostic then print("plotCI") end
-	if plotCI ~= nil then	--cargo inventory
-		plotCI(delta)
-	end
 	if updateDiagnostic then print("plotH") end
 	if plotH ~= nil then	--health
 		plotH(delta)
@@ -6577,4 +6235,5 @@ function update(delta)
 	if plotCN ~= nil then	--coolant via nebula
 		plotCN(delta)
 	end
+	xanstas_player_update(delta)
 end

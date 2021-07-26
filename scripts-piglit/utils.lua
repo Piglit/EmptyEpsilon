@@ -242,6 +242,7 @@ end
 -- Example:
 --   createRandomAlongArc(Asteroid, 100, 500, 3000, 65, 120, 450)
 function createRandomAlongArc(object_type, amount, x, y, distance, startArc, endArcClockwise, randomize)
+	local object_list = {}
 	if randomize == nil then randomize = 0 end
 	if amount == nil then amount = 1 end
 	arcLen = endArcClockwise - startArc
@@ -253,18 +254,19 @@ function createRandomAlongArc(object_type, amount, x, y, distance, startArc, end
 		for ndex=1,arcLen do
 			radialPoint = startArc+ndex
 			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
 		end
 		for ndex=1,amount-arcLen do
 			radialPoint = random(startArc,endArcClockwise)
 			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
 		end
 	else
 		for ndex=1,amount do
 			radialPoint = random(startArc,endArcClockwise)
 			pointDist = distance + random(-randomize,randomize)
 			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
 		end
 	end
 end

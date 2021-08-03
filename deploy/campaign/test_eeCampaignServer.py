@@ -7,6 +7,7 @@ from pprint import pprint
 import pytest
 import os
 import random
+import urllib
 
 from srvData import servers
 
@@ -109,6 +110,12 @@ def test_getScenarios():
 	assert response.status_code == 200, response.reason
 	assert response.json() == {"scenarios": ["scenario_20_training1.lua", "scenario_00_test.lua"]}
 
+	# urlencode
+	server_name = "Test Server"
+	server_name = urllib.parse.quote(server_name)
+	response = testClient.get("/scenarios/"+server_name)
+	assert response.status_code == 200, response.reason
+
 def test_getShips():
 	server_name = "Testserver"
 	response = testClient.get("/ships_available/"+server_name)
@@ -119,7 +126,6 @@ def test_getShips():
 	assert response.status_code == 200, response.reason
 	assert "Hathcock" in response.json()["ships"]
 	
-
 def test_getScenarioInfo():
 	server_name = "Testserver"
 	missionId = "00_basic"

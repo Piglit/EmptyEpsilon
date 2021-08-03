@@ -9,6 +9,7 @@ import logging
 import os
 import json
 from copy import deepcopy
+from urllib.parse import unquote
 
 from scenarioInfo import scenarioInfos
 from srvData import servers
@@ -123,6 +124,7 @@ class ScenarioResponse(BaseModel):
 
 @app.get("/scenarios/{server_name}", response_model = ScenarioResponse)
 async def getScenarios(server_name):
+	server_name = unquote(server_name)
 	log.debug(server_name + "\tget scenarios")
 	scenarios = servers.getScenarios(server_name)
 	scenarios = ["scenario_"+s+".lua" for s in scenarios] 
@@ -130,6 +132,7 @@ async def getScenarios(server_name):
 
 @app.get("/scenario_info/{server_name}/{scenario_name}")
 async def getScenarioInfo(server_name, scenario_name):
+	server_name = unquote(server_name)
 	log.debug(server_name + "\tget scenario info for "+scenario_name)
 	scenario_name = scenarioFileNameToMissionId(scenario_name)
 	info = deepcopy(scenarioInfos[scenario_name]["info"])
@@ -150,6 +153,7 @@ async def getScenarioInfo(server_name, scenario_name):
 
 @app.get("/ships_available/{server_name}")
 async def getShipsAvailable(server_name):
+	server_name = unquote(server_name)
 	log.debug(server_name + "\tget ships avail")
 	ships = servers.getShips(server_name)
 	return {"ships": ships}

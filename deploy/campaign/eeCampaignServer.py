@@ -107,6 +107,7 @@ async def scenario_victory(scenario_info: ScenarioInfoVictory, server_name: str 
 
 @app.post("/script_message")
 async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: str = Body(...)):
+	# unused
 	scm = scenario_info.script_message
 	log.info(server_name + "\tscript message   " + str(scenario_info) + "\t:" + scm)
 	if scm.startswith("unlock:[") and scm.endswith("]"):
@@ -145,6 +146,12 @@ async def getScenarioInfo(server_name, scenario_name):
 	info = {"scenarioInfo": info}
 	#log.debug(json.dumps(info))
 	return info
+
+@app.get("/ships_available/{server_name}")
+async def getShipsAvailable(server_name):
+	log.debug(server_name + "\tget ships avail")
+	ships = servers.getShips(server_name)
+	return {"ships": ships}
 
 if __name__ == "__main__":
 	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=True, port=8888)

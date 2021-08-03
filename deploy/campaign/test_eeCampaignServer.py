@@ -109,6 +109,17 @@ def test_getScenarios():
 	assert response.status_code == 200, response.reason
 	assert response.json() == {"scenarios": ["scenario_20_training1.lua", "scenario_00_test.lua"]}
 
+def test_getShips():
+	server_name = "Testserver"
+	response = testClient.get("/ships_available/"+server_name)
+	assert response.status_code == 200, response.reason
+	assert response.json() == {"ships": ["Phobos"]}
+	servers.unlockShip("Hathcock", server_name)
+	response = testClient.get("/ships_available/"+server_name)
+	assert response.status_code == 200, response.reason
+	assert "Hathcock" in response.json()["ships"]
+	
+
 def test_getScenarioInfo():
 	server_name = "Testserver"
 	missionId = "00_basic"

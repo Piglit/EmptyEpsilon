@@ -53,7 +53,7 @@ scenarioInfos = {
 	"06_battlefield":		{},
 	"08_atlantis":			{},
 	"09_outpost":			{},
-	"49_allies"				{},
+	"49_allies":			{},
 	"50_gaps":				{},
 	"51_deliverAmbassador":	{},
 	"53_escape":			{},

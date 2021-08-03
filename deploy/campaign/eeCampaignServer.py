@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Request, Body, logger
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
-from typing import Optional, Literal, List
+from typing import Optional, List
 from pprint import pprint
 import uvicorn
 import logging
@@ -12,6 +12,7 @@ from copy import deepcopy
 
 from scenarioInfo import scenarioInfos
 from srvData import servers
+from utils import removeprefix, removesuffix
 
 #MISSIONS = missionDB.MISSIONS
 
@@ -29,7 +30,7 @@ app = FastAPI()
 testClient = TestClient(app)
 
 def scenarioFileNameToMissionId(scenario_name):
-	return scenario_name.removeprefix("scenario_").removesuffix(".lua")
+	return removesuffix(removeprefix(scenario_name, "scenario_"), ".lua")
 
 @app.get("/")
 async def root():

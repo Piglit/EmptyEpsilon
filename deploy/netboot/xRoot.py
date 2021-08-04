@@ -9,13 +9,13 @@ print("starting launcher")
 command = ["./serverLauncher.py"]
 launcher = subprocess.Popen(command)
 
-time.sleep(2)
+#time.sleep(2)
+#
+#print("starting selector")
+#command = ["./missionSelector.py"]
+#selector = subprocess.Popen(command)
 
-print("starting selector")
-command = ["./missionSelector.py"]
-selector = subprocess.Popen(command)
-
-selector.wait()
+#selector.wait()
 launcher.wait()
 
 #scenario:

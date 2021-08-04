@@ -20,6 +20,6 @@ def test_command():
 	assert response.status_code == 200, response.reason
 
 def test_spawn():
-	query = "setCallsign('Testship')&setTemplate('Hathcock')"
+	query = "callsign=Testship&template=Hathcock"
 	response = testClient.get("/spwan?"+query)
 	assert response.status_code == 200, response.reason

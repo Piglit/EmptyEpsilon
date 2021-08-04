@@ -36,8 +36,8 @@ from srvData import servers as S
 from utils import removeprefix 
 
 scenarioInfos = {
-#	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
-#	"01_test2":				{},
+	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
+	"01_test2":				{},
 	"00_basic":				{},
 	"01_quick_basic":		{},
 	"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos")]},

@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+
+"""
+This script starts a EE server (or proxy) and provides an API that is attached to the HTTP API of the EE server (or the luaproxy of the proxies destination)
+The features provided are higher level features.
+"""
+
+
+
 from fastapi import FastAPI, Request, Body, logger
 import uvicorn
 import logging
@@ -29,7 +37,7 @@ async def command(callsign: str, request: Request):
 	return {"EE-Query": query}
 
 @proxy.get("/spawn")
-async def command(request: Request):
+async def spawn(request: Request):
 	query = "_OBJECT_=PlayerSpaceship()"
 	for first, second in request.query_params.items():
 		assert first.startswith("set")

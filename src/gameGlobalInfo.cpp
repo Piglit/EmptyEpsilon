@@ -81,12 +81,12 @@ void GameGlobalInfo::setPlayerShip(int index, P<PlayerSpaceship> ship)
         playerShipId[index] = -1;
 }
 
-P<PlayerSpaceship> GameGlobalInfo::getPlayerShipByName(string callsign)
+int GameGlobalInfo::getPlayerShipIndexByName(string callsign)
 {
     for(int n=0; n<max_player_ships; n++)
         if (getPlayerShip(n)->getCallSign() == callsign)
-            return getPlayerShip(n);
-    return getPlayerShip(-1);
+            return n;
+    return -1;
 }
 
 int GameGlobalInfo::findPlayerShip(P<PlayerSpaceship> ship)
@@ -360,6 +360,15 @@ static int getPlayerShip(lua_State* L)
 /// getPlayerShip(index)
 /// Return the player's ship, use -1 to get the first active player ship.
 REGISTER_SCRIPT_FUNCTION(getPlayerShip);
+
+static int getPlayerShipIndex(lua_State* L)
+{
+    string callsign = luaL_checkstring(L, 1);
+    return gameGlobalInfo->getPlayerShipIndexByName(callsign);
+}
+/// getPlayerShipIndex(index)
+/// Return the player's ship, use -1 to get the first active player ship.
+REGISTER_SCRIPT_FUNCTION(getPlayerShipIndex);
 
 static int getActivePlayerShips(lua_State* L)
 {

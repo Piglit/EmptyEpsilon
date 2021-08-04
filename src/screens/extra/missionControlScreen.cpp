@@ -10,6 +10,7 @@
 #include "gui/gui2_panel.h"
 #include "gui/gui2_selector.h"
 #include "campaign_client.h"
+#include "preferenceManager.h"
 
 MissionControlScreen::MissionControlScreen()
 {
@@ -68,7 +69,8 @@ MissionControlScreen::MissionControlScreen()
     // If this is the server, add a panel to create player ships.
 	(new GuiPanel(left_container, "CREATE_SHIP_BOX"))->setPosition(0, 50, ATopCenter)->setSize(550, 700);
     //Add buttons and a selector to create player ships.
-	if (gameGlobalInfo->allow_new_player_ships)
+	string callsign = PreferencesManager::get("shipname", "");
+	if ((gameGlobalInfo->allow_new_player_ships) && (gameGlobalInfo->getPlayerShipIndexByName(callsign) == -1))
 	{
 		GuiSelector* ship_template_selector = new GuiSelector(left_container, "CREATE_SHIP_SELECTOR", nullptr);
 		// List only ships with templates designated for player use.
@@ -85,7 +87,8 @@ MissionControlScreen::MissionControlScreen()
 		// Spawn a ship of the selected template near 0,0 and give it a random
 		// heading.
 		(new GuiButton(left_container, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [this, ship_template_selector]() {
-			if (!gameGlobalInfo->allow_new_player_ships)
+			string callsign = PreferencesManager::get("shipname", "");
+			if ((!gameGlobalInfo->allow_new_player_ships) || (gameGlobalInfo->getPlayerShipIndexByName(callsign) != -1))
 				return;
 			P<PlayerSpaceship> ship = new PlayerSpaceship();
 
@@ -96,12 +99,12 @@ MissionControlScreen::MissionControlScreen()
 				ship->target_rotation = ship->getRotation();
 				ship->setPosition(sf::Vector2f(random(-100, 100), random(-100, 100)));
 				ship->setTemplate(ship_template_selector->getSelectionValue());
-				my_player_info->commandSetShipId(ship->getMultiplayerId());
+				ship->setCallSign(callsign);
+				//ship->setControlCode(PreferencesManager::get("password"));
+				//my_player_info->commandSetShipId(ship->getMultiplayerId());
 			}
 		}))->setPosition(0, 680, ATopCenter)->setSize(490, 50);
 	}
-
-
 
 	// mission control
     gm_script_label = new GuiLabel(right_panel, "SERVER_GM_LABEL", tr("Mission control"), 30);

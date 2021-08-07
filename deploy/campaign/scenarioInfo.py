@@ -36,31 +36,44 @@ from srvData import servers as S
 from utils import removeprefix 
 
 scenarioInfos = {
-	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
-	"01_test2":				{},
-	"00_basic":				{},
-	"01_quick_basic":		{},
-	"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos")]},
+#	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
+#	"01_test2":				{},
+
+	# Training Tree
+	"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos M3P")]},
 	"21_training2":			{"@victory[Human Navy]": [P(S.unlockScenario, "09_outpost"), P(S.unlockShip, "Hathcock")]},
-	"22_training3":			{"@victory[Human Navy]": P(S.unlockShip, "Piranha M5P")},
-	"23_training4":			{"@victory[Human Navy]": P(S.unlockShip, "Nautilus")},
-	"01a_waves":			{},
-	"01d_waves":			{},
-	"01e_waves":			{},
-	"02_beacon":			{},
-	"03_edgeofspace":		{},
-	"04_gftp":				{},
-	"05_surrounded":		{},
-	"06_battlefield":		{},
-	"08_atlantis":			{},
+	"22_training3":			{"@victory[Human Navy]": [P(S.unlockScenario, "05_surrounded"), P(S.unlockShip, "Piranha M5P")]},
+	"23_training4":			{"@victory[Human Navy]": [P(S.unlockScenario, "50_gaps", "*"), P(S.unlockShip, "Nautilus")]},
+
+	# Quick Battles
+	"01_quick_basic":		{},
 	"09_outpost":			{},
-	"49_allies":			{},
+	"05_surrounded":		{},
 	"50_gaps":				{},
-	"51_deliverAmbassador":	{},
-	"53_escape":			{},
+
+	# Missions - unlock for specific Crews
+	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic", "*"), P(S.unlockShip, "Atlantis")]},
+	"02_beacon":			{"@start": P(S.unlockScenario, "01e_waves", "*")},
+	"03_edgeofspace":		{"@start": P(S.unlockScenario, "01k_waves", "*")},
+#	"04_gftp":				{"@start": P(S.unlockScenario, "01g_waves", "*")},
+	"49_allies":			{"@victory[Human Navy]": P(S.unlockScenarios, [("01e_waves", "*"), ("01k_waves", "*")])},
+
+	# More Battles
+	"00_basic":				{},
+	"01a_waves":			{},
+	"01e_waves":			{},
+	"01k_waves":			{},
+#	"01g_waves":			{},
+
+	# Multiplayer Missions
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
 	"59_border":			{"info": {"Proxy": "192.168.2.3"}},
+
+#	"06_battlefield":		{},
+#	"48_visitors":			{},
+#	"51_deliverAmbassador":	{},
+#	"53_escape":			{},
 }
 
 for key in scenarioInfos:
@@ -106,7 +119,7 @@ scenarioInfos_unused_infos = {
 "scenario_00_training3.lua":			{"variation": "Boss", "name": "Training: Missile Cruiser - Boss", "shipType": "Piranha", "unlocks":[]},
 "scenario_00_training4.lua":			{"shipType": "Nautilus", "unlocks":["gaps"]},
 "scenario_01a_waves.lua":				{"shipType": "", "unlocks":[]},
-"scenario_01d_waves.lua":				{"shipType": "", "unlocks":[]},
+"scenario_01k_waves.lua":				{"shipType": "", "unlocks":[]},
 "scenario_01e_waves.lua":				{"shipType": "", "unlocks":[]},
 "scenario_02_beacon.lua":				{"shipType": "Atlantis", "unlocks":[]},
 "scenario_03_edgeofspace.lua":			{"shipType": "Phobos", "unlocks":[]},

@@ -14,6 +14,7 @@ from urllib.parse import unquote
 from scenarioInfo import scenarioInfos
 from srvData import servers
 from utils import removeprefix, removesuffix
+import pyrohelper
 
 #MISSIONS = missionDB.MISSIONS
 
@@ -89,6 +90,7 @@ def runScenarioInfoCallback(scenario_id, callback_name, server_name, **kwargs):
 async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str = Body(...)):
 	log.info(server_name + "\tstarted scenario" + str(scenario_info))
 	runScenarioInfoCallback(scenario_info.getId(), "@start", server_name)
+	servers.storeData()
 
 @app.post("/scenario_join")
 async def scenario_start(scenario_info: EEServerScenarioInfo, ship: EEProxyShipInfo):
@@ -160,3 +162,4 @@ async def getShipsAvailable(server_name):
 
 if __name__ == "__main__":
 	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=True, port=8888)
+	pyrohelper.cleanup()

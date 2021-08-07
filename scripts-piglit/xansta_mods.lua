@@ -357,9 +357,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Phobos M3P" then
 			if #playerShipNamesForPhobosM3P > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForPhobosM3P)
-				pobj:setCallSign(playerShipNamesForPhobosM3P[ni])
-				table.remove(playerShipNamesForPhobosM3P,ni)
+				--ni = math.random(1,#playerShipNamesForPhobosM3P)
+				--pobj:setCallSign(playerShipNamesForPhobosM3P[ni])
+				--table.remove(playerShipNamesForPhobosM3P,ni)
 			end
 			pobj.shipScore = 19
 			pobj.maxCargo = 10
@@ -367,54 +367,54 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Hathcock" then
 			if #playerShipNamesForHathcock > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForHathcock)
-				pobj:setCallSign(playerShipNamesForHathcock[ni])
-				table.remove(playerShipNamesForHathcock,ni)
+				--ni = math.random(1,#playerShipNamesForHathcock)
+				--pobj:setCallSign(playerShipNamesForHathcock[ni])
+				--table.remove(playerShipNamesForHathcock,ni)
 			end
 			pobj.shipScore = 30
 			pobj.maxCargo = 6
 		elseif tempPlayerType == "Piranha M5P" then
 			if #playerShipNamesForPiranha > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForPiranha)
-				pobj:setCallSign(playerShipNamesForPiranha[ni])
-				table.remove(playerShipNamesForPiranha,ni)
+				--ni = math.random(1,#playerShipNamesForPiranha)
+				--pobj:setCallSign(playerShipNamesForPiranha[ni])
+				--table.remove(playerShipNamesForPiranha,ni)
 			end
 			pobj.shipScore = 16
 			pobj.maxCargo = 8
 		elseif tempPlayerType == "Flavia P.Falcon" then
 			if #playerShipNamesForFlaviaPFalcon > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForFlaviaPFalcon)
-				pobj:setCallSign(playerShipNamesForFlaviaPFalcon[ni])
-				table.remove(playerShipNamesForFlaviaPFalcon,ni)
+				--ni = math.random(1,#playerShipNamesForFlaviaPFalcon)
+				--pobj:setCallSign(playerShipNamesForFlaviaPFalcon[ni])
+				--table.remove(playerShipNamesForFlaviaPFalcon,ni)
 			end
 			pobj.shipScore = 13
 			pobj.maxCargo = 15
 		elseif tempPlayerType == "Repulse" then
 			if #playerShipNamesForRepulse > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForRepulse)
-				pobj:setCallSign(playerShipNamesForRepulse[ni])
-				table.remove(playerShipNamesForRepulse,ni)
+				--ni = math.random(1,#playerShipNamesForRepulse)
+				--pobj:setCallSign(playerShipNamesForRepulse[ni])
+				--table.remove(playerShipNamesForRepulse,ni)
 			end
 			pobj.shipScore = 14
 			pobj.maxCargo = 12
 		elseif tempPlayerType == "Nautilus" then
 			if #playerShipNamesForNautilus > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForNautilus)
-				pobj:setCallSign(playerShipNamesForNautilus[ni])
-				table.remove(playerShipNamesForNautilus,ni)
+				--ni = math.random(1,#playerShipNamesForNautilus)
+				--pobj:setCallSign(playerShipNamesForNautilus[ni])
+				--table.remove(playerShipNamesForNautilus,ni)
 			end
 			pobj.shipScore = 12
 			pobj.maxCargo = 7
 		elseif tempPlayerType == "Atlantis" then
 			if #playerShipNamesForAtlantis > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForAtlantis)
-				pobj:setCallSign(playerShipNamesForAtlantis[ni])
-				table.remove(playerShipNamesForAtlantis,ni)
+				--ni = math.random(1,#playerShipNamesForAtlantis)
+				--pobj:setCallSign(playerShipNamesForAtlantis[ni])
+				--table.remove(playerShipNamesForAtlantis,ni)
 			end
 			pobj.carrier = true
 			pobj.shipScore = 52
@@ -422,9 +422,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Maverick" then
 			if #playerShipNamesForMaverick > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForMaverick)
-				pobj:setCallSign(playerShipNamesForMaverick[ni])
-				table.remove(playerShipNamesForMaverick,ni)
+				--ni = math.random(1,#playerShipNamesForMaverick)
+				--pobj:setCallSign(playerShipNamesForMaverick[ni])
+				--table.remove(playerShipNamesForMaverick,ni)
 			end
 			pobj.carrier = true
 			pobj.shipScore = 52
@@ -432,9 +432,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Crucible" then
 			if #playerShipNamesForCrucible > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForCrucible)
-				pobj:setCallSign(playerShipNamesForCrucible[ni])
-				table.remove(playerShipNamesForCrucible,ni)
+				--ni = math.random(1,#playerShipNamesForCrucible)
+				--pobj:setCallSign(playerShipNamesForCrucible[ni])
+				--table.remove(playerShipNamesForCrucible,ni)
 			end
 			pobj.carrier = true
 			pobj.shipScore = 52
@@ -442,9 +442,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Benedict" then
 			if #playerShipNamesForBenedict > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForBenedict)
-				pobj:setCallSign(playerShipNamesForBenedict[ni])
-				table.remove(playerShipNamesForBenedict,ni)
+				--ni = math.random(1,#playerShipNamesForBenedict)
+				--pobj:setCallSign(playerShipNamesForBenedict[ni])
+				--table.remove(playerShipNamesForBenedict,ni)
 			end
 			pobj.carrier = true
 			pobj.shipScore = 10
@@ -452,9 +452,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Kiriya" then
 			if #playerShipNamesForKiriya > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForKiriya)
-				pobj:setCallSign(playerShipNamesForKiriya[ni])
-				table.remove(playerShipNamesForKiriya,ni)
+				--ni = math.random(1,#playerShipNamesForKiriya)
+				--pobj:setCallSign(playerShipNamesForKiriya[ni])
+				--table.remove(playerShipNamesForKiriya,ni)
 			end
 			pobj.carrier = true
 			pobj.shipScore = 10
@@ -462,9 +462,9 @@ function modify_player_ships(pobj)
 		elseif tempPlayerType == "Ender" then
 			if #playerShipNamesForEnder > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForEnder)
-				pobj:setCallSign(playerShipNamesForEnder[ni])
-				table.remove(playerShipNamesForEnder,ni)
+				--ni = math.random(1,#playerShipNamesForEnder)
+				--pobj:setCallSign(playerShipNamesForEnder[ni])
+				--table.remove(playerShipNamesForEnder,ni)
 			end
 			pobj.shipScore = 100
 			pobj.maxCargo = 20

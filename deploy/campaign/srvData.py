@@ -18,7 +18,7 @@ class GameServerData:
 			self.servers[serverName] = {
 				"scenarios": ["20_training1"],
 				"scenarioVariations": {},
-				"ships": ["Phobos"]
+				"ships": ["Phobos M3P"]
 			}
 		return self.servers[serverName]
 	
@@ -73,6 +73,7 @@ class GameServerData:
 				srv["scenarioVariations"][scenarioName] = ["*"]
 		if scenarioName not in srv["scenarios"]:
 			srv["scenarios"].append(scenarioName)
+		self.storeData()
 
 	def unlockScenarios(self, scenarios, serverName):
 		assert isinstance(scenarios, list)
@@ -88,6 +89,7 @@ class GameServerData:
 		srv = self.getOrCreateServer(serverName)
 		if shipName not in srv["ships"]:
 			srv["ships"].append(shipName)
+		self.storeData()
 
 	def unlockShips(self, shipNames, serverName):
 		assert isinstance(shipNames, list)
@@ -95,4 +97,4 @@ class GameServerData:
 			self.unlockShip(sn, serverName)
 
 servers = GameServerData()
-pyrohelper.host_named_server(servers, "campaign_state", port=22813)
+#pyrohelper.host_named_server(servers, "campaign_state", port=22814)

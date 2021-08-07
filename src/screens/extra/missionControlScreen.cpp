@@ -27,7 +27,7 @@ MissionControlScreen::MissionControlScreen()
     info_layout = new GuiAutoLayout(left_container, "INFO_LAYOUT", GuiAutoLayout::LayoutVerticalTopToBottom);
     info_layout->setPosition(0, 20, ATopLeft)->setSize(550, GuiElement::GuiSizeMax);
 
-    (new GuiLabel(info_layout, "SERVER_INFO_LABEL", tr("Server info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+    (new GuiLabel(info_layout, "SERVER_INFO_LABEL", tr("Server info"), 30))->addBackground()->setAlignment(ACenter)->setSize(GuiElement::GuiSizeMax, 50);
 
     GuiElement* right_panel = new GuiAutoLayout(right_container, "", GuiAutoLayout::LayoutVerticalTopToBottom);
     right_panel->setPosition(0, 20, ATopCenter)->setSize(550, GuiElement::GuiSizeMax);
@@ -51,7 +51,48 @@ MissionControlScreen::MissionControlScreen()
     info_clock = new GuiLabel(row, "CLOCK", "0", 30);
     info_clock->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
+    // If this is the server, add a panel to create player ships.
+    //Add buttons and a selector to create player ships.
+	string callsign = PreferencesManager::get("shipname", "");
+	if ((gameGlobalInfo->allow_new_player_ships) && (gameGlobalInfo->getPlayerShipIndexByName(callsign) == -1))
+	{
+		(new GuiLabel(info_layout, "SHIP_CONFIG_LABEL", tr("Ship selection"), 30))->addBackground()->setAlignment(ACenter)->setSize(GuiElement::GuiSizeMax, 50);
+		GuiSelector* ship_template_selector = new GuiSelector(info_layout, "CREATE_SHIP_SELECTOR", nullptr);
+		// List only ships with templates designated for player use.
+		std::vector<string> template_names = campaign_client->getShips();
+
+		for(string& template_name : template_names)
+		{
+			P<ShipTemplate> ship_template = ShipTemplate::getTemplate(template_name);
+			ship_template_selector->addEntry(template_name + " (" + ship_template->getClass() + ":" + ship_template->getSubClass() + ")", template_name);
+		}
+		ship_template_selector->setSelectionIndex(0);
+		ship_template_selector->setPosition(0, 7*50, ATopCenter)->setSize(490, 50);
+
+		// Spawn a ship of the selected template near 0,0 and give it a random
+		// heading.
+		(new GuiButton(info_layout, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [this, ship_template_selector]() {
+			string callsign = PreferencesManager::get("shipname", "");
+			if ((!gameGlobalInfo->allow_new_player_ships) || (gameGlobalInfo->getPlayerShipIndexByName(callsign) != -1))
+				return;
+			P<PlayerSpaceship> ship = new PlayerSpaceship();
+
+			if (ship)
+			{
+		// set the position before the template so that onNewPlayerShip has as much data as possible
+				ship->setRotation(random(0, 360));
+				ship->target_rotation = ship->getRotation();
+				ship->setPosition(sf::Vector2f(random(-100, 100), random(-100, 100)));
+				ship->setCallSign(callsign);
+				ship->setTemplate(ship_template_selector->getSelectionValue());
+				//ship->setControlCode(PreferencesManager::get("password"));
+				//my_player_info->commandSetShipId(ship->getMultiplayerId());
+			}
+		}))->setPosition(20, 20, ATopCenter)->setSize(250, 50);
+	}
+
     // Buttons
+	(new GuiLabel(info_layout, "BUTTON_LABEL", tr("Server control"), 30))->addBackground()->setAlignment(ACenter)->setSize(GuiElement::GuiSizeMax, 50);
     pause_button = new GuiToggleButton(info_layout, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
         if (!value)
             engine->setGameSpeed(1.0f);
@@ -64,47 +105,6 @@ MissionControlScreen::MissionControlScreen()
         destroy();
         new ScenarioSelectionScreen();
     }))->setPosition(20, 20, ATopCenter)->setSize(250, 50);
-
-
-    // If this is the server, add a panel to create player ships.
-	(new GuiPanel(left_container, "CREATE_SHIP_BOX"))->setPosition(0, 50, ATopCenter)->setSize(550, 700);
-    //Add buttons and a selector to create player ships.
-	string callsign = PreferencesManager::get("shipname", "");
-	if ((gameGlobalInfo->allow_new_player_ships) && (gameGlobalInfo->getPlayerShipIndexByName(callsign) == -1))
-	{
-		GuiSelector* ship_template_selector = new GuiSelector(left_container, "CREATE_SHIP_SELECTOR", nullptr);
-		// List only ships with templates designated for player use.
-		std::vector<string> template_names = campaign_client->getShips();
-
-		for(string& template_name : template_names)
-		{
-			P<ShipTemplate> ship_template = ShipTemplate::getTemplate(template_name);
-			ship_template_selector->addEntry(template_name + " (" + ship_template->getClass() + ":" + ship_template->getSubClass() + ")", template_name);
-		}
-		ship_template_selector->setSelectionIndex(0);
-		ship_template_selector->setPosition(0, 630, ATopCenter)->setSize(490, 50);
-
-		// Spawn a ship of the selected template near 0,0 and give it a random
-		// heading.
-		(new GuiButton(left_container, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [this, ship_template_selector]() {
-			string callsign = PreferencesManager::get("shipname", "");
-			if ((!gameGlobalInfo->allow_new_player_ships) || (gameGlobalInfo->getPlayerShipIndexByName(callsign) != -1))
-				return;
-			P<PlayerSpaceship> ship = new PlayerSpaceship();
-
-			if (ship)
-			{
-		// set the position before the template so that onNewPlayerShip has as much data as possible
-				ship->setRotation(random(0, 360));
-				ship->target_rotation = ship->getRotation();
-				ship->setPosition(sf::Vector2f(random(-100, 100), random(-100, 100)));
-				ship->setTemplate(ship_template_selector->getSelectionValue());
-				ship->setCallSign(callsign);
-				//ship->setControlCode(PreferencesManager::get("password"));
-				//my_player_info->commandSetShipId(ship->getMultiplayerId());
-			}
-		}))->setPosition(0, 680, ATopCenter)->setSize(490, 50);
-	}
 
 	// mission control
     gm_script_label = new GuiLabel(right_panel, "SERVER_GM_LABEL", tr("Mission control"), 30);

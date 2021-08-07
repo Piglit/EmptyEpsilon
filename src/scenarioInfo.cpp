@@ -1,13 +1,14 @@
 #include "scenarioInfo.h"
 #include "resources.h"
 #include "campaign_client.h"
+#include "preferenceManager.h"
 
 ScenarioInfo::ScenarioInfo(string filename)
 {
     this->filename = filename;
     name = filename.substr(9, -4);
 
-    if (campaign_client)
+    if (campaign_client && PreferencesManager::get("alternative_server").toInt())
     {
         // get scenario info from server
         auto info = campaign_client->getScenarioInfo(filename);

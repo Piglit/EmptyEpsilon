@@ -1,7 +1,10 @@
 """load and store server specific data"""
 import os
 import json
+import pyrohelper
+import Pyro4
 
+@Pyro4.expose
 class GameServerData:
 	db = "serverDB.json"
 
@@ -92,4 +95,4 @@ class GameServerData:
 			self.unlockShip(sn, serverName)
 
 servers = GameServerData()
-
+pyrohelper.host_named_server(servers, "campaign_state", port=22813)

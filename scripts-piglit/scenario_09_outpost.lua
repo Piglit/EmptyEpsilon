@@ -14,7 +14,7 @@ require("script_hangar.lua")
 
 function createMiningFrigate()
     local frigates = {
-        "Phobos Y2",
+        "Phobos T3",
         "Piranha F12",
         "Nirvana R5A",
     }

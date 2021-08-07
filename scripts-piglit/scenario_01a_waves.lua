@@ -1,8 +1,13 @@
--- Name: Basic Waves
--- Description: Waves of increasingly difficult enemies. Prevent the destruction of your stations.
+-- Name: Waves
+-- Description: Waves of increasingly difficult enemies attack friendly stations. There is no victory. How many waves can you destroy?
+---
+--- Spawn the player ships you want. The strength of enemy ships is independent of the number and type of player ships.
 -- Type: Basic
--- Variation[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. (Players are more quickly overwhelmed, leading to shorter games.)
--- Variation[Easy]: Makes each wave easier by decreasing the number of ships in each wave. (Takes longer for the players to be overwhelmed; good for new players.)
+-- Variation[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. Players are overwhelmed more quickly, leading to shorter games.
+-- Variation[Easy]: Decreases the number of ships in each wave. Good for new players, but takes longer for the players to be overwhelmed.
+
+--- Scenario
+-- @script scenario_03_waves
 
 require("utils.lua")
 -- For this scenario, utils.lua provides:
@@ -12,37 +17,51 @@ require("utils.lua")
 --      Returns the object with its position set to the resulting coordinates.
 
 function randomStationTemplate()
-    if random(0, 100) < 10 then
-        return 'Huge Station'
+    local rnd = random(0, 100)
+    if rnd < 10 then
+        return "Huge Station"
     end
-    if random(0, 100) < 20 then
-        return 'Large Station'
+    if rnd < 20 then
+        return "Large Station"
     end
-    if random(0, 100) < 50 then
-        return 'Medium Station'
+    if rnd < 50 then
+        return "Medium Station"
     end
-    return 'Small Station'
+    return "Small Station"
 end
 
 function init()
+    -- global variables:
     waveNumber = 0
     spawnWaveDelay = nil
     enemyList = {}
     friendlyList = {}
 
     --PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
+    -- Random friendly stations
+    for _ = 1, 2 do
+        local station = SpaceStation():setTemplate(randomStationTemplate()):setFaction("Human Navy"):setPosition(random(-5000, 5000), random(-5000, 5000))
+        table.insert(friendlyList, station)
+    end
 
-    for n = 1, 2 do
-        table.insert(friendlyList, SpaceStation():setTemplate(randomStationTemplate()):setFaction("Human Navy"):setPosition(random(-5000, 5000), random(-5000, 5000)))
+    -- Random neutral stations
+    for _ = 1, 6 do
+        local station = SpaceStation():setTemplate(randomStationTemplate()):setFaction("Independent")
+        setCirclePos(station, 0, 0, random(0, 360), random(15000, 30000))
     end
     friendlyList[1]:addReputationPoints(150.0)
 
+    -- Random nebulae
     local x, y = vectorFromAngle(random(0, 360), 15000)
     for n = 1, 5 do
         local xx, yy = vectorFromAngle(random(0, 360), random(2500, 10000))
         Nebula():setPosition(x + xx, y + yy)
     end
 
+    -- Random asteroids
+    local a, a2, d
+    local dx1, dy1
+    local dx2, dy2
     for cnt = 1, random(2, 7) do
         a = random(0, 360)
         a2 = random(0, 360)
@@ -60,15 +79,16 @@ function init()
         end
     end
 
+    -- First enemy wave
     spawnWave()
 
-    for n = 1, 6 do
-        setCirclePos(SpaceStation():setTemplate(randomStationTemplate()):setFaction("Independent"), 0, 0, random(0, 360), random(15000, 30000))
-    end
+    -- Random transports
     Script():run("util_random_transports.lua")
 end
 
 function randomSpawnPointInfo(distance)
+    local x, y
+    local rx, ry
     if random(0, 100) < 50 then
         if random(0, 100) < 50 then
             x = -distance
@@ -104,15 +124,15 @@ function createEnemyGroup(difficulty)
         ["Adder MK6"]= 8,
         ["Phobos M3"]= 15,
         ["Piranha M5"]= 20,
-        ["Nirvana R5M"]= 21,
+        ["Nirvana R5A"]= 21,
         ["Storm"]= 22,
         ["Yellow Hornet"]= 5,
         ["Yellow Lindworm"]= 7,
         ["Yellow Adder MK5"]= 7,
         ["Yellow Adder MK4"]= 6,
-        ["Phobos Y2"]= 16,    
+        ["Phobos T3"]= 16,    
         ["Piranha F12"]= 15,
-        ["Nirvana R5A"]= 20,
+        ["Nirvana R3"]= 20,
         ["Blue Hornet"]= 5,
         ["Blue Lindworm"]= 7,
         ["Blue Adder MK5"]= 7,
@@ -178,42 +198,47 @@ function spawnWave()
     friendlyList[1]:addReputationPoints(150 + waveNumber * 15)
 
 
+    -- Calculate score of wave
+    local totalScoreRequirement  -- actually: remainingScoreRequirement
     if getScenarioVariation() == "Hard" then
-        totalScoreRequirement = math.pow(waveNumber * 1.5 + 4, 1.3) * 10;
+        totalScoreRequirement = math.pow(waveNumber * 1.5 + 4, 1.3) * 10
     elseif getScenarioVariation() == "Easy" then
-        totalScoreRequirement = math.pow(waveNumber * 0.8, 1.3) * 9;
+        totalScoreRequirement = math.pow(waveNumber * 0.8, 1.3) * 9
     else
-        totalScoreRequirement = math.pow(waveNumber, 1.3) * 10;
+        totalScoreRequirement = math.pow(waveNumber, 1.3) * 10
     end
 
     local newEnemies = createEnemyGroup(totalScoreRequirement)
 
-    spawnDistance = 20000
-    spawnPointLeader = nil
-    spawn_x, spawn_y, spawn_range_x, spawn_range_y = randomSpawnPointInfo(spawnDistance)
+    local spawnDistance = 20000
+    local spawnPointLeader = nil
+    local spawn_x, spawn_y, spawn_range_x, spawn_range_y = randomSpawnPointInfo(spawnDistance)
     for _, ship in ipairs(newEnemies) do
         ship:setPosition(random(-spawn_range_x, spawn_range_x) + spawn_x, random(-spawn_range_y, spawn_range_y) + spawn_y);
         ship:orderRoaming()
         table.insert(enemyList, ship);
     end
 
-    globalMessage("Wave " .. waveNumber);
+    globalMessage(string.format(_("Wave %d"), waveNumber))
 end
 
 function update(delta)
+    -- Show countdown, spawn wave
     if spawnWaveDelay ~= nil then
         spawnWaveDelay = spawnWaveDelay - delta
         if spawnWaveDelay < 5 then
-            globalMessage(math.ceil(spawnWaveDelay));
+            globalMessage(math.ceil(spawnWaveDelay))
         end
         if spawnWaveDelay < 0 then
-            spawnWave();
-            spawnWaveDelay = nil;
+            spawnWave()
+            spawnWaveDelay = nil
         end
         return
     end
-    enemy_count = 0
-    friendly_count = 0
+
+    -- Count enemies and friends
+    local enemy_count = 0
+    local friendly_count = 0
     for _, enemy in ipairs(enemyList) do
         if enemy:isValid() then
             enemy_count = enemy_count + 1
@@ -224,11 +249,13 @@ function update(delta)
             friendly_count = friendly_count + 1
         end
     end
+    -- Continue ...
     if enemy_count == 0 then
-        spawnWaveDelay = 15.0;
-        globalMessage("Wave cleared!");
+        spawnWaveDelay = 15.0
+        globalMessage(_("Wave cleared!"))
     end
+    -- ... or lose
     if friendly_count == 0 then
-        victory("Ghosts");
+        victory("Ghosts") -- Victory for the Ghosts (= defeat for the players)
     end
 end

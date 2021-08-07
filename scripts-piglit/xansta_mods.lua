@@ -13,7 +13,7 @@ function init_constants_xansta()
 			["Adder MK6"]= 8,
 			["Phobos M3"]= 15, --15 as long ai can't use mines
 			["Piranha M5"]= 17,
-			["Nirvana R5M"]= 18,
+			["Nirvana R5A"]= 18,
 			["Storm"]= 22,
 		},
 		["Mining Corporation"]= {
@@ -22,9 +22,9 @@ function init_constants_xansta()
 			["Yellow Adder MK5"]= 8,
 			["Yellow Adder MK4"]= 6,
 
-			["Phobos Y2"]= 16,	
+			["Phobos T3"]= 16,	
 			["Piranha F12"]= 15,
-			["Nirvana R5A"]= 17,
+			["Nirvana R3"]= 17,
 		},
 		["Blue Star Cartell"]= {
 			["Blue Hornet"]= 5,
@@ -626,26 +626,25 @@ end
 
 function xanstas_player_update(delta)
 	if feature_cargoInventory then
-		assert playerShipCargoInventory == nil
-		assert cargoInventory == nil
+		assert(playerShipCargoInventory == nil)
+		assert(cargoInventory == nil)
 	end
 	if feature_autoCoolant then
-		assert autoCoolant == nil
+		assert(autoCoolant == nil)
 	end
 	if feature_crewFate then
-		assert healthCheck == nil
-		assert resetPreviousSystemHealth == nil
-		assert crewFate == nil
+		assert(healthCheck == nil)
+		assert(resetPreviousSystemHealth == nil)
+		assert(crewFate == nil)
 	end
 	if feature_coolantNebulae then
-		assert coolantNebulae == nil
-		assert updateCoolantGivenPlayer == nil
-		assert getCoolantGivenPlayer == nil
-		assert coolant_nebulae ~= nil	--table
-		assert coolant_loss ~= nil
-		assert adverseEffect ~= nil
-		assert coolant_gain ~= nil
-
+		assert(coolantNebulae == nil)
+		assert(updateCoolantGivenPlayer == nil)
+		assert(getCoolantGivenPlayer == nil)
+		assert(coolant_nebulae ~= nil)	--table
+		assert(coolant_loss ~= nil)
+		assert(adverseEffect ~= nil)
+		assert(coolant_gain ~= nil)
 	end
 	for pidx=1,32 do	-- or use MAX_PLAYERS constant?
 		p = getPlayerShip(pidx)
@@ -662,6 +661,8 @@ function xanstas_player_update(delta)
 			if feature_coolantNebulae then
 				x_coolantNebulae(delta, p)
 			end
+		end
+	end
 end
 
 --      Inventory button and functions for relay/operations 

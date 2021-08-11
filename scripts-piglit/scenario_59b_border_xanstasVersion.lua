@@ -195,7 +195,7 @@ function init()
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 	plotPB = playerBorderCheck		--monitor players positions relative to neutral border zone
-	plotPWC = playerWarCrimeCheck	--be sure players do not commit war crimes
+	plotPWC = --playerWarCrimeCheck	--be sure players do not commit war crimes
 	plotED = enemyDefenseCheck		
 	plotEB = enemyBorderCheck
 	plotER = enemyReinforcements
@@ -17188,27 +17188,27 @@ function playerBorderCheck(delta)
 		end
 	end
 end
-function displayDefeatResults(delta)
-	finalTimer = finalTimer - delta
-	if finalTimer < 0 then
-		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
-		endStatistics()
-		game_state = "victory-kraylor"
-		victory("Kraylor")
-	end
-end
-function playerWarCrimeCheck(delta)
-	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
-		local stat_list = gatherStats()
-		if stat_list.kraylor.station.percentage < 100 then
-			missionVictory = false
-			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
-			endStatistics()
-			game_state = "victory_kraylor"
-			victory("Kraylor")
-		end
-	end
-end
+--function displayDefeatResults(delta)
+--	finalTimer = finalTimer - delta
+--	if finalTimer < 0 then
+--		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
+--		endStatistics()
+--		game_state = "victory-kraylor"
+--		victory("Kraylor")
+--	end
+--end
+--function playerWarCrimeCheck(delta)
+--	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
+--		local stat_list = gatherStats()
+--		if stat_list.kraylor.station.percentage < 100 then
+--			missionVictory = false
+--			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
+--			endStatistics()
+--			game_state = "victory_kraylor"
+--			victory("Kraylor")
+--		end
+--	end
+--end
 -- Plot EB enemy border zone checks
 function enemyBorderCheck(delta)
 	local tempEnemy

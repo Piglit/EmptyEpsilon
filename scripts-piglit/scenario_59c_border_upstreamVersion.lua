@@ -177,7 +177,7 @@ function init()
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 	plotPB = playerBorderCheck		--monitor players positions relative to neutral border zone
-	plotPWC = playerWarCrimeCheck	--be sure players do not commit war crimes
+	plotPWC = nil --playerWarCrimeCheck	--be sure players do not commit war crimes
 	plotED = enemyDefenseCheck		
 	plotEB = enemyBorderCheck
 	plotER = enemyReinforcements
@@ -14350,28 +14350,28 @@ function playerBorderCheck(delta)
 		end
 	end
 end
-function displayDefeatResults(delta)
-	finalTimer = finalTimer - delta
-	if finalTimer < 0 then
-		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
-		endStatistics()
-		victory("Kraylor")
-	end
-end
-function playerWarCrimeCheck(delta)
-	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
-		local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
-		if friendlySurvivedCount == nil then
-			return
-		end
-		if epct2 < 100 then
-			missionVictory = false
-			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
-			endStatistics()
-			victory("Kraylor")
-		end
-	end
-end
+--function displayDefeatResults(delta)
+--	finalTimer = finalTimer - delta
+--	if finalTimer < 0 then
+--		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
+--		endStatistics()
+--		victory("Kraylor")
+--	end
+--end
+--function playerWarCrimeCheck(delta)
+--	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
+--		local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
+--		if friendlySurvivedCount == nil then
+--			return
+--		end
+--		if epct2 < 100 then
+--			missionVictory = false
+--			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
+--			endStatistics()
+--			victory("Kraylor")
+--		end
+--	end
+--end
 -- Plot EB enemy border zone checks
 function enemyBorderCheck(delta)
 	local tempEnemy

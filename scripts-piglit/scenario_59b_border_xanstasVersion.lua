@@ -288,7 +288,7 @@ function setVariations()
 	end
 end
 function setConstants()
-	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
+	init_constants_xansta()
 	system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
 	pool_selectivity = "full"
 	template_pool_size = 5
@@ -520,103 +520,6 @@ function setConstants()
 	playerShipNamesFor["Redhook"] = {"Headhunter", "Thud", "Troll", "Scalper", "Shark"}
 	playerShipNamesFor["Destroyer III"] = {"Trebuchet", "Pitcher", "Mutant", "Gronk", "Methuselah"}
 	playerShipNamesFor["Leftovers"] = {"Foregone","Righteous","Masher"}
-	commonGoods = {"food","medicine","nickel","platinum","gold","dilithium","tritanium","luxury","cobalt","impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
-	componentGoods = {"impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
-	mineralGoods = {"nickel","platinum","gold","dilithium","tritanium","cobalt"}
-	vapor_goods = {"gold pressed latinum","unobtanium","eludium","impossibrium"}
-	characterNames = {"Frank Brown",
-					  "Joyce Miller",
-					  "Harry Jones",
-					  "Emma Davis",
-					  "Zhang Wei Chen",
-					  "Yu Yan Li",
-					  "Li Wei Wang",
-					  "Li Na Zhao",
-					  "Sai Laghari",
-					  "Anaya Khatri",
-					  "Vihaan Reddy",
-					  "Trisha Varma",
-					  "Henry Gunawan",
-					  "Putri Febrian",
-					  "Stanley Hartono",
-					  "Citra Mulyadi",
-					  "Bashir Pitafi",
-					  "Hania Kohli",
-					  "Gohar Lehri",
-					  "Sohelia Lau",
-					  "Gabriel Santos",
-					  "Ana Melo",
-					  "Lucas Barbosa",
-					  "Juliana Rocha",
-					  "Habib Oni",
-					  "Chinara Adebayo",
-					  "Tanimu Ali",
-					  "Naija Bello",
-					  "Shamim Khan",
-					  "Barsha Tripura",
-					  "Sumon Das",
-					  "Farah Munsi",
-					  "Denis Popov",
-					  "Pasha Sokolov",
-					  "Burian Ivanov",
-					  "Radka Vasiliev",
-					  "Jose Hernandez",
-					  "Victoria Garcia",
-					  "Miguel Lopez",
-					  "Renata Rodriguez"}
-	hitZonePermutations = {
-		{"warp","beamweapons","reactor"},
-		{"jumpdrive","beamweapons","reactor"},
-		{"impulse","beamweapons","reactor"},
-		{"warp","missilesystem","reactor"},
-		{"jumpdrive","missilesystem","reactor"},
-		{"impulse","missilesystem","reactor"},
-		{"warp","beamweapons","maneuver"},
-		{"jumpdrive","beamweapons","maneuver"},
-		{"impulse","beamweapons","maneuver"},
-		{"warp","missilesystem","maneuver"},
-		{"jumpdrive","missilesystem","maneuver"},
-		{"impulse","missilesystem","maneuver"},
-		{"warp","beamweapons","frontshield"},
-		{"jumpdrive","beamweapons","frontshield"},
-		{"impulse","beamweapons","frontshield"},
-		{"warp","missilesystem","frontshield"},
-		{"jumpdrive","missilesystem","frontshield"},
-		{"impulse","missilesystem","frontshield"},
-		{"warp","beamweapons","rearshield"},
-		{"jumpdrive","beamweapons","rearshield"},
-		{"impulse","beamweapons","rearshield"},
-		{"warp","missilesystem","rearshield"},
-		{"jumpdrive","missilesystem","rearshield"},
-		{"impulse","missilesystem","rearshield"},
-		{"warp","reactor","maneuver"},
-		{"jumpdrive","reactor","maneuver"},
-		{"impulse","reactor","maneuver"},
-		{"warp","reactor","frontshield"},
-		{"jumpdrive","reactor","frontshield"},
-		{"impulse","reactor","frontshield"},
-		{"warp","reactor","rearshield"},
-		{"jumpdrive","reactor","rearshield"},
-		{"impulse","reactor","rearshield"},
-		{"warp","maneuver","frontshield"},
-		{"jumpdrive","maneuver","frontshield"},
-		{"impulse","maneuver","frontshield"},
-		{"warp","maneuver","rearshield"},
-		{"jumpdrive","maneuver","rearshield"},
-		{"impulse","maneuver","rearshield"},
-		{"beamweapons","beamweapons","maneuver"},
-		{"missilesystem","beamweapons","maneuver"},
-		{"beamweapons","beamweapons","frontshield"},
-		{"missilesystem","beamweapons","frontshield"},
-		{"beamweapons","beamweapons","rearshield"},
-		{"missilesystem","beamweapons","rearshield"},
-		{"beamweapons","maneuver","frontshield"},
-		{"missilesystem","maneuver","frontshield"},
-		{"beamweapons","maneuver","rearshield"},
-		{"missilesystem","maneuver","rearshield"},
-		{"reactor","maneuver","frontshield"},
-		{"reactor","maneuver","rearshield"}
-	}
 	--minutes and danger
 	enemyReinforcementSchedule = {
 		{30, 1},
@@ -13552,8 +13455,8 @@ function setPlayer(pobj)
 		pobj:addReputationPoints(500-(difficulty*20))
 		pobj.initialRep = true
 	end
-	if not pobj.nameAssigned then
-		pobj.nameAssigned = true
+	if not pobj.modsAssigned then
+		pobj.modsAssigned= true
 		local tempPlayerType = pobj:getTypeName()
 		pobj.shipScore = playerShipStats[tempPlayerType].strength
 		pobj.maxCargo = playerShipStats[tempPlayerType].cargo
@@ -13563,55 +13466,7 @@ function setPlayer(pobj)
 		pobj.mining = playerShipStats[tempPlayerType].mining
 		pobj.mining_target_lock = false
 		pobj.mining_in_progress = false
-		nameShip(pobj,tempPlayerType)
-		if tempPlayerType == "MP52 Hornet" then
-			pobj.autoCoolant = false
-			pobj:setWarpDrive(true)
-		elseif tempPlayerType == "Phobos M3P" then
-			pobj:setWarpDrive(true)
-			pobj:setWarpSpeed(500)
-		elseif tempPlayerType == "Player Fighter" then
-			pobj.autoCoolant = false
-			pobj:setJumpDrive(true)
-			pobj.max_jump_range = 40000
-			pobj.min_jump_range = 3000
-			pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-			pobj:setJumpDriveCharge(pobj.max_jump_range)
-		elseif tempPlayerType == "Striker" then
-			if pobj:getImpulseMaxSpeed() == 45 then
-				pobj:setImpulseMaxSpeed(90)
-			end
-			if pobj:getBeamWeaponCycleTime(0) == 6 then
-				local bi = 0
-				repeat
-					local tempArc = pobj:getBeamWeaponArc(bi)
-					local tempDir = pobj:getBeamWeaponDirection(bi)
-					local tempRng = pobj:getBeamWeaponRange(bi)
-					local tempDmg = pobj:getBeamWeaponDamage(bi)
-					pobj:setBeamWeapon(bi,tempArc,tempDir,tempRng,5,tempDmg)
-					bi = bi + 1
-				until(pobj:getBeamWeaponRange(bi) < 1)
-			end
-			pobj:setJumpDrive(true)
-			pobj.max_jump_range = 40000
-			pobj.min_jump_range = 3000
-			pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-			pobj:setJumpDriveCharge(pobj.max_jump_range)
-		elseif tempPlayerType == "ZX-Lindworm" then
-			pobj.autoCoolant = false
-			pobj:setWarpDrive(true)
-		else	--leftovers
-			if playerShipStats[tempPlayerType] == nil then
-				pobj.shipScore = 24
-				pobj.maxCargo = 5
-				pobj:setWarpDrive(true)
-				pobj:setWarpSpeed(500)
-				pobj:setLongRangeRadarRange(30000)
-				pobj:setShortRangeRadarRange(5000)
-				pobj.tractor = false
-				pobj.mining = false
-			end
-		end
+		modify_player_ships(pobj)
 		if pobj.cargo == nil then
 			pobj.cargo = pobj.maxCargo
 			pobj.maxRepairCrew = pobj:getRepairCrewCount()

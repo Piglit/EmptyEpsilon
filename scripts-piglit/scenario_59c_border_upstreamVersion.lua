@@ -10488,8 +10488,8 @@ function setPlayers()
 				pobj:addReputationPoints(500-(difficulty*20))
 				pobj.initialRep = true
 			end
-			if not pobj.nameAssigned then
-				pobj.nameAssigned = true
+			if not pobj.modsAssigned then
+				pobj.modsAssigned= true
 				local tempPlayerType = pobj:getTypeName()
 				pobj.shipScore = playerShipStats[tempPlayerType].strength
 				pobj.maxCargo = playerShipStats[tempPlayerType].cargo
@@ -10499,146 +10499,7 @@ function setPlayers()
 				pobj.mining = playerShipStats[tempPlayerType].mining
 				pobj.mining_target_lock = false
 				pobj.mining_in_progress = false
-				if tempPlayerType == "MP52 Hornet" then
-					if #playerShipNamesFor["MP52Hornet"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["MP52Hornet"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Piranha" then
-					if #playerShipNamesFor["Piranha"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Piranha"]))
-					end
-				elseif tempPlayerType == "Flavia P.Falcon" then
-					if #playerShipNamesFor["FlaviaPFalcon"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["FlaviaPFalcon"]))
-					end
-				elseif tempPlayerType == "Phobos M3P" then
-					if #playerShipNamesFor["PhobosM3P"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["PhobosM3P"]))
-					end
-					pobj:setWarpDrive(true)
-					pobj:setWarpSpeed(500)
-				elseif tempPlayerType == "Atlantis" then
-					if #playerShipNamesFor["Atlantis"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Atlantis"]))
-					end
-				elseif tempPlayerType == "Player Cruiser" then
-					if #playerShipNamesFor["Cruiser"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Cruiser"]))
-					end
-				elseif tempPlayerType == "Player Missile Cr." then
-					if #playerShipNamesFor["MissileCruiser"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["MissileCruiser"]))
-					end
-				elseif tempPlayerType == "Player Fighter" then
-					if #playerShipNamesFor["Fighter"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Fighter"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setJumpDrive(true)
-					pobj.max_jump_range = 40000
-					pobj.min_jump_range = 3000
-					pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-					pobj:setJumpDriveCharge(pobj.max_jump_range)
-				elseif tempPlayerType == "Benedict" then
-					if #playerShipNamesFor["Benedict"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Benedict"]))
-					end
-				elseif tempPlayerType == "Kiriya" then
-					if #playerShipNamesFor["Kiriya"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Kiriya"]))
-					end
-				elseif tempPlayerType == "Striker" then
-					if #playerShipNamesFor["Striker"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Striker"]))
-					end
-					if pobj:getImpulseMaxSpeed() == 45 then
-						pobj:setImpulseMaxSpeed(90)
-					end
-					if pobj:getBeamWeaponCycleTime(0) == 6 then
-						local bi = 0
-						repeat
-							local tempArc = pobj:getBeamWeaponArc(bi)
-							local tempDir = pobj:getBeamWeaponDirection(bi)
-							local tempRng = pobj:getBeamWeaponRange(bi)
-							local tempDmg = pobj:getBeamWeaponDamage(bi)
-							pobj:setBeamWeapon(bi,tempArc,tempDir,tempRng,5,tempDmg)
-							bi = bi + 1
-						until(pobj:getBeamWeaponRange(bi) < 1)
-					end
-					pobj:setJumpDrive(true)
-					pobj.max_jump_range = 40000
-					pobj.min_jump_range = 3000
-					pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-					pobj:setJumpDriveCharge(pobj.max_jump_range)
-				elseif tempPlayerType == "ZX-Lindworm" then
-					if #playerShipNamesFor["Lindworm"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Lindworm"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Repulse" then
-					if #playerShipNamesFor["Repulse"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Repulse"]))
-					end
-				elseif tempPlayerType == "Ender" then
-					if #playerShipNamesFor["Ender"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Ender"]))
-					end
-				elseif tempPlayerType == "Nautilus" then
-					if #playerShipNamesFor["Nautilus"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Nautilus"]))
-					end
-				elseif tempPlayerType == "Hathcock" then
-					if #playerShipNamesFor["Hathcock"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Hathcock"]))
-					end
-				elseif tempPlayerType == "Proto-Atlantis" then
-					if #playerShipNamesFor["ProtoAtlantis"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["ProtoAtlantis"]))
-					end
-				elseif tempPlayerType == "Maverick" then
-					if #playerShipNamesFor["Maverick"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Maverick"]))
-					end
-				elseif tempPlayerType == "Crucible" then
-					if #playerShipNamesFor["Crucible"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Crucible"]))
-					end
-				elseif tempPlayerType == "Atlantis II" then
-					if #playerShipNamesFor["AtlantisII"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["AtlantisII"]))
-					end
-				elseif tempPlayerType == "Surkov" then
-					if #playerShipNamesFor["Surkov"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Surkov"]))
-					end
-				elseif tempPlayerType == "Stricken" then
-					if #playerShipNamesFor["Stricken"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Stricken"]))
-					end
-				elseif tempPlayerType == "Redhook" then
-					if #playerShipNamesFor["Redhook"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Redhook"]))
-					end
-				elseif tempPlayerType == "Destroyer III" then
-					if #playerShipNamesFor["DestroyerIII"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["DestroyerIII"]))
-					end
-				else
-					if #playerShipNamesFor["Leftovers"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Leftovers"]))
-					end
-					pobj.shipScore = 24
-					pobj.maxCargo = 5
-					pobj:setWarpDrive(true)
-					pobj:setWarpSpeed(500)
-					pobj:setLongRangeRadarRange(30000)
-					pobj:setShortRangeRadarRange(5000)
-					pobj.tractor = false
-					pobj.mining = false
-				end
+				modify_player_ships(pobj)
 				if pobj.cargo == nil then
 					pobj.cargo = pobj.maxCargo
 					pobj.maxRepairCrew = pobj:getRepairCrewCount()

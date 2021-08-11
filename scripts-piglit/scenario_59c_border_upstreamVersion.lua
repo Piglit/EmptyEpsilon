@@ -177,7 +177,7 @@ function init()
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 	plotPB = playerBorderCheck		--monitor players positions relative to neutral border zone
-	plotPWC = nil --playerWarCrimeCheck	--be sure players do not commit war crimes
+	plotPWC = playerWarCrimeCheck	--be sure players do not commit war crimes
 	plotED = enemyDefenseCheck		
 	plotEB = enemyBorderCheck
 	plotER = enemyReinforcements
@@ -224,6 +224,26 @@ function init()
 	secondaryOrders = ""
 	optionalOrders = ""
 	mainGMButtons()
+end
+function setDifficulty(newDiff)
+	difficulty = newDiff
+	if difficulty == 1 then
+		adverseEffect = .995
+		coolant_loss = .99995
+		coolant_gain = .001
+		ersAdj = 0
+	elseif difficulty < 1 then
+		adverseEffect = .999
+		coolant_loss = .99999
+		coolant_gain = .01
+		ersAdj = 10
+	else
+		adverseEffect = .99 - difficulty*.01
+		coolant_loss = .9999 - difficulty*.0001
+		coolant_gain = .0001 
+		ersAdj = -1 - 2*difficulty
+	end
+	print(string.format("Difficulty: %2d", difficulty))
 end
 function setVariations()
 	if string.find(getScenarioVariation(),"Easy") then
@@ -14358,20 +14378,23 @@ end
 --		victory("Kraylor")
 --	end
 --end
---function playerWarCrimeCheck(delta)
---	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
---		local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
---		if friendlySurvivedCount == nil then
---			return
---		end
---		if epct2 < 100 then
---			missionVictory = false
---			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
---			endStatistics()
---			victory("Kraylor")
---		end
---	end
---end
+function playerWarCrimeCheck(delta)
+	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
+		-- raise difficulty once but do not lose
+		setDifficulty(difficulty + 1)
+		plotPWC = nil
+		--[[local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
+		if friendlySurvivedCount == nil then
+			return
+		end
+		if epct2 < 100 then
+			missionVictory = false
+			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
+			endStatistics()
+			victory("Kraylor")
+		end--]]
+	end
+end
 -- Plot EB enemy border zone checks
 function enemyBorderCheck(delta)
 	local tempEnemy
@@ -14991,29 +15014,35 @@ function endWar(delta)
 		end
 		local evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
 		if evalEnemy < enemyDestructionVictoryCondition then
-			missionVictory = true
-			missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
-			endStatistics()
-			victory("Human Navy")
+			if difficulty >= 5 then
+				missionVictory = true
+				missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
+				endStatistics()
+				victory("Human Navy")
+			else
+				setDifficulty(difficulty + 1)
+				enemyDestructionVictoryCondition = enemyDestructionVictoryCondition * .8
+			end
 		end
 		local evalFriendly = fpct2*friendlyStationComponentWeight + npct2*neutralStationComponentWeight + fpct*friendlyShipComponentWeight
 		if evalFriendly < friendlyDestructionDefeatCondition then
-			missionVictory = false
-			missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
-			endStatistics()
-			victory("Kraylor")
+			if difficulty < 0.5 then
+				missionVictory = false
+				missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
+				endStatistics()
+				victory("Kraylor")
+			else
+				setDifficulty(difficulty/2)
+				friendlyDestructionDefeatCondition = friendlyDestructionDefeatCondition * .75
+			end
 		end
 		if evalEnemy - evalFriendly > destructionDifferenceEndCondition then
-			missionVictory = false
-			missionCompleteReason = string.format("Enemy strength exceeded ours by %i percentage points",math.floor(destructionDifferenceEndCondition))
-			endStatistics()
-			victory("Kraylor")
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			setDifficulty(difficulty/2)
 		end
 		if evalFriendly - evalEnemy > destructionDifferenceEndCondition then
-			missionVictory = true
-			missionCompleteReason = string.format("Our strength exceeded enemy strength by %i percentage points",math.floor(destructionDifferenceEndCondition))
-			endStatistics()
-			victory("Human Navy")
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			setDifficulty(difficulty + 1)
 		end
 	end
 end

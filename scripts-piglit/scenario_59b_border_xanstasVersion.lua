@@ -195,7 +195,7 @@ function init()
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 	plotPB = playerBorderCheck		--monitor players positions relative to neutral border zone
-	plotPWC = --playerWarCrimeCheck	--be sure players do not commit war crimes
+	plotPWC = playerWarCrimeCheck	--be sure players do not commit war crimes
 	plotED = enemyDefenseCheck		
 	plotEB = enemyBorderCheck
 	plotER = enemyReinforcements
@@ -242,6 +242,26 @@ function init()
 	secondaryOrders = ""
 	optionalOrders = ""
 	mainGMButtons()
+end
+function setDifficulty(newDiff)
+	difficulty = newDiff
+	if difficulty == 1 then
+		adverseEffect = .995
+		coolant_loss = .99995
+		coolant_gain = .001
+		ersAdj = 0
+	elseif difficulty < 1 then
+		adverseEffect = .999
+		coolant_loss = .99999
+		coolant_gain = .01
+		ersAdj = 10
+	else
+		adverseEffect = .99 - difficulty*.01
+		coolant_loss = .9999 - difficulty*.0001
+		coolant_gain = .0001 
+		ersAdj = -1 - 2*difficulty
+	end
+	print(string.format("Difficulty: %2d", difficulty))
 end
 function setVariations()
 	if string.find(getScenarioVariation(),"Easy") then
@@ -16428,8 +16448,9 @@ end
 function initialAttack(delta)
 	if plot3diagnostic then print("initial attack") end
 	local enemyInitialFleet = spawnEnemies(kraylorCentroidX, kraylorCentroidY, 1.3, "Kraylor")
+
+	enemyInitialFleet[1]:orderFlyTowards(humanCentroidX, humanCentroidY)
 	for _, enemy in ipairs(enemyInitialFleet) do
-		enemy:orderFlyTowards(humanCentroidX, humanCentroidY)
 		enemy.initialFleetMember = true
 	end
 	if plot3diagnostic then print("initial fleet created") end
@@ -16495,14 +16516,14 @@ function pincerAttack(delta)
 		rightPincerX, rightPincerY = vectorFromAngle(rightPincerAngle,pincerSize)
 		if plot3diagnostic then print(string.format("Angles: Pincer: %.1f, Left: %.1f, Right: %.1f",pincerAngle,leftPincerAngle,rightPincerAngle)) end
 		local enemyLeftPincerFleet = spawnEnemies(referenceStartX+leftPincerX,referenceStartY+leftPincerY,1.5,"Kraylor")
-		for _, enemy in ipairs(enemyLeftPincerFleet) do
-			enemy:orderRoaming()
-		end
+--		for _, enemy in ipairs(enemyLeftPincerFleet) do
+--			enemy:orderRoaming()
+--		end
 		table.insert(enemyFleetList,enemyLeftPincerFleet)
 		local enemyRightPincerFleet = spawnEnemies(referenceStartX+rightPincerX,referenceStartY+rightPincerY,1.5,"Kraylor")
-		for _, enemy in ipairs(enemyRightPincerFleet) do
-			enemy:orderRoaming()
-		end
+--		for _, enemy in ipairs(enemyRightPincerFleet) do
+--			enemy:orderRoaming()
+--		end
 		table.insert(enemyFleetList,enemyRightPincerFleet)
 		if playWithTimeLimit then
 			vengenceTimer = random(lrr1,urr1)
@@ -17095,9 +17116,7 @@ function personalAmbushPlayerCheck(p)
 		if p.nebula_candidate ~= nil and gameTimeLimit < paTriggerTime then
 			local efx, efy = p.nebula_candidate:getPosition()
 			local enemyAmbushFleet = spawnEnemies(efx,efy,1,"Kraylor")
-			for _, enemy in ipairs(enemyAmbushFleet) do
-				enemy:orderAttack(p)
-			end
+			enemyAmbushFleet[1]:orderAttack(p)
 			table.insert(enemyFleetList,enemyAmbushFleet)
 			p.sprung = true
 		end
@@ -17197,18 +17216,21 @@ end
 --		victory("Kraylor")
 --	end
 --end
---function playerWarCrimeCheck(delta)
---	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
---		local stat_list = gatherStats()
---		if stat_list.kraylor.station.percentage < 100 then
---			missionVictory = false
---			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
---			endStatistics()
---			game_state = "victory_kraylor"
---			victory("Kraylor")
---		end
---	end
---end
+function playerWarCrimeCheck(delta)
+	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
+		-- raise difficulty once but do not lose
+		setDifficulty(difficulty + 1)
+		plotPWC = nil
+		--[[local stat_list = gatherStats()
+		if stat_list.kraylor.station.percentage < 100 then
+			missionVictory = false
+			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
+			endStatistics()
+			game_state = "victory_kraylor"
+			victory("Kraylor")
+		end--]]
+	end
+end
 -- Plot EB enemy border zone checks
 function enemyBorderCheck(delta)
 	local tempEnemy
@@ -17276,9 +17298,7 @@ function enemyReinforcements(delta)
 					local dirx, diry = vectorFromAngle(random(0,360),random(15000,25000))
 					local fpx, fpy = p:getPosition()
 					local tempFleet = spawnEnemies(fpx+dirx,fpy+diry,enemyReinforcementSchedule[1][2],"Kraylor")
-					for _, enemy in ipairs(tempFleet) do
-						enemy:orderAttack(p)
-					end
+					tempFleet[1]:orderAttack(p)
 					table.insert(enemyFleetList,tempFleet)
 					table.remove(enemyReinforcementSchedule,1)
 				end
@@ -17831,32 +17851,38 @@ function endWar(delta)
 		endWarTimer = delta + endWarTimerInterval
 		local stat_list = gatherStats()
 		if stat_list.kraylor.evaluation < enemyDestructionVictoryCondition then
-			missionVictory = true
-			missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
-			endStatistics()
-			game_state = "victory-human"
-			victory("Human Navy")
+			if difficulty >= 5 then
+				missionVictory = true
+				missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
+				endStatistics()
+				game_state = "victory-human"
+				victory("Human Navy")
+			else
+				setDifficulty(difficulty + 1)
+				enemyDestructionVictoryCondition = enemyDestructionVictoryCondition * .8
+			end
 		end
 		if stat_list.human.evaluation < friendlyDestructionDefeatCondition then
-			missionVictory = false
-			missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
-			endStatistics()
-			game_state = "victory-kraylor"
-			victory("Kraylor")
+			if difficulty < 0.5 then
+				missionVictory = false
+				missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
+				endStatistics()
+				game_state = "victory-kraylor"
+				victory("Kraylor")
+			else
+				setDifficulty(difficulty/2)
+				friendlyDestructionDefeatCondition = friendlyDestructionDefeatCondition * .75
+			end
 		end
-		if stat_list.kraylor.evaluation - stat_list.human.evaluation > stat_list.times.threshold then
-			missionVictory = false
-			missionCompleteReason = string.format("Enemy strength exceeded ours by %i percentage points",math.floor(stat_list.times.threshold))
-			endStatistics()
-			game_state = "victory-kraylor"
-			victory("Kraylor")
+		if stat_list.kraylor.evaluation - stat_list.human.evaluation > destructionDifferenceEndCondition then
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			stat_list.times.threshold = destructionDifferenceEndCondition
+			setDifficulty(difficulty/2)
 		end
-		if stat_list.human.evaluation - stat_list.kraylor.evaluation > stat_list.times.threshold then
-			missionVictory = true
-			missionCompleteReason = string.format("Our strength exceeded enemy strength by %i percentage points",math.floor(stat_list.times.threshold))
-			endStatistics()
-			game_state = "victory-human"
-			victory("Human Navy")
+		if stat_list.human.evaluation - stat_list.kraylor.evaluation > destructionDifferenceEndCondition then
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			stat_list.times.threshold = destructionDifferenceEndCondition
+			setDifficulty(difficulty + 1)
 		end
 	end
 end

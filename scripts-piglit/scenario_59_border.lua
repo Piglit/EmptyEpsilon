@@ -10482,7 +10482,7 @@ function artifactToPlatform(delta)
 			tap:destroy()
 			break
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty*delta)
 			tap:setPosition(apx+tDeltax,apy+tDeltay)
 		end
 	end
@@ -10491,7 +10491,7 @@ function weaponPlatformOrbit(delta)
 	for i=1,#enemyDefensePlatformList do
 		twp = enemyDefensePlatformList[i]
 		if twp ~= nil and twp:isValid() then
-			twp.travelAngle = twp.travelAngle + .05*difficulty
+			twp.travelAngle = twp.travelAngle + .05*difficulty*delta
 			if twp.travelAngle >= 360 then 
 				twp.travelAngle = 0
 			end
@@ -10505,7 +10505,7 @@ function warpJammerOrbit(delta)
 		tj = jammerList[i]
 		if tj ~= nil and tj:isValid() then
 			if tj.orbit then
-				tj.travelAngle = tj.travelAngle + .05*difficulty
+				tj.travelAngle = tj.travelAngle + .05*difficulty*delta
 --				if tj.travelAngle >= 360 then
 --					tj.travelAngle = 0
 --				end
@@ -10523,7 +10523,7 @@ function warpJammerOrbit(delta)
 					table.insert(enemyFleetList,ef)
 					tj.orbit = true
 				else
-					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty)
+					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty*delta)
 					tj:setPosition(wjx+tDeltax,wjy+tDeltay)
 				end
 			end
@@ -10554,7 +10554,7 @@ function artifactToMinefield(delta)
 				tam.deleteMe = true
 			end
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty*delta)
 			tam:setPosition(amx+tDeltax,amy+tDeltay)
 		end
 	end
@@ -10602,7 +10602,7 @@ function artifactToWorm(delta)
 			local wdx, wdy = vectorFromAngle(random(0,360),100000)
 			WormHole():setPosition(awx,awy):setTargetPosition(awx+wdx,awy+wdy)
 		else
-			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty*delta)
 			taw:setPosition(awx+tDeltax,awy+tDeltay)
 		end	
 	end

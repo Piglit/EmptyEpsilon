@@ -116,12 +116,14 @@ function init_constants_xansta()
 	stln = {}
 	stnl = {}
 	stsl = {}
+	ship_template = {}
 	for faction, list in pairs(stl) do
 			stln[faction] = {}
 			for key, value in pairs(list) do
 				table.insert(stln[faction], key)
 				table.insert(stnl, key)
 				table.insert(stsl, value)
+				ship_template[key] = {strength = value}
 			end
 	end
 

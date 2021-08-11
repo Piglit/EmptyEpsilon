@@ -292,67 +292,6 @@ function setConstants()
 	system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
 	pool_selectivity = "full"
 	template_pool_size = 5
-	ship_template = {	--ordered by relative strength
-		["Gnat"] =				{strength = 2,		create = gnat},
-		["Lite Drone"] =		{strength = 3,		create = droneLite},
-		["Jacket Drone"] =		{strength = 4,		create = droneJacket},
-		["Ktlitan Drone"] =		{strength = 4,		create = stockTemplate},
-		["Heavy Drone"] =		{strength = 5,		create = droneHeavy},
-		["MT52 Hornet"] =		{strength = 5,		create = stockTemplate},
-		["MU52 Hornet"] =		{strength = 5,		create = stockTemplate},
-		["MV52 Hornet"] =		{strength = 6,		create = hornetMV52},
-		["Adder MK4"] =			{strength = 6,		create = stockTemplate},
-		["Fighter"] =			{strength = 6,		create = stockTemplate},
-		["Ktlitan Fighter"] =	{strength = 6,		create = stockTemplate},
-		["K2 Fighter"] =		{strength = 7,		create = k2fighter},
-		["Adder MK5"] =			{strength = 7,		create = stockTemplate},
-		["WX-Lindworm"] =		{strength = 7,		create = stockTemplate},
-		["K3 Fighter"] =		{strength = 8,		create = k3fighter},
-		["Adder MK6"] =			{strength = 8,		create = stockTemplate},
-		["Ktlitan Scout"] =		{strength = 8,		create = stockTemplate},
-		["WZ-Lindworm"] =		{strength = 9,		create = wzLindworm},
-		["Phobos R2"] =			{strength = 13,		create = phobosR2},
-		["Missile Cruiser"] =	{strength = 14,		create = stockTemplate},
-		["Waddle 5"] =			{strength = 15,		create = waddle5},
-		["Jade 5"] =			{strength = 15,		create = jade5},
-		["Phobos T3"] =			{strength = 15,		create = stockTemplate},
-		["Piranha F8"] =		{strength = 15,		create = stockTemplate},
-		["Piranha F12"] =		{strength = 15,		create = stockTemplate},
-		["Piranha F12.M"] =		{strength = 16,		create = stockTemplate},
-		["Phobos M3"] =			{strength = 16,		create = stockTemplate},
-		["Karnack"] =			{strength = 17,		create = stockTemplate},
-		["Gunship"] =			{strength = 17,		create = stockTemplate},
-		["Cruiser"] =			{strength = 18,		create = stockTemplate},
-		["Nirvana R5"] =		{strength = 19,		create = stockTemplate},
-		["Nirvana R5A"] =		{strength = 20,		create = stockTemplate},
-		["Adv. Gunship"] =		{strength = 20,		create = stockTemplate},
-		["Ktlitan Worker"] =	{strength = 21,		create = stockTemplate},
-		["Storm"] =				{strength = 22,		create = stockTemplate},
-		["Ranus U"] =			{strength = 25,		create = stockTemplate},
-		["Stalker Q7"] =		{strength = 25,		create = stockTemplate},
-		["Stalker R7"] =		{strength = 25,		create = stockTemplate},
-		["Adv. Striker"] =		{strength = 27,		create = stockTemplate},
-		["Tempest"] =			{strength = 30,		create = tempest},
-		["Strikeship"] =		{strength = 30,		create = stockTemplate},
-		["Cucaracha"] =			{strength = 36,		create = cucaracha},
-		["Predator"] =			{strength = 42,		create = predator},
-		["Ktlitan Breaker"] =	{strength = 45,		create = stockTemplate},
-		["Hurricane"] =			{strength = 46,		create = hurricane},
-		["Ktlitan Feeder"] =	{strength = 48,		create = stockTemplate},
-		["Atlantis X23"] =		{strength = 50,		create = stockTemplate},
-		["K2 Breaker"] =		{strength = 55,		create = k2breaker},
-		["Ktlitan Destroyer"] =	{strength = 50,		create = stockTemplate},
-		["Atlantis Y42"] =		{strength = 60,		create = atlantisY42},
-		["Blockade Runner"] =	{strength = 65,		create = stockTemplate},
-		["Starhammer II"] =		{strength = 70,		create = stockTemplate},
-		["Enforcer"] =			{strength = 75,		create = enforcer},
-		["Dreadnought"] =		{strength = 80,		create = stockTemplate},
-		["Starhammer III"] =	{strength = 85,		create = starhammerIII},
-		["Starhammer V"] =		{strength = 90,		create = starhammerV},
-		["Battlestation"] =		{strength = 100,	create = stockTemplate},
-		["Tyr"] =				{strength = 150,	create = tyr},
-		["Odin"] =				{strength = 250,	create = stockTemplate},
-	}
 	formation_delta = {
 		["square"] = {
 			x = {0,1,0,-1, 0,1,-1, 1,-1,2,0,-2, 0,2,-2, 2,-2,2, 2,-2,-2,1,-1, 1,-1,0, 0,3,-3,1, 1,3,-3,-1,-1, 3,-3,2, 2,3,-3,-2,-2, 3,-3,3, 3,-3,-3,4,0,-4, 0,4,-4, 4,-4,-4,-4,-4,-4,-4,-4,4, 4,4, 4,4, 4, 1,-1, 2,-2, 3,-3,1,-1,2,-2,3,-3,5,-5,0, 0,5, 5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,5, 5,5, 5,5, 5,5, 5, 1,-1, 2,-2, 3,-3, 4,-4,1,-1,2,-2,3,-3,4,-4},
@@ -17084,56 +17023,43 @@ function spawnDroneFleet(originX, originY, droneCount, faction)
 	if faction == nil then
 		faction = "Kraylor"
 	end
-	local fleetList = {}
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local fleetList = script_formation.spawnFormation("Drone", droneCount, originX, originY, faction)
+	local fleetPower = droneCount * 5
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower 
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower 
 	end
-	for i=1,droneCount do
-		ship = CpuShip():setFaction(faction):setTemplate("Ktlitan Drone"):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
+	for _, ship in ipairs(fleetList) do
 		if faction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + 4
 			ship:onDestroyed(enemyVesselDestroyed)
 		elseif faction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + 4
 			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
 	end
-	return fleetList, droneCount*4
+	return fleetList, fleetPower
 end
 function spawnFighterFleet(originX, originY, fighterCount, faction)
 	if faction == nil then
 		faction = "Kraylor"
 	end
-	--Ship Template Name List
-	local fighterNames  = {"MT52 Hornet","MU52 Hornet","WX-Lindworm","Fighter","Ktlitan Fighter"}
+	local fighterNames  = {"Red Hornet", "Red Lindworm", "Red Adder MK5", "Red Adder MK4"} -- hired criminal ships
+	local templ = fighterNames[math.random(1,#fighterNames)]
 	--Ship Template Score List
-	local fighterScores = {5            ,5            ,7            ,6        ,6}
-	local fleetList = {}
-	local fleetPower = 0
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local fighterScores = stl["Criminals"]
+	local fleetPower = fighterCount * fighterScores[templ]
+	local fleetList = script_formation.spawnFormation(templ, fighterCount, originX, originY, faction)
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	for i=1,fighterCount do
-		local shipTemplateType = math.random(1,#fighterNames)
-		fleetPower = fleetPower + fighterScores[shipTemplateType]
-		ship = CpuShip():setFaction(faction):setTemplate(fighterNames[shipTemplateType]):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
+	for _, ship in ipairs(fleetList) do
 		if faction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + fighterScores[shipTemplateType]
 			ship:onDestroyed(enemyVesselDestroyed)
 		elseif faction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + fighterScores[shipTemplateType]
 			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
 	end
 	return fleetList, fleetPower
 end
@@ -17146,25 +17072,23 @@ function spawnJammerFleet(originX, originY)
 		shipSpawnCount = 4
 	end
 	--Ship Template Name List
-	local jammerNames  = {"MT52 Hornet","MU52 Hornet","Adder MK5","Adder MK4","WX-Lindworm","Adder MK6","Phobos T3","Phobos M3","Piranha F8","Piranha F12","Fighter","Ktlitan Fighter","Ktlitan Drone","Ktlitan Scout"}
+	local jammerNames  = stln["Criminals"] -- hired criminal ships
+	local templ = jammerNames[math.random(1,#jammerNames)]
 	--Ship Template Score List
-	local jammerScores = {5            ,5            ,7          ,6          ,7            ,8          ,15         ,16         ,15          ,15           ,6        ,6                ,4              ,8              }
-	local fleetList = {}
-	local fleetPower = 0
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local jammerScores = stl["Criminals"]
+	local fleetPower = shipSpawnCount * jammerScores[templ]
+	local fleetList = script_formation.spawnFormation(templ, shipSpawnCount, originX, originY, faction)
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	for i=1,shipSpawnCount do
-		local shipTemplateType = math.random(1,#jammerNames)
-		fleetPower = fleetPower + jammerScores[shipTemplateType]
-		ship = CpuShip():setFaction(faction):setTemplate(jammerNames[shipTemplateType]):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
-		rawKraylorShipStrength = rawKraylorShipStrength + jammerScores[shipTemplateType]
-		ship:onDestroyed(enemyVesselDestroyed)
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
+	for _, ship in ipairs(fleetList) do
+		if faction == "Kraylor" then
+			ship:onDestroyed(enemyVesselDestroyed)
+		elseif faction == "Human Navy" then
+			ship:onDestroyed(friendlyVesselDestroyed)
+		end
 	end
 	return fleetList, fleetPower
 end

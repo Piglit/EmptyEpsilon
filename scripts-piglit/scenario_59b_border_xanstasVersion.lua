@@ -10334,6 +10334,25 @@ function handleDockedState()
 			end
 		end
 	end
+    local ptype = comms_source:getTypeName()
+    local stype = comms_target:getTypeName()
+    if isAllowedTo(comms_target.comms_data.services.fighters) then
+        if stype == "Large Station" or stype == "Huge Station" then
+            if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+                addCommsReply("Visit fighter bay", function()
+                    handleBuyShips()
+                end)
+            end
+        end
+    end
+    if isAllowedTo(comms_target.comms_data.services.refitDrive) then
+        if stype == "Huge Station" and (comms_source:hasWarpDrive() ~= comms_source:hasJumpDrive()) then
+            -- logical XOR with hasWarpDrive and hasJumpDrive
+            addCommsReply("Refit your ships drive", function()
+                handleChangeDrive()
+            end)
+        end
+    end
 	addCommsReply("Visit cartography office", function()
 		if comms_target.cartographer_description == nil then
 			local clerk_choice = math.random(1,3)
@@ -10997,6 +11016,81 @@ function isAllowedTo(state)
     end
     return false
 end
+
+function handleChangeDrive()
+    if comms_source:hasWarpDrive() and not comms_source:hasJumpDrive() then
+        setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not comms_source:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                comms_source:setWarpDrive(false)
+                comms_source:setJumpDrive(true)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    if comms_source:hasJumpDrive() and not comms_source:hasWarpDrive() then
+        setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not comms_source:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                comms_source:setWarpDrive(true)
+                comms_source:setJumpDrive(false)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    addCommsReply("Back", mainMenu)
+end
+
+function handleBuyShips()
+    setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+    addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterBomber")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterScout")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply("Back", mainMenu)
+end
+
 function handleWeaponRestock(weapon)
     if not comms_source:isDocked(comms_target) then 
 		setCommsMessage("You need to stay docked for that action.")

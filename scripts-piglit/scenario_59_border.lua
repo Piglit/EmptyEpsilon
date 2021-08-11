@@ -64,6 +64,7 @@ function init()
 	lrr5 = 240
 	urr5 = 540
 
+	-- piglits border check - do not lose, just make player criminal
 	factions_forbidden_in_neutral_zone = {"Human Navy", "Black Ops"}
 	factions_forbidden_in_enemy_zone = {"Human Navy", "Blue Star Cartell", "Mining Corporation"}
 	faction_transporter_neutral = "Transport"

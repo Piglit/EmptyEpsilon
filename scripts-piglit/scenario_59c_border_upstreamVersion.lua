@@ -103,7 +103,13 @@ function init()
 	--random range 4 final: 240, 540 (lowered for test) treaty for game with no time limit
 	lrr5 = 240
 	urr5 = 540
-	
+
+	-- piglits border check - do not lose, just make player criminal
+	factions_forbidden_in_neutral_zone = {"Human Navy", "Black Ops"}
+	factions_forbidden_in_enemy_zone = {"Human Navy", "Blue Star Cartell", "Mining Corporation"}
+	faction_transporter_neutral = "Transport"
+	faction_transporter_friendly= "Blue Star Cartell"
+
 	--end of game victory/defeat values
 	enemyDestructionVictoryCondition = 70		--final: 70
 	friendlyDestructionDefeatCondition = 50		--final: 50
@@ -14458,42 +14464,54 @@ function playerBorderCheck(delta)
 				playerOutOfBounds = false
 				tbz = outerZone
 				if tbz:isInside(p) then
-					playerOutOfBounds = true
-					break
+					--allow 'black ops' jumping over neutral zone
+					for _, faction in ipairs(factions_forbidden_in_enemy_zone) do
+						if p:getFaction() == faction then
+							p.playerOutOfBounds = true
+							break
+						end
+					end
 				end
 				for i=1,#borderZone do
 					tbz = borderZone[i]
 					if tbz:isInside(p) then
-						playerOutOfBounds = true
-						break
+						--allow 'neutrals' in neutral zone
+						for _, faction in ipairs(factions_forbidden_in_neutral_zone) do
+							if p:getFaction() == faction then
+								p.playerOutOfBounds = true
+								break
+							end
+						end
+						if p.playerOutOfBounds then
+							break
+						end
 					end
 				end
-				if playerOutOfBounds then
-					break
-				end
-			end
-		end
-		if tbz ~= nil then
-			if playerOutOfBounds then
-				if tbz.playerDetected == nil then
-					tbz.playerDetected = 1
-				else
-					if tbz.playerDetected >= 10 then
-						missionVictory = false
-						finalTimer = 2
-						plotPB = displayDefeatResults
+				if p.playerOutOfBounds then
+					if p.playerDetected == nil then
+						p.playerDetected = 0
 					else
-						tbz.playerDetected = tbz.playerDetected + 1
+						if p.playerDetected >= 10 then
+							for p2idx=1,32 do
+								p2 = getPlayerShip(p2idx)
+								if p2 ~=nil and p2:isValid() then
+									p2:addToShipLog(p:getCallSign() .. " violated treaty terms by crossing neutral border zone. " .. p:getCallSign() .. " is treated as criminal now.", "Magenta")
+								end
+							end
+							p:setFaction("Criminals")
+						else
+							p.playerDetected = p.playerDetected + delta
+						end
 					end
-				end
-			else
-				if tbz.playerDetected == nil then
-					tbz.playerDetected = 0
 				else
-					if tbz.playerDetected <= 0 then
-						tbz.playerDetected = 0
+					if p.playerDetected == nil then
+						p.playerDetected = 0
 					else
-						tbz.playerDetected = tbz.playerDetected - 1
+						if p.playerDetected <= 0 then
+							p.playerDetected = 0
+						else
+							p.playerDetected = p.playerDetected - delta
+						end
 					end
 				end
 			end

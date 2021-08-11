@@ -116,12 +116,14 @@ function init_constants_xansta()
 	stln = {}
 	stnl = {}
 	stsl = {}
+	ship_template = {}
 	for faction, list in pairs(stl) do
 			stln[faction] = {}
 			for key, value in pairs(list) do
 				table.insert(stln[faction], key)
 				table.insert(stnl, key)
 				table.insert(stsl, value)
+				ship_template[key] = {strength = value}
 			end
 	end
 
@@ -181,6 +183,7 @@ function init_constants_xansta()
 	commonGoods = {"food","medicine","nickel","platinum","gold","dilithium","tritanium","luxury","cobalt","impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
 	componentGoods = {"impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
 	mineralGoods = {"nickel","platinum","gold","dilithium","tritanium","cobalt"}
+	vapor_goods = {"gold pressed latinum","unobtanium","eludium","impossibrium"}
 	playerShipNamesForMP52Hornet = {"Dragonfly","Scarab","Mantis","Yellow Jacket","Jimminy","Flik","Thorny","Buzz"}
 	playerShipNamesForPiranha = {"Razor","Biter","Ripper","Voracious","Carnivorous","Characid","Vulture","Predator"}
 	playerShipNamesForFlaviaPFalcon = {"Ladyhawke","Hunter","Seeker","Gyrefalcon","Kestrel","Magpie","Bandit","Buccaneer"}
@@ -341,6 +344,7 @@ function modify_player_ships(pobj)
 			pobj.autoCoolant = true
 --			pobj:setWarpDrive(true)
 		elseif tempPlayerType == "Adder MK7" then
+			print("Adder")
 			if #playerShipNamesForStriker > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				ni = math.random(1,#playerShipNamesForStriker)
@@ -484,8 +488,14 @@ function modify_player_ships(pobj)
 end
 
 
-function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, shape)
 	-- called in spawnEnemies()
+	if shape == nil then
+		shape = "square"
+		if random(1,100) < 50 then
+			shape = "hexagonal"
+		end
+	end
 
 	local enemyFactionScoreList = stl[enemyFaction]
 	local enemyFactionNameList = stln[enemyFaction]
@@ -500,7 +510,6 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 
 	local enemyPosition = 0
 	local sp = irandom(300,500)			--random spacing of spawned group
-	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
 
 	local formationLeader = nil
 	local formationSecond = nil
@@ -524,9 +533,9 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	for index,shipTemplateType in ipairs(enemyNameList) do
 		local ship = CpuShip():setFaction(enemyFaction):setScannedByFaction(enemyFaction, true):setTemplate(shipTemplateType):orderRoaming()
 		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 and enemyPosition <= #fleetPosDelta1x then
+		if shape == "square" and enemyPosition <= #fleetPosDelta1x then
 			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		elseif enemyPosition <= #fleetPosDelta2x then
+		elseif shape == "hexagonal" and enemyPosition <= #fleetPosDelta2x then
 			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
 		else
 			ship:setPosition(xOrigin, yOrigin)
@@ -568,7 +577,7 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 end
 
 function enemyComms(comms_data)
-	-- called intead enemyComms() of xanstas scenarios, as long it is deleted there.
+	-- called instead enemyComms() of xanstas scenarios, as long it is deleted there.
 	if comms_data.friendlyness > 50 then
 		local faction = comms_target:getFaction()
 		local taunt_option = "We will see to your destruction!"

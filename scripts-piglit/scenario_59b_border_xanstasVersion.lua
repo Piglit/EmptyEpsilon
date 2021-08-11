@@ -8688,6 +8688,7 @@ function setFleets()
 	end
 end
 function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction, fleetName, shape)
+
 	if enemyFaction == nil then
 		enemyFaction = "Kraylor"
 	end
@@ -8695,49 +8696,22 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction, fleetNam
 		danger = 1
 	end
 	local enemyStrength = math.max(power * danger * difficulty, 5)
-	local enemy_position = 0
-	local sp = irandom(400,900)			--random spacing of spawned group
-	if shape == nil then
-		shape = "square"
-		if random(1,100) < 50 then
-			shape = "hexagonal"
-		end
+	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	local enemyList = {}
-	template_pool_size = 10
-	local template_pool = getTemplatePool(enemyStrength)
-	if #template_pool < 1 then
-		addGMMessage("Empty Template pool: fix excludes or other criteria")
-		return enemyList
-	end
-	template_pool_size = 5
-	local fleetPower = 0
-	local prefix = generateCallSignPrefix(1)
-	while enemyStrength > 0 do
-		local selected_template = template_pool[math.random(1,#template_pool)]
-		fleetPower = fleetPower + ship_template[selected_template].strength
-		local ship = ship_template[selected_template].create(enemyFaction,selected_template)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
+	for _, ship in ipairs(enemyList) do
 		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + ship_template[selected_template].strength
 			ship:onDestroyed(enemyVesselDestroyed)
 		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + ship_template[selected_template].strength
 			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		enemy_position = enemy_position + 1
-		if shape == "none" or shape == "pyramid" or shape == "ambush" then
-			ship:setPosition(xOrigin,yOrigin)
-		else
-			ship:setPosition(xOrigin + formation_delta[shape].x[enemy_position] * sp, yOrigin + formation_delta[shape].y[enemy_position] * sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
+		ship:setCallSign(generateCallSign(nil,enemyFaction))
 		if fleetName ~= nil then
 			ship.fleet = fleetName
 		end
-		table.insert(enemyList, ship)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
-		enemyStrength = enemyStrength - ship_template[selected_template].strength
 	end
 	local increment = 360/#enemyList
 	local angle = random(0,360)
@@ -13398,44 +13372,23 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 	if enemyStrength == nil then
 		enemyStrength = math.max(danger * difficulty * playerPower(),5)
 	end
-	local enemy_position = 0
-	local sp = irandom(400,900)			--random spacing of spawned group
-	if shape == nil then
-		shape = "square"
-		if random(1,100) < 50 then
-			shape = "hexagonal"
-		end
-	end
-	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	local enemyList = {}
-	template_pool_size = 10
-	local template_pool = getTemplatePool(enemyStrength)
-	if #template_pool < 1 then
-		addGMMessage("Empty Template pool: fix excludes or other criteria")
-		return enemyList
-	end
+
+	local enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, shape)
 	local prefix = generateCallSignPrefix(1)
-	while enemyStrength > 0 do
-		local selected_template = template_pool[math.random(1,#template_pool)]
-		local ship = ship_template[selected_template].create(enemyFaction,selected_template)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
+	end
+	for _, ship in ipairs(enemyList) do
+		ship:setCallSign(generateCallSign(nil,enemyFaction))
 		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + ship_template[selected_template].strength
 			ship:onDestroyed(enemyVesselDestroyed)
 		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + ship_template[selected_template].strength
 			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		enemy_position = enemy_position + 1
-		if shape == "none" or shape == "pyramid" or shape == "ambush" then
-			ship:setPosition(xOrigin,yOrigin)
-		else
-			ship:setPosition(xOrigin + formation_delta[shape].x[enemy_position] * sp, yOrigin + formation_delta[shape].y[enemy_position] * sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
-		enemyStrength = enemyStrength - ship_template[selected_template].strength
 	end
+
 	if shape == "pyramid" then
 		if spawn_distance == nil then
 			spawn_distance = 30
@@ -13463,7 +13416,6 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 				ship:setPosition(px+vx,py+vy)
 			end
 			ship:setHeading((spawn_angle + 270) % 360)
-			ship:orderFlyTowards(px,py)
 		end
 	end
 	if shape == "ambush" then
@@ -13482,7 +13434,7 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 	end
 	return enemyList
 end
-function getTemplatePool(max_strength)
+--[[function getTemplatePool(max_strength)
 	local function getStrengthSort(tbl, sortFunction)
 		local keys = {}
 		for key in pairs(tbl) do
@@ -13524,7 +13476,7 @@ function getTemplatePool(max_strength)
 		end
 	end
 	return template_pool
-end
+end--]]
 function playerPower()
 --evaluate the players for enemy strength and size spawning purposes
 	local playerShipScore = 0

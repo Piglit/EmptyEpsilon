@@ -484,8 +484,14 @@ function modify_player_ships(pobj)
 end
 
 
-function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, shape)
 	-- called in spawnEnemies()
+	if shape == nil then
+		shape = "square"
+		if random(1,100) < 50 then
+			shape = "hexagonal"
+		end
+	end
 
 	local enemyFactionScoreList = stl[enemyFaction]
 	local enemyFactionNameList = stln[enemyFaction]
@@ -500,7 +506,6 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 
 	local enemyPosition = 0
 	local sp = irandom(300,500)			--random spacing of spawned group
-	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
 
 	local formationLeader = nil
 	local formationSecond = nil
@@ -524,9 +529,9 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	for index,shipTemplateType in ipairs(enemyNameList) do
 		local ship = CpuShip():setFaction(enemyFaction):setScannedByFaction(enemyFaction, true):setTemplate(shipTemplateType):orderRoaming()
 		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 and enemyPosition <= #fleetPosDelta1x then
+		if shape == "square" and enemyPosition <= #fleetPosDelta1x then
 			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		elseif enemyPosition <= #fleetPosDelta2x then
+		elseif shape == "hexagonal" and enemyPosition <= #fleetPosDelta2x then
 			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
 		else
 			ship:setPosition(xOrigin, yOrigin)

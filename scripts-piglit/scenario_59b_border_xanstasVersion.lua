@@ -13710,7 +13710,7 @@ function resetBanner(evalFriendly,evalEnemy)
 	if evalFriendly ~= nil then
 		banner_string = string.format("%s  Friendly: %.1f  Enemy: %.1f  Difference: %.1f",banner_string,evalFriendly,evalEnemy,evalFriendly-evalEnemy)
 	end
-	setBanner(banner_string)
+	--setBanner(banner_string)
 end
 function expediteDockCheck(delta, p)
 	if p.expedite_dock then

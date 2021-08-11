@@ -1,4 +1,4 @@
--- Name: Borderline Fever
+-- Name: Borderline Fever Upstream
 -- Description: War temperature rises along the border between Human Navy space and Kraylor space. The treaty holds for now, but the diplomats and intelligence operatives fear the Kraylors are about to break the treaty. We must maintain the treaty despite provocation until war is formally declared.
 ---
 --- Version 5

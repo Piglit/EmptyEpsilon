@@ -344,6 +344,7 @@ function modify_player_ships(pobj)
 			pobj.autoCoolant = true
 --			pobj:setWarpDrive(true)
 		elseif tempPlayerType == "Adder MK7" then
+			print("Adder")
 			if #playerShipNamesForStriker > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				ni = math.random(1,#playerShipNamesForStriker)

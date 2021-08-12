@@ -15,6 +15,7 @@
 -- Station warning of enemies in area (helpful warnings - shuffle stations)
 
 require("utils.lua")
+require("xansta_mods.lua")
 
 --------------------
 -- Initialization --
@@ -261,7 +262,7 @@ function setDifficulty(newDiff)
 		coolant_gain = .0001 
 		ersAdj = -1 - 2*difficulty
 	end
-	print(string.format("Difficulty: %2d", difficulty))
+	print("Difficulty: " .. string(difficulty))
 end
 function setVariations()
 	if string.find(getScenarioVariation(),"Easy") then
@@ -475,8 +476,9 @@ function setConstants()
 		},
 	}		
 	max_pyramid_tier = 15	
-	playerShipStats = {	["MP52 Hornet"] 		= { strength = 7, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
-						["Piranha"]				= { strength = 16,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+	playerShipStats = {	["Adder MK7"] 			= { strength = 8, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
+						["MP52 Hornet"] 		= { strength = 7, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
+						["Piranha M5P"]				= { strength = 16,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
 						["Flavia P.Falcon"]		= { strength = 13,	cargo = 15,	distance = 200,	long_range_radar = 40000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 250, cm_strafe = 150,	},
 						["Phobos M3P"]			= { strength = 19,	cargo = 10,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = true,		mining = false,	cm_boost = 400, cm_strafe = 250,	},
 						["Atlantis"]			= { strength = 52,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 400, cm_strafe = 250,	},
@@ -3719,7 +3721,7 @@ function buildStationsPlus()
 		gx = adjList[rn][1]
 		gy = adjList[rn][2]
 	until(not neutralStationsRemain or not humanStationsRemain or not kraylorStationsRemain)
-	if diagnostic then print(string.format("Human stations: %i, Kraylor stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#neutralStationList)) end
+	if true then print(string.format("Human stations: %i, Kraylor stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#neutralStationList)) end
 	if not diagnostic then
 		local nebula_count = math.random(7,25)
 		local nebula_list = placeRandomListAroundPoint(Nebula,nebula_count,1,150000,0,0)
@@ -9672,6 +9674,16 @@ function commsStation()
     if comms_target.comms_data == nil then
         comms_target.comms_data = {}
     end
+    local stype = comms_target:getTypeName()
+	local has_fighters = "no"
+	local has_refit_drive = "no"
+	if stype == "Large Station" then
+		has_fighters = "friend"
+	end
+	if stype == "Huge Station" then
+		has_fighters = "friend"
+		has_refit_drive = "friend"
+	end
     mergeTables(comms_target.comms_data, {
         friendlyness = random(0.0, 100.0),
         weapons = {
@@ -9693,11 +9705,17 @@ function commsStation()
             reinforcements = "friend",
             preorder = "friend",
             activatedefensefleet = "neutral",
+            fighters = has_fighters,
+            refitDrive = has_refit_drive,
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = math.random(125,175),
             activatedefensefleet = 20,
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -10258,18 +10276,15 @@ function handleDockedState()
 		end
 	end
     local ptype = comms_source:getTypeName()
-    local stype = comms_target:getTypeName()
     if isAllowedTo(comms_target.comms_data.services.fighters) then
-        if stype == "Large Station" or stype == "Huge Station" then
-            if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
-                addCommsReply("Visit fighter bay", function()
-                    handleBuyShips()
-                end)
-            end
-        end
+		if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+			addCommsReply("Visit fighter bay", function()
+				handleBuyShips()
+			end)
+		end
     end
     if isAllowedTo(comms_target.comms_data.services.refitDrive) then
-        if stype == "Huge Station" and (comms_source:hasWarpDrive() ~= comms_source:hasJumpDrive()) then
+        if comms_source:hasWarpDrive() ~= comms_source:hasJumpDrive() then
             -- logical XOR with hasWarpDrive and hasJumpDrive
             addCommsReply("Refit your ships drive", function()
                 handleChangeDrive()
@@ -10967,7 +10982,7 @@ function handleChangeDrive()
             end
         end)
     end
-    addCommsReply("Back", mainMenu)
+    addCommsReply("Back", commsStation)
 end
 
 function handleBuyShips()
@@ -10983,7 +10998,7 @@ function handleBuyShips()
             setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
             return true
         end
-        addCommsReply("Back", mainMenu)
+        addCommsReply("Back", commsStation)
     end)
     addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
         if not comms_source:takeReputationPoints(getServiceCost("fighterBomber")) then
@@ -10996,7 +11011,7 @@ function handleBuyShips()
             setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
             return true
         end
-        addCommsReply("Back", mainMenu)
+        addCommsReply("Back", commsStation)
     end)
     addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
         if not comms_source:takeReputationPoints(getServiceCost("fighterScout")) then
@@ -11009,9 +11024,9 @@ function handleBuyShips()
             setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
             return true
         end
-        addCommsReply("Back", mainMenu)
+        addCommsReply("Back", commsStation)
     end)
-    addCommsReply("Back", mainMenu)
+    addCommsReply("Back", commsStation)
 end
 
 function handleWeaponRestock(weapon)
@@ -13476,17 +13491,17 @@ function setPlayer(pobj)
 		pobj.initialRep = true
 	end
 	if not pobj.modsAssigned then
-		pobj.modsAssigned= true
+		modify_player_ships(pobj)
 		local tempPlayerType = pobj:getTypeName()
-		pobj.shipScore = playerShipStats[tempPlayerType].strength
-		pobj.maxCargo = playerShipStats[tempPlayerType].cargo
-		pobj:setLongRangeRadarRange(playerShipStats[tempPlayerType].long_range_radar)
-		pobj:setShortRangeRadarRange(playerShipStats[tempPlayerType].short_range_radar)
+		print("setPlayer "..tempPlayerType)
+--		pobj.shipScore = playerShipStats[tempPlayerType].strength
+--		pobj.maxCargo = playerShipStats[tempPlayerType].cargo
+--		pobj:setLongRangeRadarRange(playerShipStats[tempPlayerType].long_range_radar)
+--		pobj:setShortRangeRadarRange(playerShipStats[tempPlayerType].short_range_radar)
 		pobj.tractor = playerShipStats[tempPlayerType].tractor
 		pobj.mining = playerShipStats[tempPlayerType].mining
 		pobj.mining_target_lock = false
 		pobj.mining_in_progress = false
-		modify_player_ships(pobj)
 		if pobj.cargo == nil then
 			pobj.cargo = pobj.maxCargo
 			pobj.maxRepairCrew = pobj:getRepairCrewCount()
@@ -13521,6 +13536,7 @@ function setPlayer(pobj)
 				pobj.min_jump_range = 5000
 			end
 		end
+		print("setPlayer fin "..pobj:getCallSign())
 	end
 	pobj.initialCoolant = pobj:getMaxCoolant()
 end
@@ -16841,7 +16857,7 @@ function artifactToPlatform(delta)
 			tap:destroy()
 			break
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty*delta)
+			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty*delta*30)
 			tap:setPosition(apx+tDeltax,apy+tDeltay)
 		end
 	end
@@ -16850,7 +16866,7 @@ function weaponPlatformOrbit(delta)
 	for i=1,#enemyDefensePlatformList do
 		twp = enemyDefensePlatformList[i]
 		if twp ~= nil and twp:isValid() then
-			twp.travelAngle = twp.travelAngle + .05*difficulty*delta
+			twp.travelAngle = twp.travelAngle + .05*difficulty*delta*30
 			if twp.travelAngle >= 360 then 
 				twp.travelAngle = 0
 			end
@@ -16864,7 +16880,7 @@ function warpJammerOrbit(delta)
 		tj = jammerList[i]
 		if tj ~= nil and tj:isValid() then
 			if tj.orbit then
-				tj.travelAngle = tj.travelAngle + .05*difficulty*delta
+				tj.travelAngle = tj.travelAngle + .05*difficulty*delta*30
 --				if tj.travelAngle >= 360 then
 --					tj.travelAngle = 0
 --				end
@@ -16881,7 +16897,7 @@ function warpJammerOrbit(delta)
 					table.insert(enemyFleetList,ef)
 					tj.orbit = true
 				else
-					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty*delta)
+					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty*delta*30)
 					tj:setPosition(wjx+tDeltax,wjy+tDeltay)
 				end
 			end
@@ -16913,7 +16929,7 @@ function artifactToMinefield(delta)
 				tam.deleteMe = true
 			end
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty*delta)
+			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty*delta*30)
 			tam:setPosition(amx+tDeltax,amy+tDeltay)
 		end
 	end
@@ -16959,7 +16975,7 @@ function artifactToWorm(delta)
 			local wdx, wdy = vectorFromAngle(random(0,360),100000)
 			WormHole():setPosition(awx,awy):setTargetPosition(awx+wdx,awy+wdy)
 		else
-			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty*delta)
+			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty*delta*30)
 			taw:setPosition(awx+tDeltax,awy+tDeltay)
 		end	
 	end
@@ -17188,6 +17204,7 @@ function playerBorderCheck(delta)
 								end
 							end
 							p:setFaction("Criminals")
+							p.playerOutOfBounds = false
 						else
 							p.playerDetected = p.playerDetected + delta
 						end
@@ -17889,9 +17906,8 @@ end
 function setSecondaryOrders()
 	secondaryOrders = ""
 	local stat_list = gatherStats()
-	secondaryOrders = secondaryOrders .. string.format("\n\nFriendly evaluation: %.1f%%. Below %.1f%% = defeat",stat_list.human.evaluation,friendlyDestructionDefeatCondition)
-	secondaryOrders = secondaryOrders .. string.format("\nEnemy evaluation: %.1f%%. Below %.1f%% = victory",stat_list.kraylor.evaluation,enemyDestructionVictoryCondition)
-	secondaryOrders = secondaryOrders .. string.format("\n\nGet behind by %.1f%% = defeat. Get ahead by %.1f%% = victory",stat_list.times.threshold,stat_list.times.threshold)
+	secondaryOrders = secondaryOrders .. string.format("\n\nFriendly evaluation: %.1f%%.",stat_list.human.evaluation)
+	secondaryOrders = secondaryOrders .. string.format("\nEnemy evaluation: %.1f%%.",stat_list.kraylor.evaluation)
 end
 function stationWarning(delta)
 	if station_warning_diagnostic then print("In station warning function") end

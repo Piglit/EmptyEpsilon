@@ -83,4 +83,5 @@ template:setTubes(2, 15.0) -- Amount of torpedo tubes
 template:setWeaponStorage("Nuke", 5)
 template:setWeaponStorage("EMP", 5)
 template:setWeaponStorage("Homing", 5)
+template:setSpeed(10, 5, 5)
 

@@ -1,9 +1,7 @@
--- Name: Quick Basic
--- Description: Different version of the Basic scenario intended to play out quicker. There is only a single small station to defend.
+-- Name: Quick Battle
+-- Description: Use your Phobos light cruiser to defend a single small station against the incoming Kraylor attack.
 ---
---- This scenario is designed to be ran at conventions, since you can run a 4-player crew with minimal experience through a game in 20 minutes.
----
---- This scenario is designed for the provided player Phobos-type ship (or an Atlantis in the Advanced variant).
+--- This mission can be run with a 4-6 player crew with minimal experience in 20 minutes.
 -- Type: Convention
 -- Variation[Advanced]: Give the players a stronger Atlantis instead of the Phobos. The Atlantis is more difficult to control, but has more firepower and defense. Also increases enemy strength.
 -- Variation[GM Start]: The scenario is not started until the GM signals for it to start. This gives some time for a new crew to get a feeling for the controls before the actual scenario starts.
@@ -239,7 +237,7 @@ function initGM()
 
     -- Let the GM create more enemies if the players are having a too easy time.
     addGMFunction(
-        "Extra wave",
+        "Spawn extra enemies",
         function()
             addWave(enemyList, random(0, 10), random(0, 360), random(25000, 30000))
         end

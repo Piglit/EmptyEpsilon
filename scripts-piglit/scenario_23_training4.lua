@@ -5,7 +5,7 @@
 --- Objective: Destroy all enemy ships in the area.
 ---
 --- Description:
---- In this training you will use mines...TODO
+--- In this training you will use mines to defend a station against an enemy carrier ship.
 ---
 --- Your ship is a Nautilus Mine Layer - a jump-driven cruiser without missiles but multiple mine tubes.
 ---

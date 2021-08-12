@@ -1,4 +1,4 @@
--- Name: Exuari Waves
+-- Name: Battle: Exuari Waves
 -- Description: Waves of increasingly difficult enemies. Prevent the destruction of your stations.
 -- Type: Basic
 -- Variation[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. Players are overwhelmed more quickly, leading to shorter games.

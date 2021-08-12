@@ -1,7 +1,5 @@
--- Name: Kraylor Waves
--- Description: Waves of increasingly difficult enemies. Prevent the destruction of your stations. Playable with any number of ships
----
---- Kraylor ships are attacking human navy stations to claim our territory.
+-- Name: Battle: Kraylor Waves
+-- Description: Waves of increasingly difficult enemies. Prevent the destruction of your stations.
 -- Type: Basic
 -- Variation[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. Players are overwhelmed more quickly, leading to shorter games.
 -- Variation[Easy]: Decreases the number of ships in each wave. Good for new players, but takes longer for the players to be overwhelmed.

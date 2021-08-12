@@ -1,10 +1,5 @@
--- Name: The Mining Outpost
+-- Name: Battle: The Mining Outpost
 -- Description: A mining outpost near the Kraylor border sent an emercency call. Defend the outpost against the Kraylor attack!
---- 
---- You will be piloting a Hathcock battle cruiser.
----
---- This is a short mission designed for one ship, but it can be played with any number of player ships.
---- 
 -- Type: Basic
 
 -- This mission uses hangar and fighter formation code.
@@ -65,7 +60,7 @@ end
 
 function init()
 
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Hathcock")
+    --player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Hathcock")
     station = SpaceStation():setTemplate("Small Station"):setPosition(0, -500):setRotation(random(0, 360)):setFaction("Mining Corporation"):setCallSign("Mining Outpost")
     enemies = {}
     friends = {}

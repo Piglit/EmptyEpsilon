@@ -1,9 +1,6 @@
--- Name: Allies and Enemies
+-- Name: Scenario: Allies and Enemies
 -- Description: The Arlenians are your allies. The Kraylors and Exuari are your enemies and will try to prevent you from completing your missions. Duration: approximately 30 minutes
----
---- Version 0
----
---- Three missions available in current version. Tested with EE version 20190910
+--- Three missions will be given to you in this scenario.
 -- Type: Replayable Mission
 -- Variation[Easy]: Easy goals and/or enemies
 -- Variation[Hard]: Hard goals and/or enemies

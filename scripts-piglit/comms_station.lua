@@ -4,6 +4,16 @@ function mainMenu()
     if comms_target.comms_data == nil then
         comms_target.comms_data = {}
     end
+    local stype = comms_target:getTypeName()
+	local has_fighters = "no"
+	local has_refit_drive = "no"
+	if stype == "Large Station" then
+		has_fighters = "friend"
+	end
+	if stype == "Huge Station" then
+		has_fighters = "friend"
+		has_refit_drive = "friend"
+	end
     mergeTables(comms_target.comms_data, {
         friendlyness = random(0.0, 100.0),
         surrender_hull_threshold = math.random(40,80),
@@ -24,8 +34,8 @@ function mainMenu()
         services = {
             supplydrop = "friend",
             reinforcements = "friend",
-            fighters = "friend",
-            refitDrive = "friend"
+            fighters = has_fighters,
+            refitDrive = has_refit_drive
         },
         service_cost = {
             supplydrop = math.random(80,120),
@@ -102,18 +112,15 @@ function handleDockedState()
 		addCommsReply("Back", mainMenu)
 	end)
     local ptype = player:getTypeName()
-    local stype = comms_target:getTypeName()
     if isAllowedTo(comms_target.comms_data.services.fighters) then
-        if stype == "Large Station" or stype == "Huge Station" then
             if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
                 addCommsReply("Visit fighter bay", function()
                     handleBuyShips()
                 end)
             end
-        end
     end
     if isAllowedTo(comms_target.comms_data.services.refitDrive) then
-        if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
+        if player:hasWarpDrive() ~= player:hasJumpDrive() then
             -- logical XOR with hasWarpDrive and hasJumpDrive
             addCommsReply("Refit your ships drive", function()
                 handleChangeDrive()

@@ -55,7 +55,7 @@ scenarioInfos = {
 	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic", "*"), P(S.unlockShip, "Atlantis")]},
 	"02_beacon":			{"@start": P(S.unlockScenario, "01e_waves", "*")},
 	"03_edgeofspace":		{"@start": P(S.unlockScenario, "01k_waves", "*")},
-	"04_gftp":				{},#"@start": P(S.unlockScenario, "01t_waves", "*")},
+	"04_gftp":				{"@start": P(S.unlockScenario, "01t_waves", "*")},
 	"49_allies":			{"@victory[Human Navy]": P(S.unlockScenarios, [("01e_waves", "*"), ("01k_waves", "*")])},
 
 	# More Battles
@@ -63,7 +63,7 @@ scenarioInfos = {
 	"01a_waves":			{},
 	"01e_waves":			{},
 	"01k_waves":			{},
-#	"01g_waves":			{},
+	"01t_waves":			{},
 
 	# Multiplayer Missions
 	"55_defenderHunter":	{},

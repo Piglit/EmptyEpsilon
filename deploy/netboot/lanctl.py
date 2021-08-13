@@ -18,12 +18,25 @@ class LanController:
 
 	def __init__(self):
 		self.state = "default"
+		self.state_end = lambda : None
 
 	def ping(self):
 		return True
 
 	def getState(self):
 		return self.state
+
+	def _changeState(self, new_state):
+		self.state_end()
+		self.state = new_state
+
+	@Pyro4.oneway
+	def startServer(self)
+		self._changeState("server")
+		if GameServer.startMissionControlServer():
+			self.state_end = lambda GameServer.stop()
+		else:
+			self.state = "error"
 
 def start():
 	controller = LanController()

@@ -85,8 +85,7 @@ MissionControlScreen::MissionControlScreen()
 				ship->setPosition(sf::Vector2f(random(-100, 100), random(-100, 100)));
 				ship->setCallSign(callsign);
 				ship->setTemplate(ship_template_selector->getSelectionValue());
-				//ship->setControlCode(PreferencesManager::get("password"));
-				//my_player_info->commandSetShipId(ship->getMultiplayerId());
+				my_player_info->commandSetShipId(ship->getMultiplayerId());
 			}
 		}))->setPosition(20, 20, ATopCenter)->setSize(250, 50);
 	}

@@ -38,6 +38,12 @@ class LanController:
 		else:
 			self.state = "error"
 
+	# def startProxy(self):
+	# GameServer.startProxy("192.168.2.3", shipname)
+
+	# def startClient(self):
+	# GameClient.startClient(hip=shipname)
+
 def start():
 	controller = LanController()
 	uri_srv = pyrohelper.host(controller, port=2221, objectId="Control_"+socket.gethostname())

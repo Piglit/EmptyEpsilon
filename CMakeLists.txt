@@ -29,7 +29,7 @@ else()
     string(TIMESTAMP PATCH "%d")
 endif()
 
-project(EmptyEpsilon LANGUAGES CXX C  VERSION ${MAJOR}.${MINOR}.${PATCH})
+project(EmptyEpsilon LANGUAGES CXX C  VERSION 2021)
 
 include(GNUInstallDirs)
 
@@ -369,7 +369,7 @@ endif()
 include(InstallRequiredSystemLibraries)
 
 
-set(EE_RESOURCES resources scripts packs)
+set(EE_RESOURCES resources scripts-piglit packs)
 if(WIN32)
     
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
@@ -426,8 +426,8 @@ endif()
 
 add_custom_target(update_locale
     COMMAND xgettext --keyword=tr:1c,2 --keyword=tr:1 --keyword=trMark:1c,2 --keyword=trMark:1 --omit-header -d resources/locale/main.en ${SOURCES}
-    COMMAND xgettext --keyword=_:1c,2 --keyword=_:1 --omit-header -j -d resources/locale/main.en scripts/shipTemplates_*.lua scripts/comms_ship.lua scripts/comms_station.lua scripts/comms_supply_drop.lua scripts/factionInfo.lua scripts/science_db.lua
-    COMMAND xgettext --keyword=_:1c,2 --keyword=_:1 --omit-header -d resources/locale/tutorial.en scripts/tutorial_*.lua
+    COMMAND xgettext --keyword=_:1c,2 --keyword=_:1 --omit-header -j -d resources/locale/main.en scripts-piglit/shipTemplates_*.lua scripts-piglit/comms_ship.lua scripts-piglit/comms_station.lua scripts-piglit/comms_supply_drop.lua scripts-piglit/factionInfo.lua scripts-piglit/science_db.lua
+    COMMAND xgettext --keyword=_:1c,2 --keyword=_:1 --omit-header -d resources/locale/tutorial.en scripts-piglit/tutorial_*.lua
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 # Generic settings

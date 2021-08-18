@@ -27,16 +27,10 @@ def scenario_info():
 @pytest.fixture()
 def scenario_info_proxy():
 	return {
-		"scenario_info": {
-			"filename": "scenario_59_border.lua",
-			"name": "Test",
-			"variation": "None",
-		},
-		"ship": {
-			"callsign": "Testship",
-			"template": "Phobos",
-			"password": "testi"
-		}
+		"callsign": "Testship",
+		"template": "Atlantis",
+		"password": "testi",
+		"server_ip": "127.0.0.1",
 	}
 
 @pytest.fixture(autouse=True)
@@ -58,8 +52,7 @@ def test_scenario_start(scenario_info):
 	assert "01_test2" in servers.getScenarios(scenario_info["server_name"])
 
 def test_scenario_join(scenario_info_proxy):
-	scenario_info_proxy["ship_template"] = "Phobos"
-	response = testClient.post("/scenario_join", json = scenario_info_proxy)
+	response = testClient.post("/proxySpawn", json = scenario_info_proxy)
 	assert response.status_code == 200, response.reason
 
 def test_scenario_end(scenario_info):
@@ -199,4 +192,5 @@ def test_fuzzy_workflow():
 	servers.storeData()
 
 if __name__ == "__main__":
-	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=True, port=8888)
+	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=False, port=8888)
+

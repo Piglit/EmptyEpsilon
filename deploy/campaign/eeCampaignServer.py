@@ -8,6 +8,7 @@ import uvicorn
 import logging
 import os
 import json
+import requests
 from copy import deepcopy
 from urllib.parse import unquote
 
@@ -67,6 +68,7 @@ class EEServerScenarioInfo(BaseModel):
 		return readable
 
 class EEProxyShipInfo(BaseModel):
+	server_ip: str
 	callsign: str
 	password: str
 	template: str
@@ -92,10 +94,12 @@ async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str =
 	runScenarioInfoCallback(scenario_info.getId(), "@start", server_name)
 	servers.storeData()
 
-@app.post("/scenario_join")
-async def scenario_start(scenario_info: EEServerScenarioInfo, ship: EEProxyShipInfo):
-	log.info(ship.callsign + "\tjoined scenario" + str(scenario_info))
-	runScenarioInfoCallback(scenario_info.getId(), "@join", ship.callsign, **ship.__dict__)
+@app.post("/proxySpawn")
+async def proxySpawn(ship = EEProxyShipInfo):
+	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " on " + str(ship.server_ip))
+	command = f"PlayerSpaceship():setFaction('Human Navy'):setTemplate('{ship.template}'):setCallSign('{ship.callsign}'):setControlCode('{ship.password}')"
+	result = requests.get(f"{ship.server_ip}/exec.lua", data=command)
+	log.debug(result)
 
 @app.post("/scenario_end")
 async def scenario_end(scenario_info: EEServerScenarioInfo, server_name: str = Body(...)):
@@ -161,5 +165,5 @@ async def getShipsAvailable(server_name):
 	return {"ships": ships}
 
 if __name__ == "__main__":
-	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=True, port=8888)
+	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=False, port=8888)
 	pyrohelper.cleanup()

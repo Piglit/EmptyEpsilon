@@ -13,6 +13,9 @@ class GameServerData:
 		if os.path.exists(GameServerData.db):
 			self.loadData()
 
+	def ping(self):
+		return True
+
 	def getOrCreateServer(self, serverName):
 		if serverName not in self.servers:
 			self.servers[serverName] = {
@@ -97,4 +100,4 @@ class GameServerData:
 			self.unlockShip(sn, serverName)
 
 servers = GameServerData()
-#pyrohelper.host_named_server(servers, "campaign_state", port=22814)
+pyrohelper.host_named_server(servers, "campaign_state")

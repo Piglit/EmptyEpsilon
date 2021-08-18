@@ -5,7 +5,7 @@ import os
 import time
 import Pyro4
 from Pyro4 import naming
-import pyrohelper
+import util.pyrohelper
 import os
 import sys
 import threading
@@ -13,13 +13,21 @@ import socket
 from time import sleep
 import datetime
 
-_starts_x = False # global, depends on machine
+_starts_x = True # global, depends on machine
 with open("/proc/sys/net/ipv4/tcp_fin_timeout","r") as file:
 	_socket_timeout = datetime.timedelta(seconds=int(file.read()))
 
 # Notice: When server or proxy are closed, the listen socket remains in TIMED_WAIT state.
 # The duration is configured in the os in /proc/sys/net/ipv4/tcp_fin_timeout.
 # Until this timeout, starting a server or proxy will fail to listen on the socket!
+
+def startx(command):
+	cwd = "/root/EmptyEpsilon"
+	env = os.environ.copy()
+	env["XAUTHORITY"] = "/tmp/.xauthority"
+	command = ["/usr/bin/startx"] + command + ["--", "-logfile", "/tmp/x.log"]
+	process = subprocess.Popen(command, cwd=cwd, env=env)
+	return process
 
 @Pyro4.expose
 class GameServer:
@@ -40,7 +48,7 @@ class GameServer:
 			return False
 		return GameServer._process.wait()
 
-	def _startWithArgs(self, cmds):
+	def _startWithArgs(self, cmds, do_startx=False):
 		now = datetime.datetime.now()
 		if GameServer._socket_timeout_started:
 			delta = now - GameServer._socket_timeout_started
@@ -50,9 +58,10 @@ class GameServer:
 			return False
 		command = ["./EmptyEpsilon"]
 		command += cmds
-		if _starts_x:
-			command = ["/usr/bin/startx"] + command + ["--", "-logfile", "/tmp/x.log"]
-		GameServer._process = subprocess.Popen(command, cwd="..")
+		if do_startx:
+			GameServer._process = startx(command)
+		else:
+			GameServer._process = subprocess.Popen(command, cwd="/root/EmptyEpsilon")
 		print("started server")
 		time.sleep(2.0)
 		GameServer._socket_timeout_started = datetime.datetime.now()
@@ -65,12 +74,14 @@ class GameServer:
 		command = []
 		return self._startWithArgs(command)
 
-	def startMissionControlServer(self):
+	def startMissionControlServer(self, shipname=None):
 		command = ["httpserver=8080"]
 		command += ["campaign_server=192.168.2.3:8888"]
 		command += ["alternative_server=1"]
+		if shipname:
+			command += [f"shipname={shipname}"]
 		GameServer._http_allowed = True
-		return self._startWithArgs(command)
+		return self._startWithArgs(command, do_startx=True)
 
 	def startHeadlessServer(self, scenario, variation="", name=""):
 		command = ["httpserver=8080"]
@@ -86,8 +97,19 @@ class GameServer:
 		return self._startWithArgs(command)
 
 	def startProxy(self, host, name):
-		command = ["proxy=%s:35666::35666:%s" % (host,name)]
-		return self._startWithArgs(command)
+		if GameServer._process is not None:
+			return False
+		command = ["./EmptyEpsilon"]
+		command += ["proxy=%s:35666::35666:%s" % (host,name)]
+		cwd = "/root/EmptyEpsilon"
+		env = os.environ.copy()
+		GameServer._process = subprocess.Popen(command, cwd=cwd, env=env)
+		print(f"starting proxy({' '.join(command)})")
+		time.sleep(2.0)
+		if GameServer._process.poll() is not None:
+			GameServer._process = None
+			return False
+		return True
 	
 	def pause(self):
 		return self._lua("pauseGame()")
@@ -156,23 +178,30 @@ class GameClient:
 			return False
 		return GameClient._process.wait()
 
-	def startClient(self, addr="127.0.0.1", crewPos=14, ship=""):
+	def startClient(self, addr=None, crewPos=None, ship=None, starts_x=None):
 		if GameClient._process is not None:
 			return False
 		command = ["./EmptyEpsilon"]
-		command += ["autoconnect=%s" % (crewPos)]
-		command += ["autoconnect_address=%s" % (addr)]
+		cwd = "/root/EmptyEpsilon"
+		if crewPos:
+			command += ["autoconnect=%s" % (crewPos)]
+		if addr:
+			command += ["autoconnect_address=%s" % (addr)]
 		if ship:
 			command += ["autoconnect_ship=callsign:%s" % (ship)]
-		if _starts_x:
-			command = ["/usr/bin/startx"] + command + ["--", "-logfile", "/tmp/x.log"]
-		GameClient._process = subprocess.Popen(command, cwd="..")
-		print("starting client")
+		if starts_x:
+			GameClient._process = startx(command)
+		else:
+			GameClient._process = subprocess.Popen(command, cwd=cwd)
+		print(f"starting client ({' '.join(command)})")
 		time.sleep(2.0)
 		if GameClient._process.poll() is not None:
 			GameClient._process = None
 			return False
 		return True
+
+	def startObserverClient(self):
+		return self.startClient(addr="127.0.0.1", crewPos=14, ship="")
 	
 	def terminate(self):
 		if GameClient._process is None:

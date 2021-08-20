@@ -31,64 +31,13 @@
 --	"#228b22"		Forest green		"34,139,34"
 --	"#b22222"		Firebrick			"178,34,34"
 
+require("ee.lua")
 require("utils.lua")
+require("xansta_mods.lua")
 
 function init()
-	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
-	--Ship Template Name List
-	stnl = {"MT52 Hornet","MU52 Hornet","Adder MK5","Adder MK4","WX-Lindworm","Adder MK6","Phobos T3","Phobos M3","Piranha F8","Piranha F12","Ranus U","Nirvana R5A","Stalker Q7","Stalker R7","Atlantis X23","Starhammer II","Odin","Fighter","Cruiser","Missile Cruiser","Strikeship","Adv. Striker","Dreadnought","Battlestation","Blockade Runner","Ktlitan Fighter","Ktlitan Breaker","Ktlitan Worker","Ktlitan Drone","Ktlitan Feeder","Ktlitan Scout","Ktlitan Destroyer","Storm"}
-	--Ship Template Score List
-	stsl = {5            ,5            ,7          ,6          ,7            ,8          ,15         ,16         ,15          ,15           ,25       ,20           ,25          ,25          ,50            ,70             ,250   ,6        ,18       ,14               ,30          ,27            ,80           ,100            ,65               ,6                ,45               ,40              ,4              ,48              ,8              ,50                 ,22}
 	difficulty = 1
-	--Player Ship Beams
-	psb = {}
-	psb["MP52 Hornet"] = 2
-	psb["Phobos M3P"] = 2
-	psb["Flavia P.Falcon"] = 2
-	psb["Atlantis"] = 2
-	psb["Player Cruiser"] = 2
-	psb["Player Fighter"] = 2
-	psb["Striker"] = 2
-	psb["ZX-Lindworm"] = 1
-	psb["Ender"] = 12
-	psb["Benedict"] = 2
-	psb["Kiriya"] = 2
-	psb["Nautilus"] = 2
-	psb["Hathcock"] = 4
-	-- square grid deployment
-	fleetPosDelta1x = {0,1,0,-1, 0,1,-1, 1,-1,2,0,-2, 0,2,-2, 2,-2,2, 2,-2,-2,1,-1, 1,-1}
-	fleetPosDelta1y = {0,0,1, 0,-1,1,-1,-1, 1,0,2, 0,-2,2,-2,-2, 2,1,-1, 1,-1,2, 2,-2,-2}
-	-- rough hexagonal deployment
-	fleetPosDelta2x = {0,2,-2,1,-1, 1, 1,4,-4,0, 0,2,-2,-2, 2,3,-3, 3,-3,6,-6,1,-1, 1,-1,3,-3, 3,-3,4,-4, 4,-4,5,-5, 5,-5}
-	fleetPosDelta2y = {0,0, 0,1, 1,-1,-1,0, 0,2,-2,2,-2, 2,-2,1,-1,-1, 1,0, 0,3, 3,-3,-3,3,-3,-3, 3,2,-2,-2, 2,1,-1,-1, 1}
-	goodsList = {	{"food",0},
-					{"medicine",0},
-					{"nickel",0},
-					{"platinum",0},
-					{"gold",0},
-					{"dilithium",0},
-					{"tritanium",0},
-					{"luxury",0},
-					{"cobalt",0},
-					{"impulse",0},
-					{"warp",0},
-					{"shield",0},
-					{"tractor",0},
-					{"repulsor",0},
-					{"beam",0},
-					{"optic",0},
-					{"robotic",0},
-					{"filament",0},
-					{"transporter",0},
-					{"sensor",0},
-					{"communication",0},
-					{"autodoc",0},
-					{"lifter",0},
-					{"android",0},
-					{"nanites",0},
-					{"software",0},
-					{"circuit",0},
-					{"battery",0}	}
+	init_constants_xansta()
 	diagnostic = false
 	GMDiagnosticOn = "Turn On Diagnostic"
 	addGMFunction(GMDiagnosticOn,turnOnDiagnostic)
@@ -195,24 +144,6 @@ function init()
 					placeStahlstadt,		--11
 					placeTic}				--12
 	buildStations()
-	--Player ship name lists to supplant standard randomized call sign generation
-	playerShipNamesForMP52Hornet = {"Dragonfly","Scarab","Mantis","Yellow Jacket","Jimminy","Flik","Thorny","Buzz"}
-	playerShipNamesForPiranha = {"Razor","Biter","Ripper","Voracious","Carnivorous","Characid","Vulture","Predator"}
-	playerShipNamesForFlaviaPFalcon = {"Ladyhawke","Hunter","Seeker","Gyrefalcon","Kestrel","Magpie","Bandit","Buccaneer"}
-	playerShipNamesForPhobosM3P = {"Blinder","Shadow","Distortion","Diemos","Ganymede","Castillo","Thebe","Retrograde"}
-	playerShipNamesForAtlantis = {"Excaliber","Thrasher","Punisher","Vorpal","Protang","Drummond","Parchim","Coronado"}
-	playerShipNamesForCruiser = {"Excelsior","Velociraptor","Thunder","Kona","Encounter","Perth","Aspern","Panther"}
-	playerShipNamesForMissileCruiser = {"Projectus","Hurlmeister","Flinger","Ovod","Amatola","Nakhimov","Antigone"}
-	playerShipNamesForFighter = {"Buzzer","Flitter","Zippiticus","Hopper","Molt","Stinger","Stripe"}
-	playerShipNamesForBenedict = {"Elizabeth","Ford","Vikramaditya","Liaoning","Avenger","Naruebet","Washington","Lincoln","Garibaldi","Eisenhower"}
-	playerShipNamesForKiriya = {"Cavour","Reagan","Gaulle","Paulo","Truman","Stennis","Kuznetsov","Roosevelt","Vinson","Old Salt"}
-	playerShipNamesForStriker = {"Sparrow","Sizzle","Squawk","Crow","Phoenix","Snowbird","Hawk"}
-	playerShipNamesForLindworm = {"Seagull","Catapult","Blowhard","Flapper","Nixie","Pixie","Tinkerbell"}
-	playerShipNamesForRepulse = {"Fiddler","Brinks","Loomis","Mowag","Patria","Pandur","Terrex","Komatsu","Eitan"}
-	playerShipNamesForEnder = {"Mongo","Godzilla","Leviathan","Kraken","Jupiter","Saturn"}
-	playerShipNamesForNautilus = {"October", "Abdiel", "Manxman", "Newcon", "Nusret", "Pluton", "Amiral", "Amur", "Heinkel", "Dornier"}
-	playerShipNamesForHathcock = {"Hayha", "Waldron", "Plunkett", "Mawhinney", "Furlong", "Zaytsev", "Pavlichenko", "Pegahmagabow", "Fett", "Hawkeye", "Hanzo"}
-	playerShipNamesForLeftovers = {"Foregone","Righteous","Masher"}
 	highestConcurrentPlayerCount = 0
 	setConcurrentPlayerCount = 0
 	primaryOrders = ""
@@ -468,40 +399,6 @@ function moveAsteroids(delta)
 	end
 	if movingAsteroidCount < 1 then
 		setMovingAsteroids()
-	end
-end
--- Create amount of objects of type object_type along arc
--- Center defined by x and y
--- Radius defined by distance
--- Start of arc between 0 and 360 (startArc), end arc: endArcClockwise
--- Use randomize to vary the distance from the center point. Omit to keep distance constant
--- Example:
---   createRandomAlongArc(Asteroid, 100, 500, 3000, 65, 120, 450)
-function createRandomAlongArc(object_type, amount, x, y, distance, startArc, endArcClockwise, randomize)
-	if randomize == nil then randomize = 0 end
-	if amount == nil then amount = 1 end
-	arcLen = endArcClockwise - startArc
-	if startArc > endArcClockwise then
-		endArcClockwise = endArcClockwise + 360
-		arcLen = arcLen + 360
-	end
-	if amount > arcLen then
-		for ndex=1,arcLen do
-			radialPoint = startArc+ndex
-			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)			
-		end
-		for ndex=1,amount-arcLen do
-			radialPoint = random(startArc,endArcClockwise)
-			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)			
-		end
-	else
-		for ndex=1,amount do
-			radialPoint = random(startArc,endArcClockwise)
-			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
-		end
 	end
 end
 -- Organically (simulated asymetrically) grow stations from a central grid location
@@ -2454,7 +2351,7 @@ end
 function placeMaverick()
 	--Maverick
 	stationMaverick = SpaceStation():setTemplate(szt()):setFaction(stationFaction):setCommsScript(""):setCommsFunction(commsStation)
-	stationMaverick:setPosition(psx,psy):setCallSign("Maverick"):setDescription("Gambling and resupply")
+	stationMaverick:setPosition(psx,psy):setCallSign("Moverick"):setDescription("Gambling and resupply")
 	stationMaverick.publicRelations = true
 	stationMaverick.generalInformation = "Relax and meet some interesting players"
 	return stationMaverick
@@ -2847,7 +2744,7 @@ function commsStation()
     })
     comms_data = comms_target.comms_data
 	setPlayers()
-	for p3idx=1,8 do
+	for p3idx=1, MAX_PLAYER_SHIPS do
 		p3obj = getPlayerShip(p3idx)
 		if p3obj ~= nil and p3obj:isValid() then
 			if p3obj:isCommsOpening() then
@@ -3352,7 +3249,7 @@ function handleDockedState()
 				until(gi > #goods[player])
 				addCommsReply("Back", commsStation)
 			end)
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p == comms_target and player:isDocked(p) and p.cargo > 0 then
 					addCommsReply(string.format("Transfer cargo to %s",p:getCallSign()), function()
@@ -3837,7 +3734,7 @@ function handleUndockedState()
 			until(gi > #goods[player])
 			addCommsReply("Back", commsStation)
 		end)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p == comms_target and distance(p,player) < 1000 and p.cargo > 0 then
 				addCommsReply(string.format("Transfer cargo to %s",p:getCallSign()), function()
@@ -3947,7 +3844,7 @@ function commsShip()
 	end
 	comms_data = comms_target.comms_data
 	setPlayers()
-	for p4idx=1,8 do
+	for p4idx=1, MAX_PLAYER_SHIPS do
 		p4obj = getPlayerShip(p4idx)
 		if p4obj ~= nil and p4obj:isValid() then
 			if p4obj:isCommsOpening() then
@@ -4064,45 +3961,6 @@ function friendlyComms(comms_data)
 		end
 	end
 	return true
-end
-
-function enemyComms(comms_data)
-	if comms_data.friendlyness > 50 then
-		faction = comms_target:getFaction()
-		taunt_option = "We will see to your destruction!"
-		taunt_success_reply = "Your bloodline will end here!"
-		taunt_failed_reply = "Your feeble threats are meaningless."
-		if faction == "Kraylor" then
-			setCommsMessage("Ktzzzsss.\nYou will DIEEee weaklingsss!");
-		elseif faction == "Arlenians" then
-			setCommsMessage("We wish you no harm, but will harm you if we must.\nEnd of transmission.");
-		elseif faction == "Exuari" then
-			setCommsMessage("Stay out of our way, or your death will amuse us extremely!");
-		elseif faction == "Ghosts" then
-			setCommsMessage("One zero one.\nNo binary communication detected.\nSwitching to universal speech.\nGenerating appropriate response for target from human language archives.\n:Do not cross us:\nCommunication halted.");
-			taunt_option = "EXECUTE: SELFDESTRUCT"
-			taunt_success_reply = "Rogue command received. Targeting source."
-			taunt_failed_reply = "External command ignored."
-		elseif faction == "Ktlitans" then
-			setCommsMessage("The hive suffers no threats. Opposition to any of us is opposition to us all.\nStand down or prepare to donate your corpses toward our nutrition.");
-			taunt_option = "<Transmit 'The Itsy-Bitsy Spider' on all wavelengths>"
-			taunt_success_reply = "We do not need permission to pluck apart such an insignificant threat."
-			taunt_failed_reply = "The hive has greater priorities than exterminating pests."
-		else
-			setCommsMessage("Mind your own business!");
-		end
-		comms_data.friendlyness = comms_data.friendlyness - random(0, 10)
-		addCommsReply(taunt_option, function()
-			if random(0, 100) < 30 then
-				comms_target:orderAttack(player)
-				setCommsMessage(taunt_success_reply);
-			else
-				setCommsMessage(taunt_failed_reply);
-			end
-		end)
-		return true
-	end
-	return false
 end
 
 function freighterComms(comms_data)
@@ -4535,7 +4393,7 @@ function initialOrders(delta)
 	if initialOrderTimer < 0 then
 		if initialOrdersMsg == nil then
 			initialOrdersMsg = "sent"
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(string.format("The Ktlitans keep sending harassing ships. We've decrypted some of their communications - enough to identify their primary base by name if not by location. Find and destroy Ktlitan station %s. Respond to other requests from stations in the area if you wish, but your primary goal is do destroy %s. You're in control of our prototype carrier. As you know, it has minimal weapons and cannot dock with a station. It is in your best interest to protect it since it will significantly shorten the duration of your mission.",targetEnemyStation:getCallSign(),targetEnemyStation:getCallSign()),"Magenta")
@@ -4749,7 +4607,7 @@ function upgradeShipSpin(delta)
 				spinScientistStation = candidate
 			end
 		until(spinScientistStation ~= nil)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("Paulina Lindquist, a noted research engineer recently published her latest theories on engine design. We believe her theories have practical applications to our ship maneuvering systems. You may want to talk to her about putting her theories into practice on our naval vessels. She's currently stationed on %s in %s",spinScientistStation:getCallSign(),spinScientistStation:getSectorName()),"Magenta")
@@ -4765,7 +4623,7 @@ function spinScientist(delta)
 	validPlayers = 0
 	spinPlayers = 0
 	if spinUpgradeAvailable then
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				validPlayers = validPlayers + 1
@@ -4786,7 +4644,7 @@ function spinScientist(delta)
 					spinScientistStation = candidate
 				end
 			until(spinScientistStation ~= nil)
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(string.format("Paulina Lindquist, has been reassigned to station %s in %s",spinScientistStation:getCallSign(),spinScientistStation:getSectorName()),"Magenta")
@@ -4807,7 +4665,7 @@ function locateTargetEnemyBase(delta)
 			if candidate:isValid() then
 			end
 		until(friendlyClueStation ~= nil)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("Herbert Long believes he has a lead on some information about the enemy base that has been the source of the harassing ships. He's stationed on %s in %s",friendlyClueStation:getCallSign(),friendlyClueStation:getSectorName()),"Magenta")
@@ -4828,7 +4686,7 @@ function rescueDyingScientist(delta)
 	pickScientistStation()
 	pickDoctorStation()
 	placeHullArtifact()
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			p:addToShipLog(string.format("[%s in %s] Medical emergency: Engineering research scientist Terrence Forsythe has contracted a rare medical condition. After contacting nearly every station in the area, we found that doctor Geraldine Polaski on %s has the expertise and facilities to help. However, we don't have the necessary transport to get Terrence there in time - he has only a few minutes left to live. Can you take Terrence to %s?",scientistStation:getCallSign(),scientistStation:getSectorName(),doctorStation:getCallSign(),doctorStation:getCallSign()),"95,158,160")
@@ -4866,7 +4724,7 @@ function getSickScientist(delta)
 		scientistDies()
 	end
 	if scientistStation:isValid() then
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() and distance(p,scientistStation) < 1000 then
 				playerWithScientist = p
@@ -4886,7 +4744,7 @@ function getSickScientist(delta)
 			end
 		end
 		if pickupMsg ~= nil then
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() and p ~= playerWithScientist then
 					p:addToShipLog(string.format("Terrence Forsyth aboard %s",playerWithScientist:getCallSign()),"Magenta")
@@ -4894,7 +4752,7 @@ function getSickScientist(delta)
 			end
 		end
 	else
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("%s has been destroyed",scientistStation:getCallSign()),"Magenta")
@@ -4921,7 +4779,7 @@ function deliverSickScientist(delta)
 			betweenPlot2fleet()
 		end
 	else
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("%s has been destroyed",doctorStation:getCallSign()),"Magenta")
@@ -4937,7 +4795,7 @@ function keyToArtifact(delta)
 		if playerWithScientist:isValid() then
 			playerWithScientist:addToShipLog(keyMsg,"#8a2be2")
 		else
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(keyMsg,"#8a2be2")
@@ -4951,7 +4809,7 @@ function keyToArtifact(delta)
 end
 -- Semi-automated hull repair functions
 function recoverHullArtifact(delta)
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			tempPlayerType = p:getTypeName()
@@ -5007,7 +4865,7 @@ function repairHull()
 	end
 end
 function scientistDies()
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			p:addToShipLog("Terrence Forsythe has perished","Magenta")
@@ -5092,7 +4950,7 @@ function addTubeToShip(delta)
 		else
 			tubePart = "nanites"
 		end
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("Retired naval officer, Boris Eggleston has taken his expertise in miniaturization and come up with a way to add a missile tube to naval vessels. He's vacationing on %s in %s",addTubeStation:getCallSign(),addTubeStation:getSectorName()),"Magenta")
@@ -5108,7 +4966,7 @@ function tubeOfficer(delta)
 	if addTubeStation:isValid() then
 		validPlayers = 0
 		tubePlayers = 0
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				validPlayers = validPlayers + 1
@@ -5128,7 +4986,7 @@ function tubeOfficer(delta)
 				addTubeStation = candidate
 			end
 		until(addTubeStation ~= nil)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("Boris Eggleston changed his vacation spot to %s in %s",addTubeStation:getCallSign(),addTubeStation:getSectorName()),"Magenta")
@@ -5173,7 +5031,7 @@ function upgradeBeamDamage(delta)
 		else
 			beamPart2 = "robotic"
 		end
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("There's a physicist turned maintenance technician named Frederico Booker that has developed some innovative beam weapon technology that could increase the damage produced by our beam weapons. He's based on %s in %s",beamDamageStation:getCallSign(),beamDamageStation:getSectorName()),"Magenta")
@@ -5188,7 +5046,7 @@ function beamPhysicist(delta)
 	if beamDamageStation:isValid() then
 		validPlayers = 0
 		beamPlayers = 0
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() and p:getBeamWeaponRange(0) > 0 then
 				validPlayers = validPlayers + 1
@@ -5208,7 +5066,7 @@ function beamPhysicist(delta)
 				beamDamageStation = candidate
 			end
 		until(beamDamageStation ~= nil)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("Frederico Booker has moved to station %s in %s",beamDamageStation:getCallSign(),beamDamageStation:getSectorName()),"Magenta")
@@ -5236,7 +5094,7 @@ function tractorDisabledShip(delta)
 			strikeShipNames = {"Cropper","Dunner","Forthwith","Stellar","Trammel","Greeble"}
 			tractorShip = CpuShip():setTemplate("Strikeship"):setFaction("Human Navy"):setPosition(ppx+tpx,ppy+tpy):setScanned(true)
 			tractorShip:setSystemHealth("warp",-.5):setSystemHealth("jumpdrive",-.5):orderStandGround():setCallSign(strikeShipNames[math.random(1,#strikeShipNames)])
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(string.format("[%s] Help requested: Our engines are damaged beyond our ability to repair. We are located in %s",tractorShip:getCallSign(),tractorShip:getSectorName()),"#556b2f")
@@ -5414,7 +5272,7 @@ function awaitRepairs(delta)
 	repairDelayTimer = repairDelayTimer - delta
 	if repairDelayTimer < 0 then
 		tractorShip:setSystemHealth("warp",1):setSystemHealth("jumpdrive",1)
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("[%s] Our engines have been repaired and we stand ready to assist",tractorShip:getCallSign()),"#556b2f")
@@ -5478,7 +5336,7 @@ end
 -----------------------------------------------------------------]]--
 function setPlayers()
 	concurrentPlayerCount = 0
-	for p1idx=1,8 do
+	for p1idx=1, MAX_PLAYER_SHIPS do
 		pobj = getPlayerShip(p1idx)
 		if pobj ~= nil and pobj:isValid() then
 			concurrentPlayerCount = concurrentPlayerCount + 1
@@ -5489,181 +5347,33 @@ function setPlayers()
 				pobj:addReputationPoints(150-(difficulty*6))
 				pobj.initialRep = true
 			end
-			if not pobj.nameAssigned then
-				pobj.nameAssigned = true
-				tempPlayerType = pobj:getTypeName()
-				if tempPlayerType == "MP52 Hornet" then
-					if #playerShipNamesForMP52Hornet > 0 then
-						ni = math.random(1,#playerShipNamesForMP52Hornet)
-						pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
-						table.remove(playerShipNamesForMP52Hornet,ni)
-					end
-					pobj.shipScore = 6
-					pobj.maxCargo = 3
-				elseif tempPlayerType == "Piranha" then
-					if #playerShipNamesForPiranha > 0 then
-						ni = math.random(1,#playerShipNamesForPiranha)
-						pobj:setCallSign(playerShipNamesForPiranha[ni])
-						table.remove(playerShipNamesForPiranha,ni)
-					end
-					pobj.shipScore = 16
-					pobj.maxCargo = 8
-				elseif tempPlayerType == "Flavia P.Falcon" then
-					if #playerShipNamesForFlaviaPFalcon > 0 then
-						ni = math.random(1,#playerShipNamesForFlaviaPFalcon)
-						pobj:setCallSign(playerShipNamesForFlaviaPFalcon[ni])
-						table.remove(playerShipNamesForFlaviaPFalcon,ni)
-					end
-					pobj.shipScore = 13
-					pobj.maxCargo = 15
-				elseif tempPlayerType == "Phobos M3P" then
-					if #playerShipNamesForPhobosM3P > 0 then
-						ni = math.random(1,#playerShipNamesForPhobosM3P)
-						pobj:setCallSign(playerShipNamesForPhobosM3P[ni])
-						table.remove(playerShipNamesForPhobosM3P,ni)
-					end
-					pobj.shipScore = 19
-					pobj.maxCargo = 10
-				elseif tempPlayerType == "Atlantis" then
-					if #playerShipNamesForAtlantis > 0 then
-						ni = math.random(1,#playerShipNamesForAtlantis)
-						pobj:setCallSign(playerShipNamesForAtlantis[ni])
-						table.remove(playerShipNamesForAtlantis,ni)
-					end
-					pobj.shipScore = 52
-					pobj.maxCargo = 6
-				elseif tempPlayerType == "Player Cruiser" then
-					if #playerShipNamesForCruiser > 0 then
-						ni = math.random(1,#playerShipNamesForCruiser)
-						pobj:setCallSign(playerShipNamesForCruiser[ni])
-						table.remove(playerShipNamesForCruiser,ni)
-					end
-					pobj.shipScore = 40
-					pobj.maxCargo = 6
-				elseif tempPlayerType == "Player Missile Cr." then
-					if #playerShipNamesForMissileCruiser > 0 then
-						ni = math.random(1,#playerShipNamesForMissileCruiser)
-						pobj:setCallSign(playerShipNamesForMissileCruiser[ni])
-						table.remove(playerShipNamesForMissileCruiser,ni)
-					end
-					pobj.shipScore = 45
-					pobj.maxCargo = 8
-				elseif tempPlayerType == "Player Fighter" then
-					if #playerShipNamesForFighter > 0 then
-						ni = math.random(1,#playerShipNamesForFighter)
-						pobj:setCallSign(playerShipNamesForFighter[ni])
-						table.remove(playerShipNamesForFighter,ni)
-					end
-					pobj.shipScore = 7
-					pobj.maxCargo = 3
-				elseif tempPlayerType == "Benedict" then
-					if #playerShipNamesForBenedict > 0 then
-						ni = math.random(1,#playerShipNamesForBenedict)
-						pobj:setCallSign(playerShipNamesForBenedict[ni])
-						table.remove(playerShipNamesForBenedict,ni)
-					end
-					if diagnostic then
-						pobj.shipScore = 1
-					else
-						pobj.shipScore = 10
-					end
-					pobj.maxCargo = 9
-				elseif tempPlayerType == "Kiriya" then
-					if #playerShipNamesForKiriya > 0 then
-						ni = math.random(1,#playerShipNamesForKiriya)
-						pobj:setCallSign(playerShipNamesForKiriya[ni])
-						table.remove(playerShipNamesForKiriya,ni)
-					end
-					if diagnostic then
-						pobj.shipScore = 1
-					else
-						pobj.shipScore = 10
-					end
-					pobj.maxCargo = 9
-				elseif tempPlayerType == "Striker" then
-					if #playerShipNamesForStriker > 0 then
-						ni = math.random(1,#playerShipNamesForStriker)
-						pobj:setCallSign(playerShipNamesForStriker[ni])
-						table.remove(playerShipNamesForStriker,ni)
-					end
-					pobj.shipScore = 7
-					pobj.maxCargo = 4
-				elseif tempPlayerType == "ZX-Lindworm" then
-					if #playerShipNamesForLindworm > 0 then
-						ni = math.random(1,#playerShipNamesForLindworm)
-						pobj:setCallSign(playerShipNamesForLindworm[ni])
-						table.remove(playerShipNamesForLindworm,ni)
-					end
-					pobj.shipScore = 7
-					pobj.maxCargo = 3
-				elseif tempPlayerType == "Repulse" then
-					if #playerShipNamesForRepulse > 0 then
-						ni = math.random(1,#playerShipNamesForRepulse)
-						pobj:setCallSign(playerShipNamesForRepulse[ni])
-						table.remove(playerShipNamesForRepulse,ni)
-					end
-					pobj.shipScore = 14
-					pobj.maxCargo = 12
-				elseif tempPlayerType == "Ender" then
-					if #playerShipNamesForEnder > 0 then
-						ni = math.random(1,#playerShipNamesForEnder)
-						pobj:setCallSign(playerShipNamesForEnder[ni])
-						table.remove(playerShipNamesForEnder,ni)
-					end
-					pobj.shipScore = 100
-					pobj.maxCargo = 20
-				elseif tempPlayerType == "Nautilus" then
-					if #playerShipNamesForNautilus > 0 then
-						ni = math.random(1,#playerShipNamesForNautilus)
-						pobj:setCallSign(playerShipNamesForNautilus[ni])
-						table.remove(playerShipNamesForNautilus,ni)
-					end
-					pobj.shipScore = 12
-					pobj.maxCargo = 7
-				elseif tempPlayerType == "Hathcock" then
-					if #playerShipNamesForHathcock > 0 then
-						ni = math.random(1,#playerShipNamesForHathcock)
-						pobj:setCallSign(playerShipNamesForHathcock[ni])
-						table.remove(playerShipNamesForHathcock,ni)
-					end
-					pobj.shipScore = 30
-					pobj.maxCargo = 6
-				else
-					if #playerShipNamesForLeftovers > 0 then
-						ni = math.random(1,#playerShipNamesForLeftovers)
-						pobj:setCallSign(playerShipNamesForLeftovers[ni])
-						table.remove(playerShipNamesForLeftovers,ni)
-					end
-					pobj.shipScore = 24
-					pobj.maxCargo = 5
+			modify_player_ships(pobj)
+			if pobj.cargo == nil then
+				pobj.cargo = pobj.maxCargo
+				pobj.maxRepairCrew = pobj:getRepairCrewCount()
+				pobj.healthyShield = 1.0
+				pobj.prevShield = 1.0
+				pobj.healthyReactor = 1.0
+				pobj.prevReactor = 1.0
+				pobj.healthyManeuver = 1.0
+				pobj.prevManeuver = 1.0
+				pobj.healthyImpulse = 1.0
+				pobj.prevImpulse = 1.0
+				if psb[pobj:getTypeName()] ~= nil then
+					pobj.healthyBeam = 1.0
+					pobj.prevBeam = 1.0
 				end
-				if pobj.cargo == nil then
-					pobj.cargo = pobj.maxCargo
-					pobj.maxRepairCrew = pobj:getRepairCrewCount()
-					pobj.healthyShield = 1.0
-					pobj.prevShield = 1.0
-					pobj.healthyReactor = 1.0
-					pobj.prevReactor = 1.0
-					pobj.healthyManeuver = 1.0
-					pobj.prevManeuver = 1.0
-					pobj.healthyImpulse = 1.0
-					pobj.prevImpulse = 1.0
-					if psb[pobj:getTypeName()] ~= nil then
-						pobj.healthyBeam = 1.0
-						pobj.prevBeam = 1.0
-					end
-					if pobj:getWeaponTubeCount() > 0 then
-						pobj.healthyMissile = 1.0
-						pobj.prevMissile = 1.0
-					end
-					if pobj:hasWarpDrive() then
-						pobj.healthyWarp = 1.0
-						pobj.prevWarp = 1.0
-					end
-					if pobj:hasJumpDrive() then
-						pobj.healthyJump = 1.0
-						pobj.prevJump = 1.0
-					end
+				if pobj:getWeaponTubeCount() > 0 then
+					pobj.healthyMissile = 1.0
+					pobj.prevMissile = 1.0
+				end
+				if pobj:hasWarpDrive() then
+					pobj.healthyWarp = 1.0
+					pobj.prevWarp = 1.0
+				end
+				if pobj:hasJumpDrive() then
+					pobj.healthyJump = 1.0
+					pobj.prevJump = 1.0
 				end
 			end
 		end
@@ -5677,7 +5387,7 @@ function closestPlayerTo(obj)
 	if obj ~= nil and obj:isValid() then
 		local closestDistance = 9999999
 		closestPlayer = nil
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				local currentDistance = distance(p,obj)
@@ -5697,7 +5407,7 @@ function farthestPlayerFrom(obj)
 	if obj ~= nil and obj:isValid() then
 		local farthestDistance = 0
 		farthestPlayer = nil
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				local currentDistance = distance(p,obj)
@@ -5762,32 +5472,12 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction)
 		danger = 1
 	end
 	enemyStrength = math.max(danger * difficulty * playerPower(),5)
-	enemyPosition = 0
-	sp = irandom(300,500)			--random spacing of spawned group
-	deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	enemyList = {}
-	-- Reminder: stsl and stnl are ship template score and name list
-	while enemyStrength > 0 do
-		shipTemplateType = irandom(1,#stsl)
-		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
-			shipTemplateType = irandom(1,#stsl)
-		end		
-		ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
-		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 then
-			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		else
-			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
-		end
-		table.insert(enemyList, ship)
-		enemyStrength = enemyStrength - stsl[shipTemplateType]
-	end
-	return enemyList
+	return spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 end
 --evaluate the players for enemy strength and size spawning purposes
 function playerPower()
 	playerShipScore = 0
-	for p5idx=1,8 do
+	for p5idx=1, MAX_PLAYER_SHIPS do
 		p5obj = getPlayerShip(p5idx)
 		if p5obj ~= nil and p5obj:isValid() then
 			if p5obj.shipScore == nil then
@@ -5806,7 +5496,7 @@ function healthCheck(delta)
 	healthCheckTimer = healthCheckTimer - delta
 	if healthCheckTimer < 0 then
 		healthCheckCount = healthCheckCount + 1
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				if p:getRepairCrewCount() > 0 then
@@ -5960,7 +5650,7 @@ end
 
 function update(delta)
 	concurrentPlayerCount = 0
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			concurrentPlayerCount = concurrentPlayerCount + 1

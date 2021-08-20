@@ -1,35 +1,49 @@
 -- Name: Borderline Fever
 -- Description: War temperature rises along the border between Human Navy space and Kraylor space. The treaty holds for now, but the diplomats and intelligence operatives fear the Kraylors are about to break the treaty. We must maintain the treaty despite provocation until war is formally declared.
----
---- Version 5
 -- Type: Replayable Mission
 -- Variation[Easy]: Easy goals and/or enemies
 -- Variation[Hard]: Hard goals and/or enemies
+-- Variation[Quixotic]: Practically insurmountable goals and/or enemies
 -- Variation[Timed]: Victory if some human navy stations and player ships survive for 30 minutes
 -- Variation[Timed Easy]: Victory if some human navy stations and player ships survive for 30 minutes, Easy goals and/or enemies
 -- Variation[Timed Hard]: Victory if some human navy stations and player ships survive for 30 minutes, Hard goals and/or enemies
+-- Variation[Timed Quixotic]: Victory if some human navy stations and player ships survive for 30 minutes, Practically insurmountable goals and/or enemies
 
 -- to do items:
 -- Station warning of enemies in area (helpful warnings - shuffle stations)
 
 require("utils.lua")
+require("xansta_mods.lua")
 
 --------------------
 -- Initialization --
 --------------------
 function init()
 	popupGMDebug = "once"
+	scenario_version = "5.1.3"
+	print(string.format("     -----     Scenario: Borderline Fever     -----     Version %s     -----",scenario_version))
 	print(_VERSION)
+	game_state = "paused"
+--	stored_fixed_names = {	--change table name to predefined_player_ships to default to fixed names
+--		{name = "Phoenix",		control_code = "BURN265"},
+--		{name = "Callisto",		control_code = "MOON558"},
+--		{name = "Charybdis",	control_code = "JACKPOT777"},
+--		{name = "Sentinel",		control_code = "FERENGI432"},
+--		{name = "Omnivore",		control_code = "EQUILATERAL180"},
+--		{name = "Tarquin",		control_code = "TIME909"},
+--	}
 	-- Make the createPlayerShip... functions accessible from other scripts (including exec.lua)
 	local scenario = {}
-	scenario.createPlayerShipBlazon = createPlayerShipBlazon
-	scenario.createPlayerShipHeadhunter = createPlayerShipHeadhunter
-	scenario.createPlayerShipNarsil = createPlayerShipNarsil
-	scenario.createPlayerShipSimian = createPlayerShipSimian
-	scenario.createPlayerShipSpinstar = createPlayerShipSpinstar
-	scenario.createPlayerShipSpyder = createPlayerShipSpyder
-	scenario.createPlayerShipSting = createPlayerShipSting
-	print([[Usage: curl --data "getScriptStorage().scenario.createPlayerShipSting()" http://localhost:8080/exec.lua]])
+--	scenario.createPlayerShipBlazon = createPlayerShipBlazon
+--	scenario.createPlayerShipHeadhunter = createPlayerShipHeadhunter
+--	scenario.createPlayerShipNarsil = createPlayerShipNarsil
+--	scenario.createPlayerShipSimian = createPlayerShipSimian
+--	scenario.createPlayerShipSpinstar = createPlayerShipSpinstar
+--	scenario.createPlayerShipSpyder = createPlayerShipSpyder
+--	scenario.createPlayerShipSting = createPlayerShipSting
+	scenario.gatherStats = gatherStats
+	print("Example of calling a function via http API, assuming you start EE with parameter httpserver=8080 (or it's in options.ini):")
+	print('curl --data "getScriptStorage().scenario.createPlayerShipSting()" http://localhost:8080/exec.lua')
 	local storage = getScriptStorage()
 	storage.scenario = scenario
 	-- starryUtil v2
@@ -103,7 +117,13 @@ function init()
 	--random range 4 final: 240, 540 (lowered for test) treaty for game with no time limit
 	lrr5 = 240
 	urr5 = 540
-	
+
+	-- piglits border check - do not lose, just make player criminal
+	factions_forbidden_in_neutral_zone = {"Human Navy", "Black Ops"}
+	factions_forbidden_in_enemy_zone = {"Human Navy", "Blue Star Cartell", "Mining Corporation"}
+	faction_transporter_neutral = "Transport"
+	faction_transporter_friendly= "Blue Star Cartell"
+
 	--end of game victory/defeat values
 	enemyDestructionVictoryCondition = 70		--final: 70
 	friendlyDestructionDefeatCondition = 50		--final: 50
@@ -120,7 +140,7 @@ function init()
 	setVariations()
 	initDiagnostic = false
 	diagnostic = false
-	muckDiagnostic = false
+	mf_diagnostic = false
 	stationCommsDiagnostic = false
 	shipCommsDiagnostic = false
 	optionalMissionDiagnostic = false
@@ -128,11 +148,13 @@ function init()
 	plot3diagnostic = false
 	plot1Diagnostic = false
 	updateDiagnostic = false
+	station_warning_diagnostic = false
 	healthDiagnostic = false
 	plot2diagnostic = false
 	endStatDiagnostic = false
 	printDetailedStats = true
 	change_enemy_order_diagnostic = false
+	distance_diagnostic = false
 	setConstants()	--missle type names, template names and scores, deployment directions, player ship names, etc.
 	repeat
 		setGossipSnippets()
@@ -165,6 +187,7 @@ function init()
 	plot1 = treatyHolds				--start main plot with the treaty in place
 	treaty = true
 	initialAssetsEvaluated = false
+	plotSW = stationWarning
 	plotC = autoCoolant				--enable buttons for turning on and off automated cooling
 	plotCI = cargoInventory			--manage button on relay/operations to show cargo inventory
 	plotH = healthCheck				--Damage to ship can kill repair crew members
@@ -189,7 +212,7 @@ function init()
 	friendlyTransportList = {}
 	friendlyTransportSpawnDelay = 20
 	plotEW = endWar
-	endWarTimerInterval = 9
+	endWarTimerInterval = 3
 	endWarTimer = endWarTimerInterval
 	plotDGM = dynamicGameMasterButtons
 	plotPA = personalAmbush
@@ -219,6 +242,26 @@ function init()
 	optionalOrders = ""
 	mainGMButtons()
 end
+function setDifficulty(newDiff)
+	difficulty = newDiff
+	if difficulty == 1 then
+		adverseEffect = .995
+		coolant_loss = .99995
+		coolant_gain = .001
+		ersAdj = 0
+	elseif difficulty < 1 then
+		adverseEffect = .999
+		coolant_loss = .99999
+		coolant_gain = .01
+		ersAdj = 10
+	else
+		adverseEffect = .99 - difficulty*.01
+		coolant_loss = .9999 - difficulty*.0001
+		coolant_gain = .0001 
+		ersAdj = -1 - 2*difficulty
+	end
+	print("Difficulty: " .. string(difficulty))
+end
 function setVariations()
 	if string.find(getScenarioVariation(),"Easy") then
 		difficulty = .5
@@ -238,6 +281,15 @@ function setVariations()
 		enemyDestructionVictoryCondition = enemyDestructionVictoryCondition*.9
 		friendlyDestructionDefeatCondition = friendlyDestructionDefeatCondition*1.1
 		destructionDifferenceEndCondition = destructionDifferenceEndCondition*.9
+	elseif string.find(getScenarioVariation(),"Quixotic") then
+		difficulty = 5
+		adverseEffect = .9
+		coolant_loss = .999
+		coolant_gain = .0001
+		ersAdj = -10
+		enemyDestructionVictoryCondition = enemyDestructionVictoryCondition*.8
+		friendlyDestructionDefeatCondition = friendlyDestructionDefeatCondition*1.2
+		destructionDifferenceEndCondition = destructionDifferenceEndCondition*.8
 	else
 		difficulty = 1		--default (normal)
 		adverseEffect = .995
@@ -255,70 +307,10 @@ function setVariations()
 	end
 end
 function setConstants()
-	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
+	init_constants_xansta()
+	system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
 	pool_selectivity = "full"
 	template_pool_size = 5
-	ship_template = {	--ordered by relative strength
-		["Gnat"] =				{strength = 2,		create = gnat},
-		["Lite Drone"] =		{strength = 3,		create = droneLite},
-		["Jacket Drone"] =		{strength = 4,		create = droneJacket},
-		["Ktlitan Drone"] =		{strength = 4,		create = stockTemplate},
-		["Heavy Drone"] =		{strength = 5,		create = droneHeavy},
-		["MT52 Hornet"] =		{strength = 5,		create = stockTemplate},
-		["MU52 Hornet"] =		{strength = 5,		create = stockTemplate},
-		["MV52 Hornet"] =		{strength = 6,		create = hornetMV52},
-		["Adder MK4"] =			{strength = 6,		create = stockTemplate},
-		["Fighter"] =			{strength = 6,		create = stockTemplate},
-		["Ktlitan Fighter"] =	{strength = 6,		create = stockTemplate},
-		["K2 Fighter"] =		{strength = 7,		create = k2fighter},
-		["Adder MK5"] =			{strength = 7,		create = stockTemplate},
-		["WX-Lindworm"] =		{strength = 7,		create = stockTemplate},
-		["K3 Fighter"] =		{strength = 8,		create = k3fighter},
-		["Adder MK6"] =			{strength = 8,		create = stockTemplate},
-		["Ktlitan Scout"] =		{strength = 8,		create = stockTemplate},
-		["WZ-Lindworm"] =		{strength = 9,		create = wzLindworm},
-		["Phobos R2"] =			{strength = 13,		create = phobosR2},
-		["Missile Cruiser"] =	{strength = 14,		create = stockTemplate},
-		["Waddle 5"] =			{strength = 15,		create = waddle5},
-		["Jade 5"] =			{strength = 15,		create = jade5},
-		["Phobos T3"] =			{strength = 15,		create = stockTemplate},
-		["Piranha F8"] =		{strength = 15,		create = stockTemplate},
-		["Piranha F12"] =		{strength = 15,		create = stockTemplate},
-		["Piranha F12.M"] =		{strength = 16,		create = stockTemplate},
-		["Phobos M3"] =			{strength = 16,		create = stockTemplate},
-		["Karnack"] =			{strength = 17,		create = stockTemplate},
-		["Gunship"] =			{strength = 17,		create = stockTemplate},
-		["Cruiser"] =			{strength = 18,		create = stockTemplate},
-		["Nirvana R5"] =		{strength = 19,		create = stockTemplate},
-		["Nirvana R5A"] =		{strength = 20,		create = stockTemplate},
-		["Adv. Gunship"] =		{strength = 20,		create = stockTemplate},
-		["Ktlitan Worker"] =	{strength = 21,		create = stockTemplate},
-		["Storm"] =				{strength = 22,		create = stockTemplate},
-		["Ranus U"] =			{strength = 25,		create = stockTemplate},
-		["Stalker Q7"] =		{strength = 25,		create = stockTemplate},
-		["Stalker R7"] =		{strength = 25,		create = stockTemplate},
-		["Adv. Striker"] =		{strength = 27,		create = stockTemplate},
-		["Tempest"] =			{strength = 30,		create = tempest},
-		["Strikeship"] =		{strength = 30,		create = stockTemplate},
-		["Cucaracha"] =			{strength = 36,		create = cucaracha},
-		["Predator"] =			{strength = 42,		create = predator},
-		["Ktlitan Breaker"] =	{strength = 45,		create = stockTemplate},
-		["Hurricane"] =			{strength = 46,		create = hurricane},
-		["Ktlitan Feeder"] =	{strength = 48,		create = stockTemplate},
-		["Atlantis X23"] =		{strength = 50,		create = stockTemplate},
-		["K2 Breaker"] =		{strength = 55,		create = k2breaker},
-		["Ktlitan Destroyer"] =	{strength = 50,		create = stockTemplate},
-		["Atlantis Y42"] =		{strength = 60,		create = atlantisY42},
-		["Blockade Runner"] =	{strength = 65,		create = stockTemplate},
-		["Starhammer II"] =		{strength = 70,		create = stockTemplate},
-		["Enforcer"] =			{strength = 75,		create = enforcer},
-		["Dreadnought"] =		{strength = 80,		create = stockTemplate},
-		["Starhammer III"] =	{strength = 85,		create = starhammerIII},
-		["Starhammer V"] =		{strength = 90,		create = starhammerV},
-		["Battlestation"] =		{strength = 100,	create = stockTemplate},
-		["Tyr"] =				{strength = 150,	create = tyr},
-		["Odin"] =				{strength = 250,	create = stockTemplate},
-	}
 	formation_delta = {
 		["square"] = {
 			x = {0,1,0,-1, 0,1,-1, 1,-1,2,0,-2, 0,2,-2, 2,-2,2, 2,-2,-2,1,-1, 1,-1,0, 0,3,-3,1, 1,3,-3,-1,-1, 3,-3,2, 2,3,-3,-2,-2, 3,-3,3, 3,-3,-3,4,0,-4, 0,4,-4, 4,-4,-4,-4,-4,-4,-4,-4,4, 4,4, 4,4, 4, 1,-1, 2,-2, 3,-3,1,-1,2,-2,3,-3,5,-5,0, 0,5, 5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,5, 5,5, 5,5, 5,5, 5, 1,-1, 2,-2, 3,-3, 4,-4,1,-1,2,-2,3,-3,4,-4},
@@ -482,167 +474,72 @@ function setConstants()
 		},
 	}		
 	max_pyramid_tier = 15	
-	playerShipStats = {	["MP52 Hornet"] 		= { strength = 7, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false	},
-						["Piranha"]				= { strength = 16,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Flavia P.Falcon"]		= { strength = 13,	cargo = 15,	distance = 200,	long_range_radar = 40000, short_range_radar = 5000, tractor = true,		mining = true	},
-						["Phobos M3P"]			= { strength = 19,	cargo = 10,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = true,		mining = false	},
-						["Atlantis"]			= { strength = 52,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true	},
-						["Player Cruiser"]		= { strength = 40,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["Player Missile Cr."]	= { strength = 45,	cargo = 8,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Player Fighter"]		= { strength = 7,	cargo = 3,	distance = 100,	long_range_radar = 15000, short_range_radar = 4500, tractor = false,	mining = false	},
-						["Benedict"]			= { strength = 10,	cargo = 9,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true	},
-						["Kiriya"]				= { strength = 10,	cargo = 9,	distance = 400,	long_range_radar = 35000, short_range_radar = 5000, tractor = true,		mining = true	},
-						["Striker"]				= { strength = 8,	cargo = 4,	distance = 200,	long_range_radar = 35000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["ZX-Lindworm"]			= { strength = 8,	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 5500, tractor = false,	mining = false	},
-						["Repulse"]				= { strength = 14,	cargo = 12,	distance = 200,	long_range_radar = 38000, short_range_radar = 5000, tractor = true,		mining = false	},
-						["Ender"]				= { strength = 100,	cargo = 20,	distance = 2000,long_range_radar = 45000, short_range_radar = 7000, tractor = true,		mining = false	},
-						["Nautilus"]			= { strength = 12,	cargo = 7,	distance = 200,	long_range_radar = 22000, short_range_radar = 4000, tractor = false,	mining = false	},
-						["Hathcock"]			= { strength = 30,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = true	},
-						["Maverick"]			= { strength = 45,	cargo = 5,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = true	},
-						["Crucible"]			= { strength = 45,	cargo = 5,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Proto-Atlantis"]		= { strength = 40,	cargo = 4,	distance = 400,	long_range_radar = 30000, short_range_radar = 4500, tractor = false,	mining = true	},
-						["Stricken"]			= { strength = 40,	cargo = 4,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = false	},
-						["Surkov"]				= { strength = 35,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Redhook"]				= { strength = 11,	cargo = 8,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Pacu"]				= { strength = 18,	cargo = 7,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Phobos T2"]			= { strength = 19,	cargo = 9,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = true,		mining = false	},
-						["Wombat"]				= { strength = 13,	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 6000, tractor = false,	mining = false	},
-						["Holmes"]				= { strength = 35,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 4000, tractor = true,		mining = false	},
-						["Focus"]				= { strength = 35,	cargo = 4,	distance = 200,	long_range_radar = 32000, short_range_radar = 5000, tractor = false,	mining = true	},
-						["Flavia 2C"]			= { strength = 25,	cargo = 12,	distance = 200,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = true	},
-						["Destroyer IV"]		= { strength = 25,	cargo = 5,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["Destroyer III"]		= { strength = 25,	cargo = 7,	distance = 200,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["MX-Lindworm"]			= { strength = 10,	cargo = 3,	distance = 100,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["Striker LX"]			= { strength = 16,	cargo = 4,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = false	},
-						["Maverick XP"]			= { strength = 23,	cargo = 5,	distance = 200,	long_range_radar = 25000, short_range_radar = 7000, tractor = true,		mining = false	},
-						["Era"]					= { strength = 14,	cargo = 14,	distance = 200,	long_range_radar = 50000, short_range_radar = 5000, tractor = true,		mining = true	},
-						["Squid"]				= { strength = 14,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = false,	mining = false	},
-						["Atlantis II"]			= { strength = 60,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true	},
+	playerShipStats = {	["Adder MK7"] 			= { strength = 8, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
+						["MP52 Hornet"] 		= { strength = 7, 	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
+						["Piranha M5P"]				= { strength = 16,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+						["Flavia P.Falcon"]		= { strength = 13,	cargo = 15,	distance = 200,	long_range_radar = 40000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 250, cm_strafe = 150,	},
+						["Phobos M3P"]			= { strength = 19,	cargo = 10,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = true,		mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Atlantis"]			= { strength = 52,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Player Cruiser"]		= { strength = 40,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Player Missile Cr."]	= { strength = 45,	cargo = 8,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 450, cm_strafe = 150,	},
+						["Player Fighter"]		= { strength = 7,	cargo = 3,	distance = 100,	long_range_radar = 15000, short_range_radar = 4500, tractor = false,	mining = false,	cm_boost = 600, cm_strafe = 0,	},
+						["Benedict"]			= { strength = 10,	cargo = 9,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Kiriya"]				= { strength = 10,	cargo = 9,	distance = 400,	long_range_radar = 35000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Striker"]				= { strength = 8,	cargo = 4,	distance = 200,	long_range_radar = 35000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["ZX-Lindworm"]			= { strength = 8,	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 5500, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Repulse"]				= { strength = 14,	cargo = 12,	distance = 200,	long_range_radar = 38000, short_range_radar = 5000, tractor = true,		mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Ender"]				= { strength = 100,	cargo = 20,	distance = 2000,long_range_radar = 45000, short_range_radar = 7000, tractor = true,		mining = false,	cm_boost = 800, cm_strafe = 500,	},
+						["Nautilus"]			= { strength = 12,	cargo = 7,	distance = 200,	long_range_radar = 22000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Hathcock"]			= { strength = 30,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = true,	cm_boost = 200, cm_strafe = 150,	},
+						["Maverick"]			= { strength = 45,	cargo = 5,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Crucible"]			= { strength = 45,	cargo = 5,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Proto-Atlantis"]		= { strength = 40,	cargo = 4,	distance = 400,	long_range_radar = 30000, short_range_radar = 4500, tractor = false,	mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Stricken"]			= { strength = 40,	cargo = 4,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Surkov"]				= { strength = 35,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+						["Redhook"]				= { strength = 11,	cargo = 8,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+						["Pacu"]				= { strength = 18,	cargo = 7,	distance = 200,	long_range_radar = 20000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+						["Phobos T2"]			= { strength = 19,	cargo = 9,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = true,		mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Wombat"]				= { strength = 13,	cargo = 3,	distance = 100,	long_range_radar = 18000, short_range_radar = 6000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Holmes"]				= { strength = 35,	cargo = 6,	distance = 200,	long_range_radar = 35000, short_range_radar = 4000, tractor = true,		mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Focus"]				= { strength = 35,	cargo = 4,	distance = 200,	long_range_radar = 32000, short_range_radar = 5000, tractor = false,	mining = true,	cm_boost = 400, cm_strafe = 250,	},
+						["Flavia 2C"]			= { strength = 25,	cargo = 12,	distance = 200,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = true,	cm_boost = 250, cm_strafe = 150,	},
+						["Destroyer IV"]		= { strength = 25,	cargo = 5,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Destroyer III"]		= { strength = 25,	cargo = 7,	distance = 200,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 450, cm_strafe = 150,	},
+						["MX-Lindworm"]			= { strength = 10,	cargo = 3,	distance = 100,	long_range_radar = 30000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Striker LX"]			= { strength = 16,	cargo = 4,	distance = 200,	long_range_radar = 20000, short_range_radar = 4000, tractor = false,	mining = false,	cm_boost = 250, cm_strafe = 150,	},
+						["Maverick XP"]			= { strength = 23,	cargo = 5,	distance = 200,	long_range_radar = 25000, short_range_radar = 7000, tractor = true,		mining = false,	cm_boost = 400, cm_strafe = 250,	},
+						["Era"]					= { strength = 14,	cargo = 14,	distance = 200,	long_range_radar = 50000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 250, cm_strafe = 150,	},
+						["Squid"]				= { strength = 14,	cargo = 8,	distance = 200,	long_range_radar = 25000, short_range_radar = 5000, tractor = false,	mining = false,	cm_boost = 200, cm_strafe = 150,	},
+						["Atlantis II"]			= { strength = 60,	cargo = 6,	distance = 400,	long_range_radar = 30000, short_range_radar = 5000, tractor = true,		mining = true,	cm_boost = 400, cm_strafe = 250,	},
 					}	
 	--Player ship name lists to supplant standard randomized call sign generation
 	playerShipNamesFor = {}
 	-- TODO switch to spelling with space or dash matching the type name
-	playerShipNamesFor["MP52Hornet"] = {"Dragonfly","Scarab","Mantis","Yellow Jacket","Jimminy","Flik","Thorny","Buzz"}
+	playerShipNamesFor["MP52 Hornet"] = {"Dragonfly","Scarab","Mantis","Yellow Jacket","Jimminy","Flik","Thorny","Buzz"}
 	playerShipNamesFor["Piranha"] = {"Razor","Biter","Ripper","Voracious","Carnivorous","Characid","Vulture","Predator"}
-	playerShipNamesFor["FlaviaPFalcon"] = {"Ladyhawke","Hunter","Seeker","Gyrefalcon","Kestrel","Magpie","Bandit","Buccaneer"}
-	playerShipNamesFor["PhobosM3P"] = {"Blinder","Shadow","Distortion","Diemos","Ganymede","Castillo","Thebe","Retrograde"}
+	playerShipNamesFor["Flavia P.Falcon"] = {"Ladyhawke","Hunter","Seeker","Gyrefalcon","Kestrel","Magpie","Bandit","Buccaneer"}
+	playerShipNamesFor["Phobos M3P"] = {"Blinder","Shadow","Distortion","Diemos","Ganymede","Castillo","Thebe","Retrograde"}
 	playerShipNamesFor["Atlantis"] = {"Excaliber","Thrasher","Punisher","Vorpal","Protang","Drummond","Parchim","Coronado"}
-	playerShipNamesFor["Cruiser"] = {"Excelsior","Velociraptor","Thunder","Kona","Encounter","Perth","Aspern","Panther"}
-	playerShipNamesFor["MissileCruiser"] = {"Projectus","Hurlmeister","Flinger","Ovod","Amatola","Nakhimov","Antigone"}
-	playerShipNamesFor["Fighter"] = {"Buzzer","Flitter","Zippiticus","Hopper","Molt","Stinger","Stripe"}
+	playerShipNamesFor["Player Cruiser"] = {"Excelsior","Velociraptor","Thunder","Kona","Encounter","Perth","Aspern","Panther"}
+	playerShipNamesFor["Player Missile Cr."] = {"Projectus","Hurlmeister","Flinger","Ovod","Amatola","Nakhimov","Antigone"}
+	playerShipNamesFor["Player Fighter"] = {"Buzzer","Flitter","Zippiticus","Hopper","Molt","Stinger","Stripe"}
 	playerShipNamesFor["Benedict"] = {"Elizabeth","Ford","Vikramaditya","Liaoning","Avenger","Naruebet","Washington","Lincoln","Garibaldi","Eisenhower"}
 	playerShipNamesFor["Kiriya"] = {"Cavour","Reagan","Gaulle","Paulo","Truman","Stennis","Kuznetsov","Roosevelt","Vinson","Old Salt"}
 	playerShipNamesFor["Striker"] = {"Sparrow","Sizzle","Squawk","Crow","Phoenix","Snowbird","Hawk"}
-	playerShipNamesFor["Lindworm"] = {"Seagull","Catapult","Blowhard","Flapper","Nixie","Pixie","Tinkerbell"}
+	playerShipNamesFor["ZX-Lindworm"] = {"Seagull","Catapult","Blowhard","Flapper","Nixie","Pixie","Tinkerbell"}
 	playerShipNamesFor["Repulse"] = {"Fiddler","Brinks","Loomis","Mowag","Patria","Pandur","Terrex","Komatsu","Eitan"}
 	playerShipNamesFor["Ender"] = {"Mongo","Godzilla","Leviathan","Kraken","Jupiter","Saturn"}
 	playerShipNamesFor["Nautilus"] = {"October", "Abdiel", "Manxman", "Newcon", "Nusret", "Pluton", "Amiral", "Amur", "Heinkel", "Dornier"}
 	playerShipNamesFor["Hathcock"] = {"Hayha", "Waldron", "Plunkett", "Mawhinney", "Furlong", "Zaytsev", "Pavlichenko", "Pegahmagabow", "Fett", "Hawkeye", "Hanzo"}
-	playerShipNamesFor["ProtoAtlantis"] = {"Narsil", "Blade", "Decapitator", "Trisect", "Sabre"}
+	playerShipNamesFor["Proto-Atlantis"] = {"Narsil", "Blade", "Decapitator", "Trisect", "Sabre"}
 	playerShipNamesFor["Maverick"] = {"Angel", "Thunderbird", "Roaster", "Magnifier", "Hedge"}
 	playerShipNamesFor["Crucible"] = {"Sling", "Stark", "Torrid", "Kicker", "Flummox"}
 	playerShipNamesFor["Surkov"] = {"Sting", "Sneak", "Bingo", "Thrill", "Vivisect"}
 	playerShipNamesFor["Stricken"] = {"Blazon", "Streaker", "Pinto", "Spear", "Javelin"}
-	playerShipNamesFor["AtlantisII"] = {"Spyder", "Shelob", "Tarantula", "Aragog", "Charlotte"}
+	playerShipNamesFor["Atlantis II"] = {"Spyder", "Shelob", "Tarantula", "Aragog", "Charlotte"}
 	playerShipNamesFor["Redhook"] = {"Headhunter", "Thud", "Troll", "Scalper", "Shark"}
-	playerShipNamesFor["DestroyerIII"] = {"Trebuchet", "Pitcher", "Mutant", "Gronk", "Methuselah"}
+	playerShipNamesFor["Destroyer III"] = {"Trebuchet", "Pitcher", "Mutant", "Gronk", "Methuselah"}
 	playerShipNamesFor["Leftovers"] = {"Foregone","Righteous","Masher"}
-	commonGoods = {"food","medicine","nickel","platinum","gold","dilithium","tritanium","luxury","cobalt","impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
-	componentGoods = {"impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
-	mineralGoods = {"nickel","platinum","gold","dilithium","tritanium","cobalt"}
-	characterNames = {"Frank Brown",
-					  "Joyce Miller",
-					  "Harry Jones",
-					  "Emma Davis",
-					  "Zhang Wei Chen",
-					  "Yu Yan Li",
-					  "Li Wei Wang",
-					  "Li Na Zhao",
-					  "Sai Laghari",
-					  "Anaya Khatri",
-					  "Vihaan Reddy",
-					  "Trisha Varma",
-					  "Henry Gunawan",
-					  "Putri Febrian",
-					  "Stanley Hartono",
-					  "Citra Mulyadi",
-					  "Bashir Pitafi",
-					  "Hania Kohli",
-					  "Gohar Lehri",
-					  "Sohelia Lau",
-					  "Gabriel Santos",
-					  "Ana Melo",
-					  "Lucas Barbosa",
-					  "Juliana Rocha",
-					  "Habib Oni",
-					  "Chinara Adebayo",
-					  "Tanimu Ali",
-					  "Naija Bello",
-					  "Shamim Khan",
-					  "Barsha Tripura",
-					  "Sumon Das",
-					  "Farah Munsi",
-					  "Denis Popov",
-					  "Pasha Sokolov",
-					  "Burian Ivanov",
-					  "Radka Vasiliev",
-					  "Jose Hernandez",
-					  "Victoria Garcia",
-					  "Miguel Lopez",
-					  "Renata Rodriguez"}
-	hitZonePermutations = {
-		{"warp","beamweapons","reactor"},
-		{"jumpdrive","beamweapons","reactor"},
-		{"impulse","beamweapons","reactor"},
-		{"warp","missilesystem","reactor"},
-		{"jumpdrive","missilesystem","reactor"},
-		{"impulse","missilesystem","reactor"},
-		{"warp","beamweapons","maneuver"},
-		{"jumpdrive","beamweapons","maneuver"},
-		{"impulse","beamweapons","maneuver"},
-		{"warp","missilesystem","maneuver"},
-		{"jumpdrive","missilesystem","maneuver"},
-		{"impulse","missilesystem","maneuver"},
-		{"warp","beamweapons","frontshield"},
-		{"jumpdrive","beamweapons","frontshield"},
-		{"impulse","beamweapons","frontshield"},
-		{"warp","missilesystem","frontshield"},
-		{"jumpdrive","missilesystem","frontshield"},
-		{"impulse","missilesystem","frontshield"},
-		{"warp","beamweapons","rearshield"},
-		{"jumpdrive","beamweapons","rearshield"},
-		{"impulse","beamweapons","rearshield"},
-		{"warp","missilesystem","rearshield"},
-		{"jumpdrive","missilesystem","rearshield"},
-		{"impulse","missilesystem","rearshield"},
-		{"warp","reactor","maneuver"},
-		{"jumpdrive","reactor","maneuver"},
-		{"impulse","reactor","maneuver"},
-		{"warp","reactor","frontshield"},
-		{"jumpdrive","reactor","frontshield"},
-		{"impulse","reactor","frontshield"},
-		{"warp","reactor","rearshield"},
-		{"jumpdrive","reactor","rearshield"},
-		{"impulse","reactor","rearshield"},
-		{"warp","maneuver","frontshield"},
-		{"jumpdrive","maneuver","frontshield"},
-		{"impulse","maneuver","frontshield"},
-		{"warp","maneuver","rearshield"},
-		{"jumpdrive","maneuver","rearshield"},
-		{"impulse","maneuver","rearshield"},
-		{"beamweapons","beamweapons","maneuver"},
-		{"missilesystem","beamweapons","maneuver"},
-		{"beamweapons","beamweapons","frontshield"},
-		{"missilesystem","beamweapons","frontshield"},
-		{"beamweapons","beamweapons","rearshield"},
-		{"missilesystem","beamweapons","rearshield"},
-		{"beamweapons","maneuver","frontshield"},
-		{"missilesystem","maneuver","frontshield"},
-		{"beamweapons","maneuver","rearshield"},
-		{"missilesystem","maneuver","rearshield"},
-		{"reactor","maneuver","frontshield"},
-		{"reactor","maneuver","rearshield"}
-	}
 	--minutes and danger
 	enemyReinforcementSchedule = {
 		{30, 1},
@@ -653,24 +550,6 @@ function setConstants()
 		{15, 3},
 		{20, 4}
 	}
-	cargoInventoryList = {}
-	table.insert(cargoInventoryList,cargoInventory1)
-	table.insert(cargoInventoryList,cargoInventory2)
-	table.insert(cargoInventoryList,cargoInventory3)
-	table.insert(cargoInventoryList,cargoInventory4)
-	table.insert(cargoInventoryList,cargoInventory5)
-	table.insert(cargoInventoryList,cargoInventory6)
-	table.insert(cargoInventoryList,cargoInventory7)
-	table.insert(cargoInventoryList,cargoInventory8)
-	get_coolant_function = {}
-	table.insert(get_coolant_function,getCoolant1)
-	table.insert(get_coolant_function,getCoolant2)
-	table.insert(get_coolant_function,getCoolant3)
-	table.insert(get_coolant_function,getCoolant4)
-	table.insert(get_coolant_function,getCoolant5)
-	table.insert(get_coolant_function,getCoolant6)
-	table.insert(get_coolant_function,getCoolant7)
-	table.insert(get_coolant_function,getCoolant8)
 	show_player_info = true
 	show_only_player_name = true
 	info_choice = 0
@@ -681,6 +560,43 @@ function setConstants()
 		"fire_sphere_texture.png"
 	}
 	mining_drain = .00025 * difficulty
+	wreck_mod_debris = {}
+	base_wreck_mod_positive = 80
+	wreck_mod_interval = 20
+	wreck_debris_label_count = 1
+	wreck_mod_type = {
+		{func=wreckModHealthBeam,		desc="Primary ship system component",	scan_desc="Beam system component"},					--1
+		{func=wreckModHealthMissile,	desc="Primary ship system component",	scan_desc="Missile system component"},				--2
+		{func=wreckModHealthImpulse,	desc="Primary ship system component",	scan_desc="Impulse engine component"},				--3
+		{func=wreckModHealthWarp,		desc="Primary ship system component",	scan_desc="Warp engine component"},					--4
+		{func=wreckModHealthJump,		desc="Primary ship system component",	scan_desc="Jump drive component"},					--5
+		{func=wreckModHealthShield,		desc="Primary ship system component",	scan_desc="Shield component"},						--6
+		{func=wreckModHealthSpin,		desc="Primary ship system component",	scan_desc="Maneuver system component"},				--7
+		{func=wreckModHealthReactor,	desc="Primary ship system component",	scan_desc="Reactor system component"},				--8
+		{func=wreckModBoolScan,			desc="Secondary ship system component",	scan_desc="Scanner system component"},				--9
+		{func=wreckModBoolCombat,		desc="Secondary ship system component",	scan_desc="Combat maneuver system component"},		--10
+		{func=wreckModBoolProbe,		desc="Secondary ship system component",	scan_desc="Probe launch system component"},			--11
+		{func=wreckModBoolHack,			desc="Secondary ship system component",	scan_desc="Hacking system component"},				--12
+		{func=wreckModChangeScan,		desc="Secondary ship system component",	scan_desc="Scan range system component"},			--13
+		{func=wreckModChangeCoolant,	desc="Secondary ship system component",	scan_desc="System coolant container"},				--14
+		{func=wreckModChangeRepair,		desc="Secondary ship system component",	scan_desc="Robotic repair crew"},					--15
+		{func=wreckModChangeHull,		desc="Secondary ship system component",	scan_desc="Modular hull plating"},					--16
+		{func=wreckModChangeShield,		desc="Secondary ship system component",	scan_desc="Shield charging component"},				--17 can overcharge
+		{func=wreckModChangePower,		desc="Secondary ship system component",	scan_desc="Power source"},							--18
+		{func=wreckModCombatBoost,		desc="Secondary ship system component",	scan_desc="Maneuver boost thruster"},				--19 timed
+		{func=wreckModCombatStrafe,		desc="Secondary ship system component",	scan_desc="Maneuver strafe thruster"},				--20 timed
+		{func=wreckModProbeStock,		desc="Secondary ship system component",	scan_desc="Probe container"},						--21 
+		{func=wreckModBeamDamage,		desc="Primary ship system component",	scan_desc="Beam system optics"},					--22 timed
+		{func=wreckModBeamCycle,		desc="Primary ship system component",	scan_desc="Beam system power capacitors"},			--23 timed
+		{func=wreckModMissileStock,		desc="Primary ship system component",	scan_desc="Missile container"},						--24
+		{func=wreckModImpulseSpeed,		desc="Primary ship system component",	scan_desc="Impulse engine regulator"},				--25 timed
+		{func=wreckModWarpSpeed,		desc="Primary ship system component",	scan_desc="Alternate warp drive envelope shape"},	--26 timed
+		{func=wreckModJumpRange,		desc="Primary ship system component",	scan_desc="Jump drive range ringer"},				--27 timed
+		{func=wreckModShieldMax,		desc="Primary ship system component",	scan_desc="Shield capacitor"},						--28 timed
+		{func=wreckModSpinSpeed,		desc="Primary ship system component",	scan_desc="Maneuvering thrusters"},					--29 timed
+		{func=wreckModBatteryMax,		desc="Primary ship system component",	scan_desc="Main power battery"},					--30 timed
+		{func=wreckCargo,				desc="Cargo",							scan_desc="Cargo"},									--31
+	}
 end
 function setGossipSnippets()
 	gossipSnippets = {}
@@ -707,6 +623,2565 @@ function setCharacterNames()
 			end
 		end
 	end
+end
+--	Modifications from wreck artifact functions
+function wreckModCommonArtifact(wma)
+	wma:setScanningParameters(math.random(1,2),math.random(1,3))
+	wma:setRadarTraceScale(.5)
+	local color_scheme = math.random(1,3)
+	if color_scheme == 1 then
+		wma:setRadarTraceColor(0,255,0)
+		wma:setModel("ammo_box")
+	elseif color_scheme == 2 then
+		wma:setRadarTraceColor(255,200,100)	--asteroid color
+		wma:setModel("artifact1")
+	else
+		wma:setModel("artifact2")
+	end
+end
+function wreckModHealthBeam(x,y)
+	local full_desc = wreck_mod_type[1].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[1].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local max_health = p:getSystemHealthMax("beamweapons")
+		local health = p:getSystemHealth("beamweapons")
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if max_health < 1 then
+				p:setSystemHealthMax("beamweapons",math.min(1, max_health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_max_beam_health_message = "artifact_improved_max_beam_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_max_beam_health_message,string.format("The %s retrieved has improved the beam system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_max_beam_health_message_plus = "artifact_improved_max_beam_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_max_beam_health_message_plus,string.format("The %s retrieved has improved the beam system maximum health",full_desc))
+				end
+			elseif health < 1 then
+				p:setSystemHealth("beamweapons",math.min(1, health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_beam_health_message = "artifact_improved_beam_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_beam_health_message,string.format("The %s retrieved has improved the beam system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_beam_health_message_plus = "artifact_improved_beam_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_beam_health_message_plus,string.format("The %s retrieved has improved the beam system health",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_beam_health_message = "artifact_beam_health_message"
+					p:addCustomMessage("Engineering",p.artifact_beam_health_message,string.format("The %s retrieved has had no impact on an already healthy beam system",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_beam_health_message_plus = "artifact_beam_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_beam_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy beam system",full_desc))
+				end
+			end
+		else
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p:setSystemHealth("beamweapons",math.max(-1, health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_beam_health_message = "artifact_damaged_beam_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_beam_health_message,string.format("The %s retrieved has damaged the beam system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_beam_health_message_plus = "artifact_damaged_beam_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_beam_health_message_plus,string.format("The %s retrieved has damaged the beam system health",full_desc))
+				end
+			else
+				p:setSystemHealthMax("beamweapons",math.max(-1, max_health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_max_beam_health_message = "artifact_damaged_max_beam_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_max_beam_health_message,string.format("The %s retrieved has damaged the beam system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_max_beam_health_message_plus = "artifact_damaged_max_beam_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_max_beam_health_message_plus,string.format("The %s retrieved has damaged the beam system maximum health",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthMissile(x,y)
+	local full_desc = wreck_mod_type[2].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[2].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local max_health = p:getSystemHealthMax("missilesystem")
+		local health = p:getSystemHealth("missilesystem")
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if max_health < 1 then
+				p:setSystemHealthMax("missilesystem",math.min(1, max_health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_max_missile_health_message = "artifact_improved_max_missile_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_max_missile_health_message,string.format("The %s retrieved has improved the missile system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_max_missile_health_message_plus = "artifact_improved_max_missile_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_max_missile_health_message_plus,string.format("The %s retrieved has improved the missile system maximum health",full_desc))
+				end
+			elseif health < 1 then
+				p:setSystemHealth("missilesystem",math.min(1, health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_missile_health_message = "artifact_improved_missile_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_missile_health_message,string.format("The %s retrieved has improved the missile system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_missile_health_message_plus = "artifact_improved_missile_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_missile_health_message_plus,string.format("The %s retrieved has improved the missile system health",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_missile_health_message = "artifact_missile_health_message"
+					p:addCustomMessage("Engineering",p.artifact_missile_health_message,string.format("The %s retrieved has had no impact on an already healthy missile system",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_missile_health_message_plus = "artifact_missile_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_missile_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy missile system",full_desc))
+				end
+			end
+		else
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p:setSystemHealth("missilesystem",math.max(-1, health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_missile_health_message = "artifact_damaged_missile_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_missile_health_message,string.format("The %s retrieved has damaged the missile system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_missile_health_message_plus = "artifact_damaged_missile_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_missile_health_message_plus,string.format("The %s retrieved has damaged the missile system health",full_desc))
+				end
+			else
+				p:setSystemHealthMax("missilesystem",math.max(-1, max_health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_max_missile_health_message = "artifact_damaged_max_missile_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_max_missile_health_message,string.format("The %s retrieved has damaged the missile system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_max_missile_health_message_plus = "artifact_damaged_max_missile_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_max_missile_health_message_plus,string.format("The %s retrieved has damaged the missile system maximum health",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthImpulse(x,y)
+	local full_desc = wreck_mod_type[3].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[3].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local max_health = p:getSystemHealthMax("impulse")
+		local health = p:getSystemHealth("impulse")
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if max_health < 1 then
+				p:setSystemHealthMax("impulse",math.min(1, max_health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_max_impulse_health_message = "artifact_improved_max_impulse_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_max_impulse_health_message,string.format("The %s retrieved has improved the impulse system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_max_impulse_health_message_plus = "artifact_improved_max_impulse_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_max_impulse_health_message_plus,string.format("The %s retrieved has improved the impulse system maximum health",full_desc))
+				end
+			elseif health < 1 then
+				p:setSystemHealth("impulse",math.min(1, health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_impulse_health_message = "artifact_improved_impulse_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_impulse_health_message,string.format("The %s retrieved has improved the impulse system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_impulse_health_message_plus = "artifact_improved_impulse_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_impulse_health_message_plus,string.format("The %s retrieved has improved the impulse system health",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_impulse_health_message = "artifact_impulse_health_message"
+					p:addCustomMessage("Engineering",p.artifact_impulse_health_message,string.format("The %s retrieved has had no impact on an already healthy impulse system",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_impulse_health_message_plus = "artifact_impulse_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_impulse_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy impulse system",full_desc))
+				end
+			end
+		else
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p:setSystemHealth("impulse",math.max(-1, health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_impulse_health_message = "artifact_damaged_impulse_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_impulse_health_message,string.format("The %s retrieved has damaged the impulse system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_impulse_health_message_plus = "artifact_damaged_impulse_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_impulse_health_message_plus,string.format("The %s retrieved has damaged the impulse system health",full_desc))
+				end
+			else
+				p:setSystemHealthMax("impulse",math.max(-1, max_health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_max_impulse_health_message = "artifact_damaged_max_impulse_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_max_impulse_health_message,string.format("The %s retrieved has damaged the impulse system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_max_impulse_health_message_plus = "artifact_damaged_max_impulse_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_max_impulse_health_message_plus,string.format("The %s retrieved has damaged the impulse system maximum health",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthWarp(x,y)
+	local full_desc = wreck_mod_type[4].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[4].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("warp") then
+			local max_health = p:getSystemHealthMax("warp")
+			local health = p:getSystemHealth("warp")
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				if max_health < 1 then
+					p:setSystemHealthMax("warp",math.min(1, max_health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_max_warp_health_message = "artifact_improved_max_warp_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_max_warp_health_message,string.format("The %s retrieved has improved the warp system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_max_warp_health_message_plus = "artifact_improved_max_warp_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_max_warp_health_message_plus,string.format("The %s retrieved has improved the warp system maximum health",full_desc))
+					end
+				elseif health < 1 then
+					p:setSystemHealth("warp",math.min(1, health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_warp_health_message = "artifact_improved_warp_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_warp_health_message,string.format("The %s retrieved has improved the warp system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_warp_health_message_plus = "artifact_improved_warp_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_warp_health_message_plus,string.format("The %s retrieved has improved the warp system health",full_desc))
+					end
+				else
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_warp_health_message = "artifact_warp_health_message"
+						p:addCustomMessage("Engineering",p.artifact_warp_health_message,string.format("The %s retrieved has had no impact on an already healthy warp system",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_warp_health_message_plus = "artifact_warp_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_warp_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy warp system",full_desc))
+					end
+				end
+			else
+				if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+					p:setSystemHealth("warp",math.max(-1, health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_warp_health_message = "artifact_damaged_warp_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_warp_health_message,string.format("The %s retrieved has damaged the warp system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_warp_health_message_plus = "artifact_damaged_warp_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_warp_health_message_plus,string.format("The %s retrieved has damaged the warp system health",full_desc))
+					end
+				else
+					p:setSystemHealthMax("warp",math.max(-1, max_health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_max_warp_health_message = "artifact_damaged_max_warp_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_max_warp_health_message,string.format("The %s retrieved has damaged the warp system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_max_warp_health_message_plus = "artifact_damaged_max_warp_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_max_warp_health_message_plus,string.format("The %s retrieved has damaged the warp system maximum health",full_desc))
+					end
+				end
+			end
+--		else
+--			if p:hasPlayerAtPosition("Engineering") then
+--				p.artifact_warp_health_message = "artifact_warp_health_message"
+--				p:addCustomMessage("Engineering",p.artifact_warp_health_message,string.format("The %s retrieved has had no impact on a non-existent warp system",full_desc))
+--			end
+--			if p:hasPlayerAtPosition("Engineering+") then
+--				p.artifact_warp_health_message_plus = "artifact_warp_health_message_plus"
+--				p:addCustomMessage("Engineering+",p.artifact_warp_health_message_plus,string.format("The %s retrieved has had no impact on a non-existent warp system",full_desc))
+--			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthJump(x,y)
+	local full_desc = wreck_mod_type[5].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[5].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("jumpdrive") then
+			local max_health = p:getSystemHealthMax("jumpdrive")
+			local health = p:getSystemHealth("jumpdrive")
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				if max_health < 1 then
+					p:setSystemHealthMax("jumpdrive",math.min(1, max_health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_max_jump_health_message = "artifact_improved_max_jump_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_max_jump_health_message,string.format("The %s retrieved has improved the jump system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_max_jump_health_message_plus = "artifact_improved_max_jump_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_max_jump_health_message_plus,string.format("The %s retrieved has improved the jump system maximum health",full_desc))
+					end
+				elseif health < 1 then
+					p:setSystemHealth("jumpdrive",math.min(1, health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_jump_health_message = "artifact_improved_jump_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_jump_health_message,string.format("The %s retrieved has improved the jump system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_jump_health_message_plus = "artifact_improved_jump_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_jump_health_message_plus,string.format("The %s retrieved has improved the jump system health",full_desc))
+					end
+				else
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_jump_health_message = "artifact_jump_health_message"
+						p:addCustomMessage("Engineering",p.artifact_jump_health_message,string.format("The %s retrieved has had no impact on an already healthy jump system",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_jump_health_message_plus = "artifact_jump_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_jump_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy jump system",full_desc))
+					end
+				end
+			else
+				if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+					p:setSystemHealth("jumpdrive",math.max(-1, health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_jump_health_message = "artifact_damaged_jump_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_jump_health_message,string.format("The %s retrieved has damaged the jump system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_jump_health_message_plus = "artifact_damaged_jump_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_jump_health_message_plus,string.format("The %s retrieved has damaged the jump system health",full_desc))
+					end
+				else
+					p:setSystemHealthMax("jumpdrive",math.max(-1, max_health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_max_jump_health_message = "artifact_damaged_max_jump_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_max_jump_health_message,string.format("The %s retrieved has damaged the jump system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_max_jump_health_message_plus = "artifact_damaged_max_jump_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_max_jump_health_message_plus,string.format("The %s retrieved has damaged the jump system maximum health",full_desc))
+					end
+				end
+			end
+--		else
+--			if p:hasPlayerAtPosition("Engineering") then
+--				p.artifact_jump_health_message = "artifact_jump_health_message"
+--				p:addCustomMessage("Engineering",p.artifact_jump_health_message,string.format("The %s retrieved has had no impact on a non-existent jump system",full_desc))
+--			end
+--			if p:hasPlayerAtPosition("Engineering+") then
+--				p.artifact_jump_health_message_plus = "artifact_jump_health_message_plus"
+--				p:addCustomMessage("Engineering+",p.artifact_jump_health_message_plus,string.format("The %s retrieved has had no impact on a non-existent jump system",full_desc))
+--			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthShield(x,y)
+	local full_desc = wreck_mod_type[6].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[6].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:getShieldCount() > 1 then
+			local max_health_front = p:getSystemHealthMax("frontshield")
+			local health_front = p:getSystemHealth("frontshield")
+			local max_health_rear = p:getSystemHealthMax("rearshield")
+			local health_rear = p:getSystemHealth("rearshield")
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				if max_health_front < 1 then
+					p:setSystemHealthMax("frontshield",math.min(1, max_health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_max_front_shield_health_message = "artifact_improved_max_front_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_max_front_shield_health_message,string.format("The %s retrieved has improved the front shield system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_max_front_shield_health_message_plus = "artifact_improved_max_front_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_max_front_shield_health_message_plus,string.format("The %s retrieved has improved the front shield system maximum health",full_desc))
+					end
+				elseif max_health_rear < 1 then
+					p:setSystemHealthMax("rearshield",math.min(1, max_health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_max_rear_shield_health_message = "artifact_improved_max_rear_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_max_rear_shield_health_message,string.format("The %s retrieved has improved the rear shield system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_max_rear_shield_health_message_plus = "artifact_improved_max_rear_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_max_rear_shield_health_message_plus,string.format("The %s retrieved has improved the rear shield system maximum health",full_desc))
+					end
+				elseif health_front < 1 then
+					p:setSystemHealth("frontshield",math.min(1, health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_front_shield_health_message = "artifact_improved_front_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_front_shield_health_message,string.format("The %s retrieved has improved the front shield system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_front_shield_health_message_plus = "artifact_improved_front_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_front_shield_health_message_plus,string.format("The %s retrieved has improved the front shield system health",full_desc))
+					end
+				elseif health_rear < 1 then
+					p:setSystemHealth("rearshield",math.min(1, health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_rear_shield_health_message = "artifact_improved_rear_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_rear_shield_health_message,string.format("The %s retrieved has improved the rear shield system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_rear_shield_health_message_plus = "artifact_improved_rear_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_rear_shield_health_message_plus,string.format("The %s retrieved has improved the rear shield system health",full_desc))
+					end
+				else
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_shield_health_message = "artifact_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_shield_health_message,string.format("The %s retrieved has had no impact on an already healthy shield system",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_shield_health_message_plus = "artifact_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_shield_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy shield system",full_desc))
+					end
+				end
+			else
+				if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+					if random(1,100) <= 50 then
+						p:setSystemHealth("frontshield",math.max(-1, health - .05))
+						if p:hasPlayerAtPosition("Engineering") then
+							p.artifact_damaged_front_shield_health_message = "artifact_damaged_front_shield_health_message"
+							p:addCustomMessage("Engineering",p.artifact_damaged_front_shield_health_message,string.format("The %s retrieved has damaged the front shield system health",full_desc))
+						end
+						if p:hasPlayerAtPosition("Engineering+") then
+							p.artifact_damaged_front_shield_health_message_plus = "artifact_damaged_front_shield_health_message_plus"
+							p:addCustomMessage("Engineering+",p.artifact_damaged_front_shield_health_message_plus,string.format("The %s retrieved has damaged the front shield system health",full_desc))
+						end
+					else
+						p:setSystemHealth("rearshield",math.max(-1, health - .05))
+						if p:hasPlayerAtPosition("Engineering") then
+							p.artifact_damaged_rear_shield_health_message = "artifact_damaged_rear_shield_health_message"
+							p:addCustomMessage("Engineering",p.artifact_damaged_rear_shield_health_message,string.format("The %s retrieved has damaged the rear shield system health",full_desc))
+						end
+						if p:hasPlayerAtPosition("Engineering+") then
+							p.artifact_damaged_rear_shield_health_message_plus = "artifact_damaged_rear_shield_health_message_plus"
+							p:addCustomMessage("Engineering+",p.artifact_damaged_rear_shield_health_message_plus,string.format("The %s retrieved has damaged the rear shield system health",full_desc))
+						end
+					end
+				else
+					if random(1,100) <= 50 then
+						p:setSystemHealthMax("frontshield",math.max(-1, max_health - .05))
+						if p:hasPlayerAtPosition("Engineering") then
+							p.artifact_damaged_max_front_shield_health_message = "artifact_damaged_max_front_shield_health_message"
+							p:addCustomMessage("Engineering",p.artifact_damaged_max_front_shield_health_message,string.format("The %s retrieved has damaged the front shield system maximum health",full_desc))
+						end
+						if p:hasPlayerAtPosition("Engineering+") then
+							p.artifact_damaged_max_front_shield_health_message_plus = "artifact_damaged_max_front_shield_health_message_plus"
+							p:addCustomMessage("Engineering+",p.artifact_damaged_max_front_shield_health_message_plus,string.format("The %s retrieved has damaged the front shield system maximum health",full_desc))
+						end
+					else
+						p:setSystemHealthMax("rearshield",math.max(-1, max_health - .05))
+						if p:hasPlayerAtPosition("Engineering") then
+							p.artifact_damaged_max_rear_shield_health_message = "artifact_damaged_max_rear_shield_health_message"
+							p:addCustomMessage("Engineering",p.artifact_damaged_max_rear_shield_health_message,string.format("The %s retrieved has damaged the rear shield system maximum health",full_desc))
+						end
+						if p:hasPlayerAtPosition("Engineering+") then
+							p.artifact_damaged_max_rear_shield_health_message_plus = "artifact_damaged_max_rear_shield_health_message_plus"
+							p:addCustomMessage("Engineering+",p.artifact_damaged_max_rear_shield_health_message_plus,string.format("The %s retrieved has damaged the rear shield system maximum health",full_desc))
+						end
+					end
+				end
+			end
+		else	--only one shield
+			local max_health = p:getSystemHealthMax("frontshield")
+			local health = p:getSystemHealth("frontshield")
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				if max_health < 1 then
+					p:setSystemHealthMax("frontshield",math.min(1, max_health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_max_shield_health_message = "artifact_improved_max_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_max_shield_health_message,string.format("The %s retrieved has improved the shield system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_max_shield_health_message_plus = "artifact_improved_max_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_max_shield_health_message_plus,string.format("The %s retrieved has improved the shield system maximum health",full_desc))
+					end
+				elseif health < 1 then
+					p:setSystemHealth("frontshield",math.min(1, health + .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_improved_shield_health_message = "artifact_improved_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_improved_shield_health_message,string.format("The %s retrieved has improved the shield system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_improved_shield_health_message_plus = "artifact_improved_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_improved_shield_health_message_plus,string.format("The %s retrieved has improved the shield system health",full_desc))
+					end
+				else
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_shield_health_message = "artifact_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_shield_health_message,string.format("The %s retrieved has had no impact on an already healthy shield system",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_shield_health_message_plus = "artifact_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_shield_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy shield system",full_desc))
+					end
+				end
+			else
+				if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+					p:setSystemHealth("frontshield",math.max(-1, health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_shield_health_message = "artifact_damaged_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_shield_health_message,string.format("The %s retrieved has damaged the shield system health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_shield_health_message_plus = "artifact_damaged_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_shield_health_message_plus,string.format("The %s retrieved has damaged the shield system health",full_desc))
+					end
+				else
+					p:setSystemHealthMax("frontshield",math.max(-1, max_health - .05))
+					if p:hasPlayerAtPosition("Engineering") then
+						p.artifact_damaged_max_shield_health_message = "artifact_damaged_max_shield_health_message"
+						p:addCustomMessage("Engineering",p.artifact_damaged_max_shield_health_message,string.format("The %s retrieved has damaged the shield system maximum health",full_desc))
+					end
+					if p:hasPlayerAtPosition("Engineering+") then
+						p.artifact_damaged_max_shield_health_message_plus = "artifact_damaged_max_shield_health_message_plus"
+						p:addCustomMessage("Engineering+",p.artifact_damaged_max_shield_health_message_plus,string.format("The %s retrieved has damaged the shield system maximum health",full_desc))
+					end
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthSpin(x,y)
+	local full_desc = wreck_mod_type[7].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[7].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local max_health = p:getSystemHealthMax("maneuver")
+		local health = p:getSystemHealth("maneuver")
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if max_health < 1 then
+				p:setSystemHealthMax("maneuver",math.min(1, max_health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_max_maneuver_health_message = "artifact_improved_max_maneuver_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_max_maneuver_health_message,string.format("The %s retrieved has improved the maneuver system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_max_maneuver_health_message_plus = "artifact_improved_max_maneuver_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_max_maneuver_health_message_plus,string.format("The %s retrieved has improved the maneuver system maximum health",full_desc))
+				end
+			elseif health < 1 then
+				p:setSystemHealth("maneuver",math.min(1, health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_maneuver_health_message = "artifact_improved_maneuver_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_maneuver_health_message,string.format("The %s retrieved has improved the maneuver system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_maneuver_health_message_plus = "artifact_improved_maneuver_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_maneuver_health_message_plus,string.format("The %s retrieved has improved the maneuver system health",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_maneuver_health_message = "artifact_maneuver_health_message"
+					p:addCustomMessage("Engineering",p.artifact_maneuver_health_message,string.format("The %s retrieved has had no impact on an already healthy maneuver system",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_maneuver_health_message_plus = "artifact_maneuver_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_maneuver_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy maneuver system",full_desc))
+				end
+			end
+		else
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p:setSystemHealth("maneuver",math.max(-1, health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_maneuver_health_message = "artifact_damaged_maneuver_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_maneuver_health_message,string.format("The %s retrieved has damaged the maneuver system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_maneuver_health_message_plus = "artifact_damaged_maneuver_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_maneuver_health_message_plus,string.format("The %s retrieved has damaged the maneuver system health",full_desc))
+				end
+			else
+				p:setSystemHealthMax("maneuver",math.max(-1, max_health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_max_maneuver_health_message = "artifact_damaged_max_maneuver_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_max_maneuver_health_message,string.format("The %s retrieved has damaged the maneuver system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_max_maneuver_health_message_plus = "artifact_damaged_max_maneuver_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_max_maneuver_health_message_plus,string.format("The %s retrieved has damaged the maneuver system maximum health",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModHealthReactor(x,y)
+	local full_desc = wreck_mod_type[8].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[8].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local max_health = p:getSystemHealthMax("reactor")
+		local health = p:getSystemHealth("reactor")
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if max_health < 1 then
+				p:setSystemHealthMax("reactor",math.min(1, max_health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_max_reactor_health_message = "artifact_improved_max_reactor_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_max_reactor_health_message,string.format("The %s retrieved has improved the reactor system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_max_reactor_health_message_plus = "artifact_improved_max_reactor_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_max_reactor_health_message_plus,string.format("The %s retrieved has improved the reactor system maximum health",full_desc))
+				end
+			elseif health < 1 then
+				p:setSystemHealth("reactor",math.min(1, health + .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_improved_reactor_health_message = "artifact_improved_reactor_health_message"
+					p:addCustomMessage("Engineering",p.artifact_improved_reactor_health_message,string.format("The %s retrieved has improved the reactor system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_improved_reactor_health_message_plus = "artifact_improved_reactor_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_improved_reactor_health_message_plus,string.format("The %s retrieved has improved the reactor system health",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_reactor_health_message = "artifact_reactor_health_message"
+					p:addCustomMessage("Engineering",p.artifact_reactor_health_message,string.format("The %s retrieved has had no impact on an already healthy reactor system",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_reactor_health_message_plus = "artifact_reactor_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_reactor_health_message_plus,string.format("The %s retrieved has had no impact on an already healthy reactor system",full_desc))
+				end
+			end
+		else
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p:setSystemHealth("reactor",math.max(-1, health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_reactor_health_message = "artifact_damaged_reactor_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_reactor_health_message,string.format("The %s retrieved has damaged the reactor system health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_reactor_health_message_plus = "artifact_damaged_reactor_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_reactor_health_message_plus,string.format("The %s retrieved has damaged the reactor system health",full_desc))
+				end
+			else
+				p:setSystemHealthMax("reactor",math.max(-1, max_health - .05))
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_damaged_max_reactor_health_message = "artifact_damaged_max_reactor_health_message"
+					p:addCustomMessage("Engineering",p.artifact_damaged_max_reactor_health_message,string.format("The %s retrieved has damaged the reactor system maximum health",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_damaged_max_reactor_health_message_plus = "artifact_damaged_max_reactor_health_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_damaged_max_reactor_health_message_plus,string.format("The %s retrieved has damaged the reactor system maximum health",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBoolScan(x,y)
+	local full_desc = wreck_mod_type[9].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[9].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local enabled = p:getCanScan()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if not enabled then
+				p:setCanScan(true)
+				if p:hasPlayerAtPosition("Science") then
+					p.artifact_enabled_scan_message = "artifact_enabled_scan_message"
+					p:addCustomMessage("Science",p.artifact_enabled_scan_message,string.format("The %s retrieved has enabled the scanners",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_enabled_scan_message_ops = "artifact_enabled_scan_message_ops"
+					p:addCustomMessage("Operations",p.artifact_enabled_scan_message_ops,string.format("The %s retrieved has enabled the scanners",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Science") then
+					p.artifact_scan_message = "artifact_scan_message"
+					p:addCustomMessage("Science",p.artifact_scan_message,string.format("The %s retrieved does not effect the scanners",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_scan_message_ops = "artifact_scan_message_ops"
+					p:addCustomMessage("Operations",p.artifact_scan_message_ops,string.format("The %s retrieved does not effect the scanners",full_desc))
+				end
+			end
+		else
+			if enabled then
+				p:setCanScan(false)
+				if p:hasPlayerAtPosition("Science") then
+					p.artifact_disabled_scan_message = "artifact_disabled_scan_message"
+					p:addCustomMessage("Science",p.artifact_disabled_scan_message,string.format("The %s retrieved has disabled the scanners",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_disabled_scan_message_ops = "artifact_disabled_scan_message_ops"
+					p:addCustomMessage("Operations",p.artifact_disabled_scan_message_ops,string.format("The %s retrieved has disabled the scanners",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Science") then
+					p.artifact_scan_message = "artifact_scan_message"
+					p:addCustomMessage("Science",p.artifact_scan_message,string.format("The %s retrieved does not effect the scanners",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_scan_message_ops = "artifact_scan_message_ops"
+					p:addCustomMessage("Operations",p.artifact_scan_message_ops,string.format("The %s retrieved does not effect the scanners",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBoolCombat(x,y)
+	local full_desc = wreck_mod_type[10].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[10].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local enabled = p:getCanCombatManeuver()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if not enabled then
+				p:setCanCombatManeuver(true)
+				if p:hasPlayerAtPosition("Helms") then
+					p.artifact_enabled_cm_message = "artifact_enabled_cm_message"
+					p:addCustomMessage("Helms",p.artifact_enabled_cm_message,string.format("The %s retrieved has enabled combat maneuver",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.artifact_enabled_cm_message_tac = "artifact_enabled_cm_message_tac"
+					p:addCustomMessage("Tactical",p.artifact_enabled_cm_message_tac,string.format("The %s retrieved has enabled combat maneuver",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Helms") then
+					p.artifact_cm_message = "artifact_cm_message"
+					p:addCustomMessage("Helms",p.artifact_cm_message,string.format("The %s retrieved does not effect combat maneuver",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.artifact_cm_message_tac = "artifact_cm_message_tac"
+					p:addCustomMessage("Tactical",p.artifact_cm_message_tac,string.format("The %s retrieved does not effect combat maneuver",full_desc))
+				end
+			end
+		else
+			if enabled then
+				p:setCanCombatManeuver(false)
+				if p:hasPlayerAtPosition("Helms") then
+					p.artifact_disabled_cm_message = "artifact_disabled_cm_message"
+					p:addCustomMessage("Helms",p.artifact_disabled_cm_message,string.format("The %s retrieved has disabled combat maneuver",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.artifact_disabled_cm_message_tac = "artifact_disabled_cm_message_tac"
+					p:addCustomMessage("Tactical",p.artifact_disabled_cm_message_tac,string.format("The %s retrieved has disabled combat maneuver",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Helms") then
+					p.artifact_cm_message = "artifact_cm_message"
+					p:addCustomMessage("Helms",p.artifact_cm_message,string.format("The %s retrieved does not effect combat maneuver",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.artifact_cm_message_tac = "artifact_cm_message_tac"
+					p:addCustomMessage("Tactical",p.artifact_cm_message_tac,string.format("The %s retrieved does not effect combat maneuver",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBoolProbe(x,y)
+	local full_desc = wreck_mod_type[11].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[11].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local enabled = p:getCanLaunchProbe()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if not enabled then
+				p:setCanLaunchProbe(true)
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_enabled_probe_message = "artifact_enabled_probe_message"
+					p:addCustomMessage("Relay",p.artifact_enabled_probe_message,string.format("The %s retrieved has enabled probe launch",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_enabled_probe_message_ops = "artifact_enabled_probe_message_ops"
+					p:addCustomMessage("Operations",p.artifact_enabled_probe_message_ops,string.format("The %s retrieved has enabled probe launch",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_probe_message = "artifact_probe_message"
+					p:addCustomMessage("Relay",p.artifact_probe_message,string.format("The %s retrieved does not effect probe launch",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_probe_message_ops = "artifact_probe_message_ops"
+					p:addCustomMessage("Operations",p.artifact_probe_message_ops,string.format("The %s retrieved does not effect probe launch",full_desc))
+				end
+			end
+		else
+			if enabled then
+				p:setCanLaunchProbe(false)
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_disabled_probe_message = "artifact_disabled_probe_message"
+					p:addCustomMessage("Relay",p.artifact_disabled_probe_message,string.format("The %s retrieved has disabled probe launch",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_disabled_probe_message_ops = "artifact_disabled_probe_message_ops"
+					p:addCustomMessage("Operations",p.artifact_disabled_probe_message_ops,string.format("The %s retrieved has disabled probe launch",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_probe_message = "artifact_probe_message"
+					p:addCustomMessage("Relay",p.artifact_probe_message,string.format("The %s retrieved does not effect probe launch",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_probe_message_ops = "artifact_probe_message_ops"
+					p:addCustomMessage("Operations",p.artifact_probe_message_ops,string.format("The %s retrieved does not effect probe launch",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBoolHack(x,y)
+	local full_desc = wreck_mod_type[12].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[12].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local enabled = p:getCanHack()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if not enabled then
+				p:setCanHack(true)
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_enabled_hack_message = "artifact_enabled_hack_message"
+					p:addCustomMessage("Relay",p.artifact_enabled_hack_message,string.format("The %s retrieved has enabled hacking",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_enabled_hack_message_ops = "artifact_enabled_hack_message_ops"
+					p:addCustomMessage("Operations",p.artifact_enabled_hack_message_ops,string.format("The %s retrieved has enabled hacking",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_hack_message = "artifact_hack_message"
+					p:addCustomMessage("Relay",p.artifact_hack_message,string.format("The %s retrieved does not effect hacking",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_hack_message_ops = "artifact_hack_message_ops"
+					p:addCustomMessage("Operations",p.artifact_hack_message_ops,string.format("The %s retrieved does not effect hacking",full_desc))
+				end
+			end
+		else
+			if enabled then
+				p:setCanHack(false)
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_disabled_hack_message = "artifact_disabled_hack_message"
+					p:addCustomMessage("Relay",p.artifact_disabled_hack_message,string.format("The %s retrieved has disabled hacking",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_disabled_hack_message_ops = "artifact_disabled_hack_message_ops"
+					p:addCustomMessage("Operations",p.artifact_disabled_hack_message_ops,string.format("The %s retrieved has disabled hacking",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_hack_message = "artifact_hack_message"
+					p:addCustomMessage("Relay",p.artifact_hack_message,string.format("The %s retrieved does not effect hacking",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_hack_message_ops = "artifact_hack_message_ops"
+					p:addCustomMessage("Operations",p.artifact_hack_message_ops,string.format("The %s retrieved does not effect hacking",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangeScan(x,y)
+	local full_desc = wreck_mod_type[13].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[13].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_range = p:getLongRangeRadarRange()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p:setLongRangeRadarRange(current_range*1.1)
+			if p:hasPlayerAtPosition("Science") then
+				p.artifact_increase_sensor_range_message = "artifact_increase_sensor_range_message"
+				p:addCustomMessage("Science",p.artifact_increase_sensor_range_message,string.format("The %s retrieved has increased our sensor range",full_desc))
+			end
+			if p:hasPlayerAtPosition("Operations") then
+				p.artifact_increase_sensor_range_message_ops = "artifact_increase_sensor_range_message_ops"
+				p:addCustomMessage("Operations",p.artifact_increase_sensor_range_message_ops,string.format("The %s retrieved has increased our sensor range",full_desc))
+			end
+		else
+			p:setLongRangeRadarRange(current_range*.9)
+			if p:hasPlayerAtPosition("Science") then
+				p.artifact_decrease_sensor_range_message = "artifact_decrease_sensor_range_message"
+				p:addCustomMessage("Science",p.artifact_decrease_sensor_range_message,string.format("The %s retrieved has decreased our sensor range",full_desc))
+			end
+			if p:hasPlayerAtPosition("Operations") then
+				p.artifact_decrease_sensor_range_message_ops = "artifact_decrease_sensor_range_message_ops"
+				p:addCustomMessage("Operations",p.artifact_decrease_sensor_range_message_ops,string.format("The %s retrieved has decreased our sensor range",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangeCoolant(x,y)
+	local full_desc = wreck_mod_type[14].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[14].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_coolant = p:getMaxCoolant()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p:setMaxCoolant(current_coolant*1.1)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_increase_coolant_message = "artifact_increase_coolant_message"
+				p:addCustomMessage("Engineering",p.artifact_increase_coolant_message,string.format("The %s retrieved has increased our coolant",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_increase_coolant_message_plus = "artifact_increase_coolant_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_increase_coolant_message_plus,string.format("The %s retrieved has increased our coolant",full_desc))
+			end
+		else
+			p:setMaxCoolant(current_coolant*.9)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_decrease_coolant_message = "artifact_decrease_coolant_message"
+				p:addCustomMessage("Engineering",p.artifact_decrease_coolant_message,string.format("The %s retrieved has decreased our coolant: incompatible, corrosive reaction",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_decrease_coolant_message_plus = "artifact_decrease_coolant_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_decrease_coolant_message_plus,string.format("The %s retrieved has decreased our coolant: incompatible, corrosive reaction",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangeRepair(x,y)
+	local full_desc = wreck_mod_type[15].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[15].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_repair_crew_count = p:getRepairCrewCount()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p:setRepairCrewCount(current_repair_crew_count + 1)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_increase_repair_crew_message = "artifact_increase_repair_crew_message"
+				p:addCustomMessage("Engineering",p.artifact_increase_repair_crew_message,string.format("The %s retrieved has increased the number of repair crew",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_increase_repair_crew_message_plus = "artifact_increase_repair_crew_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_increase_repair_crew_message_plus,string.format("The %s retrieved has increased the number of repair crew",full_desc))
+			end
+		else
+			if current_repair_crew_count > 0 then
+				p:setRepairCrewCount(current_repair_crew_count - 1)
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_decrease_repair_crew_message = "artifact_decrease_repair_crew_message"
+					p:addCustomMessage("Engineering",p.artifact_decrease_repair_crew_message,string.format("The %s retrieved has decreased the number of repair crew: assassination malware",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_decrease_repair_crew_message_plus = "artifact_decrease_repair_crew_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_decrease_repair_crew_message_plus,string.format("The %s retrieved has decreased the number of repair crew: assassination malware",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Engineering") then
+					p.artifact_repair_crew_message = "artifact_repair_crew_message"
+					p:addCustomMessage("Engineering",p.artifact_repair_crew_message,string.format("The %s retrieved has had no effect on the number of repair crew: malfunction",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.artifact_repair_crew_message_plus = "artifact_repair_crew_message_plus"
+					p:addCustomMessage("Engineering+",p.artifact_repair_crew_message_plus,string.format("The %s retrieved has had no effect on the number of repair crew: malfunction",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangeHull(x,y)
+	local full_desc = wreck_mod_type[16].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[16].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_hull = p:getHull()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p:setHull(current_hull*1.1)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_increase_hull_message = "artifact_increase_hull_message"
+				p:addCustomMessage("Engineering",p.artifact_increase_hull_message,string.format("The %s retrieved has repaired some hull damage",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_increase_hull_message_plus = "artifact_increase_hull_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_increase_hull_message_plus,string.format("The %s retrieved has repaired some hull damage",full_desc))
+			end
+		else
+			p:setHull(current_hull*.9)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_decrease_hull_message = "artifact_decrease_hull_message"
+				p:addCustomMessage("Engineering",p.artifact_decrease_hull_message,string.format("The %s retrieved has damaged the hull: poor integration",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_decrease_hull_message_plus = "artifact_decrease_hull_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_decrease_hull_message_plus,string.format("The %s retrieved has damaged the hull: poor integration",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangeShield(x,y)
+	local full_desc = wreck_mod_type[17].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[17].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if p:getShieldCount() > 1 then
+				p:setShields(p:getShieldLevel(0)*1.1,p:getShieldLevel(1)*1.1)
+			else
+				p:setShields(p:getShieldLevel(0)*1.1)
+			end
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_increase_shield_message = "artifact_increase_shield_message"
+				p:addCustomMessage("Engineering",p.artifact_increase_shield_message,string.format("The %s retrieved has added charge to the shields",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_increase_shield_message_plus = "artifact_increase_shield_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_increase_shield_message_plus,string.format("The %s retrieved has added charge to the shields",full_desc))
+			end
+		else
+			if p:getShieldCount() > 1 then
+				p:setShields(p:getShieldLevel(0)*.9,p:getShieldLevel(1)*.9)
+			else
+				p:setShields(p:getShieldLevel(0)*.9)
+			end
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_decrease_shield_message = "artifact_decrease_shield_message"
+				p:addCustomMessage("Engineering",p.artifact_decrease_shield_message,string.format("The %s retrieved has reduced shield charge: corroded couplings",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_decrease_shield_message_plus = "artifact_decrease_shield_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_decrease_shield_message_plus,string.format("The %s retrieved has reduced shield charge: corroded couplings",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModChangePower(x,y)
+	local full_desc = wreck_mod_type[18].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[18].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_energy = p:getEnergy()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p:setEnergy(current_energy + p:getMaxEnergy()*.1)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_increase_energy_message = "artifact_increase_energy_message"
+				p:addCustomMessage("Engineering",p.artifact_increase_energy_message,string.format("The %s retrieved has added energy to our reserves",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_increase_energy_message_plus = "artifact_increase_energy_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_increase_energy_message_plus,string.format("The %s retrieved has added energy to our reserves",full_desc))
+			end
+		else
+			p:setEnergy(current_energy - p:getMaxEnergy()*.1)
+			if p:hasPlayerAtPosition("Engineering") then
+				p.artifact_decrease_energy_message = "artifact_decrease_energy_message"
+				p:addCustomMessage("Engineering",p.artifact_decrease_energy_message,string.format("The %s retrieved has drained some energy: incompatibility",full_desc))
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.artifact_decrease_energy_message_plus = "artifact_decrease_energy_message_plus"
+				p:addCustomMessage("Engineering+",p.artifact_decrease_energy_message_plus,string.format("The %s retrieved has drained some energy: incompatibility",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wmCombatBoostButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_cm_boost_button == nil then
+				p.activate_cm_boost_button = "activate_cm_boost_button"
+				p:addCustomButton("Helms",p.activate_cm_boost_button,"C.M. Boost",function()
+					string.format("")	--global context for serious proton
+					if p.cm_boost_count > 0 then
+						p.cm_boost_active = true
+						p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost + 200,playerShipStats[p:getTypeName()].cm_strafe)
+						p.cm_boost_timer = 300
+						p.cm_boost_count = p.cm_boost_count - 1
+						p.cm_boost_activated_message = "cm_boost_activated_message"
+						p:addCustomMessage("Helms",p.cm_boost_activated_message,"Combat maneuver boost (forward direction) ability increased")
+					end
+					p:removeCustom(p.activate_cm_boost_button)
+					p.activate_cm_boost_button = nil
+					if p.activate_cm_boost_button_tac ~= nil then
+						p:removeCustom(p.activate_cm_boost_button_tac)
+						p.activate_cm_boost_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_cm_boost_button_tac == nil then
+				p.activate_cm_boost_button_tac = "activate_cm_boost_button_tac"
+				p:addCustomButton("Tactical",p.activate_cm_boost_button_tac,"C.M. Boost",function()
+					string.format("")	--global context for serious proton
+					if p.cm_boost_count > 0 then
+						p.cm_boost_active = true
+						p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost + 200,playerShipStats[p:getTypeName()].cm_strafe)
+						p.cm_boost_timer = 300
+						p.cm_boost_count = p.cm_boost_count - 1
+						p.cm_boost_activated_message_tac = "cm_boost_activated_message_tac"
+						p:addCustomMessage("Tactical",p.cm_boost_activated_message_tac,"Combat maneuver boost (forward direction) ability increased")
+					end
+					p:removeCustom(p.activate_cm_boost_button_tac)
+					p.activate_cm_boost_button_tac = nil
+					if p.activate_cm_boost_button ~= nil then
+						p:removeCustom(p.activate_cm_boost_button)
+						p.activate_cm_boost_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmCombatStrafeButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_cm_strafe_button == nil then
+				p.activate_cm_strafe_button = "activate_cm_strafe_button"
+				p:addCustomButton("Helms",p.activate_cm_strafe_button,"C.M. Strafe",function()
+					string.format("")	--global context for serious proton
+					if p.cm_strafe_count > 0 then
+						p.cm_strafe_active = true
+						p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost,playerShipStats[p:getTypeName()].cm_strafe + 200)
+						p.cm_strafe_timer = 300
+						p.cm_strafe_count = p.cm_strafe_count - 1
+						p.cm_strafe_activated_message = "cm_strafe_activated_message"
+						p:addCustomMessage("Helms",p.cm_strafe_activated_message,"Combat maneuver strafe (sideways direction) ability increased")
+					end
+					p:removeCustom(p.activate_cm_strafe_button)
+					p.activate_cm_strafe_button = nil
+					if p.activate_cm_strafe_button_tac ~= nil then
+						p:removeCustom(p.activate_cm_strafe_button_tac)
+						p.activate_cm_strafe_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_cm_strafe_button_tac == nil then
+				p.activate_cm_strafe_button_tac = "activate_cm_strafe_button_tac"
+				p:addCustomButton("Tactical",p.activate_cm_strafe_button_tac,"C.M. Strafe",function()
+					string.format("")	--global context for serious proton
+					if p.cm_strafe_count > 0 then
+						p.cm_strafe_active = true
+						p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost,playerShipStats[p:getTypeName()].cm_strafe + 200)
+						p.cm_strafe_timer = 300
+						p.cm_strafe_count = p.cm_strafe_count - 1
+						p.cm_strafe_activated_message_tac = "cm_strafe_activated_message_tac"
+						p:addCustomMessage("Tactical",p.cm_strafe_activated_message_tac,"Combat maneuver strafe (sideways direction) ability increased")
+					end
+					p:removeCustom(p.activate_cm_strafe_button_tac)
+					p.activate_cm_strafe_button_tac = nil
+					if p.activate_cm_strafe_button ~= nil then
+						p:removeCustom(p.activate_cm_strafe_button)
+						p.activate_cm_strafe_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmBeamDamageButton(p,console)
+	if console == "Weapons" then
+		if p:hasPlayerAtPosition("Weapons") then
+			if p.activate_beam_damage_button == nil then
+				p.activate_beam_damage_button = "activate_beam_damage_button"
+				p:addCustomButton("Weapons",p.activate_beam_damage_button,"Beam Damage",function()
+					string.format("")	--global context for serious proton
+					if p.beam_damage_count > 0 then
+						p.beam_damage_active = true
+						local bi = 0
+						repeat
+							p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi),p:getBeamWeaponDamage(bi)*1.1)
+							bi = bi + 1
+						until(p:getBeamWeaponRange(bi) < 1)
+						p.beam_damage_timer = 300
+						p.beam_damage_count = p.beam_damage_count - 1
+						p.beam_damage_activated_message = "beam_damage_activated_message"
+						p:addCustomMessage("Weapons",p.beam_damage_activated_message,"Damage applied by beam weapons increased")
+					end
+					p:removeCustom(p.activate_beam_damage_button)
+					p.activate_beam_damage_button = nil
+					if p.activate_beam_damage_button_tac ~= nil then
+						p:removeCustom(p.activate_beam_damage_button_tac)
+						p.activate_beam_damage_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_beam_damage_button_tac == nil then
+				p.activate_beam_damage_button_tac = "activate_beam_damage_button_tac"
+				p:addCustomButton("Tactical",p.activate_beam_damage_button_tac,"Beam Damage",function()
+					string.format("")	--global context for serious proton
+					if p.beam_damage_count > 0 then
+						p.beam_damage_active = true
+						local bi = 0
+						repeat
+							p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi),p:getBeamWeaponDamage(bi)*1.1)
+							bi = bi + 1
+						until(p:getBeamWeaponRange(bi) < 1)
+						p.beam_damage_timer = 300
+						p.beam_damage_count = p.beam_damage_count - 1
+						p.beam_damage_activated_message_tac = "beam_damage_activated_message_tac"
+						p:addCustomMessage("Tactical",p.beam_damage_activated_message_tac,"Damage applied by beam weapons increased")
+					end
+					p:removeCustom(p.activate_beam_damage_button_tac)
+					p.activate_beam_damage_button_tac = nil
+					if p.activate_beam_damage_button ~= nil then
+						p:removeCustom(p.activate_beam_damage_button)
+						p.activate_beam_damage_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmBeamCycleButton(p,console)
+	if console == "Weapons" then
+		if p:hasPlayerAtPosition("Weapons") then
+			if p.activate_beam_cycle_button == nil then
+				p.activate_beam_cycle_button = "activate_beam_cycle_button"
+				p:addCustomButton("Weapons",p.activate_beam_cycle_button,"Beam Cycle",function()
+					string.format("")	--global context for serious proton
+					if p.beam_cycle_count > 0 then
+						p.beam_cycle_active = true
+						local bi = 0
+						repeat
+							p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi)*.9,p:getBeamWeaponDamage(bi))
+							bi = bi + 1
+						until(p:getBeamWeaponRange(bi) < 1)
+						p.beam_cycle_timer = 300
+						p.beam_cycle_count = p.beam_cycle_count - 1
+						p.beam_cycle_activated_message = "beam_cycle_activated_message"
+						p:addCustomMessage("Weapons",p.beam_cycle_activated_message,"The time it takes to cycle the beams between firing has been reduced")
+					end
+					p:removeCustom(p.activate_beam_cycle_button)
+					p.activate_beam_cycle_button = nil
+					if p.activate_beam_cycle_button_tac ~= nil then
+						p:removeCustom(p.activate_beam_cycle_button_tac)
+						p.activate_beam_cycle_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_beam_cycle_button_tac == nil then
+				p.activate_beam_cycle_button_tac = "activate_beam_cycle_button_tac"
+				p:addCustomButton("Tactical",p.activate_beam_cycle_button_tac,"Beam Cycle",function()
+					string.format("")	--global context for serious proton
+					if p.beam_cycle_count > 0 then
+						p.beam_cycle_active = true
+						local bi = 0
+						repeat
+							p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi)*.9,p:getBeamWeaponDamage(bi))
+							bi = bi + 1
+						until(p:getBeamWeaponRange(bi) < 1)
+						p.beam_cycle_timer = 300
+						p.beam_cycle_count = p.beam_cycle_count - 1
+						p.beam_cycle_activated_message_tac = "beam_cycle_activated_message_tac"
+						p:addCustomMessage("Tactical",p.beam_cycle_activated_message_tac,"The time it takes to cycle the beams between firing has been reduced")
+					end
+					p:removeCustom(p.activate_beam_cycle_button_tac)
+					p.activate_beam_cycle_button_tac = nil
+					if p.activate_beam_cycle_button ~= nil then
+						p:removeCustom(p.activate_beam_cycle_button)
+						p.activate_beam_cycle_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmImpulseButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_impulse_button == nil then
+				p.activate_impulse_button = "activate_impulse_button"
+				p:addCustomButton("Helms",p.activate_impulse_button,"Impulse Speed",function()
+					string.format("")	--global context for serious proton
+					if p.impulse_count > 0 then
+						p.impulse_active = true
+						p:setImpulseMaxSpeed(p:getImpulseMaxSpeed()*1.1)
+						p.impulse_timer = 300
+						p.impulse_count = p.impulse_count - 1
+						p.impulse_activated_message = "impulse_activated_message"
+						p:addCustomMessage("Helms",p.impulse_activated_message,"The maximum impulse speed has been increased")
+					end
+					p:removeCustom(p.activate_impulse_button)
+					p.activate_impulse_button = nil
+					if p.activate_impulse_button_tac ~= nil then
+						p:removeCustom(p.activate_impulse_button_tac)
+						p.activate_impulse_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_impulse_button_tac == nil then
+				p.activate_impulse_button_tac = "activate_impulse_button_tac"
+				p:addCustomButton("Tactical",p.activate_impulse_button_tac,"Impulse Speed",function()
+					string.format("")	--global context for serious proton
+					if p.impulse_count > 0 then
+						p.impulse_active = true
+						p:setImpulseMaxSpeed(p:getImpulseMaxSpeed()*1.1)
+						p.impulse_timer = 300
+						p.impulse_count = p.impulse_count - 1
+						p.impulse_activated_message_tac = "impulse_activated_message_tac"
+						p:addCustomMessage("Tactical",p.impulse_activated_message_tac,"The maximum impulse speed has been increased")
+					end
+					p:removeCustom(p.activate_impulse_button_tac)
+					p.activate_impulse_button_tac = nil
+					if p.activate_impulse_button ~= nil then
+						p:removeCustom(p.activate_impulse_button)
+						p.activate_impulse_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmWarpButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_warp_button == nil then
+				p.activate_warp_button = "activate_warp_button"
+				p:addCustomButton("Helms",p.activate_warp_button,"Warp Speed",function()
+					string.format("")	--global context for serious proton
+					if p.warp_count > 0 then
+						p.warp_active = true
+						p:setWarpSpeed(p:getWarpSpeed()*1.1)
+						p.warp_timer = 300
+						p.warp_count = p.warp_count - 1
+						p.warp_activated_message = "warp_activated_message"
+						p:addCustomMessage("Helms",p.warp_activated_message,"The maximum warp speed has been increased")
+					end
+					p:removeCustom(p.activate_warp_button)
+					p.activate_warp_button = nil
+					if p.activate_warp_button_tac ~= nil then
+						p:removeCustom(p.activate_warp_button_tac)
+						p.activate_warp_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_warp_button_tac == nil then
+				p.activate_warp_button_tac = "activate_warp_button_tac"
+				p:addCustomButton("Tactical",p.activate_warp_button_tac,"Warp Speed",function()
+					string.format("")	--global context for serious proton
+					if p.warp_count > 0 then
+						p.warp_active = true
+						p:setWarpSpeed(p:getWarpSpeed()*1.1)
+						p.warp_timer = 300
+						p.warp_count = p.warp_count - 1
+						p.warp_activated_message_tac = "warp_activated_message_tac"
+						p:addCustomMessage("Tactical",p.warp_activated_message_tac,"The maximum warp speed has been increased")
+					end
+					p:removeCustom(p.activate_warp_button_tac)
+					p.activate_warp_button_tac = nil
+					if p.activate_warp_button ~= nil then
+						p:removeCustom(p.activate_warp_button)
+						p.activate_warp_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmJumpButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_jump_button == nil then
+				p.activate_jump_button = "activate_jump_button"
+				p:addCustomButton("Helms",p.activate_jump_button,"Jump Range",function()
+					string.format("")	--global context for serious proton
+					if p.jump_count > 0 then
+						p.jump_active = true
+						if p.max_jump_range == nil then
+							p.max_jump_range = 50000
+							p.min_jump_range = 5000
+						end
+						p:setJumpDriveRange(p.min_jump_range,p.max_jump_range*1.1)
+						p.max_jump_range = p.max_jump_range*1.1
+						p.jump_timer = 300
+						p.jump_count = p.jump_count - 1
+						p.jump_activated_message = "jump_activated_message"
+						p:addCustomMessage("Helms",p.jump_activated_message,"The maximum jump range has been increased")
+					end
+					p:removeCustom(p.activate_jump_button)
+					p.activate_jump_button = nil
+					if p.activate_jump_button_tac ~= nil then
+						p:removeCustom(p.activate_jump_button_tac)
+						p.activate_jump_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_jump_button_tac == nil then
+				p.activate_jump_button_tac = "activate_jump_button_tac"
+				p:addCustomButton("Tactical",p.activate_jump_button_tac,"Jump Range",function()
+					string.format("")	--global context for serious proton
+					if p.jump_count > 0 then
+						p.jump_active = true
+						if p.max_jump_range == nil then
+							p.max_jump_range = 50000
+							p.min_jump_range = 5000
+						end
+						p:setJumpDriveRange(p.min_jump_range,p.max_jump_range*1.1)
+						p.max_jump_range = p.max_jump_range*1.1
+						p.jump_timer = 300
+						p.jump_count = p.jump_count - 1
+						p.jump_activated_message_tac = "jump_activated_message_tac"
+						p:addCustomMessage("Tactical",p.jump_activated_message_tac,"The maximum jump range has been increased")
+					end
+					p:removeCustom(p.activate_jump_button_tac)
+					p.activate_jump_button_tac = nil
+					if p.activate_jump_button ~= nil then
+						p:removeCustom(p.activate_jump_button)
+						p.activate_jump_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmShieldButton(p,console)
+	if console == "Weapons" then
+		if p:hasPlayerAtPosition("Weapons") then
+			if p.activate_shield_button == nil then
+				p.activate_shield_button = "activate_shield_button"
+				p:addCustomButton("Weapons",p.activate_shield_button,"Shield Capacity",function()
+					string.format("")	--global context for serious proton
+					if p.shield_count > 0 then
+						p.shield_active = true
+						if p:getShieldCount() > 1 then
+							p:setShieldsMax(p:getShieldMax(0)*1.1,p:getShieldMax(1)*1.1)
+						else
+							p:setShieldsMax(p:getShieldMax(0)*1.1)
+						end
+						p.shield_timer = 300
+						p.shield_count = p.shield_count - 1
+						p.shield_activated_message = "shield_activated_message"
+						p:addCustomMessage("Weapons",p.shield_activated_message,"The maximum shield strength has been increased")
+					end
+					p:removeCustom(p.activate_shield_button)
+					p.activate_shield_button = nil
+					if p.activate_shield_button_tac ~= nil then
+						p:removeCustom(p.activate_shield_button_tac)
+						p.activate_shield_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_shield_button_tac == nil then
+				p.activate_shield_button_tac = "activate_shield_button_tac"
+				p:addCustomButton("Tactical",p.activate_shield_button_tac,"Shield Capacity",function()
+					string.format("")	--global context for serious proton
+					if p.shield_count > 0 then
+						p.shield_active = true
+						if p:getShieldCount() > 1 then
+							p:setShieldsMax(p:getShieldMax(0)*1.1,p:getShieldMax(1)*1.1)
+						else
+							p:setShieldsMax(p:getShieldMax(0)*1.1)
+						end
+						p.shield_timer = 300
+						p.shield_count = p.shield_count - 1
+						p.shield_activated_message_tac = "shield_activated_message_tac"
+						p:addCustomMessage("Tactical",p.shield_activated_message_tac,"The maximum shield strength has been increased")
+					end
+					p:removeCustom(p.activate_shield_button_tac)
+					p.activate_shield_button_tac = nil
+					if p.activate_shield_button ~= nil then
+						p:removeCustom(p.activate_shield_button)
+						p.activate_shield_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmManeuverButton(p,console)
+	if console == "Helms" then
+		if p:hasPlayerAtPosition("Helms") then
+			if p.activate_maneuver_button == nil then
+				p.activate_maneuver_button = "activate_maneuver_button"
+				p:addCustomButton("Helms",p.activate_maneuver_button,"Spin Speed",function()
+					string.format("")	--global context for serious proton
+					if p.maneuver_count > 0 then
+						p.maneuver_active = true
+						p:setRotationMaxSpeed(p:getRotationMaxSpeed()*1.1)
+						p.maneuver_timer = 300
+						p.maneuver_count = p.maneuver_count - 1
+						p.maneuver_activated_message = "maneuver_activated_message"
+						p:addCustomMessage("Helms",p.maneuver_activated_message,"The maximum spin speed has been increased")
+					end
+					p:removeCustom(p.activate_maneuver_button)
+					p.activate_maneuver_button = nil
+					if p.activate_maneuver_button_tac ~= nil then
+						p:removeCustom(p.activate_maneuver_button_tac)
+						p.activate_maneuver_button_tac = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Tactical" then
+		if p:hasPlayerAtPosition("Tactical") then
+			if p.activate_maneuver_button_tac == nil then
+				p.activate_maneuver_button_tac = "activate_maneuver_button_tac"
+				p:addCustomButton("Tactical",p.activate_maneuver_button_tac,"Spin Speed",function()
+					string.format("")	--global context for serious proton
+					if p.maneuver_count > 0 then
+						p.maneuver_active = true
+						p:setRotationMaxSpeed(p:getRotationMaxSpeed()*1.1)
+						p.maneuver_timer = 300
+						p.maneuver_count = p.maneuver_count - 1
+						p.maneuver_activated_message_tac = "maneuver_activated_message_tac"
+						p:addCustomMessage("Tactical",p.maneuver_activated_message_tac,"The maximum spin speed has been increased")
+					end
+					p:removeCustom(p.activate_maneuver_button_tac)
+					p.activate_maneuver_button_tac = nil
+					if p.activate_maneuver_button ~= nil then
+						p:removeCustom(p.activate_maneuver_button)
+						p.activate_maneuver_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wmBatteryButton(p,console)
+	if console == "Engineering" then
+		if p:hasPlayerAtPosition("Engineering") then
+			if p.activate_battery_button == nil then
+				p.activate_battery_button = "activate_battery_button"
+				p:addCustomButton("Engineering",p.activate_battery_button,"Battery Capacity",function()
+					string.format("")	--global context for serious proton
+					if p.battery_count > 0 then
+						p.battery_active = true
+						p:setMaxEnergy(p:getMaxEnergy()*1.1)
+						p.battery_timer = 300
+						p.battery_count = p.battery_count - 1
+						p.battery_activated_message = "battery_activated_message"
+						p:addCustomMessage("Engineering",p.battery_activated_message,"The maximum battery capacity has been increased")
+					end
+					p:removeCustom(p.activate_battery_button)
+					p.activate_battery_button = nil
+					if p.activate_battery_button_plus ~= nil then
+						p:removeCustom(p.activate_battery_button_plus)
+						p.activate_battery_button_plus = nil
+					end
+				end)
+			end
+		end
+	elseif console == "Engineering+" then
+		if p:hasPlayerAtPosition("Engineering+") then
+			if p.activate_battery_button_plus == nil then
+				p.activate_battery_button_plus = "activate_battery_button_plus"
+				p:addCustomButton("Engineering+",p.activate_battery_button_plus,"Battery Capacity",function()
+					string.format("")	--global context for serious proton
+					if p.battery_count > 0 then
+						p.battery_active = true
+						p:setMaxEnergy(p:getMaxEnergy()*1.1)
+						p.battery_timer = 300
+						p.battery_count = p.battery_count - 1
+						p.battery_activated_message_plus = "battery_activated_message_plus"
+						p:addCustomMessage("Engineering+",p.battery_activated_message_plus,"The maximum battery capacity has been increased")
+					end
+					p:removeCustom(p.activate_battery_button_plus)
+					p.activate_battery_button_plus = nil
+					if p.activate_battery_button ~= nil then
+						p:removeCustom(p.activate_battery_button)
+						p.activate_battery_button = nil
+					end
+				end)
+			end
+		end
+	end
+end
+function wreckModCombatBoost(x,y)
+	local full_desc = wreck_mod_type[19].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[19].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_boost = playerShipStats[p:getTypeName()].cm_boost
+		if current_boost ~= nil then
+			if p.cm_boost_count == nil then
+				p.cm_boost_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.cm_boost_count = p.cm_boost_count + 1
+				if p.cm_boost_active == nil then
+					p.cm_boost_active = false
+				end
+				if not p.cm_boost_active then
+					wmCombatBoostButton(p,"Helms")
+					wmCombatBoostButton(p,"Tactical")
+				end
+			else
+				if p.cm_boost_count > 0 then
+					p.cm_boost_count = p.cm_boost_count - 1
+					if p.cm_boost_count < 1 then
+						if p.activate_cm_boost_button ~= nil then
+							p:removeCustom(p.activate_cm_boost_button)
+							p.activate_cm_boost_button = nil
+						end
+						if p.activate_cm_boost_button_tac ~= nil then
+							p:removeCustom(p.activate_cm_boost_button_tac)
+							p.activate_cm_boost_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Helms") then
+						p.lost_cm_boost_message = "lost_cm_boost_message"
+						p:addCustomMessage("Helms",p.lost_cm_boost_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_cm_boost_message_tac = "lost_cm_boost_message_tac"
+						p:addCustomMessage("Tactical",p.lost_cm_boost_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost - 100,playerShipStats[p:getTypeName()].cm_strafe)
+					if p:hasPlayerAtPosition("Helms") then
+						p.reduced_cm_boost_message = "reduced_cm_boost_message"
+						p:addCustomMessage("Helms",p.reduced_cm_boost_message,string.format("The %s retrieved reduced the combat maneuver boost (forward direction) ability",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_cm_boost_message_tac = "reduced_cm_boost_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_cm_boost_message_tac,string.format("The %s retrieved reduced the combat maneuver boost (forward direction) ability",full_desc))
+					end
+				end
+			end
+		else	--cannot determine current combat maneuver values since player template type not in player ship stats table
+			if p:hasPlayerAtPosition("Helms") then
+				p.cm_boost_message = "cm_boost_message"
+				p:addCustomMessage("Helms",p.cm_boost_message,string.format("The %s retrieved has had no effect on combat maneuver",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.cm_boost_message_tac = "cm_boost_message_tac"
+				p:addCustomMessage("Tactical",p.cm_boost_message_tac,string.format("The %s retrieved has had no effect on combat maneuver",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModCombatStrafe(x,y)
+	local full_desc = wreck_mod_type[20].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[20].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_strafe = playerShipStats[p:getTypeName()].cm_strafe
+		if current_strafe ~= nil then
+			if p.cm_strafe_count == nil then
+				p.cm_strafe_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.cm_strafe_count = p.cm_strafe_count + 1
+				if p.cm_strafe_active == nil then
+					p.cm_strafe_active = false
+				end
+				if not p.cm_strafe_active then
+					wmCombatStrafeButton(p,"Helms")
+					wmCombatStrafeButton(p,"Tactical")
+				end
+			else
+				if p.cm_strafe_count > 0 then
+					p.cm_strafe_count = p.cm_strafe_count - 1
+					if p.cm_strafe_count < 1 then
+						if p.activate_cm_strafe_button ~= nil then
+							p:removeCustom(p.activate_cm_strafe_button)
+							p.activate_cm_strafe_button = nil
+						end
+						if p.activate_cm_strafe_button_tac ~= nil then
+							p:removeCustom(p.activate_cm_strafe_button_tac)
+							p.activate_cm_strafe_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Helms") then
+						p.lost_cm_strafe_message = "lost_cm_strafe_message"
+						p:addCustomMessage("Helms",p.lost_cm_strafe_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_cm_strafe_message_tac = "lost_cm_strafe_message_tac"
+						p:addCustomMessage("Tactical",p.lost_cm_strafe_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost,playerShipStats[p:getTypeName()].cm_strafe - 100)
+					if p:hasPlayerAtPosition("Helms") then
+						p.reduced_cm_strafe_message = "reduced_cm_strafe_message"
+						p:addCustomMessage("Helms",p.reduced_cm_strafe_message,string.format("The %s retrieved reduced the combat maneuver strafe (sideways direction) ability",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_cm_strafe_message_tac = "reduced_cm_strafe_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_cm_strafe_message_tac,string.format("The %s retrieved reduced the combat maneuver strafe (sideways direction) ability",full_desc))
+					end
+				end
+			end
+		else	--cannot determine current combat maneuver values since player template type not in player ship stats table
+			if p:hasPlayerAtPosition("Helms") then
+				p.cm_strafe_message = "cm_strafe_message"
+				p:addCustomMessage("Helms",p.cm_strafe_message,string.format("The %s retrieved has had no effect on combat maneuver",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.cm_strafe_message_tac = "cm_strafe_message_tac"
+				p:addCustomMessage("Tactical",p.cm_strafe_message_tac,string.format("The %s retrieved has had no effect on combat maneuver",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModProbeStock(x,y)
+	local full_desc = wreck_mod_type[21].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[21].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		local current_stock = p:getScanProbeCount()
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if current_stock < p:getMaxScanProbeCount() then
+				p:setScanProbeCount(p:getMaxScanProbeCount())
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_restocked_probes_message = "artifact_restocked_probes_message"
+					p:addCustomMessage("Relay",p.artifact_restocked_probes_message,string.format("The %s retrieved has restocked your probes",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_restocked_probes_message_ops = "artifact_restocked_probes_message_ops"
+					p:addCustomMessage("Operations",p.artifact_restocked_probes_message_ops,string.format("The %s retrieved has restocked your probes",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_probes_message = "artifact_probes_message"
+					p:addCustomMessage("Relay",p.artifact_probes_message,string.format("The %s retrieved does not effect probe stock",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_probes_message_ops = "artifact_probes_message_ops"
+					p:addCustomMessage("Operations",p.artifact_probes_message_ops,string.format("The %s retrieved does not effect probe stock",full_desc))
+				end
+			end
+		else
+			if current_stock > 0 then
+				p:setScanProbeCount(math.floor(current_stock/2))
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_depleted_probes_message = "artifact_depleted_probes_message"
+					p:addCustomMessage("Relay",p.artifact_depleted_probes_message,string.format("The %s retrieved has depleted probe stock",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_depleted_probes_message_ops = "artifact_depleted_probes_message_ops"
+					p:addCustomMessage("Operations",p.artifact_depleted_probes_message_ops,string.format("The %s retrieved has depleted probe stock",full_desc))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.artifact_probes_message = "artifact_probes_message"
+					p:addCustomMessage("Relay",p.artifact_probes_message,string.format("The %s retrieved does not effect probe stock",full_desc))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.artifact_probes_message_ops = "artifact_probes_message_ops"
+					p:addCustomMessage("Operations",p.artifact_probes_message_ops,string.format("The %s retrieved does not effect probe stock",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBeamDamage(x,y)
+	local full_desc = wreck_mod_type[22].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[22].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("beamweapons") then
+			if p.beam_damage_count == nil then
+				p.beam_damage_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.beam_damage_count = p.beam_damage_count + 1
+				if p.beam_damage_active == nil then
+					p.beam_damage_active = false
+				end
+				if not p.beam_damage_active then
+					wmBeamDamageButton(p,"Weapons")
+					wmBeamDamageButton(p,"Tactical")
+				end
+			else
+				if p.beam_damage_count > 0 then
+					p.beam_damage_count = p.beam_damage_count - 1
+					if p.beam_damage_count < 1 then
+						if p.activate_beam_damage_button ~= nil then
+							p:removeCustom(p.activate_beam_damage_button)
+							p.activate_beam_damage_button = nil
+						end
+						if p.activate_beam_damage_button_tac ~= nil then
+							p:removeCustom(p.activate_beam_damage_button_tac)
+							p.activate_beam_damage_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Weapons") then
+						p.lost_beam_damage_message = "lost_beam_damage_message"
+						p:addCustomMessage("Weapons",p.lost_beam_damage_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_beam_damage_message_tac = "lost_beam_damage_message_tac"
+						p:addCustomMessage("Tactical",p.lost_beam_damage_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					local bi = 0
+					repeat
+						p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi),p:getBeamWeaponDamage(bi)*.9)
+						bi = bi + 1
+					until(p:getBeamWeaponRange(bi) < 1)
+					if p:hasPlayerAtPosition("Weapons") then
+						p.reduced_beam_damage_message = "reduced_beam_damage_message"
+						p:addCustomMessage("Weapons",p.reduced_beam_damage_message,string.format("The %s retrieved reduced beam damage",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_beam_damage_message_tac = "reduced_beam_damage_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_beam_damage_message_tac,string.format("The %s retrieved reduced beam damage",full_desc))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Weapons") then
+				p.beam_message = "beam_message"
+				p:addCustomMessage("Weapons",p.beam_message,string.format("The %s retrieved has had no effect on your non-existent beam weapon system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.beam_message_tac = "beam_message_tac"
+				p:addCustomMessage("Tactical",p.beam_message_tac,string.format("The %s retrieved has had no effect on your non-existent beam weapon system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBeamCycle(x,y)
+	local full_desc = wreck_mod_type[23].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[23].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("beamweapons") then
+			if p.beam_cycle_count == nil then
+				p.beam_cycle_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.beam_cycle_count = p.beam_cycle_count + 1
+				if p.beam_cycle_active == nil then
+					p.beam_cycle_active = false
+				end
+				if not p.beam_cycle_active then
+					wmBeamCycleButton(p,"Weapons")
+					wmBeamCycleButton(p,"Tactical")
+				end
+			else
+				if p.beam_cycle_count > 0 then
+					p.beam_cycle_count = p.beam_cycle_count - 1
+					if p.beam_cycle_count < 1 then
+						if p.activate_beam_cycle_button ~= nil then
+							p:removeCustom(p.activate_beam_cycle_button)
+							p.activate_beam_cycle_button = nil
+						end
+						if p.activate_beam_cycle_button_tac ~= nil then
+							p:removeCustom(p.activate_beam_cycle_button_tac)
+							p.activate_beam_cycle_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Weapons") then
+						p.lost_beam_cycle_message = "lost_beam_cycle_message"
+						p:addCustomMessage("Weapons",p.lost_beam_cycle_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_beam_cycle_message_tac = "lost_beam_cycle_message_tac"
+						p:addCustomMessage("Tactical",p.lost_beam_cycle_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					local bi = 0
+					repeat
+						p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi)*1.1,p:getBeamWeaponDamage(bi))
+						bi = bi + 1
+					until(p:getBeamWeaponRange(bi) < 1)
+					if p:hasPlayerAtPosition("Weapons") then
+						p.reduced_beam_cycle_message = "reduced_beam_cycle_message"
+						p:addCustomMessage("Weapons",p.reduced_beam_cycle_message,string.format("The %s retrieved slowed beam cycle time",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_beam_cycle_message_tac = "reduced_beam_cycle_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_beam_cycle_message_tac,string.format("The %s retrieved slowed beam cycle time",full_desc))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Weapons") then
+				p.beam_message = "beam_message"
+				p:addCustomMessage("Weapons",p.beam_message,string.format("The %s retrieved has had no effect on your non-existent beam weapon system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.beam_message_tac = "beam_message_tac"
+				p:addCustomMessage("Tactical",p.beam_message_tac,string.format("The %s retrieved has had no effect on your non-existent beam weapon system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModMissileStock(x,y)
+	local full_desc = wreck_mod_type[24].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[24].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("missilesystem") then
+			local current_shortage = -1
+			local missle_type = {"Nuke","EMP","Mine","Homing","HVLI"}
+			for _, m_type in ipairs(missle_type) do
+				if p:getWeaponStorageMax(m_type) > 0 then
+					if p:getWeaponStorage(m_type) < p:getWeaponStorageMax(m_type) then
+						if p:getWeaponStorageMax(m_type) - p:getWeaponStorage(m_type) > current_shortage then
+							current_shortage = p:getWeaponStorageMax(m_type) - p:getWeaponStorage(m_type)
+							shortage_type = m_type
+						end
+					end
+				end
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				if current_shortage > 0 then
+					p:setWeaponStorage(shortage_type,p:getWeaponStorageMax(shortage_type))
+					if p:hasPlayerAtPosition("Weapons") then
+						p.artifact_restocked_missiles_message = "artifact_restocked_missiles_message"
+						p:addCustomMessage("Weapons",p.artifact_restocked_missiles_message,string.format("The %s retrieved has restocked your %ss",full_desc,shortage_type))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.artifact_restocked_missiles_message_tac = "artifact_restocked_missiles_message_tac"
+						p:addCustomMessage("Tactical",p.artifact_restocked_missiles_message_tac,string.format("The %s retrieved has restocked your %ss",full_desc,shortage_type))
+					end
+				else
+					if p:hasPlayerAtPosition("Weapons") then
+						p.artifact_missiles_message = "artifact_missiles_message"
+						p:addCustomMessage("Weapons",p.artifact_missiles_message,string.format("The %s retrieved does not effect missile stocks",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.artifact_missiles_message_tac = "artifact_missiles_message_tac"
+						p:addCustomMessage("Tactical",p.artifact_missiles_message_tac,string.format("The %s retrieved does not effect missile stocks",full_desc))
+					end
+				end
+			else
+				local plentiful_amount = 0
+				local plentiful_type = ""
+				for _, m_type in ipairs(missle_type) do
+					if p:getWeaponStorage(m_type) > plentiful_amount then
+						plentiful_amount = p:getWeaponStorage(m_type)
+						plentiful_type = m_type
+					end
+				end
+				if current_shortage > 0 then
+					if plentiful_amount > 0 then
+						p:setWeaponStorage(plentiful_type,math.floor(p:getWeaponStorage(plentiful_type)/2))
+						if p:hasPlayerAtPosition("Weapons") then
+							p.artifact_depleted_missiles_message = "artifact_depleted_missiles_message"
+							p:addCustomMessage("Weapons",p.artifact_depleted_missiles_message,string.format("The %s retrieved has depleted your stock of %ss",full_desc,plentiful_type))
+						end
+						if p:hasPlayerAtPosition("Tactical") then
+							p.artifact_depleted_missiles_message_tac = "artifact_depleted_missiles_message_tac"
+							p:addCustomMessage("Tactical",p.artifact_depleted_missiles_message_tac,string.format("The %s retrieved has depleted your stock of %ss",full_desc,plentiful_type))
+						end
+					else
+						if p:hasPlayerAtPosition("Weapons") then
+							p.artifact_missiles_message = "artifact_missiles_message"
+							p:addCustomMessage("Weapons",p.artifact_missiles_message,string.format("The %s retrieved does not effect missile stocks",full_desc))
+						end
+						if p:hasPlayerAtPosition("Tactical") then
+							p.artifact_missiles_message_tac = "artifact_missiles_message_tac"
+							p:addCustomMessage("Tactical",p.artifact_missiles_message_tac,string.format("The %s retrieved does not effect missile stocks",full_desc))
+						end
+					end
+				else
+					p:setWeaponStorage(plentiful_type,math.floor(p:getWeaponStorage(plentiful_type)/2))
+					if p:hasPlayerAtPosition("Weapons") then
+						p.artifact_depleted_missiles_message = "artifact_depleted_missiles_message"
+						p:addCustomMessage("Weapons",p.artifact_depleted_missiles_message,string.format("The %s retrieved has depleted your stock of %ss",full_desc,plentiful_type))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.artifact_depleted_missiles_message_tac = "artifact_depleted_missiles_message_tac"
+						p:addCustomMessage("Tactical",p.artifact_depleted_missiles_message_tac,string.format("The %s retrieved has depleted your stock of %ss",full_desc,plentiful_type))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Weapons") then
+				p.artifact_missiles_message = "artifact_missiles_message"
+				p:addCustomMessage("Weapons",p.artifact_missiles_message,string.format("The %s retrieved does not effect your non-existent missile system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.artifact_missiles_message_tac = "artifact_missiles_message_tac"
+				p:addCustomMessage("Tactical",p.artifact_missiles_message_tac,string.format("The %s retrieved does not effect your non-existent missile system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModImpulseSpeed(x,y)
+	local full_desc = wreck_mod_type[25].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[25].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p.impulse_count == nil then
+			p.impulse_count = 0
+		end
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p.impulse_count = p.impulse_count + 1
+			if p.impulse_active == nil then
+				p.impulse_active = false
+			end
+			if not p.impulse_active then
+				wmImpulseButton(p,"Helms")
+				wmImpulseButton(p,"Tactical")
+			end
+		else
+			if p.impulse_count > 0 then
+				p.impulse_count = p.impulse_count - 1
+				if p.impulse_count < 1 then
+					if p.activate_impulse_button ~= nil then
+						p:removeCustom(p.activate_impulse_button)
+						p.activate_impulse_button = nil
+					end
+					if p.activate_impulse_button_tac ~= nil then
+						p:removeCustom(p.activate_impulse_button_tac)
+						p.activate_impulse_button_tac = nil
+					end
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.lost_impulse_message = "lost_impulse_message"
+					p:addCustomMessage("Helms",p.lost_impulse_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.lost_impulse_message_tac = "lost_impulse_message_tac"
+					p:addCustomMessage("Tactical",p.lost_impulse_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+			else
+				p:setImpulseMaxSpeed(p:getImpulseMaxSpeed()*.9)
+				if p:hasPlayerAtPosition("Helms") then
+					p.reduced_impulse_message = "reduced_impulse_message"
+					p:addCustomMessage("Helms",p.reduced_impulse_message,string.format("The %s retrieved slowed maximum impulse speed",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.reduced_impulse_message_tac = "reduced_impulse_message_tac"
+					p:addCustomMessage("Tactical",p.reduced_impulse_message_tac,string.format("The %s retrieved slowed maximum impulse speed",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModWarpSpeed(x,y)
+	local full_desc = wreck_mod_type[26].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[26].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("warp") then
+			if p.warp_count == nil then
+				p.warp_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.warp_count = p.warp_count + 1
+				if p.warp_active == nil then
+					p.warp_active = false
+				end
+				if not p.warp_active then
+					wmWarpButton(p,"Helms")
+					wmWarpButton(p,"Tactical")
+				end
+			else
+				if p.warp_count > 0 then
+					p.warp_count = p.warp_count - 1
+					if p.warp_count < 1 then
+						if p.activate_warp_button ~= nil then
+							p:removeCustom(p.activate_warp_button)
+							p.activate_warp_button = nil
+						end
+						if p.activate_warp_button_tac ~= nil then
+							p:removeCustom(p.activate_warp_button_tac)
+							p.activate_warp_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Helms") then
+						p.lost_warp_message = "lost_warp_message"
+						p:addCustomMessage("Helms",p.lost_warp_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_warp_message_tac = "lost_warp_message_tac"
+						p:addCustomMessage("Tactical",p.lost_warp_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					p:setWarpSpeed(p:getWarpSpeed()*.9)
+					if p:hasPlayerAtPosition("Helms") then
+						p.reduced_warp_message = "reduced_warp_message"
+						p:addCustomMessage("Helms",p.reduced_warp_message,string.format("The %s retrieved slowed maximum warp speed",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_warp_message_tac = "reduced_warp_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_warp_message_tac,string.format("The %s retrieved slowed maximum warp speed",full_desc))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Helms") then
+				p.warp_message = "warp_message"
+				p:addCustomMessage("Helms",p.warp_message,string.format("The %s retrieved had no effect on your non-existent warp system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.warp_message_tac = "warp_message_tac"
+				p:addCustomMessage("Tactical",p.warp_message_tac,string.format("The %s retrieved had no effect on your non-existent warp system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModJumpRange(x,y)
+	local full_desc = wreck_mod_type[27].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[27].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("jumpdrive") then
+			if p.jump_count == nil then
+				p.jump_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.jump_count = p.jump_count + 1
+				if p.jump_active == nil then
+					p.jump_active = false
+				end
+				if not p.jump_active then
+					wmJumpButton(p,"Helms")
+					wmJumpButton(p,"Tactical")
+				end
+			else
+				if p.jump_count > 0 then
+					p.jump_count = p.jump_count - 1
+					if p.jump_count < 1 then
+						if p.activate_jump_button ~= nil then
+							p:removeCustom(p.activate_jump_button)
+							p.activate_jump_button = nil
+						end
+						if p.activate_jump_button_tac ~= nil then
+							p:removeCustom(p.activate_jump_button_tac)
+							p.activate_jump_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Helms") then
+						p.lost_jump_message = "lost_jump_message"
+						p:addCustomMessage("Helms",p.lost_jump_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_jump_message_tac = "lost_jump_message_tac"
+						p:addCustomMessage("Tactical",p.lost_jump_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					if p.max_jump_range == nil then
+						p.max_jump_range = 50000
+						p.min_jump_range = 5000
+					end
+					p:setJumpDriveRange(p.max_jump_range*.9)
+					p.max_jump_range = p.max_jump_range*.9
+					if p:hasPlayerAtPosition("Helms") then
+						p.reduced_jump_message = "reduced_jump_message"
+						p:addCustomMessage("Helms",p.reduced_jump_message,string.format("The %s retrieved reduced maximum jump range",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_jump_message_tac = "reduced_jump_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_jump_message_tac,string.format("The %s retrieved reduced maximum jump range",full_desc))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Helms") then
+				p.jump_message = "jump_message"
+				p:addCustomMessage("Helms",p.jump_message,string.format("The %s retrieved had no effect on your non-existent jump system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.jump_message_tac = "jump_message_tac"
+				p:addCustomMessage("Tactical",p.jump_message_tac,string.format("The %s retrieved had no effect on your non-existent jump system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModShieldMax(x,y)
+	local full_desc = wreck_mod_type[28].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[28].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p:hasSystem("frontshield") then
+			if p.shield_count == nil then
+				p.shield_count = 0
+			end
+			local scan_bonus = 0
+			if self:isScannedByFaction(p:getFaction()) then
+				scan_bonus = difficulty * 5
+			end
+			if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+				p.shield_count = p.shield_count + 1
+				if p.shield_active == nil then
+					p.shield_active = false
+				end
+				if not p.shield_active then
+					wmShieldButton(p,"Weapons")
+					wmShieldButton(p,"Tactical")
+				end
+			else
+				if p.shield_count > 0 then
+					p.shield_count = p.shield_count - 1
+					if p.shield_count < 1 then
+						if p.activate_shield_button ~= nil then
+							p:removeCustom(p.activate_shield_button)
+							p.activate_shield_button = nil
+						end
+						if p.activate_shield_button_tac ~= nil then
+							p:removeCustom(p.activate_shield_button_tac)
+							p.activate_shield_button_tac = nil
+						end
+					end
+					if p:hasPlayerAtPosition("Weapons") then
+						p.lost_shield_message = "lost_shield_message"
+						p:addCustomMessage("Weapons",p.lost_shield_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.lost_shield_message_tac = "lost_shield_message_tac"
+						p:addCustomMessage("Tactical",p.lost_shield_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+					end
+				else
+					if p:getShieldCount() > 1 then
+						p:setShieldsMax(p:getShieldMax(0)*.9,p:getShieldMax(1)*.9)
+					else
+						p:setShieldsMax(p:getShieldMax(0)*.9)
+					end
+					if p:hasPlayerAtPosition("Weapons") then
+						p.reduced_shield_message = "reduced_shield_message"
+						p:addCustomMessage("Weapons",p.reduced_shield_message,string.format("The %s retrieved reduced maximum shield strength",full_desc))
+					end
+					if p:hasPlayerAtPosition("Tactical") then
+						p.reduced_shield_message_tac = "reduced_shield_message_tac"
+						p:addCustomMessage("Tactical",p.reduced_shield_message_tac,string.format("The %s retrieved reduced maximum shield strength",full_desc))
+					end
+				end
+			end
+		else
+			if p:hasPlayerAtPosition("Weapons") then
+				p.shield_message = "shield_message"
+				p:addCustomMessage("Weapons",p.shield_message,string.format("The %s retrieved had no effect on your non-existent shield system",full_desc))
+			end
+			if p:hasPlayerAtPosition("Tactical") then
+				p.shield_message_tac = "shield_message_tac"
+				p:addCustomMessage("Tactical",p.shield_message_tac,string.format("The %s retrieved had no effect on your non-existent shield system",full_desc))
+			end
+		end
+	end)
+	return wma
+end
+function wreckModSpinSpeed(x,y)
+	local full_desc = wreck_mod_type[29].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[29].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p.maneuver_count == nil then
+			p.maneuver_count = 0
+		end
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p.maneuver_count = p.maneuver_count + 1
+			if p.maneuver_active == nil then
+				p.maneuver_active = false
+			end
+			if not p.maneuver_active then
+				wmManeuverButton(p,"Helms")
+				wmManeuverButton(p,"Tactical")
+			end
+		else
+			if p.maneuver_count > 0 then
+				p.maneuver_count = p.maneuver_count - 1
+				if p.maneuver_count < 1 then
+					if p.activate_maneuver_button ~= nil then
+						p:removeCustom(p.activate_maneuver_button)
+						p.activate_maneuver_button = nil
+					end
+					if p.activate_maneuver_button_tac ~= nil then
+						p:removeCustom(p.activate_maneuver_button_tac)
+						p.activate_maneuver_button_tac = nil
+					end
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.lost_maneuver_message = "lost_maneuver_message"
+					p:addCustomMessage("Helms",p.lost_maneuver_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.lost_maneuver_message_tac = "lost_maneuver_message_tac"
+					p:addCustomMessage("Tactical",p.lost_maneuver_message_tac,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+			else
+				p:setRotationMaxSpeed(p:getRotationMaxSpeed()*.9)
+				if p:hasPlayerAtPosition("Helms") then
+					p.reduced_maneuver_message = "reduced_maneuver_message"
+					p:addCustomMessage("Helms",p.reduced_maneuver_message,string.format("The %s retrieved reduced maximum spin speed",full_desc))
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.reduced_maneuver_message_tac = "reduced_maneuver_message_tac"
+					p:addCustomMessage("Tactical",p.reduced_maneuver_message_tac,string.format("The %s retrieved reduced maximum spin speed",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckModBatteryMax(x,y)
+	local full_desc = wreck_mod_type[30].scan_desc
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[30].desc,full_desc)
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--global context for serious proton
+		if p.battery_count == nil then
+			p.battery_count = 0
+		end
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			p.battery_count = p.battery_count + 1
+			if p.battery_active == nil then
+				p.battery_active = false
+			end
+			if not p.battery_active then
+				wmBatteryButton(p,"Engineering")
+				wmBatteryButton(p,"Engineering+")
+			end
+		else
+			if p.battery_count > 0 then
+				p.battery_count = p.battery_count - 1
+				if p.battery_count < 1 then
+					if p.activate_battery_button ~= nil then
+						p:removeCustom(p.activate_battery_button)
+						p.activate_battery_button = nil
+					end
+					if p.activate_battery_button_plus ~= nil then
+						p:removeCustom(p.activate_battery_button_plus)
+						p.activate_battery_button_plus = nil
+					end
+				end
+				if p:hasPlayerAtPosition("Engineering") then
+					p.lost_battery_message = "lost_battery_message"
+					p:addCustomMessage("Engineering",p.lost_battery_message,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.lost_battery_message_plus = "lost_battery_message_plus"
+					p:addCustomMessage("Engineering+",p.lost_battery_message_plus,string.format("The %s retrieved disabled a %s previously retrieved",full_desc,full_desc))
+				end
+			else
+				p:setMaxEnergy(p:getMaxEnergy()*.9)
+				if p:hasPlayerAtPosition("Engineering") then
+					p.reduced_battery_message = "reduced_battery_message"
+					p:addCustomMessage("Engineering",p.reduced_battery_message,string.format("The %s retrieved reduced maximum battery capacity",full_desc))
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.reduced_battery_message_plus = "reduced_battery_message_plus"
+					p:addCustomMessage("Engineering+",p.reduced_battery_message_plus,string.format("The %s retrieved reduced maximum battery capacity",full_desc))
+				end
+			end
+		end
+	end)
+	return wma
+end
+function wreckCargo(x,y)
+	local wreck_good = commonGoods[math.random(1,#commonGoods)]
+	local wma = Artifact():setPosition(x,y):setDescriptions(wreck_mod_type[31].desc,string.format("Cargo (type: %s)",wreck_good))
+	wreckModCommonArtifact(wma)
+	wma:onPickup(function(self,p)
+		string.format("")	--serious proton needs global context
+		local scan_bonus = 0
+		if self:isScannedByFaction(p:getFaction()) then
+			scan_bonus = difficulty * 5
+		end
+		if random(1,100) < base_wreck_mod_positive - (difficulty * wreck_mod_interval) + scan_bonus then
+			if p.cargo > 0 then
+				p.cargo = p.cargo - 1
+				if p.goods == nil then
+					p.goods = {}
+				end
+				if p.goods[wreck_good] == nil then
+					p.goods[wreck_good] = 0
+				end
+				p.goods[wreck_good] = p.goods[wreck_good] + 1
+				if p:hasPlayerAtPosition("Relay") then
+					p.good_added = "good_added"
+					p:addCustomMessage("Relay",p.good_added,string.format("One %s added to ship inventory",wreck_good))
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.good_added_ops = "good_added_ops"
+					p:addCustomMessage("Operations",p.good_added_ops,string.format("One %s added to ship inventory",wreck_good))
+				end
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.no_cargo_space = "no_cargo_space"
+					p:addCustomMessage("Relay",p.no_cargo_space,"No cargo space available. Cargo wasted")
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.no_cargo_space_ops = "no_cargo_space_ops"
+					p:addCustomMessage("Operations",p.no_cargo_space_ops,"No cargo space available. Cargo wasted")
+				end
+			end
+		else
+			self:explode()
+			p:setHull(p:getHull()-random(1,3))
+			if p:hasPlayerAtPosition("Relay") then
+				p.cargo_sabotage = "cargo_sabotage"
+				p:addCustomMessage("Relay",p.cargo_sabotage,"Booby trapped cargo container. Fortunately automated safety protocols transported the cargo container off the ship before too much damage was taken")
+			end
+			if p:hasPlayerAtPosition("Operations") then
+				p.cargo_sabotage_ops = "cargo_sabotage_ops"
+				p:addCustomMessage("Operations",p.cargo_sabotage_ops,"Booby trapped cargo container. Fortunately automated safety protocols transported the cargo container off the ship before too much damage was taken")
+			end
+		end
+	end)
+	return wma
 end
 -- Terrain and environment creation functions
 function setBorderZones()
@@ -1244,7 +3719,7 @@ function buildStationsPlus()
 		gx = adjList[rn][1]
 		gy = adjList[rn][2]
 	until(not neutralStationsRemain or not humanStationsRemain or not kraylorStationsRemain)
-	if diagnostic then print(string.format("Human stations: %i, Kraylor stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#neutralStationList)) end
+	if true then print(string.format("Human stations: %i, Kraylor stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#neutralStationList)) end
 	if not diagnostic then
 		local nebula_count = math.random(7,25)
 		local nebula_list = placeRandomListAroundPoint(Nebula,nebula_count,1,150000,0,0)
@@ -1369,17 +3844,21 @@ function placeInner()
 		if sizeTemplate == "Huge Station" then
 			humanStationStrength = humanStationStrength + 10
 			pStation.strength = 10
+			pStation:setShortRangeRadarRange(math.random(150,500)*100)
 		elseif sizeTemplate == "Large Station" then
 			humanStationStrength = humanStationStrength + 5
 			pStation.strength = 5
+			pStation:setShortRangeRadarRange(math.random(90,300)*100)
 		elseif sizeTemplate == "Medium Station" then
 			humanStationStrength = humanStationStrength + 3
 			pStation.strength = 3
+			pStation:setShortRangeRadarRange(math.random(60,200)*100)
 		else
 			humanStationStrength = humanStationStrength + 1
 			pStation.strength = 1
+			pStation:setShortRangeRadarRange(math.random(35,100)*100)
 		end
-		pStation:onDestruction(friendlyStationDestroyed)
+		pStation:onDestroyed(friendlyStationDestroyed)
 		table.insert(stationList,pStation)			--save station in general station list
 		table.insert(humanStationList,pStation)		--save station in friendly station list
 	end
@@ -1398,17 +3877,21 @@ function placeOuter()
 		if sizeTemplate == "Huge Station" then
 			kraylorStationStrength = kraylorStationStrength + 10
 			pStation.strength = 10
+			pStation:setShortRangeRadarRange(math.random(150,500)*100)
 		elseif sizeTemplate == "Large Station" then
 			kraylorStationStrength = kraylorStationStrength + 5
 			pStation.strength = 5
+			pStation:setShortRangeRadarRange(math.random(90,300)*100)
 		elseif sizeTemplate == "Medium Station" then
 			kraylorStationStrength = kraylorStationStrength + 3
 			pStation.strength = 3
+			pStation:setShortRangeRadarRange(math.random(60,200)*100)
 		else
 			kraylorStationStrength = kraylorStationStrength + 1
 			pStation.strength = 1
+			pStation:setShortRangeRadarRange(math.random(35,100)*100)
 		end
-		pStation:onDestruction(enemyStationDestroyed)
+		pStation:onDestroyed(enemyStationDestroyed)
 		table.insert(stationList,pStation)			--save station in general station list
 		table.insert(kraylorStationList,pStation)	--save station in enemy station list
 	end
@@ -1437,7 +3920,7 @@ function placeBorder()
 			pStation.strength = 1
 			neutralStationStrength = neutralStationStrength + 1
 		end
-		pStation:onDestruction(neutralStationDestroyed)
+		pStation:onDestroyed(neutralStationDestroyed)
 		table.insert(stationList,pStation)			--save station in general station list
 		table.insert(neutralStationList,pStation)	--save station in neutral station list
 	end
@@ -1819,7 +4302,7 @@ function mainGMButtons()
 	clearGMFunctions()
 	local playerShipCount = 0
 	local highestPlayerIndex = 0
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil then
 			if p:isValid() then
@@ -1828,10 +4311,39 @@ function mainGMButtons()
 			highestPlayerIndex = pidx
 		end
 	end
-	addGMFunction(string.format("+Player ships %i/%i",playerShipCount,highestPlayerIndex),playerShip)
+--	addGMFunction(string.format("+Player ships %i/%i",playerShipCount,highestPlayerIndex),playerShip)
 	addGMFunction("+Set Time Limit",setGameTimeLimit)
 	addGMFunction("+Show Player Info",setShowPlayerInfo)
 	addGMFunction("+debug",debugButtons)
+--[[	if predefined_player_ships ~= nil then
+		addGMFunction("Fixed->Random Names",function()
+			if #predefined_player_ships > 0 then
+				stored_fixed_names = {}
+				for i=1,#predefined_player_ships do
+					table.insert(stored_fixed_names,predefined_player_ships[i])
+				end
+			else
+				stored_fixed_names = nil
+			end
+			predefined_player_ships = nil
+			mainGMButtons()
+		end)
+	else
+		addGMFunction("Random->Fixed Names",function()
+			if stored_fixed_names ~= nil and #stored_fixed_names > 0 then
+				predefined_player_ships = {}
+				for i=1,#stored_fixed_names do
+					table.insert(predefined_player_ships,stored_fixed_names[i])
+				end
+			else
+				addGMMessage("No fixed names available. Either there never were any defined or they have all been used")
+				predefined_player_ships = nil
+			end
+			stored_fixed_names = nil
+			mainGMButtons()
+		end)
+	end
+--]]
 	GMBelligerentKraylors = nil
 	GMLimitedWar = nil
 	GMFullWar = nil
@@ -1872,7 +4384,7 @@ function setShowPlayerInfo()
 		setShowPlayerInfo()
 	end)
 	if show_player_info then
-		for pidx=1,8 do
+		for pidx=1,32 do
 			local p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				local player_name = p:getCallSign()
@@ -1922,190 +4434,180 @@ function setShowPlayerInfo()
 		end
 	end
 end
-function showPlayerInfoOnConsole(delta)
+function showPlayerInfoOnConsole(delta, p)
 	if show_player_info then
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				local player_name = p:getCallSign()
-				if p.player_info_timer == nil then
-					p.player_info_timer = delta + 5
+		local player_name = p:getCallSign()
+		if p.player_info_timer == nil then
+			p.player_info_timer = delta + 5
+		end
+		p.player_info_timer = p.player_info_timer - delta
+		if p.player_info_timer < 0 then
+			if show_only_player_name then
+				if p.show_name_helm then
+					if p:hasPlayerAtPosition("Helms") then
+						p.name_helm = "name_helm"
+						p:addCustomInfo("Helms",p.name_helm,player_name)
+					end
+				else
+					if p.name_helm ~= nil then
+						p:removeCustom(p.name_helm)
+						p.name_helm = nil
+					end
 				end
-				p.player_info_timer = p.player_info_timer - delta
-				if p.player_info_timer < 0 then
-					if show_only_player_name then
-						if p.show_name_helm then
-							if p:hasPlayerAtPosition("Helms") then
-								p.name_helm = "name_helm"
-								p:addCustomInfo("Helms",p.name_helm,player_name)
-							end
-						else
-							if p.name_helm ~= nil then
-								p:removeCustom(p.name_helm)
-								p.name_helm = nil
-							end
+				if p.show_name_weapons then
+					if p:hasPlayerAtPosition("Weapons") then
+						p.name_weapons = "name_weapons"
+						p:addCustomInfo("Weapons",p.name_weapons,player_name)
+					end
+				else
+					if p.name_weapons ~= nil then
+						p:removeCustom(p.name_weapons)
+						p.name_weapons = nil
+					end
+				end
+				if p.show_name_engineer then
+					if p:hasPlayerAtPosition("Engineering") then
+						p.name_engineer = "name_engineer"
+						p:addCustomInfo("Engineering",p.name_engineer,player_name)
+					end
+				else
+					if p.name_engineer ~= nil then
+						p:removeCustom(p.name_engineer)
+						p.name_engineer = nil
+					end
+				end
+				p.player_info_timer = delta + 5
+			else	--show player name and other info
+				if p.name_toggle == nil then
+					p.name_toggle = true
+				end
+				if p.name_toggle then	--show player name
+					if p.show_name_helm then
+						if p:hasPlayerAtPosition("Helms") then
+							p.name_helm = "name_helm"
+							p:addCustomInfo("Helms",p.name_helm,player_name)
 						end
-						if p.show_name_weapons then
-							if p:hasPlayerAtPosition("Weapons") then
-								p.name_weapons = "name_weapons"
-								p:addCustomInfo("Weapons",p.name_weapons,player_name)
-							end
-						else
-							if p.name_weapons ~= nil then
-								p:removeCustom(p.name_weapons)
-								p.name_weapons = nil
-							end
-						end
-						if p.show_name_engineer then
-							if p:hasPlayerAtPosition("Engineering") then
-								p.name_engineer = "name_engineer"
-								p:addCustomInfo("Engineering",p.name_engineer,player_name)
-							end
-						else
-							if p.name_engineer ~= nil then
-								p:removeCustom(p.name_engineer)
-								p.name_engineer = nil
-							end
-						end
-						p.player_info_timer = delta + 5
-					else	--show player name and other info
-						if p.name_toggle == nil then
-							p.name_toggle = true
-						end
-						if p.name_toggle then	--show player name
-							if p.show_name_helm then
-								if p:hasPlayerAtPosition("Helms") then
-									p.name_helm = "name_helm"
-									p:addCustomInfo("Helms",p.name_helm,player_name)
-								end
-							else
-								if p.name_helm ~= nil then
-									p:removeCustom(p.name_helm)
-									p.name_helm = nil
-								end
-							end
-							if p.show_name_weapons then
-								if p:hasPlayerAtPosition("Weapons") then
-									p.name_weapons = "name_weapons"
-									p:addCustomInfo("Weapons",p.name_weapons,player_name)
-								end
-							else
-								if p.name_weapons ~= nil then
-									p:removeCustom(p.name_weapons)
-									p.name_weapons = nil
-								end
-							end
-							if p.show_name_engineer then
-								if p:hasPlayerAtPosition("Engineering") then
-									p.name_engineer = "name_engineer"
-									p:addCustomInfo("Engineering",p.name_engineer,player_name)
-								end
-							else
-								if p.name_engineer ~= nil then
-									p:removeCustom(p.name_engineer)
-									p.name_engineer = nil
-								end
-							end
-							p.name_toggle = false
-							p.player_info_timer = delta + 5
-						else	--show other info
-							local ship_info = ""
-							info_choice = info_choice + 1
-							if info_choice > info_choice_max then
-								info_choice = 1
-							end
-							if info_choice == 1 then
-								ship_info = string.format("Repair Crew: %i",p:getRepairCrewCount())
-								if p.maxRepairCrew ~= nil then
-									ship_info = string.format("%s/%i",ship_info,p.maxRepairCrew)
-								end
-							elseif info_choice == 2 then
-								ship_info = string.format("Hull: %i/%i",math.floor(p:getHull()),math.floor(p:getHullMax()))
-							elseif info_choice == 3 then
-								ship_info = "Shield: "
-								if p:getShieldCount() == 1 then
-									ship_info = string.format("%s%i/%i",ship_info,math.floor(p:getShieldLevel(0)),math.floor(p:getShieldMax(0)))
-								else
-									ship_info = string.format("%sF:%i/%i R:%i/%i",ship_info,math.floor(p:getShieldLevel(0)),math.floor(p:getShieldMax(0)),math.floor(p:getShieldLevel(1)),math.floor(p:getShieldMax(1)))
-								end
-							elseif info_choice == 4 then
-								local beam_count = 0
-								for i=0,15 do
-									if p:getBeamWeaponRange(i) > 0 then
-										beam_count = beam_count + 1
-									end
-								end
-								ship_info = string.format("Beams: %i, Tubes: %i",beam_count,p:getWeaponTubeCount())
-							else
-								ship_info = p:getTypeName()
-								print(ship_info)
-								if ship_info == nil then
-									ship_info = string.format("Repair Crew: %i",p:getRepairCrewCount())
-								else
-									ship_info = string.format("Type: %s",ship_info)
-								end
-							end
-							if p.show_name_helm then
-								if p:hasPlayerAtPosition("Helms") then
-									p.name_helm = "name_helm"
-									p:addCustomInfo("Helms",p.name_helm,ship_info)
-								end
-							else
-								if p.name_helm ~= nil then
-									p:removeCustom(p.name_helm)
-									p.name_helm = nil
-								end
-							end
-							if p.show_name_weapons then
-								if p:hasPlayerAtPosition("Weapons") then
-									p.name_weapons = "name_weapons"
-									p:addCustomInfo("Weapons",p.name_weapons,ship_info)
-								end
-							else
-								if p.name_weapons ~= nil then
-									p:removeCustom(p.name_weapons)
-									p.name_weapons = nil
-								end
-							end
-							if p.show_name_engineer then
-								if p:hasPlayerAtPosition("Engineering") then
-									p.name_engineer = "name_engineer"
-									p:addCustomInfo("Engineering",p.name_engineer,ship_info)
-								end
-							else
-								if p.name_engineer ~= nil then
-									p:removeCustom(p.name_engineer)
-									p.name_engineer = nil
-								end
-							end
-							p.name_toggle = true
-							p.player_info_timer = delta + 3
+					else
+						if p.name_helm ~= nil then
+							p:removeCustom(p.name_helm)
+							p.name_helm = nil
 						end
 					end
+					if p.show_name_weapons then
+						if p:hasPlayerAtPosition("Weapons") then
+							p.name_weapons = "name_weapons"
+							p:addCustomInfo("Weapons",p.name_weapons,player_name)
+						end
+					else
+						if p.name_weapons ~= nil then
+							p:removeCustom(p.name_weapons)
+							p.name_weapons = nil
+						end
+					end
+					if p.show_name_engineer then
+						if p:hasPlayerAtPosition("Engineering") then
+							p.name_engineer = "name_engineer"
+							p:addCustomInfo("Engineering",p.name_engineer,player_name)
+						end
+					else
+						if p.name_engineer ~= nil then
+							p:removeCustom(p.name_engineer)
+							p.name_engineer = nil
+						end
+					end
+					p.name_toggle = false
+					p.player_info_timer = delta + 5
+				else	--show other info
+					local ship_info = ""
+					info_choice = info_choice + 1
+					if info_choice > info_choice_max then
+						info_choice = 1
+					end
+					if info_choice == 1 then
+						ship_info = string.format("Repair Crew: %i",p:getRepairCrewCount())
+						if p.maxRepairCrew ~= nil then
+							ship_info = string.format("%s/%i",ship_info,p.maxRepairCrew)
+						end
+					elseif info_choice == 2 then
+						ship_info = string.format("Hull: %i/%i",math.floor(p:getHull()),math.floor(p:getHullMax()))
+					elseif info_choice == 3 then
+						ship_info = "Shield: "
+						if p:getShieldCount() == 1 then
+							ship_info = string.format("%s%i/%i",ship_info,math.floor(p:getShieldLevel(0)),math.floor(p:getShieldMax(0)))
+						else
+							ship_info = string.format("%sF:%i/%i R:%i/%i",ship_info,math.floor(p:getShieldLevel(0)),math.floor(p:getShieldMax(0)),math.floor(p:getShieldLevel(1)),math.floor(p:getShieldMax(1)))
+						end
+					elseif info_choice == 4 then
+						local beam_count = 0
+						for i=0,15 do
+							if p:getBeamWeaponRange(i) > 0 then
+								beam_count = beam_count + 1
+							end
+						end
+						ship_info = string.format("Beams: %i, Tubes: %i",beam_count,p:getWeaponTubeCount())
+					else
+						ship_info = p:getTypeName()
+						print(ship_info)
+						if ship_info == nil then
+							ship_info = string.format("Repair Crew: %i",p:getRepairCrewCount())
+						else
+							ship_info = string.format("Type: %s",ship_info)
+						end
+					end
+					if p.show_name_helm then
+						if p:hasPlayerAtPosition("Helms") then
+							p.name_helm = "name_helm"
+							p:addCustomInfo("Helms",p.name_helm,ship_info)
+						end
+					else
+						if p.name_helm ~= nil then
+							p:removeCustom(p.name_helm)
+							p.name_helm = nil
+						end
+					end
+					if p.show_name_weapons then
+						if p:hasPlayerAtPosition("Weapons") then
+							p.name_weapons = "name_weapons"
+							p:addCustomInfo("Weapons",p.name_weapons,ship_info)
+						end
+					else
+						if p.name_weapons ~= nil then
+							p:removeCustom(p.name_weapons)
+							p.name_weapons = nil
+						end
+					end
+					if p.show_name_engineer then
+						if p:hasPlayerAtPosition("Engineering") then
+							p.name_engineer = "name_engineer"
+							p:addCustomInfo("Engineering",p.name_engineer,ship_info)
+						end
+					else
+						if p.name_engineer ~= nil then
+							p:removeCustom(p.name_engineer)
+							p.name_engineer = nil
+						end
+					end
+					p.name_toggle = true
+					p.player_info_timer = delta + 3
 				end
 			end
 		end
 	else	--not show player info
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				if p.name_helm ~= nil then
-					p:removeCustom(p.name_helm)
-					p.name_helm = nil
-				end
-				if p.name_weapons ~= nil then
-					p:removeCustom(p.name_weapons)
-					p.name_weapons = nil
-				end
-				if p.name_engineer ~= nil then
-					p:removeCustom(p.name_engineer)
-					p.name_engineer = nil
-				end
-			end
+		if p.name_helm ~= nil then
+			p:removeCustom(p.name_helm)
+			p.name_helm = nil
+		end
+		if p.name_weapons ~= nil then
+			p:removeCustom(p.name_weapons)
+			p.name_weapons = nil
+		end
+		if p.name_engineer ~= nil then
+			p:removeCustom(p.name_engineer)
+			p.name_engineer = nil
 		end
 	end
 end
-function playerShip()
+--[[function playerShip()
 	clearGMFunctions()
 	addGMFunction("-From Player ships",mainGMButtons)
 	addGMFunction("+Describe stock",describeStockPlayerShips)
@@ -2131,13 +4633,14 @@ function playerShip()
 	if playerSimian == nil then
 		addGMFunction("Simian",createPlayerShipSimian)
 	end
-end
+end]
 function describeSpecialPlayerShips()
 	clearGMFunctions()
 	addGMFunction("-Back",playerShip)
 	addGMFunction("Simian",function()
 		addGMMessage("Destroyer III(Simian):   Hull:100   Shield:110,70   Size:200   Repair Crew:3   Cargo:7   R.Strength:25\nDefault advanced engine:Jump (2U - 20U)   Speeds: Impulse:60   Spin:8   Accelerate:15   C.Maneuver: Boost:450 Strafe:150\nBeam:1 Turreted Speed:0.2\n   Arc:270   Direction:0   Range:0.8   Cycle:5   Damage:6\nTubes:5   Load Speed:8   Front:2   Side:2   Back:1\n   Direction:  0   Type:Exclude Mine\n   Direction:  0   Type:Exclude Mine\n   Direction:-90   Type:Homing Only\n   Direction: 90   Type:Homing Only\n   Direction:180   Type:Mine Only\n   Ordnance stock and type:\n      10 Homing\n      04 Nuke\n      06 Mine\n      05 EMP\n      10 HVLI\nBased on player missile cruiser: short jump drive (no warp), weaker hull, added one turreted beam, fewer tubes on side, fewer homing, nuke, EMP, mine and added HVLI")
 	end)	
+	--]]
 	--[[	ships not present yet
 	addGMFunction("Cobra",function()
 		addGMMessage("Striker LX(Cobra): Starfighter, Patrol   Hull:120   Shield:100,100   Size:200   Repair Crew:2   Cargo:4   R.Strength:15\nDefault advanced engine:Jump (2U - 20U)   Speeds: Impulse:65   Spin:15   Accelerate:30   C.Maneuver: Boost:250 Strafe:150   Energy:800\nBeams:2 Turreted Speed:0.1\n   Arc:100   Direction:-15   Range:1   Cycle:6   Damage:6\n   Arc:100   Direction: 15   Range:1   Cycle:6   Damage:6\nTubes:2 Rear:2\n   Direction:180   Type:Any\n   Direction:180   Type:Any\n   Ordnance stock and type:\n      4 Homing\n      2 Nuke\n      3 Mine\n      3 EMP\n      6 HVLI\nBased on Striker: stronger shields, more energy, jump drive (vs none), faster impulse, slower turret, two rear tubes (vs none)")
@@ -2152,7 +4655,7 @@ function describeSpecialPlayerShips()
 		addGMMessage("Maverick XP(Rogue): Corvette, Gunner   Hull:160   Shield:160,160   Size:200   Repair Crew:4   Cargo:5   R.Strength:23\nDefault advanced engine:Jump (2U - 20U)   Speeds: Impulse:65   Spin:15   Accelerate:40   C.Maneuver: Boost:400 Strafe:250\nBeams:1 Turreted Speed:0.1   5X heat   5X energy\n   Arc:270   Direction:  0   Range:1.8   Cycle:18   Damage:18\nTubes:3   Load Speed:8   Side:2   Back:1\n   Direction:-90   Type:Exclude Mine\n   Direction: 90   Type:Exclude Mine\n   Direction:180   Type:Mine Only\n   Ordnance stock and type:\n      06 Homing\n      02 Nuke\n      02 Mine\n      04 EMP\n      10 HVLI\nBased on Maverick: slower impulse, jump (no warp), one heavy slow turreted beam (not 6 beams)")
 	end)
 	--]]	
-end
+--[[end
 function describeStockPlayerShips()
 	clearGMFunctions()
 	addGMFunction("-Back",playerShip)
@@ -2210,58 +4713,19 @@ function describeStockPlayerShips()
 	addGMFunction("ZX-Lindworm",function()
 		addGMMessage("ZX-Lindworm: Starfighter, Bomber   Hull:75   Shield:40   Size:100   Repair Crew:1   Cargo:3   R.Strength:8\nDefault advanced engine:None   Speeds: Impulse:70   Spin:15   Accelerate:25   C.Maneuver: Boost:250 Strafe:150   Energy:400\nBeam:1 Turreted Speed:4\n   Arc:270   Direction:180   Range:0.7   Cycle:6   Damage:2\nTubes:3   Load Speed:10   Front:3 (small)\n   Direction: 0   Type:Any - small\n   Direction: 1   Type:HVLI Only - small\n   Direction:-1   Type:HVLI Only - small\n   Ordnance stock and type:\n      03 Homing\n      12 HVLI")
 	end)
-end
+end--]]
 function setGameTimeLimit()
 	clearGMFunctions()
 	addGMFunction("-From time limit",mainGMButtons)
-	addGMFunction("15 minutes", function()
-		gameTimeLimit = 15*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 15 minutes")
-	end)
-	addGMFunction("20 minutes", function()
-		gameTimeLimit = 20*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 20 minutes")
-	end)
-	addGMFunction("25 minutes", function()
-		gameTimeLimit = 25*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 25 minutes")
-	end)
-	addGMFunction("30 minutes", function()
-		gameTimeLimit = 30*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 30 minutes")
-	end)
-	addGMFunction("40 minutes", function()
-		gameTimeLimit = 40*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 40 minutes")
-	end)
-	addGMFunction("45 minutes", function()
-		gameTimeLimit = 45*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 45 minutes")
-	end)
-	addGMFunction("50 minutes", function()
-		gameTimeLimit = 50*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 50 minutes")
-	end)
-	addGMFunction("55 minutes", function()
-		gameTimeLimit = 55*60
-		plot2 = timedGame
-		playWithTimeLimit = true
-		addGMMessage("Game time limit set to 55 minutes")
-	end)
+	for gt=15,55,5 do
+		addGMFunction(string.format("%i minutes",gt),function()
+			defaultGameTimeLimitInMinutes = gt
+			gameTimeLimit = defaultGameTimeLimitInMinutes*60
+			plot2 = timedGame
+			playWithTimeLimit = true
+			addGMMessage(string.format("Game time limit set to %i minutes",defaultGameTimeLimitInMinutes))
+		end)
+	end
 end
 -- Dynamic game master buttons --
 function dynamicGameMasterButtons(delta)
@@ -2318,6 +4782,7 @@ function fullWarByGM()
 	GMFullWar = nil
 end
 -- New player ship types via GM button
+--[[
 function createPlayerShipNarsil()
 	playerNarsil = PlayerSpaceship():setTemplate("Atlantis"):setFaction("Human Navy"):setCallSign("Narsil")
 	playerNarsil:setTypeName("Proto-Atlantis")
@@ -2587,7 +5052,7 @@ function spinalShip(delta)
 			end	--spine weapon charge handling
 		end	--spine button handling
 	end	--valid player ship handling
-end
+end--]]
 --------------------------------
 -- Station creation functions --
 --------------------------------
@@ -5607,6 +8072,18 @@ function placeStation(x,y,name,faction,size)
 	if station:getFaction() == "Human Navy" then
 		faction_matters = 20
 	end
+	station.comms_data.system_repair = {}
+--	local check_out = station_size
+	for _, system in ipairs(system_list) do
+		local chance = 60 + size_matters
+		local eval = random(1,100)
+		station.comms_data.system_repair[system] = eval <= chance
+--		check_out = string.format("%s %s:%.1f/%i",check_out,system,eval,chance)
+	end
+--	print(station:getCallSign(),check_out)
+--	for name, val in pairs(station.comms_data.system_repair) do
+--		print(name, val)
+--	end
 	station.comms_data.probe_launch_repair =	random(1,100) <= (20 + size_matters + faction_matters)
 	station.comms_data.scan_repair =			random(1,100) <= (30 + size_matters + faction_matters)
 	station.comms_data.hack_repair =			random(1,100) <= (10 + size_matters + faction_matters)
@@ -6073,6 +8550,7 @@ function setFleets()
 	end
 end
 function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction, fleetName, shape)
+
 	if enemyFaction == nil then
 		enemyFaction = "Kraylor"
 	end
@@ -6080,49 +8558,22 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction, fleetNam
 		danger = 1
 	end
 	local enemyStrength = math.max(power * danger * difficulty, 5)
-	local enemy_position = 0
-	local sp = irandom(400,900)			--random spacing of spawned group
-	if shape == nil then
-		shape = "square"
-		if random(1,100) < 50 then
-			shape = "hexagonal"
-		end
+	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	local enemyList = {}
-	template_pool_size = 10
-	local template_pool = getTemplatePool(enemyStrength)
-	if #template_pool < 1 then
-		addGMMessage("Empty Template pool: fix excludes or other criteria")
-		return enemyList
-	end
-	template_pool_size = 5
-	local fleetPower = 0
-	local prefix = generateCallSignPrefix(1)
-	while enemyStrength > 0 do
-		local selected_template = template_pool[math.random(1,#template_pool)]
-		fleetPower = fleetPower + ship_template[selected_template].strength
-		local ship = ship_template[selected_template].create(enemyFaction,selected_template)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
+	for _, ship in ipairs(enemyList) do
 		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + ship_template[selected_template].strength
-			ship:onDestruction(enemyVesselDestroyed)
+			ship:onDestroyed(enemyVesselDestroyed)
 		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + ship_template[selected_template].strength
-			ship:onDestruction(friendlyVesselDestroyed)
+			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		enemy_position = enemy_position + 1
-		if shape == "none" or shape == "pyramid" or shape == "ambush" then
-			ship:setPosition(xOrigin,yOrigin)
-		else
-			ship:setPosition(xOrigin + formation_delta[shape].x[enemy_position] * sp, yOrigin + formation_delta[shape].y[enemy_position] * sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
+		ship:setCallSign(generateCallSign(nil,enemyFaction))
 		if fleetName ~= nil then
 			ship.fleet = fleetName
 		end
-		table.insert(enemyList, ship)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
-		enemyStrength = enemyStrength - ship_template[selected_template].strength
 	end
 	local increment = 360/#enemyList
 	local angle = random(0,360)
@@ -6248,7 +8699,7 @@ function setOptionalMissions()
 		beamTimeBase.comms_data.characterDescription = "He dabbles in ship system innovations. He's been working on improving beam weapons by reducing the amount of time between firing. I hear he's already installed some improvements on ships that have docked here previously"
 		beamTimeBase.comms_data.characterFunction = "shrinkBeamCycle"
 		if beamTimeGood == nil then
-			beamTimeBase.comms_data.characterGood = "gold pressed latinum"			
+			beamTimeBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			beamTimeBase.comms_data.characterGood = beamTimeGood
 			clueStation = nil
@@ -6290,7 +8741,7 @@ function setOptionalMissions()
 		spinBase.comms_data.characterDescription = "She tinkers with ship systems like engines and thrusters. She's consulted with the military on tuning spin time by increasing thruster power. She's got prototypes that are awaiting formal military approval before installation"
 		spinBase.comms_data.characterFunction = "increaseSpin"
 		if spinGood == nil then
-			spinBase.comms_data.characterGood = "gold pressed latinum"			
+			spinBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			spinBase.comms_data.characterGood = spinGood
 			clueStation = nil
@@ -6332,7 +8783,7 @@ function setOptionalMissions()
 		auxTubeBase.comms_data.characterDescription = "He specializes in miniaturization of weapons systems. He's come up with a way to add a missile tube and some missiles to any ship regardless of size or configuration"
 		auxTubeBase.comms_data.characterFunction = "addAuxTube"
 		if auxTubeGood == nil then
-			auxTubeBase.comms_data.characterGood = "gold pressed latinum"			
+			auxTubeBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			auxTubeBase.comms_data.characterGood = auxTubeGood
 			clueStation = nil
@@ -6374,7 +8825,7 @@ function setOptionalMissions()
 		coolBeamBase.comms_data.characterDescription = "She developed this technique for cooling beam systems so that they can be fired more often without burning out"
 		coolBeamBase.comms_data.characterFunction = "coolBeam"
 		if coolBeamGood == nil then
-			coolBeamBase.comms_data.characterGood = "gold pressed latinum"			
+			coolBeamBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			coolBeamBase.comms_data.characterGood = coolBeamGood
 			clueStation = nil
@@ -6416,7 +8867,7 @@ function setOptionalMissions()
 		longerBeamBase.comms_data.characterDescription = "He knows how to modify beam systems to extend their range"
 		longerBeamBase.comms_data.characterFunction = "longerBeam"
 		if longerBeamGood == nil then
-			longerBeamBase.comms_data.characterGood = "gold pressed latinum"			
+			longerBeamBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			longerBeamBase.comms_data.characterGood = longerBeamGood
 			clueStation = nil
@@ -6458,7 +8909,7 @@ function setOptionalMissions()
 		damageBeamBase.comms_data.characterDescription = "She can make your beams hit harder"
 		damageBeamBase.comms_data.characterFunction = "damageBeam"
 		if damageBeamGood == nil then
-			damageBeamBase.comms_data.characterGood = "gold pressed latinum"			
+			damageBeamBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			damageBeamBase.comms_data.characterGood = damageBeamGood
 			clueStation = nil
@@ -6500,7 +8951,7 @@ function setOptionalMissions()
 		moreMissilesBase.comms_data.characterDescription = "He can fit more missiles aboard your ship"
 		moreMissilesBase.comms_data.characterFunction = "moreMissiles"
 		if moreMissilesGood == nil then
-			moreMissilesBase.comms_data.characterGood = "gold pressed latinum"			
+			moreMissilesBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			moreMissilesBase.comms_data.characterGood = moreMissilesGood
 			clueStation = nil
@@ -6542,7 +8993,7 @@ function setOptionalMissions()
 		fasterImpulseBase.comms_data.characterDescription = "She can soup up your impulse engines"
 		fasterImpulseBase.comms_data.characterFunction = "fasterImpulse"
 		if fasterImpulseGood == nil then
-			fasterImpulseBase.comms_data.characterGood = "gold pressed latinum"			
+			fasterImpulseBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			fasterImpulseBase.comms_data.characterGood = fasterImpulseGood
 			clueStation = nil
@@ -6584,7 +9035,7 @@ function setOptionalMissions()
 		strongerHullBase.comms_data.characterDescription = "He can strengthen your hull"
 		strongerHullBase.comms_data.characterFunction = "strongerHull"
 		if strongerHullGood ~= nil then
-			strongerHullBase.comms_data.characterGood = "gold pressed latinum"			
+			strongerHullBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			strongerHullBase.comms_data.characterGood = strongerHullGood
 			clueStation = nil
@@ -6626,7 +9077,7 @@ function setOptionalMissions()
 		efficientBatteriesBase.comms_data.characterDescription = "She knows how to increase your maximum energy capacity by improving battery efficiency"
 		efficientBatteriesBase.comms_data.characterFunction = "efficientBatteries"
 		if efficientBatteriesGood == nil then
-			efficientBatteriesBase.comms_data.characterGood = "gold pressed latinum"			
+			efficientBatteriesBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			efficientBatteriesBase.comms_data.characterGood = efficientBatteriesGood
 			clueStation = nil
@@ -6668,7 +9119,7 @@ function setOptionalMissions()
 		strongerShieldsBase.comms_data.characterDescription = "He can strengthen your shields"
 		strongerShieldsBase.comms_data.characterFunction = "strongerShields"
 		if strongerShieldsGood == nil then
-			strongerShieldsBase.comms_data.characterGood = "gold pressed latinum"			
+			strongerShieldsBase.comms_data.characterGood = vapor_goods[math.random(1,#vapor_goods)]			
 		else
 			strongerShieldsBase.comms_data.characterGood = strongerShieldsGood
 			clueStation = nil
@@ -6725,8 +9176,15 @@ function shrinkBeamCycle()
 					end
 					if partQuantity > 0 then
 						comms_source.shrinkBeamCycleUpgrade = "done"
-						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-						comms_source.cargo = comms_source.cargo + 1
+						local upgrade_value = .75
+						if partQuantity > 1 then
+							upgrade_value = .6
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+							comms_source.cargo = comms_source.cargo + 2
+						else
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+							comms_source.cargo = comms_source.cargo + 1
+						end
 						local bi = 0
 						repeat
 							local tempArc = comms_source:getBeamWeaponArc(bi)
@@ -6734,10 +9192,10 @@ function shrinkBeamCycle()
 							local tempRng = comms_source:getBeamWeaponRange(bi)
 							local tempCyc = comms_source:getBeamWeaponCycleTime(bi)
 							local tempDmg = comms_source:getBeamWeaponDamage(bi)
-							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng,tempCyc * .75,tempDmg)
+							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng,tempCyc * upgrade_value,tempDmg)
 							bi = bi + 1
 						until(comms_source:getBeamWeaponRange(bi) < 1)
-						setCommsMessage("After accepting your gift, he reduced your Beam cycle time by 25%")
+						setCommsMessage(string.format("After accepting your gift, he reduced your Beam cycle time by %i%%",math.floor((1-upgrade_value)*100)))
 					else
 						setCommsMessage(string.format("%s requires %s for the upgrade",ctd.character,ctd.characterGood))
 					end
@@ -6758,6 +9216,7 @@ function shrinkBeamCycle()
 			else
 				setCommsMessage("Your ship type does not support a beam weapon upgrade.")				
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6772,10 +9231,17 @@ function increaseSpin()
 				end
 				if partQuantity > 0 then
 					comms_source.increaseSpinUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.cargo = comms_source.cargo + 1
-					comms_source:setRotationMaxSpeed(comms_source:getRotationMaxSpeed()*1.5)
-					setCommsMessage(string.format("Ship spin speed increased by 50%% after you gave %s to %s",ctd.characterGood,ctd.character))
+					local upgrade_value = 1.5
+					if partQuantity > 1 then
+						upgrade_value = 1.8
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+						comms_source.cargo = comms_source.cargo + 2
+					else
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.cargo = comms_source.cargo + 1
+					end
+					comms_source:setRotationMaxSpeed(comms_source:getRotationMaxSpeed()*upgrade_value)
+					setCommsMessage(string.format("Ship spin speed increased by %i%% after you gave %s to %s",math.floor((upgrade_value-1)*100),ctd.characterGood,ctd.character))
 				else
 					setCommsMessage(string.format("%s requires %s for the spin upgrade",ctd.character,ctd.characterGood))
 				end
@@ -6784,6 +9250,7 @@ function increaseSpin()
 				comms_source:setRotationMaxSpeed(comms_source:getRotationMaxSpeed()*1.5)
 				setCommsMessage(string.format("%s: I increased the speed your ship spins by 50%%. Normally, I'd require %s, but seeing as you're going out to take on the Kraylors, we worked it out",ctd.character,ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6802,15 +9269,23 @@ function addAuxTube()
 				end
 				if partQuantity > 0 and luxQuantity > 0 then
 					comms_source.auxTubeUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.goods["luxury"] = comms_source.goods["luxury"] - 1
-					comms_source.cargo = comms_source.cargo + 2
+					local upgrade_value = 2
+					if luxQuantity > 1 then
+						upgrade_value = 4
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.goods["luxury"] = comms_source.goods["luxury"] - 2
+						comms_source.cargo = comms_source.cargo + 3
+					else
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.goods["luxury"] = comms_source.goods["luxury"] - 1
+						comms_source.cargo = comms_source.cargo + 2
+					end
 					local originalTubes = comms_source:getWeaponTubeCount()
 					local newTubes = originalTubes + 1
 					comms_source:setWeaponTubeCount(newTubes)
 					comms_source:setWeaponTubeExclusiveFor(originalTubes, "Homing")
-					comms_source:setWeaponStorageMax("Homing", comms_source:getWeaponStorageMax("Homing") + 2)
-					comms_source:setWeaponStorage("Homing", comms_source:getWeaponStorage("Homing") + 2)
+					comms_source:setWeaponStorageMax("Homing", comms_source:getWeaponStorageMax("Homing") + upgrade_value)
+					comms_source:setWeaponStorage("Homing", comms_source:getWeaponStorage("Homing") + upgrade_value)
 					setCommsMessage(string.format("%s thanks you for the %s and the luxury and installs a homing missile tube for you",ctd.character,ctd.characterGood))
 				else
 					setCommsMessage(string.format("%s requires %s and luxury for the missile tube",ctd.character,ctd.characterGood))
@@ -6825,6 +9300,7 @@ function addAuxTube()
 				comms_source:setWeaponStorage("Homing", comms_source:getWeaponStorage("Homing") + 2)
 				setCommsMessage(string.format("%s installs a homing missile tube for you. The %s required was requisitioned from wartime contingency supplies",ctd.character,ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6840,14 +9316,21 @@ function coolBeam()
 					end
 					if partQuantity > 0 then
 						comms_source.coolBeamUpgrade = "done"
-						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-						comms_source.cargo = comms_source.cargo + 1
+						local upgrade_value = .5
+						if partQuantity > 1 then
+							upgrade_value = .4
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+							comms_source.cargo = comms_source.cargo + 2
+						else
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+							comms_source.cargo = comms_source.cargo + 1
+						end
 						local bi = 0
 						repeat
-							comms_source:setBeamWeaponHeatPerFire(bi,comms_source:getBeamWeaponHeatPerFire(bi) * 0.5)
+							comms_source:setBeamWeaponHeatPerFire(bi,comms_source:getBeamWeaponHeatPerFire(bi) * upgrade_value)
 							bi = bi + 1
 						until(comms_source:getBeamWeaponRange(bi) < 1)
-						setCommsMessage("Beam heat generation reduced by 50%")
+						setCommsMessage(string.format("Beam heat generation reduced by %i%%",math.floor((1-upgrade_value)*100)))
 					else
 						setCommsMessage(string.format("%s says she needs %s before she can cool your beams",ctd.character,ctd.characterGood))
 					end
@@ -6863,6 +9346,7 @@ function coolBeam()
 			else
 				setCommsMessage("Your ship type does not support a beam weapon upgrade.")				
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6886,8 +9370,15 @@ function longerBeam()
 					if partQuantity > 0 then
 						if optionalMissionDiagnostic then print("player has enough of the right goods") end
 						comms_source.longerBeamUpgrade = "done"
-						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-						comms_source.cargo = comms_source.cargo + 1
+						local upgrade_value = 1.25
+						if partQuantity > 1 then
+							upgrade_value = 1.4
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+							comms_source.cargo = comms_source.cargo + 2
+						else
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+							comms_source.cargo = comms_source.cargo + 1
+						end
 						local bi = 0
 						repeat
 							local tempArc = comms_source:getBeamWeaponArc(bi)
@@ -6895,11 +9386,11 @@ function longerBeam()
 							local tempRng = comms_source:getBeamWeaponRange(bi)
 							local tempCyc = comms_source:getBeamWeaponCycleTime(bi)
 							local tempDmg = comms_source:getBeamWeaponDamage(bi)
-							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng * 1.25,tempCyc,tempDmg)
+							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng * upgrade_value,tempCyc,tempDmg)
 							bi = bi + 1
 						until(comms_source:getBeamWeaponRange(bi) < 1)
 						if optionalMissionDiagnostic then print("beam range extended") end
-						setCommsMessage(string.format("%s extended your beam range by 25%% and says thanks for the %s",ctd.character,ctd.characterGood))
+						setCommsMessage(string.format("%s extended your beam range by %i%% and says thanks for the %s",ctd.character,math.floor((upgrade_value-1)*100),ctd.characterGood))
 					else
 						setCommsMessage(string.format("%s requires %s for the upgrade",ctd.character,ctd.characterGood))
 					end
@@ -6922,6 +9413,7 @@ function longerBeam()
 			else
 				setCommsMessage("Your ship type does not support a beam weapon upgrade.")				
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6937,8 +9429,15 @@ function damageBeam()
 					end
 					if partQuantity > 0 then
 						comms_source.damageBeamUpgrade = "done"
-						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-						comms_source.cargo = comms_source.cargo + 1
+						local upgrade_value = 1.2
+						if partQuantity > 1 then
+							upgrade_value = 1.3
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+							comms_source.cargo = comms_source.cargo + 2
+						else
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+							comms_source.cargo = comms_source.cargo + 1
+						end
 						local bi = 0
 						repeat
 							local tempArc = comms_source:getBeamWeaponArc(bi)
@@ -6946,10 +9445,10 @@ function damageBeam()
 							local tempRng = comms_source:getBeamWeaponRange(bi)
 							local tempCyc = comms_source:getBeamWeaponCycleTime(bi)
 							local tempDmg = comms_source:getBeamWeaponDamage(bi)
-							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng,tempCyc,tempDmg*1.2)
+							comms_source:setBeamWeapon(bi,tempArc,tempDir,tempRng,tempCyc,tempDmg*upgrade_value)
 							bi = bi + 1
 						until(comms_source:getBeamWeaponRange(bi) < 1)
-						setCommsMessage(string.format("%s increased your beam damage by 20%% and stores away the %s",ctd.character,ctd.characterGood))
+						setCommsMessage(string.format("%s increased your beam damage by %i%% and stores away the %s",ctd.character,math.floor((upgrade_value-1)*100),ctd.characterGood))
 					else
 						setCommsMessage(string.format("%s requires %s for the upgrade",ctd.character,ctd.characterGood))
 					end
@@ -6970,6 +9469,7 @@ function damageBeam()
 			else
 				setCommsMessage("Your ship type does not support a beam weapon upgrade.")				
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -6985,13 +9485,20 @@ function moreMissiles()
 					end
 					if partQuantity > 0 then
 						comms_source.moreMissilesUpgrade = "done"
-						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-						comms_source.cargo = comms_source.cargo + 1
+						local upgrade_value = 1.25
+						if partQuantity > 1 then
+							upgrade_value = 1.4
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+							comms_source.cargo = comms_source.cargo + 2
+						else
+							comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+							comms_source.cargo = comms_source.cargo + 1
+						end
 						local missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
 						for _, missile_type in ipairs(missile_types) do
-							comms_source:setWeaponStorageMax(missile_type, math.ceil(comms_source:getWeaponStorageMax(missile_type)*1.25))
+							comms_source:setWeaponStorageMax(missile_type, math.ceil(comms_source:getWeaponStorageMax(missile_type)*upgrade_value))
 						end
-						setCommsMessage(string.format("%s: You can now store at least 25%% more missiles. I appreciate the %s",ctd.character,ctd.characterGood))
+						setCommsMessage(string.format("%s: You can now store at least %i%% more missiles. I appreciate the %s",ctd.character,math.floor((upgrade_value-1)*100),ctd.characterGood))
 					else
 						setCommsMessage(string.format("%s needs %s for the upgrade",ctd.character,ctd.characterGood))
 					end
@@ -7006,6 +9513,7 @@ function moreMissiles()
 			else
 				setCommsMessage("Your ship type does not support a missile storage capacity upgrade.")				
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -7020,10 +9528,17 @@ function fasterImpulse()
 				end
 				if partQuantity > 0 then
 					comms_source.fasterImpulseUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.cargo = comms_source.cargo + 1
-					comms_source:setImpulseMaxSpeed(comms_source:getImpulseMaxSpeed()*1.25)
-					setCommsMessage(string.format("%s: Your impulse engines now push you up to 25%% faster. Thanks for the %s",ctd.character,ctd.characterGood))
+					local upgrade_value = 1.25
+					if partQuantity > 1 then
+						upgrade_value = 1.4
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+						comms_source.cargo = comms_source.cargo + 2
+					else
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.cargo = comms_source.cargo + 1
+					end
+					comms_source:setImpulseMaxSpeed(comms_source:getImpulseMaxSpeed()*upgrade_value)
+					setCommsMessage(string.format("%s: Your impulse engines now push you up to %i%% faster. Thanks for the %s",ctd.character,math.floor((upgrade_value-1)*100),ctd.characterGood))
 				else
 					setCommsMessage(string.format("You need to bring %s to %s for the upgrade",ctd.characterGood,ctd.character))
 				end
@@ -7032,6 +9547,7 @@ function fasterImpulse()
 				comms_source:setImpulseMaxSpeed(comms_source:getImpulseMaxSpeed()*1.25)
 				setCommsMessage(string.format("%s: Your impulse engines now push you up to 25%% faster. I didn't need %s after all. Go run circles around those blinking Kraylors",ctd.character,ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -7046,11 +9562,18 @@ function strongerHull()
 				end
 				if partQuantity > 0 then
 					comms_source.strongerHullUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.cargo = comms_source.cargo + 1
-					comms_source:setHullMax(comms_source:getHullMax()*1.5)
+					local upgrade_value = 1.5
+					if partQuantity > 1 then
+						upgrade_value = 1.8
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+						comms_source.cargo = comms_source.cargo + 2
+					else
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.cargo = comms_source.cargo + 1
+					end
+					comms_source:setHullMax(comms_source:getHullMax()*upgrade_value)
 					comms_source:setHull(comms_source:getHullMax())
-					setCommsMessage(string.format("%s: Thank you for the %s. Your hull is 50%% stronger",ctd.character,ctd.characterGood))
+					setCommsMessage(string.format("%s: Thank you for the %s. Your hull is %i%% stronger",ctd.character,math.floor((upgrade_value-1)*100),ctd.characterGood))
 				else
 					setCommsMessage(string.format("%s: I need %s before I can increase your hull strength",ctd.character,ctd.characterGood))
 				end
@@ -7060,6 +9583,7 @@ function strongerHull()
 				comms_source:setHull(comms_source:getHullMax())
 				setCommsMessage(string.format("%s: I made your hull 50%% stronger. I scrounged some %s from around here since you are on the Kraylor offense team",ctd.character,ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -7074,11 +9598,18 @@ function efficientBatteries()
 				end
 				if partQuantity > 0 then
 					comms_source.efficientBatteriesUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.cargo = comms_source.cargo + 1
-					comms_source:setMaxEnergy(comms_source:getMaxEnergy()*1.25)
+					local upgrade_value = 1.25
+					if partQuantity > 1 then
+						upgrade_value = 1.4
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+						comms_source.cargo = comms_source.cargo + 2
+					else
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.cargo = comms_source.cargo + 1
+					end
+					comms_source:setMaxEnergy(comms_source:getMaxEnergy()*upgrade_value)
 					comms_source:setEnergy(comms_source:getMaxEnergy())
-					setCommsMessage(string.format("%s: I appreciate the %s. You have a 25%% greater energy capacity due to increased battery efficiency",ctd.character,ctd.characterGood))
+					setCommsMessage(string.format("%s: I appreciate the %s. You have a %i%% greater energy capacity due to increased battery efficiency",ctd.character,ctd.characterGood,math.floor((upgrade_value-1)*100)))
 				else
 					setCommsMessage(string.format("%s: You need to bring me some %s before I can increase your battery efficiency",ctd.character,ctd.characterGood))
 				end
@@ -7088,6 +9619,7 @@ function efficientBatteries()
 				comms_source:setEnergy(comms_source:getMaxEnergy())
 				setCommsMessage(string.format("%s increased your battery efficiency by 25%% without the need for %s due to the pressing military demands on your ship",ctd.character,ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -7102,14 +9634,21 @@ function strongerShields()
 				end
 				if partQuantity > 0 then
 					comms_source.strongerShieldsUpgrade = "done"
-					comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
-					comms_source.cargo = comms_source.cargo + 1
-					if comms_source:getShieldCount() == 1 then
-						comms_source:setShieldsMax(comms_source:getShieldMax(0)*1.2)
+					local upgrade_value = 1.2
+					if partQuantity > 1 then
+						upgrade_value = 1.4
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 2
+						comms_source.cargo = comms_source.cargo + 2
 					else
-						comms_source:setShieldsMax(comms_source:getShieldMax(0)*1.2,comms_source:getShieldMax(1)*1.2)
+						comms_source.goods[ctd.characterGood] = comms_source.goods[ctd.characterGood] - 1
+						comms_source.cargo = comms_source.cargo + 1
 					end
-					setCommsMessage(string.format("%s: I've raised your shield maximum by 20%%, %s. Thanks for bringing the %s",ctd.character,comms_source:getCallSign(),ctd.characterGood))
+					if comms_source:getShieldCount() == 1 then
+						comms_source:setShieldsMax(comms_source:getShieldMax(0)*upgrade_value)
+					else
+						comms_source:setShieldsMax(comms_source:getShieldMax(0)*upgrade_value,comms_source:getShieldMax(1)*upgrade_value)
+					end
+					setCommsMessage(string.format("%s: I've raised your shield maximum by %i%%, %s. Thanks for bringing the %s",ctd.character,math.floor((upgrade_value-1)*100),comms_source:getCallSign(),ctd.characterGood))
 				else
 					setCommsMessage(string.format("%s: You need to provide %s before I can raise your shield strength",ctd.character,ctd.characterGood))
 				end
@@ -7122,6 +9661,7 @@ function strongerShields()
 				end
 				setCommsMessage(string.format("%s: Congratulations, %s, your shields are 20%% stronger. Don't worry about the %s. Go kick those Kraylors outta here",ctd.character,comms_source:getCallSign(),ctd.characterGood))
 			end
+			addCommsReply("Back",commsStation)
 		end)
 	end
 end
@@ -7132,6 +9672,16 @@ function commsStation()
     if comms_target.comms_data == nil then
         comms_target.comms_data = {}
     end
+    local stype = comms_target:getTypeName()
+	local has_fighters = "no"
+	local has_refit_drive = "no"
+	if stype == "Large Station" then
+		has_fighters = "friend"
+	end
+	if stype == "Huge Station" then
+		has_fighters = "friend"
+		has_refit_drive = "friend"
+	end
     mergeTables(comms_target.comms_data, {
         friendlyness = random(0.0, 100.0),
         weapons = {
@@ -7153,11 +9703,17 @@ function commsStation()
             reinforcements = "friend",
             preorder = "friend",
             activatedefensefleet = "neutral",
+            fighters = has_fighters,
+            refitDrive = has_refit_drive,
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = math.random(125,175),
             activatedefensefleet = 20,
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -7200,6 +9756,7 @@ function handleDockedState()
     if comms_target:areEnemiesInRange(20000) then
 		oMsg = oMsg .. "\nForgive us if we seem a little distracted. We are carefully monitoring the enemies nearby."
 	end
+	oMsg = string.format("%s\n\nReputation: %i",oMsg,math.floor(comms_source:getReputationPoints()))
 	setCommsMessage(oMsg)
 	local missilePresence = 0
 	local missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
@@ -7215,7 +9772,7 @@ function handleDockedState()
 			addCommsReply("I need ordnance restocked", function()
 				local ctd = comms_target.comms_data
 				if stationCommsDiagnostic then print("in restock function") end
-				setCommsMessage("What type of ordnance?")
+				setCommsMessage(string.format("What type of ordnance?\n\nReputation: %i",math.floor(comms_source:getReputationPoints())))
 				if stationCommsDiagnostic then print(string.format("player nuke weapon storage max: %.1f",comms_source:getWeaponStorageMax("Nuke"))) end
 				if comms_source:getWeaponStorageMax("Nuke") > 0 then
 					if stationCommsDiagnostic then print("player can fire nukes") end
@@ -7328,20 +9885,58 @@ function handleDockedState()
 		if comms_target.comms_data.jump_overcharge then
 			service_status = string.format("%s\nMay overcharge jump drive",service_status)
 		end
+		service_status = string.format("%s\nMay repair the following primary systems:",service_status)		
+		local line_item_count = 0
+		for _, system in ipairs(system_list) do
+			if comms_target.comms_data.system_repair[system] then
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = service_status .. system .. "  "
+				line_item_count = line_item_count + 1
+			end
+		end
+		service_status = string.format("%s\nMay repair the following secondary systems:",service_status)
+		line_item_count = 0	
 		if comms_target.comms_data.probe_launch_repair then
-			service_status = string.format("%s\nMay repair probe launch system",service_status)
+			if line_item_count == 0 or line_item_count >= 3 then
+				service_status = service_status .. "\n    "
+				line_item_count = 0
+			end
+			service_status = string.format("%sprobe launch system   ",service_status)
+			line_item_count = line_item_count + 1
 		end
 		if comms_target.comms_data.hack_repair then
-			service_status = string.format("%s\nMay repair hacking system",service_status)
+			if line_item_count == 0 or line_item_count >= 3 then
+				service_status = service_status .. "\n    "
+				line_item_count = 0
+			end
+			service_status = string.format("%shacking system   ",service_status)
+			line_item_count = line_item_count + 1
 		end
 		if comms_target.comms_data.scan_repair then
-			service_status = string.format("%s\nMay repair scanners",service_status)
+			if line_item_count == 0 or line_item_count >= 3 then
+				service_status = service_status .. "\n    "
+				line_item_count = 0
+			end
+			service_status = string.format("%sscanners   ",service_status)
+			line_item_count = line_item_count + 1
 		end
 		if comms_target.comms_data.combat_maneuver_repair then
-			service_status = string.format("%s\nMay repair combat maneuver",service_status)
+			if line_item_count == 0 or line_item_count >= 3 then
+				service_status = service_status .. "\n    "
+				line_item_count = 0
+			end
+			service_status = string.format("%scombat maneuver   ",service_status)
+			line_item_count = line_item_count + 1
 		end
 		if comms_target.comms_data.self_destruct_repair then
-			service_status = string.format("%s\nMay repair self destruct system",service_status)
+			if line_item_count == 0 or line_item_count >= 3 then
+				service_status = service_status .. "\n    "
+				line_item_count = 0
+			end
+			service_status = string.format("%sself destruct system   ",service_status)
 		end
 		setCommsMessage(service_status)
 		addCommsReply("Back", commsStation)
@@ -7381,9 +9976,32 @@ function handleDockedState()
 	if not offer_repair and comms_target.comms_data.self_destruct_repair and not comms_source:getCanSelfDestruct() then
 		offer_repair = true
 	end
+	local system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
+	for _, system in ipairs(system_list) do
+		if not offer_repair and comms_source:getSystemHealthMax(system) < 1 and comms_target.comms_data.system_repair[system] then
+			offer_repair = true
+			break
+		end
+	end
 	if offer_repair then
 		addCommsReply("Repair ship system",function()
-			setCommsMessage("What system would you like repaired?")
+			setCommsMessage(string.format("What system would you like repaired?\n\nReputation: %i",math.floor(comms_source:getReputationPoints())))
+			for _, system in ipairs(system_list) do
+				if comms_target.comms_data.system_repair[system] then
+					if comms_source:getSystemHealthMax(system) < 1 then
+						addCommsReply(string.format("Repair %s (current max is %i%%) (5 Rep)",system,math.floor(comms_source:getSystemHealthMax(system)*100)),function()
+							if comms_source:takeReputationPoints(5) then
+								comms_source:setSystemHealthMax(system,1)
+								comms_source:setSystemHealth(system,1)
+								setCommsMessage(string.format("%s has been repaired",system))
+							else
+								setCommsMessage("Insufficient reputation")
+							end
+							addCommsReply("Back", commsStation)
+						end)
+					end
+				end
+			end
 			if comms_target.comms_data.probe_launch_repair then
 				if not comms_source:getCanLaunchProbe() then
 					addCommsReply("Repair probe launch system (5 Rep)",function()
@@ -7480,7 +10098,7 @@ function handleDockedState()
     			else
     				setCommsMessage("Insufficient reputation")
     			end
-				addCommsReply("Back", mainMenu)
+				addCommsReply("Back", commsStation)
     		end)
 		end
     end
@@ -7512,11 +10130,13 @@ function handleDockedState()
 					end
 				end
 			end
+			addCommsReply("Back",commsStation)
 		end)	--end station info comms reply branch
 	end
 	if enemyEverDetected then
 		addCommsReply("Why the yellow neutral border zones?", function()
 			setCommsMessage("Each neutral border zone is equipped with sensors and an auto-transmitter. If the sensors detect enemy forces in the zone, the auto-transmitter sends encoded zone identifying details through subspace. Human navy ships are equipped to recognize this data and color code the appropriate zone on the science and relay consoles.")
+			addCommsReply("Back",commsStation)
 		end)
 	end
 	if ctd.character ~= nil then
@@ -7653,6 +10273,22 @@ function handleDockedState()
 			end
 		end
 	end
+    local ptype = comms_source:getTypeName()
+    if isAllowedTo(comms_target.comms_data.services.fighters) then
+		if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+			addCommsReply("Visit fighter bay", function()
+				handleBuyShips()
+			end)
+		end
+    end
+    if isAllowedTo(comms_target.comms_data.services.refitDrive) then
+        if comms_source:hasWarpDrive() ~= comms_source:hasJumpDrive() then
+            -- logical XOR with hasWarpDrive and hasJumpDrive
+            addCommsReply("Refit your ships drive", function()
+                handleChangeDrive()
+            end)
+        end
+    end
 	addCommsReply("Visit cartography office", function()
 		if comms_target.cartographer_description == nil then
 			local clerk_choice = math.random(1,3)
@@ -7664,14 +10300,14 @@ function handleDockedState()
 				comms_target.cartographer_description = "The clerk behind the desk glances at you then returns to preening her feathers."
 			end
 		end
-		setCommsMessage(string.format("%s\n\nYou can examine the brochure on the coffee table, talk to the apprentice cartographer or talk to the master cartographer",comms_target.cartographer_description))
+		setCommsMessage(string.format("%s\n\nYou can examine the brochure on the coffee table, talk to the apprentice cartographer or talk to the master cartographer.\n\nReputation: %i",comms_target.cartographer_description,math.floor(comms_source:getReputationPoints())))
 		addCommsReply("What's the difference between the apprentice and the master?", function()
 			setCommsMessage("The clerk responds in a bored voice, 'The apprentice knows the local area and is learning the broader area. The master knows the local and the broader area but can't be bothered with the local area'")
 			addCommsReply("Back",commsStation)
 		end)
 		addCommsReply(string.format("Examine brochure (%i rep)",getCartographerCost()),function()
 			if comms_source:takeReputationPoints(getCartographerCost()) then
-				setCommsMessage("The brochure has a list of nearby stations and has a list of goods nearby")
+				setCommsMessage(string.format("The brochure has a list of nearby stations and has a list of goods nearby.\n\nReputation: %i",math.floor(comms_source:getReputationPoints())))
 				addCommsReply(string.format("Examine station list (%i rep)",getCartographerCost()), function()
 					if comms_source:takeReputationPoints(getCartographerCost()) then
 						local brochure_stations = ""
@@ -7728,6 +10364,7 @@ function handleDockedState()
 						if obj.typeName == "SpaceStation" then
 							if not obj:isEnemy(comms_target) then
 								if obj.comms_data.characterDescription ~= nil then
+									if distance_diagnostic then print("distance_diagnostic 1",obj,sx,sy) end
 									local sd = distance(obj,sx, sy)
 									if random(0,1) < (1 - (sd/30000)) then
 										table.insert(upgrade_stations,obj)
@@ -7931,6 +10568,12 @@ function handleDockedState()
 		end)
 		addCommsReply("Back",commsStation)
 	end)
+	if comms_source:isFriendly(comms_target) then
+		addCommsReply("Visit the office of wartime statistics",function()
+			wartimeStatistics()
+			addCommsReply("Back",commsStation)
+		end)
+	end
 	local goodCount = 0
 	for good, goodData in pairs(ctd.goods) do
 		goodCount = goodCount + 1
@@ -8006,73 +10649,91 @@ function handleDockedState()
 					end
 				end
 			end
-			if ctd.trade.food and comms_source.goods ~= nil and comms_source.goods.food ~= nil and comms_source.goods.food.quantity > 0 then
-				for good, goodData in pairs(ctd.goods) do
-					addCommsReply(string.format("Trade food for %s",good), function()
-						local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
-						if goodData["quantity"] < 1 then
-							goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
-						else
-							goodData["quantity"] = goodData["quantity"] - 1
-							if comms_source.goods == nil then
-								comms_source.goods = {}
+			if ctd.trade.food then
+				if comms_source.goods ~= nil then
+					if comms_source.goods.food ~= nil then
+						if comms_source.goods.food > 0 then
+							for good, goodData in pairs(ctd.goods) do
+								addCommsReply(string.format("Trade food for %s",good), function()
+									local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
+									if goodData["quantity"] < 1 then
+										goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
+									else
+										goodData["quantity"] = goodData["quantity"] - 1
+										if comms_source.goods == nil then
+											comms_source.goods = {}
+										end
+										if comms_source.goods[good] == nil then
+											comms_source.goods[good] = 0
+										end
+										comms_source.goods[good] = comms_source.goods[good] + 1
+										comms_source.goods["food"] = comms_source.goods["food"] - 1
+										goodTransactionMessage = goodTransactionMessage .. "\nTraded"
+									end
+									setCommsMessage(goodTransactionMessage)
+									addCommsReply("Back", commsStation)
+								end)
 							end
-							if comms_source.goods[good] == nil then
-								comms_source.goods[good] = 0
-							end
-							comms_source.goods[good] = comms_source.goods[good] + 1
-							comms_source.goods["food"] = comms_source.goods["food"] - 1
-							goodTransactionMessage = goodTransactionMessage .. "\nTraded"
 						end
-						setCommsMessage(goodTransactionMessage)
-						addCommsReply("Back", commsStation)
-					end)
+					end
 				end
 			end
-			if ctd.trade.medicine and comms_source.goods ~= nil and comms_source.goods.medicine ~= nil and comms_source.goods.medicine.quantity > 0 then
-				for good, goodData in pairs(ctd.goods) do
-					addCommsReply(string.format("Trade medicine for %s",good), function()
-						local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
-						if goodData["quantity"] < 1 then
-							goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
-						else
-							goodData["quantity"] = goodData["quantity"] - 1
-							if comms_source.goods == nil then
-								comms_source.goods = {}
+			if ctd.trade.medicine then
+				if comms_source.goods ~= nil then
+					if comms_source.goods.medicine ~= nil then
+						if comms_source.goods.medicine > 0 then
+							for good, goodData in pairs(ctd.goods) do
+								addCommsReply(string.format("Trade medicine for %s",good), function()
+									local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
+									if goodData["quantity"] < 1 then
+										goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
+									else
+										goodData["quantity"] = goodData["quantity"] - 1
+										if comms_source.goods == nil then
+											comms_source.goods = {}
+										end
+										if comms_source.goods[good] == nil then
+											comms_source.goods[good] = 0
+										end
+										comms_source.goods[good] = comms_source.goods[good] + 1
+										comms_source.goods["medicine"] = comms_source.goods["medicine"] - 1
+										goodTransactionMessage = goodTransactionMessage .. "\nTraded"
+									end
+									setCommsMessage(goodTransactionMessage)
+									addCommsReply("Back", commsStation)
+								end)
 							end
-							if comms_source.goods[good] == nil then
-								comms_source.goods[good] = 0
-							end
-							comms_source.goods[good] = comms_source.goods[good] + 1
-							comms_source.goods["medicine"] = comms_source.goods["medicine"] - 1
-							goodTransactionMessage = goodTransactionMessage .. "\nTraded"
 						end
-						setCommsMessage(goodTransactionMessage)
-						addCommsReply("Back", commsStation)
-					end)
+					end
 				end
 			end
-			if ctd.trade.luxury and comms_source.goods ~= nil and comms_source.goods.luxury ~= nil and comms_source.goods.luxury.quantity > 0 then
-				for good, goodData in pairs(ctd.goods) do
-					addCommsReply(string.format("Trade luxury for %s",good), function()
-						local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
-						if goodData[quantity] < 1 then
-							goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
-						else
-							goodData["quantity"] = goodData["quantity"] - 1
-							if comms_source.goods == nil then
-								comms_source.goods = {}
+			if ctd.trade.luxury then
+				if comms_source.goods ~= nil then
+					if comms_source.goods.luxury ~= nil then
+						if comms_source.goods.luxury > 0 then
+							for good, goodData in pairs(ctd.goods) do
+								addCommsReply(string.format("Trade luxury for %s",good), function()
+									local goodTransactionMessage = string.format("Type: %s,  Quantity: %i",good,goodData["quantity"])
+									if goodData[quantity] < 1 then
+										goodTransactionMessage = goodTransactionMessage .. "\nInsufficient station inventory"
+									else
+										goodData["quantity"] = goodData["quantity"] - 1
+										if comms_source.goods == nil then
+											comms_source.goods = {}
+										end
+										if comms_source.goods[good] == nil then
+											comms_source.goods[good] = 0
+										end
+										comms_source.goods[good] = comms_source.goods[good] + 1
+										comms_source.goods["luxury"] = comms_source.goods["luxury"] - 1
+										goodTransactionMessage = goodTransactionMessage .. "\nTraded"
+									end
+									setCommsMessage(goodTransactionMessage)
+									addCommsReply("Back", commsStation)
+								end)
 							end
-							if comms_source.goods[good] == nil then
-								comms_source.goods[good] = 0
-							end
-							comms_source.goods[good] = comms_source.goods[good] + 1
-							comms_source.goods["luxury"] = comms_source.goods["luxury"] - 1
-							goodTransactionMessage = goodTransactionMessage .. "\nTraded"
 						end
-						setCommsMessage(goodTransactionMessage)
-						addCommsReply("Back", commsStation)
-					end)
+					end
 				end
 			end
 			addCommsReply("Back", commsStation)
@@ -8115,6 +10776,7 @@ function masterCartographer()
 			for _, obj in ipairs(nearby_objects) do
 				if obj.typeName == "SpaceStation" then
 					if not obj:isEnemy(comms_target) then
+						if distance_diagnostic then print("distance_diagnostic 2",comms_target,obj) end
 						station_distance = distance(comms_target,obj)
 						if station_distance > 50000 then
 							if obj.comms_data.characterDescription ~= nil then
@@ -8139,6 +10801,7 @@ function masterCartographer()
 			for _, obj in ipairs(nearby_objects) do
 				if obj.typeName == "SpaceStation" then
 					if not obj:isEnemy(comms_target) then
+						if distance_diagnostic then print("distance_diagnostic 3",comms_target,obj) end
 						station_distance = distance(comms_target,obj)
 						if station_distance > 50000 then
 							stations_known = stations_known + 1
@@ -8163,7 +10826,7 @@ function masterCartographer()
 									station_details = string.format("%s\n%s:\n   %s",station_details,obj.comms_data.character,obj.comms_data.characterDescription)
 								end
 								local dsx, dsy = obj:getPosition()
-								comms_source:commandAddWaypoint(dsx,dsy)
+								comms_source:commandAddWaypoint(dsx,dsy)								
 								station_details = string.format("%s\nAdded waypoint %i to your navigation system for %s",station_details,comms_source:getWaypointCount(),obj:getCallSign())
 								setCommsMessage(station_details)
 								addCommsReply("Back",commsStation)
@@ -8184,6 +10847,7 @@ function masterCartographer()
 			for _, obj in ipairs(nearby_objects) do
 				if obj.typeName == "SpaceStation" then
 					if not obj:isEnemy(comms_target) then
+						if distance_diagnostic then print("distance_diagnostic 4",comms_target,obj) end
 						local station_distance = distance(comms_target,obj)
 						if station_distance > 50000 then
 							if obj.comms_data.goods ~= nil then
@@ -8197,6 +10861,7 @@ function masterCartographer()
 			end
 			for good, obj in pairs(by_goods) do
 				addCommsReply(good, function()
+					if distance_diagnostic then print("distance_diagnostic 5",comms_target,obj) end
 					local station_distance = distance(comms_target,obj)
 					local station_details = string.format("%s %s %s Distance:%.1fU",obj:getSectorName(),obj:getFaction(),obj:getCallSign(),station_distance/1000)
 					if obj.comms_data.goods ~= nil then
@@ -8231,6 +10896,7 @@ function masterCartographer()
 				setCommsMessage("What station?")
 				for i=1,#ctd.character_master do
 					local obj = ctd.character_master[i]
+					if distance_diagnostic then print("distance_diagnostic 6",comms_target,obj) end
 					station_distance = distance(comms_target,obj)
 					addCommsReply(obj:getCallSign(), function()
 						local station_details = string.format("%s %s %s Distance:%.1fU",obj:getSectorName(),obj:getFaction(),obj:getCallSign(),station_distance/1000)
@@ -8272,7 +10938,7 @@ function getCartographerCost(service)
 	elseif service == "master" then
 		base_cost = 10
 	end
-	return math.ceil(base_cost * comms_data.reputation_cost_multipliers[getFriendStatus()])
+	return math.ceil(base_cost * comms_target.comms_data.reputation_cost_multipliers[getFriendStatus()])
 end
 function setOptionalOrders()
 	optionalOrders = ""
@@ -8286,6 +10952,81 @@ function isAllowedTo(state)
     end
     return false
 end
+
+function handleChangeDrive()
+    if comms_source:hasWarpDrive() and not comms_source:hasJumpDrive() then
+        setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not comms_source:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                comms_source:setWarpDrive(false)
+                comms_source:setJumpDrive(true)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    if comms_source:hasJumpDrive() and not comms_source:hasWarpDrive() then
+        setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not comms_source:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                comms_source:setWarpDrive(true)
+                comms_source:setJumpDrive(false)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    addCommsReply("Back", commsStation)
+end
+
+function handleBuyShips()
+    setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+    addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", commsStation)
+    end)
+    addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterBomber")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", commsStation)
+    end)
+    addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+        if not comms_source:takeReputationPoints(getServiceCost("fighterScout")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(comms_source:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", commsStation)
+    end)
+    addCommsReply("Back", commsStation)
+end
+
 function handleWeaponRestock(weapon)
     if not comms_source:isDocked(comms_target) then 
 		setCommsMessage("You need to stay docked for that action.")
@@ -8358,6 +11099,7 @@ function handleUndockedState()
 		oMsg = oMsg .. "\nBe aware that if enemies in the area get much closer, we will be too busy to conduct business with you."
 	end
 	setCommsMessage(oMsg)
+	--[[	Disabling until I find the bug
 	if isAllowedTo(ctd.services.preorder) then
 		addCommsReply("Expedite Dock",function()
 			if comms_source.expedite_dock == nil then
@@ -8449,6 +11191,7 @@ function handleUndockedState()
 			addCommsReply("Back", commsStation)
 		end)
 	end	
+	--]]
  	addCommsReply("I need information", function()
 		setCommsMessage("What kind of information do you need?")
 		addCommsReply("What are my current orders?", function()
@@ -8540,20 +11283,63 @@ function handleUndockedState()
 			if comms_target.comms_data.jump_overcharge then
 				service_status = string.format("%s\nMay overcharge jump drive",service_status)
 			end
+			service_status = string.format("%s\nMay repair the following primary systems:",service_status)		
+			local line_item_count = 0
+--			local check_out = "undocked report " .. comms_target:getCallSign()
+			for _, system in ipairs(system_list) do
+--				local can_help = "N"
+				if comms_target.comms_data.system_repair[system] then
+--					can_help = "Yes"
+					if line_item_count == 0 or line_item_count >= 3 then
+						service_status = service_status .. "\n    "
+						line_item_count = 0
+					end
+					service_status = service_status .. system .. "  "
+					line_item_count = line_item_count + 1
+				end
+--				check_out = string.format("%s %s:%s",check_out,system,can_help)
+			end
+--			print(check_out)
+			service_status = string.format("%s\nMay repair the following secondary systems:",service_status)
+			line_item_count = 0	
 			if comms_target.comms_data.probe_launch_repair then
-				service_status = string.format("%s\nMay repair probe launch system",service_status)
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = string.format("%sprobe launch system   ",service_status)
+				line_item_count = line_item_count + 1
 			end
 			if comms_target.comms_data.hack_repair then
-				service_status = string.format("%s\nMay repair hacking system",service_status)
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = string.format("%shacking system   ",service_status)
+				line_item_count = line_item_count + 1
 			end
 			if comms_target.comms_data.scan_repair then
-				service_status = string.format("%s\nMay repair scanners",service_status)
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = string.format("%sscanners   ",service_status)
+				line_item_count = line_item_count + 1
 			end
 			if comms_target.comms_data.combat_maneuver_repair then
-				service_status = string.format("%s\nMay repair combat maneuver",service_status)
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = string.format("%scombat maneuver   ",service_status)
+				line_item_count = line_item_count + 1
 			end
 			if comms_target.comms_data.self_destruct_repair then
-				service_status = string.format("%s\nMay repair self destruct system",service_status)
+				if line_item_count == 0 or line_item_count >= 3 then
+					service_status = service_status .. "\n    "
+					line_item_count = 0
+				end
+				service_status = string.format("%sself destruct system   ",service_status)
 			end
 			setCommsMessage(service_status)
 			addCommsReply("Back", commsStation)
@@ -8577,6 +11363,12 @@ function handleUndockedState()
 				addCommsReply("Back", commsStation)
 			end)
 		end
+		if comms_source:isFriendly(comms_target) then
+			addCommsReply("Contact the office of wartime statistics",function()
+				wartimeStatistics()
+				addCommsReply("Back",commsStation)
+			end)
+		end
 		addCommsReply("Where can I find particular goods?", function()
 			local ctd = comms_target.comms_data
 			gkMsg = "Friendly stations often have food or medicine or both. Neutral stations may trade their goods for food, medicine or luxury."
@@ -8588,6 +11380,7 @@ function handleUndockedState()
 					local station = humanStationList[i]
 					if station ~= nil and station:isValid() then
 						local brainCheckChance = 60
+						if distance_diagnostic then print("distance_diagnostic 7",comms_target,station) end
 						if distance(comms_target,station) > 75000 then
 							brainCheckChance = 20
 						end
@@ -8756,7 +11549,7 @@ function handleUndockedState()
 								if comms_source:takeReputationPoints(getServiceCost("reinforcements")) then
 									local ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(comms_source:getWaypoint(n))
 									ship:setCallSign(generateCallSign(nil,"Human Navy"))
-									ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(friendlyVesselDestroyed)
+									ship:setCommsScript(""):setCommsFunction(commsShip):onDestroyed(friendlyVesselDestroyed)
 									table.insert(friendlyHelperFleet,ship)
 									setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
 								else
@@ -8767,7 +11560,7 @@ function handleUndockedState()
 						else
 							if comms_source:takeReputationPoints(getServiceCost("reinforcements")) then
 								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(comms_source:getWaypoint(n))
-								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(friendlyVesselDestroyed)
+								ship:setCommsScript(""):setCommsFunction(commsShip):onDestroyed(friendlyVesselDestroyed)
 								ship:setCallSign(generateCallSign(nil,"Human Navy"))
 								table.insert(friendlyHelperFleet,ship)
 								setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
@@ -8810,7 +11603,7 @@ function handleUndockedState()
     			else
     				setCommsMessage("Insufficient reputation")
     			end
-				addCommsReply("Back", mainMenu)
+				addCommsReply("Back", commsStation)
     		end)
 		end
     end
@@ -8993,6 +11786,211 @@ function getFriendStatus()
     else
         return "neutral"
     end
+end
+function wartimeStatistics()
+	setCommsMessage("So, what category of wartime statistics are you interested in?")
+	addCommsReply("Destroyed assets",function()
+		setCommsMessage("What kind of destroyed assets may I show you?")
+		addCommsReply("Destroyed Human stations",function()
+			if friendlyStationDestroyedNameList ~= nil and #friendlyStationDestroyedNameList > 0 then
+				local out = "Destroyed Human Stations (value, name):"
+				local friendlyDestructionValue = 0
+				for i=1,#friendlyStationDestroyedNameList do
+					out = string.format("%s\n    %2d %s",out,friendlyStationDestroyedValue[i],friendlyStationDestroyedNameList[i])
+					friendlyDestructionValue = friendlyDestructionValue + friendlyStationDestroyedValue[i]
+				end
+				local stat_list = gatherStats()
+				out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,friendlyDestructionValue,stat_list.human.weight.station*100)
+				setCommsMessage(out)
+			else
+				setCommsMessage("No Human stations have been destroyed (yet)")
+			end
+			addCommsReply("Back",commsStation)		
+		end)
+		addCommsReply("Destroyed Kraylor stations",function()
+			if enemyStationDestroyedNameList ~= nil and #enemyStationDestroyedNameList > 0 then
+				local out = "Destroyed Kraylor Stations (value, name):"
+				local enemyDestroyedValue = 0
+				for i=1,#enemyStationDestroyedNameList do
+					out = string.format("%s\n    %2d %s",out,enemyStationDestroyedValue[i],enemyStationDestroyedNameList[i])
+					enemyDestroyedValue = enemyDestroyedValue + enemyStationDestroyedValue[i]
+				end
+				local stat_list = gatherStats()
+				out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,enemyDestroyedValue,stat_list.kraylor.weight.station*100)
+				setCommsMessage(out)
+			else
+				setCommsMessage("No Kraylor stations have been destroyed (yet)")
+			end
+			addCommsReply("Back",commsStation)		
+		end)
+		addCommsReply("Destroyed Independent stations",function()
+			if neutralStationDestroyedNameList ~= nil and #neutralStationDestroyedNameList > 0 then
+				local out = "Destroyed Independent Stations (value, name):"
+				local neutralDestroyedValue = 0
+				for i=1,#neutralStationDestroyedNameList do
+					out = string.format("%s\n    %2d %s",out,neutralStationDestroyedValue[i],neutralStationDestroyedNameList[i])
+					neutralDestroyedValue = neutralDestroyedValue + neutralStationDestroyedValue[i]
+				end
+				local stat_list = gatherStats()
+				out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,neutralDestroyedValue,stat_list.human.weight.neutral*100)
+				setCommsMessage(out)
+			else
+				setCommsMessage("No Independent stations have been destroyed (yet)")
+			end
+			addCommsReply("Back",commsStation)		
+		end)
+		addCommsReply("Destroyed Human ships",function()
+			if friendlyVesselDestroyedNameList ~= nil and #friendlyVesselDestroyedNameList > 0 then
+				local out = "Destroyed Human Naval Vessels (value, name, type):"
+				local friendlyShipDestroyedValue = 0
+				for i=1,#friendlyVesselDestroyedNameList do
+					out = string.format("%s\n    %2d %s %s",out,friendlyVesselDestroyedValue[i],friendlyVesselDestroyedNameList[i],friendlyVesselDestroyedType[i])
+					friendlyShipDestroyedValue = friendlyShipDestroyedValue + friendlyVesselDestroyedValue[i]
+				end
+				local stat_list = gatherStats()
+				out = string.format("%s\nTotal: %s (ship evaluation weight: %i%%)",out,friendlyShipDestroyedValue,stat_list.human.weight.ship*100)
+				setCommsMessage(out)
+			else
+				setCommsMessage("No Human naval vessels have been destroyed (yet)")
+			end
+			addCommsReply("Back",commsStation)		
+		end)
+		addCommsReply("Destroyed Kraylor ships",function()
+			if enemyVesselDestroyedNameList ~= nil and #enemyVesselDestroyedNameList > 0 then
+				local out = "Destroyed Kraylor Vessels (value, name, type):"
+				local enemyShipDestroyedValue = 0
+				for i=1,#enemyVesselDestroyedNameList do
+					out = string.format("%s\n    %2d %s %s",out,enemyVesselDestroyedValue[i],enemyVesselDestroyedNameList[i],enemyVesselDestroyedType[i])
+					enemyShipDestroyedValue = enemyShipDestroyedValue + enemyVesselDestroyedValue[i]
+				end
+				local stat_list = gatherStats()
+				out = string.format("%s\nTotal: %s (ship evaluation weight: %i%%)",out,enemyShipDestroyedValue,stat_list.kraylor.weight.ship*100)
+				setCommsMessage(out)
+			else
+				setCommsMessage("No Kraylor vessels have been destroyed yet. You'd better get busy")
+			end
+			addCommsReply("Back",commsStation)		
+		end)
+		addCommsReply("Back",commsStation)
+	end)
+	addCommsReply("Surviving assets",function()
+		setCommsMessage("What kind of surviving assets may I show you?")
+		addCommsReply("Surviving Human stations",function()
+			local out = "Surviving Human stations (value, name):"
+			local friendlySurvivalValue = 0
+			for _, station in ipairs(stationList) do
+				if station:isValid() then
+					if station:isFriendly(comms_source) then
+						out = string.format("%s\n    %2d %s",out,station.strength,station:getCallSign())
+						friendlySurvivalValue = friendlySurvivalValue + station.strength
+					end
+				end
+			end
+			local stat_list = gatherStats()
+			out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,friendlySurvivalValue,stat_list.human.weight.station*100)
+			setCommsMessage(out)
+			addCommsReply("Back",commsStation)
+		end)
+		addCommsReply("Surviving Kraylor stations",function()
+			local out = "Surviving Kraylor stations (value, name):"
+			local enemySurvivalValue = 0
+			for _, station in ipairs(stationList) do
+				if station:isValid() then
+					if station:isEnemy(comms_source) then
+						out = string.format("%s\n    %2d %s",out,station.strength,station:getCallSign())
+						enemySurvivalValue = enemySurvivalValue + station.strength
+					end
+				end
+			end
+			local stat_list = gatherStats()
+			out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,enemySurvivalValue,stat_list.kraylor.weight.station*100)
+			if game_state == "full war" then
+				out = string.format("%s\n\nNow that we've been given authorization to destroy Kraylor stations, can you provide the location of one of these staions, please?",out)
+				setCommsMessage(out)
+				addCommsReply("Get location of one enemy station (5 Rep)",function()
+					if comms_source:takeReputationPoints(5) then
+						setCommsMessage("Which enemy station are you interested in?")
+						local choice_count = 0
+						for _, station in ipairs(stationList) do
+							if station:isValid() then
+								if station:isEnemy(comms_source) then
+									choice_count = choice_count + 1
+									addCommsReply(station:getCallSign(),function()
+										setCommsMessage(string.format("Station %s is in %s",station:getCallSign(),station:getSectorName()))
+										addCommsReply("Back",commsStation)
+									end)
+								end
+							end
+							if choice_count >= 20 then
+								break
+							end
+						end
+					else
+						setCommsMessage("Insufficient reputation")
+					end
+				end)
+			else
+				setCommsMessage(out)
+			end
+			addCommsReply("Back",commsStation)
+		end)
+		addCommsReply("Surviving Independent Stations",function()
+			local out = "Surviving Independent stations (value, name):"
+			local neutralSurvivalValue = 0
+			for _, station in ipairs(stationList) do
+				if station:isValid() then
+					if not station:isFriendly(comms_source) and not station:isEnemy(comms_source)then
+						out = string.format("%s\n    %2d %s",out,station.strength,station:getCallSign())
+						neutralSurvivalValue = neutralSurvivalValue + station.strength
+					end
+				end
+			end
+			local stat_list = gatherStats()
+			out = string.format("%s\nTotal: %s (station evaluation weight: %i%%)",out,neutralSurvivalValue,stat_list.human.weight.neutral*100)
+			setCommsMessage(out)
+			addCommsReply("Back",commsStation)
+		end)
+		addCommsReply("Surviving Human ships",function()
+			local out = "Surviving Human naval vessels (value, name, type):"
+			local friendlyShipSurvivedValue = 0
+			for j=1,#friendlyFleetList do
+				local tempFleet = friendlyFleetList[j]
+				for _, tempFriend in ipairs(tempFleet) do
+					if tempFriend ~= nil and tempFriend:isValid() then
+						local friend_type = tempFriend:getTypeName()
+						out = string.format("%s\n    %2d %s %s",out,ship_template[friend_type].strength,tempFriend:getCallSign(),friend_type)
+						friendlyShipSurvivedValue = friendlyShipSurvivedValue + ship_template[friend_type].strength
+					end
+				end
+			end
+			local stat_list = gatherStats()
+			out = string.format("%s\nTotal: %s (ship evaluation weight: %i%%)",out,friendlyShipSurvivedValue,stat_list.human.weight.ship*100)
+			setCommsMessage(out)
+			addCommsReply("Back",commsStation)
+		end)
+		addCommsReply("Surviving Kraylor ships",function()
+			local out = "Surviving Kraylor vessels (intelligence estimate):"
+			local enemyShipSurvivedValue = 0
+			local enemyShipCount = 0
+			local ship_type_list = {}
+			for j=1,#enemyFleetList do
+				tempFleet = enemyFleetList[j]
+				for _, tempEnemy in ipairs(tempFleet) do
+					local enemy_type = tempEnemy:getTypeName()
+					enemyShipSurvivedValue = enemyShipSurvivedValue + ship_template[enemy_type].strength
+					enemyShipCount = enemyShipCount + 1
+					table.insert(ship_type_list,enemy_type)
+				end
+			end
+			local stat_list = gatherStats()
+			out = string.format("%s\nApproximately %i ships valued between %i and %i",out,enemyShipCount,math.floor(enemyShipSurvivedValue - random(0,enemyShipSurvivedValue*.3)),math.floor(enemyShipSurvivedValue + random(0,enemyShipSurvivedValue*.3)))
+			out = string.format("%s\nAt least one ship is of type %s",out,ship_type_list[math.random(1,#ship_type_list)])
+			out = string.format("%s\nShip evaluation weight: %i%%",out,stat_list.kraylor.weight.ship*100)
+			setCommsMessage(out)
+			addCommsReply("Back",commsStation)
+		end)
+		addCommsReply("Back",commsStation)
+	end)
 end
 -------------------------------
 -- Defend ship communication --
@@ -9316,6 +12314,7 @@ function friendlyComms(comms_data)
 	if shipCommsDiagnostic then print("got ship type") end
 	if shipType:find("Freighter") ~= nil then
 		if shipCommsDiagnostic then print("it's a freighter") end
+		if distance_diagnostic then print("distance_diagnostic 8",comms_source,comms_target) end
 		if distance(comms_source, comms_target) < 5000 then
 			if shipCommsDiagnostic then print("close enough to trade or sell") end
 			local goodCount = 0
@@ -9942,7 +12941,7 @@ function revertCheck(delta)
 end
 function checkContinuum(delta)
 	local continuum_count = 0
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			if p.continuum_target then
@@ -10021,6 +13020,7 @@ function neutralComms(comms_data)
 			end
 			setCommsMessage(cargoMsg)
 		end)
+		if distance_diagnostic then print("distance_diagnostic 9",comms_source,comms_target) end
 		if distance(comms_source,comms_target) < 5000 then
 			local goodCount = 0
 			if comms_source.goods ~= nil then
@@ -10291,9 +13291,10 @@ function closestPlayerTo(obj)
 	if obj ~= nil and obj:isValid() then
 		local closestDistance = 9999999
 		local closestPlayer = nil
-		for pidx=1,8 do
+		for pidx=1,32 do
 			local p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
+				if distance_diagnostic then print("distance_diagnostic 10",p,obj) end
 				local currentDistance = distance(p,obj)
 				if currentDistance < closestDistance then
 					closestPlayer = p
@@ -10314,6 +13315,7 @@ function nearStations(nobj, compareStationList)
 	for ri, obj in ipairs(compareStationList) do
 		if obj ~= nil and obj:isValid() and obj:getCallSign() ~= nobj:getCallSign() then
 			table.insert(remainingStations,obj)
+			if distance_diagnostic then print("distance_diagnostic 11",nobj,obj) end
 			local currentDistance = distance(nobj, obj)
 			if currentDistance < closestDistance then
 				closestObj = obj
@@ -10339,44 +13341,23 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 	if enemyStrength == nil then
 		enemyStrength = math.max(danger * difficulty * playerPower(),5)
 	end
-	local enemy_position = 0
-	local sp = irandom(400,900)			--random spacing of spawned group
-	if shape == nil then
-		shape = "square"
-		if random(1,100) < 50 then
-			shape = "hexagonal"
-		end
-	end
-	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	local enemyList = {}
-	template_pool_size = 10
-	local template_pool = getTemplatePool(enemyStrength)
-	if #template_pool < 1 then
-		addGMMessage("Empty Template pool: fix excludes or other criteria")
-		return enemyList
-	end
+
+	local enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, shape)
 	local prefix = generateCallSignPrefix(1)
-	while enemyStrength > 0 do
-		local selected_template = template_pool[math.random(1,#template_pool)]
-		local ship = ship_template[selected_template].create(enemyFaction,selected_template)
-		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + ship_template[selected_template].strength
-			ship:onDestruction(enemyVesselDestroyed)
-		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + ship_template[selected_template].strength
-			ship:onDestruction(friendlyVesselDestroyed)
-		end
-		enemy_position = enemy_position + 1
-		if shape == "none" or shape == "pyramid" or shape == "ambush" then
-			ship:setPosition(xOrigin,yOrigin)
-		else
-			ship:setPosition(xOrigin + formation_delta[shape].x[enemy_position] * sp, yOrigin + formation_delta[shape].y[enemy_position] * sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		ship:setCallSign(generateCallSign(nil,enemyFaction))
-		enemyStrength = enemyStrength - ship_template[selected_template].strength
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
+	for _, ship in ipairs(enemyList) do
+		ship:setCallSign(generateCallSign(nil,enemyFaction))
+		if enemyFaction == "Kraylor" then
+			ship:onDestroyed(enemyVesselDestroyed)
+		elseif enemyFaction == "Human Navy" then
+			ship:onDestroyed(friendlyVesselDestroyed)
+		end
+	end
+
 	if shape == "pyramid" then
 		if spawn_distance == nil then
 			spawn_distance = 30
@@ -10404,7 +13385,6 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 				ship:setPosition(px+vx,py+vy)
 			end
 			ship:setHeading((spawn_angle + 270) % 360)
-			ship:orderFlyTowards(px,py)
 		end
 	end
 	if shape == "ambush" then
@@ -10423,7 +13403,7 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, enemyStrength, sha
 	end
 	return enemyList
 end
-function getTemplatePool(max_strength)
+--[[function getTemplatePool(max_strength)
 	local function getStrengthSort(tbl, sortFunction)
 		local keys = {}
 		for key in pairs(tbl) do
@@ -10465,11 +13445,11 @@ function getTemplatePool(max_strength)
 		end
 	end
 	return template_pool
-end
+end--]]
 function playerPower()
 --evaluate the players for enemy strength and size spawning purposes
 	local playerShipScore = 0
-	for p5idx=1,8 do
+	for p5idx=1,32 do
 		local p5obj = getPlayerShip(p5idx)
 		if p5obj ~= nil and p5obj:isValid() then
 			if p5obj.shipScore == nil then
@@ -10481,207 +13461,91 @@ function playerPower()
 	end
 	return playerShipScore
 end
+function nameShip(p,p_type)
+--	if predefined_player_ships ~= nil and #predefined_player_ships > 0 then
+--		p:setCallSign(predefined_player_ships[1].name)
+--		if predefined_player_ships[1].control_code ~= nil then
+--			p.control_code = predefined_player_ships[1].control_code
+--			p:setControlCode(predefined_player_ships[1].control_code)
+--		end
+--		table.remove(predefined_player_ships,1)
+--	else
+		if playerShipNamesFor[p_type] ~= nil and #playerShipNamesFor[p_type] > 0 then
+			p:setCallSign(tableRemoveRandom(playerShipNamesFor[p_type]))
+		else
+			if #playerShipNamesFor["Leftovers"] > 0 then
+				p:setCallSign(tableRemoveRandom(playerShipNamesFor["Leftovers"]))
+			end
+		end
+--	end
+end
+--	Player functions
+function setPlayer(pobj)
+	if pobj.goods == nil then
+		pobj.goods = {}
+	end
+	if pobj.initialRep == nil then
+		pobj:addReputationPoints(500-(difficulty*20))
+		pobj.initialRep = true
+	end
+	if not pobj.modsAssigned then
+		modify_player_ships(pobj)
+		local tempPlayerType = pobj:getTypeName()
+		print("setPlayer "..tempPlayerType)
+--		pobj.shipScore = playerShipStats[tempPlayerType].strength
+--		pobj.maxCargo = playerShipStats[tempPlayerType].cargo
+--		pobj:setLongRangeRadarRange(playerShipStats[tempPlayerType].long_range_radar)
+--		pobj:setShortRangeRadarRange(playerShipStats[tempPlayerType].short_range_radar)
+		pobj.tractor = playerShipStats[tempPlayerType].tractor
+		pobj.mining = playerShipStats[tempPlayerType].mining
+		pobj.mining_target_lock = false
+		pobj.mining_in_progress = false
+		if pobj.cargo == nil then
+			pobj.cargo = pobj.maxCargo
+			pobj.maxRepairCrew = pobj:getRepairCrewCount()
+			pobj.healthyShield = 1.0
+			pobj.prevShield = 1.0
+			pobj.healthyReactor = 1.0
+			pobj.prevReactor = 1.0
+			pobj.healthyManeuver = 1.0
+			pobj.prevManeuver = 1.0
+			pobj.healthyImpulse = 1.0
+			pobj.prevImpulse = 1.0
+			if pobj:getBeamWeaponRange(0) > 0 then
+				pobj.healthyBeam = 1.0
+				pobj.prevBeam = 1.0
+			end
+			if pobj:getWeaponTubeCount() > 0 then
+				pobj.healthyMissile = 1.0
+				pobj.prevMissile = 1.0
+			end
+			if pobj:hasWarpDrive() then
+				pobj.healthyWarp = 1.0
+				pobj.prevWarp = 1.0
+			end
+			if pobj:hasJumpDrive() then
+				pobj.healthyJump = 1.0
+				pobj.prevJump = 1.0
+			end
+		end
+		if pobj:hasJumpDrive() then
+			if pobj.max_jump_range == nil then
+				pobj.max_jump_range = 50000
+				pobj.min_jump_range = 5000
+			end
+		end
+		print("setPlayer fin "..pobj:getCallSign())
+	end
+	pobj.initialCoolant = pobj:getMaxCoolant()
+end
 function setPlayers()
 --set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
 	local active_player_count = 0
-	for p1idx=1,8 do
+	for p1idx=1,32 do
 		pobj = getPlayerShip(p1idx)
 		if pobj ~= nil and pobj:isValid() then
 			active_player_count = active_player_count + 1
-			if pobj.goods == nil then
-				pobj.goods = {}
-			end
-			if pobj.initialRep == nil then
-				pobj:addReputationPoints(500-(difficulty*20))
-				pobj.initialRep = true
-			end
-			if not pobj.nameAssigned then
-				pobj.nameAssigned = true
-				local tempPlayerType = pobj:getTypeName()
-				pobj.shipScore = playerShipStats[tempPlayerType].strength
-				pobj.maxCargo = playerShipStats[tempPlayerType].cargo
-				pobj:setLongRangeRadarRange(playerShipStats[tempPlayerType].long_range_radar)
-				pobj:setShortRangeRadarRange(playerShipStats[tempPlayerType].short_range_radar)
-				pobj.tractor = playerShipStats[tempPlayerType].tractor
-				pobj.mining = playerShipStats[tempPlayerType].mining
-				pobj.mining_target_lock = false
-				pobj.mining_in_progress = false
-				if tempPlayerType == "MP52 Hornet" then
-					if #playerShipNamesFor["MP52Hornet"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["MP52Hornet"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Piranha" then
-					if #playerShipNamesFor["Piranha"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Piranha"]))
-					end
-				elseif tempPlayerType == "Flavia P.Falcon" then
-					if #playerShipNamesFor["FlaviaPFalcon"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["FlaviaPFalcon"]))
-					end
-				elseif tempPlayerType == "Phobos M3P" then
-					if #playerShipNamesFor["PhobosM3P"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["PhobosM3P"]))
-					end
-					pobj:setWarpDrive(true)
-					pobj:setWarpSpeed(500)
-				elseif tempPlayerType == "Atlantis" then
-					if #playerShipNamesFor["Atlantis"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Atlantis"]))
-					end
-				elseif tempPlayerType == "Player Cruiser" then
-					if #playerShipNamesFor["Cruiser"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Cruiser"]))
-					end
-				elseif tempPlayerType == "Player Missile Cr." then
-					if #playerShipNamesFor["MissileCruiser"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["MissileCruiser"]))
-					end
-				elseif tempPlayerType == "Player Fighter" then
-					if #playerShipNamesFor["Fighter"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Fighter"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setJumpDrive(true)
-					pobj.max_jump_range = 40000
-					pobj.min_jump_range = 3000
-					pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-					pobj:setJumpDriveCharge(pobj.max_jump_range)
-				elseif tempPlayerType == "Benedict" then
-					if #playerShipNamesFor["Benedict"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Benedict"]))
-					end
-				elseif tempPlayerType == "Kiriya" then
-					if #playerShipNamesFor["Kiriya"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Kiriya"]))
-					end
-				elseif tempPlayerType == "Striker" then
-					if #playerShipNamesFor["Striker"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Striker"]))
-					end
-					if pobj:getImpulseMaxSpeed() == 45 then
-						pobj:setImpulseMaxSpeed(90)
-					end
-					if pobj:getBeamWeaponCycleTime(0) == 6 then
-						local bi = 0
-						repeat
-							local tempArc = pobj:getBeamWeaponArc(bi)
-							local tempDir = pobj:getBeamWeaponDirection(bi)
-							local tempRng = pobj:getBeamWeaponRange(bi)
-							local tempDmg = pobj:getBeamWeaponDamage(bi)
-							pobj:setBeamWeapon(bi,tempArc,tempDir,tempRng,5,tempDmg)
-							bi = bi + 1
-						until(pobj:getBeamWeaponRange(bi) < 1)
-					end
-					pobj:setJumpDrive(true)
-					pobj.max_jump_range = 40000
-					pobj.min_jump_range = 3000
-					pobj:setJumpDriveRange(pobj.min_jump_range,pobj.max_jump_range)
-					pobj:setJumpDriveCharge(pobj.max_jump_range)
-				elseif tempPlayerType == "ZX-Lindworm" then
-					if #playerShipNamesFor["Lindworm"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Lindworm"]))
-					end
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Repulse" then
-					if #playerShipNamesFor["Repulse"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Repulse"]))
-					end
-				elseif tempPlayerType == "Ender" then
-					if #playerShipNamesFor["Ender"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Ender"]))
-					end
-				elseif tempPlayerType == "Nautilus" then
-					if #playerShipNamesFor["Nautilus"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Nautilus"]))
-					end
-				elseif tempPlayerType == "Hathcock" then
-					if #playerShipNamesFor["Hathcock"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Hathcock"]))
-					end
-				elseif tempPlayerType == "Proto-Atlantis" then
-					if #playerShipNamesFor["ProtoAtlantis"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["ProtoAtlantis"]))
-					end
-				elseif tempPlayerType == "Maverick" then
-					if #playerShipNamesFor["Maverick"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Maverick"]))
-					end
-				elseif tempPlayerType == "Crucible" then
-					if #playerShipNamesFor["Crucible"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Crucible"]))
-					end
-				elseif tempPlayerType == "Atlantis II" then
-					if #playerShipNamesFor["AtlantisII"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["AtlantisII"]))
-					end
-				elseif tempPlayerType == "Surkov" then
-					if #playerShipNamesFor["Surkov"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Surkov"]))
-					end
-				elseif tempPlayerType == "Stricken" then
-					if #playerShipNamesFor["Stricken"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Stricken"]))
-					end
-				elseif tempPlayerType == "Redhook" then
-					if #playerShipNamesFor["Redhook"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Redhook"]))
-					end
-				elseif tempPlayerType == "Destroyer III" then
-					if #playerShipNamesFor["DestroyerIII"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["DestroyerIII"]))
-					end
-				else
-					if #playerShipNamesFor["Leftovers"] > 0 then
-						pobj:setCallSign(tableRemoveRandom(playerShipNamesFor["Leftovers"]))
-					end
-					pobj.shipScore = 24
-					pobj.maxCargo = 5
-					pobj:setWarpDrive(true)
-					pobj:setWarpSpeed(500)
-					pobj:setLongRangeRadarRange(30000)
-					pobj:setShortRangeRadarRange(5000)
-					pobj.tractor = false
-					pobj.mining = false
-				end
-				if pobj.cargo == nil then
-					pobj.cargo = pobj.maxCargo
-					pobj.maxRepairCrew = pobj:getRepairCrewCount()
-					pobj.healthyShield = 1.0
-					pobj.prevShield = 1.0
-					pobj.healthyReactor = 1.0
-					pobj.prevReactor = 1.0
-					pobj.healthyManeuver = 1.0
-					pobj.prevManeuver = 1.0
-					pobj.healthyImpulse = 1.0
-					pobj.prevImpulse = 1.0
-					if pobj:getBeamWeaponRange(0) > 0 then
-						pobj.healthyBeam = 1.0
-						pobj.prevBeam = 1.0
-					end
-					if pobj:getWeaponTubeCount() > 0 then
-						pobj.healthyMissile = 1.0
-						pobj.prevMissile = 1.0
-					end
-					if pobj:hasWarpDrive() then
-						pobj.healthyWarp = 1.0
-						pobj.prevWarp = 1.0
-					end
-					if pobj:hasJumpDrive() then
-						pobj.healthyJump = 1.0
-						pobj.prevJump = 1.0
-					end
-				end
-				if pobj:hasJumpDrive() then
-					if pobj.max_jump_range == nil then
-						pobj.max_jump_range = 50000
-						pobj.min_jump_range = 5000
-					end
-				end
-			end
-			pobj.initialCoolant = pobj:getMaxCoolant()
+			setPlayer(pobj)
 		end
 	end
 	if active_player_count ~= banner["number_of_players"] then
@@ -10692,7 +13556,7 @@ function resetBanner(evalFriendly,evalEnemy)
 	local active_player_count = 0
 	local players_relative_strength = 0
 	banner["player"] = {}
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			active_player_count = active_player_count + 1
@@ -10726,255 +13590,266 @@ function resetBanner(evalFriendly,evalEnemy)
 	if evalFriendly ~= nil then
 		banner_string = string.format("%s  Friendly: %.1f  Enemy: %.1f  Difference: %.1f",banner_string,evalFriendly,evalEnemy,evalFriendly-evalEnemy)
 	end
-	setBanner(banner_string)
+	--setBanner(banner_string)
 end
-function expediteDockCheck(delta)
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			if p.expedite_dock then
-				if p.expedite_dock_timer == nil then
-					p.expedite_dock_timer = p.expedite_dock_timer_max + delta
+function expediteDockCheck(delta, p)
+	if p.expedite_dock then
+		if p.expedite_dock_timer == nil then
+			p.expedite_dock_timer = p.expedite_dock_timer_max + delta
+		end
+		p.expedite_dock_timer = p.expedite_dock_timer - delta
+		if p.expedite_dock_timer < 0 then
+			if p.expedite_dock_timer < -1 then
+				if p.expedite_dock_timer_info ~= nil then
+					p:removeCustom(p.expedite_dock_timer_info)
+					p.expedite_dock_timer_info = nil
 				end
-				p.expedite_dock_timer = p.expedite_dock_timer - delta
-				if p.expedite_dock_timer < 0 then
-					if p.expedite_dock_timer < -1 then
-						if p.expedite_dock_timer_info ~= nil then
-							p:removeCustom(p.expedite_dock_timer_info)
-							p.expedite_dock_timer_info = nil
-						end
-						if p.expedite_dock_timer_info_ops ~= nil then
-							p:removeCustom(p.expedite_dock_timer_info_ops)
-							p.expedite_dock_timer_info_ops = nil
-						end
-						p.expedite_dock = nil
-						p:addToShipLog(string.format("Docking crew of station %s returned to their normal duties",p.expedite_doc_station:getCallSign()),"Yellow")
-						p.expedite_timer = nil
-						p.expedite_dock_station = nil
-						p.preorder_hvli = nil
-						p.preorder_homing = nil
-						p.preorder_emp = nil
-						p.preorder_nuke = nil
-						p.preorder_repair_crew = nil
-						p.preorder_coolant = nil
-					else
-						if p:hasPlayerAtPosition("Relay") then
-							p.expedite_dock_timer_info = "expedite_dock_timer_info"
-							p:addCustomInfo("Relay",p.expedite_dock_timer_info,"Fast Dock Expired")						
-						end
-						if p:hasPlayerAtPosition("Operations") then
-							p.expedite_dock_timer_info_ops = "expedite_dock_timer_info_ops"
-							p:addCustomInfo("Relay",p.expedite_dock_timer_info_ops,"Fast Dock Expired")						
-						end
-					end
-				else	--timer not expired
-					local expedite_dock_timer_status = "Fast Dock"
-					local expedite_dock_timer_minutes = math.floor(p.expedite_dock_timer / 60)
-					local expedite_dock_timer_seconds = math.floor(p.expedite_dock_timer % 60)
-					if expedite_dock_timer_minutes <= 0 then
-						expedite_dock_timer_status = string.format("%s %i",expedite_dock_timer_status,expedite_dock_timer_seconds)
-					else
-						expedite_dock_timer_status = string.format("%s %i:%.2i",expedite_dock_timer_status,expedite_dock_timer_minutes,expedite_dock_timer_seconds)
-					end
-					if p:hasPlayerAtPosition("Relay") then
-						p.expedite_dock_timer_info = "expedite_dock_timer_info"
-						p:addCustomInfo("Relay",p.expedite_dock_timer_info,expedite_dock_timer_status)
-					end
-					if p:hasPlayerAtPosition("Operations") then
-						p.expedite_dock_timer_info_ops = "expedite_dock_timer_info_ops"
-						p:addCustomInfo("Operations",p.expedite_dock_timer_info_ops,expedite_dock_timer_status)
-					end					
+				if p.expedite_dock_timer_info_ops ~= nil then
+					p:removeCustom(p.expedite_dock_timer_info_ops)
+					p.expedite_dock_timer_info_ops = nil
 				end
-				if p.expedite_dock_station ~= nil and p.expedite_dock_station:isValid() then
-					if p:isDocked(p.expedite_dock_station) then
-						p:setEnergy(p:getMaxEnergy())
-						p:setScanProbeCount(p:getMaxScanProbeCount())
-						if p.preorder_hvli ~= nil then
-							local new_amount = math.min(p:getWeaponStorage("HVLI") + p.preorder_hvli,p:getWeaponStorageMax("HVLI"))
-							p:setWeaponStorage("HVLI",new_amount)
-						end
-						if p.preorder_homing ~= nil then
-							new_amount = math.min(p:getWeaponStorage("Homing") + p.preorder_homing,p:getWeaponStorageMax("Homing"))
-							p:setWeaponStorage("Homing",new_amount)
-						end
-						if p.preorder_mine ~= nil then
-							new_amount = math.min(p:getWeaponStorage("Mine") + p.preorder_mine,p:getWeaponStorageMax("Mine"))
-							p:setWeaponStorage("Mine",new_amount)
-						end
-						if p.preorder_emp ~= nil then
-							new_amount = math.min(p:getWeaponStorage("EMP") + p.preorder_emp,p:getWeaponStorageMax("EMP"))
-							p:setWeaponStorage("EMP",new_amount)
-						end
-						if p.preorder_nuke ~= nil then
-							new_amount = math.min(p:getWeaponStorage("Nuke") + p.preorder_nuke,p:getWeaponStorageMax("Nuke"))
-							p:setWeaponStorage("Nuke",new_amount)
-						end
-						if p.preorder_repair_crew ~= nil then
-							p:setRepairCrewCount(p:getRepairCrewCount() + 1)
-							resetPreviousSystemHealth(p)
-						end
-						if p.preorder_coolant ~= nil then
-							p:setMaxCoolant(p:getMaxCoolant() + 2)
-						end
-						if p.expedite_dock_timer_info ~= nil then
-							p:removeCustom(p.expedite_dock_timer_info)
-							p.expedite_dock_timer_info = nil
-						end
-						if p.expedite_dock_timer_info_ops ~= nil then
-							p:removeCustom(p.expedite_dock_timer_info_ops)
-							p.expedite_dock_timer_info_ops = nil
-						end
-						p:addToShipLog(string.format("Docking crew at station %s completed replenishment as requested",p.expedite_dock_station:getCallSign()),"Yellow")
-						p.expedite_dock = nil
-						p.expedite_timer = nil
-						p.expedite_dock_station = nil
-						p.preorder_hvli = nil
-						p.preorder_homing = nil
-						p.preorder_emp = nil
-						p.preorder_nuke = nil
-						p.preorder_repair_crew = nil
-						p.preorder_coolant = nil
-					end
+				p.expedite_dock = nil
+				p:addToShipLog(string.format("Docking crew of station %s returned to their normal duties",p.expedite_doc_station:getCallSign()),"Yellow")
+				p.expedite_timer = nil
+				p.expedite_dock_station = nil
+				p.preorder_hvli = nil
+				p.preorder_homing = nil
+				p.preorder_emp = nil
+				p.preorder_nuke = nil
+				p.preorder_repair_crew = nil
+				p.preorder_coolant = nil
+			else
+				if p:hasPlayerAtPosition("Relay") then
+					p.expedite_dock_timer_info = "expedite_dock_timer_info"
+					p:addCustomInfo("Relay",p.expedite_dock_timer_info,"Fast Dock Expired")						
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.expedite_dock_timer_info_ops = "expedite_dock_timer_info_ops"
+					p:addCustomInfo("Relay",p.expedite_dock_timer_info_ops,"Fast Dock Expired")						
 				end
 			end
-
+		else	--timer not expired
+			local expedite_dock_timer_status = "Fast Dock"
+			local expedite_dock_timer_minutes = math.floor(p.expedite_dock_timer / 60)
+			local expedite_dock_timer_seconds = math.floor(p.expedite_dock_timer % 60)
+			if expedite_dock_timer_minutes <= 0 then
+				expedite_dock_timer_status = string.format("%s %i",expedite_dock_timer_status,expedite_dock_timer_seconds)
+			else
+				expedite_dock_timer_status = string.format("%s %i:%.2i",expedite_dock_timer_status,expedite_dock_timer_minutes,expedite_dock_timer_seconds)
+			end
+			if p:hasPlayerAtPosition("Relay") then
+				p.expedite_dock_timer_info = "expedite_dock_timer_info"
+				p:addCustomInfo("Relay",p.expedite_dock_timer_info,expedite_dock_timer_status)
+			end
+			if p:hasPlayerAtPosition("Operations") then
+				p.expedite_dock_timer_info_ops = "expedite_dock_timer_info_ops"
+				p:addCustomInfo("Operations",p.expedite_dock_timer_info_ops,expedite_dock_timer_status)
+			end					
+		end
+		if p.expedite_dock_station ~= nil and p.expedite_dock_station:isValid() then
+			if p:isDocked(p.expedite_dock_station) then
+				p:setEnergy(p:getMaxEnergy())
+				p:setScanProbeCount(p:getMaxScanProbeCount())
+				if p.preorder_hvli ~= nil then
+					local new_amount = math.min(p:getWeaponStorage("HVLI") + p.preorder_hvli,p:getWeaponStorageMax("HVLI"))
+					p:setWeaponStorage("HVLI",new_amount)
+				end
+				if p.preorder_homing ~= nil then
+					new_amount = math.min(p:getWeaponStorage("Homing") + p.preorder_homing,p:getWeaponStorageMax("Homing"))
+					p:setWeaponStorage("Homing",new_amount)
+				end
+				if p.preorder_mine ~= nil then
+					new_amount = math.min(p:getWeaponStorage("Mine") + p.preorder_mine,p:getWeaponStorageMax("Mine"))
+					p:setWeaponStorage("Mine",new_amount)
+				end
+				if p.preorder_emp ~= nil then
+					new_amount = math.min(p:getWeaponStorage("EMP") + p.preorder_emp,p:getWeaponStorageMax("EMP"))
+					p:setWeaponStorage("EMP",new_amount)
+				end
+				if p.preorder_nuke ~= nil then
+					new_amount = math.min(p:getWeaponStorage("Nuke") + p.preorder_nuke,p:getWeaponStorageMax("Nuke"))
+					p:setWeaponStorage("Nuke",new_amount)
+				end
+				if p.preorder_repair_crew ~= nil then
+					p:setRepairCrewCount(p:getRepairCrewCount() + 1)
+					resetPreviousSystemHealth(p)
+				end
+				if p.preorder_coolant ~= nil then
+					p:setMaxCoolant(p:getMaxCoolant() + 2)
+				end
+				if p.expedite_dock_timer_info ~= nil then
+					p:removeCustom(p.expedite_dock_timer_info)
+					p.expedite_dock_timer_info = nil
+				end
+				if p.expedite_dock_timer_info_ops ~= nil then
+					p:removeCustom(p.expedite_dock_timer_info_ops)
+					p.expedite_dock_timer_info_ops = nil
+				end
+				p:addToShipLog(string.format("Docking crew at station %s completed replenishment as requested",p.expedite_dock_station:getCallSign()),"Yellow")
+				p.expedite_dock = nil
+				p.expedite_timer = nil
+				p.expedite_dock_station = nil
+				p.preorder_hvli = nil
+				p.preorder_homing = nil
+				p.preorder_emp = nil
+				p.preorder_nuke = nil
+				p.preorder_repair_crew = nil
+				p.preorder_coolant = nil
+			end
 		end
 	end
 end
 --		Mortal repair crew functions. Includes coolant loss as option to losing repair crew
-function healthCheck(delta)
+function healthCheck(delta, p)
 	healthCheckTimer = healthCheckTimer - delta
 	if healthCheckTimer < 0 then
 		if healthDiagnostic then print("health check timer expired") end
-		for pidx=1,8 do
-			if healthDiagnostic then print("in player loop") end
-			local p = getPlayerShip(pidx)
-			if healthDiagnostic then print("got player ship") end
-			if p ~= nil and p:isValid() then
-				if healthDiagnostic then print("valid ship") end
-				if p:getRepairCrewCount() > 0 then
-					if healthDiagnostic then print("crew on valid ship") end
-					local fatalityChance = 0
-					if healthDiagnostic then print("shields") end
-					sc = p:getShieldCount()
-					if healthDiagnostic then print("sc: " .. sc) end
-					if p:getShieldCount() > 1 then
-						cShield = (p:getSystemHealth("frontshield") + p:getSystemHealth("rearshield"))/2
-					else
-						cShield = p:getSystemHealth("frontshield")
+		if p:getRepairCrewCount() > 0 then
+			p.system_choice_list = {}
+			if healthDiagnostic then print("crew on valid ship") end
+			local fatalityChance = 0
+			if healthDiagnostic then print("shields") end
+			sc = p:getShieldCount()
+			if healthDiagnostic then print("sc: " .. sc) end
+			if p:getShieldCount() > 1 then
+				cShield = (p:getSystemHealth("frontshield") + p:getSystemHealth("rearshield"))/2
+				if p.prevShield - cShield > 0 then
+					table.insert(p.system_choice_list,"frontShield")
+					table.insert(p.system_choice_list,"rearshield")
+				end
+			else
+				cShield = p:getSystemHealth("frontshield")
+				if p.prevShield - cShield > 0 then
+					table.insert(p.system_choice_list,"frontShield")
+				end
+			end
+			fatalityChance = fatalityChance + (p.prevShield - cShield)
+			p.prevShield = cShield
+			if healthDiagnostic then print("reactor") end
+			if p.prevReactor - p:getSystemHealth("reactor") > 0 then
+				table.insert(p.system_choice_list,"reactor")
+			end
+			fatalityChance = fatalityChance + (p.prevReactor - p:getSystemHealth("reactor"))
+			p.prevReactor = p:getSystemHealth("reactor")
+			if healthDiagnostic then print("maneuver") end
+			if p.prevManeuver - p:getSystemHealth("maneuver") > 0 then
+				table.insert(p.system_choice_list,"maneuver")
+			end
+			fatalityChance = fatalityChance + (p.prevManeuver - p:getSystemHealth("maneuver"))
+			p.prevManeuver = p:getSystemHealth("maneuver")
+			if healthDiagnostic then print("impulse") end
+			if p.prevImpulse - p:getSystemHealth("impulse") > 0 then
+				table.insert(p.system_choice_list,"impulse")
+			end
+			fatalityChance = fatalityChance + (p.prevImpulse - p:getSystemHealth("impulse"))
+			p.prevImpulse = p:getSystemHealth("impulse")
+			if healthDiagnostic then print("beamweapons") end
+			if p:getBeamWeaponRange(0) > 0 then
+				if p.healthyBeam == nil then
+					p.healthyBeam = 1.0
+					p.prevBeam = 1.0
+				end
+				if p.prevBeam - p:getSystemHealth("beamweapons") > 0 then
+					table.insert(p.system_choice_list,"beamweapons")
+				end
+				fatalityChance = fatalityChance + (p.prevBeam - p:getSystemHealth("beamweapons"))
+				p.prevBeam = p:getSystemHealth("beamweapons")
+			end
+			if healthDiagnostic then print("missilesystem") end
+			if p:getWeaponTubeCount() > 0 then
+				if p.healthyMissile == nil then
+					p.healthyMissile = 1.0
+					p.prevMissile = 1.0
+				end
+				if p.prevMissile - p:getSystemHealth("missilesystem") > 0 then
+					table.insert(p.system_choice_list,"missilesystem")
+				end
+				fatalityChance = fatalityChance + (p.prevMissile - p:getSystemHealth("missilesystem"))
+				p.prevMissile = p:getSystemHealth("missilesystem")
+			end
+			if healthDiagnostic then print("warp") end
+			if p:hasWarpDrive() then
+				if p.healthyWarp == nil then
+					p.healthyWarp = 1.0
+					p.prevWarp = 1.0
+				end
+				if p.prevWarp - p:getSystemHealth("warp") > 0 then
+					table.insert(p.system_choice_list,"warp")
+				end
+				fatalityChance = fatalityChance + (p.prevWarp - p:getSystemHealth("warp"))
+				p.prevWarp = p:getSystemHealth("warp")
+			end
+			if healthDiagnostic then print("jumpdrive") end
+			if p:hasJumpDrive() then
+				if p.healthyJump == nil then
+					p.healthyJump = 1.0
+					p.prevJump = 1.0
+				end
+				if p.prevJump - p:getSystemHealth("jumpdrive") > 0 then
+					table.insert(p.system_choice_list,"jumpdrive")
+				end
+				fatalityChance = fatalityChance + (p.prevJump - p:getSystemHealth("jumpdrive"))
+				p.prevJump = p:getSystemHealth("jumpdrive")
+			end
+			if healthDiagnostic then print("adjust") end
+			if p:getRepairCrewCount() == 1 then
+				fatalityChance = fatalityChance/2	-- increase chances of last repair crew standing
+			end
+			if healthDiagnostic then print("check") end
+			if fatalityChance > 0 then
+				crewFate(p,fatalityChance)
+			end
+		else	--no repair crew left
+			if random(1,100) <= (4 - difficulty) then
+				p:setRepairCrewCount(1)
+				if p:hasPlayerAtPosition("Engineering") then
+					local repairCrewRecovery = "repairCrewRecovery"
+					p:addCustomMessage("Engineering",repairCrewRecovery,"Medical team has revived one of your repair crew")
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					local repairCrewRecoveryPlus = "repairCrewRecoveryPlus"
+					p:addCustomMessage("Engineering+",repairCrewRecoveryPlus,"Medical team has revived one of your repair crew")
+				end
+				resetPreviousSystemHealth(p)
+			end
+		end
+		if p.initialCoolant ~= nil then
+			local current_coolant = p:getMaxCoolant()
+			if current_coolant < 20 then
+				if random(1,100) <= 4 then
+					local reclaimed_coolant = 0
+					if p.reclaimable_coolant ~= nil and p.reclaimable_coolant > 0 then
+						reclaimed_coolant = p.reclaimable_coolant*random(.1,.5)	--get back 10 to 50 percent of reclaimable coolant
+						p:setMaxCoolant(math.min(20,current_coolant + reclaimed_coolant))
+						p.reclaimable_coolant = p.reclaimable_coolant - reclaimed_coolant
 					end
-					fatalityChance = fatalityChance + (p.prevShield - cShield)
-					p.prevShield = cShield
-					if healthDiagnostic then print("reactor") end
-					fatalityChance = fatalityChance + (p.prevReactor - p:getSystemHealth("reactor"))
-					p.prevReactor = p:getSystemHealth("reactor")
-					if healthDiagnostic then print("maneuver") end
-					fatalityChance = fatalityChance + (p.prevManeuver - p:getSystemHealth("maneuver"))
-					p.prevManeuver = p:getSystemHealth("maneuver")
-					if healthDiagnostic then print("impulse") end
-					fatalityChance = fatalityChance + (p.prevImpulse - p:getSystemHealth("impulse"))
-					p.prevImpulse = p:getSystemHealth("impulse")
-					if healthDiagnostic then print("beamweapons") end
-					if p:getBeamWeaponRange(0) > 0 then
-						if p.healthyBeam == nil then
-							p.healthyBeam = 1.0
-							p.prevBeam = 1.0
-						end
-						fatalityChance = fatalityChance + (p.prevBeam - p:getSystemHealth("beamweapons"))
-						p.prevBeam = p:getSystemHealth("beamweapons")
-					end
-					if healthDiagnostic then print("missilesystem") end
-					if p:getWeaponTubeCount() > 0 then
-						if p.healthyMissile == nil then
-							p.healthyMissile = 1.0
-							p.prevMissile = 1.0
-						end
-						fatalityChance = fatalityChance + (p.prevMissile - p:getSystemHealth("missilesystem"))
-						p.prevMissile = p:getSystemHealth("missilesystem")
-					end
-					if healthDiagnostic then print("warp") end
-					if p:hasWarpDrive() then
-						if p.healthyWarp == nil then
-							p.healthyWarp = 1.0
-							p.prevWarp = 1.0
-						end
-						fatalityChance = fatalityChance + (p.prevWarp - p:getSystemHealth("warp"))
-						p.prevWarp = p:getSystemHealth("warp")
-					end
-					if healthDiagnostic then print("jumpdrive") end
-					if p:hasJumpDrive() then
-						if p.healthyJump == nil then
-							p.healthyJump = 1.0
-							p.prevJump = 1.0
-						end
-						fatalityChance = fatalityChance + (p.prevJump - p:getSystemHealth("jumpdrive"))
-						p.prevJump = p:getSystemHealth("jumpdrive")
-					end
-					if healthDiagnostic then print("adjust") end
-					if p:getRepairCrewCount() == 1 then
-						fatalityChance = fatalityChance/2	-- increase chances of last repair crew standing
-					end
-					if healthDiagnostic then print("check") end
-					if fatalityChance > 0 then
-						crewFate(p,fatalityChance)
-					end
-				else	--no repair crew left
-					if random(1,100) <= (4 - difficulty) then
-						p:setRepairCrewCount(1)
+					local noticable_reclaimed_coolant = math.floor(reclaimed_coolant)
+					if noticable_reclaimed_coolant > 0 then
 						if p:hasPlayerAtPosition("Engineering") then
-							local repairCrewRecovery = "repairCrewRecovery"
-							p:addCustomMessage("Engineering",repairCrewRecovery,"Medical team has revived one of your repair crew")
+							p:addCustomMessage("Engineering","coolant_recovery","Automated systems have recovered some coolant")
 						end
 						if p:hasPlayerAtPosition("Engineering+") then
-							local repairCrewRecoveryPlus = "repairCrewRecoveryPlus"
-							p:addCustomMessage("Engineering+",repairCrewRecoveryPlus,"Medical team has revived one of your repair crew")
-						end
-						resetPreviousSystemHealth(p)
-					end
-				end
-				if p.initialCoolant ~= nil then
-					local current_coolant = p:getMaxCoolant()
-					if current_coolant < 20 then
-						if random(1,100) <= 4 then
-							local reclaimed_coolant = 0
-							if p.reclaimable_coolant ~= nil and p.reclaimable_coolant > 0 then
-								reclaimed_coolant = p.reclaimable_coolant*random(.1,.5)	--get back 10 to 50 percent of reclaimable coolant
-								p:setMaxCoolant(math.min(20,current_coolant + reclaimed_coolant))
-								p.reclaimable_coolant = p.reclaimable_coolant - reclaimed_coolant
-							end
-							local noticable_reclaimed_coolant = math.floor(reclaimed_coolant)
-							if noticable_reclaimed_coolant > 0 then
-								if p:hasPlayerAtPosition("Engineering") then
-									p:addCustomMessage("Engineering","coolant_recovery","Automated systems have recovered some coolant")
-								end
-								if p:hasPlayerAtPosition("Engineering+") then
-									p:addCustomMessage("Engineering+","coolant_recovery_plus","Automated systems have recovered some coolant")
-								end
-							end
-							resetPreviousSystemHealth(p)
+							p:addCustomMessage("Engineering+","coolant_recovery_plus","Automated systems have recovered some coolant")
 						end
 					end
+					resetPreviousSystemHealth(p)
 				end
 			end
 		end
 		healthCheckTimer = delta + healthCheckTimerInterval
-		local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct = listStatuses()
-		if friendlySurvivedCount ~= nil then
-			local evalFriendly = fpct2*friendlyStationComponentWeight + npct2*neutralStationComponentWeight + fpct*friendlyShipComponentWeight
-			local evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
-			resetBanner(evalFriendly,evalEnemy)
-			local eval_status = string.format("F:%.1f%% E:%.1f%% D:%.1f%%",evalFriendly,evalEnemy,evalFriendly-evalEnemy)
-			for pidx=1,8 do
-				local p = getPlayerShip(pidx)
-				if p ~= nil and p:isValid() then
-					if p:hasPlayerAtPosition("Relay") then
-						p.eval_status = "eval_status"
-						p:addCustomInfo("Relay",p.eval_status,eval_status)
-					end
-					if p:hasPlayerAtPosition("Operations") then
-						p.eval_status_operations = "eval_status_operations"
-						p:addCustomInfo("Operations",p.eval_status_operations,eval_status)
-					end
+		local stat_list = gatherStats()
+		resetBanner(stat_list.human.evaluation,stat_list.kraylor.evaluation)
+		local eval_status = string.format("F:%.1f%% E:%.1f%% D:%.1f%%",stat_list.human.evaluation,stat_list.kraylor.evaluation,stat_list.human.evaluation-stat_list.kraylor.evaluation)
+		for pidx=1,32 do
+			local p = getPlayerShip(pidx)
+			if p ~= nil and p:isValid() then
+				if p:hasPlayerAtPosition("Relay") then
+					p.eval_status = "eval_status"
+					p:addCustomInfo("Relay",p.eval_status,eval_status)
+				end
+				if p:hasPlayerAtPosition("Operations") then
+					p.eval_status_operations = "eval_status_operations"
+					p:addCustomInfo("Operations",p.eval_status_operations,eval_status)
 				end
 			end
 		end
@@ -11015,6 +13890,10 @@ function crewFate(p, fatalityChance)
 				p:addCustomMessage("Engineering+",repairCrewFatalityPlus,"One of your repair crew has perished")
 			end
 		else
+			local damaged_system = p.system_choice_list[math.random(1,#p.system_choice_list)]
+			local damage = p:getSystemHealth(damaged_system)
+			damage = (1 - damage)*.3
+			p:setSystemHealthMax(damaged_system,p:getSystemHealthMax(damaged_system) - damage)
 			local consequence = 0
 			local upper_consequence = 2
 			local consequence_list = {}
@@ -11118,288 +13997,158 @@ function crewFate(p, fatalityChance)
 	end
 end
 --      Inventory button and functions for relay/operations 
-function cargoInventory(delta)
-	for pidx=1,8 do
-		p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local cargoHoldEmpty = true
-			if p.goods ~= nil then
-				for good, quantity in pairs(p.goods) do
-					if quantity ~= nil and quantity > 0 then
-						cargoHoldEmpty = false
-						break
-					end
-				end
-			end
-			if not cargoHoldEmpty then
-				if p:hasPlayerAtPosition("Relay") then
-					if p.inventoryButton == nil then
-						local tbi = "inventory" .. p:getCallSign()
-						p:addCustomButton("Relay",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-				if p:hasPlayerAtPosition("Operations") then
-					if p.inventoryButton == nil then
-						local tbi = "inventoryOp" .. p:getCallSign()
-						p:addCustomButton("Operations",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-			end
-		end
-	end
-end
-function cargoInventoryGivenShip(p)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
+function cargoInventory(p)
 	local cargoHoldEmpty = true
 	if p.goods ~= nil then
 		for good, quantity in pairs(p.goods) do
 			if quantity ~= nil and quantity > 0 then
-				p:addToShipLog(string.format("     %s: %i",good,math.floor(quantity)),"Yellow")
 				cargoHoldEmpty = false
+				break
 			end
 		end
 	end
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
+	if not cargoHoldEmpty then
+		if p:hasPlayerAtPosition("Relay") then
+			if p.inventoryButton == nil then
+				local tbi = "inventory" .. p:getCallSign()
+				p:addCustomButton("Relay",tbi,"Inventory",function() playerShipCargoInventory(p) end)
+				p.inventoryButton = true
+			end
+		end
+		if p:hasPlayerAtPosition("Operations") then
+			if p.inventoryButton == nil then
+				local tbi = "inventoryOp" .. p:getCallSign()
+				p:addCustomButton("Operations",tbi,"Inventory",function() playerShipCargoInventory(p) end)
+				p.inventoryButton = true
+			end
+		end
+	end
+end
+function playerShipCargoInventory(p)
+	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
+	local goodCount = 0
+	if p.goods ~= nil then
+		for good, goodQuantity in pairs(p.goods) do
+			goodCount = goodCount + 1
+			p:addToShipLog(string.format("     %s: %i",good,goodQuantity),"Yellow")
+		end
+	end
+	if goodCount < 1 then
+		p:addToShipLog("     Empty","Yellow")
 	end
 	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
 end
-function cargoInventory1()
-	local p = getPlayerShip(1)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory2()
-	local p = getPlayerShip(2)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory3()
-	local p = getPlayerShip(3)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory4()
-	local p = getPlayerShip(4)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory5()
-	local p = getPlayerShip(5)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory6()
-	local p = getPlayerShip(6)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory7()
-	local p = getPlayerShip(7)
-	cargoInventoryGivenShip(p)
-end
-function cargoInventory8()
-	local p = getPlayerShip(8)
-	cargoInventoryGivenShip(p)
-end
 --      Enable and disable auto-cooling on a ship functions
-function autoCoolant(delta)
-	if enableAutoCoolFunctionList == nil then
-		enableAutoCoolFunctionList = {}
-		table.insert(enableAutoCoolFunctionList,enableAutoCool1)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool2)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool3)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool4)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool5)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool6)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool7)
-		table.insert(enableAutoCoolFunctionList,enableAutoCool8)
-	end
-	if disableAutoCoolFunctionList == nil then
-		disableAutoCoolFunctionList = {}
-		table.insert(disableAutoCoolFunctionList,disableAutoCool1)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool2)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool3)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool4)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool5)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool6)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool7)
-		table.insert(disableAutoCoolFunctionList,disableAutoCool8)
-	end
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			if p.autoCoolant ~= nil then
-				if p:hasPlayerAtPosition("Engineering") then
-					if p.autoCoolButton == nil then
-						local tbi = "enableAutoCool" .. p:getCallSign()
-						p:addCustomButton("Engineering",tbi,"Auto cool",enableAutoCoolFunctionList[pidx])
-						tbi = "disableAutoCool" .. p:getCallSign()
-						p:addCustomButton("Engineering",tbi,"Manual cool",disableAutoCoolFunctionList[pidx])
-						p.autoCoolButton = true
-					end
-				end
-				if p:hasPlayerAtPosition("Engineering+") then
-					if p.autoCoolButton == nil then
-						tbi = "enableAutoCoolPlus" .. p:getCallSign()
-						p:addCustomButton("Engineering+",tbi,"Auto cool",enableAutoCoolFunctionList[pidx])
-						tbi = "disableAutoCoolPlus" .. p:getCallSign()
-						p:addCustomButton("Engineering+",tbi,"Manual cool",disableAutoCoolFunctionList[pidx])
-						p.autoCoolButton = true
-					end
-				end
+function autoCoolant(p)
+	if p.autoCoolant ~= nil then
+		if p:hasPlayerAtPosition("Engineering") then
+			if p.autoCoolButton == nil then
+				local tbi = "enableAutoCool" .. p:getCallSign()
+				p:addCustomButton("Engineering",tbi,"Auto cool",function() 
+					string.format("")	--global context for serious proton
+					p:commandSetAutoRepair(true)
+					p:setAutoCoolant(true)
+					p.autoCoolant = true
+				end)
+				tbi = "disableAutoCool" .. p:getCallSign()
+				p:addCustomButton("Engineering",tbi,"Manual cool",function()
+					string.format("")	--global context for serious proton
+					p:commandSetAutoRepair(false)
+					p:setAutoCoolant(false)
+					p.autoCoolant = false
+				end)
+				p.autoCoolButton = true
+			end
+		end
+		if p:hasPlayerAtPosition("Engineering+") then
+			if p.autoCoolButton == nil then
+				tbi = "enableAutoCoolPlus" .. p:getCallSign()
+				p:addCustomButton("Engineering+",tbi,"Auto cool",function()
+					string.format("")	--global context for serious proton
+					p:commandSetAutoRepair(true)
+					p:setAutoCoolant(true)
+					p.autoCoolant = true
+				end)
+				tbi = "disableAutoCoolPlus" .. p:getCallSign()
+				p:addCustomButton("Engineering+",tbi,"Manual cool",function()
+					string.format("")	--global context for serious proton
+					p:commandSetAutoRepair(false)
+					p:setAutoCoolant(false)
+					p.autoCoolant = false
+				end)
+				p.autoCoolButton = true
 			end
 		end
 	end
 end
-function enableAutoCool1()
-	local p = getPlayerShip(1)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool1()
-	local p = getPlayerShip(1)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool2()
-	local p = getPlayerShip(2)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool2()
-	local p = getPlayerShip(2)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool3()
-	local p = getPlayerShip(3)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool3()
-	local p = getPlayerShip(3)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool4()
-	local p = getPlayerShip(4)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool4()
-	local p = getPlayerShip(4)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool5()
-	local p = getPlayerShip(5)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool5()
-	local p = getPlayerShip(5)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool6()
-	local p = getPlayerShip(6)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool6()
-	local p = getPlayerShip(6)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool7()
-	local p = getPlayerShip(7)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool7()
-	local p = getPlayerShip(7)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
-function enableAutoCool8()
-	local p = getPlayerShip(8)
-	p:setAutoCoolant(true)
-	p.autoCoolant = true
-end
-function disableAutoCool8()
-	local p = getPlayerShip(8)
-	p:setAutoCoolant(false)
-	p.autoCoolant = false
-end
 --		Gain or lose coolant from nebula functions
-function coolantNebulae(delta)
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local inside_gain_coolant_nebula = false
-			for i=1,#coolant_nebula do
-				if distance(p,coolant_nebula[i]) < 5000 then
-					if coolant_nebula[i].lose then
-						p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
-						if p:getMaxCoolant() > 50 and random(1,100) <= 13 then
-							local engine_choice = math.random(1,3)
-							if engine_choice == 1 then
-								p:setSystemHealth("impulse",p:getSystemHealth("impulse")*adverseEffect)
-							elseif engine_choice == 2 then
-								if p:hasWarpDrive() then
-									p:setSystemHealth("warp",p:getSystemHealth("warp")*adverseEffect)
-								end
-							else
-								if p:hasJumpDrive() then
-									p:setSystemHealth("jumpdrive",p:getSystemHealth("jumpdrive")*adverseEffect)
-								end
-							end
+function coolantNebulae(delta, p)
+	local inside_gain_coolant_nebula = false
+	for i=1,#coolant_nebula do
+		if distance_diagnostic then print("distance_diagnostic 12",p,coolant_nebula[i]) end
+		if distance(p,coolant_nebula[i]) < 5000 then
+			if coolant_nebula[i].lose then
+				p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
+				if p:getMaxCoolant() > 50 and random(1,100) <= 13 then
+					local engine_choice = math.random(1,3)
+					if engine_choice == 1 then
+						p:setSystemHealth("impulse",p:getSystemHealth("impulse")*adverseEffect)
+					elseif engine_choice == 2 then
+						if p:hasWarpDrive() then
+							p:setSystemHealth("warp",p:getSystemHealth("warp")*adverseEffect)
 						end
-					end
-					if coolant_nebula[i].gain then
-						inside_gain_coolant_nebula = true
+					else
+						if p:hasJumpDrive() then
+							p:setSystemHealth("jumpdrive",p:getSystemHealth("jumpdrive")*adverseEffect)
+						end
 					end
 				end
 			end
-			if inside_gain_coolant_nebula then
-				if p.get_coolant then
-					if p.coolant_trigger then
-						updateCoolantGivenPlayer(p, delta)
-					end
-				else
-					if p:hasPlayerAtPosition("Engineering") then
-						p.get_coolant_button = "get_coolant_button"
-						p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-					if p:hasPlayerAtPosition("Engineering+") then
-						p.get_coolant_button_plus = "get_coolant_button_plus"
-						p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-				end
-			else
-				p.get_coolant = false
-				p.coolant_trigger = false
-				p.configure_coolant_timer = nil
-				p.deploy_coolant_timer = nil
-				if p:hasPlayerAtPosition("Engineering") then
-					if p.get_coolant_button ~= nil then
-						p:removeCustom(p.get_coolant_button)
-						p.get_coolant_button = nil
-					end
-					if p.gather_coolant ~= nil then
-						p:removeCustom(p.gather_coolant)
-						p.gather_coolant = nil
-					end
-				end
-				if p:hasPlayerAtPosition("Engineering+") then
-					if p.get_coolant_button_plus ~= nil then
-						p:removeCustom(p.get_coolant_button_plus)
-						p.get_coolant_button_plus = nil
-					end
-					if p.gather_coolant_plus ~= nil then
-						p:removeCustom(p.gather_coolant_plus)
-						p.gather_coolant_plus = nil
-					end
-				end
+			if coolant_nebula[i].gain then
+				inside_gain_coolant_nebula = true
+			end
+		end
+	end
+	if inside_gain_coolant_nebula then
+		if p.get_coolant then
+			if p.coolant_trigger then
+				updateCoolantGivenPlayer(p, delta)
+			end
+		else
+			if p:hasPlayerAtPosition("Engineering") then
+				p.get_coolant_button = "get_coolant_button"
+				p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",function() getCoolantGivenPlayer(p) end)
+				p.get_coolant = true
+			end
+			if p:hasPlayerAtPosition("Engineering+") then
+				p.get_coolant_button_plus = "get_coolant_button_plus"
+				p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",function() getCoolantGivenPlayer(p) end)
+				p.get_coolant = true
+			end
+		end
+	else
+		p.get_coolant = false
+		p.coolant_trigger = false
+		p.configure_coolant_timer = nil
+		p.deploy_coolant_timer = nil
+		if p:hasPlayerAtPosition("Engineering") then
+			if p.get_coolant_button ~= nil then
+				p:removeCustom(p.get_coolant_button)
+				p.get_coolant_button = nil
+			end
+			if p.gather_coolant ~= nil then
+				p:removeCustom(p.gather_coolant)
+				p.gather_coolant = nil
+			end
+		end
+		if p:hasPlayerAtPosition("Engineering+") then
+			if p.get_coolant_button_plus ~= nil then
+				p:removeCustom(p.get_coolant_button_plus)
+				p.get_coolant_button_plus = nil
+			end
+			if p.gather_coolant_plus ~= nil then
+				p:removeCustom(p.gather_coolant_plus)
+				p.gather_coolant_plus = nil
 			end
 		end
 	end
@@ -11460,38 +14209,6 @@ function getCoolantGivenPlayer(p)
 		end
 	end
 	p.coolant_trigger = true
-end
-function getCoolant1()
-	local p = getPlayerShip(1)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant2()
-	local p = getPlayerShip(2)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant3()
-	local p = getPlayerShip(3)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant4()
-	local p = getPlayerShip(4)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant5()
-	local p = getPlayerShip(5)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant6()
-	local p = getPlayerShip(6)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant7()
-	local p = getPlayerShip(7)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant8()
-	local p = getPlayerShip(8)
-	getCoolantGivenPlayer(p)
 end
 --		Generate call sign functions
 function generateCallSign(prefix,faction)
@@ -12118,1022 +14835,1046 @@ function stockTemplate(enemyFaction,template)
 	end)
 	return ship
 end
---------------------------------------------------------------------------------------------
---	Additional enemy ships with some modifications from the original template parameters  --
---------------------------------------------------------------------------------------------
-function phobosR2(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Phobos T3"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Phobos R2")
-	ship:setWeaponTubeCount(1)			--one tube (vs 2)
-	ship:setWeaponTubeDirection(0,0)	
-	ship:setImpulseMaxSpeed(55)			--slower impulse (vs 60)
-	ship:setRotationMaxSpeed(15)		--faster maneuver (vs 10)
-	local phobos_r2_db = queryScienceDatabase("Ships","Frigate","Phobos R2")
-	if phobos_r2_db == nil then
-		local frigate_db = queryScienceDatabase("Ships","Frigate")
-		frigate_db:addEntry("Phobos R2")
-		phobos_r2_db = queryScienceDatabase("Ships","Frigate","Phobos R2")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Frigate","Phobos T3"),	--base ship database entry
-			phobos_r2_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Phobos R2 model is very similar to the Phobos T3. It's got a faster turn speed, but only one missile tube",
-			{
-				{key = "Tube 0", value = "60 sec"},	--torpedo tube direction and load speed
-			},
-			nil
-		)
-		--[[
-		phobos_r2_db:setLongDescription("The Phobos R2 model is very similar to the Phobos T3. It's got a faster turn speed, but only one missile tube")
-		phobos_r2_db:setKeyValue("Class","Frigate")
-		phobos_r2_db:setKeyValue("Sub-class","Cruiser")
-		phobos_r2_db:setKeyValue("Size","80")
-		phobos_r2_db:setKeyValue("Shield","50/40")
-		phobos_r2_db:setKeyValue("Hull","70")
-		phobos_r2_db:setKeyValue("Move speed","3.3 U/min")
-		phobos_r2_db:setKeyValue("Turn speed","15.0 deg/sec")
-		phobos_r2_db:setKeyValue("Beam weapon -15:90","6.0 Dmg / 8.0 sec")
-		phobos_r2_db:setKeyValue("Beam weapon 15:90","6.0 Dmg / 8.0 sec")
-		phobos_r2_db:setKeyValue("Tube 0","60 sec")
-		phobos_r2_db:setKeyValue("Storage Homing","6")
-		phobos_r2_db:setKeyValue("Storage HVLI","20")
-		phobos_r2_db:setImage("radar_cruiser.png")
-		--]]
-	end
-	return ship
-end
-function hornetMV52(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("MT52 Hornet"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("MV52 Hornet")
-	ship:setBeamWeapon(0, 30, 0, 1000.0, 4.0, 3.0)	--longer and stronger beam (vs 700 & 3)
-	ship:setRotationMaxSpeed(31)					--faster maneuver (vs 30)
-	ship:setImpulseMaxSpeed(130)					--faster impulse (vs 120)
-	local hornet_mv52_db = queryScienceDatabase("Ships","Starfighter","MV52 Hornet")
-	if hornet_mv52_db == nil then
-		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
-		starfighter_db:addEntry("MV52 Hornet")
-		hornet_mv52_db = queryScienceDatabase("Ships","Starfighter","MV52 Hornet")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Starfighter","MT52 Hornet"),	--base ship database entry
-			hornet_mv52_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The MV52 Hornet is very similar to the MT52 and MU52 models. The beam does more damage than both of the other Hornet models, it's max impulse speed is faster than both of the other Hornet models, it turns faster than the MT52, but slower than the MU52",
-			nil,
-			nil
-		)
-		--[[
-		hornet_mv52_db:setLongDescription("The MV52 Hornet is very similar to the MT52 and MU52 models. The beam does more damage than both of the other Hornet models, it's max impulse speed is faster than both of the other Hornet models, it turns faster than the MT52, but slower than the MU52")
-		hornet_mv52_db:setKeyValue("Class","Starfighter")
-		hornet_mv52_db:setKeyValue("Sub-class","Interceptor")
-		hornet_mv52_db:setKeyValue("Size","30")
-		hornet_mv52_db:setKeyValue("Shield","20")
-		hornet_mv52_db:setKeyValue("Hull","30")
-		hornet_mv52_db:setKeyValue("Move speed","7.8 U/min")
-		hornet_mv52_db:setKeyValue("Turn speed","31.0 deg/sec")
-		hornet_mv52_db:setKeyValue("Beam weapon 0:30","3.0 Dmg / 4.0 sec")
-		hornet_mv52_db:setImage("radar_fighter.png")
-		--]]
-	end
-	return ship
-end
-function k2fighter(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Fighter"):orderRoaming()
-	ship:setTypeName("K2 Fighter")
-	ship:setBeamWeapon(0, 60, 0, 1200.0, 2.5, 6)	--beams cycle faster (vs 4.0)
-	ship:setHullMax(65)								--weaker hull (vs 70)
-	ship:setHull(65)
-	local k2_fighter_db = queryScienceDatabase("Ships","No Class","K2 Fighter")
-	if k2_fighter_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("K2 Fighter")
-		k2_fighter_db = queryScienceDatabase("Ships","No Class","K2 Fighter")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Ktlitan Fighter"),	--base ship database entry
-			k2_fighter_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is a bit weaker.",
-			nil,
-			nil		--jump range
-		)
-		--[[
-		k2_fighter_db:setLongDescription("Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is a bit weaker.")
-		k2_fighter_db:setKeyValue("Class","No Class")
-		k2_fighter_db:setKeyValue("Sub-class","No Sub-Class")
-		k2_fighter_db:setKeyValue("Size","180")
-		k2_fighter_db:setKeyValue("Hull","65")
-		k2_fighter_db:setKeyValue("Move speed","8.4 U/min")
-		k2_fighter_db:setKeyValue("Turn speed","30.0 deg/sec")
-		k2_fighter_db:setKeyValue("Beam weapon 0:60","6.0 Dmg / 2.5 sec")
-		k2_fighter_db:setImage("radar_ktlitan_fighter.png")
-		--]]
-	end
-	return ship
-end	
-function k3fighter(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Fighter"):orderRoaming()
-	ship:setTypeName("K3 Fighter")
-	ship:setBeamWeapon(0, 60, 0, 1200.0, 2.5, 9)	--beams cycle faster and damage more (vs 4.0 & 6)
-	ship:setHullMax(60)								--weaker hull (vs 70)
-	ship:setHull(60)
-	local k3_fighter_db = queryScienceDatabase("Ships","No Class","K3 Fighter")
-	if k3_fighter_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("K3 Fighter")
-		k3_fighter_db = queryScienceDatabase("Ships","No Class","K3 Fighter")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Ktlitan Fighter"),	--base ship database entry
-			k3_fighter_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that are stronger and that cycle faster, but the hull is weaker.",
-			nil,
-			nil		--jump range
-		)
-		--[[
-		k3_fighter_db:setLongDescription("Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is weaker.")
-		k3_fighter_db:setKeyValue("Class","No Class")
-		k3_fighter_db:setKeyValue("Sub-class","No Sub-Class")
-		k3_fighter_db:setKeyValue("Size","180")
-		k3_fighter_db:setKeyValue("Hull","60")
-		k3_fighter_db:setKeyValue("Move speed","8.4 U/min")
-		k3_fighter_db:setKeyValue("Turn speed","30.0 deg/sec")
-		k3_fighter_db:setKeyValue("Beam weapon 0:60","9.0 Dmg / 2.5 sec")
-		k3_fighter_db:setImage("radar_ktlitan_fighter.png")
-		--]]
-	end
-	return ship
-end	
-function waddle5(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK5"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Waddle 5")
-	ship:setWarpDrive(true)
---				   Index,  Arc,	  Dir, Range, Cycle,	Damage
-	ship:setBeamWeapon(2,	70,	  -30,	 600,	5.0,	2.0)	--adjust beam direction to match starboard side (vs -35)
-	local waddle_5_db = queryScienceDatabase("Ships","Starfighter","Waddle 5")
-	if waddle_5_db == nil then
-		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
-		starfighter_db:addEntry("Waddle 5")
-		waddle_5_db = queryScienceDatabase("Ships","Starfighter","Waddle 5")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Starfighter","Adder MK5"),	--base ship database entry
-			waddle_5_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"Conversions R Us purchased a number of Adder MK 5 ships at auction and added warp drives to them to produce the Waddle 5",
-			{
-				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
-			},
-			nil		--jump range
-		)
-		--[[
-		waddle_5_db:setLongDescription("Conversions R Us purchased a number of Adder MK 5 ships at auction and added warp drives to them to produce the Waddle 5")
-		waddle_5_db:setKeyValue("Class","Starfighter")
-		waddle_5_db:setKeyValue("Sub-class","Gunship")
-		waddle_5_db:setKeyValue("Size","80")
-		waddle_5_db:setKeyValue("Shield","30")
-		waddle_5_db:setKeyValue("Hull","50")
-		waddle_5_db:setKeyValue("Move speed","4.8 U/min")
-		waddle_5_db:setKeyValue("Turn speed","28.0 deg/sec")
-		waddle_5_db:setKeyValue("Warp Speed","60.0 U/min")
-		waddle_5_db:setKeyValue("Beam weapon 0:35","2.0 Dmg / 5.0 sec")
-		waddle_5_db:setKeyValue("Beam weapon 30:70","2.0 Dmg / 5.0 sec")
-		waddle_5_db:setKeyValue("Beam weapon -35:70","2.0 Dmg / 5.0 sec")
-		waddle_5_db:setImage("radar_fighter.png")
-		--]]
-	end
-	return ship
-end
-function jade5(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK5"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Jade 5")
-	ship:setJumpDrive(true)
-	ship:setJumpDriveRange(5000,35000)
---				   Index,  Arc,	  Dir, Range, Cycle,	Damage
-	ship:setBeamWeapon(2,	70,	  -30,	 600,	5.0,	2.0)	--adjust beam direction to match starboard side (vs -35)
-	local jade_5_db = queryScienceDatabase("Ships","Starfighter","Jade 5")
-	if jade_5_db == nil then
-		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
-		starfighter_db:addEntry("Jade 5")
-		jade_5_db = queryScienceDatabase("Ships","Starfighter","Jade 5")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Starfighter","Adder MK5"),	--base ship database entry
-			jade_5_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"Conversions R Us purchased a number of Adder MK 5 ships at auction and added jump drives to them to produce the Jade 5",
-			{
-				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
-			},
-			"5 - 35 U"		--jump range
-		)
-		--[[
-		jade_5_db:setLongDescription("Conversions R Us purchased a number of Adder MK 5 ships at auction and added jump drives to them to produce the Jade 5")
-		jade_5_db:setKeyValue("Class","Starfighter")
-		jade_5_db:setKeyValue("Sub-class","Gunship")
-		jade_5_db:setKeyValue("Size","80")
-		jade_5_db:setKeyValue("Shield","30")
-		jade_5_db:setKeyValue("Hull","50")
-		jade_5_db:setKeyValue("Move speed","4.8 U/min")
-		jade_5_db:setKeyValue("Turn speed","28.0 deg/sec")
-		jade_5_db:setKeyValue("Jump Range","5 - 35 U")
-		jade_5_db:setKeyValue("Beam weapon 0:35","2.0 Dmg / 5.0 sec")
-		jade_5_db:setKeyValue("Beam weapon 30:70","2.0 Dmg / 5.0 sec")
-		jade_5_db:setKeyValue("Beam weapon -35:70","2.0 Dmg / 5.0 sec")
-		jade_5_db:setImage("radar_fighter.png")
-		--]]
-	end
-	return ship
-end
-function droneLite(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
-	ship:setTypeName("Lite Drone")
-	ship:setHullMax(20)					--weaker hull (vs 30)
-	ship:setHull(20)
-	ship:setImpulseMaxSpeed(130)		--faster impulse (vs 120)
-	ship:setRotationMaxSpeed(20)		--faster maneuver (vs 10)
-	ship:setBeamWeapon(0,40,0,600,4,4)	--weaker (vs 6) beam
-	local drone_lite_db = queryScienceDatabase("Ships","No Class","Lite Drone")
-	if drone_lite_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("Lite Drone")
-		drone_lite_db = queryScienceDatabase("Ships","No Class","Lite Drone")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
-			drone_lite_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The light drone was pieced together from scavenged parts of various damaged Ktlitan drones. Compared to the Ktlitan drone, the lite drone has a weaker hull, and a weaker beam, but a faster turn and impulse speed",
-			nil,
-			nil
-		)
-		--[[
-		drone_lite_db:setLongDescription("The light drone was pieced together from scavenged parts of various damaged Ktlitan drones. Compared to the Ktlitan drone, the lite drone has a weaker hull, and a weaker beam, but a faster turn and impulse speed")
-		drone_lite_db:setKeyValue("Class","No Class")
-		drone_lite_db:setKeyValue("Sub-class","No Sub-Class")
-		drone_lite_db:setKeyValue("Size","150")
-		drone_lite_db:setKeyValue("Hull","20")
-		drone_lite_db:setKeyValue("Move speed","7.8 U/min")
-		drone_lite_db:setKeyValue("Turn speed","20 deg/sec")
-		drone_lite_db:setKeyValue("Beam weapon 0:40","4.0 Dmg / 4.0 sec")
-		drone_lite_db:setImage("radar_ktlitan_drone.png")
-		--]]
-	end
-	return ship
-end
-function droneHeavy(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
-	ship:setTypeName("Heavy Drone")
-	ship:setHullMax(40)					--stronger hull (vs 30)
-	ship:setHull(40)
-	ship:setImpulseMaxSpeed(110)		--slower impulse (vs 120)
-	ship:setBeamWeapon(0,40,0,600,4,8)	--stronger (vs 6) beam
-	local drone_heavy_db = queryScienceDatabase("Ships","No Class","Heavy Drone")
-	if drone_heavy_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("Heavy Drone")
-		drone_heavy_db = queryScienceDatabase("Ships","No Class","Heavy Drone")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
-			drone_heavy_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The heavy drone has a stronger hull and a stronger beam than the normal Ktlitan Drone, but it also moves slower",
-			nil,
-			nil
-		)
-		--[[
-		drone_heavy_db:setLongDescription("The heavy drone has a stronger hull and a stronger beam than the normal Ktlitan Drone, but it also moves slower")
-		drone_heavy_db:setKeyValue("Class","No Class")
-		drone_heavy_db:setKeyValue("Sub-class","No Sub-Class")
-		drone_heavy_db:setKeyValue("Size","150")
-		drone_heavy_db:setKeyValue("Hull","40")
-		drone_heavy_db:setKeyValue("Move speed","6.6 U/min")
-		drone_heavy_db:setKeyValue("Turn speed","10 deg/sec")
-		drone_heavy_db:setKeyValue("Beam weapon 0:40","8.0 Dmg / 4.0 sec")
-		drone_heavy_db:setImage("radar_ktlitan_drone.png")
-		--]]
-	end
-	return ship
-end
-function droneJacket(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Jacket Drone")
-	ship:setShieldsMax(20)				--stronger shields (vs none)
-	ship:setShields(20)
-	ship:setImpulseMaxSpeed(110)		--slower impulse (vs 120)
-	ship:setBeamWeapon(0,40,0,600,4,4)	--weaker (vs 6) beam
-	local drone_jacket_db = queryScienceDatabase("Ships","No Class","Jacket Drone")
-	if drone_jacket_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("Jacket Drone")
-		drone_jacket_db = queryScienceDatabase("Ships","No Class","Jacket Drone")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
-			drone_jacket_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Jacket Drone is a Ktlitan Drone with a shield. It's also slightly slower and has a slightly weaker beam due to the energy requirements of the added shield",
-			nil,
-			nil
-		)
-		--[[
-		drone_jacket_db:setLongDescription("The Jacket Drone is a Ktlitan Drone with a shield. It's also slightly slower and has a slightly weaker beam due to the energy requirements of the added shield")
-		drone_jacket_db:setKeyValue("Class","No Class")
-		drone_jacket_db:setKeyValue("Sub-class","No Sub-Class")
-		drone_jacket_db:setKeyValue("Size","150")
-		drone_jacket_db:setKeyValue("Shield","20")
-		drone_jacket_db:setKeyValue("Hull","40")
-		drone_jacket_db:setKeyValue("Move speed","6.6 U/min")
-		drone_jacket_db:setKeyValue("Turn speed","10 deg/sec")
-		drone_jacket_db:setKeyValue("Beam weapon 0:40","4.0 Dmg / 4.0 sec")
-		drone_jacket_db:setImage("radar_ktlitan_drone.png")
-		--]]
-	end
-	return ship
-end
-function wzLindworm(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("WX-Lindworm"):orderRoaming()
-	ship:setTypeName("WZ-Lindworm")
-	ship:setWeaponStorageMax("Nuke",2)		--more nukes (vs 0)
-	ship:setWeaponStorage("Nuke",2)
-	ship:setWeaponStorageMax("Homing",4)	--more homing (vs 1)
-	ship:setWeaponStorage("Homing",4)
-	ship:setWeaponStorageMax("HVLI",12)		--more HVLI (vs 6)
-	ship:setWeaponStorage("HVLI",12)
-	ship:setRotationMaxSpeed(12)			--slower maneuver (vs 15)
-	ship:setHullMax(45)						--weaker hull (vs 50)
-	ship:setHull(45)
-	local wz_lindworm_db = queryScienceDatabase("Ships","Starfighter","WZ-Lindworm")
-	if wz_lindworm_db == nil then
-		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
-		starfighter_db:addEntry("WZ-Lindworm")
-		wz_lindworm_db = queryScienceDatabase("Ships","Starfighter","WZ-Lindworm")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Starfighter","WX-Lindworm"),	--base ship database entry
-			wz_lindworm_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The WZ-Lindworm is essentially the stock WX-Lindworm with more HVLIs, more homing missiles and added nukes. They had to remove some of the armor to get the additional missiles to fit, so the hull is weaker. Also, the WZ turns a little more slowly than the WX. This little bomber packs quite a whallop.",
-			{
-				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Small tube 1", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Small tube -1", value = "15 sec"},	--torpedo tube direction and load speed
-			},
-			nil
-		)
-		--[[
-		wz_lindworm_db:setLongDescription("The WZ-Lindworm is essentially the stock WX-Lindworm with more HVLIs, more homing missiles and added nukes. They had to remove some of the armor to get the additional missiles to fit, so the hull is weaker. Also, the WZ turns a little more slowly than the WX. This little bomber packs quite a whallop.")
-		wz_lindworm_db:setKeyValue("Class","Starfighter")
-		wz_lindworm_db:setKeyValue("Sub-class","Bomber")
-		wz_lindworm_db:setKeyValue("Size","30")
-		wz_lindworm_db:setKeyValue("Shield","20")
-		wz_lindworm_db:setKeyValue("Hull","45")
-		wz_lindworm_db:setKeyValue("Move speed","3.0 U/min")
-		wz_lindworm_db:setKeyValue("Turn speed","12 deg/sec")
-		wz_lindworm_db:setKeyValue("Small tube 0","15 sec")
-		wz_lindworm_db:setKeyValue("Small tube 1","15 sec")
-		wz_lindworm_db:setKeyValue("Small tube -1","15 sec")
-		wz_lindworm_db:setKeyValue("Storage Homing","4")
-		wz_lindworm_db:setKeyValue("Storage Nuke","2")
-		wz_lindworm_db:setKeyValue("Storage HVLI","12")
-		wz_lindworm_db:setImage("radar_fighter.png")
-		--]]
-	end
-	return ship
-end
-function tempest(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F12"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Tempest")
-	ship:setWeaponTubeCount(10)						--four more tubes (vs 6)
-	ship:setWeaponTubeDirection(0, -88)				--5 per side
-	ship:setWeaponTubeDirection(1, -89)				--slight angle spread
-	ship:setWeaponTubeDirection(3,  88)				--3 for HVLI each side
-	ship:setWeaponTubeDirection(4,  89)				--2 for homing and nuke each side
-	ship:setWeaponTubeDirection(6, -91)				
-	ship:setWeaponTubeDirection(7, -92)				
-	ship:setWeaponTubeDirection(8,  91)				
-	ship:setWeaponTubeDirection(9,  92)				
-	ship:setWeaponTubeExclusiveFor(7,"HVLI")
-	ship:setWeaponTubeExclusiveFor(9,"HVLI")
-	ship:setWeaponStorageMax("Homing",16)			--more (vs 6)
-	ship:setWeaponStorage("Homing", 16)				
-	ship:setWeaponStorageMax("Nuke",8)				--more (vs 0)
-	ship:setWeaponStorage("Nuke", 8)				
-	ship:setWeaponStorageMax("HVLI",34)				--more (vs 20)
-	ship:setWeaponStorage("HVLI", 34)
-	local tempest_db = queryScienceDatabase("Ships","Frigate","Tempest")
-	if tempest_db == nil then
-		local frigate_db = queryScienceDatabase("Ships","Frigate")
-		frigate_db:addEntry("Tempest")
-		tempest_db = queryScienceDatabase("Ships","Frigate","Tempest")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Frigate","Piranha F12"),	--base ship database entry
-			tempest_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"Loosely based on the Piranha F12 model, the Tempest adds four more broadside tubes (two on each side), more HVLIs, more Homing missiles and 8 Nukes. The Tempest can strike fear into the hearts of your enemies. Get yourself one today!",
-			{
-				{key = "Large tube -88", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -89", value = "15 sec"},		--torpedo tube direction and load speed
-				{key = "Large tube -90", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Large tube 88", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Tube 89", value = "15 sec"},		--torpedo tube direction and load speed
-				{key = "Large tube 90", value = "15 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -91", value = "15 sec"},		--torpedo tube direction and load speed
-				{key = "Tube -92", value = "15 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 91", value = "15 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 92", value = "15 sec"},		--torpedo tube direction and load speed
-			},
-			nil
-		)
-		--[[
-		tempest_db:setLongDescription("Loosely based on the Piranha F12 model, the Tempest adds four more broadside tubes (two on each side), more HVLIs, more Homing missiles and 8 Nukes. The Tempest can strike fear into the hearts of your enemies. Get yourself one today!")
-		tempest_db:setKeyValue("Class","Frigate")
-		tempest_db:setKeyValue("Sub-class","Cruiser: Light Artillery")
-		tempest_db:setKeyValue("Size","80")
-		tempest_db:setKeyValue("Shield","30/30")
-		tempest_db:setKeyValue("Hull","70")
-		tempest_db:setKeyValue("Move speed","2.4 U/min")
-		tempest_db:setKeyValue("Turn speed","6.0 deg/sec")
-		tempest_db:setKeyValue("Large Tube -88","15 sec")
-		tempest_db:setKeyValue("Tube -89","15 sec")
-		tempest_db:setKeyValue("Large Tube -90","15 sec")
-		tempest_db:setKeyValue("Large Tube 88","15 sec")
-		tempest_db:setKeyValue("Tube 89","15 sec")
-		tempest_db:setKeyValue("Large Tube 90","15 sec")
-		tempest_db:setKeyValue("Tube -91","15 sec")
-		tempest_db:setKeyValue("Tube -92","15 sec")
-		tempest_db:setKeyValue("Tube 91","15 sec")
-		tempest_db:setKeyValue("Tube 92","15 sec")
-		tempest_db:setKeyValue("Storage Homing","16")
-		tempest_db:setKeyValue("Storage Nuke","8")
-		tempest_db:setKeyValue("Storage HVLI","34")
-		tempest_db:setImage("radar_piranha.png")
-		--]]
-	end
-	return ship
-end
-function enforcer(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Blockade Runner"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Enforcer")
-	ship:setRadarTrace("radar_ktlitan_destroyer.png")			--different radar trace
-	ship:setWarpDrive(true)										--warp (vs none)
-	ship:setWarpSpeed(600)
-	ship:setImpulseMaxSpeed(100)								--faster impulse (vs 60)
-	ship:setRotationMaxSpeed(20)								--faster maneuver (vs 15)
-	ship:setShieldsMax(200,100,100)								--stronger shields (vs 100,150)
-	ship:setShields(200,100,100)					
-	ship:setHullMax(100)										--stronger hull (vs 70)
-	ship:setHull(100)
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(0,	30,	  -15,	1500,		6,		10)	--narrower (vs 60), longer (vs 1000), stronger (vs 8)
-	ship:setBeamWeapon(1,	30,	   15,	1500,		6,		10)
-	ship:setBeamWeapon(2,	 0,	    0,	   0,		0,		 0)	--fewer (vs 4)
-	ship:setBeamWeapon(3,	 0,	    0,	   0,		0,		 0)
-	ship:setWeaponTubeCount(3)									--more (vs 0)
-	ship:setTubeSize(0,"large")									--large (vs normal)
-	ship:setWeaponTubeDirection(1,-30)				
-	ship:setWeaponTubeDirection(2, 30)				
-	ship:setWeaponStorageMax("Homing",18)						--more (vs 0)
-	ship:setWeaponStorage("Homing", 18)
-	local enforcer_db = queryScienceDatabase("Ships","Frigate","Enforcer")
-	if enforcer_db == nil then
-		local frigate_db = queryScienceDatabase("Ships","Frigate")
-		frigate_db:addEntry("Enforcer")
-		enforcer_db = queryScienceDatabase("Ships","Frigate","Enforcer")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Frigate","Blockade Runner"),	--base ship database entry
-			enforcer_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Enforcer is a highly modified Blockade Runner. A warp drive was added and impulse engines boosted along with turning speed. Three missile tubes were added to shoot homing missiles, large ones straight ahead. Stronger shields and hull. Removed rear facing beams and strengthened front beams.",
-			{
-				{key = "Large tube 0", value = "20 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -30", value = "20 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 30", value = "20 sec"},		--torpedo tube direction and load speed
-			},
-			nil
-		)
-		--[[
-		enforcer_db:setLongDescription("The Enforcer is a highly modified Blockade Runner. A warp drive was added and impulse engines boosted along with turning speed. Three missile tubes were added to shoot homing missiles, large ones straight ahead. Stronger shields and hull. Removed rear facing beams and stengthened front beams.")
-		enforcer_db:setKeyValue("Class","Frigate")
-		enforcer_db:setKeyValue("Sub-class","High Punch")
-		enforcer_db:setKeyValue("Size","200")
-		enforcer_db:setKeyValue("Shield","200/100/100")
-		enforcer_db:setKeyValue("Hull","100")
-		enforcer_db:setKeyValue("Move speed","6.0 U/min")
-		enforcer_db:setKeyValue("Turn speed","20.0 deg/sec")
-		enforcer_db:setKeyValue("Warp Speed","36.0 U/min")
-		enforcer_db:setKeyValue("Beam weapon -15:30","10.0 Dmg / 6.0 sec")
-		enforcer_db:setKeyValue("Beam weapon 15:30","10.0 Dmg / 6.0 sec")
-		enforcer_db:setKeyValue("Large Tube 0","20 sec")
-		enforcer_db:setKeyValue("Tube -30","20 sec")
-		enforcer_db:setKeyValue("Tube 30","20 sec")
-		enforcer_db:setKeyValue("Storage Homing","18")
-		--]]
-		enforcer_db:setImage("radar_ktlitan_destroyer.png")		--override default radar image
-	end
-	return ship		
-end
-function predator(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F8"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Predator")
-	ship:setShieldsMax(100,100)									--stronger shields (vs 30,30)
-	ship:setShields(100,100)					
-	ship:setHullMax(80)											--stronger hull (vs 70)
-	ship:setHull(80)
-	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 40)
-	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 6)
-	ship:setJumpDrive(true)
-	ship:setJumpDriveRange(5000,35000)			
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(0,	90,	    0,	1000,		6,		 4)	--more (vs 0)
-	ship:setBeamWeapon(1,	90,	  180,	1000,		6,		 4)	
-	ship:setWeaponTubeCount(8)									--more (vs 3)
-	ship:setWeaponTubeDirection(0,-60)				
-	ship:setWeaponTubeDirection(1,-90)				
-	ship:setWeaponTubeDirection(2,-90)				
-	ship:setWeaponTubeDirection(3, 60)				
-	ship:setWeaponTubeDirection(4, 90)				
-	ship:setWeaponTubeDirection(5, 90)				
-	ship:setWeaponTubeDirection(6,-120)				
-	ship:setWeaponTubeDirection(7, 120)				
-	ship:setWeaponTubeExclusiveFor(0,"Homing")
-	ship:setWeaponTubeExclusiveFor(1,"Homing")
-	ship:setWeaponTubeExclusiveFor(2,"Homing")
-	ship:setWeaponTubeExclusiveFor(3,"Homing")
-	ship:setWeaponTubeExclusiveFor(4,"Homing")
-	ship:setWeaponTubeExclusiveFor(5,"Homing")
-	ship:setWeaponTubeExclusiveFor(6,"Homing")
-	ship:setWeaponTubeExclusiveFor(7,"Homing")
-	ship:setWeaponStorageMax("Homing",32)						--more (vs 5)
-	ship:setWeaponStorage("Homing", 32)		
-	ship:setWeaponStorageMax("HVLI",0)							--less (vs 10)
-	ship:setWeaponStorage("HVLI", 0)
-	ship:setRadarTrace("radar_missile_cruiser.png")				--different radar trace
-	local predator_db = queryScienceDatabase("Ships","Frigate","Predator")
-	if predator_db == nil then
-		local frigate_db = queryScienceDatabase("Ships","Frigate")
-		frigate_db:addEntry("Predator")
-		predator_db = queryScienceDatabase("Ships","Frigate","Predator")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Frigate","Piranha F8"),	--base ship database entry
-			predator_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Predator is a significantly improved Piranha F8. Stronger shields and hull, faster impulse and turning speeds, a jump drive, beam weapons, eight missile tubes pointing in six directions and a large number of homing missiles to shoot.",
-			{
-				{key = "Large tube -60", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -90", value = "12 sec"},		--torpedo tube direction and load speed
-				{key = "Large tube -90", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Large tube 60", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Tube 90", value = "12 sec"},		--torpedo tube direction and load speed
-				{key = "Large tube 90", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -120", value = "12 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 120", value = "12 sec"},		--torpedo tube direction and load speed
-			},
-			"5 - 35 U"		--jump range
-		)
-		--[[
-		predator_db:setLongDescription("The Predator is a significantly improved Piranha F8. Stronger shields and hull, faster impulse and turning speeds, a jump drive, beam weapons, eight missile tubes pointing in six directions and a large number of homing missiles to shoot.")
-		predator_db:setKeyValue("Class","Frigate")
-		predator_db:setKeyValue("Sub-class","Cruiser: Light Artillery")
-		predator_db:setKeyValue("Size","80")
-		predator_db:setKeyValue("Shield","100/100")
-		predator_db:setKeyValue("Hull","80")
-		predator_db:setKeyValue("Move speed","3.9 U/min")
-		predator_db:setKeyValue("Turn speed","15.0 deg/sec")
-		predator_db:setKeyValue("Jump Range","5 - 35 U")
-		predator_db:setKeyValue("Beam weapon 0:90","4.0 Dmg / 6.0 sec")
-		predator_db:setKeyValue("Beam weapon 180:90","4.0 Dmg / 6.0 sec")
-		predator_db:setKeyValue("Large Tube -60","12 sec")
-		predator_db:setKeyValue("Tube -90","12 sec")
-		predator_db:setKeyValue("Large Tube -90","12 sec")
-		predator_db:setKeyValue("Large Tube 60","12 sec")
-		predator_db:setKeyValue("Tube 90","12 sec")
-		predator_db:setKeyValue("Large Tube 90","12 sec")
-		predator_db:setKeyValue("Tube -120","12 sec")
-		predator_db:setKeyValue("Tube 120","12 sec")
-		predator_db:setKeyValue("Storage Homing","32")
-		--]]
-		predator_db:setImage("radar_missile_cruiser.png")		--override default radar image
-	end
-	return ship		
-end
-function atlantisY42(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Atlantis X23"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Atlantis Y42")
-	ship:setShieldsMax(300,200,300,200)							--stronger shields (vs 200,200,200,200)
-	ship:setShields(300,200,300,200)					
-	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 30)
-	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 3.5)
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(2,	80,	  190,	1500,		6,		 8)	--narrower (vs 100)
-	ship:setBeamWeapon(3,	80,	  170,	1500,		6,		 8)	--extra (vs 3 beams)
-	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
-	ship:setWeaponStorage("Homing", 16)
-	local atlantis_y42_db = queryScienceDatabase("Ships","Corvette","Atlantis Y42")
-	if atlantis_y42_db == nil then
-		local corvette_db = queryScienceDatabase("Ships","Corvette")
-		corvette_db:addEntry("Atlantis Y42")
-		atlantis_y42_db = queryScienceDatabase("Ships","Corvette","Atlantis Y42")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Corvette","Atlantis X23"),	--base ship database entry
-			atlantis_y42_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Atlantis Y42 improves on the Atlantis X23 with stronger shields, faster impulse and turn speeds, an extra beam in back and a larger missile stock",
-			{
-				{key = "Tube -90", value = "10 sec"},	--torpedo tube direction and load speed
-				{key = " Tube -90", value = "10 sec"},	--torpedo tube direction and load speed
-				{key = "Tube 90", value = "10 sec"},	--torpedo tube direction and load speed
-				{key = " Tube 90", value = "10 sec"},	--torpedo tube direction and load speed
-			},
-			"5 - 50 U"		--jump range
-		)
-		--[[
-		atlantis_y42_db:setLongDescription("The Atlantis Y42 improves on the Atlantis X23 with stronger shields, faster impulse and turn speeds, an extra beam in back and a larger missile stock")
-		atlantis_y42_db:setKeyValue("Class","Corvette")
-		atlantis_y42_db:setKeyValue("Sub-class","Destroyer")
-		atlantis_y42_db:setKeyValue("Size","200")
-		atlantis_y42_db:setKeyValue("Shield","300/200/300/200")
-		atlantis_y42_db:setKeyValue("Hull","100")
-		atlantis_y42_db:setKeyValue("Move speed","3.9 U/min")
-		atlantis_y42_db:setKeyValue("Turn speed","15.0 deg/sec")
-		atlantis_y42_db:setKeyValue("Jump Range","5 - 50 U")
-		atlantis_y42_db:setKeyValue("Beam weapon -20:100","8.0 Dmg / 6.0 sec")
-		atlantis_y42_db:setKeyValue("Beam weapon 20:100","8.0 Dmg / 6.0 sec")
-		atlantis_y42_db:setKeyValue("Beam weapon 190:100","8.0 Dmg / 6.0 sec")
-		atlantis_y42_db:setKeyValue("Beam weapon 170:100","8.0 Dmg / 6.0 sec")
-		atlantis_y42_db:setKeyValue("Tube -90","10 sec")
-		atlantis_y42_db:setKeyValue(" Tube -90","10 sec")
-		atlantis_y42_db:setKeyValue("Tube 90","10 sec")
-		atlantis_y42_db:setKeyValue(" Tube 90","10 sec")
-		atlantis_y42_db:setKeyValue("Storage Homing","4")
-		atlantis_y42_db:setKeyValue("Storage HVLI","20")
-		atlantis_y42_db:setImage("radar_dread.png")
-		--]]
-	end
-	return ship		
-end
-function starhammerV(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Starhammer II"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Starhammer V")
-	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 35)
-	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 6)
-	ship:setShieldsMax(450, 350, 250, 250, 350)					--stronger shields (vs 450, 350, 150, 150, 350)
-	ship:setShields(450, 350, 250, 250, 350)					
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(4,	60,	  180,	1500,		8,		11)	--extra rear facing beam
-	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
-	ship:setWeaponStorage("Homing", 16)		
-	ship:setWeaponStorageMax("HVLI",36)							--more (vs 20)
-	ship:setWeaponStorage("HVLI", 36)
-	local starhammer_v_db = queryScienceDatabase("Ships","Corvette","Starhammer V")
-	if starhammer_v_db == nil then
-		local corvette_db = queryScienceDatabase("Ships","Corvette")
-		corvette_db:addEntry("Starhammer V")
-		starhammer_v_db = queryScienceDatabase("Ships","Corvette","Starhammer V")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Corvette","Starhammer II"),	--base ship database entry
-			starhammer_v_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Starhammer V recognizes common modifications made in the field to the Starhammer II: stronger shields, faster impulse and turning speeds, additional rear beam and more missiles to shoot. These changes make the Starhammer V a force to be reckoned with.",
-			{
-				{key = "Tube 0", value = "10 sec"},	--torpedo tube direction and load speed
-				{key = " Tube 0", value = "10 sec"},	--torpedo tube direction and load speed
-			},
-			"5 - 50 U"		--jump range
-		)
-		--[[
-		starhammer_v_db:setLongDescription("The Starhammer V recognizes common modifications made in the field to the Starhammer II: stronger shields, faster impulse and turning speeds, additional rear beam and more missiles to shoot. These changes make the Starhammer V a force to be reckoned with.")
-		starhammer_v_db:setKeyValue("Class","Corvette")
-		starhammer_v_db:setKeyValue("Sub-class","Destroyer")
-		starhammer_v_db:setKeyValue("Size","200")
-		starhammer_v_db:setKeyValue("Shield","450/350/250/250/350")
-		starhammer_v_db:setKeyValue("Hull","200")
-		starhammer_v_db:setKeyValue("Move speed","3.9 U/min")
-		starhammer_v_db:setKeyValue("Turn speed","15.0 deg/sec")
-		starhammer_v_db:setKeyValue("Jump Range","5 - 50 U")
-		starhammer_v_db:setKeyValue("Beam weapon -10:60","11.0 Dmg / 8.0 sec")
-		starhammer_v_db:setKeyValue("Beam weapon 10:60","11.0 Dmg / 8.0 sec")
-		starhammer_v_db:setKeyValue("Beam weapon -20:60","11.0 Dmg / 8.0 sec")
-		starhammer_v_db:setKeyValue("Beam weapon 20:60","11.0 Dmg / 8.0 sec")
-		starhammer_v_db:setKeyValue("Beam weapon 180:60","11.0 Dmg / 8.0 sec")
-		starhammer_v_db:setKeyValue("Tube 0","10 sec")
-		starhammer_v_db:setKeyValue(" Tube 0","10 sec")
-		starhammer_v_db:setKeyValue("Storage Homing","16")
-		starhammer_v_db:setKeyValue("Storage EMP","2")
-		starhammer_v_db:setKeyValue("Storage HVLI","36")
-		starhammer_v_db:setImage("radar_dread.png")
-		--]]
-	end
-	return ship		
-end
-function tyr(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Battlestation"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Tyr")
-	ship:setImpulseMaxSpeed(50)									--faster impulse (vs 30)
-	ship:setRotationMaxSpeed(10)								--faster maneuver (vs 1.5)
-	ship:setShieldsMax(400, 300, 300, 400, 300, 300)			--stronger shields (vs 300, 300, 300, 300, 300)
-	ship:setShields(400, 300, 300, 400, 300, 300)					
-	ship:setHullMax(100)										--stronger hull (vs 70)
-	ship:setHull(100)
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(0,	90,	  -60,	2500,		6,		 8)	--stronger beams, broader coverage
-	ship:setBeamWeapon(1,	90,	 -120,	2500,		6,		 8)
-	ship:setBeamWeapon(2,	90,	   60,	2500,		6,		 8)
-	ship:setBeamWeapon(3,	90,	  120,	2500,		6,		 8)
-	ship:setBeamWeapon(4,	90,	  -60,	2500,		6,		 8)
-	ship:setBeamWeapon(5,	90,	 -120,	2500,		6,		 8)
-	ship:setBeamWeapon(6,	90,	   60,	2500,		6,		 8)
-	ship:setBeamWeapon(7,	90,	  120,	2500,		6,		 8)
-	ship:setBeamWeapon(8,	90,	  -60,	2500,		6,		 8)
-	ship:setBeamWeapon(9,	90,	 -120,	2500,		6,		 8)
-	ship:setBeamWeapon(10,	90,	   60,	2500,		6,		 8)
-	ship:setBeamWeapon(11,	90,	  120,	2500,		6,		 8)
-	local tyr_db = queryScienceDatabase("Ships","Dreadnought","Tyr")
-	if tyr_db == nil then
-		local corvette_db = queryScienceDatabase("Ships","Dreadnought")
-		corvette_db:addEntry("Tyr")
-		tyr_db = queryScienceDatabase("Ships","Dreadnought","Tyr")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Dreadnought","Battlestation"),	--base ship database entry
-			tyr_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Tyr is the shipyard's answer to admiral konstatz' casual statement that the Battlestation model was too slow to be effective. The shipyards improved on the Battlestation by fitting the Tyr with more than twice the impulse speed and more than six times the turn speed. They threw in stronger shields and hull and wider beam coverage just to show that they could",
-			nil,
-			"5 - 50 U"		--jump range
-		)
-		--[[
-		tyr_db:setLongDescription("The Tyr is the shipyard's answer to admiral konstatz' casual statement that the Battlestation model was too slow to be effective. The shipyards improved on the Battlestation by fitting the Tyr with more than twice the impulse speed and more than six times the turn speed. They threw in stronger shields and hull and wider beam coverage just to show that they could")
-		tyr_db:setKeyValue("Class","Dreadnought")
-		tyr_db:setKeyValue("Sub-class","Assault")
-		tyr_db:setKeyValue("Size","200")
-		tyr_db:setKeyValue("Shield","400/300/300/400/300/300")
-		tyr_db:setKeyValue("Hull","100")
-		tyr_db:setKeyValue("Move speed","3.0 U/min")
-		tyr_db:setKeyValue("Turn speed","10.0 deg/sec")
-		tyr_db:setKeyValue("Jump Range","5 - 50 U")
-		tyr_db:setKeyValue("Beam weapon -60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("Beam weapon -120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("Beam weapon 60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("Beam weapon 120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue(" Beam weapon -60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue(" Beam weapon -120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue(" Beam weapon 60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue(" Beam weapon 120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("  Beam weapon -60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("  Beam weapon -120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("  Beam weapon 60:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setKeyValue("  Beam weapon 120:90","8.0 Dmg / 6.0 sec")
-		tyr_db:setImage("radar_battleship.png")
-		--]]
-	end
-	return ship
-end
-function gnat(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
-	ship:setTypeName("Gnat")
-	ship:setHullMax(15)					--weaker hull (vs 30)
-	ship:setHull(15)
-	ship:setImpulseMaxSpeed(140)		--faster impulse (vs 120)
-	ship:setRotationMaxSpeed(25)		--faster maneuver (vs 10)
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(0,   40,		0,	 600,		4,		 3)	--weaker (vs 6) beam
-	local gnat_db = queryScienceDatabase("Ships","No Class","Gnat")
-	if gnat_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("Gnat")
-		gnat_db = queryScienceDatabase("Ships","No Class","Gnat")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Gnat"),	--base ship database entry
-			gnat_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Gnat is a nimbler version of the Ktlitan Drone. It's got half the hull, but it moves and turns faster",
-			nil,
-			nil		--jump range
-		)
-	end
-	return ship
-end
-function cucaracha(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Tug"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Cucaracha")
-	ship:setShieldsMax(200, 50, 50, 50, 50, 50)		--stronger shields (vs 20)
-	ship:setShields(200, 50, 50, 50, 50, 50)					
-	ship:setHullMax(100)							--stronger hull (vs 50)
-	ship:setHull(100)
-	ship:setRotationMaxSpeed(20)					--faster maneuver (vs 10)
-	ship:setAcceleration(30)						--faster acceleration (vs 15)
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(0,	60,	    0,	1500,		6,		10)	--extra rear facing beam
-	local cucaracha_db = queryScienceDatabase("Ships","No Class","Cucaracha")
-	if cucaracha_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("Cucaracha")
-		cucaracha_db = queryScienceDatabase("Ships","No Class","Cucaracha")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","Cucaracha"),	--base ship database entry
-			cucaracha_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Cucaracha is a quick ship built around the Tug model with heavy shields and a heavy beam designed to be difficult to squash",
-			nil,
-			nil		--jump range
-		)
-	end
-	return ship
-end
-function starhammerIII(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Starhammer II"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Starhammer III")
---				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
-	ship:setBeamWeapon(4,	60,	  180,	1500,		8,		11)	--extra rear facing beam
-	ship:setTubeSize(0,"large")
-	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
-	ship:setWeaponStorage("Homing", 16)		
-	ship:setWeaponStorageMax("HVLI",36)							--more (vs 20)
-	ship:setWeaponStorage("HVLI", 36)
-	local starhammer_iii_db = queryScienceDatabase("Ships","Corvette","Starhammer III")
-	if starhammer_iii_db == nil then
-		local corvette_db = queryScienceDatabase("Ships","Corvette")
-		corvette_db:addEntry("Starhammer III")
-		starhammer_iii_db = queryScienceDatabase("Ships","Corvette","Starhammer III")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Corvette","Starhammer III"),	--base ship database entry
-			starhammer_iii_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The designers of the Starhammer III took the Starhammer II and added a rear facing beam, enlarged one of the missile tubes and added more missiles to fire",
-			{
-				{key = "Large tube 0", value = "10 sec"},	--torpedo tube direction and load speed
-				{key = "Tube 0", value = "10 sec"},			--torpedo tube direction and load speed
-			},
-			"5 - 50 U"		--jump range
-		)
-	end
-	return ship
-end
-function k2breaker(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Breaker"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("K2 Breaker")
-	ship:setHullMax(200)							--stronger hull (vs 120)
-	ship:setHull(200)
-	ship:setWeaponTubeCount(3)						--more (vs 1)
-	ship:setTubeSize(0,"large")						--large (vs normal)
-	ship:setWeaponTubeDirection(1,-30)				
-	ship:setWeaponTubeDirection(2, 30)
-	ship:setWeaponTubeExclusiveFor(0,"HVLI")		--only HVLI (vs any)
-	ship:setWeaponStorageMax("Homing",16)			--more (vs 0)
-	ship:setWeaponStorage("Homing", 16)
-	ship:setWeaponStorageMax("HVLI",8)				--more (vs 5)
-	ship:setWeaponStorage("HVLI", 8)
-	local k2_breaker_db = queryScienceDatabase("Ships","No Class","K2 Breaker")
-	if k2_breaker_db == nil then
-		local no_class_db = queryScienceDatabase("Ships","No Class")
-		no_class_db:addEntry("K2 Breaker")
-		k2_breaker_db = queryScienceDatabase("Ships","No Class","K2 Breaker")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","No Class","K2 Breaker"),	--base ship database entry
-			k2_breaker_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The K2 Breaker designers took the Ktlitan Breaker and beefed up the hull, added two bracketing tubes, enlarged the center tube and added more missiles to shoot. Should be good for a couple of enemy ships",
-			{
-				{key = "Large tube 0", value = "13 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -30", value = "13 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 30", value = "13 sec"},		--torpedo tube direction and load speed
-			},
-			nil
-		)
-	end
-	return ship
-end
-function hurricane(enemyFaction)
-	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F8"):orderRoaming()
-	ship:onTakingDamage(function(self,instigator)
-		string.format("")	--serious proton needs a global context
-		if instigator ~= nil then
-			self.damage_instigator = instigator
-		end
-	end)
-	ship:setTypeName("Hurricane")
-	ship:setJumpDrive(true)
-	ship:setJumpDriveRange(5000,40000)			
-	ship:setWeaponTubeCount(8)						--more (vs 3)
-	ship:setWeaponTubeExclusiveFor(1,"HVLI")		--only HVLI (vs any)
-	ship:setWeaponTubeDirection(1,  0)				--forward (vs -90)
-	ship:setTubeSize(3,"large")						
-	ship:setWeaponTubeDirection(3,-90)
-	ship:setTubeSize(4,"small")
-	ship:setWeaponTubeExclusiveFor(4,"Homing")
-	ship:setWeaponTubeDirection(4,-15)
-	ship:setTubeSize(5,"small")
-	ship:setWeaponTubeExclusiveFor(5,"Homing")
-	ship:setWeaponTubeDirection(5, 15)
-	ship:setWeaponTubeExclusiveFor(6,"Homing")
-	ship:setWeaponTubeDirection(6,-30)
-	ship:setWeaponTubeExclusiveFor(7,"Homing")
-	ship:setWeaponTubeDirection(7, 30)
-	ship:setWeaponStorageMax("Homing",24)			--more (vs 5)
-	ship:setWeaponStorage("Homing", 24)
-	local hurricane_db = queryScienceDatabase("Ships","Frigate","Hurricane")
-	if hurricane_db == nil then
-		local frigate_db = queryScienceDatabase("Ships","Frigate")
-		frigate_db:addEntry("Hurricane")
-		hurricane_db = queryScienceDatabase("Ships","Frigate","Hurricane")
-		addShipToDatabase(
-			queryScienceDatabase("Ships","Frigate","Hurricane"),	--base ship database entry
-			hurricane_db,	--modified ship database entry
-			ship,			--ship just created, long description on the next line
-			"The Hurricane is designed to jump in and shower the target with missiles. It is based on the Piranha F8, but with a jump drive, five more tubes in various directions and sizes and lots more missiles to shoot",
-			{
-				{key = "Large tube 0", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Tube 0", value = "12 sec"},			--torpedo tube direction and load speed
-				{key = "Large tube 90", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Large tube -90", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Small tube -15", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Small tube 15", value = "12 sec"},	--torpedo tube direction and load speed
-				{key = "Tube -30", value = "12 sec"},		--torpedo tube direction and load speed
-				{key = "Tube 30", value = "12 sec"},		--torpedo tube direction and load speed
-			},
-			"5 - 40 U"		--jump range
-		)
-	end
-	return ship
-end
-function addShipToDatabase(base_db,modified_db,ship,description,tube_directions,jump_range)
+----------------------------------------------------------------------------------------------
+----	Additional enemy ships with some modifications from the original template parameters  --
+----------------------------------------------------------------------------------------------
+--function phobosR2(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Phobos T3"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Phobos R2")
+--	ship:setWeaponTubeCount(1)			--one tube (vs 2)
+--	ship:setWeaponTubeDirection(0,0)	
+--	ship:setImpulseMaxSpeed(55)			--slower impulse (vs 60)
+--	ship:setRotationMaxSpeed(15)		--faster maneuver (vs 10)
+--	local phobos_r2_db = queryScienceDatabase("Ships","Frigate","Phobos R2")
+--	if phobos_r2_db == nil then
+--		local frigate_db = queryScienceDatabase("Ships","Frigate")
+--		frigate_db:addEntry("Phobos R2")
+--		phobos_r2_db = queryScienceDatabase("Ships","Frigate","Phobos R2")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Frigate","Phobos T3"),	--base ship database entry
+--			phobos_r2_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Phobos R2 model is very similar to the Phobos T3. It's got a faster turn speed, but only one missile tube",
+--			{
+--				{key = "Tube 0", value = "60 sec"},	--torpedo tube direction and load speed
+--			},
+--			nil,
+--			"AtlasHeavyFighterYellow"
+--		)
+--		--[[
+--		phobos_r2_db:setLongDescription("The Phobos R2 model is very similar to the Phobos T3. It's got a faster turn speed, but only one missile tube")
+--		phobos_r2_db:setKeyValue("Class","Frigate")
+--		phobos_r2_db:setKeyValue("Sub-class","Cruiser")
+--		phobos_r2_db:setKeyValue("Size","80")
+--		phobos_r2_db:setKeyValue("Shield","50/40")
+--		phobos_r2_db:setKeyValue("Hull","70")
+--		phobos_r2_db:setKeyValue("Move speed","3.3 U/min")
+--		phobos_r2_db:setKeyValue("Turn speed","15.0 deg/sec")
+--		phobos_r2_db:setKeyValue("Beam weapon -15:90","6.0 Dmg / 8.0 sec")
+--		phobos_r2_db:setKeyValue("Beam weapon 15:90","6.0 Dmg / 8.0 sec")
+--		phobos_r2_db:setKeyValue("Tube 0","60 sec")
+--		phobos_r2_db:setKeyValue("Storage Homing","6")
+--		phobos_r2_db:setKeyValue("Storage HVLI","20")
+--		phobos_r2_db:setImage("radar_cruiser.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function hornetMV52(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("MT52 Hornet"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("MV52 Hornet")
+--	ship:setBeamWeapon(0, 30, 0, 1000.0, 4.0, 3.0)	--longer and stronger beam (vs 700 & 3)
+--	ship:setRotationMaxSpeed(31)					--faster maneuver (vs 30)
+--	ship:setImpulseMaxSpeed(130)					--faster impulse (vs 120)
+--	local hornet_mv52_db = queryScienceDatabase("Ships","Starfighter","MV52 Hornet")
+--	if hornet_mv52_db == nil then
+--		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+--		starfighter_db:addEntry("MV52 Hornet")
+--		hornet_mv52_db = queryScienceDatabase("Ships","Starfighter","MV52 Hornet")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Starfighter","MT52 Hornet"),	--base ship database entry
+--			hornet_mv52_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The MV52 Hornet is very similar to the MT52 and MU52 models. The beam does more damage than both of the other Hornet models, it's max impulse speed is faster than both of the other Hornet models, it turns faster than the MT52, but slower than the MU52",
+--			nil,
+--			nil,
+--			"WespeScoutYellow"
+--		)
+--		--[[
+--		hornet_mv52_db:setLongDescription("The MV52 Hornet is very similar to the MT52 and MU52 models. The beam does more damage than both of the other Hornet models, it's max impulse speed is faster than both of the other Hornet models, it turns faster than the MT52, but slower than the MU52")
+--		hornet_mv52_db:setKeyValue("Class","Starfighter")
+--		hornet_mv52_db:setKeyValue("Sub-class","Interceptor")
+--		hornet_mv52_db:setKeyValue("Size","30")
+--		hornet_mv52_db:setKeyValue("Shield","20")
+--		hornet_mv52_db:setKeyValue("Hull","30")
+--		hornet_mv52_db:setKeyValue("Move speed","7.8 U/min")
+--		hornet_mv52_db:setKeyValue("Turn speed","31.0 deg/sec")
+--		hornet_mv52_db:setKeyValue("Beam weapon 0:30","3.0 Dmg / 4.0 sec")
+--		hornet_mv52_db:setImage("radar_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function k2fighter(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Fighter"):orderRoaming()
+--	ship:setTypeName("K2 Fighter")
+--	ship:setBeamWeapon(0, 60, 0, 1200.0, 2.5, 6)	--beams cycle faster (vs 4.0)
+--	ship:setHullMax(65)								--weaker hull (vs 70)
+--	ship:setHull(65)
+--	local k2_fighter_db = queryScienceDatabase("Ships","No Class","K2 Fighter")
+--	if k2_fighter_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("K2 Fighter")
+--		k2_fighter_db = queryScienceDatabase("Ships","No Class","K2 Fighter")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Ktlitan Fighter"),	--base ship database entry
+--			k2_fighter_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is a bit weaker.",
+--			nil,
+--			nil,		--jump range
+--			"sci_fi_alien_ship_1"
+--		)
+--		--[[
+--		k2_fighter_db:setLongDescription("Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is a bit weaker.")
+--		k2_fighter_db:setKeyValue("Class","No Class")
+--		k2_fighter_db:setKeyValue("Sub-class","No Sub-Class")
+--		k2_fighter_db:setKeyValue("Size","180")
+--		k2_fighter_db:setKeyValue("Hull","65")
+--		k2_fighter_db:setKeyValue("Move speed","8.4 U/min")
+--		k2_fighter_db:setKeyValue("Turn speed","30.0 deg/sec")
+--		k2_fighter_db:setKeyValue("Beam weapon 0:60","6.0 Dmg / 2.5 sec")
+--		k2_fighter_db:setImage("radar_ktlitan_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end	
+--function k3fighter(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Fighter"):orderRoaming()
+--	ship:setTypeName("K3 Fighter")
+--	ship:setBeamWeapon(0, 60, 0, 1200.0, 2.5, 9)	--beams cycle faster and damage more (vs 4.0 & 6)
+--	ship:setHullMax(60)								--weaker hull (vs 70)
+--	ship:setHull(60)
+--	local k3_fighter_db = queryScienceDatabase("Ships","No Class","K3 Fighter")
+--	if k3_fighter_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("K3 Fighter")
+--		k3_fighter_db = queryScienceDatabase("Ships","No Class","K3 Fighter")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Ktlitan Fighter"),	--base ship database entry
+--			k3_fighter_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that are stronger and that cycle faster, but the hull is weaker.",
+--			nil,
+--			nil,		--jump range
+--			"sci_fi_alien_ship_1"
+--		)
+--		--[[
+--		k3_fighter_db:setLongDescription("Enterprising designers published this design specification based on salvaged Ktlitan Fighters. Comparatively, it's got beams that cycle faster, but the hull is weaker.")
+--		k3_fighter_db:setKeyValue("Class","No Class")
+--		k3_fighter_db:setKeyValue("Sub-class","No Sub-Class")
+--		k3_fighter_db:setKeyValue("Size","180")
+--		k3_fighter_db:setKeyValue("Hull","60")
+--		k3_fighter_db:setKeyValue("Move speed","8.4 U/min")
+--		k3_fighter_db:setKeyValue("Turn speed","30.0 deg/sec")
+--		k3_fighter_db:setKeyValue("Beam weapon 0:60","9.0 Dmg / 2.5 sec")
+--		k3_fighter_db:setImage("radar_ktlitan_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end	
+--function waddle5(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK5"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Waddle 5")
+--	ship:setWarpDrive(true)
+----				   Index,  Arc,	  Dir, Range, Cycle,	Damage
+--	ship:setBeamWeapon(2,	70,	  -30,	 600,	5.0,	2.0)	--adjust beam direction to match starboard side (vs -35)
+--	local waddle_5_db = queryScienceDatabase("Ships","Starfighter","Waddle 5")
+--	if waddle_5_db == nil then
+--		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+--		starfighter_db:addEntry("Waddle 5")
+--		waddle_5_db = queryScienceDatabase("Ships","Starfighter","Waddle 5")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Starfighter","Adder MK5"),	--base ship database entry
+--			waddle_5_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"Conversions R Us purchased a number of Adder MK 5 ships at auction and added warp drives to them to produce the Waddle 5",
+--			{
+--				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
+--			},
+--			nil,		--jump range
+--			"AdlerLongRangeScoutYellow"
+--		)
+--		--[[
+--		waddle_5_db:setLongDescription("Conversions R Us purchased a number of Adder MK 5 ships at auction and added warp drives to them to produce the Waddle 5")
+--		waddle_5_db:setKeyValue("Class","Starfighter")
+--		waddle_5_db:setKeyValue("Sub-class","Gunship")
+--		waddle_5_db:setKeyValue("Size","80")
+--		waddle_5_db:setKeyValue("Shield","30")
+--		waddle_5_db:setKeyValue("Hull","50")
+--		waddle_5_db:setKeyValue("Move speed","4.8 U/min")
+--		waddle_5_db:setKeyValue("Turn speed","28.0 deg/sec")
+--		waddle_5_db:setKeyValue("Warp Speed","60.0 U/min")
+--		waddle_5_db:setKeyValue("Beam weapon 0:35","2.0 Dmg / 5.0 sec")
+--		waddle_5_db:setKeyValue("Beam weapon 30:70","2.0 Dmg / 5.0 sec")
+--		waddle_5_db:setKeyValue("Beam weapon -35:70","2.0 Dmg / 5.0 sec")
+--		waddle_5_db:setImage("radar_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function jade5(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK5"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Jade 5")
+--	ship:setJumpDrive(true)
+--	ship:setJumpDriveRange(5000,35000)
+----				   Index,  Arc,	  Dir, Range, Cycle,	Damage
+--	ship:setBeamWeapon(2,	70,	  -30,	 600,	5.0,	2.0)	--adjust beam direction to match starboard side (vs -35)
+--	local jade_5_db = queryScienceDatabase("Ships","Starfighter","Jade 5")
+--	if jade_5_db == nil then
+--		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+--		starfighter_db:addEntry("Jade 5")
+--		jade_5_db = queryScienceDatabase("Ships","Starfighter","Jade 5")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Starfighter","Adder MK5"),	--base ship database entry
+--			jade_5_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"Conversions R Us purchased a number of Adder MK 5 ships at auction and added jump drives to them to produce the Jade 5",
+--			{
+--				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
+--			},
+--			"5 - 35 U",		--jump range
+--			"AdlerLongRangeScoutYellow"
+--		)
+--		--[[
+--		jade_5_db:setLongDescription("Conversions R Us purchased a number of Adder MK 5 ships at auction and added jump drives to them to produce the Jade 5")
+--		jade_5_db:setKeyValue("Class","Starfighter")
+--		jade_5_db:setKeyValue("Sub-class","Gunship")
+--		jade_5_db:setKeyValue("Size","80")
+--		jade_5_db:setKeyValue("Shield","30")
+--		jade_5_db:setKeyValue("Hull","50")
+--		jade_5_db:setKeyValue("Move speed","4.8 U/min")
+--		jade_5_db:setKeyValue("Turn speed","28.0 deg/sec")
+--		jade_5_db:setKeyValue("Jump Range","5 - 35 U")
+--		jade_5_db:setKeyValue("Beam weapon 0:35","2.0 Dmg / 5.0 sec")
+--		jade_5_db:setKeyValue("Beam weapon 30:70","2.0 Dmg / 5.0 sec")
+--		jade_5_db:setKeyValue("Beam weapon -35:70","2.0 Dmg / 5.0 sec")
+--		jade_5_db:setImage("radar_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function droneLite(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
+--	ship:setTypeName("Lite Drone")
+--	ship:setHullMax(20)					--weaker hull (vs 30)
+--	ship:setHull(20)
+--	ship:setImpulseMaxSpeed(130)		--faster impulse (vs 120)
+--	ship:setRotationMaxSpeed(20)		--faster maneuver (vs 10)
+--	ship:setBeamWeapon(0,40,0,600,4,4)	--weaker (vs 6) beam
+--	local drone_lite_db = queryScienceDatabase("Ships","No Class","Lite Drone")
+--	if drone_lite_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("Lite Drone")
+--		drone_lite_db = queryScienceDatabase("Ships","No Class","Lite Drone")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
+--			drone_lite_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The light drone was pieced together from scavenged parts of various damaged Ktlitan drones. Compared to the Ktlitan drone, the lite drone has a weaker hull, and a weaker beam, but a faster turn and impulse speed",
+--			nil,
+--			nil,
+--			"sci_fi_alien_ship_4"
+--		)
+--		--[[
+--		drone_lite_db:setLongDescription("The light drone was pieced together from scavenged parts of various damaged Ktlitan drones. Compared to the Ktlitan drone, the lite drone has a weaker hull, and a weaker beam, but a faster turn and impulse speed")
+--		drone_lite_db:setKeyValue("Class","No Class")
+--		drone_lite_db:setKeyValue("Sub-class","No Sub-Class")
+--		drone_lite_db:setKeyValue("Size","150")
+--		drone_lite_db:setKeyValue("Hull","20")
+--		drone_lite_db:setKeyValue("Move speed","7.8 U/min")
+--		drone_lite_db:setKeyValue("Turn speed","20 deg/sec")
+--		drone_lite_db:setKeyValue("Beam weapon 0:40","4.0 Dmg / 4.0 sec")
+--		drone_lite_db:setImage("radar_ktlitan_drone.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function droneHeavy(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
+--	ship:setTypeName("Heavy Drone")
+--	ship:setHullMax(40)					--stronger hull (vs 30)
+--	ship:setHull(40)
+--	ship:setImpulseMaxSpeed(110)		--slower impulse (vs 120)
+--	ship:setBeamWeapon(0,40,0,600,4,8)	--stronger (vs 6) beam
+--	local drone_heavy_db = queryScienceDatabase("Ships","No Class","Heavy Drone")
+--	if drone_heavy_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("Heavy Drone")
+--		drone_heavy_db = queryScienceDatabase("Ships","No Class","Heavy Drone")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
+--			drone_heavy_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The heavy drone has a stronger hull and a stronger beam than the normal Ktlitan Drone, but it also moves slower",
+--			nil,
+--			nil,
+--			"sci_fi_alien_ship_4"
+--		)
+--		--[[
+--		drone_heavy_db:setLongDescription("The heavy drone has a stronger hull and a stronger beam than the normal Ktlitan Drone, but it also moves slower")
+--		drone_heavy_db:setKeyValue("Class","No Class")
+--		drone_heavy_db:setKeyValue("Sub-class","No Sub-Class")
+--		drone_heavy_db:setKeyValue("Size","150")
+--		drone_heavy_db:setKeyValue("Hull","40")
+--		drone_heavy_db:setKeyValue("Move speed","6.6 U/min")
+--		drone_heavy_db:setKeyValue("Turn speed","10 deg/sec")
+--		drone_heavy_db:setKeyValue("Beam weapon 0:40","8.0 Dmg / 4.0 sec")
+--		drone_heavy_db:setImage("radar_ktlitan_drone.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function droneJacket(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Jacket Drone")
+--	ship:setShieldsMax(20)				--stronger shields (vs none)
+--	ship:setShields(20)
+--	ship:setImpulseMaxSpeed(110)		--slower impulse (vs 120)
+--	ship:setBeamWeapon(0,40,0,600,4,4)	--weaker (vs 6) beam
+--	local drone_jacket_db = queryScienceDatabase("Ships","No Class","Jacket Drone")
+--	if drone_jacket_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("Jacket Drone")
+--		drone_jacket_db = queryScienceDatabase("Ships","No Class","Jacket Drone")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Ktlitan Drone"),	--base ship database entry
+--			drone_jacket_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Jacket Drone is a Ktlitan Drone with a shield. It's also slightly slower and has a slightly weaker beam due to the energy requirements of the added shield",
+--			nil,
+--			nil,
+--			"sci_fi_alien_ship_4"
+--		)
+--		--[[
+--		drone_jacket_db:setLongDescription("The Jacket Drone is a Ktlitan Drone with a shield. It's also slightly slower and has a slightly weaker beam due to the energy requirements of the added shield")
+--		drone_jacket_db:setKeyValue("Class","No Class")
+--		drone_jacket_db:setKeyValue("Sub-class","No Sub-Class")
+--		drone_jacket_db:setKeyValue("Size","150")
+--		drone_jacket_db:setKeyValue("Shield","20")
+--		drone_jacket_db:setKeyValue("Hull","40")
+--		drone_jacket_db:setKeyValue("Move speed","6.6 U/min")
+--		drone_jacket_db:setKeyValue("Turn speed","10 deg/sec")
+--		drone_jacket_db:setKeyValue("Beam weapon 0:40","4.0 Dmg / 4.0 sec")
+--		drone_jacket_db:setImage("radar_ktlitan_drone.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function wzLindworm(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("WX-Lindworm"):orderRoaming()
+--	ship:setTypeName("WZ-Lindworm")
+--	ship:setWeaponStorageMax("Nuke",2)		--more nukes (vs 0)
+--	ship:setWeaponStorage("Nuke",2)
+--	ship:setWeaponStorageMax("Homing",4)	--more homing (vs 1)
+--	ship:setWeaponStorage("Homing",4)
+--	ship:setWeaponStorageMax("HVLI",12)		--more HVLI (vs 6)
+--	ship:setWeaponStorage("HVLI",12)
+--	ship:setRotationMaxSpeed(12)			--slower maneuver (vs 15)
+--	ship:setHullMax(45)						--weaker hull (vs 50)
+--	ship:setHull(45)
+--	local wz_lindworm_db = queryScienceDatabase("Ships","Starfighter","WZ-Lindworm")
+--	if wz_lindworm_db == nil then
+--		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+--		starfighter_db:addEntry("WZ-Lindworm")
+--		wz_lindworm_db = queryScienceDatabase("Ships","Starfighter","WZ-Lindworm")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Starfighter","WX-Lindworm"),	--base ship database entry
+--			wz_lindworm_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The WZ-Lindworm is essentially the stock WX-Lindworm with more HVLIs, more homing missiles and added nukes. They had to remove some of the armor to get the additional missiles to fit, so the hull is weaker. Also, the WZ turns a little more slowly than the WX. This little bomber packs quite a whallop.",
+--			{
+--				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Small tube 1", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Small tube -1", value = "15 sec"},	--torpedo tube direction and load speed
+--			},
+--			nil,
+--			"LindwurmFighterYellow"
+--		)
+--		--[[
+--		wz_lindworm_db:setLongDescription("The WZ-Lindworm is essentially the stock WX-Lindworm with more HVLIs, more homing missiles and added nukes. They had to remove some of the armor to get the additional missiles to fit, so the hull is weaker. Also, the WZ turns a little more slowly than the WX. This little bomber packs quite a whallop.")
+--		wz_lindworm_db:setKeyValue("Class","Starfighter")
+--		wz_lindworm_db:setKeyValue("Sub-class","Bomber")
+--		wz_lindworm_db:setKeyValue("Size","30")
+--		wz_lindworm_db:setKeyValue("Shield","20")
+--		wz_lindworm_db:setKeyValue("Hull","45")
+--		wz_lindworm_db:setKeyValue("Move speed","3.0 U/min")
+--		wz_lindworm_db:setKeyValue("Turn speed","12 deg/sec")
+--		wz_lindworm_db:setKeyValue("Small tube 0","15 sec")
+--		wz_lindworm_db:setKeyValue("Small tube 1","15 sec")
+--		wz_lindworm_db:setKeyValue("Small tube -1","15 sec")
+--		wz_lindworm_db:setKeyValue("Storage Homing","4")
+--		wz_lindworm_db:setKeyValue("Storage Nuke","2")
+--		wz_lindworm_db:setKeyValue("Storage HVLI","12")
+--		wz_lindworm_db:setImage("radar_fighter.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function tempest(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F12"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Tempest")
+--	ship:setWeaponTubeCount(10)						--four more tubes (vs 6)
+--	ship:setWeaponTubeDirection(0, -88)				--5 per side
+--	ship:setWeaponTubeDirection(1, -89)				--slight angle spread
+--	ship:setWeaponTubeDirection(3,  88)				--3 for HVLI each side
+--	ship:setWeaponTubeDirection(4,  89)				--2 for homing and nuke each side
+--	ship:setWeaponTubeDirection(6, -91)				
+--	ship:setWeaponTubeDirection(7, -92)				
+--	ship:setWeaponTubeDirection(8,  91)				
+--	ship:setWeaponTubeDirection(9,  92)				
+--	ship:setWeaponTubeExclusiveFor(7,"HVLI")
+--	ship:setWeaponTubeExclusiveFor(9,"HVLI")
+--	ship:setWeaponStorageMax("Homing",16)			--more (vs 6)
+--	ship:setWeaponStorage("Homing", 16)				
+--	ship:setWeaponStorageMax("Nuke",8)				--more (vs 0)
+--	ship:setWeaponStorage("Nuke", 8)				
+--	ship:setWeaponStorageMax("HVLI",34)				--more (vs 20)
+--	ship:setWeaponStorage("HVLI", 34)
+--	local tempest_db = queryScienceDatabase("Ships","Frigate","Tempest")
+--	if tempest_db == nil then
+--		local frigate_db = queryScienceDatabase("Ships","Frigate")
+--		frigate_db:addEntry("Tempest")
+--		tempest_db = queryScienceDatabase("Ships","Frigate","Tempest")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Frigate","Piranha F12"),	--base ship database entry
+--			tempest_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"Loosely based on the Piranha F12 model, the Tempest adds four more broadside tubes (two on each side), more HVLIs, more Homing missiles and 8 Nukes. The Tempest can strike fear into the hearts of your enemies. Get yourself one today!",
+--			{
+--				{key = "Large tube -88", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -89", value = "15 sec"},		--torpedo tube direction and load speed
+--				{key = "Large tube -90", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Large tube 88", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube 89", value = "15 sec"},		--torpedo tube direction and load speed
+--				{key = "Large tube 90", value = "15 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -91", value = "15 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube -92", value = "15 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 91", value = "15 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 92", value = "15 sec"},		--torpedo tube direction and load speed
+--			},
+--			nil,
+--			"HeavyCorvetteRed"
+--		)
+--		--[[
+--		tempest_db:setLongDescription("Loosely based on the Piranha F12 model, the Tempest adds four more broadside tubes (two on each side), more HVLIs, more Homing missiles and 8 Nukes. The Tempest can strike fear into the hearts of your enemies. Get yourself one today!")
+--		tempest_db:setKeyValue("Class","Frigate")
+--		tempest_db:setKeyValue("Sub-class","Cruiser: Light Artillery")
+--		tempest_db:setKeyValue("Size","80")
+--		tempest_db:setKeyValue("Shield","30/30")
+--		tempest_db:setKeyValue("Hull","70")
+--		tempest_db:setKeyValue("Move speed","2.4 U/min")
+--		tempest_db:setKeyValue("Turn speed","6.0 deg/sec")
+--		tempest_db:setKeyValue("Large Tube -88","15 sec")
+--		tempest_db:setKeyValue("Tube -89","15 sec")
+--		tempest_db:setKeyValue("Large Tube -90","15 sec")
+--		tempest_db:setKeyValue("Large Tube 88","15 sec")
+--		tempest_db:setKeyValue("Tube 89","15 sec")
+--		tempest_db:setKeyValue("Large Tube 90","15 sec")
+--		tempest_db:setKeyValue("Tube -91","15 sec")
+--		tempest_db:setKeyValue("Tube -92","15 sec")
+--		tempest_db:setKeyValue("Tube 91","15 sec")
+--		tempest_db:setKeyValue("Tube 92","15 sec")
+--		tempest_db:setKeyValue("Storage Homing","16")
+--		tempest_db:setKeyValue("Storage Nuke","8")
+--		tempest_db:setKeyValue("Storage HVLI","34")
+--		tempest_db:setImage("radar_piranha.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function enforcer(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Blockade Runner"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Enforcer")
+--	ship:setRadarTrace("radar_ktlitan_destroyer.png")			--different radar trace
+--	ship:setWarpDrive(true)										--warp (vs none)
+--	ship:setWarpSpeed(600)
+--	ship:setImpulseMaxSpeed(100)								--faster impulse (vs 60)
+--	ship:setRotationMaxSpeed(20)								--faster maneuver (vs 15)
+--	ship:setShieldsMax(200,100,100)								--stronger shields (vs 100,150)
+--	ship:setShields(200,100,100)					
+--	ship:setHullMax(100)										--stronger hull (vs 70)
+--	ship:setHull(100)
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(0,	30,	    5,	1500,		6,		10)	--narrower (vs 60), longer (vs 1000), stronger (vs 8)
+--	ship:setBeamWeapon(1,	30,	   -5,	1500,		6,		10)
+--	ship:setBeamWeapon(2,	 0,	    0,	   0,		0,		 0)	--fewer (vs 4)
+--	ship:setBeamWeapon(3,	 0,	    0,	   0,		0,		 0)
+--	ship:setWeaponTubeCount(3)									--more (vs 0)
+--	ship:setTubeSize(0,"large")									--large (vs normal)
+--	ship:setWeaponTubeDirection(1,-15)				
+--	ship:setWeaponTubeDirection(2, 15)				
+--	ship:setTubeLoadTime(0,18)
+--	ship:setTubeLoadTime(1,12)
+--	ship:setTubeLoadTime(2,12)			
+--	ship:setWeaponStorageMax("Homing",18)						--more (vs 0)
+--	ship:setWeaponStorage("Homing", 18)
+--	local enforcer_db = queryScienceDatabase("Ships","Frigate","Enforcer")
+--	if enforcer_db == nil then
+--		local frigate_db = queryScienceDatabase("Ships","Frigate")
+--		frigate_db:addEntry("Enforcer")
+--		enforcer_db = queryScienceDatabase("Ships","Frigate","Enforcer")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Frigate","Blockade Runner"),	--base ship database entry
+--			enforcer_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Enforcer is a highly modified Blockade Runner. A warp drive was added and impulse engines boosted along with turning speed. Three missile tubes were added to shoot homing missiles, large ones straight ahead. Stronger shields and hull. Removed rear facing beams and strengthened front beams.",
+--			{
+--				{key = "Large tube 0", value = "18 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -15", value = "12 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 15", value = "12 sec"},		--torpedo tube direction and load speed
+--			},
+--			nil,
+--			"battleship_destroyer_3_upgraded"
+--		)
+--		--[[
+--		enforcer_db:setLongDescription("The Enforcer is a highly modified Blockade Runner. A warp drive was added and impulse engines boosted along with turning speed. Three missile tubes were added to shoot homing missiles, large ones straight ahead. Stronger shields and hull. Removed rear facing beams and stengthened front beams.")
+--		enforcer_db:setKeyValue("Class","Frigate")
+--		enforcer_db:setKeyValue("Sub-class","High Punch")
+--		enforcer_db:setKeyValue("Size","200")
+--		enforcer_db:setKeyValue("Shield","200/100/100")
+--		enforcer_db:setKeyValue("Hull","100")
+--		enforcer_db:setKeyValue("Move speed","6.0 U/min")
+--		enforcer_db:setKeyValue("Turn speed","20.0 deg/sec")
+--		enforcer_db:setKeyValue("Warp Speed","36.0 U/min")
+--		enforcer_db:setKeyValue("Beam weapon -15:30","10.0 Dmg / 6.0 sec")
+--		enforcer_db:setKeyValue("Beam weapon 15:30","10.0 Dmg / 6.0 sec")
+--		enforcer_db:setKeyValue("Large Tube 0","20 sec")
+--		enforcer_db:setKeyValue("Tube -30","20 sec")
+--		enforcer_db:setKeyValue("Tube 30","20 sec")
+--		enforcer_db:setKeyValue("Storage Homing","18")
+--		--]]
+--		enforcer_db:setImage("radar_ktlitan_destroyer.png")		--override default radar image
+--	end
+--	return ship		
+--end
+--function predator(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F8"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Predator")
+--	ship:setShieldsMax(100,100)									--stronger shields (vs 30,30)
+--	ship:setShields(100,100)					
+--	ship:setHullMax(80)											--stronger hull (vs 70)
+--	ship:setHull(80)
+--	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 40)
+--	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 6)
+--	ship:setJumpDrive(true)
+--	ship:setJumpDriveRange(5000,35000)			
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(0,	90,	    0,	1000,		6,		 4)	--more (vs 0)
+--	ship:setBeamWeapon(1,	90,	  180,	1000,		6,		 4)	
+--	ship:setWeaponTubeCount(8)									--more (vs 3)
+--	ship:setWeaponTubeDirection(0,-60)				
+--	ship:setWeaponTubeDirection(1,-90)				
+--	ship:setWeaponTubeDirection(2,-90)				
+--	ship:setWeaponTubeDirection(3, 60)				
+--	ship:setWeaponTubeDirection(4, 90)				
+--	ship:setWeaponTubeDirection(5, 90)				
+--	ship:setWeaponTubeDirection(6,-120)				
+--	ship:setWeaponTubeDirection(7, 120)				
+--	ship:setWeaponTubeExclusiveFor(0,"Homing")
+--	ship:setWeaponTubeExclusiveFor(1,"Homing")
+--	ship:setWeaponTubeExclusiveFor(2,"Homing")
+--	ship:setWeaponTubeExclusiveFor(3,"Homing")
+--	ship:setWeaponTubeExclusiveFor(4,"Homing")
+--	ship:setWeaponTubeExclusiveFor(5,"Homing")
+--	ship:setWeaponTubeExclusiveFor(6,"Homing")
+--	ship:setWeaponTubeExclusiveFor(7,"Homing")
+--	ship:setWeaponStorageMax("Homing",32)						--more (vs 5)
+--	ship:setWeaponStorage("Homing", 32)		
+--	ship:setWeaponStorageMax("HVLI",0)							--less (vs 10)
+--	ship:setWeaponStorage("HVLI", 0)
+--	ship:setRadarTrace("radar_missile_cruiser.png")				--different radar trace
+--	local predator_db = queryScienceDatabase("Ships","Frigate","Predator")
+--	if predator_db == nil then
+--		local frigate_db = queryScienceDatabase("Ships","Frigate")
+--		frigate_db:addEntry("Predator")
+--		predator_db = queryScienceDatabase("Ships","Frigate","Predator")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Frigate","Piranha F8"),	--base ship database entry
+--			predator_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Predator is a significantly improved Piranha F8. Stronger shields and hull, faster impulse and turning speeds, a jump drive, beam weapons, eight missile tubes pointing in six directions and a large number of homing missiles to shoot.",
+--			{
+--				{key = "Large tube -60", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -90", value = "12 sec"},		--torpedo tube direction and load speed
+--				{key = "Large tube -90", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Large tube 60", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube 90", value = "12 sec"},		--torpedo tube direction and load speed
+--				{key = "Large tube 90", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -120", value = "12 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 120", value = "12 sec"},		--torpedo tube direction and load speed
+--			},
+--			"5 - 35 U",		--jump range
+--			"HeavyCorvetteRed"
+--		)
+--		--[[
+--		predator_db:setLongDescription("The Predator is a significantly improved Piranha F8. Stronger shields and hull, faster impulse and turning speeds, a jump drive, beam weapons, eight missile tubes pointing in six directions and a large number of homing missiles to shoot.")
+--		predator_db:setKeyValue("Class","Frigate")
+--		predator_db:setKeyValue("Sub-class","Cruiser: Light Artillery")
+--		predator_db:setKeyValue("Size","80")
+--		predator_db:setKeyValue("Shield","100/100")
+--		predator_db:setKeyValue("Hull","80")
+--		predator_db:setKeyValue("Move speed","3.9 U/min")
+--		predator_db:setKeyValue("Turn speed","15.0 deg/sec")
+--		predator_db:setKeyValue("Jump Range","5 - 35 U")
+--		predator_db:setKeyValue("Beam weapon 0:90","4.0 Dmg / 6.0 sec")
+--		predator_db:setKeyValue("Beam weapon 180:90","4.0 Dmg / 6.0 sec")
+--		predator_db:setKeyValue("Large Tube -60","12 sec")
+--		predator_db:setKeyValue("Tube -90","12 sec")
+--		predator_db:setKeyValue("Large Tube -90","12 sec")
+--		predator_db:setKeyValue("Large Tube 60","12 sec")
+--		predator_db:setKeyValue("Tube 90","12 sec")
+--		predator_db:setKeyValue("Large Tube 90","12 sec")
+--		predator_db:setKeyValue("Tube -120","12 sec")
+--		predator_db:setKeyValue("Tube 120","12 sec")
+--		predator_db:setKeyValue("Storage Homing","32")
+--		--]]
+--		predator_db:setImage("radar_missile_cruiser.png")		--override default radar image
+--	end
+--	return ship		
+--end
+--function atlantisY42(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Atlantis X23"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Atlantis Y42")
+--	ship:setShieldsMax(300,200,300,200)							--stronger shields (vs 200,200,200,200)
+--	ship:setShields(300,200,300,200)					
+--	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 30)
+--	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 3.5)
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(2,	80,	  190,	1500,		6,		 8)	--narrower (vs 100)
+--	ship:setBeamWeapon(3,	80,	  170,	1500,		6,		 8)	--extra (vs 3 beams)
+--	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
+--	ship:setWeaponStorage("Homing", 16)
+--	local atlantis_y42_db = queryScienceDatabase("Ships","Corvette","Atlantis Y42")
+--	if atlantis_y42_db == nil then
+--		local corvette_db = queryScienceDatabase("Ships","Corvette")
+--		corvette_db:addEntry("Atlantis Y42")
+--		atlantis_y42_db = queryScienceDatabase("Ships","Corvette","Atlantis Y42")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Corvette","Atlantis X23"),	--base ship database entry
+--			atlantis_y42_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Atlantis Y42 improves on the Atlantis X23 with stronger shields, faster impulse and turn speeds, an extra beam in back and a larger missile stock",
+--			{
+--				{key = "Tube -90", value = "10 sec"},	--torpedo tube direction and load speed
+--				{key = " Tube -90", value = "10 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube 90", value = "10 sec"},	--torpedo tube direction and load speed
+--				{key = " Tube 90", value = "10 sec"},	--torpedo tube direction and load speed
+--			},
+--			"5 - 50 U",		--jump range
+--			"battleship_destroyer_1_upgraded"
+--		)
+--		--[[
+--		atlantis_y42_db:setLongDescription("The Atlantis Y42 improves on the Atlantis X23 with stronger shields, faster impulse and turn speeds, an extra beam in back and a larger missile stock")
+--		atlantis_y42_db:setKeyValue("Class","Corvette")
+--		atlantis_y42_db:setKeyValue("Sub-class","Destroyer")
+--		atlantis_y42_db:setKeyValue("Size","200")
+--		atlantis_y42_db:setKeyValue("Shield","300/200/300/200")
+--		atlantis_y42_db:setKeyValue("Hull","100")
+--		atlantis_y42_db:setKeyValue("Move speed","3.9 U/min")
+--		atlantis_y42_db:setKeyValue("Turn speed","15.0 deg/sec")
+--		atlantis_y42_db:setKeyValue("Jump Range","5 - 50 U")
+--		atlantis_y42_db:setKeyValue("Beam weapon -20:100","8.0 Dmg / 6.0 sec")
+--		atlantis_y42_db:setKeyValue("Beam weapon 20:100","8.0 Dmg / 6.0 sec")
+--		atlantis_y42_db:setKeyValue("Beam weapon 190:100","8.0 Dmg / 6.0 sec")
+--		atlantis_y42_db:setKeyValue("Beam weapon 170:100","8.0 Dmg / 6.0 sec")
+--		atlantis_y42_db:setKeyValue("Tube -90","10 sec")
+--		atlantis_y42_db:setKeyValue(" Tube -90","10 sec")
+--		atlantis_y42_db:setKeyValue("Tube 90","10 sec")
+--		atlantis_y42_db:setKeyValue(" Tube 90","10 sec")
+--		atlantis_y42_db:setKeyValue("Storage Homing","4")
+--		atlantis_y42_db:setKeyValue("Storage HVLI","20")
+--		atlantis_y42_db:setImage("radar_dread.png")
+--		--]]
+--	end
+--	return ship		
+--end
+--function starhammerV(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Starhammer II"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Starhammer V")
+--	ship:setImpulseMaxSpeed(65)									--faster impulse (vs 35)
+--	ship:setRotationMaxSpeed(15)								--faster maneuver (vs 6)
+--	ship:setShieldsMax(450, 350, 250, 250, 350)					--stronger shields (vs 450, 350, 150, 150, 350)
+--	ship:setShields(450, 350, 250, 250, 350)					
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(4,	60,	  180,	1500,		8,		11)	--extra rear facing beam
+--	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
+--	ship:setWeaponStorage("Homing", 16)		
+--	ship:setWeaponStorageMax("HVLI",36)							--more (vs 20)
+--	ship:setWeaponStorage("HVLI", 36)
+--	local starhammer_v_db = queryScienceDatabase("Ships","Corvette","Starhammer V")
+--	if starhammer_v_db == nil then
+--		local corvette_db = queryScienceDatabase("Ships","Corvette")
+--		corvette_db:addEntry("Starhammer V")
+--		starhammer_v_db = queryScienceDatabase("Ships","Corvette","Starhammer V")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Corvette","Starhammer II"),	--base ship database entry
+--			starhammer_v_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Starhammer V recognizes common modifications made in the field to the Starhammer II: stronger shields, faster impulse and turning speeds, additional rear beam and more missiles to shoot. These changes make the Starhammer V a force to be reckoned with.",
+--			{
+--				{key = "Tube 0", value = "10 sec"},	--torpedo tube direction and load speed
+--				{key = " Tube 0", value = "10 sec"},	--torpedo tube direction and load speed
+--			},
+--			"5 - 50 U",		--jump range
+--			"battleship_destroyer_4_upgraded"
+--		)
+--		--[[
+--		starhammer_v_db:setLongDescription("The Starhammer V recognizes common modifications made in the field to the Starhammer II: stronger shields, faster impulse and turning speeds, additional rear beam and more missiles to shoot. These changes make the Starhammer V a force to be reckoned with.")
+--		starhammer_v_db:setKeyValue("Class","Corvette")
+--		starhammer_v_db:setKeyValue("Sub-class","Destroyer")
+--		starhammer_v_db:setKeyValue("Size","200")
+--		starhammer_v_db:setKeyValue("Shield","450/350/250/250/350")
+--		starhammer_v_db:setKeyValue("Hull","200")
+--		starhammer_v_db:setKeyValue("Move speed","3.9 U/min")
+--		starhammer_v_db:setKeyValue("Turn speed","15.0 deg/sec")
+--		starhammer_v_db:setKeyValue("Jump Range","5 - 50 U")
+--		starhammer_v_db:setKeyValue("Beam weapon -10:60","11.0 Dmg / 8.0 sec")
+--		starhammer_v_db:setKeyValue("Beam weapon 10:60","11.0 Dmg / 8.0 sec")
+--		starhammer_v_db:setKeyValue("Beam weapon -20:60","11.0 Dmg / 8.0 sec")
+--		starhammer_v_db:setKeyValue("Beam weapon 20:60","11.0 Dmg / 8.0 sec")
+--		starhammer_v_db:setKeyValue("Beam weapon 180:60","11.0 Dmg / 8.0 sec")
+--		starhammer_v_db:setKeyValue("Tube 0","10 sec")
+--		starhammer_v_db:setKeyValue(" Tube 0","10 sec")
+--		starhammer_v_db:setKeyValue("Storage Homing","16")
+--		starhammer_v_db:setKeyValue("Storage EMP","2")
+--		starhammer_v_db:setKeyValue("Storage HVLI","36")
+--		starhammer_v_db:setImage("radar_dread.png")
+--		--]]
+--	end
+--	return ship		
+--end
+--function tyr(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Battlestation"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Tyr")
+--	ship:setImpulseMaxSpeed(50)									--faster impulse (vs 30)
+--	ship:setRotationMaxSpeed(10)								--faster maneuver (vs 1.5)
+--	ship:setShieldsMax(400, 300, 300, 400, 300, 300)			--stronger shields (vs 300, 300, 300, 300, 300)
+--	ship:setShields(400, 300, 300, 400, 300, 300)					
+--	ship:setHullMax(100)										--stronger hull (vs 70)
+--	ship:setHull(100)
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(0,	90,	  -60,	2500,		6,		 8)	--stronger beams, broader coverage
+--	ship:setBeamWeapon(1,	90,	 -120,	2500,		6,		 8)
+--	ship:setBeamWeapon(2,	90,	   60,	2500,		6,		 8)
+--	ship:setBeamWeapon(3,	90,	  120,	2500,		6,		 8)
+--	ship:setBeamWeapon(4,	90,	  -60,	2500,		6,		 8)
+--	ship:setBeamWeapon(5,	90,	 -120,	2500,		6,		 8)
+--	ship:setBeamWeapon(6,	90,	   60,	2500,		6,		 8)
+--	ship:setBeamWeapon(7,	90,	  120,	2500,		6,		 8)
+--	ship:setBeamWeapon(8,	90,	  -60,	2500,		6,		 8)
+--	ship:setBeamWeapon(9,	90,	 -120,	2500,		6,		 8)
+--	ship:setBeamWeapon(10,	90,	   60,	2500,		6,		 8)
+--	ship:setBeamWeapon(11,	90,	  120,	2500,		6,		 8)
+--	local tyr_db = queryScienceDatabase("Ships","Dreadnought","Tyr")
+--	if tyr_db == nil then
+--		local corvette_db = queryScienceDatabase("Ships","Dreadnought")
+--		corvette_db:addEntry("Tyr")
+--		tyr_db = queryScienceDatabase("Ships","Dreadnought","Tyr")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Dreadnought","Battlestation"),	--base ship database entry
+--			tyr_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Tyr is the shipyard's answer to admiral konstatz' casual statement that the Battlestation model was too slow to be effective. The shipyards improved on the Battlestation by fitting the Tyr with more than twice the impulse speed and more than six times the turn speed. They threw in stronger shields and hull and wider beam coverage just to show that they could",
+--			nil,
+--			"5 - 50 U",		--jump range
+--			"Ender Battlecruiser"
+--		)
+--		--[[
+--		tyr_db:setLongDescription("The Tyr is the shipyard's answer to admiral konstatz' casual statement that the Battlestation model was too slow to be effective. The shipyards improved on the Battlestation by fitting the Tyr with more than twice the impulse speed and more than six times the turn speed. They threw in stronger shields and hull and wider beam coverage just to show that they could")
+--		tyr_db:setKeyValue("Class","Dreadnought")
+--		tyr_db:setKeyValue("Sub-class","Assault")
+--		tyr_db:setKeyValue("Size","200")
+--		tyr_db:setKeyValue("Shield","400/300/300/400/300/300")
+--		tyr_db:setKeyValue("Hull","100")
+--		tyr_db:setKeyValue("Move speed","3.0 U/min")
+--		tyr_db:setKeyValue("Turn speed","10.0 deg/sec")
+--		tyr_db:setKeyValue("Jump Range","5 - 50 U")
+--		tyr_db:setKeyValue("Beam weapon -60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("Beam weapon -120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("Beam weapon 60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("Beam weapon 120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue(" Beam weapon -60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue(" Beam weapon -120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue(" Beam weapon 60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue(" Beam weapon 120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("  Beam weapon -60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("  Beam weapon -120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("  Beam weapon 60:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setKeyValue("  Beam weapon 120:90","8.0 Dmg / 6.0 sec")
+--		tyr_db:setImage("radar_battleship.png")
+--		--]]
+--	end
+--	return ship
+--end
+--function gnat(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Drone"):orderRoaming()
+--	ship:setTypeName("Gnat")
+--	ship:setHullMax(15)					--weaker hull (vs 30)
+--	ship:setHull(15)
+--	ship:setImpulseMaxSpeed(140)		--faster impulse (vs 120)
+--	ship:setRotationMaxSpeed(25)		--faster maneuver (vs 10)
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(0,   40,		0,	 600,		4,		 3)	--weaker (vs 6) beam
+--	local gnat_db = queryScienceDatabase("Ships","No Class","Gnat")
+--	if gnat_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("Gnat")
+--		gnat_db = queryScienceDatabase("Ships","No Class","Gnat")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Gnat"),	--base ship database entry
+--			gnat_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Gnat is a nimbler version of the Ktlitan Drone. It's got half the hull, but it moves and turns faster",
+--			nil,
+--			nil,		--jump range
+--			"sci_fi_alien_ship_4"
+--		)
+--	end
+--	return ship
+--end
+--function cucaracha(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Tug"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Cucaracha")
+--	ship:setShieldsMax(200, 50, 50, 50, 50, 50)		--stronger shields (vs 20)
+--	ship:setShields(200, 50, 50, 50, 50, 50)					
+--	ship:setHullMax(100)							--stronger hull (vs 50)
+--	ship:setHull(100)
+--	ship:setRotationMaxSpeed(20)					--faster maneuver (vs 10)
+--	ship:setAcceleration(30)						--faster acceleration (vs 15)
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(0,	60,	    0,	1500,		6,		10)	--extra rear facing beam
+--	local cucaracha_db = queryScienceDatabase("Ships","No Class","Cucaracha")
+--	if cucaracha_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("Cucaracha")
+--		cucaracha_db = queryScienceDatabase("Ships","No Class","Cucaracha")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","Cucaracha"),	--base ship database entry
+--			cucaracha_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Cucaracha is a quick ship built around the Tug model with heavy shields and a heavy beam designed to be difficult to squash",
+--			nil,
+--			nil,		--jump range
+--			"space_tug"
+--		)
+--	end
+--	return ship
+--end
+--function starhammerIII(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Starhammer II"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Starhammer III")
+----				   Index,  Arc,	  Dir, Range,	Cycle,	Damage
+--	ship:setBeamWeapon(4,	60,	  180,	1500,		8,		11)	--extra rear facing beam
+--	ship:setTubeSize(0,"large")
+--	ship:setWeaponStorageMax("Homing",16)						--more (vs 4)
+--	ship:setWeaponStorage("Homing", 16)		
+--	ship:setWeaponStorageMax("HVLI",36)							--more (vs 20)
+--	ship:setWeaponStorage("HVLI", 36)
+--	local starhammer_iii_db = queryScienceDatabase("Ships","Corvette","Starhammer III")
+--	if starhammer_iii_db == nil then
+--		local corvette_db = queryScienceDatabase("Ships","Corvette")
+--		corvette_db:addEntry("Starhammer III")
+--		starhammer_iii_db = queryScienceDatabase("Ships","Corvette","Starhammer III")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Corvette","Starhammer III"),	--base ship database entry
+--			starhammer_iii_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The designers of the Starhammer III took the Starhammer II and added a rear facing beam, enlarged one of the missile tubes and added more missiles to fire",
+--			{
+--				{key = "Large tube 0", value = "10 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube 0", value = "10 sec"},			--torpedo tube direction and load speed
+--			},
+--			"5 - 50 U",		--jump range
+--			"battleship_destroyer_4_upgraded"
+--		)
+--	end
+--	return ship
+--end
+--function k2breaker(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Ktlitan Breaker"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("K2 Breaker")
+--	ship:setHullMax(200)							--stronger hull (vs 120)
+--	ship:setHull(200)
+--	ship:setWeaponTubeCount(3)						--more (vs 1)
+--	ship:setTubeSize(0,"large")						--large (vs normal)
+--	ship:setWeaponTubeDirection(1,-30)				
+--	ship:setWeaponTubeDirection(2, 30)
+--	ship:setWeaponTubeExclusiveFor(0,"HVLI")		--only HVLI (vs any)
+--	ship:setWeaponStorageMax("Homing",16)			--more (vs 0)
+--	ship:setWeaponStorage("Homing", 16)
+--	ship:setWeaponStorageMax("HVLI",8)				--more (vs 5)
+--	ship:setWeaponStorage("HVLI", 8)
+--	local k2_breaker_db = queryScienceDatabase("Ships","No Class","K2 Breaker")
+--	if k2_breaker_db == nil then
+--		local no_class_db = queryScienceDatabase("Ships","No Class")
+--		no_class_db:addEntry("K2 Breaker")
+--		k2_breaker_db = queryScienceDatabase("Ships","No Class","K2 Breaker")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","No Class","K2 Breaker"),	--base ship database entry
+--			k2_breaker_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The K2 Breaker designers took the Ktlitan Breaker and beefed up the hull, added two bracketing tubes, enlarged the center tube and added more missiles to shoot. Should be good for a couple of enemy ships",
+--			{
+--				{key = "Large tube 0", value = "13 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -30", value = "13 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 30", value = "13 sec"},		--torpedo tube direction and load speed
+--			},
+--			nil,
+--			"sci_fi_alien_ship_2"
+--		)
+--	end
+--	return ship
+--end
+--function hurricane(enemyFaction)
+--	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Piranha F8"):orderRoaming()
+--	ship:onTakingDamage(function(self,instigator)
+--		string.format("")	--serious proton needs a global context
+--		if instigator ~= nil then
+--			self.damage_instigator = instigator
+--		end
+--	end)
+--	ship:setTypeName("Hurricane")
+--	ship:setJumpDrive(true)
+--	ship:setJumpDriveRange(5000,40000)			
+--	ship:setWeaponTubeCount(8)						--more (vs 3)
+--	ship:setWeaponTubeExclusiveFor(1,"HVLI")		--only HVLI (vs any)
+--	ship:setWeaponTubeDirection(1,  0)				--forward (vs -90)
+--	ship:setTubeSize(3,"large")						
+--	ship:setWeaponTubeDirection(3,-90)
+--	ship:setTubeSize(4,"small")
+--	ship:setWeaponTubeExclusiveFor(4,"Homing")
+--	ship:setWeaponTubeDirection(4,-15)
+--	ship:setTubeSize(5,"small")
+--	ship:setWeaponTubeExclusiveFor(5,"Homing")
+--	ship:setWeaponTubeDirection(5, 15)
+--	ship:setWeaponTubeExclusiveFor(6,"Homing")
+--	ship:setWeaponTubeDirection(6,-30)
+--	ship:setWeaponTubeExclusiveFor(7,"Homing")
+--	ship:setWeaponTubeDirection(7, 30)
+--	ship:setWeaponStorageMax("Homing",24)			--more (vs 5)
+--	ship:setWeaponStorage("Homing", 24)
+--	local hurricane_db = queryScienceDatabase("Ships","Frigate","Hurricane")
+--	if hurricane_db == nil then
+--		local frigate_db = queryScienceDatabase("Ships","Frigate")
+--		frigate_db:addEntry("Hurricane")
+--		hurricane_db = queryScienceDatabase("Ships","Frigate","Hurricane")
+--		addShipToDatabase(
+--			queryScienceDatabase("Ships","Frigate","Hurricane"),	--base ship database entry
+--			hurricane_db,	--modified ship database entry
+--			ship,			--ship just created, long description on the next line
+--			"The Hurricane is designed to jump in and shower the target with missiles. It is based on the Piranha F8, but with a jump drive, five more tubes in various directions and sizes and lots more missiles to shoot",
+--			{
+--				{key = "Large tube 0", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube 0", value = "12 sec"},			--torpedo tube direction and load speed
+--				{key = "Large tube 90", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Large tube -90", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Small tube -15", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Small tube 15", value = "12 sec"},	--torpedo tube direction and load speed
+--				{key = "Tube -30", value = "12 sec"},		--torpedo tube direction and load speed
+--				{key = "Tube 30", value = "12 sec"},		--torpedo tube direction and load speed
+--			},
+--			"5 - 40 U",		--jump range
+--			"HeavyCorvetteRed"
+--		)
+--	end
+--	return ship
+--end
+function addShipToDatabase(base_db,modified_db,ship,description,tube_directions,jump_range,model_name)
 	modified_db:setLongDescription(description)
 	modified_db:setImage(base_db:getImage())
 	modified_db:setKeyValue("Class",base_db:getKeyValue("Class"))
@@ -13199,6 +15940,9 @@ function addShipToDatabase(base_db,modified_db,ship,description,tube_directions,
 				modified_db:setKeyValue(string.format("Storage %s",missile_type),string.format("%i",max_storage))
 			end
 		end
+	end
+	if model_name ~= nil then
+		modified_db:setModelDataName(model_name)
 	end
 end
 
@@ -13471,19 +16215,65 @@ function friendlyTransportPlot(delta)
 	end
 end
 -- Plot 1 peace/treaty/war states
-function treatyHolds(delta)
-	primaryOrders = "Treaty holds. Patrol border. Stay out of blue neutral border zone"
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() and p.order1 == nil then
+function playerPlotMessages(p)
+	if plot1 == treatyHolds then
+		--plot1 treaty holds message 1
+		if p.order1 == nil then
 			if p.nameAssigned then
 				p:addToShipLog(string.format("Greetings captain and crew of %s. The Human/Kraylor treaty has held for a number of years now, but tensions are rising. Your mission: patrol the border area for Kraylor ships. Do not enter the blue neutral border zone. Good luck",p:getCallSign()),"Magenta")
 				p.order1 = "sent"
+				p.prewar_improvement = getScenarioTime() + 120
 			else
-				setPlayers()
+				setPlayer(p)
+			end
+		else
+			if p.order1_prewar_improvement == nil and p.prewar_improvement < getScenarioTime() then
+				p:addToShipLog("Feel free to check with friendly stations while you patrol. Some of them may have people living there that can improve your ship, but they may want you to bring them something in exchange.","Magenta")
+				p.order1_prewar_improvement = "sent"
 			end
 		end
 	end
+	if plot1 == treatyStressed then
+		if p.order2 == nil then
+			if not p.nameAssigned then
+				setPlayer(p)
+			end
+			p:addToShipLog(string.format("%s, The Kraylors threaten to break the treaty. We characterize this behavior as mere sabre rattling. Nevertheless, keep a close watch on the neutral border zone. Until war is actually declared, you are not, I repeat, *not* authorized to enter the neutral border zone",p:getCallSign()),"Magenta")
+			p.order2 = "sent"
+		end
+	end
+	if plot1 == limitedWar then
+		if p.order3 == nil then
+			if not p.nameAssigned then
+				setPlayer(p)
+			end
+			p:addToShipLog(string.format("To: Commanding Officer of %s",p:getCallSign()),"Magenta")
+			p:addToShipLog("From: Human Navy Headquarters","Magenta")
+			p:addToShipLog("    War declared on Kraylors.","Magenta")
+			p:addToShipLog("    Target any Kraylor vessel.","Magenta")
+			p:addToShipLog("    Avoid targeting Kraylor stations.","Magenta")
+			p:addToShipLog("End official dispatch","Magenta")
+			p.order3 = "sent"
+		end
+	end
+	if plot1 == nil and targetKraylorStations then
+		if p.order4 == nil then
+			if not p.nameAssigned then
+				setPlayer(p)
+			end
+			p:addToShipLog(string.format("To: Commanding Officer of %s",p:getCallSign()),"Magenta")
+			p:addToShipLog("From: Human Navy Headquarters","Magenta")
+			p:addToShipLog("    War continues on Kraylors.","Magenta")
+			p:addToShipLog("    Intelligence reports Kraylors targeting civilian assets.","Magenta")
+			p:addToShipLog("    All Kraylor targets may be destroyed.","Magenta")
+			p:addToShipLog("End official dispatch","Magenta")
+			p.order4 = "sent"
+		end
+	end
+end
+function treatyHolds(delta)
+	game_state = "treaty holds"
+	primaryOrders = "Treaty holds. Patrol border. Stay out of blue neutral border zone"
 	if treatyTimer == nil then
 		if playWithTimeLimit then
 			treatyTimer = random(lrr4,urr4)
@@ -13508,15 +16298,6 @@ function treatyHolds(delta)
 			treatyStressTimer = random(lrr5,urr5)
 		end
 		primaryOrders = "Treaty holds, Kraylors belligerent. Patrol border. Stay out of blue neutral border zone"
-		for pidx=1,8 do
-			p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				if not p.nameAssigned then
-					setPlayers()
-				end
-				p:addToShipLog(string.format("%s, The Kraylors threaten to break the treaty. We characterize this behavior as mere sabre rattling. Nevertheless, keep a close watch on the neutral border zone. Until war is actually declared, you are not, I repeat, *not* authorized to enter the neutral border zone",p:getCallSign()),"Magenta")
-			end
-		end
 		if GMBelligerentKraylors ~= nil then
 			removeGMFunction(GMBelligerentKraylors)
 		end
@@ -13526,6 +16307,7 @@ function treatyHolds(delta)
 	end
 end
 function treatyStressed(delta)
+	game_state = "kraylors belligerent"
 	treatyStressTimer = treatyStressTimer - delta
 	if not initialAssetsEvaluated then
 		if gameTimeLimit < 1700 then
@@ -13542,20 +16324,6 @@ function treatyStressed(delta)
 			borderZone[i]:setColor(255,0,0)
 		end
 		primaryOrders = "War declared. Destroy any Kraylor vessels. Avoid destruction of Kraylor stations"
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				if not p.nameAssigned then
-					setPlayers()
-				end
-				p:addToShipLog(string.format("To: Commanding Officer of %s",p:getCallSign()),"Magenta")
-				p:addToShipLog("From: Human Navy Headquarters","Magenta")
-				p:addToShipLog("    War declared on Kraylors.","Magenta")
-				p:addToShipLog("    Target any Kraylor vessel.","Magenta")
-				p:addToShipLog("    Avoid targeting Kraylor stations.","Magenta")
-				p:addToShipLog("End official dispatch","Magenta")
-			end
-		end
 		if GMLimitedWar ~= nil then
 			removeGMFunction(GMLimitedWar)
 		end
@@ -13567,6 +16335,7 @@ function treatyStressed(delta)
 	end
 end
 function limitedWar(delta)
+	game_state = "limited war"
 	if not initialAssetsEvaluated then
 		if gameTimeLimit < 1700 then
 			evaluateInitialAssets()
@@ -13574,21 +16343,8 @@ function limitedWar(delta)
 	end
 	limitedWarTimer = limitedWarTimer - delta
 	if limitedWarTimer < 0 then
+		game_state = "full war"
 		primaryOrders = "War continues. Atrocities suspected. Destroy any Kraylor vessels or stations"
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				if not p.nameAssigned then
-					setPlayers()
-				end
-				p:addToShipLog(string.format("To: Commanding Officer of %s",p:getCallSign()),"Magenta")
-				p:addToShipLog("From: Human Navy Headquarters","Magenta")
-				p:addToShipLog("    War continues on Kraylors.","Magenta")
-				p:addToShipLog("    Intelligence reports Kraylors targeting civilian assets.","Magenta")
-				p:addToShipLog("    All Kraylor targets may be destroyed.","Magenta")
-				p:addToShipLog("End official dispatch","Magenta")
-			end
-		end
 		if GMFullWar ~= nil then
 			removeGMFunction(GMFullWar)
 		end
@@ -13643,13 +16399,13 @@ function evaluateInitialAssets()
 		end
 	end
 	local playerShipNames = {}
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			table.insert(playerShipNames,p:getCallSign())
 			p:addToShipLog(string.format("To: Commanding officer of %s",p:getCallSign()),"Magenta")
 			p:addToShipLog("From: Human Navy Headquarters","Magenta")
-			p:addToShipLog("    Fleet admiral relieved of fleet command duties.","Magenta")
+--			p:addToShipLog("    Fleet admiral relieved of fleet command duties.","Magenta")
 			p:addToShipLog("    You are granted fleet disposition authority.","Magenta")
 			p:addToShipLog("    Fleet assets know to respond to your Relay officer's directives.","Magenta")
 			p:addToShipLog("    Prepare for imminent Kraylor intrusion.","Magenta")
@@ -13661,7 +16417,7 @@ function evaluateInitialAssets()
 			print(i .. ": " .. playerShipNames[i])
 		end
 	end
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			if #playerShipNames > 1 then
@@ -13698,6 +16454,7 @@ function timedGame(delta)
 		if plot2diagnostic then print("reason set") end
 		endStatistics()
 		if plot2diagnostic then print("finished end stats page") end
+		game_state = "victory-human"
 		victory("Human Navy")
 	end
 end
@@ -13705,8 +16462,9 @@ end
 function initialAttack(delta)
 	if plot3diagnostic then print("initial attack") end
 	local enemyInitialFleet = spawnEnemies(kraylorCentroidX, kraylorCentroidY, 1.3, "Kraylor")
+
+	enemyInitialFleet[1]:orderFlyTowards(humanCentroidX, humanCentroidY)
 	for _, enemy in ipairs(enemyInitialFleet) do
-		enemy:orderFlyTowards(humanCentroidX, humanCentroidY)
 		enemy.initialFleetMember = true
 	end
 	if plot3diagnostic then print("initial fleet created") end
@@ -13723,6 +16481,7 @@ function pincerAttack(delta)
 	pincerTimer = pincerTimer - delta
 	if pincerTimer < 0 then
 		if plot3diagnostic then print("pincer timer expired") end
+		if distance_diagnostic then print("distance_diagnostic 13",kraylorCentroidX,kraylorCentroidY,referenceStartX,referenceStartY) end
 		local pincerSize = distance(kraylorCentroidX,kraylorCentroidY,referenceStartX,referenceStartY)*random(.4,.7)
 		foundInitialFleetMember = false
 		for i=1,#enemyFleetList do
@@ -13748,7 +16507,7 @@ function pincerAttack(delta)
 		end
 		if pincerAngle == nil then
 			pincerAngle = random(0,360)
-			print("-----     Nil angle observed. Choosing random angle: %.1f",pincerAngle)
+			print(string.format("-----     Nil angle observed. Choosing random angle: %.1f",pincerAngle))
 			if foundInitialFleetMember then
 				print("pincer angle should have come from example enemy")
 			else
@@ -13771,14 +16530,14 @@ function pincerAttack(delta)
 		rightPincerX, rightPincerY = vectorFromAngle(rightPincerAngle,pincerSize)
 		if plot3diagnostic then print(string.format("Angles: Pincer: %.1f, Left: %.1f, Right: %.1f",pincerAngle,leftPincerAngle,rightPincerAngle)) end
 		local enemyLeftPincerFleet = spawnEnemies(referenceStartX+leftPincerX,referenceStartY+leftPincerY,1.5,"Kraylor")
-		for _, enemy in ipairs(enemyLeftPincerFleet) do
-			enemy:orderRoaming()
-		end
+--		for _, enemy in ipairs(enemyLeftPincerFleet) do
+--			enemy:orderRoaming()
+--		end
 		table.insert(enemyFleetList,enemyLeftPincerFleet)
 		local enemyRightPincerFleet = spawnEnemies(referenceStartX+rightPincerX,referenceStartY+rightPincerY,1.5,"Kraylor")
-		for _, enemy in ipairs(enemyRightPincerFleet) do
-			enemy:orderRoaming()
-		end
+--		for _, enemy in ipairs(enemyRightPincerFleet) do
+--			enemy:orderRoaming()
+--		end
 		table.insert(enemyFleetList,enemyRightPincerFleet)
 		if playWithTimeLimit then
 			vengenceTimer = random(lrr1,urr1)
@@ -13904,11 +16663,12 @@ function setEnemyStationDefenses()
 	end
 end
 function enemyDefenseCheck(delta)
-	for pidx=1,8 do
+	for pidx=1,32 do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			for _, enemyStation in ipairs(kraylorStationList) do
 				if enemyStation ~= nil and enemyStation:isValid() and not enemyStation.defenseDeployed then
+					if distance_diagnostic then print("distance_diagnostic 14",p,enemyStation) end
 					local distToEnemyStation = distance(p,enemyStation)
 					if distToEnemyStation < enemyStation.defenseTriggerDistance then
 						if enemyStation.defenseType == "fighterFleet" then
@@ -14078,11 +16838,12 @@ function artifactToPlatform(delta)
 	for i=1,#artPlatformList do
 		local tap = artPlatformList[i]
 		local apx, apy = tap:getPosition()
+		if distance_diagnostic then print("distance_diagnostic 15",apx, apy, tap.originX, tap.originY) end
 		if distance(apx, apy, tap.originX, tap.originY) > tap.triggerDistance then
 			if enemyDefensePlatformList == nil then
 				enemyDefensePlatformList = {}
 			end
-			twp = CpuShip():setTemplate("Defense platform"):setFaction("Kraylor"):setPosition(apx,apy):orderRoaming()
+			twp = CpuShip():setTemplate("Battlestation"):setFaction("Kraylor"):setPosition(apx,apy):orderRoaming()
 			twp:setCallSign(generateCallSign(nil,"Kraylor"))
 			twp.distance = tap.triggerDistance
 			twp.originX = tap.originX
@@ -14094,7 +16855,7 @@ function artifactToPlatform(delta)
 			tap:destroy()
 			break
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(tap.travelAngle,4*difficulty*delta*30)
 			tap:setPosition(apx+tDeltax,apy+tDeltay)
 		end
 	end
@@ -14103,7 +16864,7 @@ function weaponPlatformOrbit(delta)
 	for i=1,#enemyDefensePlatformList do
 		twp = enemyDefensePlatformList[i]
 		if twp ~= nil and twp:isValid() then
-			twp.travelAngle = twp.travelAngle + .05*difficulty
+			twp.travelAngle = twp.travelAngle + .05*difficulty*delta*30
 			if twp.travelAngle >= 360 then 
 				twp.travelAngle = 0
 			end
@@ -14117,7 +16878,7 @@ function warpJammerOrbit(delta)
 		tj = jammerList[i]
 		if tj ~= nil and tj:isValid() then
 			if tj.orbit then
-				tj.travelAngle = tj.travelAngle + .05*difficulty
+				tj.travelAngle = tj.travelAngle + .05*difficulty*delta*30
 --				if tj.travelAngle >= 360 then
 --					tj.travelAngle = 0
 --				end
@@ -14125,6 +16886,7 @@ function warpJammerOrbit(delta)
 				tj:setPosition(tj.originX+newx,tj.originY+newy)
 			else
 				local wjx, wjy = tj:getPosition()
+				if distance_diagnostic then print("distance_diagnostic 16",wjx, wjy, tj.originX, tj.originY) end
 				if distance(wjx, wjy, tj.originX, tj.originY) > tj.triggerDistance then
 					ef, efp = spawnJammerFleet(esx, esy)
 					for _, enemy in ipairs(ef) do
@@ -14133,7 +16895,7 @@ function warpJammerOrbit(delta)
 					table.insert(enemyFleetList,ef)
 					tj.orbit = true
 				else
-					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty)
+					local tDeltax, tDeltay = vectorFromAngle(tj.travelAngle,4*difficulty*delta*30)
 					tj:setPosition(wjx+tDeltax,wjy+tDeltay)
 				end
 			end
@@ -14144,6 +16906,7 @@ function artifactToMinefield(delta)
 	for i=1,#artMineList do
 		local tam = artMineList[i]
 		local amx, amy = tam:getPosition()
+		if distance_diagnostic then print("distance_diagnostic 17",amx, amy, tam.originX, tam.originY) end
 		if distance(amx, amy, tam.originX, tam.originY) > tam.triggerDistance then
 			if tam.mineCount == nil then
 				tam.mineCount = 0
@@ -14164,7 +16927,7 @@ function artifactToMinefield(delta)
 				tam.deleteMe = true
 			end
 		else
-			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(tam.travelAngle,4*difficulty*delta*30)
 			tam:setPosition(amx+tDeltax,amy+tDeltay)
 		end
 	end
@@ -14176,23 +16939,19 @@ function artifactToMinefield(delta)
 		end
 	end
 end
-function explosiveTransportCheck(delta)
+function explosiveTransportCheck(delta,p)
 	for i=1,#deadlyTransportList do
 		local tdt = deadlyTransportList[i]
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				local tpx, tpy = p:getPosition()
-				local dtx, dty = tdt:getPosition()
-				if distance(tpx, tpy, dtx, dty) < 750 then
-					local tafx = Artifact():setPosition(dtx,dty)
-					tafx:explode()
-					p:setSystemHealth("beamweapons",-.5)
-					p:setSystemHealth("missilesystem",-.5)
-					tdt.deleteMe = true
-					break
-				end
-			end
+		local tpx, tpy = p:getPosition()
+		local dtx, dty = tdt:getPosition()
+		if distance_diagnostic then print("distance_diagnostic 18",tpx, tpy, dtx, dty) end
+		if distance(tpx, tpy, dtx, dty) < 750 then
+			local tafx = Artifact():setPosition(dtx,dty)
+			tafx:explode()
+			p:setSystemHealth("beamweapons",-.5)
+			p:setSystemHealth("missilesystem",-.5)
+			tdt.deleteMe = true
+			break
 		end
 	end
 	for i=1,#deadlyTransportList do
@@ -14208,12 +16967,13 @@ function artifactToWorm(delta)
 	for i=1,#artWormList do
 		local taw = artWormList[i]
 		local awx, awy = taw:getPosition()
+		if distance_diagnostic then print("distance_diagnostic 19",taw,taw.originX,taw.originY) end
 		if distance(taw,taw.originX,taw.originY) > taw.triggerDistance then
 			taw.deleteMe = true
 			local wdx, wdy = vectorFromAngle(random(0,360),100000)
 			WormHole():setPosition(awx,awy):setTargetPosition(awx+wdx,awy+wdy)
 		else
-			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty)
+			local tDeltax, tDeltay = vectorFromAngle(taw.travelAngle,4*difficulty*delta*30)
 			taw:setPosition(awx+tDeltax,awy+tDeltay)
 		end	
 	end
@@ -14226,17 +16986,12 @@ function artifactToWorm(delta)
 		end
 	end
 end
-function enemyDefenseZoneCheck(delta)
+function enemyDefenseZoneCheck(delta,p)
 	for i=1,#defensiveZoneList do
 		tz = defensiveZoneList[i]
-		for pidx=1,8 do
-			local p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() then
-				if tz:isInside(p) then
-					local systemHit = math.random(1,3)
-					p:setSystemHealth(tz.system[systemHit], p:getSystemHealth(tz.system[systemHit])*adverseEffect)
-				end
-			end
+		if tz:isInside(p) then
+			local systemHit = math.random(1,3)
+			p:setSystemHealth(tz.system[systemHit], p:getSystemHealth(tz.system[systemHit])*adverseEffect)
 		end
 		if tz.revealDelay < 0 then
 			if tz.color == nil then
@@ -14252,56 +17007,43 @@ function spawnDroneFleet(originX, originY, droneCount, faction)
 	if faction == nil then
 		faction = "Kraylor"
 	end
-	local fleetList = {}
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local fleetList = script_formation.spawnFormation("Drone", droneCount, originX, originY, faction)
+	local fleetPower = droneCount * 5
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower 
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower 
 	end
-	for i=1,droneCount do
-		ship = CpuShip():setFaction(faction):setTemplate("Ktlitan Drone"):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
+	for _, ship in ipairs(fleetList) do
 		if faction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + 4
-			ship:onDestruction(enemyVesselDestroyed)
+			ship:onDestroyed(enemyVesselDestroyed)
 		elseif faction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + 4
-			ship:onDestruction(friendlyVesselDestroyed)
+			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
 	end
-	return fleetList, droneCount*4
+	return fleetList, fleetPower
 end
 function spawnFighterFleet(originX, originY, fighterCount, faction)
 	if faction == nil then
 		faction = "Kraylor"
 	end
-	--Ship Template Name List
-	local fighterNames  = {"MT52 Hornet","MU52 Hornet","WX-Lindworm","Fighter","Ktlitan Fighter"}
+	local fighterNames  = {"Red Hornet", "Red Lindworm", "Red Adder MK5", "Red Adder MK4"} -- hired criminal ships
+	local templ = fighterNames[math.random(1,#fighterNames)]
 	--Ship Template Score List
-	local fighterScores = {5            ,5            ,7            ,6        ,6}
-	local fleetList = {}
-	local fleetPower = 0
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local fighterScores = stl["Criminals"]
+	local fleetPower = fighterCount * fighterScores[templ]
+	local fleetList = script_formation.spawnFormation(templ, fighterCount, originX, originY, faction)
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	for i=1,fighterCount do
-		local shipTemplateType = math.random(1,#fighterNames)
-		fleetPower = fleetPower + fighterScores[shipTemplateType]
-		ship = CpuShip():setFaction(faction):setTemplate(fighterNames[shipTemplateType]):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
+	for _, ship in ipairs(fleetList) do
 		if faction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + fighterScores[shipTemplateType]
-			ship:onDestruction(enemyVesselDestroyed)
+			ship:onDestroyed(enemyVesselDestroyed)
 		elseif faction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + fighterScores[shipTemplateType]
-			ship:onDestruction(friendlyVesselDestroyed)
+			ship:onDestroyed(friendlyVesselDestroyed)
 		end
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
 	end
 	return fleetList, fleetPower
 end
@@ -14314,25 +17056,23 @@ function spawnJammerFleet(originX, originY)
 		shipSpawnCount = 4
 	end
 	--Ship Template Name List
-	local jammerNames  = {"MT52 Hornet","MU52 Hornet","Adder MK5","Adder MK4","WX-Lindworm","Adder MK6","Phobos T3","Phobos M3","Piranha F8","Piranha F12","Fighter","Ktlitan Fighter","Ktlitan Drone","Ktlitan Scout"}
+	local jammerNames  = stln["Criminals"] -- hired criminal ships
+	local templ = jammerNames[math.random(1,#jammerNames)]
 	--Ship Template Score List
-	local jammerScores = {5            ,5            ,7          ,6          ,7            ,8          ,15         ,16         ,15          ,15           ,6        ,6                ,4              ,8              }
-	local fleetList = {}
-	local fleetPower = 0
-	local deploySpacing = random(300,800)
-	local shape = "hexagonal"
-	if random(1,100) < 50 then
-		shape = "square"
+	local jammerScores = stl["Criminals"]
+	local fleetPower = shipSpawnCount * jammerScores[templ]
+	local fleetList = script_formation.spawnFormation(templ, shipSpawnCount, originX, originY, faction)
+	if faction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+	elseif faction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
 	end
-	for i=1,shipSpawnCount do
-		local shipTemplateType = math.random(1,#jammerNames)
-		fleetPower = fleetPower + jammerScores[shipTemplateType]
-		ship = CpuShip():setFaction(faction):setTemplate(jammerNames[shipTemplateType]):orderRoaming():setCommsScript(""):setCommsFunction(commsShip)
-		ship:setCallSign(generateCallSign(nil,faction))
-		rawKraylorShipStrength = rawKraylorShipStrength + jammerScores[shipTemplateType]
-		ship:onDestruction(enemyVesselDestroyed)
-		ship:setPosition(originX + formation_delta[shape].x[i] * deploySpacing, originY + formation_delta[shape].y[i] * deploySpacing)
-		table.insert(fleetList,ship)
+	for _, ship in ipairs(fleetList) do
+		if faction == "Kraylor" then
+			ship:onDestroyed(enemyVesselDestroyed)
+		elseif faction == "Human Navy" then
+			ship:onDestroyed(friendlyVesselDestroyed)
+		end
 	end
 	return fleetList, fleetPower
 end
@@ -14364,85 +17104,56 @@ function personalAmbushDestructCheck(delta)
 	if paDestructTimer < 0 then
 		if initialAssetsEvaluated then
 			if paDiagnostic then print("paDestruct check") end
-			friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct = listStatuses()
-			if friendlySurvivedCount == nil then
-				return
-			end
-			local evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
-			if evalEnemy < paTriggerEval then
+			local stat_list = gatherStats()
+			if stat_list.kraylor.evaluation < paTriggerEval then
 				if paDiagnostic then print("met paDestruct criteria") end
-				local candidate = nil
-				for pidx=1,8 do
-					p = getPlayerShip(pidx)
-					if p ~= nil and p:isValid() and p.sprung == nil then
-						local nebulaHuntList = p:getObjectsInRange(20000)
-						for _, obj in ipairs(nebulaHuntList) do
-							if obj.typeName == "Nebula" then
-								if distance(p,obj) > 6000 then
-									if paDiagnostic then print("found a nebula in " .. obj:getSectorName()) end
-									candidate = obj
-									break
-								end
-							end					
-						end
-					end
-					if candidate ~= nil then
-						break
-					end
-				end
 				paTriggerTime = gameTimeLimit - random(30,90)
 				plotPA = personalAmbushTimeCheck
-				if candidate ~= nil then
-					local efx, efy = candidate:getPosition()
-					enemyAmbushFleet = spawnEnemies(efx,efy,1,"Kraylor")
-					for _, enemy in ipairs(enemyAmbushFleet) do
-						enemy:orderAttack(p)
-					end
-					table.insert(enemyFleetList,enemyAmbushFleet)
-					p.sprung = true
-					if paDiagnostic then print("sprung on " .. p:getCallSign()) end
-				else
-					if paDiagnostic then print("no candidate found for ambush") end
-				end
 			end
 		end
 		paDestructTimer = delta + paDestructInterval		
 	end
 end
+function personalAmbushPlayerCheck(p)
+	if plotPA ~= nil and p.sprung == nil and plotPA == personalAmbushTimeCheck then
+		p.nebula_candidate = nil
+		local nebulaHuntList = p:getObjectsInRange(20000)
+		for _, obj in ipairs(nebulaHuntList) do
+			if obj.typeName == "Nebula" then
+				if distance_diagnostic then print("distance_diagnostic 20",p,obj) end
+				if distance(p,obj) > 6000 then
+					p.nebula_candidate = obj
+					break
+				end
+			end					
+		end
+		if p.nebula_candidate ~= nil and gameTimeLimit < paTriggerTime then
+			local efx, efy = p.nebula_candidate:getPosition()
+			local enemyAmbushFleet = spawnEnemies(efx,efy,1,"Kraylor")
+			enemyAmbushFleet[1]:orderAttack(p)
+			table.insert(enemyFleetList,enemyAmbushFleet)
+			p.sprung = true
+		end
+	end
+end
 function personalAmbushTimeCheck(delta)
 	if gameTimeLimit < paTriggerTime then
 		if paDiagnostic then print("paGame Time check passed") end
-		candidate = nil
-		for pidx=1,8 do
-			p = getPlayerShip(pidx)
-			if p ~= nil and p:isValid() and p.sprung == nil then
-				nebulaHuntList = p:getObjectsInRange(20000)
-				for _, obj in ipairs(nebulaHuntList) do
-					if obj.typeName == "Nebula" then
-						if distance(p,obj) > 6000 then
-							if paDiagnostic then print("found a nebula in " .. obj:getSectorName()) end
-							candidate = obj
-							break
-						end
-					end					
+		if random(1,100) < 3 then
+			paTriggerTime = gameTimeLimit - random(30,90)
+		end
+		local all_sprung = true
+		for pidx=1,32 do
+			local p = getPlayerShip(pidx)
+			if p ~= nil and p:isValid() then
+				if not p.sprung then
+					all_sprung = false
+					break
 				end
 			end
-			if candidate ~= nil then
-				break
-			end
 		end
-		paTriggerTime = gameTimeLimit - random(30,90)
-		if candidate ~= nil then
-			efx, efy = candidate:getPosition()
-			enemyAmbushFleet = spawnEnemies(efx,efy,1,"Kraylor")
-			for _, enemy in ipairs(enemyAmbushFleet) do
-				enemy:orderAttack(p)
-			end
-			table.insert(enemyFleetList,enemyAmbushFleet)
-			p.sprung = true
-			if paDiagnostic then print("sprung on " .. p:getCallSign()) end
-		else
-			if paDiagnostic then print("no candidate found for ambush") end
+		if all_sprung then
+			plotPA = nil
 		end
 	end
 end
@@ -14450,74 +17161,89 @@ end
 function playerBorderCheck(delta)
 	if treaty then
 		tbz = nil
-		for pidx=1,8 do
+		for pidx=1,32 do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				playerOutOfBounds = false
 				tbz = outerZone
 				if tbz:isInside(p) then
-					playerOutOfBounds = true
-					break
+					--allow 'black ops' jumping over neutral zone
+					for _, faction in ipairs(factions_forbidden_in_enemy_zone) do
+						if p:getFaction() == faction then
+							p.playerOutOfBounds = true
+							break
+						end
+					end
 				end
 				for i=1,#borderZone do
 					tbz = borderZone[i]
 					if tbz:isInside(p) then
-						playerOutOfBounds = true
-						break
+						--allow 'neutrals' in neutral zone
+						for _, faction in ipairs(factions_forbidden_in_neutral_zone) do
+							if p:getFaction() == faction then
+								p.playerOutOfBounds = true
+								break
+							end
+						end
+						if p.playerOutOfBounds then
+							break
+						end
 					end
 				end
-				if playerOutOfBounds then
-					break
-				end
-			end
-		end
-		if tbz ~= nil then
-			if playerOutOfBounds then
-				if tbz.playerDetected == nil then
-					tbz.playerDetected = 1
-				else
-					if tbz.playerDetected >= 10 then
-						missionVictory = false
-						finalTimer = 2
-						plotPB = displayDefeatResults
+				if p.playerOutOfBounds then
+					if p.playerDetected == nil then
+						p.playerDetected = 0
 					else
-						tbz.playerDetected = tbz.playerDetected + 1
+						if p.playerDetected >= 10 then
+							for p2idx=1,32 do
+								p2 = getPlayerShip(p2idx)
+								if p2 ~=nil and p2:isValid() then
+									p2:addToShipLog(p:getCallSign() .. " violated treaty terms by crossing neutral border zone. " .. p:getCallSign() .. " is treated as criminal now.", "Magenta")
+								end
+							end
+							p:setFaction("Criminals")
+							p.playerOutOfBounds = false
+						else
+							p.playerDetected = p.playerDetected + delta
+						end
 					end
-				end
-			else
-				if tbz.playerDetected == nil then
-					tbz.playerDetected = 0
 				else
-					if tbz.playerDetected <= 0 then
-						tbz.playerDetected = 0
+					if p.playerDetected == nil then
+						p.playerDetected = 0
 					else
-						tbz.playerDetected = tbz.playerDetected - 1
+						if p.playerDetected <= 0 then
+							p.playerDetected = 0
+						else
+							p.playerDetected = p.playerDetected - delta
+						end
 					end
 				end
 			end
 		end
 	end
 end
-function displayDefeatResults(delta)
-	finalTimer = finalTimer - delta
-	if finalTimer < 0 then
-		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
-		endStatistics()
-		victory("Kraylor")
-	end
-end
+--function displayDefeatResults(delta)
+--	finalTimer = finalTimer - delta
+--	if finalTimer < 0 then
+--		missionCompleteReason = "Player violated treaty terms by crossing neutral border zone"
+--		endStatistics()
+--		game_state = "victory-kraylor"
+--		victory("Kraylor")
+--	end
+--end
 function playerWarCrimeCheck(delta)
 	if not treaty and not targetKraylorStations and initialAssetsEvaluated then
-		local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
-		if friendlySurvivedCount == nil then
-			return
-		end
-		if epct2 < 100 then
+		-- raise difficulty once but do not lose
+		setDifficulty(difficulty + 1)
+		plotPWC = nil
+		--[[local stat_list = gatherStats()
+		if stat_list.kraylor.station.percentage < 100 then
 			missionVictory = false
 			missionCompleteReason = "Player committed war crimes by destroying civilians aboard Kraylor station"
 			endStatistics()
+			game_state = "victory_kraylor"
 			victory("Kraylor")
-		end
+		end--]]
 	end
 end
 -- Plot EB enemy border zone checks
@@ -14576,7 +17302,7 @@ function enemyReinforcements(delta)
 				local p = closestPlayerTo(ta)
 				ta:destroy()
 				if p == nil then
-					for pidx=1,8 do
+					for pidx=1,32 do
 						p = getPlayerShip(pidx)
 						if p ~= nil and p:isValid() then
 							break
@@ -14587,9 +17313,7 @@ function enemyReinforcements(delta)
 					local dirx, diry = vectorFromAngle(random(0,360),random(15000,25000))
 					local fpx, fpy = p:getPosition()
 					local tempFleet = spawnEnemies(fpx+dirx,fpy+diry,enemyReinforcementSchedule[1][2],"Kraylor")
-					for _, enemy in ipairs(tempFleet) do
-						enemy:orderAttack(p)
-					end
+					tempFleet[1]:orderAttack(p)
 					table.insert(enemyFleetList,tempFleet)
 					table.remove(enemyReinforcementSchedule,1)
 				end
@@ -14609,25 +17333,28 @@ function muckAndFlies(delta)
 		muckFlyTimer = delta + 400 - difficulty * 90 + random(1,200)	--final: 400, 90 and 200
 	end
 	muckFlyTimer = muckFlyTimer - delta
+	if mf_diagnostic then print("In muck and flies. Counter:",muckFlyCounter,"Timer:",muckFlyTimer) end
 	if muckFlyTimer < 0 then
+		if mf_diagnostic then print("muck fly timer < 0") end
 		if treaty and treatyTimer > 0 then
 			muckFlyTimer = delta + 800 - difficulty * 90 + random(1,200)	--final: 800, 90 and 200
 			return
 		end
 		local victimList = {}
-		for pidx=1,8 do
+		for pidx=1,32 do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				table.insert(victimList,p)
 			end
 		end
 		if #victimList > 0 then
+			if mf_diagnostic then print("victim list populated") end
 			local p = victimList[math.random(1,#victimList)]
 			local px, py = p:getPosition()
 			local jamAngle = random(0,360)
 			local jamDistance = random(6000,9000)
 			local jx, jy = vectorFromAngle(jamAngle,jamDistance)
-			muck = WarpJammer():setRange(jamDistance*1.7):setPosition(px+jx,py+jy):setFaction("Kraylor"):onDestruction(armoredWarpJammer)
+			muck = WarpJammer():setRange(jamDistance*1.7):setPosition(px+jx,py+jy):setFaction("Kraylor"):onDestroyed(armoredWarpJammer)
 			muck.jamRange = jamDistance*1.7
 			if difficulty < 1 then
 				muck.lifeCount = 0
@@ -14639,7 +17366,7 @@ function muckAndFlies(delta)
 			local flies = {}
 			local flyCount = 2 * difficulty + math.random(1,3)
 			for i=1,flyCount do
-				local ship = CpuShip():setFaction("Kraylor"):setTemplate("Ktlitan Drone"):setPosition(px+jx,py+jy):orderDefendLocation(px+jx,py+jy):onDestruction(enemyVesselDestroyed):setCommsScript(""):setCommsFunction(commsShip)
+				local ship = CpuShip():setFaction("Kraylor"):setTemplate("Ktlitan Drone"):setPosition(px+jx,py+jy):orderDefendLocation(px+jx,py+jy):onDestroyed(enemyVesselDestroyed):setCommsScript(""):setCommsFunction(commsShip)
 				ship:setCallSign(string.format("F%s%i%i",string.char(math.random(65,90)),muckFlyCounter,i))
 				table.insert(flies,ship)
 				rawKraylorShipStrength = rawKraylorShipStrength + 4
@@ -14664,6 +17391,7 @@ function muckAndFlies(delta)
 					attemptCount = attemptCount + 1
 					if candidate ~= nil then
 						if candidate:isValid() then
+							if distance_diagnostic then print("distance_diagnostic 22",candidate,px+jx,py+jy) end
 							if distance(candidate,px+jx,py+jy) > (jamDistance*3 + 10000) then
 								validCandidate = true
 							end
@@ -14689,6 +17417,7 @@ function muckAndFlies(delta)
 					attemptCount = attemptCount + 1
 					if candidate ~= nil then
 						if candidate:isValid() then
+							if distance_diagnostic then print("distance_diagnostic 23",candidate,px+jx,py+jy) end
 							if distance(candidate,px+jx,py+jy) > (jamDistance*3 + 10000) then
 								validCandidate = true
 							end
@@ -14708,6 +17437,7 @@ function muckAndFlies(delta)
 			end
 		end
 		muckFlyCounter = muckFlyCounter - 1
+		if mf_diagnostic then print("muck fly counter:",muckFlyCounter) end
 		if muckFlyCounter <= 0 then
 			plotMF = sleeperAgent
 			muckFlyTimer = 500 - difficulty * 90 + random(1,60)
@@ -14717,10 +17447,11 @@ function muckAndFlies(delta)
 	end
 end
 function sleeperAgent(delta)
+	if mf_diagnostic then print("in sleeper agent function") end
 	muckFlyTimer = muckFlyTimer - delta
 	if muckFlyTimer < 0 then
 		local victim_list = {}
-		for pidx=1,8 do
+		for pidx=1,32 do
 			local p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				table.insert(victim_list,p)
@@ -14797,6 +17528,7 @@ function sleeperAgent(delta)
 	end
 end
 function sleeperAwakes(delta)
+	if mf_diagnostic then print("in sleeper awakes function") end
 	muckFlyTimer = muckFlyTimer - delta
 	if muckFlyTimer < 0 then
 		for i=1,#sleeper_agent do
@@ -14825,152 +17557,149 @@ function armoredWarpJammer(self, instigator)
 		return
 	end
 	local tempx, tempy = self:getPosition()
-	local redoMuck = WarpJammer():setRange(self.jamRange):setPosition(tempx,tempy):setFaction("Kraylor"):onDestruction(armoredWarpJammer)
+	local redoMuck = WarpJammer():setRange(self.jamRange):setPosition(tempx,tempy):setFaction("Kraylor"):onDestroyed(armoredWarpJammer)
 	redoMuck.jamRange = self.jamRange
 	redoMuck.lifeCount = self.lifeCount - 1
-	if difficulty < 1 then
-		instigator:setHull(instigator:getHull()*.9)
-	elseif difficulty > 1 then
-		instigator:setHull(instigator:getHull()*.7)
-	else
-		instigator:setHull(instigator:getHull()*.8)
+	if instigator ~= nil then
+		if difficulty < 1 then
+			instigator:setHull(instigator:getHull()*.9)
+		elseif difficulty > 1 then
+			instigator:setHull(instigator:getHull()*.7)
+		else
+			instigator:setHull(instigator:getHull()*.8)
+		end
 	end
 end
 -- Plot mining
-function checkForMining(delta)
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			if p.mining and p.cargo > 0 then
-				local vx, vy = p:getVelocity()
-				local player_velocity = math.abs(vx) + math.abs(vy)
-				local cpx, cpy = p:getPosition()
-				local nearby_objects = p:getObjectsInRange(1000)
-				if player_velocity < 10 then
-					if p.mining_target_lock then
-						if p.mining_target ~= nil and p.mining_target:isValid() then
-							if p.mining_in_progress then
-								p.mining_timer = p.mining_timer - delta
-								if p.mining_timer < 0 then
-									p.mining_in_progress = false
-									if p.mining_timer_info ~= nil then
-										p:removeCustom(p.mining_timer_info)
-										p.mining_timer_info = nil
-									end
-									p.mining_target_lock = false
-									p.mining_timer = nil
-									if #p.mining_target.trace_minerals > 0 then
-										local good = p.mining_target.trace_minerals[math.random(1,#p.mining_target.trace_minerals)]
-										if p.goods == nil then
-											p.goods = {}
-										end
-										if p.goods[good] == nil then
-											p.goods[good] = 0
-										end
-										p.goods[good] = p.goods[good] + 1
-										p.cargo = p.cargo - 1
-										if p:hasPlayerAtPosition("Science") then
-											local mined_mineral_message = "mined_mineral_message"
-											p:addCustomMessage("Science",mined_mineral_message,string.format("Mining obtained %s which has been stored in the cargo hold",good))
-										end
-									else	--no minerals in asteroid
-										if p:hasPlayerAtPosition("Science") then
-											local mined_mineral_message = "mined_mineral_message"
-											p:addCustomMessage("Science",mined_mineral_message,"mining failed to extract any minerals")
-										end										
-									end
-								else	--still mining, update timer display, energy and heat
-									p:setEnergy(p:getEnergy() - p:getMaxEnergy()*mining_drain)
-									p:setSystemHeat("beamweapons",p:getSystemHeat("beamweapons") + (.0025 * difficulty))
-									local mining_seconds = math.floor(p.mining_timer % 60)
-									if random(1,100) < 22 then
-										BeamEffect():setSource(p,0,0,0):setTarget(p.mining_target,0,0):setRing(false):setDuration(1):setTexture(mining_beam_string[math.random(1,#mining_beam_string)])
-									end
-									if p:hasPlayerAtPosition("Weapons") then
-										p.mining_timer_info = "mining_timer_info"
-										p:addCustomInfo("Weapons",p.mining_timer_info,string.format("Mining %i",mining_seconds))
-									end
-								end
-							else	--mining not in progress
-								if p.trigger_mine_beam_button == nil then
-									if p:hasPlayerAtPosition("Weapons") then
-										p.trigger_mine_beam_button = "trigger_mine_beam_button"
-										p:addCustomButton("Weapons",p.trigger_mine_beam_button,"Start Mining",function()
-											p.mining_in_progress = true
-											p.mining_timer = delta + 5
-											p:removeCustom(p.trigger_mine_beam_button)
-											p.trigger_mine_beam_button = nil
-										end)
-									end
-								end
-							end
-						else	--no mining target or mining target invalid
-							p.mining_target_lock = false
+function checkForMining(delta, p)
+	if p.mining and p.cargo > 0 then
+		local vx, vy = p:getVelocity()
+		local player_velocity = math.abs(vx) + math.abs(vy)
+		local cpx, cpy = p:getPosition()
+		local nearby_objects = p:getObjectsInRange(1000)
+		if player_velocity < 10 then
+			if p.mining_target_lock then
+				if p.mining_target ~= nil and p.mining_target:isValid() then
+					if p.mining_in_progress then
+						p.mining_timer = p.mining_timer - delta
+						if p.mining_timer < 0 then
+							p.mining_in_progress = false
 							if p.mining_timer_info ~= nil then
 								p:removeCustom(p.mining_timer_info)
 								p.mining_timer_info = nil
 							end
-						end
-					else	--not locked
-						local mining_objects = {}
-						if nearby_objects ~= nil and #nearby_objects > 1 then
-							for _, obj in ipairs(nearby_objects) do
-								if p ~= obj then
-									local object_type = obj.typeName
-									if object_type ~= nil then
-										if object_type == "Asteroid" or object_type == "VisualAsteroid" then
-											table.insert(mining_objects,obj)
-										end
-									end
+							p.mining_target_lock = false
+							p.mining_timer = nil
+							if #p.mining_target.trace_minerals > 0 then
+								local good = p.mining_target.trace_minerals[math.random(1,#p.mining_target.trace_minerals)]
+								if p.goods == nil then
+									p.goods = {}
 								end
-							end		--end of nearby object list loop
-							if #mining_objects > 0 then
-								if p.mining_target ~= nil and p.mining_target:isValid() then
-									local target_in_list = false
-									for i=1,#mining_objects do
-										if mining_objects[i] == p.mining_target then
-											target_in_list = true
-											break
-										end
-									end		--end of check for the current target in list loop
-									if not target_in_list then
-										p.mining_target = mining_objects[1]
-										removeMiningButtons(p)
-									end
-								else
-									p.mining_target = mining_objects[1]
+								if p.goods[good] == nil then
+									p.goods[good] = 0
 								end
-								addMiningButtons(p,mining_objects)
-							else	--no mining objects
-								if p.mining_target ~= nil then
-									removeMiningButtons(p)
-									p.mining_target = nil
+								p.goods[good] = p.goods[good] + 1
+								p.cargo = p.cargo - 1
+								if p:hasPlayerAtPosition("Science") then
+									local mined_mineral_message = "mined_mineral_message"
+									p:addCustomMessage("Science",mined_mineral_message,string.format("Mining obtained %s which has been stored in the cargo hold",good))
 								end
+							else	--no minerals in asteroid
+								if p:hasPlayerAtPosition("Science") then
+									local mined_mineral_message = "mined_mineral_message"
+									p:addCustomMessage("Science",mined_mineral_message,"mining failed to extract any minerals")
+								end										
 							end
-						else	--no nearby objects
-							if p.mining_target ~= nil then
-								removeMiningButtons(p)
-								p.mining_target = nil
+						else	--still mining, update timer display, energy and heat
+							p:setEnergy(p:getEnergy() - p:getMaxEnergy()*mining_drain)
+							p:setSystemHeat("beamweapons",p:getSystemHeat("beamweapons") + (.0025 * difficulty))
+							local mining_seconds = math.floor(p.mining_timer % 60)
+							if random(1,100) < 22 then
+								BeamEffect():setSource(p,0,0,0):setTarget(p.mining_target,0,0):setRing(false):setDuration(1):setTexture(mining_beam_string[math.random(1,#mining_beam_string)])
+							end
+							if p:hasPlayerAtPosition("Weapons") then
+								p.mining_timer_info = "mining_timer_info"
+								p:addCustomInfo("Weapons",p.mining_timer_info,string.format("Mining %i",mining_seconds))
+							end
+						end
+					else	--mining not in progress
+						if p.trigger_mine_beam_button == nil then
+							if p:hasPlayerAtPosition("Weapons") then
+								p.trigger_mine_beam_button = "trigger_mine_beam_button"
+								p:addCustomButton("Weapons",p.trigger_mine_beam_button,"Start Mining",function()
+									p.mining_in_progress = true
+									p.mining_timer = delta + 5
+									p:removeCustom(p.trigger_mine_beam_button)
+									p.trigger_mine_beam_button = nil
+								end)
 							end
 						end
 					end
-				else	--not moving slowly enough to mine
-					removeMiningButtons(p)
+				else	--no mining target or mining target invalid
+					p.mining_target_lock = false
 					if p.mining_timer_info ~= nil then
 						p:removeCustom(p.mining_timer_info)
 						p.mining_timer_info = nil
 					end
-					if p.trigger_mine_beam_button then
-						p:removeCustom(p.trigger_mine_beam_button)
-						p.trigger_mine_beam_button = nil
-					end
-					p.mining_target_lock = false
-					p.mining_in_progress = false
-					p.mining_timer = nil
 				end
-			end			
+			else	--not locked
+				local mining_objects = {}
+				if nearby_objects ~= nil and #nearby_objects > 1 then
+					for _, obj in ipairs(nearby_objects) do
+						if p ~= obj then
+							local object_type = obj.typeName
+							if object_type ~= nil then
+								if object_type == "Asteroid" or object_type == "VisualAsteroid" then
+									table.insert(mining_objects,obj)
+								end
+							end
+						end
+					end		--end of nearby object list loop
+					if #mining_objects > 0 then
+						if p.mining_target ~= nil and p.mining_target:isValid() then
+							local target_in_list = false
+							for i=1,#mining_objects do
+								if mining_objects[i] == p.mining_target then
+									target_in_list = true
+									break
+								end
+							end		--end of check for the current target in list loop
+							if not target_in_list then
+								p.mining_target = mining_objects[1]
+								removeMiningButtons(p)
+							end
+						else
+							p.mining_target = mining_objects[1]
+						end
+						addMiningButtons(p,mining_objects)
+					else	--no mining objects
+						if p.mining_target ~= nil then
+							removeMiningButtons(p)
+							p.mining_target = nil
+						end
+					end
+				else	--no nearby objects
+					if p.mining_target ~= nil then
+						removeMiningButtons(p)
+						p.mining_target = nil
+					end
+				end
+			end
+		else	--not moving slowly enough to mine
+			removeMiningButtons(p)
+			if p.mining_timer_info ~= nil then
+				p:removeCustom(p.mining_timer_info)
+				p.mining_timer_info = nil
+			end
+			if p.trigger_mine_beam_button then
+				p:removeCustom(p.trigger_mine_beam_button)
+				p.trigger_mine_beam_button = nil
+			end
+			p.mining_target_lock = false
+			p.mining_in_progress = false
+			p.mining_timer = nil
 		end
-	end
+	end			
 end
 function removeMiningButtons(p)
 	if p.mining_next_target_button ~= nil then
@@ -14995,6 +17724,7 @@ function addMiningButtons(p,mining_objects)
 			p:addCustomButton("Science",p.mining_lock_button,"Lock for Mining",function()
 				local cpx, cpy = p:getPosition()
 				local tpx, tpy = p.mining_target:getPosition()
+				if distance_diagnostic then print("distance_diagnostic 24",cpx,cpy,tpx,tpy) end
 				local asteroid_distance = distance(cpx,cpy,tpx,tpy)
 				if asteroid_distance < 1000 then
 					p.mining_target_lock = true
@@ -15015,6 +17745,7 @@ function addMiningButtons(p,mining_objects)
 			p:addCustomButton("Science",p.mining_target_button,"Target Asteroid",function()
 				string.format("")	--necessary to have global reference for Serious Proton engine
 				tpx, tpy = p.mining_target:getPosition()
+				if distance_diagnostic then print("distance_diagnostic 25",cpx, cpy, tpx, tpy) end
 				local target_distance = distance(cpx, cpy, tpx, tpy)/1000
 				local theta = math.atan(tpy - cpy,tpx - cpx)
 				if theta < 0 then
@@ -15133,52 +17864,167 @@ function endWar(delta)
 	endWarTimer = endWarTimer - delta
 	if endWarTimer < 0 then
 		endWarTimer = delta + endWarTimerInterval
-		friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct = listStatuses()
-		if friendlySurvivedCount == nil then
-			return
+		local stat_list = gatherStats()
+		if stat_list.kraylor.evaluation < enemyDestructionVictoryCondition then
+			if difficulty >= 5 then
+				missionVictory = true
+				missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
+				endStatistics()
+				game_state = "victory-human"
+				victory("Human Navy")
+			else
+				setDifficulty(difficulty + 1)
+				enemyDestructionVictoryCondition = enemyDestructionVictoryCondition * .8
+			end
 		end
-		local evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
-		if evalEnemy < enemyDestructionVictoryCondition then
-			missionVictory = true
-			missionCompleteReason = string.format("Enemy reduced to less than %i%% strength",math.floor(enemyDestructionVictoryCondition))
-			endStatistics()
-			victory("Human Navy")
+		if stat_list.human.evaluation < friendlyDestructionDefeatCondition then
+			if difficulty < 0.5 then
+				missionVictory = false
+				missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
+				endStatistics()
+				game_state = "victory-kraylor"
+				victory("Kraylor")
+			else
+				setDifficulty(difficulty/2)
+				friendlyDestructionDefeatCondition = friendlyDestructionDefeatCondition * .75
+			end
 		end
-		local evalFriendly = fpct2*friendlyStationComponentWeight + npct2*neutralStationComponentWeight + fpct*friendlyShipComponentWeight
-		if evalFriendly < friendlyDestructionDefeatCondition then
-			missionVictory = false
-			missionCompleteReason = string.format("Human Navy reduced to less than %i%% strength",math.floor(friendlyDestructionDefeatCondition))
-			endStatistics()
-			victory("Kraylor")
+		if stat_list.kraylor.evaluation - stat_list.human.evaluation > destructionDifferenceEndCondition then
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			stat_list.times.threshold = destructionDifferenceEndCondition
+			setDifficulty(difficulty/2)
 		end
-		if evalEnemy - evalFriendly > destructionDifferenceEndCondition then
-			missionVictory = false
-			missionCompleteReason = string.format("Enemy strength exceeded ours by %i percentage points",math.floor(destructionDifferenceEndCondition))
-			endStatistics()
-			victory("Kraylor")
-		end
-		if evalFriendly - evalEnemy > destructionDifferenceEndCondition then
-			missionVictory = true
-			missionCompleteReason = string.format("Our strength exceeded enemy strength by %i percentage points",math.floor(destructionDifferenceEndCondition))
-			endStatistics()
-			victory("Human Navy")
+		if stat_list.human.evaluation - stat_list.kraylor.evaluation > destructionDifferenceEndCondition then
+			destructionDifferenceEndCondition = destructionDifferenceEndCondition * 2
+			stat_list.times.threshold = destructionDifferenceEndCondition
+			setDifficulty(difficulty + 1)
 		end
 	end
 end
 function setSecondaryOrders()
-	friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct = listStatuses()
-	if friendlySurvivedCount == nil then
-		secondaryOrders = ""
-		return
-	end
 	secondaryOrders = ""
-	--secondaryOrders = string.format("\nStations: Friendly: %.1f%%, Enemy: %.1f%%, Neutral: %.1f%%",fpct2,epct2,npct2)
-	--secondaryOrders = secondaryOrders .. string.format("\nShips: Friendly: %.1f%%, Enemy: %.1f%%",fpct, epct)
-	evalFriendly = fpct2*friendlyStationComponentWeight + npct2*neutralStationComponentWeight + fpct*friendlyShipComponentWeight
-	secondaryOrders = secondaryOrders .. string.format("\n\nFriendly evaluation: %.1f%%. Below %.1f%% = defeat",evalFriendly,friendlyDestructionDefeatCondition)
-	evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
-	secondaryOrders = secondaryOrders .. string.format("\nEnemy evaluation: %.1f%%. Below %.1f%% = victory",evalEnemy,enemyDestructionVictoryCondition)
-	secondaryOrders = secondaryOrders .. string.format("\n\nGet behind by %.1f%% = defeat. Get ahead by %.1f%% = victory",destructionDifferenceEndCondition,destructionDifferenceEndCondition)
+	local stat_list = gatherStats()
+	secondaryOrders = secondaryOrders .. string.format("\n\nFriendly evaluation: %.1f%%.",stat_list.human.evaluation)
+	secondaryOrders = secondaryOrders .. string.format("\nEnemy evaluation: %.1f%%.",stat_list.kraylor.evaluation)
+end
+function stationWarning(delta)
+	if station_warning_diagnostic then print("In station warning function") end
+	local function warningCheckPriority1(warn_station)
+		local warning_message = ""
+		for _, obj in ipairs(warn_station:getObjectsInRange(20000)) do
+			if obj ~= nil and obj:isValid() and obj:isEnemy(warn_station) and obj.typeName == "CpuShip" then
+				warning_message = string.format("[%s in %s] We detect one or more enemies nearby",warn_station:getCallSign(),warn_station:getSectorName())
+				if difficulty < 2 then
+					warning_message = string.format("%s. At least one is of type %s",warning_message,obj:getTypeName())
+				end
+				return warning_message
+			end
+		end
+		return nil
+	end
+	local function warningCheckPriority2(warn_station)
+		for i=1,warn_station:getShieldCount() do
+			if warn_station:getShieldLevel(i-1) < warn_station:getShieldMax(i-1) then
+				return string.format("[%s in %s] Our shields have taken damage",warn_station:getCallSign(),warn_station:getSectorName())
+			end
+		end
+		return nil
+	end
+	local function warningCheckPriority3(warn_station)
+		local warning_message = ""
+		for i=1,warn_station:getShieldCount() do
+			if warn_station:getShieldLevel(i-1) < warn_station:getShieldMax(i-1)*.1 then
+				if warn_station:getShieldCount() == 1 then
+					warning_message = string.format("[%s in %s] Our shields are nearly gone",warn_station:getCallSign(),warn_station:getSectorName())
+				else
+					warning_message = string.format("[%s in %s] One or more of our shield arcs are nearly gone",warn_station:getCallSign(),warn_station:getSectorName())
+				end
+				return warning_message
+			end
+		end
+		return nil
+	end
+	local function warningCheckPriority4(warn_station)
+		if warn_station:getHull() < warn_station:getHullMax() then
+			return string.format("[%s in %s] Our hull has been damaged",warn_station:getCallSign(),warn_station:getSectorName())
+		end
+		return nil
+	end
+	local function warningCheckPriority5(warn_station)
+		if warn_station:getHull() < warn_station:getHullMax()*.1 then
+			return string.format("[%s in %s] We are on the brink of destruction",warn_station:getCallSign(),warn_station:getSectorName())
+		end
+		return nil
+	end
+	warning_priority = 0
+	warning_message = ""
+	warning_station = nil
+	local check_warning_message = ""
+	for _, warn_station in ipairs(humanStationList) do
+		if warn_station ~= nil and warn_station:isValid() then
+			if station_warning_diagnostic then print("valid station:",warn_station:getCallSign(),"warning priority:",warning_priority,"station warning priority:",warn_station.warn_priority) end
+			if warn_station.warning_timer ~= nil then
+				warn_station.warning_timer = warn_station.warning_timer - delta
+				if warn_station.warning_timer < 0 then
+					warn_station.warning_timer = nil
+					warn_station.warn_priority = 0
+				end
+			end
+			if warn_station.warn_priority == nil then
+				warn_station.warn_priority = 0
+			end
+			if warning_priority < 1 and warn_station.warn_priority < 1 then
+				if station_warning_diagnostic then print("Check 1 (nearby enemies)") end
+				check_warning_message = warningCheckPriority1(warn_station)
+				if check_warning_message ~= nil then
+					warning_message = check_warning_message
+					warning_priority = 1
+					warning_station = warn_station
+				end
+			end
+			if warning_priority < 2 and warn_station.warn_priority < 2 then
+				if station_warning_diagnostic then print("Check 2 (shield damage)") end
+				check_warning_message = warningCheckPriority2(warn_station)
+				if check_warning_message ~= nil then
+					warning_message = check_warning_message
+					warning_priority = 2
+					warning_station = warn_station
+				end
+			end
+			if warning_priority < 3 and warn_station.warn_priority < 3 then
+				if station_warning_diagnostic then print("Check 3 (significant shield damage)") end
+				check_warning_message = warningCheckPriority3(warn_station)
+				if check_warning_message ~= nil then
+					warning_message = check_warning_message
+					warning_priority = 3
+					warning_station = warn_station
+				end
+			end
+			if warning_priority < 4 and warn_station.warn_priority < 4 then
+				if station_warning_diagnostic then print("Check 4 (hull damage)") end
+				check_warning_message = warningCheckPriority4(warn_station)
+				if check_warning_message ~= nil then
+					warning_message = check_warning_message
+					warning_priority = 4
+					warning_station = warn_station
+				end
+			end
+			if warning_priority < 5 and warn_station.warn_priority < 5 then
+				if station_warning_diagnostic then print("Check 5 (significant hull damage)") end
+				check_warning_message = warningCheckPriority5(warn_station)
+				if check_warning_message ~= nil then
+					warning_message = check_warning_message
+					warning_priority = 5
+					warning_station = warn_station
+				end
+			end
+		end		
+	end
+	if warning_station ~= nil then
+		if station_warning_diagnostic then print("determined that some warning is needed") end
+		warning_station.warn_priority = warning_priority
+		warning_station.warning_timer = delta + 150 + difficulty*100
+	end
 end
 ---------------------------
 -- Statistical functions --
@@ -15189,8 +18035,8 @@ function detailedStats()
 	print("    Survived")
 	local friendlySurvivalValue = 0
 	for _, station in ipairs(stationList) do
-		if station:isFriendly(getPlayerShip(-1)) then
-			if station:isValid() then
+		if station:isValid() then
+			if station:isFriendly(getPlayerShip(-1)) then
 				print(string.format("      %2d %s",station.strength,station:getCallSign()))
 				friendlySurvivalValue = friendlySurvivalValue + station.strength
 			end
@@ -15292,6 +18138,101 @@ function enemyVesselDestroyed(self, instigator)
 	table.insert(enemyVesselDestroyedNameList,self:getCallSign())
 	table.insert(enemyVesselDestroyedType,tempShipType)
 	table.insert(enemyVesselDestroyedValue,ship_template[tempShipType].strength)
+	local exclude_mod_list = {}
+	if not self:hasSystem("warp") then
+		table.insert(exclude_mod_list,4)
+		table.insert(exclude_mod_list,25)
+	end
+	if not self:hasSystem("jumpdrive") then
+		table.insert(exclude_mod_list,5)
+		table.insert(exclude_mod_list,26)
+	end
+	if self:getShieldCount() < 1 then
+		table.insert(exclude_mod_list,6)
+		table.insert(exclude_mod_list,17)
+		table.insert(exclude_mod_list,27)
+	end
+	if not self:hasSystem("beamweapons") then
+		table.insert(exclude_mod_list,1)
+		table.insert(exclude_mod_list,21)
+		table.insert(exclude_mod_list,22)
+	end
+	if not self:hasSystem("missilesystem") then
+		table.insert(exclude_mod_list,2)
+		table.insert(exclude_mod_list,23)
+	end
+	local wreck_mod_type_index_list = {}
+	if #exclude_mod_list > 0 then
+		for i=1,#wreck_mod_type do
+			local include = true
+			for j=1,#exclude_mod_list do
+				if i == exclude_mod_list[j] then
+					include = false
+				end
+			end
+			if include then
+				table.insert(wreck_mod_type_index_list,i)
+			end
+		end
+	else
+		for i=1,#wreck_mod_type do
+			table.insert(wreck_mod_type_index_list,i)
+		end
+	end
+	local debris_count = math.floor(random(0,ship_template[tempShipType].strength)/6)
+	if debris_count > 0 then
+		local self_x, self_y = self:getPosition()
+		for i=1,debris_count do
+			local debris_x, debris_y = vectorFromAngle(random(0,360),random(300,500))
+			if instigator ~= nil then
+				local instigator_x, instigator_y = instigator:getPosition()
+				while(distance(instigator_x, instigator_y, (self_x + debris_x), (self_y + debris_y)) < 400) do
+					debris_x, debris_y = vectorFromAngle(random(0,360),random(300,500))
+				end
+			end
+			if random(1,100) > 25 then
+				local excluded_mod = false
+				local wmt = wreck_mod_type_index_list[math.random(1,#wreck_mod_type_index_list)]
+--				local wmt = 31	--for testing
+				local wma = wreck_mod_type[wmt].func(self_x, self_y)
+				wma.debris_end_x = self_x + debris_x
+				wma.debris_end_y = self_y + debris_y
+				table.insert(wreck_mod_debris,wma)
+			else
+				local ra = Asteroid():setPosition(self_x, self_y):setSize(80)
+				ra.debris_end_x = self_x + debris_x
+				ra.debris_end_y = self_y + debris_y
+				table.insert(wreck_mod_debris,ra)
+			end
+		end
+	end
+end
+function flotsamAction()
+	for index, flotsam in ipairs(wreck_mod_debris) do
+		if flotsam ~= nil and flotsam:isValid() then
+			local cur_x, cur_y = flotsam:getPosition()
+			if distance(cur_x, cur_y, flotsam.debris_end_x, flotsam.debris_end_y) < 10 then
+				if flotsam:isScannedByFaction("Human Navy") then
+					flotsam:setCallSign(string.format("WD%i",wreck_debris_label_count))
+					wreck_debris_label_count = wreck_debris_label_count + 1
+					if wreck_debris_label_count > 999 then
+						wreck_debris_label_count = 1
+					end
+					table.remove(wreck_mod_debris,index)
+					break
+				end
+			else
+				local mid_x = (cur_x + flotsam.debris_end_x)/2
+				local mid_y = (cur_y + flotsam.debris_end_y)/2
+				local quarter_x = (cur_x + mid_x)/2
+				local quarter_y = (cur_y + mid_y)/2
+				flotsam:setPosition((cur_x + quarter_x)/2,(cur_y + quarter_y)/2)
+			end
+		else
+			table.remove(wreck_mod_debris,index)
+			break
+		end
+	end
 end
 function friendlyVesselDestroyed(self, instigator)
 	tempShipType = self:getTypeName()
@@ -15300,8 +18241,10 @@ function friendlyVesselDestroyed(self, instigator)
 	table.insert(friendlyVesselDestroyedValue,ship_template[tempShipType].strength)
 end
 function friendlyStationDestroyed(self, instigator)
-	table.insert(friendlyStationDestroyedNameList,self:getCallSign())
-	table.insert(friendlyStationDestroyedValue,self.strength)
+	if self ~= nil then
+		table.insert(friendlyStationDestroyedNameList,self:getCallSign())
+		table.insert(friendlyStationDestroyedValue,self.strength)
+	end
 end
 function enemyStationDestroyed(self, instigator)
 	table.insert(enemyStationDestroyedNameList,self:getCallSign())
@@ -15311,131 +18254,167 @@ function neutralStationDestroyed(self, instigator)
 	table.insert(neutralStationDestroyedNameList,self:getCallSign())
 	table.insert(neutralStationDestroyedValue,self.strength)
 end
-function listStatuses()
-	local friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2 = stationStatus()
-	if friendlySurvivedCount == nil then
-		return nil
+function gatherStats()
+	local stat_list = {}
+	stat_list.scenario = {name = "Borderline Fever", version = scenario_version}
+	stat_list.times = {}
+	stat_list.times.stage = game_state
+	stat_list.times.threshold = destructionDifferenceEndCondition
+	if playWithTimeLimit then
+		stat_list.times.game = {}
+		stat_list.times.game.max = defaultGameTimeLimitInMinutes*60
+		stat_list.times.game.total_seconds_left = gameTimeLimit
+		stat_list.times.game.minutes_left = math.floor(gameTimeLimit / 60)
+		stat_list.times.game.seconds_left = math.floor(gameTimeLimit % 60)
 	end
-	--ship information
-	local enemyShipSurvivedCount = 0
-	local enemyShipSurvivedValue = 0
-	for j=1,#enemyFleetList do
-		local tempFleet = enemyFleetList[j]
-		for _, tempEnemy in ipairs(tempFleet) do
-			if tempEnemy ~= nil and tempEnemy:isValid() then
-				enemyShipSurvivedCount = enemyShipSurvivedCount + 1
-				local temp_type = tempEnemy:getTypeName()
-				enemyShipSurvivedValue = enemyShipSurvivedValue + ship_template[temp_type].strength
-			end
-		end
-	end
-	local friendlyShipSurvivedCount = 0
-	local friendlyShipSurvivedValue = 0
-	for j=1,#friendlyFleetList do
-		tempFleet = friendlyFleetList[j]
-		for _, tempFriend in ipairs(tempFleet) do
-			if tempFriend ~= nil and tempFriend:isValid() then
-				friendlyShipSurvivedCount = friendlyShipSurvivedCount + 1
-				local temp_type = tempFriend:getTypeName()
-				friendlyShipSurvivedValue = friendlyShipSurvivedValue + ship_template[temp_type].strength
-			end
-		end
-	end
-	local fpct = friendlyShipSurvivedValue/rawHumanShipStrength*100
-	local epct = enemyShipSurvivedValue/rawKraylorShipStrength*100
-	return friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct
-end
-function stationStatus()
-	tp = getPlayerShip(-1)
-	if tp == nil then
-		return nil
-	end
-	local friendlySurvivedCount = 0
-	local friendlySurvivedValue = 0
-	local enemySurvivedCount = 0
-	local enemySurvivedValue = 0
-	local neutralSurvivedCount = 0
-	local neutralSurvivedValue = 0
-	for _, station in pairs(stationList) do
-		if tp ~= nil then
-			if station:isFriendly(tp) then
-				if station:isValid() then
-					friendlySurvivedCount = friendlySurvivedCount + 1
-					friendlySurvivedValue = friendlySurvivedValue + station.strength
+	stat_list.human = {}
+	stat_list.human.station = {}
+	stat_list.human.station.count = 0
+	stat_list.human.station.value = 0
+	stat_list.human.station.original_count = 0
+	stat_list.human.station.original_value = 0
+	stat_list.human.ship = {}
+	stat_list.human.ship.value = 0
+	stat_list.human.ship.original_value = rawHumanShipStrength
+	stat_list.human.weight = {}
+	stat_list.human.weight.station = friendlyStationComponentWeight
+	stat_list.human.weight.ship = friendlyShipComponentWeight
+	stat_list.human.weight.neutral = neutralStationComponentWeight
+	stat_list.kraylor = {}
+	stat_list.kraylor.station = {}
+	stat_list.kraylor.station.count = 0
+	stat_list.kraylor.station.value = 0
+	stat_list.kraylor.station.original_count = 0
+	stat_list.kraylor.station.original_value = 0
+	stat_list.kraylor.ship = {}
+	stat_list.kraylor.ship.value = 0
+	stat_list.kraylor.ship.original_value = rawKraylorShipStrength
+	stat_list.kraylor.weight = {}
+	stat_list.kraylor.weight.station = enemyStationComponentWeight
+	stat_list.kraylor.weight.ship = enemyShipComponentWeight
+	stat_list.independent = {}
+	stat_list.independent.station = {}
+	stat_list.independent.station.count = 0
+	stat_list.independent.station.value = 0
+	stat_list.independent.station.original_count = 0
+	stat_list.independent.station.original_value = 0
+	if stationList ~= nil and #stationList > 0 then
+		for _, station in ipairs(stationList) do
+			if station:isValid() then
+				if station:getFaction() == "Human Navy" then
+					stat_list.human.station.count = stat_list.human.station.count + 1
+					stat_list.human.station.value = stat_list.human.station.value + station.strength
 				end
-			elseif station:isEnemy(tp) then
-				if station:isValid() then
-					enemySurvivedCount = enemySurvivedCount + 1
-					enemySurvivedValue = enemySurvivedValue + station.strength
+				if station:getFaction() == "Kraylor" then
+					stat_list.kraylor.station.count = stat_list.kraylor.station.count + 1
+					stat_list.kraylor.station.value = stat_list.kraylor.station.value + station.strength
 				end
-			else
-				if station:isValid() then
-					neutralSurvivedCount = neutralSurvivedCount + 1
-					neutralSurvivedValue = neutralSurvivedValue + station.strength
+				if station:getFaction() == "Independent" then
+					stat_list.independent.station.count = stat_list.independent.station.count + 1
+					stat_list.independent.station.value = stat_list.independent.station.value + station.strength
 				end
 			end
 		end
+		if original_human_station_count == nil then
+			original_human_station_count = stat_list.human.station.count
+		end
+		stat_list.human.station.original_count = original_human_station_count
+		if original_human_station_value == nil then
+			original_human_station_value = stat_list.human.station.value
+		end
+		stat_list.human.station.original_value = original_human_station_value
+		if original_kraylor_station_count == nil then
+			original_kraylor_station_count = stat_list.kraylor.station.count
+		end
+		stat_list.kraylor.station.original_count = original_kraylor_station_count
+		if original_kraylor_station_value == nil then
+			original_kraylor_station_value = stat_list.kraylor.station.value
+		end
+		stat_list.kraylor.station.original_value = original_kraylor_station_value
+		if original_independent_station_count == nil then
+			original_independent_station_count = stat_list.independent.station.count
+		end
+		stat_list.independent.station.original_count = original_independent_station_count
+		if original_independent_station_value == nil then
+			original_independent_station_value = stat_list.independent.station.value
+		end
+		stat_list.independent.station.original_value = original_independent_station_value
 	end
-	if originalHumanStationCount == nil then
-		originalHumanStationCount = #humanStationList
+	if stat_list.human.station.original_value > 0 then
+		stat_list.human.station.percentage = stat_list.human.station.value/stat_list.human.station.original_value*100
+	else
+		stat_list.human.station.percentage = 100
 	end
-	if originalHumanStationValue == nil then
-		originalHumanStationValue = humanStationStrength
+	if stat_list.kraylor.station.original_value > 0 then
+		stat_list.kraylor.station.percentage = stat_list.kraylor.station.value/stat_list.kraylor.station.original_value*100
+	else
+		stat_list.kraylor.station.percentage = 100
 	end
-	if originalKraylorStationCount == nil then
-		originalKraylorStationCount = #kraylorStationList
+	if stat_list.independent.station.original_value > 0 then
+		stat_list.independent.station.percentage = stat_list.independent.station.value/stat_list.independent.station.original_value*100
+	else
+		stat_list.independent.station.percentage = 100
 	end
-	if originalKraylorStationValue == nil then
-		originalKraylorStationValue = kraylorStationStrength
+	if friendlyFleetList ~= nil and #friendlyFleetList > 0 then
+		for _, temp_fleet in ipairs(friendlyFleetList) do
+			for _, temp_friend in ipairs(temp_fleet) do
+				if temp_friend ~= nil and temp_friend:isValid() then
+					stat_list.human.ship.value = stat_list.human.ship.value + ship_template[temp_friend:getTypeName()].strength
+				end
+			end
+		end
 	end
-	if originalNeutralStationCount == nil then
-		originalNeutralStationCount = #neutralStationList
+	if enemyFleetList ~= nil and #enemyFleetList > 0 then
+		for _, temp_fleet in ipairs(enemyFleetList) do
+			for _, temp_enemy in ipairs(temp_fleet) do
+				if temp_enemy ~= nil and temp_enemy:isValid() then
+					stat_list.kraylor.ship.value = stat_list.kraylor.ship.value + ship_template[temp_enemy:getTypeName()].strength
+				end
+			end
+		end
 	end
-	if originalNeutralStationValue == nil then
-		originalNeutralStationValue = neutralStationStrength
+	if stat_list.human.ship.original_value > 0 then
+		stat_list.human.ship.percentage = stat_list.human.ship.value/stat_list.human.ship.original_value*100
+	else
+		stat_list.human.ship.percentage = 100
 	end
-	local fpct1 = friendlySurvivedCount/originalHumanStationCount*100
-	local fpct2 = friendlySurvivedValue/originalHumanStationValue*100
-	local epct1 = enemySurvivedCount/originalKraylorStationCount*100
-	local epct2 = enemySurvivedValue/originalKraylorStationValue*100
-	local npct1 = neutralSurvivedCount/originalNeutralStationCount*100
-	local npct2 = neutralSurvivedValue/originalNeutralStationValue*100
-	return friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2
+	if stat_list.kraylor.ship.original_value > 0 then
+		stat_list.kraylor.ship.percentage = stat_list.kraylor.ship.value/stat_list.kraylor.ship.original_value*100
+	else
+		stat_list.kraylor.ship.percentage = 100
+	end
+	stat_list.kraylor.evaluation = stat_list.kraylor.station.percentage * stat_list.kraylor.weight.station + stat_list.kraylor.ship.percentage * stat_list.kraylor.weight.ship
+	stat_list.human.evaluation = stat_list.human.station.percentage * stat_list.human.weight.station + stat_list.independent.station.percentage * stat_list.human.weight.neutral + stat_list.human.ship.percentage * stat_list.human.weight.ship
+	return stat_list
 end
 function endStatistics()
 --final page for victory or defeat on main streen
 	if endStatDiagnostic then print("starting end statistics") end
-	friendlySurvivedCount, friendlySurvivedValue, fpct1, fpct2, enemySurvivedCount, enemySurvivedValue, epct1, epct2, neutralSurvivedCount, neutralSurvivedValue, npct1, npct2, friendlyShipSurvivedValue, fpct, enemyShipSurvivedValue, epct = listStatuses()
-	if friendlySurvivedCount == nil then
-		globalMessage("statistics unavailable")
-		return
-	end
+	local stat_list = gatherStats()
 	if endStatDiagnostic then print("got statuses")	end
 	local gMsg = ""
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
-	gMsg = gMsg .. string.format("Friendly stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n",friendlySurvivedCount,originalHumanStationCount,fpct1,friendlySurvivedValue,originalHumanStationValue,fpct2)
+	gMsg = gMsg .. string.format("Friendly stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n",stat_list.human.station.count,stat_list.human.station.original_count,stat_list.human.station.count/stat_list.human.station.original_count*100,stat_list.human.station.value,stat_list.human.station.original_value,stat_list.human.station.percentage)
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
-	gMsg = gMsg .. string.format("Enemy stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n",enemySurvivedCount,originalKraylorStationCount,epct1,enemySurvivedValue,originalKraylorStationValue,epct2)
+	gMsg = gMsg .. string.format("Enemy stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n",stat_list.kraylor.station.count,stat_list.kraylor.station.original_count,stat_list.kraylor.station.count/stat_list.kraylor.station.original_count*100,stat_list.kraylor.station.value,stat_list.kraylor.station.original_value,stat_list.kraylor.station.percentage)
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
-	gMsg = gMsg .. string.format("Neutral stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n\n\n\n",neutralSurvivedCount,originalNeutralStationCount,npct1,neutralSurvivedValue,originalNeutralStationValue,npct2)
+	gMsg = gMsg .. string.format("Neutral stations: %i out of %i survived (%.1f%%), strength: %i out of %i (%.1f%%)\n\n\n\n",stat_list.independent.station.count,stat_list.independent.station.original_count,stat_list.independent.station.count/stat_list.independent.station.original_count*100,stat_list.independent.station.value,stat_list.independent.station.original_value,stat_list.independent.station.percentage)
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
 	--ship information
-	gMsg = gMsg .. string.format("Friendly ships: strength: %i out of %i (%.1f%%)\n",friendlyShipSurvivedValue,rawHumanShipStrength,fpct)
+	gMsg = gMsg .. string.format("Friendly ships: strength: %i out of %i (%.1f%%)\n",stat_list.human.ship.value,stat_list.human.ship.original_value,stat_list.human.ship.percentage)
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
-	gMsg = gMsg .. string.format("Enemy ships: strength: %i out of %i (%.1f%%)\n",enemyShipSurvivedValue,rawKraylorShipStrength,epct)
+	gMsg = gMsg .. string.format("Enemy ships: strength: %i out of %i (%.1f%%)\n",stat_list.kraylor.ship.value,stat_list.kraylor.ship.original_value,stat_list.kraylor.ship.percentage)
 	if endStatDiagnostic then print("gMsg so far: " .. gMsg) end
 	if endStatDiagnostic then print("set raw stats") end
-	local friendlyStationComponent = friendlySurvivedValue/originalHumanStationValue
-	local enemyStationComponent = 1-enemySurvivedValue/originalKraylorStationValue
-	local neutralStationComponent = neutralSurvivedValue/originalNeutralStationValue
-	local friendlyShipComponent = friendlyShipSurvivedValue/rawHumanShipStrength
-	local enemyShipComponent = 1-enemyShipSurvivedValue/rawKraylorShipStrength
-	local evalFriendly = fpct2*friendlyStationComponentWeight + npct2*neutralStationComponentWeight + fpct*friendlyShipComponentWeight
-	gMsg = gMsg .. string.format("Friendly evaluation strength: %.1f%%\n",evalFriendly)
-	gMsg = gMsg .. string.format("   Weights: friendly station: %.2f, neutral station: %.2f, friendly ship: %.2f\n", friendlyStationComponentWeight, neutralStationComponentWeight, friendlyShipComponentWeight)
-	local evalEnemy = epct2*enemyStationComponentWeight + epct*enemyShipComponentWeight
-	gMsg = gMsg .. string.format("Enemy evaluation strength: %.1f%%\n",evalEnemy)
-	gMsg = gMsg .. string.format("   Weights: enemy station: %.2f, enemy ship: %.2f\n", enemyStationComponentWeight, enemyShipComponentWeight)
+	local friendlyStationComponent = stat_list.human.station.value/stat_list.human.station.original_value
+	local enemyStationComponent = 1-stat_list.kraylor.station.value/stat_list.kraylor.station.original_value
+	local neutralStationComponent = stat_list.independent.station.value/stat_list.independent.station.original_value
+	local friendlyShipComponent = stat_list.human.ship.value/stat_list.human.ship.original_value
+	local enemyShipComponent = 1-stat_list.kraylor.ship.value/stat_list.kraylor.ship.original_value
+	gMsg = gMsg .. string.format("Friendly evaluation strength: %.1f%%\n",stat_list.human.evaluation)
+	gMsg = gMsg .. string.format("   Weights: friendly station: %.2f, neutral station: %.2f, friendly ship: %.2f\n", stat_list.human.weight.station, stat_list.human.weight.neutral, stat_list.human.weight.ship)
+	gMsg = gMsg .. string.format("Enemy evaluation strength: %.1f%%\n",stat_list.kraylor.evaluation)
+	gMsg = gMsg .. string.format("   Weights: enemy station: %.2f, enemy ship: %.2f\n", stat_list.kraylor.weight.station, stat_list.kraylor.weight.ship)
 	local rankVal = friendlyStationComponent*.4 + friendlyShipComponent*.2 + enemyStationComponent*.2 + enemyShipComponent*.1 + neutralStationComponent*.1 
 	if endStatDiagnostic then print("calculated ranking stats") end
 	if endStatDiagnostic then print("rank value: " .. rankVal) end
@@ -15491,135 +18470,631 @@ function endStatistics()
 		if endStatDiagnostic then print("executed detalied stats function") end
 	end
 end
-function updateInner(delta)
+function update(delta)
 	if delta == 0 then
 		--game paused
-		setPlayers()
+		--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
+		local active_player_count = 0
+		for pidx=1,32 do
+			p = getPlayerShip(pidx)
+			if p ~= nil and p:isValid() then
+				active_player_count = active_player_count + 1
+				setPlayer(p)
+			end
+		end
+		if active_player_count ~= banner["number_of_players"] then
+			resetBanner()
+		end
 		return
 	end
-	setPlayers()
---	if updateDiagnostic then print("plot1") end
+	local active_player_count = 0
+	if updateDiagnostic then print("entering player loop") end
+	for pidx=1,32 do
+		p = getPlayerShip(pidx)
+		if p ~= nil and p:isValid() then
+			if updateDiagnostic then print("Player loop. Valid player. pidx:",pidx,"call sign:",p:getCallSign()) end
+			active_player_count = active_player_count + 1
+			setPlayer(p)
+			playerPlotMessages(p)
+			if plotDZ ~= nil then			--defensive zone check
+				plotDZ(delta,p)
+			end
+			if plotExpTrans ~= nil then		--exploding transport
+				plotExpTrans(delta,p)
+			end
+			if plotH ~= nil then			--health check
+				plotH(delta,p)
+			end
+			if updateDiagnostic then print("completed plotDZ, plotExpTrans & PlotH") end
+			personalAmbushPlayerCheck(p)
+			if plotCI ~= nil then	--cargo inventory
+				plotCI(p)
+			end
+			if plotC ~= nil then	--coolant automation for fighters
+				plotC(p)
+			end
+			if plotCN ~= nil then	--coolant via nebula
+				plotCN(delta, p)
+			end
+			if plotMining ~= nil then
+				plotMining(delta, p)
+			end
+			if plotExDk ~= nil then	--expedite dock
+				plotExDk(delta, p)
+			end
+			if plotShowPlayerInfo ~= nil then
+				plotShowPlayerInfo(delta, p)
+			end
+			if updateDiagnostic then print("completed plotCI, plotC, plotCN, plotMining, plotExDk & plotShowPlayerInfo") end
+			local timer_status = ""
+			local timer_minutes = 0
+			local timer_seconds = 0
+			if p.cm_boost_timer ~= nil then
+				p.cm_boost_timer = p.cm_boost_timer - delta
+				timer_status = "C.M. Boost"
+				timer_minutes = math.floor(p.cm_boost_timer / 60)
+				timer_seconds = math.floor(p.cm_boost_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.cm_boost_timer_info = "cm_boost_timer_info"
+					p:addCustomInfo("Helms",p.cm_boost_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.cm_boost_timer_info_tac = "cm_boost_timer_info_tac"
+					p:addCustomInfo("Tactical",p.cm_boost_timer_info_tac,timer_status)
+				end
+				if p.cm_boost_timer < 0 then
+					p.cm_boost_active = false
+					p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost - 200,playerShipStats[p:getTypeName()].cm_strafe)
+					p.cm_boost_timer = nil
+					if p.activate_cm_boost_button ~= nil then
+						p:removeCustom(p.activate_cm_boost_button)
+						p.activate_cm_boost_button = nil
+					end
+					if p.activate_cm_boost_button_tac ~= nil then
+						p:removeCustom(p.activate_cm_boost_button_tac)
+						p.activate_cm_boost_button_tac = nil
+					end
+					if p.cm_boost_timer_info ~= nil then
+						p:removeCustom(p.cm_boost_timer_info)
+						p.cm_boost_timer_info = nil
+					end
+					if p.cm_boost_timer_info_tac ~= nil then
+						p:removeCustom(p.cm_boost_timer_info_tac)
+						p.cm_boost_timer_info_tac = nil
+					end
+					if p.cm_boost_count > 0 then
+						wmCombatBoostButton(p,"Helms")
+						wmCombatBoostButton(p,"Tactical")
+					end
+				end
+			end
+			if p.cm_strafe_timer ~= nil then
+				p.cm_strafe_timer = p.cm_strafe_timer - delta
+				timer_status = "C.M. Boost"
+				timer_minutes = math.floor(p.cm_strafe_timer / 60)
+				timer_seconds = math.floor(p.cm_strafe_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.cm_strafe_timer_info = "cm_strafe_timer_info"
+					p:addCustomInfo("Helms",p.cm_strafe_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.cm_strafe_timer_info_tac = "cm_strafe_timer_info_tac"
+					p:addCustomInfo("Tactical",p.cm_strafe_timer_info_tac,timer_status)
+				end
+				if p.cm_strafe_timer < 0 then
+					p.cm_strafe_active = false
+					p:setCombatManeuver(playerShipStats[p:getTypeName()].cm_boost,playerShipStats[p:getTypeName()].cm_strafe - 200)
+					p.cm_strafe_timer = nil
+					if p.activate_cm_strafe_button ~= nil then
+						p:removeCustom(p.activate_cm_strafe_button)
+						p.activate_cm_strafe_button = nil
+					end
+					if p.activate_cm_strafe_button_tac ~= nil then
+						p:removeCustom(p.activate_cm_strafe_button_tac)
+						p.activate_cm_strafe_button_tac = nil
+					end
+					if p.cm_strafe_timer_info ~= nil then
+						p:removeCustom(p.cm_strafe_timer_info)
+						p.cm_strafe_timer_info = nil
+					end
+					if p.cm_strafe_timer_info_tac ~= nil then
+						p:removeCustom(p.cm_strafe_timer_info_tac)
+						p.cm_strafe_timer_info_tac = nil
+					end
+					if p.cm_strafe_count > 0 then
+						wmCombatStrafeButton(p,"Helms")
+						wmCombatStrafeButton(p,"Tactical")
+					end
+				end
+			end
+			if p.beam_damage_timer ~= nil then
+				p.beam_damage_timer = p.beam_damage_timer - delta
+				timer_status = "Beam Damage"
+				timer_minutes = math.floor(p.beam_damage_timer / 60)
+				timer_seconds = math.floor(p.beam_damage_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Weapons") then
+					p.beam_damage_timer_info = "beam_damage_timer_info"
+					p:addCustomInfo("Weapons",p.beam_damage_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.beam_damage_timer_info_tac = "beam_damage_timer_info_tac"
+					p:addCustomInfo("Tactical",p.beam_damage_timer_info_tac,timer_status)
+				end
+				if p.beam_damage_timer < 0 then
+					p.beam_damage_active = false
+					local bi = 0
+					repeat
+						p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi),p:getBeamWeaponDamage(bi)*random(.9,.95))
+						bi = bi + 1
+					until(p:getBeamWeaponRange(bi) < 1)
+					p.beam_damage_timer = nil
+					if p.activate_beam_damage_button ~= nil then
+						p:removeCustom(p.activate_beam_damage_button)
+						p.activate_beam_damage_button = nil
+					end
+					if p.activate_beam_damage_button_tac ~= nil then
+						p:removeCustom(p.activate_beam_damage_button_tac)
+						p.activate_beam_damage_button_tac = nil
+					end
+					if p.beam_damage_timer_info ~= nil then
+						p:removeCustom(p.beam_damage_timer_info)
+						p.beam_damage_timer_info = nil
+					end
+					if p.beam_damage_timer_info_tac ~= nil then
+						p:removeCustom(p.beam_damage_timer_info_tac)
+						p.beam_damage_timer_info_tac = nil
+					end
+					if p.beam_damage_count > 0 then
+						wmBeamDamageButton(p,"Weapons")
+						wmBeamDamageButton(p,"Tactical")
+					end
+				end
+			end
+			if p.beam_cycle_timer ~= nil then
+				p.beam_cycle_timer = p.beam_cycle_timer - delta
+				timer_status = "Beam Cycle"
+				timer_minutes = math.floor(p.beam_cycle_timer / 60)
+				timer_seconds = math.floor(p.beam_cycle_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Weapons") then
+					p.beam_cycle_timer_info = "beam_cycle_timer_info"
+					p:addCustomInfo("Weapons",p.beam_cycle_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.beam_cycle_timer_info_tac = "beam_cycle_timer_info_tac"
+					p:addCustomInfo("Tactical",p.beam_cycle_timer_info_tac,timer_status)
+				end
+				if p.beam_cycle_timer < 0 then
+					p.beam_cycle_active = false
+					local bi = 0
+					repeat
+						p:setBeamWeapon(bi,p:getBeamWeaponArc(bi),p:getBeamWeaponDirection(bi),p:getBeamWeaponRange(bi),p:getBeamWeaponCycleTime(bi)*random(1.05,1.15),p:getBeamWeaponDamage(bi))
+						bi = bi + 1
+					until(p:getBeamWeaponRange(bi) < 1)
+					p.beam_cycle_timer = nil
+					if p.activate_beam_cycle_button ~= nil then
+						p:removeCustom(p.activate_beam_cycle_button)
+						p.activate_beam_cycle_button = nil
+					end
+					if p.activate_beam_cycle_button_tac ~= nil then
+						p:removeCustom(p.activate_beam_cycle_button_tac)
+						p.activate_beam_cycle_button_tac = nil
+					end
+					if p.beam_cycle_timer_info ~= nil then
+						p:removeCustom(p.beam_cycle_timer_info)
+						p.beam_cycle_timer_info = nil
+					end
+					if p.beam_cycle_timer_info_tac ~= nil then
+						p:removeCustom(p.beam_cycle_timer_info_tac)
+						p.beam_cycle_timer_info_tac = nil
+					end
+					if p.beam_damage_count > 0 then
+						wmBeamCycleButton(p,"Weapons")
+						wmBeamCycleButton(p,"Tactical")
+					end
+				end
+			end
+			if p.impulse_timer ~= nil then
+				p.impulse_timer = p.impulse_timer - delta
+				timer_status = "Impulse Speed"
+				timer_minutes = math.floor(p.impulse_timer / 60)
+				timer_seconds = math.floor(p.impulse_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.impulse_timer_info = "impulse_timer_info"
+					p:addCustomInfo("Helms",p.impulse_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.impulse_timer_info_tac = "impulse_timer_info_tac"
+					p:addCustomInfo("Tactical",p.impulse_timer_info_tac,timer_status)
+				end
+				if p.impulse_timer < 0 then
+					p.impulse_active = false
+					p:setImpulseMaxSpeed(p:getImpulseMaxSpeed()*random(.9,.95))
+					p.impulse_timer = nil
+					if p.activate_impulse_button ~= nil then
+						p:removeCustom(p.activate_impulse_button)
+						p.activate_impulse_button = nil
+					end
+					if p.activate_impulse_button_tac ~= nil then
+						p:removeCustom(p.activate_impulse_button_tac)
+						p.activate_impulse_button_tac = nil
+					end
+					if p.impulse_timer_info ~= nil then
+						p:removeCustom(p.impulse_timer_info)
+						p.impulse_timer_info = nil
+					end
+					if p.impulse_timer_info_tac ~= nil then
+						p:removeCustom(p.impulse_timer_info_tac)
+						p.impulse_timer_info_tac = nil
+					end
+					if p.impulse_count > 0 then
+						wmImpulseButton(p,"Helms")
+						wmImpulseButton(p,"Tactical")
+					end
+				end
+			end
+			if p.warp_timer ~= nil then
+				p.warp_timer = p.warp_timer - delta
+				timer_status = "Warp Speed"
+				timer_minutes = math.floor(p.warp_timer / 60)
+				timer_seconds = math.floor(p.warp_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.warp_timer_info = "warp_timer_info"
+					p:addCustomInfo("Helms",p.warp_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.warp_timer_info_tac = "warp_timer_info_tac"
+					p:addCustomInfo("Tactical",p.warp_timer_info_tac,timer_status)
+				end
+				if p.warp_timer < 0 then
+					p.warp_active = false
+					p:setWarpSpeed(p:getWarpSpeed()*random(.9,.95))
+					p.warp_timer = nil
+					if p.activate_warp_button ~= nil then
+						p:removeCustom(p.activate_warp_button)
+						p.activate_warp_button = nil
+					end
+					if p.activate_warp_button_tac ~= nil then
+						p:removeCustom(p.activate_warp_button_tac)
+						p.activate_warp_button_tac = nil
+					end
+					if p.warp_timer_info ~= nil then
+						p:removeCustom(p.warp_timer_info)
+						p.warp_timer_info = nil
+					end
+					if p.warp_timer_info_tac ~= nil then
+						p:removeCustom(p.warp_timer_info_tac)
+						p.warp_timer_info_tac = nil
+					end
+					if p.impulse_count > 0 then
+						wmWarpButton(p,"Helms")
+						wmWarpButton(p,"Tactical")
+					end
+				end
+			end
+			if p.jump_timer ~= nil then
+				p.jump_timer = p.jump_timer - delta
+				timer_status = "Jump Range"
+				timer_minutes = math.floor(p.jump_timer / 60)
+				timer_seconds = math.floor(p.jump_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.jump_timer_info = "jump_timer_info"
+					p:addCustomInfo("Helms",p.jump_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.jump_timer_info_tac = "jump_timer_info_tac"
+					p:addCustomInfo("Tactical",p.jump_timer_info_tac,timer_status)
+				end
+				if p.jump_timer < 0 then
+					p.jump_active = false
+					p.max_jump_range = p.max_jump_range*random(.9,.95)
+					p:setJumpDriveRange(p.min_jump_range,p.max_jump_range)
+					p.jump_timer = nil
+					if p.activate_jump_button ~= nil then
+						p:removeCustom(p.activate_jump_button)
+						p.activate_jump_button = nil
+					end
+					if p.activate_jump_button_tac ~= nil then
+						p:removeCustom(p.activate_jump_button_tac)
+						p.activate_jump_button_tac = nil
+					end
+					if p.jump_timer_info ~= nil then
+						p:removeCustom(p.jump_timer_info)
+						p.jump_timer_info = nil
+					end
+					if p.jump_timer_info_tac ~= nil then
+						p:removeCustom(p.jump_timer_info_tac)
+						p.jump_timer_info_tac = nil
+					end
+					if p.jump_count > 0 then
+						wmJumpButton(p,"Helms")
+						wmJumpButton(p,"Tactical")
+					end
+				end
+			end
+			if p.shield_timer ~= nil then
+				p.shield_timer = p.shield_timer - delta
+				timer_status = "Shield Capacity"
+				timer_minutes = math.floor(p.shield_timer / 60)
+				timer_seconds = math.floor(p.shield_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Weapons") then
+					p.shield_timer_info = "shield_timer_info"
+					p:addCustomInfo("Weapons",p.shield_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.shield_timer_info_tac = "shield_timer_info_tac"
+					p:addCustomInfo("Tactical",p.shield_timer_info_tac,timer_status)
+				end
+				if p.shield_timer < 0 then
+					p.shield_active = false
+					local off_rate = random(.9,.95)
+					if p:getShieldCount() > 1 then
+						p:setShieldsMax(p:getShieldMax(0)*off_rate,p:getShieldMax(1)*off_rate)
+					else
+						p:setShieldsMax(p:getShieldMax(0)*off_rate)
+					end
+					p.shield_timer = nil
+					if p.activate_shield_button ~= nil then
+						p:removeCustom(p.activate_shield_button)
+						p.activate_shield_button = nil
+					end
+					if p.activate_shield_button_tac ~= nil then
+						p:removeCustom(p.activate_shield_button_tac)
+						p.activate_shield_button_tac = nil
+					end
+					if p.shield_timer_info ~= nil then
+						p:removeCustom(p.shield_timer_info)
+						p.shield_timer_info = nil
+					end
+					if p.shield_timer_info_tac ~= nil then
+						p:removeCustom(p.shield_timer_info_tac)
+						p.shield_timer_info_tac = nil
+					end
+					if p.shield_count > 0 then
+						wmShieldButton(p,"Weapons")
+						wmShieldButton(p,"Tactical")
+					end
+				end
+			end	
+			if p.maneuver_timer ~= nil then
+				p.maneuver_timer = p.maneuver_timer - delta
+				timer_status = "Spin Speed"
+				timer_minutes = math.floor(p.maneuver_timer / 60)
+				timer_seconds = math.floor(p.maneuver_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Helms") then
+					p.maneuver_timer_info = "maneuver_timer_info"
+					p:addCustomInfo("Helms",p.maneuver_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Tactical") then
+					p.maneuver_timer_info_tac = "maneuver_timer_info_tac"
+					p:addCustomInfo("Tactical",p.maneuver_timer_info_tac,timer_status)
+				end
+				if p.maneuver_timer < 0 then
+					p.maneuver_active = false
+					p:setRotationMaxSpeed(p:getRotationMaxSpeed()*random(.9,.95))
+					p.maneuver_timer = nil
+					if p.activate_maneuver_button ~= nil then
+						p:removeCustom(p.activate_maneuver_button)
+						p.activate_maneuver_button = nil
+					end
+					if p.activate_maneuver_button_tac ~= nil then
+						p:removeCustom(p.activate_maneuver_button_tac)
+						p.activate_maneuver_button_tac = nil
+					end
+					if p.maneuver_timer_info ~= nil then
+						p:removeCustom(p.maneuver_timer_info)
+						p.maneuver_timer_info = nil
+					end
+					if p.maneuver_timer_info_tac ~= nil then
+						p:removeCustom(p.maneuver_timer_info_tac)
+						p.maneuver_timer_info_tac = nil
+					end
+					if p.maneuver_count > 0 then
+						wmManeuverButton(p,"Helms")
+						wmManeuverButton(p,"Tactical")
+					end
+				end
+			end
+			if p.battery_timer ~= nil then
+				p.battery_timer = p.battery_timer - delta
+				timer_status = "Battery Capacity"
+				timer_minutes = math.floor(p.battery_timer / 60)
+				timer_seconds = math.floor(p.battery_timer % 60)
+				if timer_minutes <= 0 then
+					timer_status = string.format("%s %i",timer_status,timer_seconds)
+				else
+					timer_status = string.format("%s %i:%.2i",timer_status,timer_minutes,timer_seconds)
+				end
+				if p:hasPlayerAtPosition("Engineering") then
+					p.battery_timer_info = "battery_timer_info"
+					p:addCustomInfo("Engineering",p.battery_timer_info,timer_status)
+				end
+				if p:hasPlayerAtPosition("Engineering+") then
+					p.battery_timer_info_plus = "battery_timer_info_plus"
+					p:addCustomInfo("Engineering+",p.battery_timer_info_plus,timer_status)
+				end
+				if p.battery_timer < 0 then
+					p.battery_active = false
+					p:setMaxEnergy(p:getMaxEnergy()*random(.9,.95))
+					p.battery_timer = nil
+					if p.activate_battery_button ~= nil then
+						p:removeCustom(p.activate_battery_button)
+						p.activate_battery_button = nil
+					end
+					if p.activate_battery_button_plus ~= nil then
+						p:removeCustom(p.activate_battery_button_plus)
+						p.activate_battery_button_plus = nil
+					end
+					if p.battery_timer_info ~= nil then
+						p:removeCustom(p.battery_timer_info)
+						p.battery_timer_info = nil
+					end
+					if p.battery_timer_info_plus ~= nil then
+						p:removeCustom(p.battery_timer_info_plus)
+						p.battery_timer_info_plus = nil
+					end
+					if p.battery_count > 0 then
+						wmBatteryButton(p,"Engineering")
+						wmBatteryButton(p,"Engineering+")
+					end
+				end
+			end			
+			if warning_station ~= nil then				
+				p:addToShipLog(warning_message,"Red")
+			end
+			if updateDiagnostic then print("completed timers & warnings") end
+		end
+	end
+	if updateDiagnostic then print("done with player loop") end	
+	if #wreck_mod_debris > 0 then
+		flotsamAction()
+	end
+	if active_player_count ~= banner["number_of_players"] then
+		resetBanner()
+	end
+	if updateDiagnostic then print("plot1") end
 	if plot1 ~= nil then	--war/peace
 		plot1(delta)
 	end
---	if updateDiagnostic then print("plot2") end
+	if updateDiagnostic then print("plot2") end
 	if plot2 ~= nil then	--timed game
 		plot2(delta)
 	end
---	if updateDiagnostic then print("plotEW") end
+	if updateDiagnostic then print("plotEW") end
 	if plotEW ~= nil then	--end war checks
 		plotEW(delta)
 	end
---	if updateDiagnostic then print("plotPB") end
+	if updateDiagnostic then print("plotPB") end
 	if plotPB ~= nil then	--player border
 		plotPB(delta)
 	end
---	if updateDiagnostic then print("plotPWC") end
+	if updateDiagnostic then print("plotPWC") end
 	if plotPWC ~= nil then	--player war crime check
 		plotPWC(delta)
 	end
---	if updateDiagnostic then print("plotED") end
+	if updateDiagnostic then print("plotED") end
 	if plotED ~= nil then	--enemy defense
 		plotED(delta)
 	end
---	if updateDiagnostic then print("plotDZ") end
-	if plotDZ ~= nil then	--enemy defense zone
-		plotDZ(delta)
-	end
---	if updateDiagnostic then print("plotExpTrans") end
-	if plotExpTrans ~= nil then		--exploding transport
-		plotExpTrans(delta)
-	end
---	if updateDiagnostic then print("plotAW") end
+	if updateDiagnostic then print("plotAW") end
 	if plotAW ~= nil then	--artifact to worm
 		plotAW(delta)
 	end
---	if updateDiagnostic then print("plotWJ") end
-	if plotWJ ~= nil then	--artifact to worm
+	if updateDiagnostic then print("plotWJ") end
+	if plotWJ ~= nil then	--warp jammer
 		plotWJ(delta)
 	end
---	if updateDiagnostic then print("plotAM") end
+	if updateDiagnostic then print("plotAM") end
 	if plotAM ~= nil then	--artifact to mine
 		plotAM(delta)
 	end
---	if updateDiagnostic then print("plotWP") end
+	if updateDiagnostic then print("plotWP") end
 	if plotWP ~= nil then	--weapons platform
 		plotWP(delta)
 	end
---	if updateDiagnostic then print("plotWPO") end
+	if updateDiagnostic then print("plotWPO") end
 	if plotWPO ~= nil then	--weapons platform orbit
 		plotWPO(delta)
 	end
---	if updateDiagnostic then print("plotH") end
-	if plotH ~= nil then	--health
-		plotH(delta)
-	end
---	if updateDiagnostic then print("plot3") end
+	if updateDiagnostic then print("plot3") end
 	if plot3 ~= nil then	--kraylor attacks
 		plot3(delta)
 	end
---	if updateDiagnostic then print("plotFT") end
+	if updateDiagnostic then print("plotFT") end
 	if plotFT ~= nil then	--friendly transport plot
 		plotFT(delta)
 	end
---	if updateDiagnostic then print("plotIT") end
+	if updateDiagnostic then print("plotIT") end
 	if plotIT ~= nil then	--independent transport plot
 		plotIT(delta)
 	end
---	if updateDiagnostic then print("plotKT") end
+	if updateDiagnostic then print("plotKT") end
 	if plotKT ~= nil then	--kraylor transport plot
 		plotKT(delta)
 	end
---	if updateDiagnostic then print("plotEB") end
+	if updateDiagnostic then print("plotEB") end
 	if plotEB ~= nil then	--enemy border
 		plotEB(delta)
 	end
---	if updateDiagnostic then print("plotPA") end
+	if updateDiagnostic then print("plotPA") end
 	if plotPA ~= nil then	--personal ambush
 		plotPA(delta)
 	end
---	if updateDiagnostic then print("plotCI") end
-	if plotCI ~= nil then	--cargo inventory
-		plotCI(delta)
-	end
---	if updateDiagnostic then print("plotC") end
-	if plotC ~= nil then	--coolant automation for fighters
-		plotC(delta)
-	end
---	if updateDiagnostic then print("plotDGM") end
+	if updateDiagnostic then print("plotDGM") end
 	if plotDGM ~= nil then	--dynamic GM buttons
 		plotDGM(delta)
 	end
---	if updateDiagnostic then print("plotER") end
-	if plotER ~= nil then	--enemy resupply
+	if updateDiagnostic then print("plotER") end
+	if plotER ~= nil then	--enemy reinforcements
 		plotER(delta)
 	end
---	if updateDiagnostic then print("plotMF") end
+	if updateDiagnostic then print("plotMF") end
 	if plotMF ~= nil then	--muck and flies
 		plotMF(delta)
 	end
-	if plotCN ~= nil then	--coolant via nebula
-		plotCN(delta)
-	end
-	if plotMining ~= nil then
-		plotMining(delta)
-	end
+	if updateDiagnostic then print("plotSS") end
 	if plotSS ~= nil then	--spinal ship
 		plotSS(delta)
 	end
+	if updateDiagnostic then print("plotRevert") end
 	if plotRevert ~= nil then
 		plotRevert(delta)
 	end
+	if updateDiagnostic then print("plotContinuum") end
 	if plotContinuum ~= nil then
 		plotContinuum(delta)
 	end
-	if plotExDk ~= nil then	--expedite dock
-		plotExDk(delta)
+	if updateDiagnostic then print("plotSW") end
+	if plotSW ~= nil then	--station warning
+		plotSW(delta)
 	end
-	if plotShowPlayerInfo ~= nil then
-		plotShowPlayerInfo(delta)
-	end
+	if updateDiagnostic then print("end of update loop") end	
 end
+--[[
 function update(delta)
     local status,error=pcall(updateInner,delta)
     if not status then
@@ -15633,4 +19108,4 @@ function update(delta)
 		end
     end
 end
-
+--]]

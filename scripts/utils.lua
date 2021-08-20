@@ -234,6 +234,13 @@ function mergeTables(table_a, table_b)
     end
 end
 
+-- currying
+-- curried = curry (function) (arg)
+-- curried() calls actual function(arg)
+function curry_simple(f)
+	return function (x) return function () return f(x) end end
+end
+
 -- create amount of object_type, at a distance between dist_min and dist_max around the point (x0, y0)
 function placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
     for n = 1, amount do
@@ -241,6 +248,21 @@ function placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
         local distance = random(dist_min, dist_max)
         local x = x0 + math.cos(r / 180 * math.pi) * distance
         local y = y0 + math.sin(r / 180 * math.pi) * distance
+        object_type():setPosition(x, y)
+    end
+end
+
+-- Place random objects in a line, from point x1,y1 to x2,y2 with a random distance of random_amount
+function placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
+    for n=1,amount do
+        local f = random(0, 1)
+        local x = x1 + (x2 - x1) * f
+        local y = y1 + (y2 - y1) * f
+        local r = random(0, 360)
+        local distance = random(0, random_amount)
+        x = x + math.cos(r / 180 * math.pi) * distance
+        y = y + math.sin(r / 180 * math.pi) * distance
+
         object_type():setPosition(x, y)
     end
 end
@@ -291,7 +313,6 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
         end
     end
 end
-
 -- Extract coordinates between two objects, two points, object and point or point and object
 -- This is only helper function for distance(a,b,c,d) and angle(a,b,c,d). 
 -- Returns two sets of coordinates: x1, y1, x2, y2.
@@ -321,4 +342,87 @@ function _fourArgumentsIntoCoordinates(a, b, c, d)
         error("_fourArgumentsIntoCoordinates() function used incorrectly", 2)
     end
     return x1, y1, x2, y2
+end
+
+
+-- Create amount of objects of type object_type along arc
+-- Center defined by x and y
+-- Radius defined by distance
+-- Start of arc between 0 and 360 (startArc), end arc: endArcClockwise
+-- Use randomize to vary the distance from the center point. Omit to keep distance constant
+-- Example:
+--   createRandomAlongArc(Asteroid, 100, 500, 3000, 65, 120, 450)
+function createRandomAlongArc(object_type, amount, x, y, distance, startArc, endArcClockwise, randomize)
+	local object_list = {}
+	if randomize == nil then randomize = 0 end
+	if amount == nil then amount = 1 end
+	arcLen = endArcClockwise - startArc
+	if startArc > endArcClockwise then
+		endArcClockwise = endArcClockwise + 360
+		arcLen = arcLen + 360
+	end
+	if amount > arcLen then
+		for ndex=1,arcLen do
+			radialPoint = startArc+ndex
+			pointDist = distance + random(-randomize,randomize)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
+		end
+		for ndex=1,amount-arcLen do
+			radialPoint = random(startArc,endArcClockwise)
+			pointDist = distance + random(-randomize,randomize)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
+		end
+	else
+		for ndex=1,amount do
+			radialPoint = random(startArc,endArcClockwise)
+			pointDist = distance + random(-randomize,randomize)
+			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
+			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
+		end
+	end
+end
+
+-- Calculates coordinates from radial coordinates
+-- Center defined by x and y or by obj
+-- Radius defined by distance
+-- Arc between 0 and 360
+-- Examples:
+--   radialPosition(100, 500, 3000, 65)
+--   radialPosition(obj, 3000, 65)
+function radialPosition(a, b, c, d)
+    if type(a) == "number" and type(b) == "number" and type(c) == "number" and type(d) == "number" then
+        -- Assume radialPosition(x, y, dist, arc)
+		x = a
+		y = b
+		dist = c
+		arc = d
+	elseif type(a) == "table" and type(b) == "number" and type(c) == "number" then
+        -- Assume radialPosition(obj, dist, arc)
+		x,y = a:getPosition()
+		dist = b
+		arc = c
+	else
+        -- Not a valid use of the distance function. Throw an error.
+        print(type(a), type(b), type(c), type(d))
+        error("radialPosition() function used incorrectly", 2)
+    end
+
+	x = x + math.cos(arc / 180 * math.pi) * dist
+	y = y + math.sin(arc / 180 * math.pi) * dist
+	return x,y
+end
+
+function formatTime(seconds)
+	local str = ""
+	local minutes = math.floor(seconds / 60) % 60
+	local hours = math.floor(seconds / 60 / 60)
+	seconds = math.floor(seconds % 60)
+	if hours > 0 then
+		str = string.format("%02.f:%02.f:%02.f", hours, minutes, seconds)
+	elseif minutes > 0 then
+		str = string.format("%02.f:%02.f", minutes, seconds)
+	else
+		str = string.format("%02.f", seconds)
+	end
+	return str
 end

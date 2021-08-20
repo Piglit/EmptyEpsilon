@@ -1,9 +1,6 @@
--- Name: Allies and Enemies
+-- Name: Scenario: Allies and Enemies
 -- Description: The Arlenians are your allies. The Kraylors and Exuari are your enemies and will try to prevent you from completing your missions. Duration: approximately 30 minutes
----
---- Version 0
----
---- Three missions available in current version. Tested with EE version 20190910
+--- Three missions will be given to you in this scenario.
 -- Type: Replayable Mission
 -- Variation[Easy]: Easy goals and/or enemies
 -- Variation[Hard]: Hard goals and/or enemies
@@ -11,7 +8,9 @@
 -- Variation[Easy One]: Easy goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Variation[Hard One]: Hard goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
 
+require("ee.lua")
 require("utils.lua")
+require("xansta_mods.lua")
 
 --[[-----------------------------------------------------------------
       Initialization 
@@ -52,11 +51,7 @@ function init()
 	setPlots()
 	plotManager = plotDelay
 	plotM = movingObjects
-	plotCI = cargoInventory
 	plotCN = coolantNebulae
-	plotH = healthCheck		--Damage to ship can kill repair crew members
-	healthCheckTimer = 5
-	healthCheckTimerInterval = 5
 	scarceResources = false
 	doctorSearch = false
 	GMMining = "Mining"
@@ -152,128 +147,7 @@ function setVariations()
 	end
 end
 function setConstants()
-	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
-	--Ship Template Name List
-	stnl = {"MT52 Hornet","MU52 Hornet","Adder MK5","Adder MK4","WX-Lindworm","Adder MK6","Phobos T3","Phobos M3","Piranha F8","Piranha F12","Ranus U","Nirvana R5A","Stalker Q7","Stalker R7","Atlantis X23","Starhammer II","Odin","Fighter","Cruiser","Missile Cruiser","Strikeship","Adv. Striker","Dreadnought","Battlestation","Blockade Runner","Ktlitan Fighter","Ktlitan Breaker","Ktlitan Worker","Ktlitan Drone","Ktlitan Feeder","Ktlitan Scout","Ktlitan Destroyer","Storm"}
-	--Ship Template Score List
-	stsl = {5            ,5            ,7          ,6          ,7            ,8          ,15         ,16         ,15          ,15           ,25       ,20           ,25          ,25          ,50            ,70             ,250   ,6        ,18       ,14               ,30          ,27            ,80           ,100            ,65               ,6                ,45               ,40              ,4              ,48              ,8              ,50                 ,22}
-	-- square grid deployment
-	fleetPosDelta1x = {0,1,0,-1, 0,1,-1, 1,-1,2,0,-2, 0,2,-2, 2,-2,2, 2,-2,-2,1,-1, 1,-1}
-	fleetPosDelta1y = {0,0,1, 0,-1,1,-1,-1, 1,0,2, 0,-2,2,-2,-2, 2,1,-1, 1,-1,2, 2,-2,-2}
-	-- rough hexagonal deployment
-	fleetPosDelta2x = {0,2,-2,1,-1, 1, 1,4,-4,0, 0,2,-2,-2, 2,3,-3, 3,-3,6,-6,1,-1, 1,-1,3,-3, 3,-3,4,-4, 4,-4,5,-5, 5,-5}
-	fleetPosDelta2y = {0,0, 0,1, 1,-1,-1,0, 0,2,-2,2,-2, 2,-2,1,-1,-1, 1,0, 0,3, 3,-3,-3,3,-3,-3, 3,2,-2,-2, 2,1,-1,-1, 1}
-	--Player ship name lists to supplant standard randomized call sign generation
-	playerShipNamesForMP52Hornet = {"Dragonfly","Scarab","Mantis","Yellow Jacket","Jimminy","Flik","Thorny","Buzz"}
-	playerShipNamesForPiranha = {"Razor","Biter","Ripper","Voracious","Carnivorous","Characid","Vulture","Predator"}
-	playerShipNamesForFlaviaPFalcon = {"Ladyhawke","Hunter","Seeker","Gyrefalcon","Kestrel","Magpie","Bandit","Buccaneer"}
-	playerShipNamesForPhobosM3P = {"Blinder","Shadow","Distortion","Diemos","Ganymede","Castillo","Thebe","Retrograde"}
-	playerShipNamesForAtlantis = {"Excaliber","Thrasher","Punisher","Vorpal","Protang","Drummond","Parchim","Coronado"}
-	playerShipNamesForCruiser = {"Excelsior","Velociraptor","Thunder","Kona","Encounter","Perth","Aspern","Panther"}
-	playerShipNamesForMissileCruiser = {"Projectus","Hurlmeister","Flinger","Ovod","Amatola","Nakhimov","Antigone"}
-	playerShipNamesForFighter = {"Buzzer","Flitter","Zippiticus","Hopper","Molt","Stinger","Stripe"}
-	playerShipNamesForBenedict = {"Elizabeth","Ford","Vikramaditya","Liaoning","Avenger","Naruebet","Washington","Lincoln","Garibaldi","Eisenhower"}
-	playerShipNamesForKiriya = {"Cavour","Reagan","Gaulle","Paulo","Truman","Stennis","Kuznetsov","Roosevelt","Vinson","Old Salt"}
-	playerShipNamesForStriker = {"Sparrow","Sizzle","Squawk","Crow","Phoenix","Snowbird","Hawk"}
-	playerShipNamesForLindworm = {"Seagull","Catapult","Blowhard","Flapper","Nixie","Pixie","Tinkerbell"}
-	playerShipNamesForRepulse = {"Fiddler","Brinks","Loomis","Mowag","Patria","Pandur","Terrex","Komatsu","Eitan"}
-	playerShipNamesForEnder = {"Mongo","Godzilla","Leviathan","Kraken","Jupiter","Saturn"}
-	playerShipNamesForNautilus = {"October", "Abdiel", "Manxman", "Newcon", "Nusret", "Pluton", "Amiral", "Amur", "Heinkel", "Dornier"}
-	playerShipNamesForHathcock = {"Hayha", "Waldron", "Plunkett", "Mawhinney", "Furlong", "Zaytsev", "Pavlichenko", "Pegahmagabow", "Fett", "Hawkeye", "Hanzo"}
-	playerShipNamesForLeftovers = {"Foregone","Righteous","Masher"}
-	characterNames = {"Frank Brown",
-					  "Joyce Miller",
-					  "Harry Jones",
-					  "Emma Davis",
-					  "Zhang Wei Chen",
-					  "Yu Yan Li",
-					  "Li Wei Wang",
-					  "Li Na Zhao",
-					  "Sai Laghari",
-					  "Anaya Khatri",
-					  "Vihaan Reddy",
-					  "Trisha Varma",
-					  "Henry Gunawan",
-					  "Putri Febrian",
-					  "Stanley Hartono",
-					  "Citra Mulyadi",
-					  "Bashir Pitafi",
-					  "Hania Kohli",
-					  "Gohar Lehri",
-					  "Sohelia Lau",
-					  "Gabriel Santos",
-					  "Ana Melo",
-					  "Lucas Barbosa",
-					  "Juliana Rocha",
-					  "Habib Oni",
-					  "Chinara Adebayo",
-					  "Tanimu Ali",
-					  "Naija Bello",
-					  "Shamim Khan",
-					  "Barsha Tripura",
-					  "Sumon Das",
-					  "Farah Munsi",
-					  "Denis Popov",
-					  "Pasha Sokolov",
-					  "Burian Ivanov",
-					  "Radka Vasiliev",
-					  "Jose Hernandez",
-					  "Victoria Garcia",
-					  "Miguel Lopez",
-					  "Renata Rodriguez"}
-	hitZonePermutations = {
-		{"warp","beamweapons","reactor"},
-		{"jumpdrive","beamweapons","reactor"},
-		{"impulse","beamweapons","reactor"},
-		{"warp","missilesystem","reactor"},
-		{"jumpdrive","missilesystem","reactor"},
-		{"impulse","missilesystem","reactor"},
-		{"warp","beamweapons","maneuver"},
-		{"jumpdrive","beamweapons","maneuver"},
-		{"impulse","beamweapons","maneuver"},
-		{"warp","missilesystem","maneuver"},
-		{"jumpdrive","missilesystem","maneuver"},
-		{"impulse","missilesystem","maneuver"},
-		{"warp","beamweapons","frontshield"},
-		{"jumpdrive","beamweapons","frontshield"},
-		{"impulse","beamweapons","frontshield"},
-		{"warp","missilesystem","frontshield"},
-		{"jumpdrive","missilesystem","frontshield"},
-		{"impulse","missilesystem","frontshield"},
-		{"warp","beamweapons","rearshield"},
-		{"jumpdrive","beamweapons","rearshield"},
-		{"impulse","beamweapons","rearshield"},
-		{"warp","missilesystem","rearshield"},
-		{"jumpdrive","missilesystem","rearshield"},
-		{"impulse","missilesystem","rearshield"},
-		{"warp","reactor","maneuver"},
-		{"jumpdrive","reactor","maneuver"},
-		{"impulse","reactor","maneuver"},
-		{"warp","reactor","frontshield"},
-		{"jumpdrive","reactor","frontshield"},
-		{"impulse","reactor","frontshield"},
-		{"warp","reactor","rearshield"},
-		{"jumpdrive","reactor","rearshield"},
-		{"impulse","reactor","rearshield"},
-		{"warp","maneuver","frontshield"},
-		{"jumpdrive","maneuver","frontshield"},
-		{"impulse","maneuver","frontshield"},
-		{"warp","maneuver","rearshield"},
-		{"jumpdrive","maneuver","rearshield"},
-		{"impulse","maneuver","rearshield"},
-		{"beamweapons","beamweapons","maneuver"},
-		{"missilesystem","beamweapons","maneuver"},
-		{"beamweapons","beamweapons","frontshield"},
-		{"missilesystem","beamweapons","frontshield"},
-		{"beamweapons","beamweapons","rearshield"},
-		{"missilesystem","beamweapons","rearshield"},
-		{"beamweapons","maneuver","frontshield"},
-		{"missilesystem","maneuver","frontshield"},
-		{"beamweapons","maneuver","rearshield"},
-		{"missilesystem","maneuver","rearshield"},
-		{"reactor","maneuver","frontshield"},
-		{"reactor","maneuver","rearshield"}
-	}
+	init_constants_xansta()
 	get_coolant_function = {}
 	table.insert(get_coolant_function,getCoolant1)
 	table.insert(get_coolant_function,getCoolant2)
@@ -3330,43 +3204,32 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 		danger = 1
 	end
 	enemyStrength = math.max(power * danger * difficulty, 5)
-	enemyPosition = 0
-	sp = irandom(400,900)			--random spacing of spawned group
-	deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	enemyList = {}
-	fleetPower = 0
-	while enemyStrength > 0 do
-		shipTemplateType = irandom(1,#stsl)
-		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
-			shipTemplateType = irandom(1,#stsl)
-		end
-		fleetPower = fleetPower + stsl[shipTemplateType]
-		ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
-		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + stsl[shipTemplateType]
+	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(kraylorVesselDestroyed)
-		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(humanVesselDestroyed)
-		elseif enemyFaction == "Exuari" then
-			rawExuariShipStrength = rawExuariShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Exuari" then
+		rawExuariShipStrength = rawExuariShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(exuariVesselDestroyed)
-		elseif enemyFaction == "Arlenians" then
-			rawArlenianShipStrength = rawArlenianShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Arlenians" then
+		rawArlenianShipStrength = rawArlenianShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(arlenianVesselDestroyed)
-		elseif enemyFaction == "Independent" then
-			rawNeutralShipStrength = rawNeutralShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Independent" then
+		rawNeutralShipStrength = rawNeutralShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(neutralVesselDestroyed)
 		end
-		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 then
-			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		else
-			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		enemyStrength = enemyStrength - stsl[shipTemplateType]
 	end
 	fleetPower = math.max(fleetPower/danger/difficulty, 5)
 	return enemyList, fleetPower
@@ -3397,12 +3260,17 @@ function commsStation()
         services = {
             supplydrop = "friend",
             reinforcements = "friend",
+            fighters = "friend",
+            refitDrive = "friend"
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = math.random(125,175),
             phobosReinforcements = math.random(200,250),
-            stalkerReinforcements = math.random(275,325)
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -3415,7 +3283,7 @@ function commsStation()
     })
     comms_data = comms_target.comms_data
 	setPlayers()
-	for p4idx=1,8 do
+	for p4idx=1, MAX_PLAYER_SHIPS do
 		local p4obj = getPlayerShip(p4idx)
 		if p4obj ~= nil and p4obj:isValid() then
 			if p4obj:isCommsOpening() then
@@ -3905,6 +3773,25 @@ function handleDockedState()
 			end)
 		end
 	end
+	local ptype = player:getTypeName()
+	local stype = comms_target:getTypeName()
+	if isAllowedTo(comms_target.comms_data.fighters) then
+		if stype == "Large Station" or stype == "Huge Station" then
+			if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+				addCommsReply("Visit fighter bay", function()
+					handleBuyShips()
+				end)
+			end
+		end
+	end
+	if isAllowedTo(player.comms_data.refitDrive) then
+		if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
+			-- logical XOR with hasWarpDrive and hasJumpDrive
+			addCommsReply("Refit your ships drive", function()
+				handleChangeDrive()
+			end)
+		end
+	end
 	if comms_target:getFaction() == "Arlenians" then
 		if scarceResources then
 			addCommsReply("Where is Bespin?", function()
@@ -4105,6 +3992,82 @@ function handleDockedState()
 		end	
 	end	--end of goods present on comms target if branch
 end	--end of handleDockedState function
+
+function handleChangeDrive()
+	if player:hasWarpDrive() and not player:hasJumpDrive() then
+		setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(false)
+				player:setJumpDrive(true)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	if player:hasJumpDrive() and not player:hasWarpDrive() then
+		setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(true)
+				player:setJumpDrive(false)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	addCommsReply("Back", mainMenu)
+end
+
+function handleBuyShips()
+	setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+	addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterScout")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply("Back", mainMenu)
+end
+
+
 function setOptionalOrders()
 	optionalOrders = ""
 end
@@ -4486,27 +4449,6 @@ function handleUndockedState()
             end
             addCommsReply("Back", commsStation)
         end)
-        addCommsReply("Please send Stalker Q7 reinforcements! ("..getServiceCost("stalkerReinforcements").."rep)", function()
-            if player:getWaypointCount() < 1 then
-                setCommsMessage("You need to set a waypoint before you can request reinforcements.");
-            else
-                setCommsMessage("To which waypoint should we dispatch the reinforcements?");
-                for n=1,player:getWaypointCount() do
-                    addCommsReply("WP" .. n, function()
-						if player:takeReputationPoints(getServiceCost("stalkerReinforcements")) then
-							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Stalker Q7"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
-							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
-							table.insert(friendlyHelperFleet,ship)
-							setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
-						else
-							setCommsMessage("Not enough reputation!");
-						end
-                        addCommsReply("Back", commsStation)
-                    end)
-                end
-            end
-            addCommsReply("Back", commsStation)
-        end)
     end
 end
 function getServiceCost(service)
@@ -4583,7 +4525,7 @@ function commsShip()
 	end
 	comms_data = comms_target.comms_data
 	setPlayers()
-	for p4idx=1,8 do
+	for p4idx=1, MAX_PLAYER_SHIPS do
 		local p4obj = getPlayerShip(p4idx)
 		if p4obj ~= nil and p4obj:isValid() then
 			if p4obj:isCommsOpening() then
@@ -4809,57 +4751,7 @@ function friendlyComms(comms_data)
 	end
 	return true
 end
-function enemyComms(comms_data)
-	if comms_data.friendlyness > 50 then
-		local faction = comms_target:getFaction()
-		local taunt_option = "We will see to your destruction!"
-		local taunt_success_reply = "Your bloodline will end here!"
-		local taunt_failed_reply = "Your feeble threats are meaningless."
-		if faction == "Kraylor" then
-			setCommsMessage("Ktzzzsss.\nYou will DIEEee weaklingsss!");
-			local kraylorTauntChoice = math.random(1,3)
-			if kraylorTauntChoice == 1 then
-				taunt_option = "We will destroy you"
-				taunt_success_reply = "We think not. It is you who will experience destruction!"
-			elseif kraylorTauntChoice == 2 then
-				taunt_option = "You have no honor"
-				taunt_success_reply = "Your insult has brought our wrath upon you. Prepare to die."
-				taunt_failed_reply = "Your comments about honor have no meaning to us"
-			else
-				taunt_option = "We pity your pathetic race"
-				taunt_success_reply = "Pathetic? You will regret your disparagement!"
-				taunt_failed_reply = "We don't care what you think of us"
-			end
-		elseif faction == "Arlenians" then
-			setCommsMessage("We wish you no harm, but will harm you if we must.\nEnd of transmission.");
-		elseif faction == "Exuari" then
-			setCommsMessage("Stay out of our way, or your death will amuse us extremely!");
-		elseif faction == "Ghosts" then
-			setCommsMessage("One zero one.\nNo binary communication detected.\nSwitching to universal speech.\nGenerating appropriate response for target from human language archives.\n:Do not cross us:\nCommunication halted.");
-			taunt_option = "EXECUTE: SELFDESTRUCT"
-			taunt_success_reply = "Rogue command received. Targeting source."
-			taunt_failed_reply = "External command ignored."
-		elseif faction == "Ktlitans" then
-			setCommsMessage("The hive suffers no threats. Opposition to any of us is opposition to us all.\nStand down or prepare to donate your corpses toward our nutrition.");
-			taunt_option = "<Transmit 'The Itsy-Bitsy Spider' on all wavelengths>"
-			taunt_success_reply = "We do not need permission to pluck apart such an insignificant threat."
-			taunt_failed_reply = "The hive has greater priorities than exterminating pests."
-		else
-			setCommsMessage("Mind your own business!");
-		end
-		comms_data.friendlyness = comms_data.friendlyness - random(0, 10)
-		addCommsReply(taunt_option, function()
-			if random(0, 100) < 30 then
-				comms_target:orderAttack(player)
-				setCommsMessage(taunt_success_reply);
-			else
-				setCommsMessage(taunt_failed_reply);
-			end
-		end)
-		return true
-	end
-	return false
-end
+
 function neutralComms(comms_data)
 	if comms_target:getFaction() == "Arlenians" then
 		if scarceResources then
@@ -5141,7 +5033,7 @@ function closestPlayerTo(obj)
 	if obj ~= nil and obj:isValid() then
 		local closestDistance = 9999999
 		local closestPlayer = nil
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			local p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				local currentDistance = distance(p,obj)
@@ -5187,46 +5079,13 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction)
 		danger = 1
 	end
 	local enemyStrength = math.max(danger * difficulty * playerPower(),5)
-	local enemyPosition = 0
-	local sp = irandom(400,900)			--random spacing of spawned group
-	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	local enemyList = {}
-	-- Reminder: stsl and stnl are ship template score and name list
-	while enemyStrength > 0 do
-		local shipTemplateType = irandom(1,#stsl)
-		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
-			shipTemplateType = irandom(1,#stsl)
-		end		
-		local ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
-		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + stsl[shipTemplateType]
-			ship:onDestruction(kraylorVesselDestroyed)
-		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + stsl[shipTemplateType]
-			ship:onDestruction(humanVesselDestroyed)
-		elseif enemyFaction == "Exuari" then
-			rawExuariShipStrength = rawExuariShipStrength + stsl[shipTemplateType]
-			ship:onDestruction(exuariVesselDestroyed)
-		elseif enemyFaction == "Arlenians" then
-			rawArlenianShipStrength = rawArlenianShipStrength + stsl[shipTemplateType]
-			ship:onDestruction(arlenianVesselDestroyed)
-		end
-		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 then
-			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		else
-			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		enemyStrength = enemyStrength - stsl[shipTemplateType]
-	end
+	local enemyList = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	return enemyList
 end
 function playerPower()
 --evaluate the players for enemy strength and size spawning purposes
 	local playerShipScore = 0
-	for p5idx=1,8 do
+	for p5idx=1, MAX_PLAYER_SHIPS do
 		local p5obj = getPlayerShip(p5idx)
 		if p5obj ~= nil and p5obj:isValid() then
 			if p5obj.shipScore == nil then
@@ -5238,342 +5097,7 @@ function playerPower()
 	end
 	return playerShipScore
 end
---[[-----------------------------------------------------------------
-      Inventory button for relay/operations 
------------------------------------------------------------------]]--
-function cargoInventory(delta)
-	if cargoInventoryList == nil then
-		cargoInventoryList = {}
-		table.insert(cargoInventoryList,cargoInventory1)
-		table.insert(cargoInventoryList,cargoInventory2)
-		table.insert(cargoInventoryList,cargoInventory3)
-		table.insert(cargoInventoryList,cargoInventory4)
-		table.insert(cargoInventoryList,cargoInventory5)
-		table.insert(cargoInventoryList,cargoInventory6)
-		table.insert(cargoInventoryList,cargoInventory7)
-		table.insert(cargoInventoryList,cargoInventory8)
-	end
-	for pidx=1,8 do
-		p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			gi = 1
-			cargoHoldEmpty = true
-			repeat
-				playerGoodsType = goods[p][gi][1]
-				playerGoodsQuantity = goods[p][gi][2]
-				if playerGoodsQuantity > 0 then
-					cargoHoldEmpty = false
-				end
-				gi = gi + 1
-			until(gi > #goods[p])
-			if not cargoHoldEmpty then
-				if p:hasPlayerAtPosition("Relay") then
-					if p.inventoryButton == nil then
-						local tbi = "inventory" .. p:getCallSign()
-						p:addCustomButton("Relay",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-				if p:hasPlayerAtPosition("Operations") then
-					if p.inventoryButton == nil then
-						local tbi = "inventoryOp" .. p:getCallSign()
-						p:addCustomButton("Operations",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-			end
-		end
-	end
-end
-function cargoInventory1()
-	local p = getPlayerShip(1)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory2()
-	local p = getPlayerShip(2)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory3()
-	local p = getPlayerShip(3)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory4()
-	local p = getPlayerShip(4)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory5()
-	local p = getPlayerShip(5)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory6()
-	local p = getPlayerShip(6)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory7()
-	local p = getPlayerShip(7)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory8()
-	local p = getPlayerShip(8)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
---		Coolant buttons and functions
-function coolantNebulae(delta)
-	for pidx=1,8 do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local inside_gain_coolant_nebula = false
-			for i=1,#coolant_nebula do
-				if distance(p,coolant_nebula[i]) < 5000 then
-					if coolant_nebula[i].lose then
-						p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
-					end
-					if coolant_nebula[i].gain then
-						inside_gain_coolant_nebula = true
-					end
-				end
-			end
-			if inside_gain_coolant_nebula then
-				if p.get_coolant then
-					if p.coolant_trigger then
-						updateCoolantGivenPlayer(p, delta)
-					end
-				else
-					if p:hasPlayerAtPosition("Engineering") then
-						p.get_coolant_button = "get_coolant_button"
-						p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-					if p:hasPlayerAtPosition("Engineering+") then
-						p.get_coolant_button_plus = "get_coolant_button_plus"
-						p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-				end
-			else
-				p.get_coolant = false
-				p.coolant_trigger = false
-				p.configure_coolant_timer = nil
-				p.deploy_coolant_timer = nil
-				if p:hasPlayerAtPosition("Engineering") then
-					if p.get_coolant_button ~= nil then
-						p:removeCustom(p.get_coolant_button)
-						p.get_coolant_button = nil
-					end
-					if p.gather_coolant ~= nil then
-						p:removeCustom(p.gather_coolant)
-						p.gather_coolant = nil
-					end
-				end
-				if p:hasPlayerAtPosition("Engineering+") then
-					if p.get_coolant_button_plus ~= nil then
-						p:removeCustom(p.get_coolant_button_plus)
-						p.get_coolant_button_plus = nil
-					end
-					if p.gather_coolant_plus ~= nil then
-						p:removeCustom(p.gather_coolant_plus)
-						p.gather_coolant_plus = nil
-					end
-				end
-			end
-		end
-	end
-end
-function updateCoolantGivenPlayer(p, delta)
-	if p.configure_coolant_timer == nil then
-		p.configure_coolant_timer = delta + 5
-	end
-	p.configure_coolant_timer = p.configure_coolant_timer - delta
-	if p.configure_coolant_timer < 0 then
-		if p.deploy_coolant_timer == nil then
-			p.deploy_coolant_timer = delta + 5
-		end
-		p.deploy_coolant_timer = p.deploy_coolant_timer - delta
-		if p.deploy_coolant_timer < 0 then
-			gather_coolant_status = "Gathering Coolant"
-			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain)
-		else
-			gather_coolant_status = string.format("Deploying Collectors %i",math.ceil(p.deploy_coolant_timer - delta))
-		end
-	else
-		gather_coolant_status = string.format("Configuring Collectors %i",math.ceil(p.configure_coolant_timer - delta))
-	end
-	if p:hasPlayerAtPosition("Engineering") then
-		p.gather_coolant = "gather_coolant"
-		p:addCustomInfo("Engineering",p.gather_coolant,gather_coolant_status)
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		p.gather_coolant_plus = "gather_coolant_plus"
-		p:addCustomInfo("Engineering",p.gather_coolant_plus,gather_coolant_status)
-	end
-end
-function getCoolantGivenPlayer(p)
-	if p:hasPlayerAtPosition("Engineering") then
-		if p.get_coolant_button ~= nil then
-			p:removeCustom(p.get_coolant_button)
-			p.get_coolant_button = nil
-		end
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		if p.get_coolant_button_plus ~= nil then
-			p:removeCustom(p.get_coolant_button_plus)
-			p.get_coolant_button_plus = nil
-		end
-	end
-	p.coolant_trigger = true
-end
-function getCoolant1()
-	local p = getPlayerShip(1)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant2()
-	local p = getPlayerShip(2)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant3()
-	local p = getPlayerShip(3)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant4()
-	local p = getPlayerShip(4)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant5()
-	local p = getPlayerShip(5)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant6()
-	local p = getPlayerShip(6)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant7()
-	local p = getPlayerShip(7)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant8()
-	local p = getPlayerShip(8)
-	getCoolantGivenPlayer(p)
-end
+
 --[[-----------------------------------------------------------------
     Timed game plot
 -----------------------------------------------------------------]]--
@@ -5650,7 +5174,7 @@ end
 -----------------------------------------------------------------]]--
 function startDoomsday()
 	setUpDoomsday = "done"
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			p:addToShipLog("Intelligence tells us the Exuari have nearly completed a 'doomsday' device. Retired scientist, Gregory Unruh warned us before he retired about this possibility, but we did not take him seriously. He was working on a defense mechanism. Find professor Unruh and get the plans for his defense mechanism","Magenta")
@@ -5753,7 +5277,7 @@ function checkDoomsdayEvents(delta)
 	if doomsdayTimer < halfDoom then
 		if doomsdayWarning == nil then
 			doomsdayWarning = "sent"
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(string.format("Intelligence estimates %i minutes remain before the Exuari deploy the doomsday device. Exuari and Kraylors both seem to be on a pillaging rampage",math.floor(doomsdayTimer/60)),"Magenta")
@@ -5766,7 +5290,7 @@ function checkDoomsdayEvents(delta)
 			primaryOrders = string.format("Get %s, %s and %s to build doomsday defense mechanism",component1,component2,component3)
 			if componentMessage1 == nil then
 				componentMessage1 = "sent"
-				for pidx=1,8 do
+				for pidx=1, MAX_PLAYER_SHIPS do
 					p = getPlayerShip(pidx)
 					if p ~= nil and p:isValid() and p.professor then
 						p:addToShipLog(string.format("The instructions list %s, %s and %s as necessary components",component1,component2,component3),"Magenta")
@@ -5776,14 +5300,14 @@ function checkDoomsdayEvents(delta)
 			end
 			if componentMessage2 == nil and doomsdayTimer < notesMarker then
 				componentMessage2 = "sent"
-				for pidx=1,8 do
+				for pidx=1, MAX_PLAYER_SHIPS do
 					p = getPlayerShip(pidx)
 					if p ~= nil and p:isValid() and p.professor then
 						p:addToShipLog(string.format("Further inspection of Gregory Unruh's plans reveal notes in the margin: %s on %s, %s on %s, %s on %s",component1,component1Base:getCallSign(),component2,component2Base:getCallSign(),component3,component3Base:getCallSign()),"Magenta")
 					end
 				end
 			end
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() and p.professor then
 					local gi = 1
@@ -5873,7 +5397,7 @@ function checkDoomsdayEvents(delta)
 			doomsday_status = string.format("%s: %i:%.2i",doomsday_status,doomsday_minutes,doomsday_seconds)
 		end
 	end
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			if p:hasPlayerAtPosition("Engineering") then
@@ -5991,7 +5515,7 @@ end
 -----------------------------------------------------------------]]--
 function startSickArlenianAdmiral()
 	setUpSickArlenianAdmiral = "done"
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			p:addToShipLog("Our allies, the Arlenians tell us that Admiral Koshenz has contracted a severe disease. The Arlenian doctors have struggled for days with the disease with minimal change in his condition. They fear he does not have much longer to live. They have asked for assistance from any Human researchers in Arlenian disease. One of their medical team referred to a Dr. Morrigan Thultris who recently published information regarding a disease that shares symptoms and characteristics with the admiral's affliction. Dr. Thultris does not show up on our military registry implying she works in relative seclusion. Search the Human Navy stations and find her and enlist her aid if applicable. Do it quickly, Admiral Koshenz likely does not have long to live","Magenta")
@@ -6044,7 +5568,7 @@ function checkSickArlenianAdmiralEvents(delta)
 	end
 	if admiralTimeToLive < 180 and admiralDyingWarning == nil then
 		admiralDyingWarning = "sent"
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog("The Arlenians say that they think the admiral has less than three minutes to live","Magenta")
@@ -6062,7 +5586,7 @@ function checkSickArlenianAdmiralEvents(delta)
 	end
 	if admiralTimeToLive < 225 and kraylorAdmiralWarning == nil then
 		kraylorAdmiralWarning = "sent"
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() then
 				p:addToShipLog(string.format("The Kraylors seem to have discovered the location of Admiral Koshenz. We detect Kraylor ships en route to %s",arlenianFleet2base:getCallSign()),"Magenta")
@@ -6080,7 +5604,7 @@ function checkSickArlenianAdmiralEvents(delta)
 		if admiralLocationMessage == nil then
 			admiralLocationMessage = "sent"
 			if arlenianFleet2base ~= nil and arlenianFleet2base:isValid() then
-				for pidx=1,8 do
+				for pidx=1, MAX_PLAYER_SHIPS do
 					p = getPlayerShip(pidx)
 					if p ~= nil and p:isValid() then
 						p:addToShipLog(string.format("Admiral Koshenz is on %s in %s",arlenianFleet2base:getCallSign(),arlenianFleet2base:getSectorName()),"Magenta")
@@ -6089,7 +5613,7 @@ function checkSickArlenianAdmiralEvents(delta)
 				primaryOrders = string.format("Take Dr. Thultris to %s in %s",arlenianFleet2base:getCallSign(),arlenianFleet2base:getSectorName())
 			end
 		end
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			p = getPlayerShip(pidx)
 			if p ~= nil and p:isValid() and p.doctorAboard then
 				if p:isDocked(arlenianFleet2base) then
@@ -6117,7 +5641,7 @@ function checkSickArlenianAdmiralEvents(delta)
 	else
 		admiral_status = string.format("%s: %i:%.2i",admiral_status,death_minutes,death_seconds)
 	end
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		local p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			if p:hasPlayerAtPosition("Science") then
@@ -6137,7 +5661,7 @@ end
 function startMiningConflict()
 	setUpMiningConflict = "done"
 	removeGMFunction(GMMining)
-	for pidx=1,8 do
+	for pidx=1, MAX_PLAYER_SHIPS do
 		p = getPlayerShip(pidx)
 		if p ~= nil and p:isValid() then
 			p:addToShipLog("Our allies, the Arlenians tell us that the Kraylors are attacking the mining facility around the planet Bespin. We rely heavily on that mineral supply for commerce and military operations. Contact the Arlenians and render assistance","Magenta")
@@ -6222,7 +5746,7 @@ function checkMiningConflictEvents(delta)
 			if exuariMiningWarningTimer < 0 then
 				if exuariMiningWarning == nil then
 					exuariMiningWarning = "sent"
-					for pidx=1,8 do
+					for pidx=1, MAX_PLAYER_SHIPS do
 						p = getPlayerShip(pidx)
 						if p ~= nil and p:isValid() then
 							p:addToShipLog("Looks like the Exuari are taking advantage of the Kraylor mining incident by sending forces against us and the Arlenians","Magenta")
@@ -6238,7 +5762,7 @@ function checkMiningConflictEvents(delta)
 			end
 		end
 		if menaceMiningFleetCount < 1 then
-			for pidx=1,8 do
+			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog("The Arlenians thanked us for the help with the Kraylors around Cloud City","Magenta")
@@ -6269,11 +5793,11 @@ function movingObjects(delta)
 		end	
 	end
 end
-function healthCheck(delta)
+--[[function healthCheck(delta)
 	healthCheckTimer = healthCheckTimer - delta
 	if healthCheckTimer < 0 then
 		if healthDiagnostic then print("health check timer expired") end
-		for pidx=1,8 do
+		for pidx=1, MAX_PLAYER_SHIPS do
 			if healthDiagnostic then print("in player loop") end
 			local p = getPlayerShip(pidx)
 			if healthDiagnostic then print("got player ship") end
@@ -6363,11 +5887,13 @@ function crewFate(p, fatalityChance)
 			p:addCustomMessage("Engineering+",repairCrewFatalityPlus,"One of your repair crew has perished")
 		end
 	end
-end--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
+end
+--]]
+--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
 function setPlayers()
 	local concurrentPlayerCount = 0
 	if setPlayerDiagnostic then print("local concurrent player count: " .. concurrentPlayerCount) end
-	for p1idx=1,8 do
+	for p1idx=1, MAX_PLAYER_SHIPS do
 		pobj = getPlayerShip(p1idx)
 		if pobj ~= nil and pobj:isValid() then
 			if setPlayerDiagnostic then print("valid player") end
@@ -6382,172 +5908,8 @@ function setPlayers()
 				pobj.initialRep = true
 			end
 			if setPlayerDiagnostic then print("set reputation") end
-			if not pobj.nameAssigned then
-				if setPlayerDiagnostic then print("assigning variables for player ship") end
-				pobj.nameAssigned = true
-				local tempPlayerType = pobj:getTypeName()
-				if tempPlayerType == "MP52 Hornet" then
-					if #playerShipNamesForMP52Hornet > 0 then
-						local ni = math.random(1,#playerShipNamesForMP52Hornet)
-						pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
-						table.remove(playerShipNamesForMP52Hornet,ni)
-					end
-					pobj.shipScore = 7
-					pobj.maxCargo = 3
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Piranha" then
-					if #playerShipNamesForPiranha > 0 then
-						ni = math.random(1,#playerShipNamesForPiranha)
-						pobj:setCallSign(playerShipNamesForPiranha[ni])
-						table.remove(playerShipNamesForPiranha,ni)
-					end
-					pobj.shipScore = 16
-					pobj.maxCargo = 8
-				elseif tempPlayerType == "Flavia P.Falcon" then
-					if #playerShipNamesForFlaviaPFalcon > 0 then
-						ni = math.random(1,#playerShipNamesForFlaviaPFalcon)
-						pobj:setCallSign(playerShipNamesForFlaviaPFalcon[ni])
-						table.remove(playerShipNamesForFlaviaPFalcon,ni)
-					end
-					pobj.shipScore = 13
-					pobj.maxCargo = 15
-				elseif tempPlayerType == "Phobos M3P" then
-					if #playerShipNamesForPhobosM3P > 0 then
-						ni = math.random(1,#playerShipNamesForPhobosM3P)
-						pobj:setCallSign(playerShipNamesForPhobosM3P[ni])
-						table.remove(playerShipNamesForPhobosM3P,ni)
-					end
-					pobj.shipScore = 19
-					pobj.maxCargo = 10
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Atlantis" then
-					if #playerShipNamesForAtlantis > 0 then
-						ni = math.random(1,#playerShipNamesForAtlantis)
-						pobj:setCallSign(playerShipNamesForAtlantis[ni])
-						table.remove(playerShipNamesForAtlantis,ni)
-					end
-					pobj.shipScore = 52
-					pobj.maxCargo = 6
-				elseif tempPlayerType == "Player Cruiser" then
-					if #playerShipNamesForCruiser > 0 then
-						ni = math.random(1,#playerShipNamesForCruiser)
-						pobj:setCallSign(playerShipNamesForCruiser[ni])
-						table.remove(playerShipNamesForCruiser,ni)
-					end
-					pobj.shipScore = 40
-					pobj.maxCargo = 6
-				elseif tempPlayerType == "Player Missile Cr." then
-					if #playerShipNamesForMissileCruiser > 0 then
-						ni = math.random(1,#playerShipNamesForMissileCruiser)
-						pobj:setCallSign(playerShipNamesForMissileCruiser[ni])
-						table.remove(playerShipNamesForMissileCruiser,ni)
-					end
-					pobj.shipScore = 45
-					pobj.maxCargo = 8
-				elseif tempPlayerType == "Player Fighter" then
-					if #playerShipNamesForFighter > 0 then
-						ni = math.random(1,#playerShipNamesForFighter)
-						pobj:setCallSign(playerShipNamesForFighter[ni])
-						table.remove(playerShipNamesForFighter,ni)
-					end
-					pobj.shipScore = 7
-					pobj.maxCargo = 3
-					pobj.autoCoolant = false
-					pobj:setJumpDrive(true)
-					pobj:setJumpDriveRange(3000,40000)
-				elseif tempPlayerType == "Benedict" then
-					if #playerShipNamesForBenedict > 0 then
-						ni = math.random(1,#playerShipNamesForBenedict)
-						pobj:setCallSign(playerShipNamesForBenedict[ni])
-						table.remove(playerShipNamesForBenedict,ni)
-					end
-					pobj.shipScore = 10
-					pobj.maxCargo = 9
-				elseif tempPlayerType == "Kiriya" then
-					if #playerShipNamesForKiriya > 0 then
-						ni = math.random(1,#playerShipNamesForKiriya)
-						pobj:setCallSign(playerShipNamesForKiriya[ni])
-						table.remove(playerShipNamesForKiriya,ni)
-					end
-					pobj.shipScore = 10
-					pobj.maxCargo = 9
-				elseif tempPlayerType == "Striker" then
-					if #playerShipNamesForStriker > 0 then
-						ni = math.random(1,#playerShipNamesForStriker)
-						pobj:setCallSign(playerShipNamesForStriker[ni])
-						table.remove(playerShipNamesForStriker,ni)
-					end
-					if pobj:getImpulseMaxSpeed() == 45 then
-						pobj:setImpulseMaxSpeed(90)
-					end
-					if pobj:getBeamWeaponCycleTime(0) == 6 then
-						local bi = 0
-						repeat
-							local tempArc = pobj:getBeamWeaponArc(bi)
-							local tempDir = pobj:getBeamWeaponDirection(bi)
-							local tempRng = pobj:getBeamWeaponRange(bi)
-							local tempDmg = pobj:getBeamWeaponDamage(bi)
-							pobj:setBeamWeapon(bi,tempArc,tempDir,tempRng,5,tempDmg)
-							bi = bi + 1
-						until(pobj:getBeamWeaponRange(bi) < 1)
-					end
-					pobj.shipScore = 8
-					pobj.maxCargo = 4
-					pobj:setJumpDrive(true)
-					pobj:setJumpDriveRange(3000,40000)
-				elseif tempPlayerType == "ZX-Lindworm" then
-					if #playerShipNamesForLindworm > 0 then
-						ni = math.random(1,#playerShipNamesForLindworm)
-						pobj:setCallSign(playerShipNamesForLindworm[ni])
-						table.remove(playerShipNamesForLindworm,ni)
-					end
-					pobj.shipScore = 8
-					pobj.maxCargo = 3
-					pobj.autoCoolant = false
-					pobj:setWarpDrive(true)
-				elseif tempPlayerType == "Repulse" then
-					if #playerShipNamesForRepulse > 0 then
-						ni = math.random(1,#playerShipNamesForRepulse)
-						pobj:setCallSign(playerShipNamesForRepulse[ni])
-						table.remove(playerShipNamesForRepulse,ni)
-					end
-					pobj.shipScore = 14
-					pobj.maxCargo = 12
-				elseif tempPlayerType == "Ender" then
-					if #playerShipNamesForEnder > 0 then
-						ni = math.random(1,#playerShipNamesForEnder)
-						pobj:setCallSign(playerShipNamesForEnder[ni])
-						table.remove(playerShipNamesForEnder,ni)
-					end
-					pobj.shipScore = 100
-					pobj.maxCargo = 20
-				elseif tempPlayerType == "Nautilus" then
-					if #playerShipNamesForNautilus > 0 then
-						ni = math.random(1,#playerShipNamesForNautilus)
-						pobj:setCallSign(playerShipNamesForNautilus[ni])
-						table.remove(playerShipNamesForNautilus,ni)
-					end
-					pobj.shipScore = 12
-					pobj.maxCargo = 7
-				elseif tempPlayerType == "Hathcock" then
-					if #playerShipNamesForHathcock > 0 then
-						ni = math.random(1,#playerShipNamesForHathcock)
-						pobj:setCallSign(playerShipNamesForHathcock[ni])
-						table.remove(playerShipNamesForHathcock,ni)
-					end
-					pobj.shipScore = 30
-					pobj.maxCargo = 6
-				else
-					if #playerShipNamesForLeftovers > 0 then
-						ni = math.random(1,#playerShipNamesForLeftovers)
-						pobj:setCallSign(playerShipNamesForLeftovers[ni])
-						table.remove(playerShipNamesForLeftovers,ni)
-					end
-					pobj.shipScore = 24
-					pobj.maxCargo = 5
-					pobj:setWarpDrive(true)
-				end
+			if not pobj.modsAssigned then
+				modify_player_ships(pobj)
 				if pobj.cargo == nil then
 					pobj.cargo = pobj.maxCargo
 					pobj.maxRepairCrew = pobj:getRepairCrewCount()
@@ -6863,10 +6225,6 @@ function update(delta)
 	if plotM ~= nil then	--moving objects
 		plotM(delta)
 	end
-	if updateDiagnostic then print("plotCI") end
-	if plotCI ~= nil then	--cargo inventory
-		plotCI(delta)
-	end
 	if updateDiagnostic then print("plotH") end
 	if plotH ~= nil then	--health
 		plotH(delta)
@@ -6874,4 +6232,5 @@ function update(delta)
 	if plotCN ~= nil then	--coolant via nebula
 		plotCN(delta)
 	end
+	xanstas_player_update(delta)
 end

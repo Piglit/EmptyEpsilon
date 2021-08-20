@@ -1,5 +1,5 @@
--- Name: Surrounded
--- Description: You are surrounded by astroids, enemies and mines.
+-- Name: Battle: Surrounded
+-- Description: You are surrounded by astroids, enemies and mines. Fight to stay alive.
 -- Type: Basic
 
 function setCirclePos(obj, angle, distance)
@@ -9,7 +9,7 @@ end
 enemy_faction = "Criminals"
 
 function init()
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Piranha M5P")
+    --player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Piranha M5P")
     SpaceStation():setTemplate("Small Station"):setPosition(0, -500):setRotation(random(0, 360)):setFaction("Independent")
     enemies = {}
     

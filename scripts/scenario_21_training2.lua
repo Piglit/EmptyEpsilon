@@ -1,33 +1,36 @@
 -- Name: Training: Battlecruiser
 -- Type: Mission
--- Description: Combat Training Course
+-- Description: Close Combat Training Course
 ---
 --- Objective: Defend your mothership against enemy fighters and destroy the enemy carrier.
 ---
 --- Description:
---- In this training you will face different armed oppenents that you must destroy one by one. The difficulty will start low and will increase slowly with every destroyed enemy.
+--- In this training you will face different armed oppenents that you must destroy one by one. The difficulty will start low and will increase slowly with every destroyed enemy squadron.
 ---
---- Your ship is a Hathcock Battle Cruiser - a warp-driven cruiser with great beam power and few missiles.
+--- Your ship is a warp-driven Hathcock Battle Cruiser - a cruiser with great beam power but few missiles.
 ---
 --- This is a short mission for players who prefer close combat.
--- Variation[Hard]: All enemies (and more stonger ones) are present at the beginning of the scenario.
--- Variation[only Homings]: Your ship has more homing missiles, but no other missiles.
+-- Variation[Easy]: Each enemy wave consists of only one single ship. Intedned for inexperienced players.
+-- Variation[Only Homings]: Your ship has more homing missiles, but no other ordnance.
+-- Variation[Hard]: More enemies, and they are present at the beginning of the scenario.
 
 -- secondary design goal: Test and example for utils_formations
-
--- TODO slow mothership down when players are slow (and hard mode was not chosen)
 
 require "utils.lua"
 require "utils_formations.lua"
 
 --- Ship creation functions
-function createExuariFighterSquad(amount, posx, posy)
-    local enemyList = formations:spawn("Dagger", amount, posx, posy, "Exuari", "factional", "Alpha-")
+
+function createExuariStrikerSquad(amount, posx, posy)
+    local enemyList = formations:spawn("Dash", amount, posx, posy, "Exuari", "factional", "Alpha-")
+    for _,ship in ipairs(enemyList) do
+        ship:setWarpDrive(false)
+    end
     return enemyList
 end
 
-function createExuariInterceptorSquad(amount, posx, posy)
-    local enemyList = formations:spawn("Blade", amount, posx, posy, "Exuari", "factional", "Beta-")
+function createExuariFighterSquad(amount, posx, posy)
+    local enemyList = formations:spawn("Dagger", amount, posx, posy, "Exuari", "factional", "Beta-")
     return enemyList
 end
 
@@ -36,8 +39,8 @@ function createExuariBomberSquad(amount, posx, posy)
     return enemyList
 end
 
-function createExuariStrikerSquad(amount, posx, posy)
-    local enemyList = formations:spawn("Strike", amount, posx, posy, "Exuari", "factional", "Delta-")
+function createExuariArtillerySquad(amount, posx, posy)
+    local enemyList = formations:spawn("Ranger", amount, posx, posy, "Exuari", "factional", "Delta-")
     return enemyList
 end
 
@@ -59,7 +62,16 @@ function createHumanMothership()
 end
 
 function createPlayerShip()
-    return PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
+    local ship = PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
+    ship:setJumpDrive(false):setWarpDrive(true)
+    if getScenarioVariation() == "Only Homings" then
+        ship:setWeaponStorageMax("Nuke", 0):setWeaponStorage("Nuke", 0)
+        ship:setWeaponStorageMax("Mine", 0):setWeaponStorage("Mine", 0)
+        ship:setWeaponStorageMax("EMP", 0):setWeaponStorage("EMP", 0)
+        ship:setWeaponStorageMax("HVLI", 0):setWeaponStorage("HVLI", 0)
+        ship:setWeaponStorageMax("Homing", 16):setWeaponStorage("Homing", 16)
+    end
+    return ship
 end
 
 function init()
@@ -92,7 +104,6 @@ function init()
     enemyList = {}
     dreadNextPosx = 0
     dreadProgress = 0
-    plot = "waves" 
 
     instr1 = false
     timer = 0
@@ -109,40 +120,56 @@ function init()
     end
     instructions()
     dread:orderFlyTowardsBlind(dreadNextPosx, dreadPosy)
-
 end
 
 function spwanNextWave()
+    -- waves are:
+    -- 1. slow Striker
+    -- 2. Fighter Squad (attacking player)
+    -- 3. Bomber Squad
+    -- 4. Artillery
+    -- 5. Boss (already present)
 
     enemyWaveIndex = enemyWaveIndex + 1
 
     local amount
     if getScenarioVariation() == "Hard" then
-        amount = enemyWaveIndex
+        amount = enemyWaveIndex * 2
+    elseif getScenarioVariation() == "Easy" then
+        amount = 1
     else
-        amount = enemyWaveIndex % 4 + 1
+        amount = enemyWaveIndex
     end
 
+    -- spwan and determine squad leaders target
     if enemyWaveIndex == 1 then
-        enemyList = createExuariFighterSquad(amount, 2*gu, -1*gu)
+        enemyList = createExuariStrikerSquad(amount, 2*gu, -1*gu)
         enemyList[1]:orderRoaming()
     elseif enemyWaveIndex == 2 then
-        enemyList = createExuariInterceptorSquad(amount, 3.5*gu, 1.5*gu)
+        enemyList = createExuariFighterSquad(amount, 3.5*gu, 1.5*gu)
         enemyList[1]:orderAttack(player)
     elseif enemyWaveIndex == 3 then
         enemyList = createExuariBomberSquad(amount, 6*gu, -2.5*gu)
         enemyList[1]:orderAttack(dread)
     elseif enemyWaveIndex == 4 then
-        enemyList = createExuariStrikerSquad(amount, 7*gu, 2*gu)
+        enemyList = createExuariArtillerySquad(amount, 7*gu, 2*gu)
         enemyList[1]:orderAttack(dread)
-        if getScenarioVariation() == "Hard" then
-            enemyList[2]:orderAttack(player)
-        end
     elseif enemyWaveIndex == 5 then
         -- only boss may be left
         enemyList = {boss, guard}
         if dread:isValid() then
-            dread:setWeaponStorage("HVLI", 20)  -- restore full fire power, in case some was fired upon fighters
+            -- restore full fire power, in case some was fired upon fighters
+            dread:setWeaponStorage("HVLI", 20) 
+        end
+    end
+
+    -- half of each squad attack the player
+    -- but only if the wave is big enough; depends on difficulty
+    -- in exuari sqads, fighter with index 4 follows index 3.
+    -- Index higher than 5 follow index 5.
+    if dread:isValid() then
+        if #enemyList > 2 then
+            enemyList[math.ceil(#enemyList/2)+1]:orderAttack(player)
         end
     end
 

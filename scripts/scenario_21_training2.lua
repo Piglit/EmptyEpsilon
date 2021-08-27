@@ -59,7 +59,7 @@ function createHumanMothership()
 end
 
 function createPlayerShip()
-	return PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
+    return PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
 end
 
 function init()
@@ -74,8 +74,9 @@ function init()
     -- player and ally
     allowNewPlayerShips(false)
     player = createPlayerShip()
-	player:setCallSign("Rookie 1"):setPosition(gu/4, -gu/4):setHeading(90):setLongRangeRadarRange(5*gu):addReputationPoints(140.0)
+    player:setCallSign("Rookie 1"):setPosition(gu/4, -gu/4):setHeading(90):setLongRangeRadarRange(5*gu):addReputationPoints(140.0)
     dread = createHumanMothership():setCallSign("Liberator"):setPosition(-gu/4, gu/4):setHeading(90):orderAttack(boss)
+    dreadSpeed = dread:getImpulseMaxSpeed()
  
     -- terrain
     createRandomAlongArc(Asteroid, 100, 2*gu, -1*gu, gu, 60, 220, 200)
@@ -87,9 +88,10 @@ function init()
     createObjectsOnLine(8*gu, -gu, 8*gu, gu, 1000, Mine, 2)
 
     -- scenario script details
-    enemyWaveIndex = 1
+    enemyWaveIndex = 0
     enemyList = {}
-    nextWaveDreadPos = 0
+    dreadNextPosx = 0
+    dreadProgress = 0
     plot = "waves" 
 
     instr1 = false
@@ -99,10 +101,20 @@ function init()
 
     -- start action
     spwanNextWave()
+    if getScenarioVariation() == "Hard" then
+        spwanNextWave()
+        spwanNextWave()
+        spwanNextWave()
+        spwanNextWave()
+    end
     instructions()
+    dread:orderFlyTowardsBlind(dreadNextPosx, dreadPosy)
+
 end
 
 function spwanNextWave()
+
+    enemyWaveIndex = enemyWaveIndex + 1
 
     local amount
     if getScenarioVariation() == "Hard" then
@@ -132,17 +144,9 @@ function spwanNextWave()
         if dread:isValid() then
             dread:setWeaponStorage("HVLI", 20)  -- restore full fire power, in case some was fired upon fighters
         end
-    elseif enemyWaveIndex >= 6 then
-        if #enemyList == 0 then
-            return false
-        else
-            return true
-        end
     end
 
-    enemyWaveIndex = enemyWaveIndex + 1
-    nextWaveDreadPos = nextWaveDreadPos + 2*gu
-    dread:orderAttack(boss)
+    dread:setImpulseMaxSpeed(dreadSpeed)
     return true
 end
 
@@ -155,7 +159,7 @@ function instructions()
 Your goal is to keep yourself and the Liberator alive until the enemy carrier and it's guards are destroyed. You chose the hard mode, so prepare for some resistance.
 
 Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 2 then
+        elseif enemyWaveIndex == 1 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen onboard the Liberator.
 
 In this combat training you will practise your abilities with a Hathcock battlecruiser.
@@ -168,7 +172,7 @@ We will face several small groups of enemies that will target you or the Liberat
 Each group will be more difficult then the previous one.
 
 Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 3 and dread:isValid() then
+        elseif enemyWaveIndex == 2 and dread:isValid() then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 You can dock at the Liberator if you need to restore your energy or if you need repairs.
@@ -178,21 +182,21 @@ If you run into more trouble than you can handle, feel free to contact us for he
 Commander Saberhagen out.
 ]])
 
-        elseif enemyWaveIndex == 4 then
+        elseif enemyWaveIndex == 3 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 Remember to use all of your capabilities to your advantage: warp drive, hacking, shield and beam frequencies, the database, energy management etc.
 
 Commander Saberhagen out.
 ]])
-        elseif enemyWaveIndex == 5 then
+        elseif enemyWaveIndex == 4 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 We need you to find a way for the Liberator to get across that mine-field ahead.
 
 Commander Saberhagen out.
 ]])
-        elseif enemyWaveIndex == 6 then
+        elseif enemyWaveIndex == 5 then
             instr1 = true
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
@@ -202,9 +206,45 @@ Commander Saberhagen out.
 ]])
 
         end
-
     end
 end
+
+function update_dread(delta)
+    if dread:isValid() then
+        local dreadPosx, dreadPosy = dread:getPosition()
+        if dreadPosx > dreadNextPosx then
+            -- target reached
+            dreadProgress = dreadProgress + 1
+            dreadNextPosx = dreadProgress * gu
+            if dreadProgress > 8 or enemyWaveIndex >= 5 then
+                -- fight boss
+                if boss:isValid() then
+                    dread:orderAttack(boss)
+                else
+                    dread:orderRoaming()
+                end
+                dread:setImpulseMaxSpeed(dreadSpeed)
+            else
+                -- still in waves
+                dread:orderFlyTowardsBlind(dreadNextPosx, dreadPosy)
+                if enemyWaveIndex*2 > dreadProgress then
+                    dread:setImpulseMaxSpeed(dreadSpeed)
+                elseif enemyWaveIndex*2 == dreadProgress then
+                    dread:setImpulseMaxSpeed(dreadSpeed/2)
+                else
+                    dread:setImpulseMaxSpeed(dreadSpeed/4)
+                end
+            end
+        end
+    end
+end
+
+-- thoughts:
+-- D ->-> C ->-> C ...
+-- P x E
+-- progress story: when enemies are defeated, progress story
+
+
 
 
 function finished(delta)
@@ -245,25 +285,17 @@ function update(delta)
         end
     end
 
-    continue = false
-    if dread:isValid() then
-        dreadPosx, dreadPosy = dread:getPosition()
-        if dreadPosx > nextWaveDreadPos then
-            continue = true
-        end
-    end
     if #enemyList == 0 then
-        continue = true
-    end
-    if getScenarioVariation() == "Hard" then
-        continue = true
+        spwanNextWave() 
+        instructions()
     end
 
-    if continue then
-        if not spwanNextWave() then
+    -- Adjust mothership speed, depending on player progress
+    update_dread(delta)
+
+    if enemyWaveIndex >= 5 then
+        if #enemyList == 0 then
             finished(delta)
-        else
-            instructions()
         end
     end
 end

@@ -66,7 +66,7 @@ def stop():
 def waitForHostname():
 	hostname = socket.gethostname()
 	timeout = 5
-	while hostname == "pxeclient" and timeout > 0:
+	while hostname == "pxeclient" or hostname == "localhost" and timeout > 0:
 		print(f"waiting for hostname change (timeout: {timeout}s)")
 		time.sleep(1)
 		hostname = socket.gethostname()

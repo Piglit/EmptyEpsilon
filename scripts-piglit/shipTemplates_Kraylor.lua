@@ -1,32 +1,73 @@
---Ships from Kraylor shipyards.
---
---Faction style (equipment):
---moderate hull, even on heavyer ships (Kraylors can survive hull breaches more easily than other species)
---strong shields, more shield segments (counts as pysical strength of the ship)
---heavyer beams
---moderate speed, no warp, heavyer ships may have jump
---homing missiles as standarg equipment. Heavyer ships have also HVLIs.
---focus on capital ships, no fighters, few specialiced ships
---big bulky ships
---naming mentions physical strength and the destructive capabilities of the ship
---Models: battleship_destroyer_*
---
---Tech details:
--- Beams
---  Kraylor standard beam:     Range: 1000-1500 CycleTime: 6.0 Dmg: 8  (dps: 1.33)
---  Kraylor heavy beam:        Range: 1500-2000 CycleTime: 8.0 Dmg: 11 (dps: 1.375) (only doombringer)
---  Kraylor turbo beam:        Range: 3000-4000 CycleTime: 3.0 Dmg: 10 (dps: 3.33)  (stations only)
--- Hull/shields
---  100, 100/80/80
---  70,  100/150
---  70,  5*300
---  100, 4*200
---  200, 450/2*350/2*150
---  150, 6*120
---  => hull: 70-200, shields: 2-6 * 80-300
--- Engines
---  Gunships  60, 5-15, 10-25
---  Destroyer 30-35, 1.5-6, 5-10 jump
+--Exuari ships
+
+--[[
+
+Description
+-----------
+This file describes a set of ships of a similar style that was designed with the background of the Kraylor culture.
+
+Appearance
+----------
+Kraylor spacecrafts are large bulky ships, mostly in dark color with many small light dots (windows).
+The models that were chosen for the ships provide those common features.
+Custom variations of radar traces were created for Kraylor ships. The radar traces typically show where the weapon slots are located on the ships. It should enable players to distinguish between Gunships and Dreadnoughts and ships of other factions.
+If you want to extend this list of ships, consider using variations of the "battleship_destroyer" Models/Meshes.
+
+Strategic use in scenarios
+--------------------------
+Considering the faction description and existing scenarios the following strategies have been developed for the Kraylor fleet. Typically each Kraylor Capital ship fights for it's own, only accompanied by some Drones.
+  * Raiders: A single Gunship with maybe a few drones is roaming the sector. It will endanger freighters or small stations. Often multiple Raiders attack a larger region of space at the same time, but each one usualy travels alone. When used in a scenario, the players goal can be to defend a larger area from incomming raiders. Defeated raiders may respawn to put the player under constant preassure during a scenario.
+  * Patrol: A single or multiple Gunship and some drones are defending the enemy territory. They can be used as obstacle for the players to overcome.
+  * Dreadnought: A single Dreadnought is steamrolling stations. Equipped with a jumpdrive and heavy weapons it will systematically destroy one station after the other if not stopped by the players. The Dreadnought can act as a boss enemy that must be destroyed to win a scenario.
+  * Armada: A large number of Dreadnoughts and Gunships is comming to take the sector. The players goal can be to survive or to defend a single more important station from the incomming armada.
+
+Ship Properties
+---------------
+The following features were chosen for Kraylor ships, to make them distinguishable from other factions:
+  * Kraylor like physical strength. Focus on few but strong capital ships.
+  * Hull and shields are stronger than most other factions.
+  * Hull is weaker than shields (Kraylors can survive hull breaches)
+  * Front shields are often stronger than rear shields.
+  * Slow firing but stong beam weapons
+  * Moderate Speed, no Warp-Drives.
+  * Homing missiles are standard equipment.
+  * Hull of heavier ships is not much higher than hull of light ships.
+  * Heavy Kraylor ships have stronger shields, and/or more shield segments
+  * Heavy Kraylor ships use HVLIs and jump drives, but have reduced speed and maneuverability.
+  * Kraylor ships usualy travel alone or in small groups.
+  * Small fighters are only seen as Drones that act as distraction from larger ships.
+
+Naming Convention
+-----------------
+The Kraylor ship template names mostly are very 'edgy' names, like Rockbreaker or Doombringer.
+
+Ship Classes
+------------
+Kraylor ships are not very specialised and so ship classes are distinguished by strength:
+  * Gunships: weaker capital ships. But still stronger than most non-player ships of other factions.
+  * Dreadnoughts: stronger capital ships. Often with Jump-Drive. Can take out even large stations alone. Should be a challenge for players to defeat.
+
+Overview
+--------
+
+--[[
+Component details used for designing the ships above:
+ Beams
+  Kraylor standard beam:     Range: 1000-1500 CycleTime: 6.0 Dmg: 8  (dps: 1.33)
+  Kraylor heavy beam:        Range: 1500-2000 CycleTime: 8.0 Dmg: 11 (dps: 1.375) (only doombringer)
+  Kraylor turbo beam:        Range: 3000-4000 CycleTime: 3.0 Dmg: 10 (dps: 3.33)  (stations only)
+ Hull/shields
+  100, 100/80/80
+  70,  100/150
+  70,  5*300
+  100, 4*200
+  200, 450/2*350/2*150
+  150, 6*120
+  => hull: 70-200, shields: 2-6 * 80-300
+ Engines
+  Gunships  60, 5-15, 10-25
+  Destroyer 30-35, 1.5-6, 5-10 jump
+--]]
 
 --[[Fighter--]]
 template = ShipTemplate():setName("Drone"):setClass("Starfighter", "Interceptor")

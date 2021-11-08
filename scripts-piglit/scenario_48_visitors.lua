@@ -31,8 +31,6 @@
 -- Variation[Hard Random]: Hard goals and/or enemies, Next mission is chosen at random
 -- Variation[Hard Selectable]: Hard goals and/or enemies, Next mission may be selected
 
---XXX start server with Easy Random; choose Easy Selectable if something fails
-
 require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
@@ -478,6 +476,7 @@ function setVariations()
 		mission_choice = "Random"
 	end
 	gameTimeLimit = 0
+	scoreTime = 0
 	playWithTimeLimit = false
 end
 function setConstants()
@@ -5634,6 +5633,10 @@ function handleDockedState()
 	if comms_source.plotChoiceStation == nil or not comms_source.plotChoiceStation:isValid() then
 		comms_source.plotChoiceStation = plotChoiceStation
 	end
+	if comms_source.plots1_begone == nil then
+		comms_source.plots1_begone = 0
+		comms_source.plots2_begone = 0
+	end
 	if comms_target == primusStation and comms_source.plotChoiceStation == primusStation and comms_source.plot1 == nil then
 		addCommsReply("Visit dispatch office", function()
 			setCommsMessage(string.format("Excellent work on your last assignment, %s. You may take another assignment",playerCallSign))
@@ -5673,12 +5676,13 @@ function handleDockedState()
 --						end)
 --					end
 --				else
-				if true then
+				if true and comms_source.plots1_begone < 2 then
 					for plot_index=1,#plotList do
 						addCommsReply(plotListOrders[plot_index], function()
 							plotChoice = plot_index
 							currentPlayer = comms_source
 							currentPlayer.plot1 = plotList[plotChoice]
+							currentPlayer.plots1_begone = currentPlayer.plots1_begone + 1
 							setCommsMessage(plotListMessage[plot_index])
 							if server_voices then
 								if plotChoice == 1 then
@@ -5700,17 +5704,19 @@ function handleDockedState()
 							table.remove(plotListMessage,plot_index)
 							table.remove(plotListOrders,plot_index)
 						end)
-					end				
+					end	
 				end
-				if #plotList < 1 or string.find(mission_choice,"Selectable") then
+				if #plotList < 1 or string.find(mission_choice,"Selectable") or comms_source.plots1_begone > 0 then
 					addCommsReply("Move to next region of available missions", function()
 						setCommsMessage(string.format("Dock with station %s for the details of your next assignment. Beware the asteroids",belt1Stations[1]:getCallSign()))
 						playVoice("Pat06")
 						comms_source.plotChoiceStation = belt1Stations[1]
-						plotChoiceStation = belt1Stations[1]
-						mission_region = 2
 						comms_source.primaryOrders = string.format("Dock with station %s",belt1Stations[1]:getCallSign())
-						primaryOrders = string.format("Dock with station %s",belt1Stations[1]:getCallSign())
+						if #plotList < 1 then
+							plotChoiceStation = belt1Stations[1]
+							mission_region = 2
+							primaryOrders = string.format("Dock with station %s",belt1Stations[1]:getCallSign())
+						end
 					end)
 				end
 --			else
@@ -5821,36 +5827,38 @@ function handleDockedState()
 --				end
 			else
 				addCommsReply("Request next assignment", function()
-					if #plotList2 < 1 then
+					if #plotList2 < 1 or comms_source.plots2_begone > 0 then
 						setCommsMessage(string.format("Dock with station %s for your next assignment",tertiusStation:getCallSign()))
 						playVoice(string.format("Tracy01%s",planetTertius:getCallSign()))
 						comms_source.plotChoiceStation = tertiusStation
 						comms_source.primaryOrders = string.format("Dock with station %s",tertiusStation:getCallSign())
-						plotChoiceStation = tertiusStation
-						mission_region = 3
-						primaryOrders = string.format("Dock with station %s",tertiusStation:getCallSign())
+						if #plotList2 < 1 then
+							plotChoiceStation = tertiusStation
+							mission_region = 3
+							primaryOrders = string.format("Dock with station %s",tertiusStation:getCallSign())
+						end
 					else
---						plotChoice = math.random(1,#plotList2)
-						local plotChoice = 1
+						plotChoice = math.random(1,#plotList2)
 						comms_source.plot1 = plotList2[plotChoice]
 						setCommsMessage(plotListMessage2[plotChoice])
-						if server_voices then
-							if plotChoice == 1 then
-								playVoice("Tracy03")
-							end
-							if plotChoice == 2 then
-								playVoice("Tracy05")
-							end
-							if plotChoice == 3 then
-								local orbit_label = "Outside"
-								if secondusOrbit > playerSpawnBand then		--players spawn inside Secondus
-									orbit_label = "Inside"
-								end
-								playVoice(string.format("Tracy06%s%s",orbit_label,planetSecondus:getCallSign()))
-							end
-						end
+--						if server_voices then
+--							if plotChoice == 1 then
+--								playVoice("Tracy03")
+--							end
+--							if plotChoice == 2 then
+--								playVoice("Tracy05")
+--							end
+--							if plotChoice == 3 then
+--								local orbit_label = "Outside"
+--								if secondusOrbit > playerSpawnBand then		--players spawn inside Secondus
+--									orbit_label = "Inside"
+--								end
+--								playVoice(string.format("Tracy06%s%s",orbit_label,planetSecondus:getCallSign()))
+--							end
+--						end
 						comms_source.primaryOrders = plotListOrders2[plotChoice]
 						plotPlayers[comms_source.plot1] = comms_source 
+						comms_source.plots2_begone = comms_source.plots2_begone + 1
 						table.remove(plotList2,plotChoice)
 						table.remove(plotListMessage2,plotChoice)
 						table.remove(plotListOrders2,plotChoice)
@@ -5881,48 +5889,68 @@ function handleDockedState()
 --				end)
 --				addCommsReply("Back", commsStation)
 --			end)
-			addCommsReply("Eliminate Exuari stronghold", function()
-				setCommsMessage("The Exuari have unlimited resources, but they are constrained to funnel them through their stronghold. Obtain victory by finding and destroying the Exuari stronghold.")
-				playVoice("Hayden04")
-				addCommsReply("Confirm", function()
-					comms_source.plot1 = stronghold
-					plotPlayers[comms_source.plot1] = comms_source 
-					setCommsMessage("Good luck")
-					playVoice("Hayden05")
-					comms_source.primaryOrders = "Find and eliminate the Exuari station that is sending all these ships after us"
-					comms_source.plotChoiceStation = nil
-				end)
-				addCommsReply("Back", commsStation)
-			end)
---			addCommsReply("Survive Exuari offensive", function()
---				setCommsMessage("The Exuari launch their invasion offensive. You must survive their attack. You will have a limited amount of time during which you must survive")
---				playVoice("Hayden06")
---				addCommsReply("15 minutes", function()
---					plot1 = survive
---					playWithTimeLimit = true
---					gameTimeLimit = 15*60
---					setCommsMessage("The countdown has begun")
---					playVoice("Hayden07")
---					addCommsReply("Back", commsStation)
+--			addCommsReply("Eliminate Exuari stronghold", function()
+--				setCommsMessage("The Exuari have unlimited resources, but they are constrained to funnel them through their stronghold. Obtain victory by finding and destroying the Exuari stronghold.")
+--				playVoice("Hayden04")
+--				addCommsReply("Confirm", function()
+--					comms_source.plot1 = stronghold
+--					plotPlayers[comms_source.plot1] = comms_source 
+--					setCommsMessage("Good luck")
+--					playVoice("Hayden05")
+--					comms_source.primaryOrders = "Find and eliminate the Exuari station that is sending all these ships after us"
+--					comms_source.plotChoiceStation = nil
 --				end)
---				addCommsReply("30 minutes", function()
---					plot1 = survive
---					playWithTimeLimit = true
---					gameTimeLimit = 30*60
---					setCommsMessage("The countdown has begun")
---					playVoice("Hayden07")
---					addCommsReply("Back", commsStation)
---				end)
---				addCommsReply("45 minutes", function()
---					plot1 = survive
---					playWithTimeLimit = true
---					gameTimeLimit = 45*60
---					setCommsMessage("The countdown has begun")
---					playVoice("Hayden07")
---					addCommsReply("Back", commsStation)
---				end)
---				addCommsReply("Back",commsStation)
+--				addCommsReply("Back", commsStation)
 --			end)
+			addCommsReply("Survive Exuari offensive", function()
+				setCommsMessage("The Exuari launch their invasion offensive. You must survive their attack. You will have a limited amount of time during which you must survive.")
+				if playWithTimeLimit then
+					comms_source.primaryOrders = "Survive the exuari attack."
+					comms_source.plotChoiceStation = nil
+				else
+					playVoice("Hayden06")
+					addCommsReply("15 minutes", function()
+						plot1 = survive
+						comms_source.primaryOrders = "Survive the exuari attack."
+						comms_source.plotChoiceStation = nil
+						primaryOrders = "Survive the exuari attack."
+						plotChoiceStation = nil
+						playWithTimeLimit = true
+						gameTimeLimit = 15*60
+						scoreTime = 15*60
+						setCommsMessage("The countdown has begun")
+						playVoice("Hayden07")
+						addCommsReply("Back", commsStation)
+					end)
+					addCommsReply("30 minutes", function()
+						plot1 = survive
+						comms_source.primaryOrders = "Survive the exuari attack."
+						comms_source.plotChoiceStation = nil
+						primaryOrders = "Survive the exuari attack."
+						plotChoiceStation = nil
+						playWithTimeLimit = true
+						gameTimeLimit = 30*60
+						scoreTime = 15*60
+						setCommsMessage("The countdown has begun")
+						playVoice("Hayden07")
+						addCommsReply("Back", commsStation)
+					end)
+					addCommsReply("45 minutes", function()
+						plot1 = survive
+						comms_source.primaryOrders = "Survive the exuari attack."
+						comms_source.plotChoiceStation = nil
+						primaryOrders = "Survive the exuari attack."
+						plotChoiceStation = nil
+						playWithTimeLimit = true
+						gameTimeLimit = 45*60
+						scoreTime = 15*60
+						setCommsMessage("The countdown has begun")
+						playVoice("Hayden07")
+						addCommsReply("Back", commsStation)
+					end)
+				end
+				addCommsReply("Back",commsStation)
+			end)
 --			addCommsReply("Stand down", function()
 --				setCommsMessage("Congratulations and thank you")
 --				playVoice("Hayden08")
@@ -6570,7 +6598,7 @@ function handleDockedState()
 				end
 				ordMsg = comms_source.primaryOrders .. "\n" .. secondaryOrders .. optionalOrders	-- secondary and optional orders are not present in this mission.
 				if playWithTimeLimit then
-					ordMsg = ordMsg .. string.format("\n   %i Minutes remain in game",math.floor(gameTimeLimit/60))
+					ordMsg = ordMsg .. string.format("\n   %i Minutes remaining",math.floor(gameTimeLimit/60))
 				end
 				setCommsMessage(ordMsg)
 			end
@@ -7367,7 +7395,7 @@ function handleUndockedState()
 				end
 				ordMsg = comms_source.primaryOrders .. "\n" .. secondaryOrders .. optionalOrders
 				if playWithTimeLimit then
-					ordMsg = ordMsg .. string.format("\n   %i Minutes remain in game",math.floor(gameTimeLimit/60))
+					ordMsg = ordMsg .. string.format("\n   %i Minutes remaining",math.floor(gameTimeLimit/60))
 				end
 				setCommsMessage(ordMsg)
 				addCommsReply("Back", commsStation)
@@ -9395,8 +9423,26 @@ end
 function checkDefendPrimusStationEvents(delta)
 	if not primusStation:isValid() then
 		--migratory headquarters destroyed
-		showEndStats("Critical station destroyed")
-		victory("Exuari")
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'stability': -1, 'msg': 'Critical station destroyed'}")
+		initialMission = false
+		plot1 = nil	--abort current plot, lose some quests
+		mission_region = 2
+		plotChoiceStation = belt1Stations[1]
+		primaryOrders = string.format("Dock with station %s",belt1Stations[1]:getCallSign())
+		if missionCloseMessage == nil then
+			missionCloseMessage = "sent"
+			for pidx=1, MAX_PLAYER_SHIPS do
+				p = getPlayerShip(pidx)
+				if p ~= nil and p:isValid() then
+					p:addToShipLog(string.format("[%s] %s has been destroyed. Eliminate remaining attackers and dock with us for further orders",plotChoiceStation:getCallSign(), primusStation:getCallSign()),"Magenta")
+					p.primaryOrders = string.format("Dock with %s",belt1Stations[1]:getCallSign())
+				end
+			end
+			playVoice("Skyler02")
+			primaryOrders = string.format("Dock with %s",belt1Stations[1]:getCallSign())
+		end
+		--showEndStats("Critical station destroyed")
+		--victory("Exuari")
 	end
 	local perceivePlayer = false
 	local remainingEnemyCount = 0
@@ -9452,6 +9498,7 @@ function checkDefendPrimusStationEvents(delta)
 				p = getPlayerShip(pidx)
 				if p ~= nil and p:isValid() then
 					p:addToShipLog(string.format("[%s] All station personnel thank you for your assistance. Dock with us for further orders",primusStation:getCallSign()),"Magenta")
+					p.primaryOrders = string.format("Dock with %s",primusStation:getCallSign())
 				end
 			end
 			playVoice("Skyler02")
@@ -9460,6 +9507,7 @@ function checkDefendPrimusStationEvents(delta)
 		initialMission = false
 		plot1 = nil
 		mission_complete_count = mission_complete_count + 1
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Defeated attackers'}")
 		mission_region = 1
 		plotChoiceStation = primusStation
 	end
@@ -9622,6 +9670,7 @@ function checkOrbitingArtifactEvents(delta)
 						plot3 = transportCleanup
 						plotPlayers[orbitingArtifact].plot1 = nil
 						mission_complete_count = mission_complete_count + 1
+						sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Temporal anomaly analysed'}")
 						--plotChoiceStation = primusStation
 						plotPlayers[orbitingArtifact].primaryOrders = string.format("Dock with %s",primusStation:getCallSign())
 					end
@@ -9785,6 +9834,7 @@ function checkTransportPrimusResearcherEvents(delta)
 							plotPlayers[transportPrimusResearcher].primaryOrders = string.format("Dock with %s",primusStation:getCallSign())
 							plotPlayers[transportPrimusResearcher].plot1 = nil
 							mission_complete_count = mission_complete_count + 1
+							sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Planetologist transportation completed'}")
 							--plotChoiceStation = primusStation
 							p:addToShipLog("Enrique Flogistan profusely thanked you as he dashed to his observation laboratory. He discussed his research on some unique properties of dilithium with your engineer before he left. Consequently, engineering has improved battery efficiency by ten percent","Magenta")
 							p:setMaxEnergy(p:getMaxEnergy()*1.1)
@@ -9938,6 +9988,7 @@ function checkFixSatelliteEvents(delta)
 		--when completion criteria met, set plot1 to nil and set the plot choice station
 		plotPlayers[fixSatellites].plot1 = nil
 		mission_complete_count = mission_complete_count + 1
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Satellites repaired'}")
 		--plotChoiceStation = primusStation
 		local reputationPending = true
 --		for pidx=1, MAX_PLAYER_SHIPS do
@@ -9994,8 +10045,11 @@ function startDefendSpawnBandStation()
 		end
 	end
 	if possible == false then
-		showEndStats("Too many stations destroyed")
-		victory("Exuari")
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'msg': 'Too many stations destroyed'}")
+		plotPlayers[defendSpawnBandStation].plot1 = nil
+		plotPlayers[defendSpawnBandStation].primaryOrders = string.format("Dock with %s",primusStation:getCallSign())
+		--showEndStats("Too many stations destroyed")
+		--victory("Exuari")
 	else
 		repeat
 			protect_station = playerSpawnBandStations[math.random(1,#playerSpawnBandStations)]
@@ -10170,6 +10224,7 @@ function marauderFleetDestroyed(delta)
 		if marauder_count < 1 then
 			plotPlayers[defendSpawnBandStation].plot1 = nil
 			mission_complete_count = mission_complete_count + 1
+			sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Defeated marauders'}")
 			--plotChoiceStation = primusStation
 			local reputationPending = true
 --			for pidx=1, MAX_PLAYER_SHIPS do
@@ -10229,6 +10284,7 @@ function checkPiracyEvents(delta)
 		end
 		plotPlayers[piracyPlot].plot1 = nil
 		plotPlayers[piracyPlot].primaryOrders = string.format("Dock with %s",belt1Stations[1]:getCallSign())
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'msg': 'Pirates drstroyed transport'}")
 		piracy = "done"
 	end
 	local piracyFleetCount = 0
@@ -10242,6 +10298,7 @@ function checkPiracyEvents(delta)
 		if piracyFleetCount < 1 then
 			plotPlayers[piracyPlot].plot1 = nil
 			mission_complete_count = mission_complete_count + 1
+			sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Pirates defeated'}")
 			--plotChoiceStation = belt1Stations[1]
 			for pidx=1, MAX_PLAYER_SHIPS do
 				p = getPlayerShip(pidx)
@@ -10382,6 +10439,7 @@ function checkVirusEvents(delta)
 	else
 		plot1 = nil
 		if station_cure_count > station_fatality_count then
+			sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Virus contained'}")
 			mission_complete_count = mission_complete_count + 1
 		end
 		if belt1Stations[1].virus_cure then
@@ -10605,7 +10663,9 @@ function checkTargetIntelEvents(delta)
 		playVoice("Tracy10")
 		--showEndStats("Exuari destroyed station")
 		--victory("Exuari")
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'msg': 'Station was destroyed'}")
 		plotPlayers[targetIntel].plot1 = nil 
+		plotPlayers[targetIntel].primaryOrders = string.format("Dock with %s",belt1Stations[1]:getCallSign())
 		return
 	end
 	local iwpx, iwpy = target_station:getPosition()
@@ -10659,6 +10719,7 @@ function checkTargetIntelEvents(delta)
 		if intel_fleet_count < 1 then
 			plotPlayers[targetIntel].plot1 = nil
 			mission_complete_count = mission_complete_count + 1
+			sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Defeated attackers'}")
 			--plotChoiceStation = belt1Stations[1]
 			for pidx=1, MAX_PLAYER_SHIPS do
 				local p = getPlayerShip(pidx)
@@ -10763,92 +10824,24 @@ end
 --	end
 --end
 -- TERTIUS PLOT Eliminate Exuari stronghold
-function startStronghold()
-	print("start stronghold")
-	set_up_stronghold = "done"
-	primaryOrders = "Find and eliminate the Exuari station that is sending all these ships after us"
-	plotChoiceStation = nil
-	local esx, esy = vectorFromAngle(random(10,80),random(tertiusOrbit + tertiusMoonOrbit + 50000,tertiusOrbit + tertiusMoonOrbit + 100000))
-	psx = solX+esx
-	psy = solY+esy
-	stationFaction = "Exuari"
-	stationStaticAsteroids = true
---	si = math.random(1,#placeEnemyStation)		--station index
---	pStation = placeEnemyStation[si]()			--place selected station
---	table.remove(placeEnemyStation,si)			--remove station from placement list
---	table.insert(stationList,pStation)			--save station in general station list
---	table.insert(exuariStationList,pStation)	--save station in exuari station list
-	exuari_stronghold = CpuShip():setTemplate("Fortress"):setFaction(stationFaction):setCallSign("Empok Nor"):setScannedByFaction(stationFaction, true):orderDefendLocation(psx, psy):setPosition(psx,psy):setCommsFunction(commsStation)
-	stronghold_interval = 300 - 50*difficulty
-	stronghold_timer = stronghold_interval
-	exuari_danger = 1
-	for pidx=1, MAX_PLAYER_SHIPS do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local plx, ply = p:getPosition()
-			local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
-			for _, enemy in ipairs(eFleet) do
-				if enemy:getOrder() == "Roaming" then
-					enemy:orderAttack(p)
-				end
-			end
-		end
-	end
-end
-function stronghold(delta)
-	if set_up_stronghold == nil then
-		startStronghold()
-	end
-	plot1 = checkStrongholdEvents
-	plotPlayers[stronghold].plot1 = nil 
-end
-function checkStrongholdEvents(delta)
-	if exuari_stronghold == nil or not exuari_stronghold:isValid() then
-		mission_complete_count = mission_complete_count + 1
-		showEndStats("Exuari stronghold destroyed")
-		victory("Human Navy")
-	end
-	stronghold_timer = stronghold_timer - delta
-	if stronghold_timer < 0 then
-		local p = closestPlayerTo(exuari_stronghold)
-		if p ~= nil then
-			local plx, ply = p:getPosition()
-			if random(1,100) < 50 then
-				local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
-				for _, enemy in ipairs(eFleet) do
-					if enemy:getOrder() == "Roaming" then
-						enemy:orderAttack(p)
-					end
-				end
-				if random(1,100) < 50 then
-					WarpJammer():setRange(8000):setPosition(plx+3000,ply+3000):setFaction("Exuari")
-				end
-			else
-				local esx, esy = exuari_stronghold:getPosition()
-				eFleet = spawnEnemies((plx+esx)/2,(ply+esy)/2,exuari_danger,"Exuari")
---				for _, enemy in ipairs(eFleet) do
---					enemy:orderRoaming()
---				end
-			end
-		else
-			local plx, ply = exuari_stronghold:getPosition()
-			local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
-			for _, enemy in ipairs(eFleet) do
-				if enemy:getOrder() == "Roaming" then
-					enemy:orderStandGround()
-				end
-			end
-		end
-		exuari_danger = exuari_danger + 1
-		stronghold_timer = delta + stronghold_interval
-	end
-end
--- TERTIUS PLOT Eliminate Exuari stronghold
---function startSurvive()
---	set_up_survive = "done"
---	primaryOrders = "Survive until the game time runs out"
---	survive_interval = 300 - 50*difficulty
---	survive_timer = survive_interval
+--function startStronghold()
+--	print("start stronghold")
+--	set_up_stronghold = "done"
+--	primaryOrders = "Find and eliminate the Exuari station that is sending all these ships after us"
+--	plotChoiceStation = nil
+--	local esx, esy = vectorFromAngle(random(10,80),random(tertiusOrbit + tertiusMoonOrbit + 50000,tertiusOrbit + tertiusMoonOrbit + 100000))
+--	psx = solX+esx
+--	psy = solY+esy
+--	stationFaction = "Exuari"
+--	stationStaticAsteroids = true
+----	si = math.random(1,#placeEnemyStation)		--station index
+----	pStation = placeEnemyStation[si]()			--place selected station
+----	table.remove(placeEnemyStation,si)			--remove station from placement list
+----	table.insert(stationList,pStation)			--save station in general station list
+----	table.insert(exuariStationList,pStation)	--save station in exuari station list
+--	exuari_stronghold = CpuShip():setTemplate("Fortress"):setFaction(stationFaction):setCallSign("Empok Nor"):setScannedByFaction(stationFaction, true):orderDefendLocation(psx, psy):setPosition(psx,psy):setCommsFunction(commsStation)
+--	stronghold_interval = 300 - 50*difficulty
+--	stronghold_timer = stronghold_interval
 --	exuari_danger = 1
 --	for pidx=1, MAX_PLAYER_SHIPS do
 --		local p = getPlayerShip(pidx)
@@ -10856,44 +10849,124 @@ end
 --			local plx, ply = p:getPosition()
 --			local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
 --			for _, enemy in ipairs(eFleet) do
---				enemy:orderAttack(p)
---			end
---		end
---	end
---end
---function survive(delta)
---	if set_up_survive == nil then
---		startSurvive()
---	end
---	plot1 = checkSurviveEvents
---end
---function checkSurviveEvents(delta)
---	gameTimeLimit = gameTimeLimit - delta
---	if gameTimeLimit < 0 then
---		mission_complete_count = mission_complete_count + 1
---		showEndStats("Survived Exuari Attacks")
---		victory("Human Navy")
---	else
---		survive_timer = survive_timer - delta
---		if survive_timer < 0 then
---			exuari_danger = exuari_danger + 1
---			for pidx=1, MAX_PLAYER_SHIPS do
---				local p = getPlayerShip(pidx)
---				if p ~= nil and p:isValid() then
---					local plx, ply = p:getPosition()
---					local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
---					for _, enemy in ipairs(eFleet) do
---						enemy:orderAttack(p)
---					end
---					if random(1,100) < 50 then
---						WarpJammer():setRange(8000):setLocation(plx+3000,ply-3000):setFaction("Exuari")
---					end
+--				if enemy:getOrder() == "Roaming" then
+--					enemy:orderAttack(p)
 --				end
 --			end
---			survive_timer = delta + survive_interval
 --		end
 --	end
 --end
+--function stronghold(delta)
+--	if set_up_stronghold == nil then
+--		startStronghold()
+--	end
+--	plot1 = checkStrongholdEvents
+--	plotPlayers[stronghold].plot1 = nil 
+--end
+--function checkStrongholdEvents(delta)
+--	if exuari_stronghold == nil or not exuari_stronghold:isValid() then
+--		mission_complete_count = mission_complete_count + 1
+--		showEndStats("Exuari stronghold destroyed")
+--		victory("Human Navy")
+--	end
+--	stronghold_timer = stronghold_timer - delta
+--	if stronghold_timer < 0 then
+--		local p = closestPlayerTo(exuari_stronghold)
+--		if p ~= nil then
+--			local plx, ply = p:getPosition()
+--			if random(1,100) < 50 then
+--				local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
+--				for _, enemy in ipairs(eFleet) do
+--					if enemy:getOrder() == "Roaming" then
+--						enemy:orderAttack(p)
+--					end
+--				end
+--				if random(1,100) < 50 then
+--					WarpJammer():setRange(8000):setPosition(plx+3000,ply+3000):setFaction("Exuari")
+--				end
+--			else
+--				local esx, esy = exuari_stronghold:getPosition()
+--				eFleet = spawnEnemies((plx+esx)/2,(ply+esy)/2,exuari_danger,"Exuari")
+----				for _, enemy in ipairs(eFleet) do
+----					enemy:orderRoaming()
+----				end
+--			end
+--		else
+--			local plx, ply = exuari_stronghold:getPosition()
+--			local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
+--			for _, enemy in ipairs(eFleet) do
+--				if enemy:getOrder() == "Roaming" then
+--					enemy:orderStandGround()
+--				end
+--			end
+--		end
+--		exuari_danger = exuari_danger + 1
+--		stronghold_timer = delta + stronghold_interval
+--	end
+--end
+-- TERTIUS PLOT Survive Exuari Attack
+function startSurvive()
+	set_up_survive = "done"
+	primaryOrders = "Survive until the game time runs out"
+	survive_interval = 300 - 50*difficulty
+	survive_timer = survive_interval
+	exuari_danger = 1
+	for pidx=1, MAX_PLAYER_SHIPS do
+		local p = getPlayerShip(pidx)
+		if p ~= nil and p:isValid() then
+			local plx, ply = p:getPosition()
+			local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
+			for _, enemy in ipairs(eFleet) do
+				enemy:orderAttack(p)
+			end
+		end
+	end
+end
+function survive(delta)
+	if set_up_survive == nil then
+		startSurvive()
+	end
+	plot1 = checkSurviveEvents
+end
+function checkSurviveEvents(delta)
+	gameTimeLimit = gameTimeLimit - delta
+	scoreTime = scoreTime - delta
+	if scoreTime < 0 then
+		sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': 1, 'msg': 'Survived 15 Minutes'}")
+		scoreTime = scoreTime + 15*60 
+	end
+	if gameTimeLimit < 0 then
+		mission_complete_count = mission_complete_count + 1
+		showEndStats("Survived Exuari Attacks")
+		victory("Human Navy")
+	else
+		survive_timer = survive_timer - delta
+		if survive_timer < 0 then
+			exuari_danger = exuari_danger + 1
+			local active_players = 0
+			for pidx=1, MAX_PLAYER_SHIPS do
+				local p = getPlayerShip(pidx)
+				if p ~= nil and p:isValid() then
+					active_players = active_players + 1
+					local plx, ply = p:getPosition()
+					local eFleet = spawnEnemies(plx,ply,exuari_danger,"Exuari",4000,6000)
+					for _, enemy in ipairs(eFleet) do
+						enemy:orderAttack(p)
+					end
+					if random(1,100) < 50 then
+						WarpJammer():setRange(8000):setLocation(plx+3000,ply-3000):setFaction("Exuari")
+					end
+				end
+			end
+			survive_timer = delta + survive_interval
+			if active_players == 0 then
+				sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'stability': -1, 'msg': 'All ships destroyed'}")
+				showEndStats("Players did not survive")
+				victory("Exuari")
+			end
+		end
+	end
+end
 -- Working transports plot
 function workingTransports(delta)
 	transportCheckDelayTimer = transportCheckDelayTimer - delta
@@ -10954,14 +11027,16 @@ function setPlots()
 	maxPlotCount = #plotList
 	initialMission = true
 	plotList2 = {piracyPlot,
-				 targetIntel,
-				 virusOutbreak}
+				 targetIntel}
+				 --,virusOutbreak}
 	plotListMessage2 = {"A transport reports Exuari pirates threatening them",
 						string.format("Station %s in %s has intelligence on where the Exuari are attacking next",playerSpawnBandStations[1]:getCallSign(),playerSpawnBandStations[1]:getSectorName()),
-						string.format("Stations %s, %s, %s, %s and %s all report outbreaks of a variant of Rathgar's space virus. %s has developed an effective anti-virus, but it needs to be delivered to all the stations quickly",belt1Stations[1]:getCallSign(),belt1Stations[2]:getCallSign(),belt1Stations[3]:getCallSign(),belt1Stations[4]:getCallSign(),belt1Stations[5]:getCallSign(),belt1Stations[4]:getCallSign())}
+--						string.format("Stations %s, %s, %s, %s and %s all report outbreaks of a variant of Rathgar's space virus. %s has developed an effective anti-virus, but it needs to be delivered to all the stations quickly",belt1Stations[1]:getCallSign(),belt1Stations[2]:getCallSign(),belt1Stations[3]:getCallSign(),belt1Stations[4]:getCallSign(),belt1Stations[5]:getCallSign(),belt1Stations[4]:getCallSign())
+	}
 	plotListOrders2 = {"Protect transport from Exuari pirates",
 						string.format("Dock with %s in %s for Exuari intelligence",playerSpawnBandStations[1]:getCallSign(),playerSpawnBandStations[1]:getSectorName()),
-						string.format("Dock with %s to pick up anti-virus",belt1Stations[4]:getCallSign())}
+--						string.format("Dock with %s to pick up anti-virus",belt1Stations[4]:getCallSign())
+}
 	piracy = "available"
 	plotCI = cargoInventory			--manage button on relay/operations to show cargo inventory
 	plotPlayers = {}
@@ -10988,8 +11063,26 @@ function plotChoose(delta)
 		else
 			if not plotChoiceStation:isValid() then
 				--migratory headquarters destroyed
-				showEndStats("Critical station destroyed")
-				victory("Exuari")
+				if plotChoiceStation == primusStation then
+					plotChoiceStation = belt1Stations[1]
+					mission_region = 2
+					primaryOrders = string.format("Dock with station %s",belt1Stations[1]:getCallSign())
+				else if plotChoiceStation == belt1Stations[1] then
+					plotChoiceStation = tertiusStation
+					mission_region = 3
+					primaryOrders = string.format("Dock with station %s",tertiusStation:getCallSign())
+				else if plotChoiceStation == tertiusStation then
+					plot1 = survive
+					primaryOrders = "Survive the exuari attack."
+					plotChoiceStation = nil
+					playWithTimeLimit = true
+					gameTimeLimit = 15*60
+					scoreTime = 15*60
+					setCommsMessage("The countdown has begun")
+				end
+				sendMessageToCampaignServer("{'msg_type': 'admiral score', 'score': -1, 'stability': -1, 'msg': 'Critical station destroyed'}")
+				--showEndStats("Critical station destroyed")
+				--victory("Exuari")
 			end
 		end
 	end

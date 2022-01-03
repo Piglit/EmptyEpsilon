@@ -8358,11 +8358,8 @@ end
 --------------------------------------
 -- Set up enemy and friendly fleets --
 --------------------------------------
-function setFleets()
-	--enemy defensive fleets
-	local enemyResource = 300 + difficulty*200
-	enemyFleetList = {}
-	enemyDefensiveFleetList = {}
+function reinforceFleets()
+	local enemyResource = difficulty*200
 	enemyFleet1base = kraylorStationList[math.random(1,#kraylorStationList)]
 	local f1bx, f1by = enemyFleet1base:getPosition()
 	local enemyFleet1, enemyFleet1Power = spawnEnemyFleet(f1bx, f1by, random(90,130))
@@ -8371,6 +8368,24 @@ function setFleets()
 	end
 	table.insert(enemyFleetList,enemyFleet1)
 	table.insert(enemyDefensiveFleetList,enemyFleet1)
+
+end
+
+function setFleets()
+	--enemy defensive fleets
+	local enemyResource = 300 + difficulty*200
+	enemyFleetList = {}
+	enemyDefensiveFleetList = {}
+	enemyFleetBases = {}
+	enemyFleet1base = kraylorStationList[math.random(1,#kraylorStationList)]
+	local f1bx, f1by = enemyFleet1base:getPosition()
+	local enemyFleet1, enemyFleet1Power = spawnEnemyFleet(f1bx, f1by, random(90,130))
+	for _, enemy in ipairs(enemyFleet1) do
+		enemy:orderDefendTarget(enemyFleet1base)
+	end
+	table.insert(enemyFleetList,enemyFleet1)
+	table.insert(enemyDefensiveFleetList,enemyFleet1)
+	enemyFleetBases[enemyFleet1base] = true
 	intelGatherArtifacts[1]:setDescriptions("Scan to gather intelligence",string.format("Enemy fleet detected in sector %s",enemyFleet1base:getSectorName()))
 	intelGatherArtifacts[1].startSector = enemyFleet1base:getSectorName()
 	enemyResource = enemyResource - enemyFleet1Power

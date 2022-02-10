@@ -529,8 +529,28 @@ static int unpauseGame(lua_State* L)
 }
 /// void unpauseGame()
 /// Pause the game
-/// Calling this function will pause the game. Mainly useful for a headless server setup. As the scenario functions are not called when paused.
+/// Calling this function will unpause the game. Mainly useful for a headless server setup. As the scenario functions are not called when paused.
 REGISTER_SCRIPT_FUNCTION(unpauseGame);
+
+static int slowGame(lua_State* L)
+{
+    engine->setGameSpeed(0.1);
+    return 0;
+}
+/// void slowGame()
+/// slow down the game
+/// Calling this function will slow the game down. Mainly usefull for a larp setup.
+REGISTER_SCRIPT_FUNCTION(slowGame);
+
+static int unslowGame(lua_State* L)
+{
+    engine->setGameSpeed(1.0);
+    return 0;
+}
+/// void unslowGame()
+/// unslow the game
+/// Calling this function will unslow the game. Mainly usefull for a larp setup.
+REGISTER_SCRIPT_FUNCTION(unslowGame);
 
 static int playSoundFile(lua_State* L)
 {

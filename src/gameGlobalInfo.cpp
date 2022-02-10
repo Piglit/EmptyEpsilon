@@ -633,6 +633,26 @@ static int unpauseGame(lua_State* L)
 /// Example: unpauseGame()
 REGISTER_SCRIPT_FUNCTION(unpauseGame);
 
+static int slowGame(lua_State* L)
+{
+    engine->setGameSpeed(0.1);
+    return 0;
+}
+/// void slowGame()
+/// slow down the game
+/// Calling this function will slow the game down. Mainly usefull for a larp setup.
+REGISTER_SCRIPT_FUNCTION(slowGame);
+
+static int unslowGame(lua_State* L)
+{
+    engine->setGameSpeed(1.0);
+    return 0;
+}
+/// void unslowGame()
+/// unslow the game
+/// Calling this function will unslow the game. Mainly usefull for a larp setup.
+REGISTER_SCRIPT_FUNCTION(unslowGame);
+
 static int playSoundFile(lua_State* L)
 {
     string filename = luaL_checkstring(L, 1);

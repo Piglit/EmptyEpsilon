@@ -702,6 +702,21 @@ static bool luaIsGamePaused()
     return engine->getGameSpeed() == 0.0f;
 }
 
+static void luaSlowGame()
+{
+    engine->setGameSpeed(0.1f);
+}
+
+static void luaUnslowGame()
+{
+    engine->setGameSpeed(1.0f);
+}
+
+static bool luaIsGameSlowed()
+{
+    return engine->getGameSpeed() == 0.1f;
+}
+
 static void luaPlaySoundFile(string filename)
 {
     int n = filename.rfind(".");

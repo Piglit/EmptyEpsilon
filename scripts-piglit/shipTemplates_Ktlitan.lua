@@ -2,7 +2,7 @@
 --
 --Faction style (equipment):
 --hull:    30-350
---shields: mostly 0, except destroyer (3*50) & queen (3*100)
+--shields: always 0  (original destroyer & queen had shields, those were removed for consistency)
 --beam:    rng 600-1200, dmg 6, cycle 4.0, dps 1.5 (except destroyer: 10/6, dps 1.66)
 --missiles: only special
 --speed: impulse 70-150 very fast!  maneuver 5-35,  accel:  25 (exc. destr.)
@@ -66,8 +66,9 @@ template = ShipTemplate():setName("Ktlitan Destroyer"):setModel("sci_fi_alien_sh
 template:setRadarTrace("radar_ktlitan_destroyer.png")
 template:setBeam(0, 90, -15, 1000.0, 6.0, 10)
 template:setBeam(1, 90,  15, 1000.0, 6.0, 10)
-template:setHull(300)
-template:setShields(50, 50, 50)
+template:setHull(450)
+--template:setShields(50, 50, 50)
+-- shields were removed for stronger hull
 --Reputation Score: 45
 template:setTubes(3, 15.0) -- Amount of torpedo tubes
 template:setSpeed(70, 5, 10)
@@ -76,8 +77,9 @@ template:setDefaultAI('missilevolley')
 
 template = ShipTemplate():setName("Ktlitan Queen"):setModel("sci_fi_alien_ship_8"):setClass("Ktlitan", "Queen")
 template:setRadarTrace("radar_ktlitan_queen.png")
-template:setHull(350)
-template:setShields(100, 100, 100)
+template:setHull(650)
+--template:setShields(100, 100, 100)
+-- shields were removed for stronger hull
 --Reputation Score: 65
 template:setTubes(2, 15.0) -- Amount of torpedo tubes
 template:setWeaponStorage("Nuke", 5)

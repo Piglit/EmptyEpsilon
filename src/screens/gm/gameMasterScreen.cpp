@@ -36,21 +36,23 @@ GameMasterScreen::GameMasterScreen()
     box_selection_overlay->hide();
 
     pause_button = new GuiToggleButton(this, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
-        if (!value)
+        if (!value) {
             engine->setGameSpeed(1.0f);
-			slow_button->setValue(false);
-        else
+            slow_button->setValue(false);
+        } else {
             engine->setGameSpeed(0.0f);
-			slow_button->setValue(false);
+            slow_button->setValue(false);
+        }
     });
     pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, 20, ATopLeft)->setSize(250, 50);
     slow_button = new GuiToggleButton(this, "SLOW_BUTTON", tr("button", "Slow"), [this](bool value) {
-        if (!value)
+        if (!value) {
             engine->setGameSpeed(1.0f);
-			pause_button->setValue(false);
-        else
+            pause_button->setValue(false);
+        } else {
             engine->setGameSpeed(0.1f);
-			pause_button->setValue(false);
+            pause_button->setValue(false);
+        }
     });
     slow_button->setValue(false)->setPosition(300, 20, ATopLeft)->setSize(250, 50);
 
@@ -311,9 +313,9 @@ void GameMasterScreen::update(float delta)
     // Update mission clock
     info_clock->setValue(string(gameGlobalInfo->elapsed_time, 0));
 
-	// Update pause button
-	slow_button->setValue(engine->getGameSpeed() == 0.1f);
-	pause_button->setValue(engine->getGameSpeed() == 0.0f);
+    // Update pause button
+    slow_button->setValue(engine->getGameSpeed() == 0.1f);
+    pause_button->setValue(engine->getGameSpeed() == 0.0f);
 
     std::unordered_map<string, string> selection_info;
 

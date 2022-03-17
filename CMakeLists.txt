@@ -33,7 +33,7 @@ else()
     string(TIMESTAMP PATCH "%d")
 endif()
 
-project(EmptyEpsilon LANGUAGES CXX C  VERSION ${MAJOR}.${MINOR}.${PATCH})
+project(EmptyEpsilon LANGUAGES CXX C  VERSION 2022.05.28)
 
 include(GNUInstallDirs)
 

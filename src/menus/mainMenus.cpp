@@ -147,12 +147,12 @@ MainMenu::MainMenu()
         (new GuiLabel(this, "", PreferencesManager::get("instance_name"), 25))->setAlignment(sp::Alignment::CenterLeft)->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(0, 18);
     }
 
-#ifdef DEBUG
+
     (new GuiButton(this, "", "TO DA GM!", [this]() {
         new EpsilonServer(defaultServerPort);
         if (game_server)
         {
-            gameGlobalInfo->startScenario("scenario_10_empty.lua");
+            gameGlobalInfo->startScenario("scenario_09_sandbox.lua");
 
             my_player_info->commandSetShipId(-1);
             destroy();
@@ -160,6 +160,7 @@ MainMenu::MainMenu()
         }
     }))->setPosition({370, -150}, sp::Alignment::BottomLeft)->setSize(300, 50);
 
+#ifdef DEBUG
     (new GuiButton(this, "", "MODELS!", [this]() {
         destroy();
         new DebugAllModelView();

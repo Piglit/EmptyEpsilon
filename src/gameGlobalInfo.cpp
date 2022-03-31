@@ -650,27 +650,6 @@ static int playSoundFile(lua_State* L)
 /// Example: playSoundFile("sfx/laser.wav")
 REGISTER_SCRIPT_FUNCTION(playSoundFile);
 
-template<> int convert<EScanningComplexity>::returnType(lua_State* L, EScanningComplexity complexity)
-{
-    switch(complexity)
-    {
-    case SC_None:
-        lua_pushstring(L, "none");
-        return 1;
-    case SC_Simple:
-        lua_pushstring(L, "simple");
-        return 1;
-    case SC_Normal:
-        lua_pushstring(L, "normal");
-        return 1;
-    case SC_Advanced:
-        lua_pushstring(L, "advanced");
-        return 1;
-    default:
-        return 0;
-    }
-}
-
 static int getScanningComplexity(lua_State* L)
 {
     return convert<EScanningComplexity>::returnType(L, gameGlobalInfo->scanning_complexity);
@@ -679,6 +658,16 @@ static int getScanningComplexity(lua_State* L)
 /// Returns the running scenario's scanning complexity setting.
 /// Example: getScanningComplexity() -- returns "normal" by default
 REGISTER_SCRIPT_FUNCTION(getScanningComplexity);
+
+static int setScanningComplexity(lua_State* L)
+{
+    int idx = 1;
+    convert<EScanningComplexity>::param(L, idx, gameGlobalInfo->scanning_complexity);
+    return 1;
+}
+/// void setScanningComplexity(EScanningComplexity complexity)
+/// Set the scanning complexity setting
+REGISTER_SCRIPT_FUNCTION(setScanningComplexity);
 
 static int getHackingDifficulty(lua_State* L)
 {
@@ -695,23 +684,14 @@ static int getHackingDifficulty(lua_State* L)
 /// Example: getHackingDifficulty() -- returns 2 by default
 REGISTER_SCRIPT_FUNCTION(getHackingDifficulty);
 
-template<> int convert<EHackingGames>::returnType(lua_State* L, EHackingGames game)
+static int setHackingDifficulty(lua_State* L)
 {
-    switch(game)
-    {
-    case HG_Mine:
-        lua_pushstring(L, "mines");
-        return 1;
-    case HG_Lights:
-        lua_pushstring(L, "lights");
-        return 1;
-    case HG_All:
-        lua_pushstring(L, "all");
-        return 1;
-    default:
-        return 0;
-    }
+    gameGlobalInfo->hacking_difficulty = luaL_checkinteger(L, 1);
+    return 1;
 }
+/// void setHackingDifficulty(int difficulty)
+/// Set the hacking difficulty setting (expects an integer between 0 and 3)
+REGISTER_SCRIPT_FUNCTION(setHackingDifficulty);
 
 static int getHackingGames(lua_State* L)
 {
@@ -721,6 +701,16 @@ static int getHackingGames(lua_State* L)
 /// Returns the running scenario's hacking difficulty setting.
 /// Example: getHackingGames() -- returns "all" by default
 REGISTER_SCRIPT_FUNCTION(getHackingGames);
+
+static int setHackingGames(lua_State* L)
+{
+    int idx = 1;
+    convert<EHackingGames>::param(L, idx, gameGlobalInfo->hacking_games);
+    return 1;
+}
+/// void setHackingGames(EHackingGames games)
+/// Set the hacking games setting
+REGISTER_SCRIPT_FUNCTION(setHackingGames);
 
 static int areBeamShieldFrequenciesUsed(lua_State* L)
 {
@@ -732,6 +722,15 @@ static int areBeamShieldFrequenciesUsed(lua_State* L)
 /// Example: areBeamShieldFrequenciesUsed() -- returns true by default
 REGISTER_SCRIPT_FUNCTION(areBeamShieldFrequenciesUsed);
 
+static int setBeamShieldFrequenciesUsed(lua_State* L)
+{
+    gameGlobalInfo->use_beam_shield_frequencies = lua_toboolean(L, 1);
+    return 1;
+}
+/// void setBeamShieldFrequenciesUsed(bool use)
+/// set the "Beam/Shield Frequencies" setting
+REGISTER_SCRIPT_FUNCTION(setBeamShieldFrequenciesUsed);
+
 static int isPerSystemDamageUsed(lua_State* L)
 {
     lua_pushboolean(L, gameGlobalInfo->use_system_damage);
@@ -741,6 +740,15 @@ static int isPerSystemDamageUsed(lua_State* L)
 /// Returns whether the "Per-System Damage" setting is enabled in the running scenario.
 /// Example: isPerSystemDamageUsed() -- returns true by default
 REGISTER_SCRIPT_FUNCTION(isPerSystemDamageUsed);
+
+static int setPerSystemDamageUsed(lua_State* L)
+{
+    gameGlobalInfo->use_system_damage = lua_toboolean(L, 1);
+    return 1;
+}
+/// void setPerSystemDamageUsed(bool use)
+/// set the "Per-System Damage" setting
+REGISTER_SCRIPT_FUNCTION(setPerSystemDamageUsed);
 
 static int isTacticalRadarAllowed(lua_State* L)
 {
@@ -752,6 +760,15 @@ static int isTacticalRadarAllowed(lua_State* L)
 /// Example: isTacticalRadarAllowed() -- returns true by default
 REGISTER_SCRIPT_FUNCTION(isTacticalRadarAllowed);
 
+static int setTacticalRadarAllowed(lua_State* L)
+{
+    gameGlobalInfo->allow_main_screen_tactical_radar = lua_toboolean(L, 1);
+    return 1;
+}
+/// void setTacticalRadarAllowed(bool allow)
+/// set the "Tactical Radar" setting
+REGISTER_SCRIPT_FUNCTION(setTacticalRadarAllowed);
+
 static int isLongRangeRadarAllowed(lua_State* L)
 {
     lua_pushboolean(L, gameGlobalInfo->allow_main_screen_long_range_radar);
@@ -761,6 +778,15 @@ static int isLongRangeRadarAllowed(lua_State* L)
 /// Returns whether the "Long Range Radar" setting for main screens is enabled in the running scenario.
 /// Example: isLongRangeRadarAllowed() -- returns true by default
 REGISTER_SCRIPT_FUNCTION(isLongRangeRadarAllowed);
+
+static int setLongRangeRadarAllowed(lua_State* L)
+{
+    gameGlobalInfo->allow_main_screen_long_range_radar = lua_toboolean(L, 1);
+    return 1;
+}
+/// void setLongRangeRadarAllowed(bool allow)
+/// set the "Long Range Radar" setting
+REGISTER_SCRIPT_FUNCTION(setLongRangeRadarAllowed);
 
 static int onNewPlayerShip(lua_State* L)
 {
@@ -793,3 +819,5 @@ static int getEEVersion(lua_State* L)
 /// Returns a string with the current EmptyEpsilon version number, such as "20221029".
 /// Example: getEEVersion() -- returns 20221029 on EE-2022.10.29
 REGISTER_SCRIPT_FUNCTION(getEEVersion);
+
+#include "gameGlobalInfo.hpp"

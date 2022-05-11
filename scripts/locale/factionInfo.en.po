@@ -12,11 +12,11 @@ msgstr ""
 
 #: scripts/factionInfo.lua:5
 msgid "Human Navy"
-msgstr "Interplanetare Union"
+msgstr ""
 
 #: scripts/factionInfo.lua:7
 msgid ""
-"Die Interplanetare Union\n"
+"The remnants of the human navy.\n"
 "\n"
 "While all other races were driven to the stars out of greed or scientific "
 "research, humans where the only race to start exploring the galaxy because "

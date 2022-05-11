@@ -267,19 +267,19 @@ void GuiShipCrew::onDraw(sp::RenderTarget& renderer)
         return;
     setPosition(crew->position * getSize().x, sp::Alignment::TopLeft);
 
-    float rotation = 0;
+//    float rotation = 0;
     string tex = "topdownCrew0.png";
     if (crew->action == RC_Move)
-        tex = "topdownCrew" + string(int(crew->action_delay * 12) % 6) + ".png";
-    switch(crew->direction)
-    {
-    case RC_Left: rotation = 180; break;
-    case RC_Right: rotation = 0; break;
-    case RC_None:
-    case RC_Up: rotation = -90; break;
-    case RC_Down: rotation = 90; break;
-    }
-    renderer.drawRotatedSprite(tex, getCenterPoint(), getSize().x, rotation);
+        tex = "topdownCrew" + string(int(crew->action_delay * 12) % 4) + ".png";
+//    switch(crew->direction)
+//    {
+//    case RC_Left: rotation = 180; break;
+//    case RC_Right: rotation = 0; break;
+//    case RC_None:
+//    case RC_Up: rotation = -90; break;
+//    case RC_Down: rotation = 90; break;
+//    }
+    renderer.drawSprite(tex, getCenterPoint(), getSize().x);
     if (crew->selected)
     {
         renderer.drawSprite("redicule.png", getCenterPoint(), getSize().x);

@@ -148,6 +148,7 @@ MainMenu::MainMenu()
     }
 
 
+#ifdef DEBUG
     (new GuiButton(this, "", "TO DA GM!", [this]() {
         new EpsilonServer(defaultServerPort);
         if (game_server)
@@ -160,7 +161,6 @@ MainMenu::MainMenu()
         }
     }))->setPosition({370, -150}, sp::Alignment::BottomLeft)->setSize(300, 50);
 
-#ifdef DEBUG
     (new GuiButton(this, "", "MODELS!", [this]() {
         destroy();
         new DebugAllModelView();

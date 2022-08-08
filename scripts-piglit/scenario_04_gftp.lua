@@ -1,7 +1,7 @@
--- Name: Ghost from the Past
+-- Name: Mission: Ghost from the Past
 -- Description: Far from any frontline or civilization, patrolling the Stakhanov Mining Complex can be dull,
 --- consisting mainly of seizing contraband and stopping drunken brawls. It is indeed a lonely ward brightened only by R&R at the Marco Polo station.
---- However, when an inbound FTL-capable Ktlitan Swarm is announced, you must scramble to save the Sector ! [Requires beam/shield frequenies] [Hard]
+--- However, when an inbound FTL-capable Ktlitan Swarm is announced, you must scramble to save the Sector ! [Requires beam/shield frequenies]
 -- Type: Mission
 -- Author: Fouindor
 
@@ -73,6 +73,7 @@ function init()
     
     --Spawn the Player
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setPosition(-22000, 44000):setCallSign("Epsilon")
+    allowNewPlayerShips(false)
     
     --start the mission
     main_mission = 1

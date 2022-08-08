@@ -4,8 +4,19 @@ function mainMenu()
     if comms_target.comms_data == nil then
         comms_target.comms_data = {}
     end
+    local stype = comms_target:getTypeName()
+	local has_fighters = "no"
+	local has_refit_drive = "no"
+	if stype == "Large Station" then
+		has_fighters = "friend"
+	end
+	if stype == "Huge Station" then
+		has_fighters = "friend"
+		has_refit_drive = "friend"
+	end
     mergeTables(comms_target.comms_data, {
         friendlyness = random(0.0, 100.0),
+        surrender_hull_threshold = math.random(40,80),
         weapons = {
             Homing = "neutral",
             HVLI = "neutral",
@@ -23,14 +34,16 @@ function mainMenu()
         services = {
             supplydrop = "friend",
             reinforcements = "friend",
+            fighters = has_fighters,
+            refitDrive = has_refit_drive
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = 150,
-			reinforcements_factor = math.random(16,24),
-			fighterInterceptor = math.random(125,175),
-			fighterBomber = math.random(150,200),
-			fighterScout = math.random(175,225)
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -46,7 +59,7 @@ function mainMenu()
     comms_data = comms_target.comms_data
 
     if player:isEnemy(comms_target) then
-        return false
+        return handleEnemy()
     end
 
     if comms_target:areEnemiesInRange(5000) then
@@ -69,77 +82,125 @@ function handleDockedState()
         setCommsMessage("Welcome to our lovely station " .. comms_target:getCallSign() .. ".")
     end
 
-    if player:getWeaponStorageMax("Homing") > 0 then
-        addCommsReply("Do you have spare homing missiles for us? ("..getWeaponCost("Homing").."rep each)", function()
-            handleWeaponRestock("Homing")
-        end)
-    end
-    if player:getWeaponStorageMax("HVLI") > 0 then
-        addCommsReply("Can you restock us with HVLI? ("..getWeaponCost("HVLI").."rep each)", function()
-            handleWeaponRestock("HVLI")
-        end)
-    end
-    if player:getWeaponStorageMax("Mine") > 0 then
-        addCommsReply("Please re-stock our mines. ("..getWeaponCost("Mine").."rep each)", function()
-            handleWeaponRestock("Mine")
-        end)
-    end
-    if player:getWeaponStorageMax("Nuke") > 0 then
-        addCommsReply("Can you supply us with some nukes? ("..getWeaponCost("Nuke").."rep each)", function()
-            handleWeaponRestock("Nuke")
-        end)
-    end
-    if player:getWeaponStorageMax("EMP") > 0 then
-        addCommsReply("Please re-stock our EMP missiles. ("..getWeaponCost("EMP").."rep each)", function()
-            handleWeaponRestock("EMP")
-        end)
-    end
-	local ptype = player:getTypeName()
-	if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
-		addCommsReply("Visit shipyard", function()
-			setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
-			addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
-				if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
-					setCommsMessage("Insufficient reputation")
-				else
-					local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
-					ship:setAutoCoolant(true)
-					ship:commandSetAutoRepair(true)
-					ship:setPosition(comms_target:getPosition())
-					setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
-					return true
-				end
-				addCommsReply("Back", mainMenu)
+	addCommsReply("Restock us with weapons", function()
+        setCommsMessage("In what kind of weapons are you interested?")
+		if player:getWeaponStorageMax("Homing") > 0 then
+			addCommsReply("Do you have spare homing missiles for us? ("..getWeaponCost("Homing").."rep each)", function()
+				handleWeaponRestock("Homing")
 			end)
-			addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
-				if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
-					setCommsMessage("Insufficient reputation")
-				else
-					local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
-					ship:setAutoCoolant(true)
-					ship:commandSetAutoRepair(true)
-					ship:setPosition(comms_target:getPosition())
-					setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
-					return true
-				end
-				addCommsReply("Back", mainMenu)
+		end
+		if player:getWeaponStorageMax("HVLI") > 0 then
+			addCommsReply("Can you restock us with HVLI? ("..getWeaponCost("HVLI").."rep each)", function()
+				handleWeaponRestock("HVLI")
 			end)
-			addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
-				if not player:takeReputationPoints(getServiceCost("fighterScout")) then
-					setCommsMessage("Insufficient reputation")
-				else
-					local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
-					ship:setAutoCoolant(true)
-					ship:commandSetAutoRepair(true)
-					ship:setPosition(comms_target:getPosition())
-					setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
-					return true
-				end
-				addCommsReply("Back", mainMenu)
+		end
+		if player:getWeaponStorageMax("Mine") > 0 then
+			addCommsReply("Please re-stock our mines. ("..getWeaponCost("Mine").."rep each)", function()
+				handleWeaponRestock("Mine")
 			end)
-			addCommsReply("Back", mainMenu)
-		end)
-	end
+		end
+		if player:getWeaponStorageMax("Nuke") > 0 then
+			addCommsReply("Can you supply us with some nukes? ("..getWeaponCost("Nuke").."rep each)", function()
+				handleWeaponRestock("Nuke")
+			end)
+		end
+		if player:getWeaponStorageMax("EMP") > 0 then
+			addCommsReply("Please re-stock our EMP missiles. ("..getWeaponCost("EMP").."rep each)", function()
+				handleWeaponRestock("EMP")
+			end)
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+    local ptype = player:getTypeName()
+    if isAllowedTo(comms_target.comms_data.services.fighters) then
+            if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+                addCommsReply("Visit fighter bay", function()
+                    handleBuyShips()
+                end)
+            end
+    end
+    if isAllowedTo(comms_target.comms_data.services.refitDrive) then
+        if player:hasWarpDrive() ~= player:hasJumpDrive() then
+            -- logical XOR with hasWarpDrive and hasJumpDrive
+            addCommsReply("Refit your ships drive", function()
+                handleChangeDrive()
+            end)
+        end
+    end
+end
+
+function handleChangeDrive()
+    if player:hasWarpDrive() and not player:hasJumpDrive() then
+        setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                player:setWarpDrive(false)
+                player:setJumpDrive(true)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    if player:hasJumpDrive() and not player:hasWarpDrive() then
+        setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+        addCommsReply("Make it so!", function()
+            if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+                setCommsMessage("Insufficient reputation")
+            else
+                player:setWarpDrive(true)
+                player:setJumpDrive(false)
+                setCommsMessage("Consider it done.")
+                return true
+            end
+        end)
+    end
+    addCommsReply("Back", mainMenu)
+end
+
+function handleBuyShips()
+    setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+    addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+        if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+        if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+        if not player:takeReputationPoints(getServiceCost("fighterScout")) then
+            setCommsMessage("Insufficient reputation")
+        else
+            local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
+            ship:setAutoCoolant(true)
+            ship:commandSetAutoRepair(true)
+            ship:setPosition(comms_target:getPosition())
+            setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+            return true
+        end
+        addCommsReply("Back", mainMenu)
+    end)
+    addCommsReply("Back", mainMenu)
 end
 
 function handleWeaponRestock(weapon)
@@ -228,6 +289,52 @@ function handleUndockedState()
             addCommsReply("Back", mainMenu)
         end)
     end
+end
+
+function handleEnemy()
+    local min_shields = 100
+    local shieldCount = comms_target:getShieldCount()
+    if shieldCount == 0 then
+        min_shields = 0
+    else
+        for n=0,shieldCount do
+            local sl = comms_target:getShieldLevel(n)
+            if sl < min_shields then
+                min_shields = sl
+            end
+        end
+    end
+    if min_shields >= 100 then
+        setCommsMessage("There is nothing to talk about with you!")
+        return true
+    end
+    if min_shields > comms_data.friendlyness then
+        setCommsMessage("You will never break our shields!")
+        return true
+    end
+    setCommsMessage("You may have done some damage, but you will never defeat us!")
+    addCommsReply("Try something different - surrender.", function()
+        local hull_percent = 100 * comms_target:getHull() / comms_target:getHullMax()
+        if hull_percent > comms_data.surrender_hull_threshold then
+            setCommsMessage("The moment to surrender has not yet arrived. We choose to stand and fight!")
+            return true
+        end
+        if hull_percent > comms_data.friendlyness then
+            setCommsMessage("The moment we surrender is the moment we lose our identity. We will hold on a little longer.")
+            return true
+        end
+        local surrender_cost = 100 + hull_percent
+        setCommsMessage("Maybe we can find a solution to end this conflict.")
+        addCommsReply(string.format("Surrender now. [reputation cost: %i]", surrender_cost), function()
+            if not player:takeReputationPoints(surrender_cost) then
+                setCommsMessage("Insufficient reputation")
+            else
+                comms_target:setFaction("Independent")
+                comms_data.surrender_hull_threshold = comms_target:getHull() / 2
+                setCommsMessage("We surrender. You may dock and refuel at our station.")
+            end
+        end)
+    end)
 end
 
 function isAllowedTo(state)

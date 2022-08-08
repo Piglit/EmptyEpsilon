@@ -1,4 +1,4 @@
--- Name: The Edge-of-Space
+-- Name: Mission: The Edge-of-Space
 -- Description: You command the Technician Cruiser Apollo, a repair ship on the border of dangerous space.
 --- The Apollo is outfitted with minimal weapons as there is a cease-fire between the Human Navy and the neighboring Kraylor.
 ---- You are tasked with discovering the cause of damage on one of your deep space telescopes.
@@ -293,7 +293,7 @@ function goto_war_early()
     --createHumanFighter():setScanned(true):setCallSign("BR42"):setPosition(-12796, 16809):orderRoaming()
     --createHumanFighter():setScanned(true):setCallSign("UTI43"):setPosition(-10463, 7476):orderRoaming()
     CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos T3"):setCallSign("CI44"):setPosition(-10368, 13571):orderRoaming()
-    CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos Y2"):setCallSign("NI15"):setPosition(-10368, 50143):orderRoaming()
+    CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos T3"):setCallSign("NI15"):setPosition(-10368, 50143):orderRoaming()
 
     Human_m1:orderRoaming()
     Human_m2:orderRoaming()
@@ -746,7 +746,7 @@ Reports are coming in from core Human space that a massive Kraylor strike force 
             --createHumanFighter():setScanned(true):setCallSign("BR42"):setPosition(-12796, 16809):orderRoaming()
             --createHumanFighter():setScanned(true):setCallSign("UTI43"):setPosition(-10463, 7476):orderRoaming()
             CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos T3"):setCallSign("CI44"):setPosition(-10368, 13571):orderRoaming()
-            CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos Y2"):setCallSign("NI15"):setPosition(-10368, 50143):orderRoaming()
+            CpuShip():setFaction("Human Navy"):setScanned(true):setTemplate("Phobos T3"):setCallSign("NI15"):setPosition(-10368, 50143):orderRoaming()
 
             Human_m1:orderRoaming()
             Human_m2:orderRoaming()

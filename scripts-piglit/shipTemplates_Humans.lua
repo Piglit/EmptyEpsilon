@@ -1,12 +1,77 @@
---this file contains human npc ships. Playerships are found in shipTemplates_Player.
---Every ship hull comes in several colors:
+-- Human ships
 
--- White: owned and outfited by Human Navy. Players default color (adjustable in shipTemplates_Player)
--- Yellow: Workers (stationary or unordered)
--- Blue: Travellers (convoys and escorts)
--- Red: criminals (enemy)
--- Green: Ghosts (enemy)
--- Grey: old default ships. (friendly)
+--[[
+
+Description
+-----------
+This file defines some ships of a similar optical style with the background of several human factions.
+
+Appearance
+----------
+The models from msgamedev.pack (AdlerLongRangeScout, ... , WespeScout) are used here, since there are various ship types with different colors each. So every human faction can have a different color scheme but still the same ships.
+
+Colors
+------
+* White: owned and outfited by Human Navy. Players default color (adjustable in shipTemplates_Player)
+* Yellow: Workers (stationary or unordered)
+* Blue: Travellers (convoys and escorts)
+* Red: criminals (enemy)
+* Green: Ghosts (enemy)
+* Grey: old default ships. (friendly)
+
+Compatibility
+-------------
+All vanilla ship templates (except playerships) should also occure in this file with the same stats - the ship model may however vary. Using this file instead of shipTemplates_{StarFighters, Firgates, Corvette, Dreadnought} shall be sufficient to run existing scenarios. Special care must be taken with playerships, stations, transports and content from shipTemplatesOLD.
+
+Ship Classes
+------------
+Some ship models use fixed beam or tube positions for their first beam/tube slots. The size of each ship is also determined by the models radius.
+
+* Fighters:
+	* Hornet(Interceptor, fighter, WespeScout, radius: 30, beams: 2, tubes: 0)
+	* Lindwurm(Bomber, fighter, LindwurmFighter, radius: 30, beams: 0, tubes: 3)
+	* Adder(Scout, fighter, AdlerLongRangeScout, radius: 30, beams: 3, tubes: 1)
+* Frigates:
+	* Storm(heavy attil, nonplayer, MissileCorvette, radius: 80, beams: 0 , tubes: 0)
+	* Nirvana/Hathcock(Beam cruiser/sniper, frontal, LaserCorvette, radius: 80, beams: 0, tubes: 0)
+	* Flavia/Repulse (Transport, rear fire, LightCorvette, radius: 80, beams: 0, tubes: 0)
+	* Nautilus (player only, MineLayerCorvette, radius: 80, beams: 0, tubes: 0)
+	* Piranha(Missile, no beam, HeavyCorvette, radius: 80, beams: 0, tubes: 0)
+	* Phobos(light Cruiser, MultiGunCorvette, radius: 80, beams: 0, tubes: 0)
+* Corvette:
+	* Atlantis(Destroyer, AtlasHeavyFighter/AtlasDestroyer, radius: 80/160, beams: 2, tubes: 3/5)
+* Dreadnought:
+	* TODO
+
+Strategic use in scenarios
+--------------------------
+Depending on the scenario and faction human ship may be found single or in small to large flottillas. Very often different ship classes/types are found within a single flottilla, since each ship is specialised in a specific task around a flottilla (e.g. fast Interceptor, Beam/Missile Cruiser, ...).
+As script author you are adviced to spawn several random ships near each other that act as flottilla, if you do not need something special.
+
+
+Human ships seldom use weapons of mass destruction like nukes or emps and almost never use very specialised technology like mines, warp jammers or similar.
+Most human ships relay on beam weapons, homing and hvli missiles and strenght in numbers. You will seldom find a human NPC ship that is capable of fighting alone successfully.
+
+Based on analysis of wars in human histoy some characteristics can be found.
+Human like to use or create asymmetic advantages in war (e.g. numbers, surprise, a larger population of fighters, deception, ...)
+Humans tend to avoid unneccessary losses. They will not sacrifice their troops without a change to achieve some goal.
+However both can be spoiled by embarassed leaders or concepts of group honor.
+
+Since there are differnt factions of humans with similar ship classes, there can be a wide range of strategies. Often flottilas of different ship types or classes can be seen. 
+
+--LC light cruiser, allrounder
+--MC missile cruiser broadside, no beam, defense against surprise attacks/surrounded - combine with BS
+--BC beam cruiser anti fighter, defense against fighters/close combat - combine with MC
+--TRN transport, maybe armed
+--JCR jump carrier
+--CRV corvette, destroyer - offensive allround 
+--HMC heavy missile cruiser frontal assault, +beam, offensive
+--stalker? nuker? enemies!
+
+
+
+--]]
+
 
 color_default= "Grey"  --default/old equipment
 -- Human light beam:  arc 90, rng 1200, cycle 8, dmg 6 = 0.75 dps  (used on light cruiser and transport)
@@ -54,68 +119,19 @@ color_civil2 = "Blue"  --get civil equipment. Blues like to travel in column for
 --
 
 
---AdlerLongRangeScout
---radius: 30, beams: 3, tubes: 1
---Adder(Scout, fighter)
---
---AtlasHeavyFighter/AtlasDestroyer
---radius: 80/160, beams: 2, tubes: 3/5
---Atlantis(Destroyer)
---
---LindwurmFighter
---radius: 30, beams: 0, tubes: 3
---Lindwurm(Bomber, fighter)
---
---WespeScout
---radius: 30, beams: 2, tubes: 0
---Hornet(Interceptor, fighter)
---
---MissileCorvette
---radius: 80, beams: 0 , tubes: 0
---Storm(heavy attil, nonplayer)
---
---LaserCorvette
---radius: 80, beams: 0, tubes: 0
---Nirvana/Hathcock(Beam cruiser/sniper, frontal)
---
---LightCorvette
---radius: 80, beams: 0, tubes: 0
---Flavia (Transport, rear fire), Repulse(rear fire)
---
---MineLayerCorvette
---radius: 80, beams: 0, tubes: 0
---Nautilus (player only)
---
---HeavyCorvette
---radius: 80, beams: 0, tubes: 0
---Piranha(Missile, no beam)
---
---MultiGunCorvette
---radius: 80, beams: 0, tubes: 0
---Phobos(light Cruiser)
---
-
-
 
 --9 ships, 10 models; just rematch!
 
 
---LC light cruiser, allrounder
---MC missile cruiser broadside, no beam, defense against surprise attacks/surrounded - combine with BS
---BC beam cruiser anti fighter, defense against fighters/close combat - combine with MC
---TRN transport, maybe armed
---JCR jump carrier
---CRV corvette, destroyer - offensive allround 
---HMC heavy missile cruiser frontal assault, +beam, offensive
---stalker? nuker? enemies!
 
 --[[Fighter--]]
 model_hornet = "WespeFighter"
 descr_hornet = [[The MT52 Hornet is a basic interceptor found in many corners of the galaxy. It's easy to find spare parts for MT52s, not only because they are produced in large numbers, but also because they suffer high losses in combat.]]
-template = ShipTemplate():setName("MT52 Hornet"):setClass("Starfighter", "Interceptor")
+template = ShipTemplate():setName("MT52 Hornet"):setLocaleName(_("MT52 Hornet"))
+template:setClass(_("Starfighter"), _("Interceptor"))
 template:setModel(model_hornet..color_default)
 template:setRadarTrace("radar_fighter.png")
-template:setDescription(descr_hornet)
+template:setDescription(_(descr_hornet))
 template:setHull(30)
 template:setShields(20)
 --Reputation Score: 5.0
@@ -148,10 +164,11 @@ end
 --[[Bomber--]]
 model_lindworm = "LindwurmFighter"
 descr_lindworm = [[The WX-Lindworm, or "Worm" as it's often called, is a bomber-class starfighter. While one of the least-shielded starfighters in active duty, the Worm's two launchers can pack quite a punch. Its goal is to fly in, destroy its target, and fly out or be destroyed.]]
-template = ShipTemplate():setName("WX-Lindworm"):setClass("Starfighter", "Bomber")
+template = ShipTemplate():setName("WX-Lindworm"):setLocaleName(_("WX-Lindworm"))
+template:setClass(_("Starfighter"), _("Bomber"))
 template:setModel(model_lindworm..color_default)
 template:setRadarTrace("radar_fighter.png")
-template:setDescription(descr_lindworm)
+template:setDescription(_(descr_lindworm))
 template:setHull(50)
 template:setShields(20)
 --Reputation Score: 7
@@ -179,10 +196,11 @@ end
 model_adder = "AdlerLongRangeScout"
 descr_adder = [[The Adder line's fifth iteration proved to be a great success among pirates and law officers alike. It is cheap, fast, and easy to maintain, and it packs a decent punch.]]
 
-template = ShipTemplate():setName("Adder MK5"):setClass("Starfighter", "Gunship")
+template = ShipTemplate():setName("Adder MK5"):setLocaleName(_("Adder MK5"))
+template:setClass(_("Starfighter"), _("Gunship"))
 template:setModel(model_adder..color_default)
 template:setRadarTrace("radar_fighter.png")
-template:setDescription(descr_adder)
+template:setDescription(_(descr_adder))
 template:setHull(50)
 template:setShields(30)
 --Reputation Score: 8
@@ -238,9 +256,11 @@ descr_phobos = [[The Phobos is the workhorse of the human navy. It's extremely e
 As a light cruiser the Phobos is a allrounder: front beams and missiles, moderate shields, reasonable speed.
 
 ]]
---as is, old
-template = ShipTemplate():setName("Phobos T3"):setClass("Frigate", "Light Cruiser"):setModel(model_phobos..color_milit)
-template:setDescription(descr_phobos)
+--as is, old, yellow
+template = ShipTemplate():setName("Phobos T3"):setLocaleName(_("Phobos T3"))
+template:setClass("Frigate", "Light Cruiser")
+template:setModel(model_phobos..color_civil1)
+template:setDescription(_(descr_phobos))
 template:setRadarTrace("radar_cruiser.png")
 template:setHull(70)
 template:setShields(50, 40)
@@ -254,13 +274,15 @@ template:setWeaponStorage("Homing", 6)
 template:setTubeDirection(0, -1)
 template:setTubeDirection(1,  1)
 
---yellow
-variation = template:copy("Phobos Y2")
-variation:setModel(model_phobos..color_civil1)
-variation:setDescription(descr_phobos..[[This civil version of the Phobos is outfited for use in asteroid belts. Higher maneuverability is combined with reinfored hull against impact.]])
-variation:setHull(90)
---Reputation Score: 18
-variation:setSpeed(60, 15, 10)
+--milit
+variation = template:copy("Elara P2")
+variation:setModel(model_phobos..color_milit)
+variation:setDescription(_([[Inspired by the Phobos T3 design, the Elara P2 is nearly identical. With the addition of a warp drive and stronger front shields, the Elara P2 poses a greater threat than the Phobos]]))
+variation:setWarpSpeed(800)
+variation:setWarpDrive(true)
+variation:setShields(70, 40)
+--Reputation Score: 19
+
 
 --blue front
 variation = template:copy("Phobos Vanguard")
@@ -308,7 +330,8 @@ descr_piranha = [[The Piranha broadside missile cruiser is a light artillery fri
 
 ]]
 --as is, yellow
-template = ShipTemplate():setName("Piranha F12"):setClass("Frigate", "Missile Cruiser")
+template = ShipTemplate():setName("Piranha F12"):setLocaleName(_("Piranha F12"))
+template:setClass("Frigate", "Missile Cruiser")
 template:setModel(model_piranha..color_civil1)
 template:setDescription(descr_piranha..[[This is the top-seller outfit for civil use. Like the old Piranha, the Piranha F12 fires exclusively from broadside weapons. Is is merely used as defense for unarmed industrial vessels against pirate raiders.]])
 template:setRadarTrace("radar_missile_cruiser_thin.png")
@@ -320,11 +343,11 @@ template:setTubes(6, 15.0)
 template:setWeaponStorage("HVLI", 20)
 template:setWeaponStorage("Homing", 6)
 template:setTubeDirection(0, -90)
-template:setTubeDirection(1, -90):setWeaponTubeExclusiveFor(1, "HVLI")
-template:setTubeDirection(2, -90):setWeaponTubeExclusiveFor(2, "HVLI")
+template:setTubeDirection(1, -90):setWeaponTubeExclusiveFor(1, "HVLI"):setTubeSize(1, "large")
+template:setTubeDirection(2, -90):setWeaponTubeExclusiveFor(2, "HVLI"):setTubeSize(2, "large")
 template:setTubeDirection(3,  90)
-template:setTubeDirection(4,  90):setWeaponTubeExclusiveFor(4, "HVLI")
-template:setTubeDirection(5,  90):setWeaponTubeExclusiveFor(5, "HVLI")
+template:setTubeDirection(4,  90):setWeaponTubeExclusiveFor(4, "HVLI"):setTubeSize(4, "large")
+template:setTubeDirection(5,  90):setWeaponTubeExclusiveFor(5, "HVLI"):setTubeSize(5, "large")
 template:setDefaultAI('missilevolley')
 
 --as is, old
@@ -391,10 +414,11 @@ descr_nirvana = [[The Nirvana is an anti-fighter cruiser. It has several rapid-f
 --Balancing Info: To take out shield+hull=40 starfighters, a range of 1200 is too low.
 
 --as is, old
-template = ShipTemplate():setName("Nirvana R5"):setClass("Frigate", "Beam Cruiser")
+template = ShipTemplate():setName("Nirvana R5"):setLocaleName(_("Nirvana R5"))
+template:setClass("Frigate", "Beam Cruiser")
 template:setModel(model_nirvana..color_default)
 template:setRadarTrace("radar_laser.png")
-template:setDescription(descr_nirvana)
+template:setDescription(_(descr_nirvana))
 template:setBeamWeapon(0, 90, -15, 1400, 3, 2)
 template:setBeamWeapon(1, 90,  15, 1400, 3, 2)
 template:setBeamWeapon(2, 90,  50, 1400, 3, 2)
@@ -405,14 +429,17 @@ template:setShields(50, 40)
 template:setSpeed(70, 12, 10)
 
 --as is, yellow
-variation = template:copy("Nirvana R5A")
+variation = template:copy("Nirvana R3")
 variation:setModel(model_nirvana..color_civil1)
-variation:setDescription(descr_nirvana..[[This is an improved version of the Nirvana R5 with faster turning speed and firing rates. It is often found protecting small groups of industrial vessels from raiders.]])
-variation:setBeamWeapon(0, 90, -15, 1400, 2.9, 2)
-variation:setBeamWeapon(1, 90,  15, 1400, 2.9, 2)
-variation:setBeamWeapon(2, 90,  50, 1400, 2.9, 2)
-variation:setBeamWeapon(3, 90, -50, 1400, 2.9, 2)
-variation:setSpeed(70, 15, 10)
+variation:setDescription(_([[One of the earliest mass produced Nirvana models, the Nirvana R3 is designed to be used against fighters. It's got several fast, low damage, point defense beam weapons. Compared to the later, more common Nirvana R5, it has shorter beams, weaker shields and hull and a slower impulse drive.]]))
+variation:setBeamWeapon(0, 90, -15, 1200, 3, 2)
+variation:setBeamWeapon(1, 90,  15, 1200, 3, 2)
+variation:setBeamWeapon(2, 90,  50, 1200, 3, 2)
+variation:setBeamWeapon(3, 90, -50, 1200, 3, 2)
+variation:setHull(60)
+variation:setShields(40, 30)
+--Reputation Score: 13
+variation:setSpeed(65, 12, 10)
 
 --blue front
 variation = template:copy("Nirvana Vanguard")
@@ -446,9 +473,9 @@ variation:setBeamWeapon(2, 60,  50, 1500, 6, 8)
 variation:setBeamWeapon(3, 60, -50, 1500, 6, 8)
 
 --milit
-variation = template:copy("Nirvana R5M")
+variation = template:copy("Nirvana R5A")
 variation:setModel(model_nirvana..color_milit)
-variation:setDescription(descr_nirvana..[[This is an improved version of the Nirvana R5 with faster turning speed and firing rates. It is equipped with military fast beam weapons, doing double damage compared to civil versions.]])
+variation:setDescription(_([[An improved version of the Nirvana R5 with faster turning speed and firing rates.]]))
 variation:setBeamWeapon(0, 90, -15, 1400, 2.9, 2.5)
 variation:setBeamWeapon(1, 90,  15, 1400, 2.9, 2.5)
 variation:setBeamWeapon(2, 90,  50, 1400, 2.9, 2.5)
@@ -460,9 +487,10 @@ variation:setSpeed(70, 15, 10)
 model_flavia = "LightCorvette" 
 descr_flavia = [[Popular among traders and smugglers, the Flavia is a small cargo and passenger transport. It's cheaper than a freighter for small loads and short distances, and is often used to carry high-value cargo discreetly.]]
 --as is, old
-template = ShipTemplate():setName("Flavia"):setClass("Frigate", "Light transport")
+template = ShipTemplate():setName("Flavia"):setLocaleName(_("Flavia"))
+template:setClass("Frigate", "Light transport")
 template:setModel(model_flavia..color_default)
-template:setDescription(descr_flavia)
+template:setDescription(_(descr_flavia))
 template:setRadarTrace("radar_tug.png")
 template:setHull(50)
 template:setShields(50, 50)
@@ -512,10 +540,11 @@ variation:setBeam(0,  20, 0, 2400.0, 6.0, 8):setBeamWeaponTurret(0, 360, 0, 3)
 --as is, milit
 model_strom = "MissileCorvette"
 descr_storm = [[A heavy artillery cruiser, the Storm fires bunches of missiles from forward facing tubes. This spacecraft is designed for pure offensive actions, hence the use of the Storm is only allowed to the Human Navy. A big weakness of the Storm is it's slow turning rate.]] 
-template = ShipTemplate():setName("Storm"):setClass("Frigate", "Heavy Artillery Cruiser")
+template = ShipTemplate():setName("Storm"):setLocaleName(_("Storm"))
+template:setClass("Frigate", "Heavy Artillery Cruiser")
 template:setModel(model_strom..color_milit)
 template:setRadarTrace("radar_cruiser.png")
-template:setDescription(descr_storm)
+template:setDescription(_(descr_storm))
 template:setBeamWeapon(0, 60, 0, 1200, 3, 2)
 template:setHull(50)
 template:setShields(30, 30)
@@ -549,9 +578,10 @@ variation:setBeam(0,  60, 0, 1500.0, 6.0, 8)
 
 model_atlantis = "AtlasHeavyCorvette"
 descr_atlantis = [[The Atlantis X23 is the smallest model of destroyer, and its combination of frigate-like size and corvette-like power makes it an excellent escort ship when defending larger ships against multiple smaller enemies. Because the Atlantis X23 is fitted with a jump drive, it can also serve as an intersystem patrol craft.]]
-template = ShipTemplate():setName("Atlantis X23"):setClass("Corvette", "Destroyer")
+template = ShipTemplate():setName("Atlantis X23"):setLocaleName(_("Atlantis X23"))
+template:setClass(_("Corvette"), _("Destroyer"))
 template:setModel(model_atlantis..color_milit)
-template:setDescription(descr_atlantis)
+template:setDescription(_(descr_atlantis))
 template:setRadarTrace("radar_dread.png")
 template:setHull(100)
 template:setShields(200, 200, 200, 200)
@@ -571,7 +601,8 @@ template:setTubeDirection(2,  90)
 template:setTubeDirection(3,  90)
 
 --TODO
-template = ShipTemplate():setName("Starhammer II"):setClass("Corvette", "Destroyer"):setModel("battleship_destroyer_4_upgraded")
+template = ShipTemplate():setName("Starhammer II"):setLocaleName(_("Starhammer II"))
+template:setClass(_("Corvette"), _("Destroyer")):setModel("battleship_destroyer_4_upgraded")
 template:setDescription([[Contrary to its predecessor, the Starhammer II lives up to its name. By resolving the original Starhammer's power and heat management issues, the updated model makes for a phenomenal frontal assault ship. Its low speed makes it difficult to position, but when in the right place at the right time, even the strongest shields can't withstand a Starhammer's assault for long.]])
 template:setRadarTrace("radar_dread.png")
 template:setHull(200)
@@ -592,7 +623,9 @@ template:weaponTubeDisallowMissle(1, "EMP")
 
 
 --[[---------------------Carrier------------------------]]
-template = ShipTemplate():setName("Jump Carrier"):setClass("Corvette", "Freighter"):setModel("transport_4_2")
+template = ShipTemplate():setName("Jump Carrier"):setLocaleName(_("Jump Carrier"))
+template:setClass(_("Corvette"), _("Freighter"))
+template:setModel("transport_4_2")
 template:setDescription([[The Jump Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized jump drive and the energy storage required to run this jump drive.
 It is designed to carry other ships deep into space. So it has special docking parameters, allowing other ships to attach themselves to this ship.]])
 template:setHull(100)
@@ -612,7 +645,9 @@ template:setRestocksScanProbes(true)
 
 -- The weapons-platform is a stationary platform with beam-weapons. It's extremely slow to turn, but it's beam weapons do a huge amount of damage.
 -- Smaller ships can dock to this platform to re-supply.
-template = ShipTemplate():setName("Defense platform"):setClass("Corvette", "Support"):setModel("space_station_4")
+template = ShipTemplate():setName("Defense platform"):setLocaleName(_("Defense platform"))
+template:setClass(_("Corvette"), _("Support"))
+template:setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
 template:setRadarTrace("radartrace_smallstation.png")
 template:setHull(150)

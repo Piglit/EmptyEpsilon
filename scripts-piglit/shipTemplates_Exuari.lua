@@ -123,7 +123,7 @@ variation:setTubeSize(0, "large")
 -- The Strikeship is a warp-drive equipped figher build for quick strikes, it's fast, it's agile, but does not do an extreme amount of damage, and lacks in rear shields.
 template = ShipTemplate():setName("Racer"):setClass("Exuari","Striker")
 template:setModel("small_frigate_1"):setRadarTrace("radar_exuari_1.png")
-template:setDescription("The Exuari alpha striker 'Racer' is a warp-drive equipped Figter build for quick strikes. This spacecraft runs on a small crew and is often used as scout, interceptor or to perform preemptive attacks. It's fast, it's agile, but the striker beams do not cause an extreme amount of damage. Like all strikers, it lacks in rear shields.")
+template:setDescription("The Exuari alpha striker 'Racer' is a warp-drive equipped fighter build for quick strikes. This spacecraft runs on a small crew and is often used as scout, interceptor or to perform preemptive attacks. It's fast, it's agile, but the striker beams do not cause an extreme amount of damage. Like all strikers, it lacks in rear shields.")
 --                  Arc, Dir, Range, CycleTime, Dmg
 template:setBeam(0, 40,-5, 1000.0, 6.0, 6)
 template:setBeam(1, 40, 5, 1000.0, 6.0, 6)
@@ -132,6 +132,7 @@ template:setShields(50, 30)
 --Reputation Score: 13
 template:setSpeed(70, 12, 12)
 template:setWarpSpeed(600)
+template:setWarpDrive(true)
 
 variation = template:copy("Hunter")
 variation:setDescription("The Exuari beta striker 'Hunter' is a warp-drive equipped reinforement fighter. This spacecraft runs on a small crew and is often sent into battle to aid other Exuari ships when they engage in combat. It has an extra pair of striker beams and improved front shields. It's fast, it's agile, and can clean up what is left of the enemies fleet after an initial strike.")
@@ -141,6 +142,7 @@ variation:setBeam(3, 50, 15, 1000.0, 6.0, 6)
 variation:setShields(80, 30)
 --Reputation Score: 16
 variation:setWarpSpeed(400)
+variation:setWarpDrive(true)
 
 variation = template:copy("Strike")
 variation:setDescription("The Exuari gamma striker 'Strike' is a warp-drive equipped tactical bomber build for quick strikes against strong shielded targets. This spacecraft runs on a small crew and is equipped with HVLIs and an EMP. It's fast, it's agile, and can do a great amount of damage in short time.")
@@ -149,6 +151,7 @@ variation:setTubes(1, 10.0)
 variation:setWeaponStorage("EMP", 1)
 variation:setWeaponStorage("HVLI", 2)
 variation:setWarpSpeed(300)
+variation:setWarpDrive(true)
 
 variation = template:copy("Dash")
 variation:setDescription("The Exuari delta striker 'Dash' is a warp-drive equipped endurance bomber build for prolonged strikes. This spacecraft runs on a small crew and combines reinforced front shields with a good amount of HVLIs. It's fast, it's agile, and can take some damage.")
@@ -159,10 +162,11 @@ variation:setHull(70)
 variation:setShields(80, 30)
 --Reputation Score: 18
 variation:setWarpSpeed(200)
+variation:setWarpDrive(true)
 
 --[[ Frigates--]]
 --Frigates are non-warp capable ships, mostly used to defend bases or to build the rear line in an assault.
---TODO: replace models (transorts should not be used here)
+--TODO: replace models (transports should not be used here)
 template = ShipTemplate():setName("Guard"):setClass("Exuari", "Frigate")
 template:setModel("transport_1_1"):setRadarTrace("radar_exuari_frigate_1.png")
 template:setDescription([[The Exuari Guard is not impressive, trying to be a alround escort or defense vessel. It has powering problems, causing the reload cycle of beams and missiles to take longer than expected. The Guard is equipped with turret beams and a large stock of different missiles, including homing missiles and mines.]])

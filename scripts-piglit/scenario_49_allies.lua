@@ -1,9 +1,6 @@
--- Name: Allies and Enemies
+-- Name: Scenario: Allies and Enemies
 -- Description: The Arlenians are your allies. The Kraylors and Exuari are your enemies and will try to prevent you from completing your missions. Duration: approximately 30 minutes
----
---- Version 0
----
---- Three missions available in current version. Tested with EE version 20190910
+--- Three missions will be given to you in this scenario.
 -- Type: Replayable Mission
 -- Variation[Easy]: Easy goals and/or enemies
 -- Variation[Hard]: Hard goals and/or enemies
@@ -14,7 +11,6 @@
 require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
-
 
 --[[-----------------------------------------------------------------
       Initialization 
@@ -55,11 +51,7 @@ function init()
 	setPlots()
 	plotManager = plotDelay
 	plotM = movingObjects
-	plotCI = cargoInventory
 	plotCN = coolantNebulae
-	plotH = healthCheck		--Damage to ship can kill repair crew members
-	healthCheckTimer = 5
-	healthCheckTimerInterval = 5
 	scarceResources = false
 	doctorSearch = false
 	GMMining = "Mining"
@@ -2590,7 +2582,7 @@ end
 function placeMaverick()
 	--Maverick
 	stationMaverick = SpaceStation():setTemplate(szt()):setFaction(stationFaction):setCommsScript(""):setCommsFunction(commsStation)
-	stationMaverick:setPosition(psx,psy):setCallSign("Moverick"):setDescription("Gambling and resupply")
+	stationMaverick:setPosition(psx,psy):setCallSign("Maverick"):setDescription("Gambling and resupply")
 	stationGoodChoice = math.random(1,3)
 	if stationGoodChoice == 1 then
 		goods[stationMaverick] = {{"luxury",5,math.random(68,81)}}
@@ -3212,43 +3204,32 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 		danger = 1
 	end
 	enemyStrength = math.max(power * danger * difficulty, 5)
-	enemyPosition = 0
-	sp = irandom(400,900)			--random spacing of spawned group
-	deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
-	enemyList = {}
-	fleetPower = 0
-	while enemyStrength > 0 do
-		shipTemplateType = irandom(1,#stsl)
-		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
-			shipTemplateType = irandom(1,#stsl)
-		end
-		fleetPower = fleetPower + stsl[shipTemplateType]
-		ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
-		if enemyFaction == "Kraylor" then
-			rawKraylorShipStrength = rawKraylorShipStrength + stsl[shipTemplateType]
+	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
+	if enemyFaction == "Kraylor" then
+		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(kraylorVesselDestroyed)
-		elseif enemyFaction == "Human Navy" then
-			rawHumanShipStrength = rawHumanShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Human Navy" then
+		rawHumanShipStrength = rawHumanShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(humanVesselDestroyed)
-		elseif enemyFaction == "Exuari" then
-			rawExuariShipStrength = rawExuariShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Exuari" then
+		rawExuariShipStrength = rawExuariShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(exuariVesselDestroyed)
-		elseif enemyFaction == "Arlenians" then
-			rawArlenianShipStrength = rawArlenianShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Arlenians" then
+		rawArlenianShipStrength = rawArlenianShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(arlenianVesselDestroyed)
-		elseif enemyFaction == "Independent" then
-			rawNeutralShipStrength = rawNeutralShipStrength + stsl[shipTemplateType]
+		end
+	elseif enemyFaction == "Independent" then
+		rawNeutralShipStrength = rawNeutralShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(neutralVesselDestroyed)
 		end
-		enemyPosition = enemyPosition + 1
-		if deployConfig < 50 then
-			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
-		else
-			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
-		end
-		ship:setCommsScript(""):setCommsFunction(commsShip)
-		table.insert(enemyList, ship)
-		enemyStrength = enemyStrength - stsl[shipTemplateType]
 	end
 	fleetPower = math.max(fleetPower/danger/difficulty, 5)
 	return enemyList, fleetPower
@@ -3279,12 +3260,17 @@ function commsStation()
         services = {
             supplydrop = "friend",
             reinforcements = "friend",
+            fighters = "friend",
+            refitDrive = "friend"
         },
         service_cost = {
             supplydrop = math.random(80,120),
             reinforcements = math.random(125,175),
             phobosReinforcements = math.random(200,250),
-            stalkerReinforcements = math.random(275,325)
+            fighterInterceptor = math.random(125,175),
+            fighterBomber = math.random(150,200),
+            fighterScout = math.random(175,225),
+            refitDrive = math.random(100,200),
         },
         reputation_cost_multipliers = {
             friend = 1.0,
@@ -3787,6 +3773,25 @@ function handleDockedState()
 			end)
 		end
 	end
+	local ptype = player:getTypeName()
+	local stype = comms_target:getTypeName()
+	if isAllowedTo(comms_target.comms_data.fighters) then
+		if stype == "Large Station" or stype == "Huge Station" then
+			if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+				addCommsReply("Visit fighter bay", function()
+					handleBuyShips()
+				end)
+			end
+		end
+	end
+	if isAllowedTo(player.comms_data.refitDrive) then
+		if stype == "Huge Station" and (player:hasWarpDrive() ~= player:hasJumpDrive()) then
+			-- logical XOR with hasWarpDrive and hasJumpDrive
+			addCommsReply("Refit your ships drive", function()
+				handleChangeDrive()
+			end)
+		end
+	end
 	if comms_target:getFaction() == "Arlenians" then
 		if scarceResources then
 			addCommsReply("Where is Bespin?", function()
@@ -3987,6 +3992,82 @@ function handleDockedState()
 		end	
 	end	--end of goods present on comms target if branch
 end	--end of handleDockedState function
+
+function handleChangeDrive()
+	if player:hasWarpDrive() and not player:hasJumpDrive() then
+		setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(false)
+				player:setJumpDrive(true)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	if player:hasJumpDrive() and not player:hasWarpDrive() then
+		setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+		addCommsReply("Make it so!", function()
+			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+				setCommsMessage("Insufficient reputation")
+			else
+				player:setWarpDrive(true)
+				player:setJumpDrive(false)
+				setCommsMessage("Consider it done.")
+				return true
+			end
+		end)
+	end
+	addCommsReply("Back", mainMenu)
+end
+
+function handleBuyShips()
+	setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
+	addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
+		if not player:takeReputationPoints(getServiceCost("fighterScout")) then
+			setCommsMessage("Insufficient reputation")
+		else
+			local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
+			ship:setAutoCoolant(true)
+			ship:commandSetAutoRepair(true)
+			ship:setPosition(comms_target:getPosition())
+			setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to be manned by one of your pilots")
+			return true
+		end
+		addCommsReply("Back", mainMenu)
+	end)
+	addCommsReply("Back", mainMenu)
+end
+
+
 function setOptionalOrders()
 	optionalOrders = ""
 end
@@ -4356,27 +4437,6 @@ function handleUndockedState()
                     addCommsReply("WP" .. n, function()
 						if player:takeReputationPoints(getServiceCost("phobosReinforcements")) then
 							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Phobos T3"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
-							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
-							table.insert(friendlyHelperFleet,ship)
-							setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
-						else
-							setCommsMessage("Not enough reputation!");
-						end
-                        addCommsReply("Back", commsStation)
-                    end)
-                end
-            end
-            addCommsReply("Back", commsStation)
-        end)
-        addCommsReply("Please send Stalker Q7 reinforcements! ("..getServiceCost("stalkerReinforcements").."rep)", function()
-            if player:getWaypointCount() < 1 then
-                setCommsMessage("You need to set a waypoint before you can request reinforcements.");
-            else
-                setCommsMessage("To which waypoint should we dispatch the reinforcements?");
-                for n=1,player:getWaypointCount() do
-                    addCommsReply("WP" .. n, function()
-						if player:takeReputationPoints(getServiceCost("stalkerReinforcements")) then
-							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Stalker Q7"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
 							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
 							table.insert(friendlyHelperFleet,ship)
 							setCommsMessage("We have dispatched " .. ship:getCallSign() .. " to assist at WP" .. n);
@@ -5037,342 +5097,7 @@ function playerPower()
 	end
 	return playerShipScore
 end
---[[-----------------------------------------------------------------
-      Inventory button for relay/operations 
------------------------------------------------------------------]]--
-function cargoInventory(delta)
-	if cargoInventoryList == nil then
-		cargoInventoryList = {}
-		table.insert(cargoInventoryList,cargoInventory1)
-		table.insert(cargoInventoryList,cargoInventory2)
-		table.insert(cargoInventoryList,cargoInventory3)
-		table.insert(cargoInventoryList,cargoInventory4)
-		table.insert(cargoInventoryList,cargoInventory5)
-		table.insert(cargoInventoryList,cargoInventory6)
-		table.insert(cargoInventoryList,cargoInventory7)
-		table.insert(cargoInventoryList,cargoInventory8)
-	end
-	for pidx=1, MAX_PLAYER_SHIPS do
-		p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			gi = 1
-			cargoHoldEmpty = true
-			repeat
-				playerGoodsType = goods[p][gi][1]
-				playerGoodsQuantity = goods[p][gi][2]
-				if playerGoodsQuantity > 0 then
-					cargoHoldEmpty = false
-				end
-				gi = gi + 1
-			until(gi > #goods[p])
-			if not cargoHoldEmpty then
-				if p:hasPlayerAtPosition("Relay") then
-					if p.inventoryButton == nil then
-						local tbi = "inventory" .. p:getCallSign()
-						p:addCustomButton("Relay",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-				if p:hasPlayerAtPosition("Operations") then
-					if p.inventoryButton == nil then
-						local tbi = "inventoryOp" .. p:getCallSign()
-						p:addCustomButton("Operations",tbi,"Inventory",cargoInventoryList[pidx])
-						p.inventoryButton = true
-					end
-				end
-			end
-		end
-	end
-end
-function cargoInventory1()
-	local p = getPlayerShip(1)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory2()
-	local p = getPlayerShip(2)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory3()
-	local p = getPlayerShip(3)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory4()
-	local p = getPlayerShip(4)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory5()
-	local p = getPlayerShip(5)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory6()
-	local p = getPlayerShip(6)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory7()
-	local p = getPlayerShip(7)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
-function cargoInventory8()
-	local p = getPlayerShip(8)
-	p:addToShipLog(string.format("%s Current cargo:",p:getCallSign()),"Yellow")
-	gi = 1
-	local cargoHoldEmpty = true
-	repeat
-		local playerGoodsType = goods[p][gi][1]
-		local playerGoodsQuantity = goods[p][gi][2]
-		if playerGoodsQuantity > 0 then
-			p:addToShipLog(string.format("     %s: %i",playerGoodsType,playerGoodsQuantity),"Yellow")
-			cargoHoldEmpty = false
-		end
-		gi = gi + 1
-	until(gi > #goods[p])
-	if cargoHoldEmpty then
-		p:addToShipLog("     Empty\n","Yellow")
-	end
-	p:addToShipLog(string.format("Available space: %i",p.cargo),"Yellow")
-end
---		Coolant buttons and functions
-function coolantNebulae(delta)
-	for pidx=1, MAX_PLAYER_SHIPS do
-		local p = getPlayerShip(pidx)
-		if p ~= nil and p:isValid() then
-			local inside_gain_coolant_nebula = false
-			for i=1,#coolant_nebula do
-				if distance(p,coolant_nebula[i]) < 5000 then
-					if coolant_nebula[i].lose then
-						p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
-					end
-					if coolant_nebula[i].gain then
-						inside_gain_coolant_nebula = true
-					end
-				end
-			end
-			if inside_gain_coolant_nebula then
-				if p.get_coolant then
-					if p.coolant_trigger then
-						updateCoolantGivenPlayer(p, delta)
-					end
-				else
-					if p:hasPlayerAtPosition("Engineering") then
-						p.get_coolant_button = "get_coolant_button"
-						p:addCustomButton("Engineering",p.get_coolant_button,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-					if p:hasPlayerAtPosition("Engineering+") then
-						p.get_coolant_button_plus = "get_coolant_button_plus"
-						p:addCustomButton("Engineering+",p.get_coolant_button_plus,"Get Coolant",get_coolant_function[pidx])
-						p.get_coolant = true
-					end
-				end
-			else
-				p.get_coolant = false
-				p.coolant_trigger = false
-				p.configure_coolant_timer = nil
-				p.deploy_coolant_timer = nil
-				if p:hasPlayerAtPosition("Engineering") then
-					if p.get_coolant_button ~= nil then
-						p:removeCustom(p.get_coolant_button)
-						p.get_coolant_button = nil
-					end
-					if p.gather_coolant ~= nil then
-						p:removeCustom(p.gather_coolant)
-						p.gather_coolant = nil
-					end
-				end
-				if p:hasPlayerAtPosition("Engineering+") then
-					if p.get_coolant_button_plus ~= nil then
-						p:removeCustom(p.get_coolant_button_plus)
-						p.get_coolant_button_plus = nil
-					end
-					if p.gather_coolant_plus ~= nil then
-						p:removeCustom(p.gather_coolant_plus)
-						p.gather_coolant_plus = nil
-					end
-				end
-			end
-		end
-	end
-end
-function updateCoolantGivenPlayer(p, delta)
-	if p.configure_coolant_timer == nil then
-		p.configure_coolant_timer = delta + 5
-	end
-	p.configure_coolant_timer = p.configure_coolant_timer - delta
-	if p.configure_coolant_timer < 0 then
-		if p.deploy_coolant_timer == nil then
-			p.deploy_coolant_timer = delta + 5
-		end
-		p.deploy_coolant_timer = p.deploy_coolant_timer - delta
-		if p.deploy_coolant_timer < 0 then
-			gather_coolant_status = "Gathering Coolant"
-			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain)
-		else
-			gather_coolant_status = string.format("Deploying Collectors %i",math.ceil(p.deploy_coolant_timer - delta))
-		end
-	else
-		gather_coolant_status = string.format("Configuring Collectors %i",math.ceil(p.configure_coolant_timer - delta))
-	end
-	if p:hasPlayerAtPosition("Engineering") then
-		p.gather_coolant = "gather_coolant"
-		p:addCustomInfo("Engineering",p.gather_coolant,gather_coolant_status)
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		p.gather_coolant_plus = "gather_coolant_plus"
-		p:addCustomInfo("Engineering",p.gather_coolant_plus,gather_coolant_status)
-	end
-end
-function getCoolantGivenPlayer(p)
-	if p:hasPlayerAtPosition("Engineering") then
-		if p.get_coolant_button ~= nil then
-			p:removeCustom(p.get_coolant_button)
-			p.get_coolant_button = nil
-		end
-	end
-	if p:hasPlayerAtPosition("Engineering+") then
-		if p.get_coolant_button_plus ~= nil then
-			p:removeCustom(p.get_coolant_button_plus)
-			p.get_coolant_button_plus = nil
-		end
-	end
-	p.coolant_trigger = true
-end
-function getCoolant1()
-	local p = getPlayerShip(1)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant2()
-	local p = getPlayerShip(2)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant3()
-	local p = getPlayerShip(3)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant4()
-	local p = getPlayerShip(4)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant5()
-	local p = getPlayerShip(5)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant6()
-	local p = getPlayerShip(6)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant7()
-	local p = getPlayerShip(7)
-	getCoolantGivenPlayer(p)
-end
-function getCoolant8()
-	local p = getPlayerShip(8)
-	getCoolantGivenPlayer(p)
-end
+
 --[[-----------------------------------------------------------------
     Timed game plot
 -----------------------------------------------------------------]]--
@@ -6068,7 +5793,7 @@ function movingObjects(delta)
 		end	
 	end
 end
-function healthCheck(delta)
+--[[function healthCheck(delta)
 	healthCheckTimer = healthCheckTimer - delta
 	if healthCheckTimer < 0 then
 		if healthDiagnostic then print("health check timer expired") end
@@ -6162,7 +5887,9 @@ function crewFate(p, fatalityChance)
 			p:addCustomMessage("Engineering+",repairCrewFatalityPlus,"One of your repair crew has perished")
 		end
 	end
-end--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
+end
+--]]
+--set up players with name, goods, cargo space, reputation and either a warp drive or a jump drive if applicable
 function setPlayers()
 	local concurrentPlayerCount = 0
 	if setPlayerDiagnostic then print("local concurrent player count: " .. concurrentPlayerCount) end
@@ -6498,10 +6225,6 @@ function update(delta)
 	if plotM ~= nil then	--moving objects
 		plotM(delta)
 	end
-	if updateDiagnostic then print("plotCI") end
-	if plotCI ~= nil then	--cargo inventory
-		plotCI(delta)
-	end
 	if updateDiagnostic then print("plotH") end
 	if plotH ~= nil then	--health
 		plotH(delta)
@@ -6509,4 +6232,5 @@ function update(delta)
 	if plotCN ~= nil then	--coolant via nebula
 		plotCN(delta)
 	end
+	xanstas_player_update(delta)
 end

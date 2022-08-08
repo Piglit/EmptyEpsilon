@@ -1,4 +1,4 @@
--- Name: Close the Gaps
+-- Name: Mission: Close the Gaps
 -- Description: Using Nautilus class mine layer, lay mines across the space lanes expected to be used by invading enemies
 ---
 --- Mission advice: It's better to hit an asteroid than a mine
@@ -138,6 +138,7 @@ function init()
 	healthCheckTimerInterval = 5
 	px, py = vectorFromAngle(random(0,360),random(2500,3000))
 	player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Nautilus"):setPosition(px,py)
+    allowNewPlayerShips(false)
 	ni = math.random(1,#playerShipNamesForNautilus)
 	player:setCallSign(playerShipNamesForNautilus[ni])
 	table.remove(playerShipNamesForNautilus,ni)
@@ -4021,7 +4022,7 @@ function waves(delta)
 			end
 		end
 		if homeStation:areEnemiesInRange(2000) then
-			wakeEnemyFleet = getObjectsInRange(2000)
+			wakeEnemyFleet = comms_target:getObjectsInRange(2000)
 			for _, enemy in ipairs(wakeEnemyFleet) do
 				if enemy:isEnemy(homeStation) then
 					enemy:orderRoaming()

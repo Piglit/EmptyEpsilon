@@ -146,10 +146,8 @@ template:setRestocksScanProbes(true)
 --threat level: 12(dps)+0(tube)+12(shields)+5(hull)+0.2(speed)+0(maneuver) = 29.2 => 14.6 
 
 --[[ Hack-Sat --]]
-template = ShipTemplate():setName("XB-4"):setClass("Satellite", "Relay"):setType("playership")
+--[[template = ShipTemplate():setName("XB-4"):setClass("Satellite", "Relay"):setType("playership")
 template:setModel("SensorBuoyMKII")
-template:setDescription([[
-]])
 template:setRadarTrace("radartrace_smallstation.png")
 template:setShields(20)
 template:setHull(20)
@@ -178,5 +176,5 @@ template:addDoor( 4, 3, true)
 template:addDoor( 6, 1, false)
 template:addDoor( 4, 2, true)
 template:addDoor( 4, 1, true)
-
+--]]
 

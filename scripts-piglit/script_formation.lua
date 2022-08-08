@@ -137,3 +137,106 @@ function script_formation.spawnFormation(shipTemplate, amount, posx, posy, facti
 	return ships
 end
 
+--[[
+
+def rotate(coords):
+	"""rotate (x,y) by 45 degrees"""
+	x_0,y_0 = coords
+	x_1 = x_0+y_0
+	y_1 = -x_0+y_0
+	return (x_1, y_1)
+
+def scale(coords, factor):
+	x,y = coords
+	return (x*factor, y*factor)
+
+def add(coords, other):
+	x_0,y_0 = coords
+	x_1,y_1 = other 
+	return (x_0+x_1, y_0+y_1)
+
+def diff(coords, other):
+	x_0,y_0 = coords
+	x_1,y_1 = other 
+	return (x_1-x_0, y_1-y_0)
+
+def invert(coords):
+	"""point reflection"""
+	x,y = coords
+	return (-x,-y)
+
+def square(limit):
+	matrix = [
+		( 1, 0),
+		(-1, 0),
+		( 0, 1),
+		( 0,-1),
+	]
+	fill = [
+		( 0, 1),
+		( 0,-1),
+		(-1, 0),
+		( 1, 0),
+		( 0, 1),
+		( 0,-1),
+		(-1, 0),
+		( 1, 0),
+	]
+	for i in range(1,limit+1):
+		# 1 <- 1..
+		cpos = (i-2)%4	# <- 0..3
+		rpos = 0
+		itr = 0
+		offset = 0
+		rot = (i-2) // 4 +1
+		ring = ceil(sqrt(i))//2
+		ring_last = ((ring-1)*2+1)**2
+		pos = matrix[cpos]
+		pos = scale(pos, ring)
+		if rot % 2 == 0:
+			pos = rotate(pos)
+		if i > ring_last+8:
+			rpos = i - ring_last - 8 -1
+			offset = fill[rpos % 8]
+			itr = rpos // 8 + 1
+			offset = scale(offset, itr)
+			pos = add(pos, offset)
+		print(i, rot, ring, ring_last, rpos, offset, itr, pos)
+		yield pos
+	
+#c = [x for x in square(25)]
+
+def hexagon(limit):
+	matrix = [
+		( 2, 0),
+		(-2, 0),
+		( 1, 1),
+		(-1,-1),
+		( 1,-1),
+		(-1, 1),
+	]
+	fill = [
+		(-1, 1),
+		( 1,-1),
+		(-2, 0),
+		( 2, 0),
+		( 1, 1),
+		(-1,-1),
+	]
+
+	for i in range(1,limit+1):
+		cpos = (i-2)%6	# <- 0..5
+		ring = ceil((sqrt(8*((i-1)/6)+1)-1)/2)
+		ring_last = (ring*(ring-1))*3+1
+		pos = matrix[cpos]
+		pos = scale(pos, ring)
+		if i > ring_last +6:
+			rpos = i - ring_last - 6 -1
+			offset = fill[rpos % 6]
+			itr = rpos // 6 + 1
+			offset = scale(offset, itr)
+			pos = add(pos, offset)
+		yield pos
+
+
+--]]

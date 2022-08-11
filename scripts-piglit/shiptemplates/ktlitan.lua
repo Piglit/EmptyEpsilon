@@ -201,20 +201,19 @@ variation:setTubeDirection(1, 180)
 variation:setDescription(_(descr .. "The Diva is a mobile version of the Ktlitan Queen with one tube pointed to the rear"))
 
 variation = template:copy("Tsarina"):setLocaleName(_("ship", "Tsarina"))
-variation:setBeam()
 variation:setBeamWeapon(0, 90, -15, 1000.0, 6.0, 10)
 variation:setBeamWeapon(1, 90, -45, 1000.0, 6.0, 10)
 variation:setBeamWeapon(3, 90, 15, 1000.0, 6.0, 10)
-variation:setBeamWeapon(4, 90, 45, 1000.0, 6.0, 10:
+variation:setBeamWeapon(4, 90, 45, 1000.0, 6.0, 10)
 variation:setTubeSize(0, "small")
 variation:setTubeSize(1, "small")
 variation:setWeaponStorage("Nuke", 0)
 variation:setWeaponStorage("EMP", 0)
 variation:setWeaponStorage("Homing", 0)
 variation:setWeaponStorage("HVLI", 100)
-variation:setHull(600:
+variation:setHull(600)
 variation:setShields(100, 100, 100)
-variation:setAI("fighter")
+variation:setDefaultAI("fighter")
 variation:setDescription(_(descr .. "Undiscovered type of Ktlitan warship", "Ktlitan Tsarina is a subtype of Ktlitan Queen. It's twice as agile and durable.  " .. "It focuses on using beams and dumbfire weapons. "))
 variation:setSpeed(500, 20, 20)
 

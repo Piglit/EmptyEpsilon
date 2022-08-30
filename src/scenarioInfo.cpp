@@ -1,5 +1,6 @@
 #include "scenarioInfo.h"
 #include "resources.h"
+#include "campaign_client.h"
 #include "preferenceManager.h"
 #include <i18n.h>
 #include <unordered_set>
@@ -12,6 +13,7 @@ ScenarioInfo::ScenarioInfo(string filename)
     this->filename = filename;
     name = filename.substr(9, -4);
 
+    // load scenario from file
     P<ResourceStream> stream = getResourceStream(filename);
     if (!stream) return;
     locale = i18n::Catalogue::create("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));

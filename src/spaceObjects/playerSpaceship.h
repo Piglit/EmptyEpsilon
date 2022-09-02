@@ -267,6 +267,7 @@ public:
     void commandSendComm(uint8_t index);
     void commandSendCommPlayer(string message);
     void commandSetAutoRepair(bool enabled);
+    void commandSetAutoReloadTube(bool enabled);
     void commandSetBeamFrequency(int32_t frequency);
     void commandSetBeamSystemTarget(ESystem system);
     void commandSetShieldFrequency(int32_t frequency);

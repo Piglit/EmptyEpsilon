@@ -114,6 +114,8 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// is command on ships to require less player interaction, especially
     /// when combined with setAutoCoolant/auto_coolant_enabled.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoRepair);
+    /// Sets weapon_tube automatic weapon tube reload is enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoReloadTube);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamFrequency);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamSystemTarget);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetShieldFrequency);
@@ -287,6 +289,7 @@ static const int16_t CMD_SET_MAIN_SCREEN_OVERLAY = 0x0027;
 static const int16_t CMD_HACKING_FINISHED = 0x0028;
 static const int16_t CMD_CUSTOM_FUNCTION = 0x0029;
 static const int16_t CMD_TURN_SPEED = 0x002A;
+static const int16_t CMD_SET_AUTO_RELOAD_TUBE= 0x002B;
 
 string alertLevelToString(EAlertLevel level)
 {
@@ -332,6 +335,7 @@ PlayerSpaceship::PlayerSpaceship()
     shield_calibration_delay = 0.0;
     auto_repair_enabled = false;
     auto_coolant_enabled = false;
+    auto_reload_tube_enabled = false;
     max_coolant = max_coolant_per_system;
     scan_probe_stock = max_scan_probes;
     alert_level = AL_Normal;
@@ -367,6 +371,7 @@ PlayerSpaceship::PlayerSpaceship()
     registerMemberReplication(&auto_repair_enabled);
     registerMemberReplication(&max_coolant);
     registerMemberReplication(&auto_coolant_enabled);
+    registerMemberReplication(&auto_reload_tube_enabled);
     registerMemberReplication(&beam_system_target);
     registerMemberReplication(&comms_state);
     registerMemberReplication(&comms_open_delay, 1.0);
@@ -1451,6 +1456,9 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     case CMD_SET_AUTO_REPAIR:
         packet >> auto_repair_enabled;
         break;
+    case CMD_SET_AUTO_RELOAD_TUBE:
+        packet >> auto_reload_tube_enabled;
+        break;
     case CMD_SET_BEAM_FREQUENCY:
         {
             int32_t new_frequency;
@@ -1848,6 +1856,12 @@ void PlayerSpaceship::commandSetAutoRepair(bool enabled)
     sendClientCommand(packet);
 }
 
+void PlayerSpaceship::commandSetAutoReloadTube(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_AUTO_RELOAD_TUBE << enabled;
+    sendClientCommand(packet);
+}
 void PlayerSpaceship::commandSetBeamFrequency(int32_t frequency)
 {
     sp::io::DataBuffer packet;
@@ -2063,6 +2077,8 @@ string PlayerSpaceship::getExportLine()
         result += ":setAutoCoolant(true)";
     if (auto_repair_enabled)
         result += ":commandSetAutoRepair(true)";
+    if (auto_reload_tube_enabled)
+        result += ":commandSetAutoReloadTube(true)";
 
     // Update power factors, only for the systems where it changed.
     for (unsigned int sys_index = 0; sys_index < SYS_COUNT; ++sys_index)

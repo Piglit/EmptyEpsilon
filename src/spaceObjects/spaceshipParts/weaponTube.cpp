@@ -105,7 +105,10 @@ void WeaponTube::fire(float target_angle)
     }else{
         spawnProjectile(target_angle);
         state = WTS_Empty;
-        type_loaded = MW_None;
+        if (parent->auto_reload_tube_enabled)
+            startLoad(type_loaded);
+        else
+            type_loaded = MW_None;
     }
 }
 
@@ -243,7 +246,10 @@ void WeaponTube::update(float delta)
                 else
                 {
                     state = WTS_Empty;
-                    type_loaded = MW_None;
+                    if (parent->auto_reload_tube_enabled)
+                        startLoad(MW_HVLI);
+                    else
+                        type_loaded = MW_None;
                 }
             }
             break;

@@ -1077,6 +1077,12 @@ GuiShipTweakPlayer2::GuiShipTweakPlayer2(GuiContainer* owner)
         target->commandSetAutoRepair(value);
     });
     auto_repair_enabled->setSize(GuiElement::GuiSizeMax, 40);
+
+    auto_reload_tube_enabled = new GuiToggleButton(right_col, "", tr("button", "Auto reload tube"), [this](bool value) {
+        target->commandSetAutoReloadTube(value);
+    });
+    auto_reload_tube_enabled->setSize(GuiElement::GuiSizeMax, 40);
+
 }
 
 void GuiShipTweakPlayer2::onDraw(sp::RenderTarget& renderer)

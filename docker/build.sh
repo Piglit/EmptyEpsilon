@@ -23,8 +23,8 @@ do
     echo "Skip [${git_ref_name}]"
     continue
   fi
-  SERIOUS_PROTON_BRANCH="${git_ref_name}"
-  output="$(git ls-remote --heads https://github.com/Daid/SeriousProton "${SERIOUS_PROTON_BRANCH}")"
+  SERIOUS_PROTON_BRANCH="spacelan22"
+  output="$(git ls-remote --heads https://github.com/Piglit/SeriousProton "${SERIOUS_PROTON_BRANCH}")"
   if [ -n "${output}" ]; then
     echo "Found SeriousProton branch [${SERIOUS_PROTON_BRANCH}]."
     break
@@ -35,7 +35,7 @@ done
 
 echo "Using SeriousProton branch ${SERIOUS_PROTON_BRANCH} ..."
 
-git clone --depth=1 -b "${SERIOUS_PROTON_BRANCH}" https://github.com/Daid/SeriousProton.git "${PROJECT_DIR}"/SeriousProton
+git clone --depth=1 -b "${SERIOUS_PROTON_BRANCH}" https://github.com/Piglit/SeriousProton.git "${PROJECT_DIR}"/SeriousProton
 
 mkdir build
 cd build

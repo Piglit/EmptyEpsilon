@@ -577,7 +577,7 @@ set_target_properties(${PROJECT_NAME}
 include(InstallRequiredSystemLibraries)
 
 
-set(EE_RESOURCES resources scripts packs)
+set(EE_RESOURCES resources scripts-piglit packs)
 if(WIN32 OR STEAMSDK)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
     install(DIRECTORY ${EE_RESOURCES} DESTINATION .)

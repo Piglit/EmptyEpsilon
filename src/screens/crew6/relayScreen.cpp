@@ -318,7 +318,16 @@ void RelayScreen::onDraw(sp::RenderTarget& renderer)
         hack_target_button->setVisible(my_spaceship->getCanHack());
 
         info_reputation->setValue(string(my_spaceship->getReputationPoints(), 0));
-        info_clock->setValue(string(gameGlobalInfo->elapsed_time, 0));
+
+        // Update mission clock
+        int seconds = gameGlobalInfo->elapsed_time;
+        int minutes = (seconds / 60) % 60;
+        int hours =(seconds / 60 / 60);
+        seconds = (seconds % 60);
+        char buf[9];
+        std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
+        info_clock->setValue(string(buf));
+
         launch_probe_button->setText(tr("Launch Probe") + " (" + string(my_spaceship->scan_probe_stock) + ")");
     }
 

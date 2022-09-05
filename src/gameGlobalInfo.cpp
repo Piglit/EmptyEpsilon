@@ -427,8 +427,8 @@ static int getPlayerShipIndex(lua_State* L)
     string callsign = luaL_checkstring(L, 1);
     return gameGlobalInfo->getPlayerShipIndexByName(callsign);
 }
-/// getPlayerShipIndex(index)
-/// Return the player's ship, use -1 to get the first active player ship.
+/// int getPlayerShipIndex(string callsign)
+/// Return the player's ship index
 REGISTER_SCRIPT_FUNCTION(getPlayerShipIndex);
 
 static int getActivePlayerShips(lua_State* L)
@@ -796,6 +796,7 @@ static int sendMessageToCampaignServer(lua_State* L)
     }
     return 0;
 }
+/// int sendMessageToCampaignServer(string message)
 /// Send a message to the campaign server, if a campaign server is configured
 /// Accepts one string as parameter.
 REGISTER_SCRIPT_FUNCTION(sendMessageToCampaignServer);

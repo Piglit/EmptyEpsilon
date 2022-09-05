@@ -104,7 +104,15 @@ void OperationScreen::onDraw(sp::RenderTarget& target)
     if (science->radar_view->isVisible())
     {
         info_reputation->setValue(string(my_spaceship->getReputationPoints(), 0))->show();
-        info_clock->setValue(string(gameGlobalInfo->elapsed_time, 0))->show();
+
+        // Update mission clock
+        int seconds = gameGlobalInfo->elapsed_time;
+        int minutes = (seconds / 60) % 60;
+        int hours =(seconds / 60 / 60);
+        seconds = (seconds % 60);
+        char buf[9];
+        std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
+        info_clock->setValue(string(buf))->show();
     }
     else
     {

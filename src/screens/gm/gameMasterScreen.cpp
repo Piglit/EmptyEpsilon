@@ -348,7 +348,14 @@ void GameMasterScreen::update(float delta)
     player_comms_hail->setVisible(has_player_ship);
 
     // Update mission clock
-    info_clock->setValue(string(gameGlobalInfo->elapsed_time, 0));
+    int seconds = gameGlobalInfo->elapsed_time;
+    int minutes = (seconds / 60) % 60;
+    int hours =(seconds / 60 / 60);
+    seconds = (seconds % 60);
+    char buf[9];
+    std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
+
+    info_clock->setValue(string(buf));
 
     // Update pause button
     slow_button->setValue(engine->getGameSpeed() == 0.1f);

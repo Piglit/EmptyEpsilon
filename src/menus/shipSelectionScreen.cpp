@@ -144,6 +144,7 @@ ShipSelectionScreen::ShipSelectionScreen()
     right_container = new GuiElement(container, "");
     right_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
+    if (game_server) {
     auto right_panel = new GuiPanel(right_container, "DIRECT_OPTIONS_PANEL");
     if (game_server) {
     right_panel->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(550, 325);
@@ -156,7 +157,7 @@ ShipSelectionScreen::ShipSelectionScreen()
     right_content->setMargins(50)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
 
     // Game master button
-    if (game_server) {
+
         auto game_master_button = new GuiButton(right_content, "GAME_MASTER_BUTTON", tr("Game master"), [this]() {
             if (gameGlobalInfo->gm_control_code.length() > 0)
             {
@@ -181,7 +182,7 @@ ShipSelectionScreen::ShipSelectionScreen()
             }
         });
         game_master_button->setSize(GuiElement::GuiSizeMax, 50);
-    }
+
 
     // Spectator view button
     auto spectator_button = new GuiButton(right_content, "SPECTATOR_BUTTON", tr("Spectate (view all)"), [this]() {
@@ -217,8 +218,6 @@ ShipSelectionScreen::ShipSelectionScreen()
     });
     cinematic_button->setSize(GuiElement::GuiSizeMax, 50);
 
-    if (game_server)
-    {
         auto extra_settings_panel = new GuiPanel(this, "");
         extra_settings_panel->setSize(600, 325)->setPosition(0, 0, sp::Alignment::Center)->hide();
         auto extra_settings = new GuiElement(extra_settings_panel, "");

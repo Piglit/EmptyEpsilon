@@ -1,4 +1,5 @@
 """
+This file contains the data to control the campaign.
 What is it for?
 
 EE-Srv asks for scenarios
@@ -32,31 +33,53 @@ srv-specific file with: scenario ID (filename) + list of unlocked variations
 
 """
 from functools import partial as P
-from srvData import servers as S
+from serverControl import servers as S
 from utils import removeprefix 
 
 scenarioInfos = {
-#	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
-#	"01_test2":				{},
+	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
+	"01_test2":				{},
+
+    # Example from 2021
+	#"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos M3P")]},
 
 	# Training Tree
-	"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos M3P")]},
-	"21_training2":			{"@victory[Human Navy]": [P(S.unlockScenario, "09_outpost"), P(S.unlockShip, "Hathcock")]},
-	"22_training3":			{"@victory[Human Navy]": [P(S.unlockScenario, "05_surrounded"), P(S.unlockShip, "Piranha M5P")]},
-	"23_training4":			{"@victory[Human Navy]": [P(S.unlockScenario, "50_gaps", "*"), P(S.unlockShip, "Nautilus")]},
+	"20_training1":			{
+		#"@victory[Human Navy]": [
+		"@victory[Human Navy]": [
+			P(S.unlockScenarios, [
+				"21_training2",
+				"22_training3",
+				"23_training4",
+				("00_basic", {
+						"Enemies":	[],
+						"Time":		["30min"]
+					})]),
+			P(S.unlockShip, "Phobos M3P")]},
+	"21_training2":			{
+		"@victory[Human Navy]": [
+#			P(S.unlockScenario, "09_outpost"),
+			P(S.unlockShip, "Hathcock")]},
+	"22_training3":			{
+		"@victory[Human Navy]": [
+#			P(S.unlockScenario, "05_surrounded"),
+			P(S.unlockShip, "Piranha M5P")]},
+	"23_training4":			{
+		"@victory[Human Navy]": [
+#			P(S.unlockScenario, "50_gaps", "*"),
+			P(S.unlockShip, "Nautilus")]},
 
 	# Quick Battles
-	"01_quick_basic":		{},
 	"09_outpost":			{},
 	"05_surrounded":		{},
 	"50_gaps":				{},
 
 	# Missions - unlock for specific Crews
-	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic", "*"), P(S.unlockShip, "Atlantis")]},
-	"02_beacon":			{"@start": P(S.unlockScenario, "01e_waves", "*")},
-	"03_edgeofspace":		{"@start": P(S.unlockScenario, "01k_waves", "*")},
-	"04_gftp":				{"@start": P(S.unlockScenario, "01t_waves", "*")},
-	"49_allies":			{"@victory[Human Navy]": P(S.unlockScenarios, [("01e_waves", "*"), ("01k_waves", "*")])},
+	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic"), P(S.unlockShip, "Atlantis")]},
+	"02_beacon":			{"@start": P(S.unlockScenario, "01e_waves")},
+	"03_edgeofspace":		{"@start": P(S.unlockScenario, "01k_waves")},
+	"04_gftp":				{"@start": P(S.unlockScenario, "01t_waves")},
+	"49_allies":			{"@victory[Human Navy]": P(S.unlockScenarios, [("01e_waves"), ("01k_waves")])},
 
 	# More Battles
 	"00_basic":				{},
@@ -68,7 +91,7 @@ scenarioInfos = {
 	# Multiplayer Missions
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
-	"59_border":			{"info": {"Proxy": "192.168.2.3"}},
+	"59_border":			{},
 
 #	"06_battlefield":		{},
 #	"48_visitors":			{},
@@ -76,39 +99,12 @@ scenarioInfos = {
 #	"53_escape":			{},
 }
 
-for key in scenarioInfos:
-	filename = "scenario_"+key+".lua"
-	path = "../../scripts-piglit/"+filename
-	if "info" not in scenarioInfos[key]:
-		scenarioInfos[key]["info"] = {}
-	scenarioInfos[key]["variations"] = {}
-	assert "@victory" not in scenarioInfos[key], "keyword @victory is not allowed without a faction"
-	
-	with open(path,"r") as file:
-		state = None
-		for line in file:
-			if state == "brief":
-				if not line.startswith("---"):
-					state = None
-				else:
-					scenarioInfos[key]["info"]["Description"] += "\n"+line[3:].strip()
-					continue
-			if not line.startswith("--"):
-				break
-			line = line[2:].strip()
-			if line.startswith("Name:") and "name" not in scenarioInfos[key]:
-				scenarioInfos[key]["info"]["Name"] = line.split(":",maxsplit=1)[1].strip()
-			if line.startswith("Type:"):
-				scenarioInfos[key]["info"]["Type"] = line.split(":",maxsplit=1)[1].strip()
-			if line.startswith("Description:"):
-				scenarioInfos[key]["info"]["Description"] = line.split(":",maxsplit=1)[1].strip()
-				state = "brief"
-			if line.startswith("Variation["):
-				var, descr = line.split("[", maxsplit=1)[1].split("]", maxsplit=1)
-				descr = removeprefix(descr,":").strip()
-				scenarioInfos[key]["variations"][var] = descr
+for name in scenarioInfos:
+	assert "@victory" not in scenarioInfos[name], "keyword @victory is not allowed without a faction"
+#	filename = "scenario_"+name+".lua"
+#	path = "../../scripts-piglit/"+filename
 
-					
+	
 scenarioInfos_unused_infos = {
 "scenario_00_test.lua":					{"shipType": "Atlantis", "unlocks":["test2"]},
 "scenario_01_test2.lua":				{"shipType": "Atlantis", "unlocks":[]},

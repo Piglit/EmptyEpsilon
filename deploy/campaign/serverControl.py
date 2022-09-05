@@ -20,8 +20,9 @@ class GameServerData:
 		if serverName not in self.servers:
 			self.servers[serverName] = {
 				"scenarios": ["20_training1"],
-				"scenarioVariations": {},
-				"ships": ["Phobos M3P"]
+				"scenarioSettings": {},
+				"ships": ["Phobos M3P"],
+				"status": "idle"
 			}
 		return self.servers[serverName]
 	
@@ -29,14 +30,21 @@ class GameServerData:
 		srv = self.getOrCreateServer(serverName)
 		return srv["scenarios"]
 
-	def getScenarioVariations(self, scenarioName, serverName):
+	def getScenarioSettings(self, scenarioName, serverName):
+		"""when a setting is undefined, it is fully available to the players.
+			to enable all possible settings, set {} as setting or just leave undefined.
+			each setting contains possible values. If empty [] or undefined,
+			everything is available.
+			When only one setting is avail, use ["value"].
+			If the default entry is not available, the first entry will become default
+		"""
 		srv = self.getOrCreateServer(serverName)
 		if scenarioName not in srv["scenarios"]:
-			raise RuntimeError("try to get Variations but scenario is not unlocked: "+scenarioName)
-		if scenarioName in srv["scenarioVariations"]:
-			return srv["scenarioVariations"][scenarioName]
+			raise RuntimeError("try to get Settings but scenario is not unlocked: "+scenarioName)
+		if scenarioName in srv["scenarioSettings"]:
+			return srv["scenarioSettings"][scenarioName]
 		else:
-			return [None]
+			return {} 
 
 	def getShips(self, serverName):
 		srv = self.getOrCreateServer(serverName)
@@ -56,24 +64,18 @@ class GameServerData:
 	def clearData(self):
 		self.servers = {}
 
-	def unlockScenario(self, scenarioName, serverName, variation=None):
+	def unlockScenario(self, scenarioName, serverName, settings=None):
 		srv = self.getOrCreateServer(serverName)
-		if variation:
-			if isinstance(variation, list):
-				for var in variation:
-					self.unlockScenario(scenarioName, serverName, var)
-				return
-			assert isinstance(variation, str) or isinstance(variation, None)
-			if scenarioName not in srv["scenarioVariations"]:
-				if scenarioName in srv["scenarios"]:
-					# scenario was already unlocked without variation
-					srv["scenarioVariations"][scenarioName] = [None]
-				else:
-					srv["scenarioVariations"][scenarioName] = []
-			if variation not in srv["scenarioVariations"][scenarioName]:
-				srv["scenarioVariations"][scenarioName].append(variation)
-			if "*" in srv["scenarioVariations"][scenarioName]:
-				srv["scenarioVariations"][scenarioName] = ["*"]
+		if settings:
+			assert isinstance(settings, dict)
+			if scenarioName not in srv["scenarioSettings"]:
+				srv["scenarioSettings"][scenarioName] = {}
+			for setting, options in settings.items():
+				assert isinstance(options, list)
+				if setting not in srv["scenarioSettings"][scenarioName]:
+					srv["scenarioSettings"][scenarioName][setting] = []
+				srv["scenarioSettings"][scenarioName][setting] = list(set(srv["scenarioSettings"][scenarioName][setting] + options))	# unique
+						
 		if scenarioName not in srv["scenarios"]:
 			srv["scenarios"].append(scenarioName)
 		self.storeData()
@@ -84,7 +86,8 @@ class GameServerData:
 			if isinstance(scenario, str):
 				self.unlockScenario(scenario, serverName)
 			elif isinstance(scenario, tuple):
-				self.unlockScenario(scenario[0], serverName, variation=scenario[1])
+				settings = scenario[1]
+				self.unlockScenario(scenario[0], serverName, settings=settings)
 			else:
 				raise TypeError(scenario + " is not of type str ot tuple")
 
@@ -98,6 +101,22 @@ class GameServerData:
 		assert isinstance(shipNames, list)
 		for sn in shipNames:
 			self.unlockShip(sn, serverName)
+	
+	def getStatus(self, serverName):
+		srv = self.getOrCreateServer(serverName)
+		return srv["status"]
+
+	def getStatusAll(self):
+		entries = {}
+		for serverName in self.servers:
+			status = self.servers[serverName].get("status")
+			entries[serverName] = status
+		return entries
+
+	def setStatus(self, statusMessage, serverName):
+		srv = self.getOrCreateServer(serverName)
+		srv["status"] = statusMessage
+	
 
 servers = GameServerData()
 pyrohelper.host_named_server(servers, "campaign_state")

@@ -184,6 +184,9 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
     middle->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     GuiElement* right = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
     right->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    if (gameGlobalInfo->campaign_running) {
+        right->setSize(600, GuiElement::GuiSizeMax);
+    }
 
     (new GuiLabel(middle, "GENERAL_LABEL", tr("Scenario"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     scenario_list = new GuiListbox(middle, "SCENARIO_LIST", [this](int index, string value)
@@ -302,6 +305,9 @@ void ServerScenarioSelectionScreen::loadScenarioListFromCampaignServer()
 ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
 {
     ScenarioInfo info(filename);
+    if (gameGlobalInfo->campaign_running) {
+        info.filterSettings(campaign_client->getScenarioSettings(filename));
+    }
 
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");

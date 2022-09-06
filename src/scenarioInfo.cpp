@@ -150,6 +150,32 @@ bool ScenarioInfo::addSettingOption(string key, string option, string descriptio
     return false;
 }
 
+void ScenarioInfo::filterSettings(const std::map<string, std::vector<string> >& filter){
+
+    for (auto& [setting_key, options] : filter) {
+        // ignore empty options, keep full selectivity
+        if (!options.empty()) {
+
+            auto match_key = [setting_key](Setting s) {return s.key == setting_key;};
+            auto setting = std::find_if(std::begin(settings), std::end(settings), match_key);
+
+            auto match_value = [options](SettingOption o) {
+                return (std::find(std::begin(options), std::end(options), o.value) != std::end(options));
+            };
+            std::vector<SettingOption> target;
+            std::copy_if(std::begin(setting->options), std::end(setting->options), std::back_inserter(target), match_value);
+            setting->options.swap(target);
+
+            auto& default_option = setting->default_option;
+            auto is_default = [default_option](SettingOption o) {
+                return o.value == default_option;
+            };
+            if (std::find_if(std::begin(setting->options), std::end(setting->options), is_default) == std::end(setting->options))
+                setting->default_option = options[0];
+        }
+    }
+}
+
 const std::vector<ScenarioInfo>& ScenarioInfo::getScenarios()
 {
     if (cached_full_list.empty())

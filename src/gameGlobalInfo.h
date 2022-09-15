@@ -70,6 +70,7 @@ public:
     string scenario;
     std::unordered_map<string, string> scenario_settings;
     string scenario_filename;
+    bool campaign_running;
 
     //List of script functions that can be called from the GM interface (Server only!)
     std::list<GMScriptCallback> gm_callback_functions;

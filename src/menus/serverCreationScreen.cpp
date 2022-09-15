@@ -17,6 +17,7 @@
 #include "scenarioInfo.h"
 #include "main.h"
 #include "campaign_client.h"
+#include "screens/missionControlScreen.h"
 
 
 ServerSetupScreen::ServerSetupScreen()
@@ -36,7 +37,7 @@ ServerSetupScreen::ServerSetupScreen()
     GuiElement* row = new GuiElement(main_panel, "");
     row->setSize(GuiElement::GuiSizeMax, 50)->setAttribute("layout", "horizontal");
     (new GuiLabel(row, "NAME_LABEL", tr("Server name: "), 30))->setAlignment(sp::Alignment::CenterRight)->setSize(250, GuiElement::GuiSizeMax);
-    server_name = new GuiTextEntry(row, "SERVER_NAME", "server");
+    server_name = new GuiTextEntry(row, "SERVER_NAME", PreferencesManager::get("headless_name", "server"));
     server_name->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
     // Server password row.
@@ -166,7 +167,7 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
     GuiElement* container = new GuiElement(this, "");
     container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
 
-    if (campaign_client && campaign_client->isOnline()) {}
+    if (gameGlobalInfo->campaign_running) {}
     else {
         GuiElement* left = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
         left->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
@@ -224,7 +225,11 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
 
             // Destroy this screen and move on to ship selection.
             destroy();
-            returnToShipSelection(getRenderLayer());
+            if (gameGlobalInfo->campaign_running) {
+                new MissionControlScreen(getRenderLayer());
+            } else {
+                returnToShipSelection(getRenderLayer());
+            }
             new ScriptErrorRenderer();
         }
         else
@@ -235,12 +240,12 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50)->disable();
 
-    if (campaign_client && campaign_client->isOnline())
+    if (gameGlobalInfo->campaign_running)
         loadScenarioListFromCampaignServer();
     // Select the previously selected scenario.
     for(const auto& info : ScenarioInfo::getScenarios()) {
         if (info.name == gameGlobalInfo->scenario) {
-            if (campaign_client && campaign_client->isOnline()) {
+            if (gameGlobalInfo->campaign_running) {
                 loadScenarioListFromCampaignServer();
             }
             else
@@ -354,7 +359,12 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
 
         // Destroy this screen and move on to ship selection.
         destroy();
-        returnToShipSelection(getRenderLayer());
+
+        if (gameGlobalInfo->campaign_running) {
+            new MissionControlScreen(getRenderLayer());
+        } else {
+            returnToShipSelection(getRenderLayer());
+        }
         new ScriptErrorRenderer();
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50);

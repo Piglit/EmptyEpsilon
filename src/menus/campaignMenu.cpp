@@ -24,10 +24,9 @@
 
 CampaignMenu::CampaignMenu()
 {
-    constexpr float logo_size = 256;
     constexpr float logo_size_y = 256;
     constexpr float logo_size_x = 1024;
-    constexpr float title_y = 160;
+    constexpr float title_y = 100;
     constexpr float pos_x = 100;
     constexpr float input_size_x = 270;
 
@@ -35,20 +34,22 @@ CampaignMenu::CampaignMenu()
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
     (new GuiImage(this, "LOGO", "logo_full.png"))->setPosition(0, title_y, sp::Alignment::TopCenter)->setSize(logo_size_x, logo_size_y);
-    (new GuiLabel(this, "VERSION", tr("Space LAN Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size, sp::Alignment::TopCenter)->setSize(0, 20);
+    (new GuiLabel(this, "VERSION", tr("Space LAN Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size_y, sp::Alignment::TopCenter)->setSize(0, 20);
 
-    float pos_y = -400;
-    (new GuiLabel(this, "", tr("Ship Name:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::BottomCenter)->setSize(300, 50);
+    float pos_y = title_y + logo_size_y + 40;
+    (new GuiLabel(this, "", tr("Ship Name:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);
 
     (new GuiTextEntry(this, "SHIPNAME", PreferencesManager::get("shipname")))->callback([](string text) {
         PreferencesManager::set("shipname", text);
-    })->setPosition({pos_x, pos_y}, sp::Alignment::BottomCenter)->setSize(input_size_x, 50);
+        PreferencesManager::set("headless_name", text);
+    })->setPosition({pos_x, pos_y}, sp::Alignment::TopCenter)->setSize(input_size_x, 50);
     pos_y += 50;
 
-    (new GuiLabel(this, "", tr("Ship Password:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::BottomCenter)->setSize(300, 50);
+    (new GuiLabel(this, "", tr("Ship Password:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);
     (new GuiTextEntry(this, "PASSWORD", PreferencesManager::get("password")))->callback([](string text) {
         PreferencesManager::set("password", text);
-    })->setPosition({pos_x, pos_y}, sp::Alignment::BottomCenter)->setSize(input_size_x, 50);
+        PreferencesManager::set("headless_password", text);
+    })->setPosition({pos_x, pos_y}, sp::Alignment::TopCenter)->setSize(input_size_x, 50);
     pos_y += 70;
 
     string label;
@@ -56,8 +57,8 @@ CampaignMenu::CampaignMenu()
         label = tr("To Mission Selection");
     } else {
         label = tr("Connect");
-        (new GuiLabel(this, "SRV_LABEL", tr("Campaign Server:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::BottomCenter)->setSize(300, 50);
-        (new GuiLabel(this, "SRV_IP", PreferencesManager::get("campaign_server"), 30))->setPosition({pos_x, pos_y}, sp::Alignment::BottomCenter)->setSize(input_size_x, 50);
+        (new GuiLabel(this, "SRV_LABEL", tr("Campaign Server:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({-50, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);
+        (new GuiLabel(this, "SRV_IP", PreferencesManager::get("campaign_server"), 30))->setPosition({pos_x, pos_y}, sp::Alignment::TopCenter)->setSize(input_size_x, 50);
         pos_y += 70;
     }
     (new GuiButton(this, "SELECT_MISSION", label, [this]() {
@@ -66,10 +67,13 @@ CampaignMenu::CampaignMenu()
         {
             game_server->setServerName(PreferencesManager::get("shipname"));
             game_server->setPassword(PreferencesManager::get("password").upper());
+            if (campaign_client && campaign_client->isOnline()) {
+                gameGlobalInfo->campaign_running = true;
+            }
             new ServerScenarioSelectionScreen();
             destroy();
         }
-    }))->setPosition({0, pos_y}, sp::Alignment::BottomCenter)->setSize(300, 50);
+    }))->setPosition({0, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);
     pos_y += 50;
 
 
@@ -78,12 +82,12 @@ CampaignMenu::CampaignMenu()
         new ServerBrowserMenu(ServerBrowserMenu::Local);
         destroy();
     }));
-    join_campaign_button->setPosition({0, pos_y}, sp::Alignment::BottomCenter)->setSize(300, 50);//->hide();
+    join_campaign_button->setPosition({0, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);//->hide();
 
     (new GuiButton(this, "COLOR", tr("COLOR"), [this]() {
         new ColorSchemeMenu();
         destroy();
-    }))->setPosition({370, -50}, sp::Alignment::BottomCenter)->setSize(300, 50);
+    }))->setPosition({370, -50}, sp::Alignment::TopCenter)->setSize(300, 50);
 */
     (new GuiButton(this, "QUIT", tr("Leave Campaign"), [this]() {
            new MainMenu();

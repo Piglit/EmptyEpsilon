@@ -39,6 +39,7 @@ GameGlobalInfo::GameGlobalInfo()
     allow_main_screen_long_range_radar = true;
     gm_control_code = "";
     elapsed_time = 0.0f;
+    campaign_running = false;
 
     intercept_all_comms_to_gm = false;
 
@@ -181,7 +182,6 @@ void GameGlobalInfo::reset()
             campaign_client->notifyCampaignServer("scenario_end", nlohmann::json {
                 {"filename", scenario_filename.c_str()},
                 {"name", scenario.c_str()},
-//                {"variation", variation.c_str()},
             });
         }
         engine->getObject("scenario")->destroy();

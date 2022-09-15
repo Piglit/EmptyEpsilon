@@ -8,13 +8,10 @@
 -- @script scenario_08_atlantis
 
 --[[Problems
-no rep at start....
-Unclear who to contact for first mission
 jump ship under attack after first jump
 not clear that you need to escape
 warp scramblers not visible
 nebula in kraylor defense line makes it unclear
-jump jammers not always blocking jump?
 --]]
 
 require("utils.lua")
@@ -126,13 +123,13 @@ function init()
     shipyard_gamma = SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("Shipyard-Gamma"):setPosition(25276, 134550)
     shipyard_gamma:setCommsFunction(shipyardGammaComms)
     player:commandDock(shipyard_gamma)
-    player:addReputationPoints(5) -- Initial reputation
+    player:addReputationPoints(50) -- Initial reputation
     supply_station_6 = SpaceStation():setTemplate("Small Station"):setFaction("Human Navy"):setCallSign("Supply-6"):setPosition(14491, 126412)
     supply_station_6.comms_data = {
         -- Do not allow supply drops or reinforcements from the supply station.
         services = {
             supplydrop = "none",
-            reinforcements = "none",
+            reinforcements = "none"
         }
     }
     Nebula():setPosition(32953, 146374)
@@ -184,9 +181,9 @@ function init()
     b20_artifact.ionic_phase_shift = irandom(1, 10)
     b20_artifact.doppler_instability = irandom(1, 10)
     b20_artifact:setDescriptions(
-        _("An odd object floating in space."),
+        _("scienceDescription-artifact", "An odd object floating in space."),
         string.format(
-            _([[This object is giving off strange readings.
+            _("scienceDescription-artifact", [[This object is giving off strange readings.
 Sensor readings:
 Beta radiation: %i
 Gravity disruption: %i
@@ -200,11 +197,11 @@ Doppler instability: %i]]),
     )
 
     x, y = table.remove(b20_nebula_list, math.random(#b20_nebula_list)):getPosition()
-    b20_dummy_artifact_1 = Artifact():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):setDescriptions(_("An odd object floating in space."), _("This object seems to be inert, and not giving any readings on your sensors. The actual object must be somewhere else."))
+    b20_dummy_artifact_1 = Artifact():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):setDescriptions(_("scienceDescription-artifact", "An odd object floating in space."), _("scienceDescription-artifact", "This object seems to be inert, and not giving any readings on your sensors. The actual object must be somewhere else."))
     b20_dummy_artifact_1:setScanningParameters(3, 1)
 
     x, y = table.remove(b20_nebula_list, math.random(#b20_nebula_list)):getPosition()
-    b20_dummy_artifact_2 = Artifact():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):setDescriptions(_("An odd object floating in space."), _("This object seems to be inert, and not giving any readings on your sensors. The actual object must be somewhere else."))
+    b20_dummy_artifact_2 = Artifact():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):setDescriptions(_("scienceDescription-artifact", "An odd object floating in space."), _("scienceDescription-artifact", "This object seems to be inert, and not giving any readings on your sensors. The actual object must be somewhere else."))
     b20_dummy_artifact_2:setScanningParameters(3, 1)
 
     x, y = table.remove(b20_nebula_list, math.random(#b20_nebula_list)):getPosition()
@@ -258,6 +255,7 @@ Doppler instability: %i]]),
     SpaceStation():setTemplate("Huge Station"):setFaction("Kraylor"):setPosition(-4252, -297462)
     SpaceStation():setTemplate("Huge Station"):setFaction("Kraylor"):setPosition(-27984, -262071)
 
+    -- Setup the Kraylor forward line.
     kraylor_forward_line = {
         SpaceStation():setTemplate("Small Station"):setFaction("Kraylor"):setPosition(-7278, -197898),
         SpaceStation():setTemplate("Large Station"):setFaction("Kraylor"):setPosition(-13839, -233328),
@@ -311,12 +309,16 @@ end
 
 function phase1MessagePowerup(delta)
     if delta > 0 then
-        shipyard_gamma:sendCommsMessage(player, [[Come in ]]..player:getCallSign()..[[.
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[Come in, Atlantis-1.
+
 Good, your communication systems seems to be working.
-As you well know, you are aboard the newest version of the ]]..player:getTypeName()..[[ space explorer.
-We will take you through a few quick tests too see if the ship is operating as expected.
+
+As you well know, you are aboard the newest version of the Atlantis space explorer. We will take you through a few quick tests to see if the ship is operating as expected.
 
 First, have your engineer power up all systems to 100%, as you are currently in powered down mode.]])
+        )
         mission_state = phase1WaitForPowerup
     end
 end
@@ -327,10 +329,13 @@ function phase1WaitForPowerup(delta)
             return
         end
     end
-    --All system powered, give the next objective.
-    shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-Good, we read all systems are go. You can safely undock now.
-Head to sector K6, there is a supply drop there dropped by F-1. Pick this up to stock up on missile weapons.]])
+    -- All system powered, give the next objective.
+    shipyard_gamma:sendCommsMessage(
+        player, 
+        _("station-incCall", [[Good, Atlantis-1, we read all systems are go. You can safely undock now.
+
+Head to sector K6, where F-1 has dropped missile supplies. Pick them up to stock up on weapons.]])
+    )
     supply_drop = SupplyDrop():setFaction("Human Navy"):setPosition(29021, 114945):setEnergy(500):setWeaponStorage("Homing", 12):setWeaponStorage("Nuke", 4):setWeaponStorage("Mine", 8):setWeaponStorage("EMP", 6):setWeaponStorage("HVLI", 20)
     transport_f1:orderDock(supply_station_6)
     player:addReputationPoints(5)
@@ -338,15 +343,19 @@ Head to sector K6, there is a supply drop there dropped by F-1. Pick this up to 
 end
 
 function phase1WaitForSupplyPickup(delta)
-    --Keep the shields of the dummies charged.
+    -- Keep the shields of the dummies charged.
     target_dummy_1:setShields(300)
     target_dummy_2:setShields(300)
 
     if not supply_drop:isValid() then
-        shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-Ok, good. I see you are stocked up on missiles now.
-There are two dummy ships in your near vicinity. Now, before we test your weapon systems, first we better ID the ships to make sure we do not destroy the wrong ships.
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[I see you are stocked up on missiles now, Atlantis-1.
+
+There are two dummy ships in your vicinity. Before we test your weapon systems, we should first identify the ships to ensure we destroy the correct ones.
+
 Have your science officer scan the Dummy-1 and Dummy-2 ships to properly identify them.]])
+        )
         mission_state = phase1ScanDummyShips
         player:addReputationPoints(5)
     end
@@ -358,9 +367,14 @@ function phase1ScanDummyShips(delta)
     target_dummy_2:setShields(300)
 
     if target_dummy_1:isScannedBy(player) and target_dummy_2:isScannedBy(player) then
-        shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-Perfect. They identify as Kraylor ships, as we put fake IDs in them. Now, take out Dummy-1 with your beam weapons. Use a homing missile to take out Dummy-2,
-as the shields of Dummy-2 are configured so that your beam weapons will not penetrate them.]])
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[Perfect, Atlantis-1. They identify as Kraylor ships because we put fake IDs in them.
+
+Destroy Dummy-1 with your beam weapons, and use a homing missile to take out Dummy-2.
+
+The shields of Dummy-2 are configured so that your beam weapons will not penetrate them.]])
+        )
         mission_state = phase1DestroyDummyShips
         target_dummy_1:setShieldsMax(30)
         target_dummy_2:setShieldsMax(30)
@@ -375,11 +389,12 @@ function phase1DestroyDummyShips(delta)
     end
 
     if not target_dummy_1:isValid() and not target_dummy_2:isValid() then
-        shipyard_gamma:sendCommsMessage(player, [[Good, all weapons are operational.
-Your ship seems to be in perfect operating condition.
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[Good, all weapons are operational. Atlantis-1 seems to be in perfect operating condition.
 
-Now, when you are ready to take on your first mission. Contact us.
-(Feel free to dock with Supply-6 to resupply)]])
+When you are ready to take on your first mission, contact us at Shipyard-Gamma. You can also dock with Supply-6 to resupply.]])
+        )
         mission_state = phase1WaitForContact
         player:addReputationPoints(5)
     end
@@ -391,13 +406,18 @@ end
 
 --[[*********************************************************************--]]
 function phase2WaitForJump(delta)
-    if handleJumpCarrier(jc88, 24000, 125000, 310000, -71000, [[Hold on tight, heading for sector B20.]]) then
-        --Good, continue.
-        jc88:sendCommsMessage(player, player:getCallSign()..[[,
-Here we are. B20. Looks like there are some lingering Kraylors here.
-As we are outside of the no-fire zone, and we are at war with the Kraylor, you are free to take them out.
+    if handleJumpCarrier(jc88, 24000, 125000, 310000, -71000, _("JumpCarrier-incCall", [[Hold on tight, heading for sector B20.]])) then
+        -- Good, continue.
+        jc88:sendCommsMessage(
+            player,
+            _("JumpCarrier-incCall", [[Atlantis-1,
+
+Here we are, sector B20. Looks like there are some lingering Kraylor here.
+
+We are outside of the no-fire zone and at war with the Kraylor, so you are clear to engage.
 
 Report back when you have found the source of the odd sensor readings.]])
+        )
         mission_state = phase2SeekArtifact
     end
 end
@@ -420,14 +440,22 @@ function phase2WaitTillNearObject(delta)
 end
 
 function phase2WaitTillAwayFromObject(delta)
-    if distance(player, b20_artifact) > 2000 and distance(player, b20_artifact) < 2200 then
+    if distance(player, b20_artifact) > 2200 then
+        setCommsMessage(_("artifact-comms", [[It seems like the artifact is stablizing.
+It would be good to get some more reading a bit closer, as the nebula causes our sensor ]]))
+        mission_state = phase2WaitTillNearObject
+    elseif distance(player, b20_artifact) > 2000 then
         phase2SpawnWormhole()
     end
 end
 
 function phase2SpawnWormhole()
-    jc88:sendCommsMessage(player, player:getCallSign()..[[? What is happening?
+    jc88:sendCommsMessage(
+        player,
+        _("JumpCarrier-incCall", [[Atlantis-1, what is happening?
+
 We are reading a huge gravity surge from your direction. Get the hell out of there.]])
+    )
     x, y = b20_artifact:getPosition()
     b20_artifact:explode()
     b20_artifact.nebula:destroy() -- Remove the nebula, else it will get sucked into the wormhole. Now it just looks like the wormhole replaces the nebula.
@@ -450,24 +478,41 @@ end
 
 function phase2WaitTillWormholeWarpedPlayer(delta)
     if distance(player, 30036, -270545) < 2000 then
-        shipyard_gamma:sendCommsMessage(player, scrambleMessage(player:getCallSign()..[[,
-Come in. Come in.
-We suddenly read that your position is behind the Kraylor defense line.
+        shipyard_gamma:sendCommsMessage(
+            player,
+            scrambleMessage(_("station-incCall", [[Atlantis-1,
+
+Come in. Come in. We suddenly read that your position is behind the Kraylor defense line.
+
 Do NOT engage the Kraylor. I repeat, DO NOT ENGAGE.]]))
+        )
         mission_state = phase3FindHoleInTheKraylorDefenseLine
     end
 end
 
 function phase3FindHoleInTheKraylorDefenseLine(delta)
     px, py = player:getPosition()
-    if distance(player, -5000, -260000) < 10000 or py > -248000 or px > 75000then
+
+    if distance(player, -5000, -260000) < 10000 or py > -248000 or px > 75000 then
         if py > -248000 or px > 75000 then
-            shipyard_gamma:sendCommsMessage(player, player:getCallSign()..", \nFinally. We thought we lost you. You are not out of the woods yet.\nTry to get to sector ZU5. We are sending JC88 to get you.")
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[Atlantis-1, come in.
+
+Finally! We thought we lost you. You are not out of the woods yet, though.
+
+Try to get to sector zu5. We are sending JC88 to get you out of there.]])
+            )
         else
-            shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-Finally. We thought we lost you. You are not out of the woods yet. Search for a hole in the kraylor defenses.
-Try to get to sector ZU5. We are sending JC88 to get you out of there.]])
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[Atlantis-1, come in.
+
+Finally! We thought we lost you. You are not out of the woods yet, though.
+
+Search for a hole in the Kraylor defenses, then try to get to sector zu5. We are sending JC88 to get you out of there.]]))
         end
+
         jc88:orderFlyTowardsBlind(10000, -210000)
         mission_state = phase3EscapeTheKraylorDefenseLine
         player:addReputationPoints(5)
@@ -475,11 +520,14 @@ Try to get to sector ZU5. We are sending JC88 to get you out of there.]])
 end
 
 function phase3EscapeTheKraylorDefenseLine(delta)
-    if handleJumpCarrier(jc88, 10000, -210000, 24000, 125000, [[Hold on tight, heading for Shipyard-Gamma.]]) then
-        --Good, continue.
-        jc88:sendCommsMessage(player, [[Welcome home ]]..player:getCallSign()..[[.
-Best dock with Supply-6 to recharge and restock.
-Report back to Shipyard-Gamma for your mission report.]])
+    if handleJumpCarrier(jc88, 10000, -210000, 24000, 125000, _("JumpCarrier-incCall", [[Hold on tight, heading for Shipyard-Gamma.]])) then
+        -- Good, continue.
+        jc88:sendCommsMessage(
+            player,
+            _("JumpCarrier-incCall", [[Welcome home, Atlantis-1.
+
+Dock with Supply-6 to recharge and restock, then report to Shipyard-Gamma for your mission report.]])
+        )
         mission_state = phase3ReportBackToShipyard
         player:addReputationPoints(5)
     end
@@ -489,20 +537,23 @@ function phase3ReportBackToShipyard(delta)
     -- The shipyardGammaComms function will handle this state.
 end
 
-function phase3AnalizingData(delta)
-    phase3AnalizingData_timeout = phase3AnalizingData_timeout - delta
-    if phase3AnalizingData_timeout < 0.0 then
-        shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-We've worked through the data you collected on the anomaly that collapsed into the wormhole.
-There are traces of both Kraylor and Arlenians technology in there. Which does not make any sense. While the Arlenians are a peaceful race,
-the Kraylor are keen on trying to destroy the Arlenians.
+function phase3AnalyzingData(delta)
+    phase3AnalyzingData_timeout = phase3AnalyzingData_timeout - delta
+    if phase3AnalyzingData_timeout < 0.0 then
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[Atlantis-1, we've worked through the data you collected on the anomaly that collapsed into the wormhole.
+
+There are traces of both Kraylor and Arlenian technology in there, which does not make any sense. The Arlenians are a peaceful race, and the Kraylor are keen on trying to destroy them.
 
 We can only assume that the Kraylor stole some kind of advanced technology from the Arlenians.
 
-Recently there has been a spike in Kraylor transports near the Kraylor defense line. We have reason to believe that these transports might carry more information regarding this technology.
-We are tasking you to head back out to the Kraylor defense line, and destroy one of these transports. Take any cargo that might stay behind. It could provide valuable intel.
+We've seen an increase in Kraylor transport activity near the Kraylor defense line. We believe these transports might carry more information regarding this technology.
 
-However, do NOT engage any of the Kraylor bases directly. You are not equipped to handle a full on assault.]])
+We're tasking you to head back to the Kraylor defense line, destroy one of these transports, and recover any cargo that might remain. It could provide valuable intel.
+
+However, do NOT engage any of the Kraylor bases directly. You are not equipped to handle a full-on assault.]])
+        )
         kraylor_transport = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setCallSign("KHVT"):orderIdle()
         kraylor_transport:setCommsScript(""):setImpulseMaxSpeed(60)
         kraylor_transport.current_station = kraylor_forward_line[irandom(1, #kraylor_forward_line)]
@@ -515,12 +566,15 @@ However, do NOT engage any of the Kraylor bases directly. You are not equipped t
 end
 
 --[[*********************************************************************--]]
-
 function phase4JumpBackToKraylorLine(delta)
-    if handleJumpCarrier(jc88, 24000, 125000, 10000, -210000, [[Hold on tight, heading for Kraylor defense line.]]) then
+    if handleJumpCarrier(jc88, 24000, 125000, 10000, -210000, _("JumpCarrier-incCall", [[Hold on tight, heading for Kraylor defense line.]])) then
         -- Good, continue.
-        jc88:sendCommsMessage(player, [[We are here. Find the right moment to take out that transport, and grab the cargo and dock with us.
+        jc88:sendCommsMessage(
+            player,
+            _("JumpCarrier-incCall", [[We have arrived. Find the right moment to take out that transport, grab the cargo, and then dock with us.
+
 Expect heavy retaliation as soon as you attack the transport.]])
+        )
         mission_state = phase4DestroyTheTransport
     end
 end
@@ -541,19 +595,25 @@ function phase4DestroyTheTransport(delta)
         putKraylorDefenseLineOnFullOffense()
         kraylor_transport.drop = SupplyDrop():setFaction("Human Navy"):setPosition(kraylor_transport.x, kraylor_transport.y)
     elseif not kraylor_transport.drop:isValid() then
-        jc88:sendCommsMessage(player, [[Get back here NOW. The whole Kraylor fleet is after you. Whatever you have, it is valuable.]])
+        jc88:sendCommsMessage(
+            player,
+            _("JumpCarrier-incCall", [[Return to the carrier IMMEDIATELY. The entire Kraylor fleet is after you. Whatever you picked up must be valuable.]])
+        )
         mission_state = phase4JumpBackToShipyard
         player:addReputationPoints(5)
     end
 end
 
 function phase4JumpBackToShipyard(delta)
-    if handleJumpCarrier(jc88, 10000, -210000, 24000, 125000, [[Hold on tight, heading for Shipyard-Gamma.]]) then
+    if handleJumpCarrier(jc88, 10000, -210000, 24000, 125000, _("JumpCarrier-incCall", [[Hold on tight, heading for Shipyard-Gamma.]])) then
         -- Good, continue.
-        shipyard_gamma:sendCommsMessage(player, player:getCallSign()..[[,
-Perfect recovery. Seems like the transport was moving highly encrypted documents.
-Dock with us, and we'll take a shot at cracking them.]])
-        --Remove all the Kraylor ships from the game that where attacking the player. We no longer need them, and they could mess things up if they get the time to fly all the way to the shipyard.
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[Perfect recovery, Atlantis-1. Seems like the transport was moving highly encrypted documents.
+
+Dock with us and we'll take a shot at cracking them.]])
+        )
+        -- Remove all Kraylor ships attacking the player from the game. We no longer need them, and they could mess things up if they get the time to fly all the way to the shipyard.
         for _, ship in ipairs(kraylor_defense_line_ships) do
             if ship:isValid() then
                 ship:destroy()
@@ -567,9 +627,12 @@ end
 --[[*********************************************************************--]]
 function phase5DockWithShipyard(delta)
     if player:isDocked(shipyard_gamma) then
-        shipyard_gamma:sendCommsMessage(player, [[Thanks. We are processing these documents right now.
-Looks like the encryption is pretty advanced for Kraylor standards. However, the Kraylor do not excel at encryption.
-So it will take some time to crack this, but it is not impossible.]])
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[We are processing the recovered documents. The Kraylor do not excel at encryption, but this is pretty advanced by their standards.
+
+It will take some time to crack this, but we should be successful.]])
+        )
         cracking_delay = 30
         mission_state = phase5Cracking1
     end
@@ -579,12 +642,14 @@ function phase5Cracking1(delta)
     if player:isCommsInactive() then
         cracking_delay = cracking_delay - delta
         if cracking_delay < 0.0 then
-            shipyard_gamma:sendCommsMessage(player, [[We've cracked the first part of the documents.
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[We've cracked the first part of the documents.
 
-It looks like the Kraylor stole some advanced jump drive technology from the Arlenians.
-It has to do with something called a Heisenberg-Einstein bridge, by folding the space time fabric.
+It looks like the Kraylor stole some advanced jump drive technology from the Arlenians, something called a Heisenberg-Einstein bridge, that folds the fabric of spacetime.
 
 This seems to require particles with a negative mass. We're working on getting more information from these documents. They are a bit of a mess.]])
+            )
             cracking_delay = 30
             mission_state = phase5Cracking2
         end
@@ -595,14 +660,16 @@ function phase5Cracking2(delta)
     if player:isCommsInactive() then
         cracking_delay = cracking_delay - delta
         if cracking_delay < 0.0 then
-            shipyard_gamma:sendCommsMessage(player, [[More results from the decryption team.
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[More results from the decryption team.
 
-The Arlenians managed to create these negative mass particles. However, the end result was extremely unstable, and could collapse into a black hole at any second.
-A huge amount of power with specially formed magnetic fields is required to keep the particles stable.
+The Arlenians managed to create negative-mass particles. However, the end result was extremely unstable and could collapse into a black hole at any second. Stabilizing the particles requires a huge amount of power with specially formed magnetic fields.
 
-In the end, they did manage to make long distance travel possible, by opening a rip in the space time fabric and sending specialized ships trough this tear.
+In the end, they managed to make long-distance travel possible by opening a rip in the fabric of spacetime and sending specialized ships through this tear.
 
 We'll keep you updated with more information.]])
+            )
             cracking_delay = 30
             mission_state = phase5Cracking3
         end
@@ -613,12 +680,14 @@ function phase5Cracking3(delta)
     if player:isCommsInactive() then
         cracking_delay = cracking_delay - delta
         if cracking_delay < 0.0 then
-            shipyard_gamma:sendCommsMessage(player, [[It looks like the Kraylor were watching these experiments and waiting for their moment to steal the end result.
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[It looks like the Kraylor were watching these experiments and waiting for their moment to steal the end result.
 
-According to these documents the Kraylor actually continued the experiments at sector D20. Explaining the phenomenon you experienced there.
+According to these documents, the Kraylor continued the experiments at sector D20, explaining the phenomenon you experienced there.
 
-It does look like they were able to successfully prototype this into a working jump drive. However, the documents must have been scrambled here.
-As they go from mentioning distances of 2000U to talking about troop counts and missile storage in insane amounts.]])
+It looks like they successfully created a working prototype jump drive, but the documents must have been scrambled here, because they go from mentioning distances of 2000U to talking about infeasibly large troop counts and missile storage.]])
+            )
             cracking_delay = 30
             mission_state = phase5Cracking4
         end
@@ -629,12 +698,14 @@ function phase5Cracking4(delta)
     if player:isCommsInactive() then
         cracking_delay = cracking_delay - delta
         if cracking_delay < 0.0 then
-            shipyard_gamma:sendCommsMessage(player, [[We cracked the final piece of the puzzle.
+            shipyard_gamma:sendCommsMessage(
+                player,
+                _("station-incCall", [[We cracked the final piece of the puzzle.
 
-This is insane. It is huge. We have the plans for some kind of massive battle station. The wormhole powered jump drive is at the center of this station.
-It seems that Kraylor are actually constructing some kind of large distance moving battle station equipped with an insane amount of firepower.
+It seems that the Kraylor are constructing a long-range, moving battle station equipped with unprecedented firepower. The wormhole-powered jump drive is at the center of this station.
 
-While the technology behind the wormhole jump drive isn't stable, the Kraylor are insane enough to do this. As it will give them a huge battle advantage.]])
+While the technology behind the wormhole jump drive isn't stable, the Kraylor are reckless enough to do this in order to gain a huge tactical advantage.]])
+            )
             mission_state = phase5CrackingDone
         end
     end
@@ -642,10 +713,15 @@ end
 
 function phase5CrackingDone(delta)
     if player:isCommsInactive() then
-        shipyard_gamma:sendCommsMessage(player, [[Just detected a power surge.\nI T ' S   T H E   B A T T L E S T A T I O N ! !
+        shipyard_gamma:sendCommsMessage(
+            player,
+            _("station-incCall", [[We've just detected a power surge.
 
-All hands on deck. Man all stations, evacuate! Save what you can!]])
-        odin = CpuShip():setFaction("Kraylor"):setTemplate("Goddess of Destruction"):setCallSign("Odin"):setScanned(true):setPosition(26900, 132872):orderAttack(shipyard_gamma)
+IT'S THE BATTLE STATION!
+
+All hands on deck! Man all combat stations and evacuate all non-essential personnel! Save what you can!]])
+        )
+        odin = CpuShip():setFaction("Kraylor"):setTemplate("Odin"):setCallSign("Odin"):setScanned(true):setPosition(26900, 132872):orderAttack(shipyard_gamma)
         odin.target = shipyard_gamma
         WormHole():setPosition(23984, 126258):setTargetPosition(0, 0)
         mission_state = phase5OdinAttack
@@ -654,7 +730,7 @@ end
 
 function phase5OdinAttack(delta)
     if not odin:isValid() then -- WTF man, you get bonus points for this.
-        globalMessage(_("Bonus points for destroying the battlestation!"))
+        globalMessage(_("msgMainscreen", "Bonus points for destroying the battlestation!"))
         victory("Human Navy")
         return
     end
@@ -692,17 +768,24 @@ function shipyardGammaComms()
     -- comms_source
     -- comms_target
     if mission_state == phase1WaitForContact then
-        setCommsMessage(player:getCallSign()..[[, all ready and set to go on your first mission?]])
-        addCommsReply("Yes", function()
-            setCommsMessage([[Good.
-Your first mission will be to seek out odd readings comming from the nebula cloud in sector B20.
-Your ship is not equipped to travel this distance by itself, so we have tasked the Jump carrier JC-88 to take you there.
-Dock with JC-88 and it will handle the rest.]])
-            mission_state = phase2WaitForJump
-        end)
-        addCommsReply("No", function()
-            setCommsMessage([[Then hail us again when you are ready.]])
-        end)
+        setCommsMessage(_("station-comms", [[Atlantis-1, are you ready for your first mission?]]))
+        addCommsReply(
+            _("station-comms", "Yes."),
+            function()
+                setCommsMessage(_("station-comms", [[Good. Your first mission is to identify odd readings coming from the nebula cloud in sector B20.
+
+Your ship is not equipped to travel this distance by itself, so we have tasked jump carrier JC-88 to take you there.
+
+Dock with JC-88 and it will handle the rest.]]))
+                mission_state = phase2WaitForJump
+            end
+        )
+        addCommsReply(
+            _("station-comms", "No."),
+            function()
+                setCommsMessage(_("station-comms", [[Then hail us again when you are ready.]]))
+            end
+        )
         return
     end
     if mission_state == phase2SeekArtifact or mission_state == phase2ReportArtifactReadings then
@@ -710,16 +793,19 @@ Dock with JC-88 and it will handle the rest.]])
         return
     end
     if mission_state == phase3ReportBackToShipyard then
-        setCommsMessage(player:getCallSign()..[[,
-We've downloaded all the data you collected thanks to the short range quantum entangled data communication radar.
-We are working trough the data right now. We will contact you when we have more details.]])
-        mission_state = phase3AnalizingData
-        phase3AnalizingData_timeout = 60.0
+        setCommsMessage(_("station-comms", [[Atlantis-1,
+
+We've downloaded all the data you collected thanks to the short-range quantum-entangled data communication radar.
+
+We're working through the data and will contact you when we have more details.]]))
+        mission_state = phase3AnalyzingData
+        phase3AnalyzingData_timeout = 60.0
         return
     end
-    
-    setCommsMessage([[Good day ]]..player:getCallSign()..[[.
-Please continue with your current objective.]])
+
+    setCommsMessage(_("station-comms", [[Good day, Atlantis-1.
+
+Please continue with your current objective.]]))
 end
 
 function jc88Comms()
@@ -731,53 +817,71 @@ function jc88Comms()
         artifactReportComms()
         return
     end
-    setCommsMessage([[Jump carrier JC-88 reporting in.
-All system nominal.]])
+    setCommsMessage(_("JumpCarrier-comms", [[Jump carrier JC-88 reporting. All system nominal.]]))
 end
 
 function artifactReportComms()
-    setCommsMessage(player:getCallSign()..[[,
-Did you find the source of the odd sensor readings?]])
-    addCommsReply("Yes", function()
-        setCommsMessage([[Great, as our sensor readings are inconclusive. Can you report back your readings to us?
+    setCommsMessage(_("artifact-comms", [[Atlantis-1, did you find the source of the odd sensor readings?]]))
+    addCommsReply(
+        _("artifact-comms", "Yes."),
+        function()
+            setCommsMessage(_("artifact-comms", [[Great, because our sensor readings are inconclusive. Can you report your readings to us?
 
-First off, what is the beta radiation reading?]])
-        for beta = 1, 10 do
-            addCommsReply(beta, function()
-                setCommsMessage([[Next up, what is your Ionic phase shift reading?]])
-                for ionic = 1, 10 do
-                    addCommsReply(ionic, function()
-                        setCommsMessage([[Next up, what is your gravity disruption reading?]])
-                        for gravity = 1, 10 do
-                            addCommsReply(gravity, function()
-                                setCommsMessage([[Finally, what is your reading on doppler instability?]])
-                                for doppler = 1, 10 do
-                                    addCommsReply(doppler, function()
-                                        if b20_artifact.beta_radiation == beta and b20_artifact.gravity_disruption == gravity and b20_artifact.ionic_phase_shift == ionic and b20_artifact.doppler_instability == doppler then
-                                            if distance(player, b20_artifact) < 2000 then
-                                                setCommsMessage([[Are you sure? Those readings are really off the normal scale.
-Please move away from it, as these readings show it is very unstable!]])
-                                                mission_state = phase2WaitTillAwayFromObject
-                                            else
-                                                setCommsMessage([[Are you sure? Those readings are really off the normal scale.
-Can you move closer to the object to see if you can improve those readings. The nebula might be interfering with your sensors.]])
-                                                mission_state = phase2WaitTillNearObject
+First, what is the beta radiation reading?]]))
+            for beta = 1, 10 do
+                addCommsReply(
+                    beta,
+                    function()
+                        setCommsMessage(_("artifact-comms", [[Next, what is the ionic phase shift reading?]]))
+                        for ionic = 1, 10 do
+                            addCommsReply(
+                                ionic,
+                                function()
+                                    setCommsMessage(_("artifact-comms", [[Next, what is the gravity disruption reading?]]))
+                                    for gravity = 1, 10 do
+                                        addCommsReply(
+                                            gravity,
+                                            function()
+                                                setCommsMessage(_("artifact-comms", [[Finally, what is the doppler instability reading?]]))
+                                                for doppler = 1, 10 do
+                                                    addCommsReply(
+                                                        doppler,
+                                                        function()
+                                                            if b20_artifact.beta_radiation == beta and b20_artifact.gravity_disruption == gravity and b20_artifact.ionic_phase_shift == ionic and b20_artifact.doppler_instability == doppler then
+                                                                if distance(player, b20_artifact) < 2000 then
+                                                                    setCommsMessage(_("artifact-comms", [[Are you sure? Those readings are really off the normal scale.
+
+These readings indicate it is very unstable! Please move away from it.]]))
+                                                                    mission_state = phase2WaitTillAwayFromObject
+                                                                else
+                                                                    setCommsMessage(_("artifact-comms", [[Are you sure? Those readings are really off the normal scale.
+
+Can you move closer to the object to see if you can improve those readings? The nebula might be interfering with your sensors.]]))
+                                                                    mission_state = phase2WaitTillNearObject
+                                                                end
+                                                            else
+                                                                setCommsMessage(_("artifact-comms", [[Can you confirm your readings and report back? These numbers do not match our readings at all.]]))
+                                                            end
+                                                        end
+                                                    )
+                                                end
                                             end
-                                        else
-                                            setCommsMessage([[Are you sure? Can you double check this and get back to us. As this does not match with our readings.]])
-                                        end
-                                    end)
+                                        )
+                                    end
                                 end
-                            end)
+                            )
                         end
-                    end)
-                end
-            end)
+                    end
+                )
+            end
         end
-    end)
-    addCommsReply("No", function()
-        setCommsMessage([[Then continue looking for it.]])
-    end)
+    )
+    addCommsReply(
+        _("artifact-comms", "No."),
+        function()
+            setCommsMessage(_("artifact-comms", [[Then continue looking for it.]]))
+        end
+    )
 end
 
 function scrambleMessage(message)
@@ -797,8 +901,9 @@ function scrambleMessage(message)
         local pos = irandom(1, #message - 1)
         message = message:sub(0, pos) .. "$" .. message:sub(pos + 1)
     end
-    message = [[(The transmission is loaded with static noise)
-]] .. message
+    message = string.format(_("station-incCall", [[(The transmission is loaded with static noise.)
+
+%s]]), message)
     return message
 end
 
@@ -828,8 +933,12 @@ function handleJumpCarrier(jc, source_x, source_y, dest_x, dest_y, jumping_messa
         else
             -- You idiot. JC-88 will fly back.
             jc88:orderFlyTowardsBlind(source_x, source_y)
-            jc88:sendCommsMessage(player, [[Looks like the docking couplers detached pre-maturely.
+            jc88:sendCommsMessage(
+                player,
+                _("JumpCarrier-incCall", [[Looks like the docking couplers detached prematurely.
+
 This happens sometimes. I am on my way so we can try again.]])
+            )
         end
     end
     return false
@@ -842,7 +951,11 @@ function putKraylorDefenseLineOnFullOffense()
                 ship:orderAttack(player)
             end
         end
-        kraylor_defense_line_ships[1]:sendCommsMessage(player, [[Human intruder. Surrender yourself.]])
+
+        kraylor_defense_line_ships[1]:sendCommsMessage(
+            player,
+            _("shipEnemy-incCall", [[Surrender yourself, human intruder.]])
+        )
         kraylor_defense_line_engaged = true
     end
 end
@@ -858,15 +971,19 @@ function update(delta)
 
     -- If the player enters the Kraylor defense line, or engages a forward station, attack with all forces.
     for _, warp_jammer in ipairs(kraylor_defense_line) do
-        if distance(player, warp_jammer) < 6000 then
-            putKraylorDefenseLineOnFullOffense()
-        end
+		if warp_jammer ~= nil and warp_jammer:isValid() then
+			if distance(player, warp_jammer) < 6000 then
+				putKraylorDefenseLineOnFullOffense()
+			end
+		end
     end
 
     for _, station in ipairs(kraylor_forward_line) do
-        if distance(player, station) < 3000 then
-            putKraylorDefenseLineOnFullOffense()
-        end
+		if station ~= nil and station:isValid() then
+			if distance(player, station) < 3000 then
+				putKraylorDefenseLineOnFullOffense()
+			end
+		end
     end
 
     if mission_state ~= nil then

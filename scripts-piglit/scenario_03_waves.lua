@@ -1,8 +1,17 @@
 -- Name: Battle: Waves
 -- Description: Waves of increasingly difficult enemies attack friendly stations. There is no victory. How many waves can you destroy?
+---
+--- Spawn the player ships you want. The strength of enemy ships is independent of the number and type of player ships.
 -- Type: Basic
--- Variation[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. Players are overwhelmed more quickly, leading to shorter games.
--- Variation[Easy]: Decreases the number of ships in each wave. Good for new players, but takes longer for the players to be overwhelmed.
+-- Setting[Enemies]: Configures the amount of enemies spawned in the scenario.
+-- Enemies[Easy]: Decreases the number of ships in each wave. Good for new players, but takes longer for the players to be overwhelmed.
+-- Enemies[Normal|Default]: Normal amount of enemies. Recommended for a normal crew.
+-- Enemies[Hard]: Difficulty starts at wave 5 and increases by 1.5 after the players defeat each wave. Players are overwhelmed more quickly, leading to shorter games.
+-- Setting[Enemy Faction]: Configures the faction of enemies spawned in the scenario. Different factions attack with different types of ships.
+-- Enemy Faction[Ghosts|Default]: Ghosts attack with ships similar to the ships used by the Human Navy
+-- Enemy Faction[Exuari]: Exuari Death Squads will attack. Expect specialised ships and fighters.
+-- Enemy Faction[Kraylor]: Kraylor forces will attack. Expect heavy ships.
+-- Enemy Faction[Ktlitans]: Ktlitans will attack. Expect ships of the swarm.
 
 --- Scenario
 -- @script scenario_03_waves
@@ -36,6 +45,15 @@ function init()
     friendlyList = {}
 
     --PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
+
+    -- Give the mission to the (first) player ship
+    local text = _("goal-shipLog", [[At least one friendly base must survive.
+
+Destroy all enemy ships. After a short delay, the next wave will appear. And so on ...
+
+How many waves can you destroy?]])
+    --getPlayerShip(-1):addToShipLog(text, "white")
+
     -- Random friendly stations
     for _ = 1, 2 do
         local station = SpaceStation():setTemplate(randomStationTemplate()):setFaction("Human Navy"):setPosition(random(-5000, 5000), random(-5000, 5000))
@@ -111,6 +129,18 @@ end
 
 
 function createEnemyGroup(difficulty)
+    if getScenarioSetting("Enemy Faction") == "Ghosts" then
+		return createEnemyGroupGhosts(difficulty)
+    elseif getScenarioSetting("Enemy Faction") == "Exuari" then
+		return createEnemyGroupExuari(difficulty)
+    elseif getScenarioSetting("Enemy Faction") == "Kraylor" then
+		return createEnemyGroupKraylor(difficulty)
+    elseif getScenarioSetting("Enemy Faction") == "Ktlitans" then
+		return createEnemyGroupKtlitans(difficulty)
+	end
+end
+
+function createEnemyGroupGhosts(difficulty)
     local faction = "Ghosts"
     -- all human ships are possible.
     -- groups are sorted by color (faction)
@@ -191,16 +221,185 @@ function createEnemyGroup(difficulty)
     return enemyList
 end
 
+function createEnemyGroupExuari(difficulty)
+    -- Exuari attack groups consist of different ship types
+    -- different types have different speeds (sorted by groups)
+    local faction = "Exuari"
+    local enemyList = {}
+    local totalScore = 0
+    -- TODO match cost/difficulty with other waves scenarios
+    local costs = {
+        ["Dagger"]= 4,
+        ["Blade"]= 5,
+        ["Gunner"]= 4,
+        ["Shooter"]= 5,
+        ["Jagger"]= 5,
+        ["Racer"]= 25,
+        ["Hunter"]= 30,
+        ["Strike"]= 25,
+        ["Dash"]= 30,
+        ["Guard"]= 20,
+        ["Sentinel"]= 15,
+        ["Warden"]= 20,
+        ["Flash"]= 25,
+        ["Ranger"]= 30,
+        ["Buster"]= 25,
+        ["Ryder"]= 50,
+        ["Fortress"]= 100,
+    }
+    local groups = {
+        {"Dagger", "Blade", "Gunner", "Shooter", "Jagger"},
+        {"Racer", "Hunter", "Strike", "Dash"},
+        {"Guard", "Sentinel", "Warden"},
+        {"Flash", "Ranger", "Buster"},
+        {"Ryder", "Fortress"}
+    }
+
+    local groupIdx = 0
+    while totalScore < difficulty do
+        groupIdx = (groupIdx % #groups) + 1
+        local tmpl = groups[groupIdx][math.random(#(groups[groupIdx]))]
+        local cost = costs[tmpl]
+        if cost == nil then
+            cost = 5
+        end
+        if cost < difficulty - totalScore + 5 then
+            local ship = CpuShip():setFaction(faction):setTemplate(tmpl)
+            totalScore = totalScore + cost
+            table.insert(enemyList, ship)
+        end
+    end
+
+    return enemyList
+end
+
+function createEnemyGroupKraylor(difficulty)
+    local faction = "Kraylor"
+    local enemyList = {}
+    local totalScore = 0
+    local costs = {
+        ["Drone"]= 5,
+        ["Rockbreaker"]= 22,
+        ["Rockbreaker Merchant"]= 25,
+        ["Rockbreaker Murderer"]= 26,
+        ["Rockbreaker Mercenary"]= 28,
+        ["Rockbreaker Marauder"]= 30,
+        ["Rockbreaker Military"]= 32,
+        ["Spinebreaker"]= 24,
+        ["Deathbringer"]= 47,
+        ["Painbringer"]= 50,
+        ["Doombringer"]= 65,
+        ["Battlestation"]= 70,
+        ["Goddess of Destruction"]= 170,
+    }
+    local destroyers = {"Deathbringer", "Painbringer", "Doombringer"}
+    local gunships = {"Rockbreaker", "Rockbreaker Merchant", "Rockbreaker Murderer", "Rockbreaker Mercenary", "Rockbreaker Marauder", "Rockbreaker Military", "Spinebreaker"}
+    local dest = math.random(math.floor(difficulty/6), math.floor(difficulty/3)) -- max d/3 points in destroyers
+
+	local tmpl
+	local cost
+    while totalScore < difficulty do
+        local ship = CpuShip():setFaction(faction)
+        if (difficulty - totalScore) > 20 then
+            if dest > 25 then
+                tmpl = destroyers[math.random(#destroyers)]
+                cost = costs[tmpl]
+                if cost == nil then
+                    cost = 50
+                end
+                ship:setTemplate(tmpl)
+                totalScore = totalScore + cost
+                dest = dest - cost
+            else
+                tmpl = gunships[math.random(#gunships)]
+                cost = costs[tmpl]
+                if cost == nil then
+                    cost = 25
+                end
+                ship:setTemplate(tmpl)
+                totalScore = totalScore + cost 
+            end
+            dest = dest - cost
+            script_hangar.create(ship, "Drone", 3, function (_, fighter, _)
+                table.insert(enemyList, fighter)
+            end)
+        else
+            ship:setTemplate("Drone")
+            totalScore = totalScore + 5 
+        end
+        table.insert(enemyList, ship)
+    end
+
+    return enemyList
+end
+
+function createEnemyGroupKtlitans(difficulty)
+    -- Ktlitan attack groups consist of different ship types
+    -- different types have different speeds (sorted by groups)
+    local faction = "Ktlitans"
+    local enemyList = {}
+    local totalScore = 0
+    local costs = {
+        ["Ktlitan Drone"]= 3,
+        ["Ktlitan Worker"]= 5,
+        ["Ktlitan Fighter"]= 7,
+        ["Ktlitan Breaker"]= 12,
+        ["Ktlitan Scout"]= 10,
+        ["Ktlitan Feeder"]= 15,
+        ["Ktlitan Destroyer"]= 45,
+        ["Ktlitan Queen"]= 64,
+    }
+	local hierarchy = {
+        "Ktlitan Queen",
+        "Ktlitan Destroyer",
+        "Ktlitan Feeder",
+        "Ktlitan Scout",
+        "Ktlitan Breaker",
+        "Ktlitan Fighter",
+        "Ktlitan Worker",
+        "Ktlitan Drone",
+	}
+    
+    local hierarchyIdx = 0
+	local maxAmount = 0
+    while totalScore < difficulty do
+		hierarchyIdx = hierarchyIdx +1
+		maxAmount = maxAmount + 1
+		if hierarchyIdx > #hierarchy then
+			hierarchyIdx = 2
+			maxAmount = 2
+		end
+        local tmpl = hierarchy[hierarchyIdx]
+        local cost = costs[tmpl]
+        if cost == nil then
+            cost = 5
+        end
+		local actualMax = math.random(1,maxAmount)
+		for i=1,actualMax do
+			if cost < difficulty - totalScore + 5 then
+				local ship = CpuShip():setFaction(faction):setTemplate(tmpl)
+				totalScore = totalScore + cost
+				table.insert(enemyList, ship)
+			end
+		end
+    end
+    return enemyList
+end
+
+
+
 function spawnWave()
     waveNumber = waveNumber + 1
+    getPlayerShip(-1):addToShipLog(string.format(_("shipLog", "Wave %d"), waveNumber), "red")
     friendlyList[1]:addReputationPoints(150 + waveNumber * 15)
 
+    enemyList = {}
 
     -- Calculate score of wave
     local totalScoreRequirement  -- actually: remainingScoreRequirement
-    if getScenarioVariation() == "Hard" then
+    if getScenarioSetting("Enemies") == "Hard" then
         totalScoreRequirement = math.pow(waveNumber * 1.5 + 4, 1.3) * 10
-    elseif getScenarioVariation() == "Easy" then
+    elseif getScenarioSetting("Enemies") == "Easy" then
         totalScoreRequirement = math.pow(waveNumber * 0.8, 1.3) * 9
     else
         totalScoreRequirement = math.pow(waveNumber, 1.3) * 10
@@ -217,7 +416,7 @@ function spawnWave()
         table.insert(enemyList, ship);
     end
 
-    globalMessage(string.format(_("Wave %d"), waveNumber))
+    globalMessage(string.format(_("msgMainscreen", "Wave %d"), waveNumber))
 end
 
 function update(delta)
@@ -250,7 +449,8 @@ function update(delta)
     -- Continue ...
     if enemy_count == 0 then
         spawnWaveDelay = 15.0
-        globalMessage(_("Wave cleared!"))
+        globalMessage(_("msgMainscreen", "Wave cleared!"))
+        getPlayerShip(-1):addToShipLog(string.format(_("shipLog", "Wave %d cleared."), waveNumber), "green")
     end
     -- ... or lose
     if friendly_count == 0 then

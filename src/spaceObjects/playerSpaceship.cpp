@@ -441,8 +441,14 @@ PlayerSpaceship::PlayerSpaceship()
         addToShipLog(tr("shiplog", "Start of log"), colorConfig.log_generic);
     }
 
-    // Initialize player ship callsigns with a "PL" designation.
-    setCallSign("PL" + string(getMultiplayerId()));
+    string shipname = PreferencesManager::get("shipname");
+    if (game_server && shipname != "" && gameGlobalInfo->getPlayerShipIndexByName(shipname) == -1) {
+        // Initialize player ship callsign with configurated name
+        setCallSign(shipname);
+    } else {
+        // Initialize player ship callsigns with a "PL" designation.
+        setCallSign("PL" + string(getMultiplayerId()));
+    }
 }
 
 //due to a suspected compiler bug this deconstructor needs to be explicitly defined

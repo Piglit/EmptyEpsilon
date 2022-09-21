@@ -75,7 +75,7 @@ function init()
     placeRandomAroundPoint(Nebula, 5, 10000, 60000, -10000, 10000)
 
     -- Spawn the player
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setPosition(-22000, 44000):setCallSign("Epsilon")
+    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setPosition(-22000, 44000)
     allowNewPlayerShips(false)
 
     -- Start the mission
@@ -83,15 +83,15 @@ function init()
     mission_timer = 0
     stakhanov:sendCommsMessage(
         player,
-        _("goal-incCall", [[Your R&R aboard the Marco Polo is brought to quick end by an urgent broadcast from Central Command:
+        string.format(_("goal-incCall", [[Your R&R aboard the Marco Polo is brought to quick end by an urgent broadcast from Central Command:
 
-"Epsilon, please come in.
+"%s, please come in.
 
 We have an emergency situation. Our sensors detect that a hostile Ktlitan swarm just jumped into your sector, with the main force heading for the Stakhanov Mining Complex. Proceed at once to Stakhanov and assist in the defence.
 
 Be careful of the dense asteroid agglomeration en route to the SMC.
 
-I repeat, this is not an exercise! Proceed at once to Stakhanov."]])
+I repeat, this is not an exercise! Proceed at once to Stakhanov."]]), player:getCallSign())
     )
 end
 
@@ -238,9 +238,9 @@ function commsHackedShipCompare(freq_min, freq_max)
             _("HackedShip-comms", "Deploy patch."),
             function()
                 comms_target:setFaction("Human Navy")
-                setCommsMessage(_("HackedShip-comms", [[The patch removes the exploit used to remotely control the ship. After a few seconds, the captain comes in:
+                setCommsMessage(string.format(_("HackedShip-comms", [[The patch removes the exploit used to remotely control the ship. After a few seconds, the captain comes in:
 
-"You saved us! Hurray for Epsilon!"]]))
+"You saved us! Hurray for %s!"]]), player:getCallSign()))
             end
         )
     else
@@ -307,11 +307,11 @@ URGENCY AND DISCRETION ARE KEY -STOP-]]))
     -- When player is near Black Site 114, reveal it, then pop defenders and attackers
     if (main_mission == 3) and (distance(player, bs114) < 12000) and (bs114:sendCommsMessageNoLog(
         player,
-        _("incCall", [[You recieve another Human Navy-encrypted communication:
+        string.format(_("incCall", [[You recieve another Human Navy-encrypted communication:
 
-"Epsilon, please come in. This is the Black Site #114 dispatch relay. We are under heavy assault by a portion of the main Ktlitan fleet!
+"%s, please come in. This is the Black Site #114 dispatch relay. We are under heavy assault by a portion of the main Ktlitan fleet!
 
-Location of the base is on a need-to-know basis, so we trust your discretion."]])
+Location of the base is on a need-to-know basis, so we trust your discretion."]]), player:getCallSign())
         )
     )
     then
@@ -378,9 +378,9 @@ However, the other ships seem to be less lucky. Most go offline, and others are 
         if (ghost_hacker:isValid()) and (distance(ghost_hacker, bs114) < 2000) and (hacker_board == 0) then
             bs114:sendCommsMessage(
                 player,
-                _("incCall", [[You hear the panicked voice of the Black Site #114 dispatcher:
+                string.format(_("incCall", [[You hear the panicked voice of the Black Site #114 dispatcher:
 
-"Epsilon, the unidentified ship is preparing for a boarding maneuver! Take out that gorram ship, NOW!"]])
+"%s, the unidentified ship is preparing for a boarding maneuver! Take out that gorram ship, NOW!"]]), player:getCallSign())
             )
             ghost_hacker:orderDock(bs114)
             hacker_board = 1
@@ -412,9 +412,9 @@ Whatever that means, it cannot be good.]])
         if (hacked == 1) then
             stakhanov:sendCommsMessage(
                 player,
-                _("incCall", [[Central Command relay's incredulous voice comes in:
+                string.format(_("incCall", [[Central Command relay's incredulous voice comes in:
 
-"The hell, Epsilon? Fall back immediately to Marco Polo. We will send a security detail to extract you. Time to call in the big guns, I guess."]])
+"The hell, %s? Fall back immediately to Marco Polo. We will send a security detail to extract you. Time to call in the big guns, I guess."]]), player:getCallSign())
             )
 
             if korolev:isValid() then
@@ -447,7 +447,7 @@ Whatever that means, it cannot be good.]])
         if (hacked == 0) then
             bs114:sendCommsMessage(
                 player,
-                _("incCall", [[After the silence, Black Site #114's dispatch comes in again:
+                string.format(_("incCall", [[After the silence, Black Site #114's dispatch comes in again:
 
 "The Engineering team identified the payload activated by the unknown ship. It was a mass hacking device which turned our ships against us.
 
@@ -455,7 +455,7 @@ Even if these ship's relays are down, reverse engineering teams think there is a
 
 Get near the infected ships, find a back door using the frequency LEAST absorbed by their shields, and deploy our patches.
 
-Godspeed, Epsilon."]])
+Godspeed, %s."]]), player:getCallSign())
             )
 
             if korolev:isValid() then
@@ -607,9 +607,9 @@ We are both ready to continue our purpose, it seems."]])
         -- If the player is near the NSA, spawn a Ghost attack.
         if (hacked == 1) and (distance(player, nsa) < 10000) and (stakhanov:sendCommsMessageNoLog(
             player,
-            _("incCall", [[Central Command comes in:
+            string.format(_("incCall", [[Central Command comes in:
 
-"Bogeys on their way to the NSA, Epsilon. Take care of them."]])))
+"Bogeys on their way to the NSA, %s. Take care of them."]]), player:getCallSign())))
         then
             gfighter1 = CpuShip():setTemplate("MT52 Hornet"):setCallSign("Z-1"):setFaction("Ghosts"):setPosition(-20000, -10000):orderFlyTowards(5000, 5000)
             gfighter2 = CpuShip():setTemplate("MT52 Hornet"):setCallSign("Z-2"):setFaction("Ghosts"):setPosition(-20000, -10000):orderFlyTowards(5000, 5000)
@@ -703,7 +703,7 @@ Escort our recovery team to infiltrate and extract information from the Swarm Co
         if (hacked == 1) and (not bs114:isValid()) then
             stakhanov:sendCommsMessage(
                 player,
-                _("incCall", [[The fallen station is down. Epsilon, gather as soon as possible with the other ships in sector H6.]])
+                string.format(_("incCall", [[The fallen station is down. %s, gather as soon as possible with the other ships in sector H6.]]), player:getCallSign())
             )
             main_mission = 12
         end

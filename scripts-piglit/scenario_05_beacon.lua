@@ -18,7 +18,7 @@ require("script_hangar.lua")
 function init()
     -- Create the main ship for the players.
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
-    player:setPosition(22400, 18200):setCallSign("Epsilon")
+    player:setPosition(22400, 18200)
     allowNewPlayerShips(false)
 
     research_station = SpaceStation():setTemplate("Small Station"):setFaction("Human Navy")
@@ -69,12 +69,12 @@ function init()
     -- Start off the mission by sending a transmission to the player
     research_station:sendCommsMessage(
         player,
-        _("goal-incCall", [[Epsilon, please come in.
+        string.format(_("goal-incCall", [[%s, please come in.
 
 We lost contact with one of our transports, callsign RT-4, transporting the diplomat named J.J. Johnson. They were heading from our research station to Orion-5.
 
 Our last contact with RT-4 was before it entered the nebula at sector G5. The nebula is blocking our long-range scans, so we're asking you to investigate and recover RT-4 if possible.]])
-    )
+    ), player:getCallSign())
     -- Set the initial mission state
     mission_state = missionStartState
 end

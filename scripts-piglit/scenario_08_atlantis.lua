@@ -92,7 +92,7 @@ function init()
     -- Create the main ship for the players.
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
     allowNewPlayerShips(false)
-    player:setPosition(25276, 133850):setCallSign("Atlantis-1"):setRotation(-90):commandTargetRotation(-90)
+    player:setPosition(25276, 133850):setRotation(-90):commandTargetRotation(-90)
 
     -- Set all systems to 0 power.
     for _, system in ipairs(
@@ -311,13 +311,13 @@ function phase1MessagePowerup(delta)
     if delta > 0 then
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[Come in, Atlantis-1.
+            string.format(_("station-incCall", [[Come in, %s.
 
 Good, your communication systems seems to be working.
 
 As you well know, you are aboard the newest version of the Atlantis space explorer. We will take you through a few quick tests to see if the ship is operating as expected.
 
-First, have your engineer power up all systems to 100%, as you are currently in powered down mode.]])
+First, have your engineer power up all systems to 100%, as you are currently in powered down mode.]]), player:getCallSign())
         )
         mission_state = phase1WaitForPowerup
     end
@@ -332,9 +332,9 @@ function phase1WaitForPowerup(delta)
     -- All system powered, give the next objective.
     shipyard_gamma:sendCommsMessage(
         player, 
-        _("station-incCall", [[Good, Atlantis-1, we read all systems are go. You can safely undock now.
+        string.format(_("station-incCall", [[Good, %s, we read all systems are go. You can safely undock now.
 
-Head to sector K6, where F-1 has dropped missile supplies. Pick them up to stock up on weapons.]])
+Head to sector K6, where F-1 has dropped missile supplies. Pick them up to stock up on weapons.]]), player:getCallSign())
     )
     supply_drop = SupplyDrop():setFaction("Human Navy"):setPosition(29021, 114945):setEnergy(500):setWeaponStorage("Homing", 12):setWeaponStorage("Nuke", 4):setWeaponStorage("Mine", 8):setWeaponStorage("EMP", 6):setWeaponStorage("HVLI", 20)
     transport_f1:orderDock(supply_station_6)
@@ -350,11 +350,11 @@ function phase1WaitForSupplyPickup(delta)
     if not supply_drop:isValid() then
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[I see you are stocked up on missiles now, Atlantis-1.
+            string.format(_("station-incCall", [[I see you are stocked up on missiles now, %s.
 
 There are two dummy ships in your vicinity. Before we test your weapon systems, we should first identify the ships to ensure we destroy the correct ones.
 
-Have your science officer scan the Dummy-1 and Dummy-2 ships to properly identify them.]])
+Have your science officer scan the Dummy-1 and Dummy-2 ships to properly identify them.]]), player:getCallSign())
         )
         mission_state = phase1ScanDummyShips
         player:addReputationPoints(5)
@@ -369,11 +369,11 @@ function phase1ScanDummyShips(delta)
     if target_dummy_1:isScannedBy(player) and target_dummy_2:isScannedBy(player) then
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[Perfect, Atlantis-1. They identify as Kraylor ships because we put fake IDs in them.
+            string.format(_("station-incCall", [[Perfect, %s. They identify as Kraylor ships because we put fake IDs in them.
 
 Destroy Dummy-1 with your beam weapons, and use a homing missile to take out Dummy-2.
 
-The shields of Dummy-2 are configured so that your beam weapons will not penetrate them.]])
+The shields of Dummy-2 are configured so that your beam weapons will not penetrate them.]]), player:getCallSign())
         )
         mission_state = phase1DestroyDummyShips
         target_dummy_1:setShieldsMax(30)
@@ -391,9 +391,9 @@ function phase1DestroyDummyShips(delta)
     if not target_dummy_1:isValid() and not target_dummy_2:isValid() then
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[Good, all weapons are operational. Atlantis-1 seems to be in perfect operating condition.
+            string.format(_("station-incCall", [[Good, all weapons are operational. %s seems to be in perfect operating condition.
 
-When you are ready to take on your first mission, contact us at Shipyard-Gamma. You can also dock with Supply-6 to resupply.]])
+When you are ready to take on your first mission, contact us at Shipyard-Gamma. You can also dock with Supply-6 to resupply.]]), player:getCallSign())
         )
         mission_state = phase1WaitForContact
         player:addReputationPoints(5)
@@ -410,13 +410,13 @@ function phase2WaitForJump(delta)
         -- Good, continue.
         jc88:sendCommsMessage(
             player,
-            _("JumpCarrier-incCall", [[Atlantis-1,
+            string.format(_("JumpCarrier-incCall", [[%s,
 
 Here we are, sector B20. Looks like there are some lingering Kraylor here.
 
 We are outside of the no-fire zone and at war with the Kraylor, so you are clear to engage.
 
-Report back when you have found the source of the odd sensor readings.]])
+Report back when you have found the source of the odd sensor readings.]]), player:getCallSign())
         )
         mission_state = phase2SeekArtifact
     end
@@ -452,9 +452,9 @@ end
 function phase2SpawnWormhole()
     jc88:sendCommsMessage(
         player,
-        _("JumpCarrier-incCall", [[Atlantis-1, what is happening?
+        string.format(_("JumpCarrier-incCall", [[%s, what is happening?
 
-We are reading a huge gravity surge from your direction. Get the hell out of there.]])
+We are reading a huge gravity surge from your direction. Get the hell out of there.]]), player:getCallSign())
     )
     x, y = b20_artifact:getPosition()
     b20_artifact:explode()
@@ -480,11 +480,11 @@ function phase2WaitTillWormholeWarpedPlayer(delta)
     if distance(player, 30036, -270545) < 2000 then
         shipyard_gamma:sendCommsMessage(
             player,
-            scrambleMessage(_("station-incCall", [[Atlantis-1,
+            scrambleMessage(string.format(_("station-incCall", [[%s,
 
 Come in. Come in. We suddenly read that your position is behind the Kraylor defense line.
 
-Do NOT engage the Kraylor. I repeat, DO NOT ENGAGE.]]))
+Do NOT engage the Kraylor. I repeat, DO NOT ENGAGE.]]), player:getCallSign()))
         )
         mission_state = phase3FindHoleInTheKraylorDefenseLine
     end
@@ -497,20 +497,20 @@ function phase3FindHoleInTheKraylorDefenseLine(delta)
         if py > -248000 or px > 75000 then
             shipyard_gamma:sendCommsMessage(
                 player,
-                _("station-incCall", [[Atlantis-1, come in.
+                string.format(_("station-incCall", [[%s, come in.
 
 Finally! We thought we lost you. You are not out of the woods yet, though.
 
-Try to get to sector zu5. We are sending JC88 to get you out of there.]])
+Try to get to sector zu5. We are sending JC88 to get you out of there.]]), player:getCallSign())
             )
         else
             shipyard_gamma:sendCommsMessage(
                 player,
-                _("station-incCall", [[Atlantis-1, come in.
+                string.format(_("station-incCall", [[%s, come in.
 
 Finally! We thought we lost you. You are not out of the woods yet, though.
 
-Search for a hole in the Kraylor defenses, then try to get to sector zu5. We are sending JC88 to get you out of there.]]))
+Search for a hole in the Kraylor defenses, then try to get to sector zu5. We are sending JC88 to get you out of there.]]), player:getCallSign()))
         end
 
         jc88:orderFlyTowardsBlind(10000, -210000)
@@ -524,9 +524,9 @@ function phase3EscapeTheKraylorDefenseLine(delta)
         -- Good, continue.
         jc88:sendCommsMessage(
             player,
-            _("JumpCarrier-incCall", [[Welcome home, Atlantis-1.
+            string.format(_("JumpCarrier-incCall", [[Welcome home, %s.
 
-Dock with Supply-6 to recharge and restock, then report to Shipyard-Gamma for your mission report.]])
+Dock with Supply-6 to recharge and restock, then report to Shipyard-Gamma for your mission report.]]), player:getCallSign())
         )
         mission_state = phase3ReportBackToShipyard
         player:addReputationPoints(5)
@@ -542,7 +542,7 @@ function phase3AnalyzingData(delta)
     if phase3AnalyzingData_timeout < 0.0 then
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[Atlantis-1, we've worked through the data you collected on the anomaly that collapsed into the wormhole.
+            string.format(_("station-incCall", [[%s, we've worked through the data you collected on the anomaly that collapsed into the wormhole.
 
 There are traces of both Kraylor and Arlenian technology in there, which does not make any sense. The Arlenians are a peaceful race, and the Kraylor are keen on trying to destroy them.
 
@@ -552,7 +552,7 @@ We've seen an increase in Kraylor transport activity near the Kraylor defense li
 
 We're tasking you to head back to the Kraylor defense line, destroy one of these transports, and recover any cargo that might remain. It could provide valuable intel.
 
-However, do NOT engage any of the Kraylor bases directly. You are not equipped to handle a full-on assault.]])
+However, do NOT engage any of the Kraylor bases directly. You are not equipped to handle a full-on assault.]]), player:getCallSign())
         )
         kraylor_transport = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setCallSign("KHVT"):orderIdle()
         kraylor_transport:setCommsScript(""):setImpulseMaxSpeed(60)
@@ -609,9 +609,9 @@ function phase4JumpBackToShipyard(delta)
         -- Good, continue.
         shipyard_gamma:sendCommsMessage(
             player,
-            _("station-incCall", [[Perfect recovery, Atlantis-1. Seems like the transport was moving highly encrypted documents.
+            string.format(_("station-incCall", [[Perfect recovery, %s. Seems like the transport was moving highly encrypted documents.
 
-Dock with us and we'll take a shot at cracking them.]])
+Dock with us and we'll take a shot at cracking them.]]), player:getCallSign())
         )
         -- Remove all Kraylor ships attacking the player from the game. We no longer need them, and they could mess things up if they get the time to fly all the way to the shipyard.
         for _, ship in ipairs(kraylor_defense_line_ships) do
@@ -768,7 +768,7 @@ function shipyardGammaComms()
     -- comms_source
     -- comms_target
     if mission_state == phase1WaitForContact then
-        setCommsMessage(_("station-comms", [[Atlantis-1, are you ready for your first mission?]]))
+        setCommsMessage(string.format(_("station-comms", [[%s, are you ready for your first mission?]]), player:getCallSign()))
         addCommsReply(
             _("station-comms", "Yes."),
             function()
@@ -793,19 +793,19 @@ Dock with JC-88 and it will handle the rest.]]))
         return
     end
     if mission_state == phase3ReportBackToShipyard then
-        setCommsMessage(_("station-comms", [[Atlantis-1,
+        setCommsMessage(string.format(_("station-comms", [[%s,
 
 We've downloaded all the data you collected thanks to the short-range quantum-entangled data communication radar.
 
-We're working through the data and will contact you when we have more details.]]))
+We're working through the data and will contact you when we have more details.]]), player:getCallSign()))
         mission_state = phase3AnalyzingData
         phase3AnalyzingData_timeout = 60.0
         return
     end
 
-    setCommsMessage(_("station-comms", [[Good day, Atlantis-1.
+    setCommsMessage(string.format(_("station-comms", [[Good day, %s.
 
-Please continue with your current objective.]]))
+Please continue with your current objective.]]), player:getCallSign()))
 end
 
 function jc88Comms()
@@ -821,7 +821,7 @@ function jc88Comms()
 end
 
 function artifactReportComms()
-    setCommsMessage(_("artifact-comms", [[Atlantis-1, did you find the source of the odd sensor readings?]]))
+    setCommsMessage(string.format(_("artifact-comms", [[%s, did you find the source of the odd sensor readings?]]), player:getCallSign()))
     addCommsReply(
         _("artifact-comms", "Yes."),
         function()

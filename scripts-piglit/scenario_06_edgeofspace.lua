@@ -1,7 +1,7 @@
 -- Name: Mission: The Edge-of-Space
--- Description: You command the Technician Cruiser Apollo, a repair ship on the border of dangerous space.
+-- Description: You command the Technician Cruiser, a repair ship on the border of dangerous space.
 ---
---- The Apollo is outfitted with minimal weapons as there is a cease-fire between the Human Navy and the neighboring Kraylor.
+--- The Technician Cruiser is outfitted with minimal weapons as there is a cease-fire between the Human Navy and the neighboring Kraylor.
 ---
 --- You are tasked with discovering the cause of damage on one of your deep space telescopes.
 -- Type: Mission
@@ -51,7 +51,7 @@ require("utils.lua")
 --- Init is run when the scenario is started. Create your initial world
 function init()
     -- Create the main ship for the players.
-    Player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Phobos M3P"):setPosition(12400, 18200):setCallSign("Apollo"):addReputationPoints(250.0)
+    Player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Phobos M3P"):setPosition(12400, 18200):addReputationPoints(250.0)
 
     -- Modify the default cruiser into a technical cruiser, which has less weapon power then the normal player cruiser.
     Player:setTypeName("Technician Cruiser")
@@ -224,7 +224,7 @@ function init()
     -- Expanded text to attempt to explain why Apollo is shuttling this data around physically.
     Central_Command:sendCommsMessage(
         Player,
-        _("centralcommandGoal-incCall", [[Apollo, come in.
+        string.format(_("centralcommandGoal-incCall", [[%s, come in.
 
 Our edge-of-space telescope has been malfunctioning for the past few days. We expect the cause to be a mechanical failure, but we want you to take a look.
 
@@ -233,7 +233,7 @@ The E.O.S. scope is on the border of Kraylor space, so maintain contact and keep
 Dock with the E.O.S. scope and investigate the damage. Transmitting your report via standard communications channels is too dangerous given the already delicate nature of our treaty with the Kraylor, so return to Central Command to report your findings.
 
 Reopen communications if you have any questions.]])
-    )
+    ), Player:getCallSign())
 
     Central_Command.mission_state = 1
     kraylor_threat = 0
@@ -248,7 +248,7 @@ end
 
 function goto_war_early()
     --start end game not; bno upgrades for the player.
-    Central_Command:sendCommsMessage(Player, [[Apollo, you've incited a war! What a disaster... ]])
+    Central_Command:sendCommsMessage(Player, string.format(_([[%s, you've incited a war! What a disaster... ]])), Player:getCallSign())
     kraylor_g1:orderRoaming()
     kraylor_g2:orderRoaming()
     kraylor_g3:orderRoaming()
@@ -414,9 +414,9 @@ We'll retrieve what we can.]])
                         if tech_stranded == 0 then -- Without this the Technical Officer will always be harrassing the Apollo for pick-up once this event has triggered
                             Technical_Officer:sendCommsMessage(
                                 Player,
-                                _("technicalofficer-incCall", [[Is something wrong Apollo? We're still in the facility.
+                                string.format(_("technicalofficer-incCall", [[Is something wrong %s? We're still in the facility.
 
-Please dock so we can come aboard.]])
+Please dock so we can come aboard.]]), Player:getCallSign())
                             )
                             tech_stranded = 1
                         end
@@ -512,11 +512,11 @@ Thank you for defending our station. Please dock with us, and we'll analyze the 
         if Player:isDocked(Science_Galileo) then
             Central_Command:sendCommsMessage(
                 Player,
-                _("centralcommand-incCall", [[Apollo, come in!
+                string.format(_("centralcommand-incCall", [[%s, come in!
 
 Leave the E.O.S. data with Galileo for now, we've confirmed reports that Kraylor are brazen enough to attack our E.O.S. scope directly! All available ships should converge on E.O.S. territory in sector H8!
 
-That means you, Apollo!]])
+That means you, %s!]]), Player:getCallSign(),Player:getCallSign())
             )
 
             kraylor_e1:orderRoaming()
@@ -540,10 +540,10 @@ That means you, Apollo!]])
                 if Human_m1:isValid() then
                     Human_m1:sendCommsMessage(
                         Player,
-                        _("human-incCall", [[Apollo, HM1 here.
+                        string.format(_("human-incCall", [[%s, HM1 here.
 
 Central Command has no choice but to declare war. We're moving into Kraylor territory for our retaliatory strike. Attack the Kraylor Endline station!]])
-                    )
+                    ),Player:getCallSign())
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -561,10 +561,10 @@ Central Command has no choice but to declare war. We're moving into Kraylor terr
                 if not Human_m1:isValid() then
                     Central_Command:sendCommsMessage(
                         Player,
-                        _("centralcommand-incCall", [[Apollo, come in.
+                        string.format(_("centralcommand-incCall", [[%s, come in.
 
 We have no choice but to declare war. Move into Kraylor territory and retaliate on their defenseless Endline station!]])
-                    )
+                    ), Player:getCallSign())
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -584,12 +584,12 @@ We have no choice but to declare war. Move into Kraylor territory and retaliate 
                 if not kraylor_m1:isValid() and not kraylor_m2:isValid() and not kraylor_m3:isValid() and not kraylor_m4:isValid() then
                     Central_Command:sendCommsMessage(
                         Player,
-                        _("centralcommand-incCall", [[Apollo, come in.
+                        string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end, and aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-                    )
+                    ), Player:getCallSign())
 
                     Human_m1:orderDefendLocation(31875, 38653)
                     Human_m2:orderDefendLocation(37493, 37185)
@@ -623,10 +623,10 @@ Human scum, we warned you to stay out of Kraylor territory!]])
                     if not Kraylor_Mline:isValid() then
                         Central_Command:sendCommsMessage(
                             Player,
-                            _("centralcommand-incCall", [[Apollo, come in.
+                            string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylor ships threatening our E.O.S. territory!]])
-                        )
+                        ), Player:getCallSign())
 
                         kraylor_m1:orderRoaming()
                         kraylor_m2:orderRoaming()
@@ -651,12 +651,12 @@ Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylo
             if not kraylor_m1:isValid() and not kraylor_m2:isValid() and not kraylor_m3:isValid() and not kraylor_m4:isValid() then
                 Central_Command:sendCommsMessage(
                     Player,
-                    _("centralcommand-incCall", [[Apollo, come in.
+                    string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end, and aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-                )
+                ), Player:getCallSign())
 
                 Human_m1:orderDefendLocation(31875, 38653)
                 Human_m2:orderDefendLocation(37493, 37185)
@@ -689,10 +689,10 @@ Human scum, we warned you to stay out of Kraylor territory!]])
                 if not Kraylor_Mline:isValid() then
                     Central_Command:sendCommsMessage(
                         Player,
-                        _("centralcommand-incCall", [[Apollo, come in.
+                        string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylor ships threatening our E.O.S. territory!]])
-                    )
+                    ), Player:getCallSign())
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -719,12 +719,12 @@ Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylo
         if not kraylor_m1:isValid() and not kraylor_m2:isValid() and not kraylor_m3:isValid() and not kraylor_m4:isValid() then
             Central_Command:sendCommsMessage(
                 Player,
-                _("centralcommand-incCall", [[Apollo, come in.
+                string.format(_("centralcommand-incCall", [[%s, come in.
 
 Kraylor aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-            )
+            ), Player:getCallSign())
 
             Human_m1:orderDefendLocation(31875, 38653)
             Human_m2:orderDefendLocation(37493, 37185)
@@ -775,10 +775,10 @@ When your ship is finished being outfitted for war, move up to the nebula, but b
         if distance(Player, Kraylor_hole) < 10000 then
             Central_Command:sendCommsMessage(
                 Player,
-                _("centralcommand-incCall", [[Apollo, come in!
+                string.format(_("centralcommand-incCall", [[%s, come in!
 
 Reports are coming in from core human space that a massive Kraylor strike force is attacking! Get through that wormhole and attack from within their ranks to hold them off. We'll send all our available ships to converge there.]])
-            )
+            ), Player:getCallSign())
 
             --Let's get crazy up in here
             k01 = createKraylorGunship():setCallSign("BR21"):setPosition(-50654, 32238):orderRoaming()
@@ -898,7 +898,7 @@ If you need more assistance, request it from Midspace Support.]]))
             end
 
 			if comms_target.mission_state == 12 then
-			setCommsMessage("Apollo, you've incited a war! What a disaster.")
+			setCommsMessage(string.format(_("%s, you've incited a war! What a disaster."), Player:getCallSign()))
 				return true
 			end
 

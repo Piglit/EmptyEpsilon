@@ -69,7 +69,8 @@ function init()
     table.insert(enemyList, createExuariTransport():setCallSign("Omega3"):setPosition(-29270, -2853):setHeading(60))
     table.insert(enemyList, createExuariFreighter():setCallSign("FTR1"):setPosition(2787, -1822):orderFlyTowards(-42873, -13865):setHeading(-60))
 
-    player = PlayerSpaceship():setTemplate("Phobos M3P"):setPosition(18, -48):setCallSign("Rookie 1"):setJumpDrive(false):setLongRangeRadarRange(20000)
+    enemyCountStart = #enemyList
+    player = PlayerSpaceship():setTemplate("Phobos M3P"):setPosition(18, -48):setJumpDrive(false):setLongRangeRadarRange(20000)
     command = CpuShip():setFaction("Human Navy"):setTemplate("Phobos M3"):setCallSign("Command"):setPosition(-100000, -100000):orderIdle()
 end
 
@@ -112,11 +113,13 @@ end
 
 function update(delta)
     timer = timer + delta
+    local enemyCountChanged = false
 
     -- Count all surviving enemies.
     for i, enemy in ipairs(enemyList) do
         if not enemy:isValid() then
             table.remove(enemyList, i)
+            enemyCountChanged = true
         -- Note: table.remove() inside iteration causes the next element to be skipped.
         -- This means in each update-cycle max half of the elements are removed.
         -- It does not matter here, since update is called regulary.
@@ -130,7 +133,11 @@ function update(delta)
                 finished(delta)
             end
         end
+    end
 
+    if enemyCountChanged then
+        local progress = 100 - 100 * (#enemyList / enemyCountStart)
+        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
     end
 
     if bonus:isValid() then

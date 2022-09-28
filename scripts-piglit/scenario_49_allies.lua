@@ -7,6 +7,7 @@
 -- Variation[One]: Only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Variation[Easy One]: Easy goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Variation[Hard One]: Hard goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
+-- Proxy: 192.168.2.227
 
 require("ee.lua")
 require("utils.lua")

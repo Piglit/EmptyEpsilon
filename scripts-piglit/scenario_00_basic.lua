@@ -1,12 +1,8 @@
--- Name: Basic
+-- Name: Basic Battle
 -- Description: A few random stations are under attack by enemies, with random terrain around them. Destroy all enemies to win.
 ---
---- The scenario provides a single player-controlled Atlantis, which is sufficient to win even in the "Extreme" variant.
----
---- Other player ships can be spawned, but the strength of enemy ships is independent of the number and types of player ships.
 -- Type: Basic
 -- Setting[Enemies]: Configures the amount of enemies spawned in the scenario.
--- Enemies[Empty]: No enemies. Recommended for GM-controlled scenarios and rookie crew orientation. The scenario continues until the GM declares victory or all Human Navy ships are destroyed.
 -- Enemies[Easy]: Fewer enemies. Recommended for inexperienced crews.
 -- Enemies[Normal|Default]: Normal amount of enemies. Recommended for a normal crew.
 -- Enemies[Hard]: More enemies. Recommended if you have multiple player-controlled ships.
@@ -16,9 +12,6 @@
 -- Time[20min]: Automatic loss after 20 minutes
 -- Time[30min]: Automatic loss after 30 minutes
 -- Time[60min]: Automatic loss after 60 minutes
--- Setting[PlayerShip]: Sets the default player ship
--- PlayerShip[Atlantis|Default]: Powerful ship with sidewards missile tubes. Requires more advanced play.
--- PlayerShip[Phobos M3P]: Simpler, less powerful ship. But easier to handle. Recommended for new crews.
 
 --- Scenario
 -- @script scenario_00_basic
@@ -40,6 +33,9 @@ local friendlyList
 local stationList
 local playerList
 local addWavesToGMPosition      -- If set to true, add wave will require GM to click on the map to position, where the wave should be spawned. 
+local startEnemyCount = nil
+local lastReportedProgress
+local lastReportedTime
 
 local gametimeleft = nil -- Maximum game time in seconds.
 local timewarning = nil -- Used for checking when to give a warning, and to update it so the warning happens once.
@@ -299,20 +295,45 @@ end
 
 --- Initialize scenario.
 function init()
+
+    --[[
     -- Spawn a player Atlantis.
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate(getScenarioSetting("PlayerShip"))
     player:setCallSign(ship_names[irandom(1, #ship_names)])
     if not player:hasWarpDrive() and not player:hasJumpDrive() then
         player:setWarpDrive(true)
     end
+    --]]
 
     enemyList = {}
     friendlyList = {}
     stationList = {}
-    playerList = {player}
+    playerList = {}
+    lastReportedProgress = 0
+    lastReportedTime = 0
 
     onNewPlayerShip(function(ship)
         table.insert(playerList, ship)
+        local station = friendlyList[1]
+        if station:isValid() then
+            if gametimeleft ~= nil then
+                station:sendCommsMessage(
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
+
+    Please inform your Captain and crew that you have a total of %d minutes for this mission.
+
+    The mission started at the arrival of this message.
+
+    Good luck.]]), ship:getCallSign(), math.ceil(gametimeleft / 60))
+                )
+            else
+                station:sendCommsMessage(
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
+
+    Good luck.]]), ship:getCallSign())
+                )
+            end
+        end
     end)
     
     addWavesToGMPosition = false
@@ -477,24 +498,7 @@ function init()
     Script():run("util_random_transports.lua")
 
 
-    local station = friendlyList[1]
-    if gametimeleft ~= nil then
-        station:sendCommsMessage(
-            player, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
 
-Please inform your Captain and crew that you have a total of %d minutes for this mission.
-
-The mission started at the arrival of this message.
-
-Good luck.]]), player:getCallSign(), gametimeleft / 60)
-        )
-    else
-        station:sendCommsMessage(
-            player, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
-
-Good luck.]]), player:getCallSign())
-        )
-    end
 end
 
 function countValid(objectList)
@@ -515,6 +519,10 @@ function update(delta)
     local enemy_count = countValid(enemyList)
     local friendly_count = countValid(friendlyList)
     local player_count = countValid(playerList)
+    if startEnemyCount == nil then
+        startEnemyCount = enemy_count
+    end
+    local progress = 100 - 100 * (enemy_count / startEnemyCount)
 
     -- If not playing the Empty variation, declare victory for the
     -- Humans (players) once all enemies are destroyed. Note that players can win
@@ -544,20 +552,30 @@ function update(delta)
         if gametimeleft < timewarning then
             if timewarning <= 1 * 60 then -- Less then 1 minutes left.
                 for idx, player in ipairs(playerList) do
-                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minute remaining.]]), player:getCallSign(), timewarning / 60))
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minute remaining.]]), player:getCallSign(), math.ceil(timewarning / 60)))
                 end
                 timewarning = timewarning - 2 * 60
             elseif timewarning <= 5 * 60 then -- Less then 5 minutes left. Warn ever 2 minutes instead of every 5.
                 for idx, player in ipairs(playerList) do
-                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining.]]), player:getCallSign(), timewarning / 60))
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining.]]), player:getCallSign(), math.ceil(timewarning / 60)))
                 end
                 timewarning = timewarning - 2 * 60
             else
                 for idx, player in ipairs(playerList) do
-                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining of mission time.]]), player:getCallSign(), timewarning / 60))
+                    friendlyList[1]:sendCommsMessage(player, string.format(_("time-incCall", [[%s, you have %d minutes remaining of mission time.]]), player:getCallSign(), math.ceil(timewarning / 60)))
                 end
                 timewarning = timewarning - 5 * 60
             end
+        end
+    end
+
+    if math.abs(lastReportedProgress - progress) > 10 or (gametimeleft ~= nil and math.abs(lastReportedTime - gametimeleft) > 60) then
+        lastReportedProgress = progress
+        if gametimeleft ~= nil then
+            lastReportedTime = gametimeleft
+            sendMessageToCampaignServer(string.format("setProgress:%.0f%%, %.0fmin left", progress, gametimeleft / 60))
+        else
+            sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
         end
     end
 
@@ -578,6 +596,7 @@ function update(delta)
         end
     end
 
+    --[[
     -- If last player ship is destroyed, the Humans (players) lose.
     if player_count == 0 then
         victory("Kraylor")
@@ -586,6 +605,7 @@ function update(delta)
         setBanner(text)
         return
     end
+    --]]
     
     -- Set banner for cinematic and top down views.
     if gametimeleft ~= nil then

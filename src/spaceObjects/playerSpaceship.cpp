@@ -114,8 +114,6 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// is command on ships to require less player interaction, especially
     /// when combined with setAutoCoolant/auto_coolant_enabled.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoRepair);
-    /// Sets weapon_tube automatic weapon tube reload is enabled.
-    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoReloadTube);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamFrequency);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamSystemTarget);
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetShieldFrequency);
@@ -150,6 +148,12 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Use this command on ships to require less player interaction, especially
     /// when combined with commandSetAutoRepair/auto_repair_enabled.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoCoolant);
+    /// repair crews to automatically move to damaged subsystems.
+    /// Use this on ships to require less player interaction, especially
+    /// when combined with setAutoCoolant/auto_coolant_enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoRepair);
+    /// Sets weapon_tube automatic weapon tube reload is enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
     /// Set a password to join the ship.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
     /// Callback when this ship launches a probe.
@@ -289,7 +293,6 @@ static const int16_t CMD_SET_MAIN_SCREEN_OVERLAY = 0x0027;
 static const int16_t CMD_HACKING_FINISHED = 0x0028;
 static const int16_t CMD_CUSTOM_FUNCTION = 0x0029;
 static const int16_t CMD_TURN_SPEED = 0x002A;
-static const int16_t CMD_SET_AUTO_RELOAD_TUBE= 0x002B;
 
 string alertLevelToString(EAlertLevel level)
 {
@@ -341,6 +344,7 @@ PlayerSpaceship::PlayerSpaceship()
     alert_level = AL_Normal;
     shields_active = false;
     control_code = "";
+	
 
     setFactionId(1);
 
@@ -764,6 +768,9 @@ void PlayerSpaceship::applyTemplateValues()
     can_combat_maneuver = ship_template->can_combat_maneuver;
     can_self_destruct = ship_template->can_self_destruct;
     can_launch_probe = ship_template->can_launch_probe;
+    auto_repair_enabled = ship_template->auto_repair_enabled;
+    auto_coolant_enabled = ship_template->auto_coolant_enabled;
+    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
     if (!on_new_player_ship_called)
     {
         on_new_player_ship_called = true;
@@ -1462,9 +1469,6 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     case CMD_SET_AUTO_REPAIR:
         packet >> auto_repair_enabled;
         break;
-    case CMD_SET_AUTO_RELOAD_TUBE:
-        packet >> auto_reload_tube_enabled;
-        break;
     case CMD_SET_BEAM_FREQUENCY:
         {
             int32_t new_frequency;
@@ -1862,12 +1866,6 @@ void PlayerSpaceship::commandSetAutoRepair(bool enabled)
     sendClientCommand(packet);
 }
 
-void PlayerSpaceship::commandSetAutoReloadTube(bool enabled)
-{
-    sp::io::DataBuffer packet;
-    packet << CMD_SET_AUTO_RELOAD_TUBE << enabled;
-    sendClientCommand(packet);
-}
 void PlayerSpaceship::commandSetBeamFrequency(int32_t frequency)
 {
     sp::io::DataBuffer packet;
@@ -2082,9 +2080,9 @@ string PlayerSpaceship::getExportLine()
     if (auto_coolant_enabled)
         result += ":setAutoCoolant(true)";
     if (auto_repair_enabled)
-        result += ":commandSetAutoRepair(true)";
+        result += ":setAutoRepair(true)";
     if (auto_reload_tube_enabled)
-        result += ":commandSetAutoReloadTube(true)";
+        result += ":setAutoMissileReload(true)";
 
     // Update power factors, only for the systems where it changed.
     for (unsigned int sys_index = 0; sys_index < SYS_COUNT; ++sys_index)

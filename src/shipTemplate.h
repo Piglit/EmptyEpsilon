@@ -105,6 +105,13 @@ public:
     bool can_self_destruct = true;
     bool can_launch_probe = true;
 
+    // Ship automation features, mostly for single-person ships like fighters
+    bool auto_repair_enabled = false;
+    bool auto_coolant_enabled = false;
+    bool auto_reload_tube_enabled = false;
+
+    std::unordered_set<string> spawnable_ships;
+
     float energy_storage_amount;
     int repair_crew_count;
     string default_ai_name;
@@ -153,6 +160,12 @@ public:
     void setCanCombatManeuver(bool enabled) { can_combat_maneuver = enabled; }
     void setCanSelfDestruct(bool enabled) { can_self_destruct = enabled; }
     void setCanLaunchProbe(bool enabled) { can_launch_probe = enabled; }
+    void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
+    void setAutoRepair(bool active) { auto_repair_enabled = active; }
+    void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
+
+    void setSpawnShips(const std::vector<string>& templates) {spawnable_ships = std::unordered_set<string>(templates.begin(), templates.end());}
+
     void setMesh(string model, string color_texture, string specular_texture, string illumination_texture);
     void setEnergyStorage(float energy_amount);
     void setRepairCrewCount(int amount);

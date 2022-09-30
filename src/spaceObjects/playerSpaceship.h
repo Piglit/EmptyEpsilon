@@ -92,8 +92,9 @@ public:
     // Time in seconds it takes to recalibrate shields
     float shield_calibration_delay;
     // Ship automation features, mostly for single-person ships like fighters
-    bool auto_repair_enabled;
-    bool auto_coolant_enabled;
+    bool auto_repair_enabled = false;
+    bool auto_coolant_enabled = false;
+    bool auto_reload_tube_enabled = false;
     // Whether shields are up (true) or down
     bool shields_active;
     // Password to join a ship. Default is empty.
@@ -267,7 +268,6 @@ public:
     void commandSendComm(uint8_t index);
     void commandSendCommPlayer(string message);
     void commandSetAutoRepair(bool enabled);
-    void commandSetAutoReloadTube(bool enabled);
     void commandSetBeamFrequency(int32_t frequency);
     void commandSetBeamSystemTarget(ESystem system);
     void commandSetShieldFrequency(int32_t frequency);
@@ -298,6 +298,8 @@ public:
     void setMaxCoolant(float coolant);
     float getMaxCoolant() { return max_coolant; }
     void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
+    void setAutoRepair(bool active) { auto_repair_enabled = active; }
+    void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
     int getRepairCrewCount();
     void setRepairCrewCount(int amount);
     EAlertLevel getAlertLevel() { return alert_level; }

@@ -949,8 +949,12 @@ void SpaceShip::update(float delta)
     {
         if (docked_style == DockStyle::Internal)
             setCollisionRadius(0);
-        else if (ship_template)
+        else if (ship_template) 
+        {
+            auto p = getPosition();
             ship_template->setCollisionData(this);
+            setPosition(p);
+        }
     }
 
     if (game_server)

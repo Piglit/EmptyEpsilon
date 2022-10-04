@@ -12,6 +12,8 @@
 #include "gui/gui2_selector.h"
 #include "gui/gui2_panel.h"
 #include "gui/gui2_button.h"
+#include "gui/gui2_textentry.h"
+#include "spaceObjects/spaceStation.h"
 
 class GuiAdvancedScrollText;
 class GuiCustomShipFunctions;
@@ -21,20 +23,34 @@ class GuiKeyValueDisplay;
 class MissionControlScreen: public GuiCanvas, public Updatable
 {
 private:
-    GuiKeyValueDisplay* info_clock;
+    GuiKeyValueDisplay* clock;
     GuiKeyValueDisplay* victory;
     GuiToggleButton* pause_button;
-    GuiPanel* ship_panel;
-    GuiElement* ship_content_with_ship;
-    GuiSelector* ship_template_selector; 
-    GuiSelector* ship_drive_selector;
+
+    GuiElement* ship_infos;
     GuiKeyValueDisplay* ship_name;
     GuiKeyValueDisplay* ship_class;
     GuiKeyValueDisplay* ship_subclass;
     GuiKeyValueDisplay* ship_type;
     GuiKeyValueDisplay* ship_drive;
-    GuiButton* create_ship_button;
-    bool updatedShip;
+
+    GuiPanel* ship_panel;
+    GuiSelector* ship_template_selector; 
+    GuiSelector* ship_drive_selector;
+    GuiButton* ship_create_button;
+
+    GuiPanel* station_panel;
+    GuiKeyValueDisplay* station_name;
+    GuiButton* ship_destroy_button;
+
+    GuiPanel* fighter_panel;
+    GuiSelector* fighter_template_selector; 
+    GuiButton* fighter_create_button;
+    GuiTextEntry* fighter_callsign;
+    GuiTextEntry* fighter_password;
+    float fighter_delay;
+
+    P<SpaceStation> spawn_station;
 public:
     MissionControlScreen(RenderLayer* render_layer);
     virtual void update(float delta) override;

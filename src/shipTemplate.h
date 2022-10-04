@@ -110,7 +110,7 @@ public:
     bool auto_coolant_enabled = false;
     bool auto_reload_tube_enabled = false;
 
-    std::unordered_set<string> spawnable_ships;
+    std::vector<string> spawnable_ships;
 
     float energy_storage_amount;
     int repair_crew_count;
@@ -164,7 +164,7 @@ public:
     void setAutoRepair(bool active) { auto_repair_enabled = active; }
     void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
 
-    void setSpawnShips(const std::vector<string>& templates) {spawnable_ships = std::unordered_set<string>(templates.begin(), templates.end());}
+    void setSpawnShips(const std::vector<string>& templates) {spawnable_ships = std::vector<string>(templates.begin(), templates.end());}
 
     void setMesh(string model, string color_texture, string specular_texture, string illumination_texture);
     void setEnergyStorage(float energy_amount);

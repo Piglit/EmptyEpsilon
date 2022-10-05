@@ -34,6 +34,8 @@ enum EAlertLevel
 class PlayerSpaceship : public SpaceShip
 {
 public:
+
+    static constexpr float missile_resupply_time = 10.0f;
     // Power consumption and generation base rates
     constexpr static float default_energy_shield_use_per_second = 1.5f;
     constexpr static float default_energy_warp_per_second = 1.7f;
@@ -99,6 +101,7 @@ public:
     bool shields_active;
     // Password to join a ship. Default is empty.
     string control_code;
+    float missile_resupply_delay = missile_resupply_time;
 
 private:
     bool on_new_player_ship_called=false;

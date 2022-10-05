@@ -569,6 +569,9 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->can_combat_maneuver = can_combat_maneuver;
     result->can_self_destruct = can_self_destruct;
     result->can_launch_probe = can_launch_probe;
+    result->auto_coolant_enabled = auto_coolant_enabled;
+    result->auto_reload_tube_enabled = auto_reload_tube_enabled;
+    result->auto_repair_enabled = auto_repair_enabled;
 
     result->default_ai_name = default_ai_name;
     for(int n=0; n<max_beam_weapons; n++)
@@ -598,9 +601,11 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     for(int n=0; n<MW_Count; n++)
         result->weapon_storage[n] = weapon_storage[n];
     result->radar_trace = radar_trace;
-
     result->rooms = rooms;
     result->doors = doors;
+    result->long_range_radar_range = long_range_radar_range;
+    result->short_range_radar_range = short_range_radar_range;
+    result->impulse_sound_file = impulse_sound_file;
 
     return result;
 }

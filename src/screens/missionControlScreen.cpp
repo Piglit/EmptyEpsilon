@@ -250,6 +250,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     (new GuiLabel(fighters_content, "SELECT_FIGHTER_LABEL", tr("Select fighters type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
     fighter_template_selector = new GuiSelector(fighters_content, "CREATE_FIGHTER_SELECTOR", nullptr);
     fighter_template_selector->setSize(GuiElement::GuiSizeMax, 50);
+    fighter_template_selector->setSelectionIndex(0);
 
     // callsign
     (new GuiLabel(fighters_content, "FIGHTER_CALLSIGN_LABEL", tr("Callsign:"), 30))->setSize(GuiElement::GuiSizeMax, 50);

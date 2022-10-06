@@ -238,7 +238,6 @@ void GameGlobalInfo::startScenario(string filename)
         campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
             {"filename", filename.c_str()},
             {"name", scenario.c_str()},
-//            {"variation", variation.c_str()},
         });
     }
 

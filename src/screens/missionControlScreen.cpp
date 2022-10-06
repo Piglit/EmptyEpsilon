@@ -27,11 +27,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     auto right_container = new GuiElement(container, "");
     right_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
-    auto right_panel = new GuiPanel(right_container, "DIRECT_OPTIONS_PANEL");
-    right_panel->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(550, 560);
-    auto right_content = new GuiElement(right_panel, "");
-    right_content->setMargins(50)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
+    ship_panel = new GuiPanel(right_container, "SHIP_PANEL");
+    ship_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 560);
 
     string callsign = PreferencesManager::get("shipname", "");
     int posy = 20;
@@ -49,6 +46,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
         name = callsign;
     }
 
+
     (new GuiKeyValueDisplay(left_container, "SERVER_NAME", 0.4, tr("Server Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
     posy += 40;
     auto ip = sp::io::network::Address::getLocalAddress().getHumanReadable()[0];
@@ -61,91 +59,157 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     (new GuiLabel(left_container, "SCENARIO_INFO_LABEL", tr("Mission info"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
     posy += 40;
 
-    name = gameGlobalInfo->scenario;
-    (new GuiKeyValueDisplay(left_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
+    if (game_server) {
+        name = gameGlobalInfo->scenario;
+        (new GuiKeyValueDisplay(left_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+        posy += 40;
+    }
+
 
     info_clock = new GuiKeyValueDisplay(left_container, "CLOCK", 0.4, tr("Mission Time"), "0");
     info_clock->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
     posy += 40;
 
+    victory = new GuiKeyValueDisplay(left_container, "VICTORY", 0.4, tr("Mission Winner"), "-");
+    victory->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+    posy += 40;
+
     
     // Buttons and controls
-    
-    posy += 40;
-    (new GuiLabel(left_container, "BUTTON_LABEL", tr("Mission control"), 30))->addBackground()->setPosition(20,posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 50;
-    pause_button = new GuiToggleButton(left_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
-        if (!value)
-            engine->setGameSpeed(1.0f);
-        else
-            engine->setGameSpeed(0.0f);
-    });
-    pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 50;
-    if (!game_server) {
-        pause_button->hide();
-    } else {
-        (new GuiButton(left_container, "QUIT", tr("Quit Mission"), [this]() {
-            destroy();
-            new ServerScenarioSelectionScreen();
-        }))->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    }
-
-    posy += 50;
-
-    posy += 50;
-
-    // If this is the server, add a panel to create player ships.
-    //Add buttons and a selector to create player ships.
-
-
-    if ((gameGlobalInfo->allow_new_player_ships) && (gameGlobalInfo->getPlayerShipIndexByName(callsign) == -1))
-    {
-        (new GuiLabel(left_container, "SHIP_CONFIG_LABEL", tr("Ship selection"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        GuiSelector* ship_template_selector = new GuiSelector(left_container, "CREATE_SHIP_SELECTOR", nullptr);
+    if (game_server) {
+        posy += 40;
+        (new GuiLabel(left_container, "BUTTON_LABEL", tr("Mission control"), 30))->addBackground()->setPosition(20,posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
         posy += 50;
-        // List only ships with templates designated for player use.
-        std::vector<string> template_names = campaign_client->getShips();
-
-        for(string& template_name : template_names)
-        {
-            P<ShipTemplate> ship_template = ShipTemplate::getTemplate(template_name);
-            ship_template_selector->addEntry(template_name + " (" + ship_template->getClass() + ":" + ship_template->getSubClass() + ")", template_name);
+        pause_button = new GuiToggleButton(left_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
+            if (!value)
+                engine->setGameSpeed(1.0f);
+            else
+                engine->setGameSpeed(0.0f);
+        });
+        pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+        posy += 50;
+        if (!game_server) {
+            pause_button->hide();
+        } else {
+            (new GuiButton(left_container, "QUIT", tr("Quit Mission"), [this]() {
+                destroy();
+                new ServerScenarioSelectionScreen();
+            }))->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
         }
-        ship_template_selector->setSelectionIndex(0);
-        ship_template_selector->setPosition(0, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        posy += 50;
 
-/*
-        // Spawn a ship of the selected template near 0,0 and give it a random
-        // heading.
-        (new GuiButton(left_content, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [this, ship_template_selector]() {
-            string callsign = PreferencesManager::get("shipname", "");
-            if ((!gameGlobalInfo->allow_new_player_ships) || (gameGlobalInfo->getPlayerShipIndexByName(callsign) != -1))
-                return;
-            if (game_server) {
-                P<PlayerSpaceship> ship = new PlayerSpaceship();
+        posy += 40;
+    }
+    posy += 40;
 
-                if (ship)
-                {
-                    // set the position before the template so that onNewPlayerShip has as much data as possible
-                    ship->setRotation(random(0, 360));
-                    ship->target_rotation = ship->getRotation();
-                    ship->setPosition(glm::vec2(random(-100, 100), random(-100, 100)));
-                    ship->setCallSign(callsign);
-                    ship->setTemplate(ship_template_selector->getSelectionValue());
-                    my_player_info->commandSetShipId(ship->getMultiplayerId());
+    // Ship Info
+    ship_content_with_ship = new GuiElement(left_container, "");
+    ship_content_with_ship->setPosition(0, posy)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    posy = 0;
+
+    (new GuiLabel(ship_content_with_ship, "SHIP_INFO_LABEL", tr("Ship info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    ship_name = new GuiKeyValueDisplay(ship_content_with_ship, "SHIP_NAME", 0.4, tr("Ship Name"), callsign);
+    ship_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    ship_drive = new GuiKeyValueDisplay(ship_content_with_ship, "SHIP_DRIVE", 0.4, tr("Ship Drive"), "");
+    ship_drive->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    ship_type = new GuiKeyValueDisplay(ship_content_with_ship, "SHIP_TYPE", 0.4, tr("Ship Type"), "");
+    ship_type->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    ship_class = new GuiKeyValueDisplay(ship_content_with_ship, "SHIP_CLASS", 0.4, tr("Ship Class"), "");
+    ship_class->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    ship_subclass = new GuiKeyValueDisplay(ship_content_with_ship, "SHIP_SUBCLASS", 0.4, tr("Ship Subclass"), "");
+    ship_subclass->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
+    posy += 40;
+
+    // Right side, Dynamic content: ship
+
+    auto ship_content_no_ship = new GuiElement(ship_panel, "");
+    ship_content_no_ship->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    ship_content_no_ship->setAttribute("layout", "vertical");
+    ship_content_no_ship->setAttribute("alignment", "topleft");
+
+    (new GuiLabel(ship_content_no_ship, "SHIP_CONFIG_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(510, 50);
+    // Ship type selection
+    (new GuiLabel(ship_content_no_ship, "SELECT_SHIP_LABEL", tr("Select ship type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_template_selector = new GuiSelector(ship_content_no_ship, "CREATE_SHIP_SELECTOR", nullptr);
+    // List only ships with templates designated for player use.
+    std::vector<string> template_names = campaign_client->getShips();
+
+    for(string& template_name : template_names)
+    {
+        P<ShipTemplate> ship_template = ShipTemplate::getTemplate(template_name);
+        ship_template_selector->addEntry(template_name + " (" + ship_template->getClass() + ": " + ship_template->getSubClass() + ")", template_name);
+    }
+    ship_template_selector->setSelectionIndex(0);
+    ship_template_selector->setSize(GuiElement::GuiSizeMax, 50);
+
+    // Ship drive selection
+
+    (new GuiLabel(ship_content_no_ship, "SELECT_DRIVE_LABEL", tr("Select drive type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_drive_selector = new GuiSelector(ship_content_no_ship, "SHIP_DRIVE_SELECTOR", nullptr);
+    ship_drive_selector->addEntry("Jump drive", "jump");
+    ship_drive_selector->addEntry("Warp drive", "warp");
+    ship_drive_selector->setSelectionIndex(0);
+    ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
+
+    // Spawn a ship of the selected template near 0,0 and give it a random
+    // heading.
+    create_ship_button = new GuiButton(ship_content_no_ship, "CREATE_SHIP_BUTTON", tr("Create ship"), [this]() {
+        string callsign = PreferencesManager::get("shipname", "");
+//        if ((!gameGlobalInfo->allow_new_player_ships) || (my_spaceship))
+//            return;
+        if (game_server) {
+            P<PlayerSpaceship> ship = new PlayerSpaceship();
+            string templ = ship_template_selector->getSelectionValue();
+
+            if (ship)
+            {
+                // set the position before the template so that onNewPlayerShip has as much data as possible
+                ship->setRotation(random(0, 360));
+                ship->target_rotation = ship->getRotation();
+                ship->setPosition(glm::vec2(random(-100, 100), random(-100, 100)));
+                ship->setCallSign(callsign);
+                ship->setTemplate(templ);
+                if (ship_drive_selector->getSelectionValue() == "jump") {
+                    ship->setJumpDrive(true);
+                    ship->setWarpDrive(false);
+                } else {
+                    ship->setJumpDrive(false);
+                    ship->setWarpDrive(true);
                 }
-            } else {
-                // proxy
-                campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), callsign, ship_template_selector->getSelectionValue(), PreferencesManager::get("password"));
+                my_player_info->commandSetShipId(ship->getMultiplayerId());
+                create_ship_button->disable();
+                updatedShip = true;
             }
-        }))->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
+        } else {
+            // proxy
+            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), callsign, ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue(), PreferencesManager::get("password"));
+            create_ship_button->disable();
+            updatedShip = true;
+        }
+    });
+    create_ship_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
 
-        */
+
+    if (!my_spaceship) {
+        int index = gameGlobalInfo->getPlayerShipIndexByName(callsign); // -1 if not found
+        if (index >= 0) {
+            auto ship = gameGlobalInfo->getPlayerShip(index);
+            my_player_info->commandSetShipId(ship->getMultiplayerId()); // sets my_spaceship
+        }
     }
 
+    updatedShip = true;
 
     // mission control
     /*
@@ -184,8 +248,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
 
 void MissionControlScreen::update(float delta)
 {
-    if (!game_server)
-        return;
+
     int seconds = gameGlobalInfo->elapsed_time;
     int minutes = (seconds / 60) % 60;
     int hours =(seconds / 60 / 60);
@@ -196,9 +259,65 @@ void MissionControlScreen::update(float delta)
     // Update mission clock
     info_clock->setValue(string(buf));
 
-    // Update pause button
-    pause_button->setValue(engine->getGameSpeed() == 0.0f);
+    // Update victory display
+    if (gameGlobalInfo->getVictoryFactionId() < 0) {
+        if (factionInfo[gameGlobalInfo->getVictoryFactionId()])
+            victory->setValue(tr("{faction}").format({{"faction", factionInfo[gameGlobalInfo->getVictoryFactionId()]->getLocaleName()}}));
+    }
 
+    // Update pause button
+    if (game_server)
+        pause_button->setValue(engine->getGameSpeed() == 0.0f);
+
+    // Update ship infos and config
+    if (!my_spaceship) {
+        if (gameGlobalInfo->allow_new_player_ships) {
+            ship_panel->show();
+        }
+        ship_content_with_ship->hide();
+    } else {
+        ship_content_with_ship->show();
+        ship_panel->hide();
+    }
+
+    // Update ship infos
+    if (updatedShip && !my_spaceship) {
+        string callsign = PreferencesManager::get("shipname", "");
+        int index = gameGlobalInfo->getPlayerShipIndexByName(callsign); // -1 if not found
+        if (index >= 0) {
+            auto ship = gameGlobalInfo->getPlayerShip(index);
+            my_player_info->commandSetShipId(ship->getMultiplayerId()); // sets my_spaceship
+        }
+    }
+    if (my_spaceship && updatedShip) {
+        updatedShip = false;
+        ship_name->setValue(my_spaceship->getCallSign());
+        string templ_name = my_spaceship->getTypeName();
+        ship_type->setValue(templ_name);
+        auto templ = ShipTemplate::getTemplate(templ_name);
+        if (templ) {
+            ship_class->setValue(templ->getClass());
+            ship_class->show();
+            ship_subclass->setValue(templ->getSubClass());
+            ship_subclass->show();
+        } else {
+            ship_class->hide();
+            ship_subclass->hide();
+        }
+        string drive = "Impulse";
+        if (my_spaceship->hasJumpDrive()){
+            drive = "Jump";
+        }
+        if (my_spaceship->hasWarpDrive()){
+            drive = "Warp";
+        }
+        if (my_spaceship->hasJumpDrive() && my_spaceship->hasWarpDrive()){
+            drive = "Jump & Warp";
+        }
+        ship_drive->setValue(drive);
+        create_ship_button->enable();
+    }
+    
 /*
     bool gm_functions_changed = gm_script_options->entryCount() != int(gameGlobalInfo->gm_callback_functions.size());
     auto it = gameGlobalInfo->gm_callback_functions.begin();

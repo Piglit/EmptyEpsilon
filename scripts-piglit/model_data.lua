@@ -520,8 +520,10 @@ for sizeName, sizeValues in pairs(sizes) do
     model:setRadius(sizeValues[2])
 
     model:addTubePosition(1.4, 0, 0.06)
-    model:addTubePosition(0.3,-0.5, 0.06)
-    model:addTubePosition(0.3, 0.5, 0.06)
+    model:addTubePosition(1.4, 0, 0.06)
+    model:addTubePosition(1.4, 0, 0.06)
+    --model:addTubePosition(0.3,-0.5, 0.06)
+    --model:addTubePosition(0.3, 0.5, 0.06)
     model:addEngineEmitter(-1, 0.54, 0.0,  0.5, 0.5, 1.0, 0.4)
     model:addEngineEmitter(-1,-0.54, 0.0,  0.5, 0.5, 1.0, 0.4)
 

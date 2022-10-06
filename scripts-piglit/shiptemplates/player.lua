@@ -9,23 +9,24 @@ color_player = "White" --change it if you want another style
 
 --[[Starfighter--]]
 
-template = ShipTemplate():setName("MP52 Hornet"):setClass("Starfighter", "Interceptor"):setType("playership")
+template = ShipTemplate():setName("MP52 Hornet"):setClass(_("class", "Starfighter"), _("subclass", "Interceptor")):setType("playership")
 template:setModel("WespeFighter"..color_player)
 template:setRadarTrace("fighter.png")
 template:setDescription([[The Hornet is a basic interceptor found in many corners of the galaxy. 
-The MP52 Hornet is a significantly upgraded version of MU52 Hornet, with nearly twice the hull strength, nearly three times the shielding, better acceleration, impulse boosters, and a second laser cannon. Combat maneuver systems are included.]])
+The MP52 Hornet is a significantly upgraded version of MU52 Hornet, with nearly twice the hull strength, nearly three times the shielding, better acceleration, impulse boosters, and a second laser cannon.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
 template:setHull(70)
 template:setShields(60)
-template:setSpeed(125, 32, 40)
+--				spped, turn, accel, rev-speed, rev-accel
+template:setSpeed(125, 32, 40, 125, 20)
 template:setCombatManeuver(600, 0)
 template:setBeam(0, 30,-5, 900.0, 4.0, 2.5)
 template:setBeam(1, 30, 5, 900.0, 4.0, 2.5)
 template:setEnergyStorage(400)
 template:setRepairCrewCount(1)
 template:setLongRangeRadarRange(5000)
-template:setShortRangeRadarRange(2500)
+template:setShortRangeRadarRange(5000)
 
 template:setCanScan(false)
 template:setCanHack(false)
@@ -34,11 +35,23 @@ template:setCanCombatManeuver(false)
 template:setCanLaunchProbe(false)
 template:setCanSelfDestruct(false)
 
+template:setAutoCoolant(true)
+template:setAutoMissileReload(true)
+template:setAutoRepair(true)
+
 addSystemsWespe(template)
+
+var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
+var:setClass(_("class", "Starfighter"), _("subclass", "Laser Drill"))
+var:setModel("WespeFighterYellow")
+var:setBeam(0, 30,-5, 900.0, 3.0, 2.5)
+var:setBeam(1, 30, 5, 900.0, 3.0, 2.5)
+var:setSpeed(80, 16, 20, 70, 10)
 
 --[[Bomber--]]
 
-template = ShipTemplate():setName("ZX-Lindworm"):setClass("Starfighter", "Bomber"):setType("playership")
+-- legacy; try not to use:
+template = ShipTemplate():setName("ZX-Lindworm"):setClass(_("class", "Starfighter"), _("subclass", "Bomber")):setType("playership")
 template:setModel("LindwurmFighter"..color_player)
 template:setRadarTrace("fighter.png")
 template:setDescription([[The WX-Lindworm, or "Worm" as it's often called, is a bomber-class starfighter. While one of the least-shielded starfighters in active duty, the Worm's two launchers can pack quite a punch. Its goal is to fly in, destroy its target, and fly out or be destroyed. The engine can be overloaded to cause a massive explotion - however this destroys the bomber, too.]])
@@ -46,7 +59,7 @@ template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
 template:setHull(75)
 template:setShields(40)
-template:setSpeed(70, 15, 25)
+template:setSpeed(70, 15, 25, 40, 15)
 template:setTubes(3, 10.0)
 template:setTubeSize(0, "small")
 template:setTubeSize(1, "small")
@@ -63,7 +76,7 @@ template:setCombatManeuver(250, 150)
 template:setEnergyStorage(400)
 template:setRepairCrewCount(1)
 template:setLongRangeRadarRange(5000)
-template:setShortRangeRadarRange(2500)
+template:setShortRangeRadarRange(5000)
 
 template:setCanScan(false)
 template:setCanHack(false)
@@ -71,10 +84,74 @@ template:setCanDock(true)
 template:setCanCombatManeuver(false)
 template:setCanLaunchProbe(false)
 template:setCanSelfDestruct(false)
+
+template:setAutoCoolant(true)
+template:setAutoMissileReload(true)
+template:setAutoRepair(true)
+
 addSystemsLindwurm(template)
 
+var = template:copy("H-Lindworm")	-- HVLI
+var:setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
+var:setTubes(1,7)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("HVLI", 12)
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+-- switch to model with two primary tubes
+var = template:copy("R-Lindworm")	-- Homing
+var:setModel("AdlerLongRangeScout"..color_player)
+var:setClass(_("class", "Starfighter"), _("subclass", "Rocket Fighter"))
+var:setTubes(2,7)
+var:setWeaponStorage("HVLI", 0)
+var:setWeaponStorage("Homing", 6)
+var:setTubeDirection(1,0):setWeaponTubeExclusiveFor(1, "Homing")
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+var = template:copy("MR-Lindworm")	-- Mine Rear
+var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+var:setTubes(1,10)
+var:setWeaponStorage("HVLI", 0)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("Mine", 1)
+var:setTubeDirection(0,180)
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+var = template:copy("MF-Lindworm")	-- Mine Front
+var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+var:setTubes(1,10)
+var:setWeaponStorage("HVLI", 0)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("Mine", 1)
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+-- switch to model with two primary tubes
+var = template:copy("E-Lindworm")	-- EMP
+var:setModel("AdlerLongRangeScout"..color_player)
+var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+var:setTubes(1,10)
+var:setWeaponStorage("HVLI", 0)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("EMP", 2)
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+var = template:copy("N-Lindworm")	-- Nuke
+var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+var:setTubes(1,10)
+var:setWeaponStorage("HVLI", 0)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("Nuke", 1)
+var:setBeam(0,0,0,0,0,0)
+var:setBeamWeaponTurret(0,0,0,0)
+
+
 --[[Scout--]]
-template = ShipTemplate():setName("Adder MK7"):setClass("Starfighter", "Scout"):setType("playership")
+template = ShipTemplate():setName("Adder MK7"):setClass(_("class", "Starfighter"), _("subclass", "Scout")):setType("playership")
 template:setModel("AdlerLongRangeScout"..color_player)
 template:setRadarTrace("cruiser.png")
 template:setDescription([[The Adder mark 7 is a superior scout with scanning and hacking capabilities.]])
@@ -161,7 +238,7 @@ template:setRepairCrewCount(2)
 addSystemsLaserAlt(template)
 
 --[[Player Missile Cruiser--]]
-template = ShipTemplate():setName("Piranha M5P"):setClass("Frigate", "Missile Cruiser"):setType("playership")
+template = ShipTemplate():setName("Piranha M5P"):setClass(_("class", "Frigate"), _("subclass", "Missile Cruiser")):setType("playership")
 template:setModel("HeavyCorvette"..color_player)
 template:setDescription([[The Piranha is a light artillery cruiser, designed to fire from broadside weapon tubes. It comes to use as a escort or defensive spacecraft, since it can quickly react to ambushes. However since it comes without beam weapons, it has proven to be useless against starfighters.
 
@@ -190,7 +267,7 @@ template:setRepairCrewCount(2)
 addSystemsHeavy(template)
 
 --[[Player Transport--]]
-template = ShipTemplate():setName("Flavia P.Falcon"):setClass("Frigate", "Light transport"):setType("playership")
+template = ShipTemplate():setName("Flavia P.Falcon"):setClass(_("class", "Frigate"), _("subclass", "Light transport")):setType("playership")
 template:setModel("LightCorvette"..color_player)
 template:setRadarTrace("tug.png")
 template:setDescription([[Popular among traders and smugglers, the Flavia is a small cargo and passenger transport. It's cheaper than a freighter for small loads and short distances, and is often used to carry high-value cargo discreetly.
@@ -217,7 +294,7 @@ template:setWeaponStorage("Nuke", 1)
 template:setRepairCrewCount(8)
 addSystemsLight(template)
 
-template = ShipTemplate():setName("Repulse"):setClass("Frigate", "Armored Transport"):setModel("LightCorvette"..color_player):setType("playership")
+template = ShipTemplate():setName("Repulse"):setClass(_("class", "Frigate"), _("subclass", "Armored Transport")):setModel("LightCorvette"..color_player):setType("playership")
 template:setRadarTrace("tug.png")
 template:setDescription("Jump/Turret version of Flavia Falcon")
 template:setHull(120)
@@ -270,7 +347,7 @@ template:setRepairCrewCount(4)
 addSystemsMineLayer(template)
 
 --[[Corvette--]]
-template = ShipTemplate():setName("Atlantis"):setClass("Corvette", "Destroyer"):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
+template = ShipTemplate():setName("Atlantis"):setClass(_("class", "Corvette"), _("subclass", "Destroyer")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
 template:setDescription([[The Atlantis X23 is the smallest model of destroyer, and its combination of frigate-like size and corvette-like power makes it an excellent escort ship when defending larger ships against multiple smaller enemies. Because the Atlantis X23 is fitted with a jump drive, it can also serve as an intersystem patrol craft.
 This is a refitted Atlantis X23 for more general tasks. The large shield system has been replaced with an advanced combat maneuvering systems and improved impulse engines. Its missile loadout is also more diverse. Mistaking the modified Atlantis for an Atlantis X23 would be a deadly mistake.]])
 template:setRadarTrace("melon.png")
@@ -297,7 +374,7 @@ template:setTubeDirection(1, -90)
 template:setTubeDirection(2,  90)
 template:setTubeDirection(3,  90)
 template:setTubeDirection(4, 180):setWeaponTubeExclusiveFor(4, "Mine")
-template:setDockClasses("Starfighter")
+template:setDockClasses(_("class", "Starfighter"))
 addSystemsAtlasAlt(template)
 
 --[[Missile Corvette--]]
@@ -332,7 +409,7 @@ template:setWeaponTubeExclusiveFor(1, "HVLI")
 template:weaponTubeDisallowMissle(2, "Mine")
 template:weaponTubeDisallowMissle(3, "Mine")
 template:setWeaponTubeExclusiveFor(4, "Mine")
-template:setDockClasses("Starfighter")
+template:setDockClasses(_("class", "Starfighter"))
 
 template:setRepairCrewCount(4)
 addSystemsAtlas(template)
@@ -370,12 +447,69 @@ template:weaponTubeDisallowMissle(0, "Mine")
 template:weaponTubeDisallowMissle(1, "Mine")
 template:setWeaponTubeExclusiveFor(2, "Mine")
 
-template:setDockClasses("Starfighter")
+template:setDockClasses(_("class", "Starfighter"))
 template:setRepairCrewCount(4)
 addSystemsAtlas(template)
- 
+
+--[[Carrier Corvette--]]
+template = ShipTemplate():setName("Poseidon"):setClass(_("class", "Corvette"), _("subclass", "Combat Carrier")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
+template:setDescription([[blabla, basically a Atlantis, TODO balance with non-carrier Atlantis and other corvettes]])
+template:setRadarTrace("melon.png")
+template:setJumpDrive(true)
+template:setWarpSpeed(750)
+template:setWarpDrive(false)
+template:setShields(200, 200)
+template:setHull(250)
+template:setSpeed(90, 8, 10)
+template:setCombatManeuver(400, 250)
+--                  Arc, Dir, Range, CycleTime, Dmg
+template:setBeam(0,100, -20, 1500.0, 6.0, 8)
+template:setBeam(1,100,  20, 1500.0, 6.0, 8)
+template:setWeaponStorage("Homing", 12)
+template:setWeaponStorage("Nuke", 4)
+template:setWeaponStorage("Mine", 8)
+template:setWeaponStorage("EMP", 6)
+template:setWeaponStorage("HVLI", 20)
+template:setTubes(5, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
+template:weaponTubeDisallowMissle(0, "Mine"):weaponTubeDisallowMissle(1, "Mine")
+template:weaponTubeDisallowMissle(2, "Mine"):weaponTubeDisallowMissle(3, "Mine")
+template:setTubeDirection(0, -90)
+template:setTubeDirection(1, -90)
+template:setTubeDirection(2,  90)
+template:setTubeDirection(3,  90)
+template:setTubeDirection(4, 180):setWeaponTubeExclusiveFor(4, "Mine")
+template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Laser Drill"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
+template:setSpawnShips("MP52 Hornet", "H-Lindworm", "R-Lindworm")
+
+template:setRestocksMissilesDocked(true)
+template:setSharesEnergyWithDocked(true)
+template:setRestocksScanProbes(true)
+template:setRepairDocked(true)
+addSystemsAtlasAlt(template)
+
+--[[Heavy Carrier Corvette--]]
+template = ShipTemplate():setName("Neptune"):setClass(_("class", "Corvette"), _("subclass", "Heavy Carrier")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
+template:setDescription([[blabla, basically a Atlantis, TODO balance with non-carrier Atlantis and other corvettes]])
+template:setRadarTrace("melon.png")
+template:setJumpDrive(true)
+template:setWarpSpeed(750)
+template:setWarpDrive(false)
+template:setShields(200, 200)
+template:setHull(250)
+template:setSpeed(90, 8, 10)
+template:setCombatManeuver(400, 250)
+template:setInternalDockClasses(_("class", "Starfighter"))
+template:setSpawnShips("MP52 Hornet", "MP58 Mole", "H-Lindworm", "R-Lindworm", "MR-Lindworm", "MF-Lindworm", "E-Lindworm", "N-Lindworm")
+
+template:setRestocksMissilesDocked(true)
+template:setSharesEnergyWithDocked(true)
+template:setRestocksScanProbes(true)
+template:setRepairDocked(true)
+addSystemsAtlasAlt(template)
+
+
 --[[---------------------Carrier------------------------]]
-template = ShipTemplate():setName("Benedict"):setClass("Corvette", "Freighter"):setModel("transport_4_2")
+template = ShipTemplate():setName("Benedict"):setClass(_("class", "Corvette"), _("subclass", "Freighter")):setModel("transport_4_2")
 template:setType("playership")
 template:setDescription([[The Jump Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized jump drive and the energy storage required to run this jump drive.
 It is designed to carry other ships deep into space. So it has special docking parameters, allowing other ships to attach themselves to this ship.
@@ -384,7 +518,8 @@ template:setRadarTrace("transport.png")
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
-template:setDockClasses("Starfighter", "Frigate", "Corvette")
+template:setExternalDockClasses(_("subclass", "Frigate"), _("subclass", "Corvette"))
+template:setInternalDockClasses(_("class", "Starfighter"))
 --template:setSharesEnergyWithDocked(true)
 template:setShields(70, 70)
 template:setHull(200)
@@ -401,12 +536,14 @@ template:setRestocksMissilesDocked(true)
 template:setSharesEnergyWithDocked(true)
 template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
+template:setSpawnShips("MP52 Hornet", "H-Lindworm", "R-Lindworm")
 addSystemsTransport(template)
 
 template:setRepairCrewCount(6)
 var2 = template:copy("Kiriya")
 var2:setDescription("Kiriya is an improved warp drive version of the Jump Carrier")
 var2:setJumpDrive(false)
+var2:setWarpDrive(true)
 var2:setWarpSpeed(750)
 
 

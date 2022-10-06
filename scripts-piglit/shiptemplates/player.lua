@@ -8,12 +8,11 @@ color_player = "White" --change it if you want another style
 
 
 --[[Starfighter--]]
-
+-- what is fun: always having to maneuver to keep behind the enemy.
 template = ShipTemplate():setName("MP52 Hornet"):setClass(_("class", "Starfighter"), _("subclass", "Interceptor")):setType("playership")
-template:setModel("WespeFighter"..color_player)
+template:setModel("WespeFighterYellow")
 template:setRadarTrace("fighter.png")
-template:setDescription([[The Hornet is a basic interceptor found in many corners of the galaxy. 
-The MP52 Hornet is a significantly upgraded version of MU52 Hornet, with nearly twice the hull strength, nearly three times the shielding, better acceleration, impulse boosters, and a second laser cannon.]])
+template:setDescription([[The MP52 Hornet interceptor is a fast but fragile starfighter of the Human Navy. Conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
 template:setHull(70)
@@ -42,20 +41,31 @@ template:setAutoRepair(true)
 addSystemsWespe(template)
 
 var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
+-- what is fun: difficult to outmaneuver enemies if they have high turn rate
 var:setClass(_("class", "Starfighter"), _("subclass", "Laser Drill"))
-var:setModel("WespeFighterRed")
+var:setDescription([[The Mole mobile drill was long used to mine small asteroids. Outfitted with a state of the art starfighter impulse engine the MP58 Mole is capable of digging holes into enemy ships.]])
+var:setModel("WespeFighterBlue")
 var:setBeam(0, 30,-5, 900.0, 3.0, 2.5)
 var:setBeam(1, 30, 5, 900.0, 3.0, 2.5)
 var:setSpeed(80, 16, 20, 70, 10)
 
+-- what is fun: same as starfighter but wider beam range makes it a bit more easy
 var = template:copy("MP56 Bumblebee")	-- Wider beam range
-var:setClass(_("class", "Starfighter"), _("subclass", "Fighter"))
-var:setModel("WespeFighterYellow")
+var:setDescription([[The MP58 Bumblebee interceptor is the upgraded version of the MP52 Hornet interceptor. Fast but fragile starfighter, conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
+var:setClass(_("class", "Starfighter"), _("subclass", "Advanced Interceptor"))
+var:setModel("WespeFighterRed")
 var:setBeam(0, 45,-5, 700.0, 4.0, 2.5)
 var:setBeam(1, 45, 5, 700.0, 4.0, 2.5)
 
 
 --[[Bomber--]]
+-- Dragon Names:
+-- Peluda: shoots quills from back - hvli
+-- Ryu: grants wishes, three claws - Rockets
+-- Drac: poison breath - Mine rear
+-- Cuelebre: poison breath, eat cattle, Mine Fwd
+-- Zomok: bad weather - emp
+-- Bashe: eaths elefants - nuke
 
 -- legacy; try not to use:
 template = ShipTemplate():setName("ZX-Lindworm"):setClass(_("class", "Starfighter"), _("subclass", "Bomber")):setType("playership")
@@ -98,28 +108,25 @@ template:setAutoRepair(true)
 
 addSystemsLindwurm(template)
 
-var = template:copy("H-Lindworm")	-- HVLI
+--what is fun: destroying bigger enemies. Player should always consider weather keeping up the attack or escaping is adequate. Reverse drive should be slower than enemies forward drive. But forward faster.
+--Challenge: you have to sustain firing, but are too slow to escape using reverse
+var = template:copy("Peluda")	-- HVLI
 var:setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
+var:setModel("LindwurmFighterGreen")
+var:setDescription([[The Peluda assault Bomber is a basic starfighter of the Human Navy; being ideally suited for attacking slow or stationary targets.]])
 var:setTubes(1,7)
 var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("HVLI", 12)
+var:setWeaponStorage("HVLI", 6)
 var:setBeam(0,0,0,0,0,0)
 var:setBeamWeaponTurret(0,0,0,0)
 
--- switch to model with two primary tubes
-var = template:copy("R-Lindworm")	-- Homing
-var:setModel("AdlerLongRangeScout"..color_player)
-var:setClass(_("class", "Starfighter"), _("subclass", "Rocket Fighter"))
-var:setTubes(2,7)
-var:setWeaponStorage("HVLI", 0)
-var:setWeaponStorage("Homing", 6)
-var:setTubeDirection(1,0):setWeaponTubeExclusiveFor(1, "Homing")
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
-var = template:copy("MR-Lindworm")	-- Mine Rear
+var = template:copy("Drac")	-- Mine Rear
+--what is fun: short range but huge AOE
+--more challenging than front mines, since reverse is slow
 var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setTubes(1,10)
+var:setModel("LindwurmFighterYellow")
+var:setDescription([[The Dray tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+var:setTubes(1,20)
 var:setWeaponStorage("HVLI", 0)
 var:setWeaponStorage("Homing", 0)
 var:setWeaponStorage("Mine", 1)
@@ -127,38 +134,84 @@ var:setTubeDirection(0,180)
 var:setBeam(0,0,0,0,0,0)
 var:setBeamWeaponTurret(0,0,0,0)
 
-var = template:copy("MF-Lindworm")	-- Mine Front
+var = template:copy("Cuelebre")	-- Mine Front
+--what is fun: frontal mines are awesome. short range but huge AOE -> fun to place
 var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setTubes(1,10)
+var:setModel("LindwurmFighterBlue")
+var:setDescription([[The Cuelebre tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+var:setTubes(1,20)
 var:setWeaponStorage("HVLI", 0)
 var:setWeaponStorage("Homing", 0)
 var:setWeaponStorage("Mine", 1)
 var:setBeam(0,0,0,0,0,0)
 var:setBeamWeaponTurret(0,0,0,0)
 
--- switch to model with two primary tubes
-var = template:copy("E-Lindworm")	-- EMP
-var:setModel("AdlerLongRangeScout"..color_player)
+var = template:copy("Bashe")	-- Nuke
+--what is fun: the firepower of nukes from a fighter.
+--not really a challenge, it is just delivery and some dodging
 var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setTubes(1,10)
-var:setWeaponStorage("HVLI", 0)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("EMP", 2)
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
-var = template:copy("N-Lindworm")	-- Nuke
-var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setTubes(1,10)
+var:setModel("LindwurmFighterRed")
+var:setDescription([[The Bashe tactical nuke delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+var:setTubes(1,20)	-- take quite long, so combat may evolve
 var:setWeaponStorage("HVLI", 0)
 var:setWeaponStorage("Homing", 0)
 var:setWeaponStorage("Nuke", 1)
 var:setBeam(0,0,0,0,0,0)
 var:setBeamWeaponTurret(0,0,0,0)
 
+--[[Still Bombers, but with Scout hull--]]
+template = ShipTemplate():setName("Ryu"):setClass(_("class", "Starfighter"), _("subclass", "Rocket Fighter")):setType("playership")
+--what is fun: double torpedo insta-destroys enemy fighters!
+template:setModel("AdlerLongRangeFighterRed")
+template:setRadarTrace("fighter.png")
+template:setImpulseSoundFile("sfx/engine_fighter.wav")
+template:setDescription([[The Ryu Rocket Fighter is a basic starfighter of the Human Navy; Designed for escort and anti-fighter missions.]])
+template:setTubes(2,7)
+template:setTubeSize(0, "small")
+template:setTubeSize(1, "small")
+template:setWeaponStorage("Homing", 4)
+template:setHull(75)
+template:setShields(40)
+template:setSpeed(70, 15, 25, 40, 15)
+
+template:setCombatManeuver(250, 150)
+template:setEnergyStorage(400)
+template:setRepairCrewCount(1)
+template:setLongRangeRadarRange(5000)
+template:setShortRangeRadarRange(5000)
+
+template:setCanScan(false)
+template:setCanHack(false)
+template:setCanDock(true)
+template:setCanCombatManeuver(false)
+template:setCanLaunchProbe(false)
+template:setCanSelfDestruct(false)
+
+template:setAutoCoolant(true)
+template:setAutoMissileReload(true)
+template:setAutoRepair(true)
+
+addSystemsAdler(template)
+
+
+-- switch to model with two primary tubes
+-- switch to model with two primary tubes
+--what is fun: 
+--Can not destroy enemies, since it has only emps
+var = template:copy("Zomok")	-- EMP
+var:setModel("AdlerLongRangeFighterBlue")
+var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+var:setDescription([[The Zomok tactical EMP delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+var:setTubes(2,10)	-- may hide two rockets in tubes while docking. So we can change loadout!
+var:setWeaponStorage("HVLI", 1)
+var:setWeaponStorage("Homing", 0)
+var:setWeaponStorage("EMP", 1)
+var:setAutoMissileReload(false)
+
 
 --[[Scout--]]
 template = ShipTemplate():setName("Adder MK7"):setClass(_("class", "Starfighter"), _("subclass", "Scout")):setType("playership")
+--what is fun: its balanced. has a bit of every weapon. and fast enough reverse. Han host specialist
 template:setModel("AdlerLongRangeScout"..color_player)
 template:setRadarTrace("cruiser.png")
 template:setDescription([[The Adder mark 7 is a superior scout with scanning and hacking capabilities.]])
@@ -214,6 +267,7 @@ template:setWeaponStorage("EMP", 3)
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
+template:setDockClasses(_("class", "Satellite"))
 addSystemsMulitGun(template)
 
 --[[ Player Laser Battlecruiser --]]
@@ -242,7 +296,14 @@ template:setJumpDrive(false)
 template:setWarpDrive(true)
 
 template:setRepairCrewCount(2)
+template:setDockClasses(_("class", "Satellite"))
 addSystemsLaserAlt(template)
+
+var = template:copy("Anvil")
+var:setModel("LaserCorvetteBlue")
+var:setSharesEnergyWithDocked(true)
+var:setClass(_("class", "Prototype"), _("subclass", "Torpedoboat Destroyer"))
+var:setDockClasses(_("class", "Prototype"))
 
 --[[Player Missile Cruiser--]]
 template = ShipTemplate():setName("Piranha M5P"):setClass(_("class", "Frigate"), _("subclass", "Missile Cruiser")):setType("playership")
@@ -271,7 +332,14 @@ template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
 template:setRepairCrewCount(2)
+template:setDockClasses(_("class", "Satellite"))
 addSystemsHeavy(template)
+
+var = template:copy("Hammer")
+var:setModel("HeavyCorvetteBlue")
+var:setSharesEnergyWithDocked(true)
+var:setClass(_("class", "Prototype"), _("subclass", "Missile Cruiser"))
+var:setDockClasses(_("class", "Prototype"))
 
 --[[Player Transport--]]
 template = ShipTemplate():setName("Flavia P.Falcon"):setClass(_("class", "Frigate"), _("subclass", "Light transport")):setType("playership")
@@ -299,6 +367,7 @@ template:setWeaponStorage("Homing", 3)
 template:setWeaponStorage("Mine", 1)
 template:setWeaponStorage("Nuke", 1)
 template:setRepairCrewCount(8)
+template:setDockClasses(_("class", "Satellite"))
 addSystemsLight(template)
 
 template = ShipTemplate():setName("Repulse"):setClass(_("class", "Frigate"), _("subclass", "Armored Transport")):setModel("LightCorvette"..color_player):setType("playership")
@@ -351,6 +420,7 @@ template:setTubeDirection(2, 180)
 template:setWeaponStorage("Mine", 12)
 
 template:setRepairCrewCount(4)
+template:setDockClasses(_("class", "Satellite"))
 addSystemsMineLayer(template)
 
 --[[Corvette--]]
@@ -459,8 +529,8 @@ template:setRepairCrewCount(4)
 addSystemsAtlas(template)
 
 --[[Carrier Corvette--]]
-template = ShipTemplate():setName("Poseidon"):setClass(_("class", "Corvette"), _("subclass", "Combat Carrier")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
-template:setDescription([[blabla, basically a Atlantis, TODO balance with non-carrier Atlantis and other corvettes]])
+template = ShipTemplate():setName("Poseidon"):setClass(_("class", "Corvette"), _("subclass", "Combat Carrier")):setModel("AtlasCarrierDreadnought"..color_player):setType("playership")
+template:setDescription([[The Poseidon armed combat carrier combines the durability of a corvette class ship with the ability to launch fighters and bombers. It has weapons to defend itself and the fighters, however there are no heavy weapons in the arsenal.]])
 template:setRadarTrace("melon.png")
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
@@ -473,20 +543,18 @@ template:setCombatManeuver(400, 250)
 template:setBeam(0,100, -20, 1500.0, 6.0, 8)
 template:setBeam(1,100,  20, 1500.0, 6.0, 8)
 template:setWeaponStorage("Homing", 12)
-template:setWeaponStorage("Nuke", 4)
-template:setWeaponStorage("Mine", 8)
-template:setWeaponStorage("EMP", 6)
-template:setWeaponStorage("HVLI", 20)
-template:setTubes(5, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
-template:weaponTubeDisallowMissle(0, "Mine"):weaponTubeDisallowMissle(1, "Mine")
-template:weaponTubeDisallowMissle(2, "Mine"):weaponTubeDisallowMissle(3, "Mine")
+template:setWeaponStorage("Nuke", 0)
+template:setWeaponStorage("Mine", 4)
+template:setWeaponStorage("EMP", 0)
+template:setWeaponStorage("HVLI", 10)
+template:setTubes(3, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
+template:weaponTubeDisallowMissle(0, "Mine")
+template:weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(0, -90)
-template:setTubeDirection(1, -90)
-template:setTubeDirection(2,  90)
-template:setTubeDirection(3,  90)
-template:setTubeDirection(4, 180):setWeaponTubeExclusiveFor(4, "Mine")
-template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Laser Drill"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
-template:setSpawnShips("MP52 Hornet", "H-Lindworm", "R-Lindworm")
+template:setTubeDirection(1,  90)
+template:setTubeDirection(2, 180):setWeaponTubeExclusiveFor(4, "Mine")
+template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
+template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
 
 template:setRestocksMissilesDocked("all")
 template:setSharesEnergyWithDocked(true)
@@ -495,9 +563,10 @@ template:setRepairDocked(true)
 addSystemsAtlasAlt(template)
 
 --[[Heavy Carrier Corvette--]]
-template = ShipTemplate():setName("Neptune"):setClass(_("class", "Corvette"), _("subclass", "Heavy Carrier")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
-template:setDescription([[blabla, basically a Atlantis, TODO balance with non-carrier Atlantis and other corvettes]])
-template:setRadarTrace("melon.png")
+template = ShipTemplate():setName("Neptune"):setClass(_("class", "Corvette"), _("subclass", "Heavy Carrier")):setType("playership")
+template:setModel("HeavyDreadnoughtGrey")
+template:setDescription([[The Neptune heavy carrier is unarmed by itself, but has the capability to produce all types of missiles for the fighters it carries. It houses upgraded interceptors and heavy bombers, capable of carrying emps, mines and nukes into the enemy lines.]])
+template:setRadarTrace("missile_cruiser.png")
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
@@ -506,19 +575,18 @@ template:setHull(250)
 template:setSpeed(90, 8, 10)
 template:setCombatManeuver(400, 250)
 template:setInternalDockClasses(_("class", "Starfighter"))
-template:setSpawnShips("MP52 Hornet", "MP58 Mole", "H-Lindworm", "R-Lindworm", "MR-Lindworm", "MF-Lindworm", "E-Lindworm", "N-Lindworm")
+template:setSpawnShips("MP56 Bumblebee", "MP58 Mole", "Peluda", "Ryu", "Drac", "Cuelebre", "Zomok", "Bashe", "Adder MK7")
 
 template:setRestocksMissilesDocked("all")
 template:setSharesEnergyWithDocked(true)
 template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
-addSystemsAtlasAlt(template)
-
+addSystemsHeavy(template)
 
 --[[---------------------Carrier------------------------]]
 template = ShipTemplate():setName("Benedict"):setClass(_("class", "Corvette"), _("subclass", "Freighter")):setModel("transport_4_2")
 template:setType("playership")
-template:setDescription([[The Jump Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized jump drive and the energy storage required to run this jump drive.
+template:setDescription([[The Jump Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized jump drive and a huge ammunition factory to supply docked ships.
 It is designed to carry other ships deep into space. So it has special docking parameters, allowing other ships to attach themselves to this ship.
 Benedict is an improved version of the Jump Carrier]])
 template:setRadarTrace("transport.png")
@@ -527,7 +595,6 @@ template:setWarpSpeed(750)
 template:setWarpDrive(false)
 template:setExternalDockClasses(_("subclass", "Frigate"), _("subclass", "Corvette"))
 template:setInternalDockClasses(_("class", "Starfighter"))
---template:setSharesEnergyWithDocked(true)
 template:setShields(70, 70)
 template:setHull(200)
 template:setSpeed(60, 6, 8)
@@ -543,12 +610,14 @@ template:setRestocksMissilesDocked("all")
 template:setSharesEnergyWithDocked(true)
 template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
-template:setSpawnShips("MP52 Hornet", "H-Lindworm", "R-Lindworm")
+template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
+template:setRepairCrewCount(6)
 addSystemsTransport(template)
 
-template:setRepairCrewCount(6)
 var2 = template:copy("Kiriya")
-var2:setDescription("Kiriya is an improved warp drive version of the Jump Carrier")
+var2:setDescription([[The Warp Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized warp drive and a huge ammunition factory to supply docked ships.
+It is designed to carry other ships deep into space. So it has special docking parameters, allowing other ships to attach themselves to this ship.
+Kiriya is an improved warp drive version of the Jump Carrier]])
 var2:setJumpDrive(false)
 var2:setWarpDrive(true)
 var2:setWarpSpeed(750)

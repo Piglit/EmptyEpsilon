@@ -149,3 +149,59 @@ template:addDoor( 4, 2, true)
 template:addDoor( 4, 1, true)
 --]]
 
+template = ShipTemplate():setName("Converted Carrier"):setModel("Ender Battlecruiser"):setClass(_("class", "Exuari"), _("subclass", "Carrier")):setType("playership")
+template:setRadarTrace("battleship.png")
+template:setDescription(_("A captured Exuari carrier spacecraft."))
+--                  Arc, Dir, Range, CycleTime, Dmg
+template:setBeam(0,  20, -90, 1200.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
+template:setBeam(1,  20, -90, 1200.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
+template:setBeam(2,  20,  90, 1200.0, 6.1, 4):setBeamWeaponTurret(2, 160,  90, 5)
+template:setBeam(3,  20,  90, 1200.0, 6.0, 4):setBeamWeaponTurret(3, 160,  90, 5)
+template:setBeam(4,  20, -90, 1200.0, 5.9, 4):setBeamWeaponTurret(4, 160, -90, 5)
+template:setBeam(5,  20, -90, 1200.0, 6.2, 4):setBeamWeaponTurret(5, 160, -90, 5)
+template:setBeam(6,  20,  90, 1200.0, 5.9, 4):setBeamWeaponTurret(6, 160,  90, 5)
+template:setBeam(7,  20,  90, 1200.0, 6.2, 4):setBeamWeaponTurret(7, 160,  90, 5)
+template:setBeam(8,  20, -90, 1200.0, 6.1, 4):setBeamWeaponTurret(8, 160, -90, 5)
+template:setBeam(9,  20, -90, 1200.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 5)
+template:setBeam(10, 20,  90, 1200.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
+template:setBeam(11, 20,  90, 1200.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
+template:setHull(100)
+template:setShields(250)
+template:setSpeed(20, 1.5, 3)
+template:setDockClasses(_("class", "Starfighter"))
+template:setSharesEnergyWithDocked(true)
+template:setRepairDocked(true)
+template:setRestocksMissilesDocked("all")
+template:setRestocksScanProbes(true)
+template:setCanCombatManeuver(false)
+template:setWarpSpeed(500)
+template:setJumpDriveRange(5000, 90000)
+addSystemsHeavy(template)
+-- GM: adjust Hull, Shields, Beam-Ranges
+
+
+template = ShipTemplate():setName("SpySat"):setClass(_("class", "Satellite"), _("subclass", "SpySat")):setType("playership")
+template:setModel("cubesat")
+template:setRadarTrace("satellite.png")
+template:setDescription([[Just some innocent looking satellite.]])
+template:setImpulseSoundFile("sfx/engine_fighter.wav")
+
+template:setHull(10)
+template:setShields(0)
+--				spped, turn, accel, rev-speed, rev-accel
+template:setSpeed(1, 1, 1)
+template:setCombatManeuver(20, 15)
+template:setEnergyStorage(100)
+template:setRepairCrewCount(1)
+template:setLongRangeRadarRange(50000)
+template:setShortRangeRadarRange(20000)
+
+template:setCanLaunchProbe(false)
+template:setCanSelfDestruct(false)
+
+template:setAutoCoolant(true)
+template:setAutoRepair(true)
+
+addSystemsHeavy(template)
+
+

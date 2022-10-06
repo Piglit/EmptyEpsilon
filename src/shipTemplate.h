@@ -137,7 +137,7 @@ public:
     float impulse_acceleration, impulse_reverse_acceleration;
     float combat_maneuver_boost_speed;
     float combat_maneuver_strafe_speed;
-    bool has_jump_drive, has_cloaking;
+    bool has_warp_drive, has_jump_drive, has_cloaking;
     float jump_drive_min_distance;
     float jump_drive_max_distance;
     int weapon_storage[MW_Count];
@@ -205,6 +205,7 @@ public:
     void setShields(const std::vector<float>& values);
     void setSpeed(float impulse, float turn, float acceleration, std::optional<float> reverse_speed, std::optional<float> reverse_acceleration);
     void setCombatManeuver(float boost, float strafe);
+    void setWarpDrive(bool enabled);
     void setWarpSpeed(float warp);
     void setJumpDrive(bool enabled);
     void setJumpDriveRange(float min, float max) { jump_drive_min_distance = min; jump_drive_max_distance = max; }

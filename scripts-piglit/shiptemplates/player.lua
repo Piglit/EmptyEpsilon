@@ -155,6 +155,7 @@ template:setTubeSize(1, "small")
 template:setWarpSpeed(750)
 template:setJumpDriveRange(5000,50000)
 template:setJumpDrive(false)
+template:setWarpDrive(true)
 
 template:setRepairCrewCount(2)
 addSystemsLaserAlt(template)

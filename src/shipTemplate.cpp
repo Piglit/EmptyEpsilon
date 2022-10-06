@@ -194,6 +194,8 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// Setting any value also enables the "warp" system and controls.
     /// Example: template:setWarpSpeed(1000)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setWarpSpeed);
+    /// Set if this ship has a warp drive. Example: template:setWarpDrive(true)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setWarpDrive);
     /// Defines whether ShipTemplateBasedObjects created from this ShipTemplate supply energy to docked PlayerSpaceships.
     /// Defaults to true.
     /// Example: template:setSharesEnergyWithDocked(false)
@@ -346,6 +348,7 @@ ShipTemplate::ShipTemplate()
     combat_maneuver_boost_speed = 0.0f;
     combat_maneuver_strafe_speed = 0.0f;
     warp_speed = 0.0;
+    has_warp_drive = false;
     has_jump_drive = false;
     jump_drive_min_distance = 5000.0;
     jump_drive_max_distance = 50000.0;
@@ -642,6 +645,11 @@ void ShipTemplate::setWarpSpeed(float warp)
     warp_speed = warp;
 }
 
+void ShipTemplate::setWarpDrive(bool enabled)
+{
+    has_warp_drive = enabled;
+}
+
 void ShipTemplate::setSharesEnergyWithDocked(bool enabled)
 {
     shares_energy_with_docked = enabled;
@@ -764,6 +772,7 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->repair_docked = repair_docked;
     result->restocks_scan_probes = restocks_scan_probes;
     result->restocks_missiles_docked = restocks_missiles_docked;
+    result->has_warp_drive = has_warp_drive;
     result->has_jump_drive = has_jump_drive;
     result->has_cloaking = has_cloaking;
     for(int n=0; n<MW_Count; n++)

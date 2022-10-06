@@ -358,6 +358,7 @@ void SpaceShip::applyTemplateValues()
         weapon_storage[n] = weapon_storage_max[n] = ship_template->weapon_storage[n];
 
     auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
+    restocks_missiles_docked = ship_template->restocks_missiles_docked;
     ship_template->setCollisionData(this);
     model_info.setData(ship_template->model_data);
 }
@@ -720,7 +721,7 @@ void SpaceShip::update(float delta)
                     {
                         if (weapon_storage[n] < weapon_storage_max[n])
                         {
-                            if (missile_resupply_delay <= 0.0)
+                            if (missile_resupply_delay <= 0.0f)
                             {
                                 weapon_storage[n] += 1;
                                 missile_resupply_delay = missile_resupply_time;
@@ -1338,7 +1339,7 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_JumpDrive:
         return has_jump_drive;
     case SYS_MissileSystem:
-        return weapon_tube_count > 0;
+        return weapon_tube_count > 0 || restocks_missiles_docked != R_None;
     case SYS_FrontShield:
         return shield_count > 0;
     case SYS_RearShield:
@@ -1346,7 +1347,7 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_Reactor:
         return true;
     case SYS_BeamWeapons:
-        return true;
+        return beam_weapons[0].getArc() > 0.0f;
     case SYS_Maneuver:
         return turn_speed > 0.0f;
     case SYS_Impulse:

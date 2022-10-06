@@ -62,11 +62,6 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
         rows[n] = row;
     }
 
-    docked_loading_bar= new GuiProgressbar(this, id + "_DOCKED_LOADING_PROGRESS", 0, 1.0, 0);
-    docked_loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(200, 50);
-    docked_loading_label = new GuiLabel(this, id + "_DOCKED_LOADING_PROGRESS_LABEL", "Loading", 35);
-    docked_loading_label->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->hide();
-
     for (int n = MW_Count-1; n >= 0; n--)
     {
         load_type_rows[n].layout = new GuiElement(this, id + "_ROW_" + string(n));
@@ -87,6 +82,12 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
     load_type_rows[MW_EMP].button->setIcon("gui/icons/weapon-emp.png");
     load_type_rows[MW_Nuke].button->setIcon("gui/icons/weapon-nuke.png");
     load_type_rows[MW_HVLI].button->setIcon("gui/icons/weapon-hvli.png");
+
+    docked_loading_bar= new GuiProgressbar(this, id + "_DOCKED_LOADING_PROGRESS", 0, 1.0, 0);
+    docked_loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(200, 50);
+    docked_loading_label = new GuiLabel(docked_loading_bar, id + "_DOCKED_LOADING_PROGRESS_LABEL", "Loading", 35);
+    docked_loading_label->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->hide();
+
 }
 
 void GuiMissileTubeControls::onUpdate()

@@ -123,6 +123,7 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
 
     long_range_radar_range = 30000.0f;
     short_range_radar_range = 5000.0f;
+    restocks_missiles_docked = R_None;
 
     registerMemberReplication(&template_name);
     registerMemberReplication(&type_name);

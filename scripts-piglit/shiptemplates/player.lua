@@ -43,10 +43,17 @@ addSystemsWespe(template)
 
 var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
 var:setClass(_("class", "Starfighter"), _("subclass", "Laser Drill"))
-var:setModel("WespeFighterYellow")
+var:setModel("WespeFighterRed")
 var:setBeam(0, 30,-5, 900.0, 3.0, 2.5)
 var:setBeam(1, 30, 5, 900.0, 3.0, 2.5)
 var:setSpeed(80, 16, 20, 70, 10)
+
+var = template:copy("MP56 Bumblebee")	-- Wider beam range
+var:setClass(_("class", "Starfighter"), _("subclass", "Fighter"))
+var:setModel("WespeFighterYellow")
+var:setBeam(0, 45,-5, 700.0, 4.0, 2.5)
+var:setBeam(1, 45, 5, 700.0, 4.0, 2.5)
+
 
 --[[Bomber--]]
 

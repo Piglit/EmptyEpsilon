@@ -508,43 +508,8 @@ void PlayerSpaceship::update(float delta)
                 }
             }
         }
-
-        // restock missiles
-        if (docked_with_template_based && docked_with_template_based->restocks_missiles_docked)
-        {
-            bool needs_missile = 0;
-
-            for(int n=0; n<MW_Count; n++)
-            {
-                if (weapon_storage[n] < weapon_storage_max[n])
-                {
-                    if (missile_resupply_delay <= 0.0)
-                    {
-                        weapon_storage[n] += 1;
-                        missile_resupply_delay = missile_resupply_time;
-                        break;
-                    }
-                    else
-                    {
-                        needs_missile = 1;
-                    }
-                }
-            }
-
-            if (needs_missile) {
-                if (docked_with_ship)
-                {
-                    missile_resupply_delay -= delta * docked_with_ship->getSystemEffectiveness(SYS_MissileSystem);
-                }
-                else
-                {
-                    missile_resupply_delay -= delta;
-                }
-            }
-        }
     }else{
         scan_probe_recharge = 0.0;
-        missile_resupply_delay = missile_resupply_time;
     }
 
     // Automate cooling if auto_coolant_enabled is true. Distributes coolant to

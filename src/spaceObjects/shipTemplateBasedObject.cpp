@@ -4,6 +4,8 @@
 
 #include "tween.h"
 #include "i18n.h"
+#include "cpuShip.h"
+#include "playerSpaceship.h"
 
 
 REGISTER_SCRIPT_SUBCLASS_NO_CREATE(ShipTemplateBasedObject, SpaceObject)
@@ -269,6 +271,28 @@ std::unordered_map<string, string> ShipTemplateBasedObject::getGMInfo()
         ret[trMark("gm_info", "Shield") + string(n + 1)] = string(shield_level[n]) + "/" + string(shield_max[n]);
     }
     return ret;
+}
+
+bool ShipTemplateBasedObject::canRestockMissiles(P<SpaceShip> receiver) {
+    switch (restocks_missiles_docked) {
+        case R_None:
+            return false;
+        case R_All:
+            return true;
+        case R_CpuShips:
+            if (P<CpuShip>(receiver))
+                return true;
+            else
+                return false;
+        case R_PlayerShips:
+            if (P<PlayerSpaceship>(receiver))
+                return true;
+            else
+                return false;
+        case R_Fighters:
+            return false; //TODO
+    }
+    return false;
 }
 
 bool ShipTemplateBasedObject::hasShield()

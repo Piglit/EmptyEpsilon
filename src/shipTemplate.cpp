@@ -81,7 +81,7 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRepairDocked);
     /// Set if this ship restocks scan probes on docked ships. Example: template:setRestocksScanProbes(false)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRestocksScanProbes);
-    /// Set if this ship restores missiles on docked cpuships. Example template:setRestocksMissilesDocked(false)
+    /// Set if this ship restores missiles on docked cpuships. Example template:setRestocksMissilesDocked("playerships")
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRestocksMissilesDocked);
     /// Set if this ship has a jump drive. Example: template:setJumpDrive(true)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setJumpDrive);
@@ -145,7 +145,7 @@ ShipTemplate::ShipTemplate()
     shares_energy_with_docked = true;
     repair_docked = false;
     restocks_scan_probes = false;
-    restocks_missiles_docked = false;
+    restocks_missiles_docked = R_None;
     energy_storage_amount = 1000;
     repair_crew_count = 3;
     weapon_tube_count = 0;
@@ -485,9 +485,9 @@ void ShipTemplate::setRestocksScanProbes(bool enabled)
     restocks_scan_probes = enabled;
 }
 
-void ShipTemplate::setRestocksMissilesDocked(bool enabled)
+void ShipTemplate::setRestocksMissilesDocked(ERestockMissileBehaviour behaviour)
 {
-    restocks_missiles_docked = enabled;
+    restocks_missiles_docked = behaviour;
 }
 
 void ShipTemplate::setJumpDrive(bool enabled)

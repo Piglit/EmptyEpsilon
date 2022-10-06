@@ -300,7 +300,10 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
                 }
                 break;
             case SYS_MissileSystem:
-                addSystemEffect(tr("missile","Reload rate"), toNearbyIntString(effectiveness * 100) + "%");
+                if (my_spaceship->weapon_tube_count > 0)
+                    addSystemEffect(tr("missile","Reload rate"), toNearbyIntString(effectiveness * 100) + "%");
+                if (my_spaceship->restocks_missiles_docked != R_None)
+                    addSystemEffect(tr("fighter missile","Fighter missile reload rate"), toNearbyIntString(effectiveness * 100) + "%");
                 break;
             case SYS_Maneuver:
                 addSystemEffect(tr("Turning speed"), toNearbyIntString(effectiveness * 100) + "%");

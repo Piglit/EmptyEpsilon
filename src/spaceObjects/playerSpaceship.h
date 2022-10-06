@@ -94,7 +94,7 @@ public:
     // Ship automation features, mostly for single-person ships like fighters
     bool auto_repair_enabled = false;
     bool auto_coolant_enabled = false;
-    bool auto_reload_tube_enabled = false;
+    //bool auto_reload_tube_enabled = false;    // defined in spaceship.h
     // Whether shields are up (true) or down
     bool shields_active;
     // Password to join a ship. Default is empty.

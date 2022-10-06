@@ -46,7 +46,7 @@ template<> void convert<ERestockMissileBehaviour>::param(lua_State* L, int& idx,
 {
     string str = string(luaL_checkstring(L, idx++)).lower();
     if (str == "all")
-        er = R_None;
+        er = R_All;
     else if (str == "cpuships")
         er = R_CpuShips;
     else if (str == "fighters")

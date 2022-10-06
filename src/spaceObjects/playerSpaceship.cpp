@@ -770,7 +770,7 @@ void PlayerSpaceship::applyTemplateValues()
     can_launch_probe = ship_template->can_launch_probe;
     auto_repair_enabled = ship_template->auto_repair_enabled;
     auto_coolant_enabled = ship_template->auto_coolant_enabled;
-    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
+    //auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;   // in spaceship.h
     if (!on_new_player_ship_called)
     {
         on_new_player_ship_called = true;

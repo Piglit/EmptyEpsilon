@@ -79,7 +79,7 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRepairDocked);
     /// Set if this ship restocks scan probes on docked ships. Example: template:setRestocksScanProbes(false)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRestocksScanProbes);
-    /// Set if this ship restores missiles on docked cpuships. Example template:setRestocksMissilesDocked(false)
+    /// Set if this ship restores missiles on docked cpuships. Example template:setRestocksMissilesDocked("playerships")
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRestocksMissilesDocked);
     /// Set if this ship has a jump drive. Example: template:setJumpDrive(true)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setJumpDrive);
@@ -143,7 +143,7 @@ ShipTemplate::ShipTemplate()
     shares_energy_with_docked = true;
     repair_docked = false;
     restocks_scan_probes = false;
-    restocks_missiles_docked = false;
+    restocks_missiles_docked = R_None;
     energy_storage_amount = 1000;
     repair_crew_count = 3;
     weapon_tube_count = 0;
@@ -477,9 +477,9 @@ void ShipTemplate::setRestocksScanProbes(bool enabled)
     restocks_scan_probes = enabled;
 }
 
-void ShipTemplate::setRestocksMissilesDocked(bool enabled)
+void ShipTemplate::setRestocksMissilesDocked(ERestockMissileBehaviour behaviour)
 {
-    restocks_missiles_docked = enabled;
+    restocks_missiles_docked = behaviour;
 }
 
 void ShipTemplate::setJumpDrive(bool enabled)
@@ -561,6 +561,9 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->can_combat_maneuver = can_combat_maneuver;
     result->can_self_destruct = can_self_destruct;
     result->can_launch_probe = can_launch_probe;
+    result->auto_coolant_enabled = auto_coolant_enabled;
+    result->auto_reload_tube_enabled = auto_reload_tube_enabled;
+    result->auto_repair_enabled = auto_repair_enabled;
 
     result->default_ai_name = default_ai_name;
     for(int n=0; n<max_beam_weapons; n++)
@@ -589,9 +592,11 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     for(int n=0; n<MW_Count; n++)
         result->weapon_storage[n] = weapon_storage[n];
     result->radar_trace = radar_trace;
-
     result->rooms = rooms;
     result->doors = doors;
+    result->long_range_radar_range = long_range_radar_range;
+    result->short_range_radar_range = short_range_radar_range;
+    result->impulse_sound_file = impulse_sound_file;
 
     return result;
 }

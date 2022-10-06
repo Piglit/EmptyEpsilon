@@ -1034,6 +1034,10 @@ void SpaceShip::update(float delta)
         {
             missile_resupply_delay = missile_resupply_time;
         }
+        else
+        {
+            missile_resupply_delay = missile_resupply_time;
+        }
         if ((docking_state == DS_Docked) || (docking_state == DS_Docking))
             warp_request = 0;
     }

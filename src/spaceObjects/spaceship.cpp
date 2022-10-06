@@ -494,6 +494,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     energy_level = 1000;
     max_energy_level = 1000;
     turnSpeed = 0.0f;
+    auto_reload_tube_enabled = false;
 
     registerMemberReplication(&target_rotation, 1.5f);
     registerMemberReplication(&turnSpeed, 0.1f);
@@ -635,6 +636,7 @@ void SpaceShip::applyTemplateValues()
     for(int n=0; n<MW_Count; n++)
         weapon_storage[n] = weapon_storage_max[n] = ship_template->weapon_storage[n];
 
+    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
     ship_template->setCollisionData(this);
     model_info.setData(ship_template->model_data);
 }

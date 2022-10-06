@@ -283,6 +283,8 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Valid values are 0 to 20, which map to 400THz to 800THz at 20THz increments. (spaceship.cpp frequencyToString())
     /// Example: player:commandSetAutoRepair(true)
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamFrequency);
+    /// Sets weapon_tube automatic weapon tube reload is enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoReloadTube);
     /// Commands this PlayerSpaceship to target the given ship system with its beam weapons.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamSystemTarget);
     /// Sets this SpaceShip's shield frequency index.
@@ -1688,6 +1690,9 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     case CMD_SET_AUTO_REPAIR:
         packet >> auto_repair_enabled;
         break;
+    case CMD_SET_AUTO_RELOAD_TUBE:
+        packet >> auto_reload_tube_enabled;
+        break;
     case CMD_SET_BEAM_FREQUENCY:
         {
             int32_t new_frequency;
@@ -2091,6 +2096,12 @@ void PlayerSpaceship::commandSetAutoRepair(bool enabled)
     sendClientCommand(packet);
 }
 
+void PlayerSpaceship::commandSetAutoReloadTube(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_AUTO_RELOAD_TUBE << enabled;
+    sendClientCommand(packet);
+}
 void PlayerSpaceship::commandSetBeamFrequency(int32_t frequency)
 {
     sp::io::DataBuffer packet;

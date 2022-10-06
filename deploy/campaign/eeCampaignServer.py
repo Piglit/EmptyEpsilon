@@ -14,6 +14,7 @@ import json
 import requests
 from copy import deepcopy
 from urllib.parse import unquote
+from random import randint
 
 from campaignScenarios import scenarioInfos
 from serverControl import servers
@@ -55,15 +56,12 @@ async def postDebug(request : Request):
 class EEServerScenarioInfo(BaseModel):
 	filename: str
 	name: str
-#	settings: str
 
 	def getId(self):
 		return scenarioFileNameToMissionId(self.filename)
 
 	def __str__(self):
 		readable = self.name
-#		if self.variation and self.variation != "None":
-#			readable += " ["+self.variation+"]"
 		if logging.DEBUG >= log.level:
 			readable += " ("+self.getId() + "; " + self.filename+")"
 		return readable
@@ -73,6 +71,9 @@ class EEProxyShipInfo(BaseModel):
 	callsign: str
 	password: str
 	template: str
+	drive: str
+	x: int
+	y: int
 
 class ScenarioInfoVictory(EEServerScenarioInfo):
 	faction: str
@@ -102,10 +103,33 @@ async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str =
 	servers.storeData()
 
 @app.post("/proxySpawn")
-async def proxySpawn(ship = EEProxyShipInfo):
-	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " on " + str(ship.server_ip))
-	command = f"PlayerSpaceship():setFaction('Human Navy'):setTemplate('{ship.template}'):setCallSign('{ship.callsign}'):setControlCode('{ship.password}')"
-	result = requests.get(f"{ship.server_ip}/exec.lua", data=command)
+async def proxySpawn(ship: EEProxyShipInfo):
+	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " with "+ str(ship.drive) + " drive on " + str(ship.server_ip))
+	script = f"""
+		ship = PlayerSpaceship()
+		rotation = random(0, 360)
+		ship:setRotation(rotation)
+		ship:commandTargetRotation(rotation)
+		ship:setPosition({ship.x}, {ship.y})
+		ship:setTemplate("{ship.template}")
+		ship:setCallSign("{ship.callsign}")
+		ship:setControlCode("{ship.password}")
+	"""
+	if ship.drive == "warp":
+		script += "ship:setWarpDrive(true):setJumpDrive(false)"
+	else:
+		script += "ship:setWarpDrive(false):setJumpDrive(true)"
+
+	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
+	log.debug(result)
+
+@app.post("/proxyDestroy")
+async def proxySpawn(server_ip: str, callsign: str):
+	log.info(callsign + "\tdestroyed on " + str(server_ip))
+	script = f"""
+		getPlayerShip(getPlayerShipIndexByName({callsign})):destroy()
+	"""
+	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
 	log.debug(result)
 
 @app.post("/scenario_end")
@@ -126,7 +150,7 @@ async def scenario_victory(scenario_info: ScenarioInfoVictory, server_name: str 
 async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: str = Body(...)):
 	# unused
 	scm = scenario_info.script_message
-	log.info(server_name + "\tscript message   " + str(scenario_info) + "\t:" + scm)
+	log.info(server_name + "\tscript message   " + str(scenario_info) + "\t" + scm)
 	if scm.startswith("unlockScenarios:[") and scm.endswith("]"):
 		unlock = scm.split("[", maxsplit=1)[1]
 		unlock = unlock.strip("]")
@@ -181,6 +205,18 @@ async def getShipsAvailable(server_name):
 	log.debug(server_name + "\tget ships avail")
 	ships = servers.getShips(server_name)
 	return {"ships": ships}
+
+@app.get("/spawn_position/{server_name}/{scenario_name}")
+async def getSpawnPosition(server_name, scenario_name):
+	server_name = unquote(server_name)
+	log.debug(server_name + "\tget spawn position for "+scenario_name)
+	scenario_name = scenarioFileNameToMissionId(scenario_name)
+	scenario = scenario_info.get(scenario_name)
+	if scenario and "spawn" in scenario:
+		spawn_info = scenario["spawn"]
+	else:
+		spawn_info = {"posx": randint(-100, 100), "posy": randint(-100, 100), "dir": randint(0,359)}
+	return spawn_info 
 
 if __name__ == "__main__":
 	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=False, port=8888)

@@ -71,27 +71,25 @@ scenarioInfos = {
 
 	# Quick Battles
 	"09_outpost":			{},
-	"05_surrounded":		{},
+	"02_surrounded":		{},
 	"50_gaps":				{},
 
 	# Missions - unlock for specific Crews
 	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic"), P(S.unlockShip, "Atlantis")]},
-	"02_beacon":			{"@start": P(S.unlockScenario, "01e_waves")},
-	"03_edgeofspace":		{"@start": P(S.unlockScenario, "01k_waves")},
-	"04_gftp":				{"@start": P(S.unlockScenario, "01t_waves")},
-	"49_allies":			{"@victory[Human Navy]": P(S.unlockScenarios, [("01e_waves"), ("01k_waves")])},
+	"05_beacon":			{"@start": P(S.unlockScenario, "03_waves")},
+	"06_edgeofspace":		{"@start": P(S.unlockScenario, "03_waves")},
+	"07_gftp":				{"@start": P(S.unlockScenario, "03_waves")},
+
 
 	# More Battles
 	"00_basic":				{},
-	"01a_waves":			{},
-	"01e_waves":			{},
-	"01k_waves":			{},
-	"01t_waves":			{},
+	"03_waves":			{},
 
 	# Multiplayer Missions
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
 	"59_border":			{},
+	"49_allies":			{"spawn": {"posx": 0, "posy": 0, "dir": 0}},
 
 #	"06_battlefield":		{},
 #	"48_visitors":			{},

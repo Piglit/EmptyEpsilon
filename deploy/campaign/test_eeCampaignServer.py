@@ -154,6 +154,14 @@ def test_getScenarioSettings():
 	assert len(response.json()["Time"]) == 1
 	assert "30min" in response.json()["Time"]
 
+def test_getSpawnPosition():
+	server_name = "Testserver"
+	missionId = "00_basic"
+	response = testClient.get("/spawn_position/"+server_name+"/"+missionId)
+	assert -100 <= response["posx"] <= 100
+	assert -100 <= response["posy"] <= 100
+	assert 0 <= response["dir"] <= 360
+
 def _test_fuzzy_workflow():
 	server_name = "Testserver"
 	response = testClient.get("/scenarios/"+server_name)

@@ -1690,6 +1690,9 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     case CMD_SET_AUTO_REPAIR:
         packet >> auto_repair_enabled;
         break;
+    case CMD_SET_AUTO_RELOAD_TUBE:
+        packet >> auto_reload_tube_enabled;
+        break;
     case CMD_SET_BEAM_FREQUENCY:
         {
             int32_t new_frequency;
@@ -2093,6 +2096,12 @@ void PlayerSpaceship::commandSetAutoRepair(bool enabled)
     sendClientCommand(packet);
 }
 
+void PlayerSpaceship::commandSetAutoReloadTube(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_AUTO_RELOAD_TUBE << enabled;
+    sendClientCommand(packet);
+}
 void PlayerSpaceship::commandSetBeamFrequency(int32_t frequency)
 {
     sp::io::DataBuffer packet;

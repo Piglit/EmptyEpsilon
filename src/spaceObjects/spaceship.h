@@ -66,6 +66,7 @@ public:
     float heat_rate_per_second{};
     float power_rate_per_second{};
 
+
     float getHeatingDelta() const
     {
         return powf(1.7f, power_level - 1.0f) - (1.01f + coolant_level * 0.1f);
@@ -214,6 +215,7 @@ public:
     glm::vec2 docking_offset{0, 0}; //Server only
 
     float missile_resupply_delay = missile_resupply_time;
+    bool auto_reload_tube_enabled;
 
     SpaceShip(string multiplayerClassName, float multiplayer_significant_range=-1);
     virtual ~SpaceShip();

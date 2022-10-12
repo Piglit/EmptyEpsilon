@@ -28,9 +28,9 @@ else()
     # - PROJECT_VERSION_MAJOR
     # - PROJECT_VERSION_MINOR
     # - PROJECT_VERSION_PATCH
-    string(TIMESTAMP MAJOR "%Y")
-    string(TIMESTAMP MINOR "%m")
-    string(TIMESTAMP PATCH "%d")
+    string(TIMESTAMP MAJOR "2020")
+    string(TIMESTAMP MINOR "10")
+    string(TIMESTAMP PATCH "29")
 endif()
 
 project(EmptyEpsilon LANGUAGES CXX C  VERSION ${MAJOR}.${MINOR}.${PATCH})

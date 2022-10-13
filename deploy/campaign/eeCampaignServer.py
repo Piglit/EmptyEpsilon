@@ -28,7 +28,7 @@ logging.getLogger("uvicorn.access").propagate = False
 log = logging.getLogger(__name__)
 h = logging.StreamHandler()
 h.setFormatter(logging.Formatter("%(asctime)s\t%(levelname)s:\t%(message)s", datefmt="%H:%M:%S"))
-log.setLevel("DEBUG")
+log.setLevel("INFO")
 log.addHandler(h)
 
 app = FastAPI()
@@ -74,6 +74,7 @@ class EEProxyShipInfo(BaseModel):
 	drive: str
 	x: int
 	y: int
+	rota: int
 
 class ScenarioInfoVictory(EEServerScenarioInfo):
 	faction: str
@@ -105,19 +106,20 @@ async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str =
 @app.post("/proxySpawn")
 async def proxySpawn(ship: EEProxyShipInfo):
 	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " with "+ str(ship.drive) + " drive on " + str(ship.server_ip))
+	additionalCode = servers.getShipAdditionalCode(ship.callsign)
 	script = f"""
 		ship = PlayerSpaceship()
-		rotation = random(0, 360)
-		ship:setRotation(rotation)
-		ship:commandTargetRotation(rotation)
+		ship:setRotation({ship.rota})
+		ship:commandTargetRotation({ship.rota})
 		ship:setPosition({ship.x}, {ship.y})
 		ship:setTemplate("{ship.template}")
 		ship:setCallSign("{ship.callsign}")
 		ship:setControlCode("{ship.password}")
+		{additionalCode}
 	"""
 	if ship.drive == "warp":
 		script += "ship:setWarpDrive(true):setJumpDrive(false)"
-	else:
+	elif ship.drive == "jump":
 		script += "ship:setWarpDrive(false):setJumpDrive(true)"
 
 	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)

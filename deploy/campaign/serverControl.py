@@ -22,7 +22,8 @@ class GameServerData:
 				"scenarios": ["20_training1"],
 				"scenarioSettings": {},
 				"ships": ["Phobos M3P"],
-				"status": "idle"
+				"status": "idle",
+				"additionalCode": ""
 			}
 		return self.servers[serverName]
 	
@@ -116,7 +117,21 @@ class GameServerData:
 	def setStatus(self, statusMessage, serverName):
 		srv = self.getOrCreateServer(serverName)
 		srv["status"] = statusMessage
+		self.storeData()
 	
+	def getShipAdditionalCode(self, serverName):
+		if serverName in self.servers:
+			# no entry in servers for fighters
+			srv = self.getOrCreateServer(serverName)
+			return srv.get("additionalCode", "")
+		else:
+			return ""
+
+	def setShipAdditionalCode(self, code, serverName):
+		srv = self.getOrCreateServer(serverName)
+		code = code.replace("\t", "")
+		srv["additionalCode"] = code 
+		self.storeData()
 
 servers = GameServerData()
 pyrohelper.host_named_server(servers, "campaign_state")

@@ -40,7 +40,7 @@ scenarioInfos = {
 	"00_test":				{"@start": P(S.unlockScenario, "01_test2"), "@end": P(S.unlockShip, "Hathcock"), "@victory[Human Navy]": P(S.unlockScenario, "09_outpost")},
 	"01_test2":				{},
 
-    # Example from 2021
+	# Example from 2021
 	#"20_training1":			{"@victory[Human Navy]": [P(S.unlockScenarios, [("21_training2", "*"), ("22_training3", "*"), ("23_training4", "*"), "01_quick_basic"]), P(S.unlockShip, "Phobos M3P")]},
 
 	# Training Tree
@@ -89,7 +89,7 @@ scenarioInfos = {
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
 	"59_border":			{},
-	"49_allies":			{"spawn": {"posx": 0, "posy": 0, "dir": 0}},
+	"49_allies":			{"@spawn": "P(spawn, posx=100000, posy=0, dir=270)"},
 
 #	"06_battlefield":		{},
 #	"48_visitors":			{},

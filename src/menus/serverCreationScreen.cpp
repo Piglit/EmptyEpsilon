@@ -198,10 +198,10 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
         ScenarioInfo info(value);
         description_text->setText(info.description);
         start_button->enable();
-        if (info.proxy == "") {
-            start_button->setText(tr("Start scenario"));
-        } else {
+        if ((info.proxy != "") && (gameGlobalInfo->campaign_running)) {
             start_button->setText(tr("Join scenario"));
+        } else {
+            start_button->setText(tr("Start scenario"));
         }
     });
     scenario_list->setSize(GuiElement::GuiSizeMax, 700);
@@ -244,7 +244,7 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
             }
             new ScriptErrorRenderer();
         }
-        else if (info.proxy != "")
+        else if ((info.proxy != "") && (gameGlobalInfo->campaign_running))
         {
             string host_name = info.proxy;
             auto host = sp::io::network::Address(host_name);

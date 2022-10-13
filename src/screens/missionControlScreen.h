@@ -50,7 +50,8 @@ private:
     GuiTextEntry* fighter_password;
     float fighter_delay;
 
-    P<SpaceStation> spawn_station;
+    glm::vec2 spawn_pos;
+    int spawn_rota;
 public:
     MissionControlScreen(RenderLayer* render_layer);
     virtual void update(float delta) override;

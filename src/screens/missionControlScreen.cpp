@@ -15,6 +15,8 @@
 MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
 : GuiCanvas(render_layer)
 {
+    spawn_pos = glm::vec2(random(-100, 100), random(-100, 100));
+    spawn_rota = random(0, 360);
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
@@ -166,19 +168,15 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
         if ((!gameGlobalInfo->allow_new_player_ships) || (my_spaceship))
             return;
         string callsign = PreferencesManager::get("shipname", "");
-        auto pos = glm::vec2(random(-100, 100), random(-100, 100));
-        if (spawn_station) {
-            pos += spawn_station->getPosition();
-        }
         if (game_server) {
             P<PlayerSpaceship> ship = new PlayerSpaceship();
             string templ = ship_template_selector->getSelectionValue();
             if (ship)
             {
                 // set the position before the template so that onNewPlayerShip has as much data as possible
-                ship->setRotation(random(0, 360));
-                ship->target_rotation = ship->getRotation();
-                ship->setPosition(pos);
+                ship->setRotation(spawn_rota);
+                ship->target_rotation = spawn_rota;
+                ship->setPosition(spawn_pos);
                 ship->setCallSign(callsign);
                 ship->setTemplate(templ);
                 if (ship_drive_selector->getSelectionValue() == "jump") {
@@ -193,7 +191,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
             }
         } else {
             // proxy
-            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), callsign, ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue(), PreferencesManager::get("password"), pos.x, pos.y);
+            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), callsign, ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue(), PreferencesManager::get("password"), spawn_pos.x, spawn_pos.y, spawn_rota);
             ship_create_button->disable();
         }
     });
@@ -225,7 +223,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     ship_destroy_button = new GuiButton(station_content, "DESTROY_SHIP_BUTTON", tr("Change ship"), [this]() {
         if ((!gameGlobalInfo->allow_new_player_ships) || !(my_spaceship))
             return;
-        spawn_station = my_spaceship->getDockedWith();  // only exists on server
+        spawn_pos = my_spaceship->getPosition();
+        spawn_rota = my_spaceship->getRotation();
         if (game_server) {
             my_spaceship->destroy();
         } else {
@@ -274,8 +273,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
             if (ship && ShipTemplate::getTemplate(templ))
             {
                 // set the position before the template so that onNewPlayerShip has as much data as possible
-                ship->setRotation(random(0, 360));
-                ship->target_rotation = ship->getRotation();
+                ship->setRotation(my_spaceship->getRotation());
+                ship->target_rotation = my_spaceship->getRotation();
                 ship->setPosition(my_spaceship->getPosition());
                 ship->setCallSign(fighter_callsign->getText());
                 ship->setTemplate(templ);
@@ -286,7 +285,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
             }
         } else {
             // proxy
-            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), fighter_callsign->getText(), fighter_template_selector->getSelectionValue(), "impulse", fighter_password->getText(), my_spaceship->getPosition().x, my_spaceship->getPosition().y);
+            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), fighter_callsign->getText(), fighter_template_selector->getSelectionValue(), "impulse", fighter_password->getText(), my_spaceship->getPosition().x, my_spaceship->getPosition().y, my_spaceship->getRotation());
             fighter_create_button->disable();
             fighter_create_button->setText("Fighter launched!");
             fighter_delay = 2.0f;

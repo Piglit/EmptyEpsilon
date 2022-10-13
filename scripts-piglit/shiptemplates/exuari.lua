@@ -247,6 +247,7 @@ variation:setWeaponStorage("Nuke", 1)
 
 --[[ Station/Transport--]]
 -- The battle station is a huge ship with many defensive features. It can be docked by smaller ships.
+-- small station
 template = ShipTemplate():setName("Ryder"):setModel("Ender Battlecruiser"):setClass(_("class", "Exuari"), _("subclass", "Carrier"))
 template:setRadarTrace("battleship.png")
 template:setDescription(_("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier."))
@@ -273,8 +274,49 @@ template:setRepairDocked(true)
 template:setRestocksMissilesDocked("cpuships")
 template:setRestocksScanProbes(true)
 
-variation = template:copy("Fortress")
-variation:setDescription(_("The Exuari Fortress is a huge carrier with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive. The shields of this base carrier are saied to be undestroyable."))
+-- medium station
+variation = template:copy("Zeppelin")
+variation:setDescription("TODO")
+--                  Arc, Dir, Range, CycleTime, Dmg
+variation:setBeam(0,  20, -90, 1800.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
+variation:setBeam(1,  20, -90, 1800.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
+variation:setBeam(2,  20,  90, 1800.0, 6.1, 4):setBeamWeaponTurret(2, 160,  90, 5)
+variation:setBeam(3,  20,  90, 1800.0, 6.0, 4):setBeamWeaponTurret(3, 160,  90, 5)
+variation:setBeam(4,  20, -90, 1800.0, 5.9, 4):setBeamWeaponTurret(4, 160, -90, 5)
+variation:setBeam(5,  20, -90, 1800.0, 6.2, 4):setBeamWeaponTurret(5, 160, -90, 5)
+variation:setBeam(6,  20,  90, 1800.0, 5.9, 4):setBeamWeaponTurret(6, 160,  90, 5)
+variation:setBeam(7,  20,  90, 1800.0, 6.2, 4):setBeamWeaponTurret(7, 160,  90, 5)
+variation:setBeam(8,  20, -90, 1800.0, 6.1, 4):setBeamWeaponTurret(8, 160, -90, 5)
+variation:setBeam(9,  20, -90, 1800.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 5)
+variation:setBeam(10, 20,  90, 1800.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
+variation:setBeam(11, 20,  90, 1800.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
+variation:setShields(600)
+variation:setHull(300)
+--Reputation Score: 
+
+-- large station
+variation = template:copy("Craver")
+variation:setDescription("TODO")
+--                  Arc, Dir, Range, CycleTime, Dmg
+variation:setBeam(0,  20, -90, 2200.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
+variation:setBeam(1,  20, -90, 2200.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
+variation:setBeam(2,  20,  90, 2200.0, 6.1, 4):setBeamWeaponTurret(2, 160,  90, 5)
+variation:setBeam(3,  20,  90, 2200.0, 6.0, 4):setBeamWeaponTurret(3, 160,  90, 5)
+variation:setBeam(4,  20, -90, 2200.0, 5.9, 4):setBeamWeaponTurret(4, 160, -90, 5)
+variation:setBeam(5,  20, -90, 2200.0, 6.2, 4):setBeamWeaponTurret(5, 160, -90, 5)
+variation:setBeam(6,  20,  90, 2200.0, 5.9, 4):setBeamWeaponTurret(6, 160,  90, 5)
+variation:setBeam(7,  20,  90, 2200.0, 6.2, 4):setBeamWeaponTurret(7, 160,  90, 5)
+variation:setBeam(8,  20, -90, 2200.0, 6.1, 4):setBeamWeaponTurret(8, 160, -90, 5)
+variation:setBeam(9,  20, -90, 2200.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 5)
+variation:setBeam(10, 20,  90, 2200.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
+variation:setBeam(11, 20,  90, 2200.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
+variation:setShields(1500)
+variation:setHull(400)
+--Reputation Score: 
+
+-- huge station
+variation = template:copy("Ridge")
+variation:setDescription(_("The Exuari Ridge is a huge carrier with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive. The shields of this base carrier are saied to be undestroyable."))
 --                  Arc, Dir, Range, CycleTime, Dmg
 variation:setBeam(0,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
 variation:setBeam(1,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
@@ -289,7 +331,8 @@ variation:setBeam(9,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 
 variation:setBeam(10, 20,  90, 2400.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
 variation:setBeam(11, 20,  90, 2400.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
 variation:setShields(2500)
---Reputation Score: 260
+variation:setHull(800)
+--Reputation Score:
 
 --[[
 Component details used for designing the ships above:

@@ -321,7 +321,7 @@ function modify_player_ships(pobj)
 			if #playerShipNamesForMP52Hornet > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				local ni = math.random(1,#playerShipNamesForMP52Hornet)
-				pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
+				--pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
 				table.remove(playerShipNamesForMP52Hornet,ni)
 			end
 			pobj.shipScore = 7
@@ -334,7 +334,7 @@ function modify_player_ships(pobj)
 			if #playerShipNamesForLindworm > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				ni = math.random(1,#playerShipNamesForLindworm)
-				pobj:setCallSign(playerShipNamesForLindworm[ni])
+				--pobj:setCallSign(playerShipNamesForLindworm[ni])
 				table.remove(playerShipNamesForLindworm,ni)
 			end
 			pobj.shipScore = 8
@@ -348,7 +348,7 @@ function modify_player_ships(pobj)
 			if #playerShipNamesForStriker > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				ni = math.random(1,#playerShipNamesForStriker)
-				pobj:setCallSign(playerShipNamesForStriker[ni])
+				--pobj:setCallSign(playerShipNamesForStriker[ni])
 				table.remove(playerShipNamesForStriker,ni)
 			end
 			pobj.shipScore = 8
@@ -476,7 +476,7 @@ function modify_player_ships(pobj)
 			if #playerShipNamesForLeftovers > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				ni = math.random(1,#playerShipNamesForLeftovers)
-				pobj:setCallSign(playerShipNamesForLeftovers[ni])
+				--pobj:setCallSign(playerShipNamesForLeftovers[ni])
 				table.remove(playerShipNamesForLeftovers,ni)
 			end
 			pobj.shipScore = 24

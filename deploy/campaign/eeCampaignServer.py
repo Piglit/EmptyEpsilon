@@ -76,6 +76,10 @@ class EEProxyShipInfo(BaseModel):
 	y: int
 	rota: int
 
+class EEProxyDestroyInfo(BaseModel):
+	server_ip: str
+	callsign: str
+
 class ScenarioInfoVictory(EEServerScenarioInfo):
 	faction: str
 
@@ -107,7 +111,7 @@ async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str =
 async def proxySpawn(ship: EEProxyShipInfo):
 	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " with "+ str(ship.drive) + " drive on " + str(ship.server_ip))
 	additionalCode = servers.getShipAdditionalCode(ship.callsign)
-	script = f"""
+	script = """
 		ship = PlayerSpaceship()
 		ship:setRotation({ship.rota})
 		ship:commandTargetRotation({ship.rota})
@@ -115,22 +119,26 @@ async def proxySpawn(ship: EEProxyShipInfo):
 		ship:setTemplate("{ship.template}")
 		ship:setCallSign("{ship.callsign}")
 		ship:setControlCode("{ship.password}")
-		{additionalCode}
-	"""
+	""" + additionalCode
+	script = script.format(**locals())
 	if ship.drive == "warp":
-		script += "ship:setWarpDrive(true):setJumpDrive(false)"
+		script += "\nship:setWarpDrive(true):setJumpDrive(false)"
 	elif ship.drive == "jump":
-		script += "ship:setWarpDrive(false):setJumpDrive(true)"
+		script += "\nship:setWarpDrive(false):setJumpDrive(true)"
 
+	log.debug(script)
 	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
 	log.debug(result)
 
 @app.post("/proxyDestroy")
-async def proxySpawn(server_ip: str, callsign: str):
-	log.info(callsign + "\tdestroyed on " + str(server_ip))
+async def proxySpawn(ship: EEProxyDestroyInfo):
+	log.info(ship.callsign + "\tdestroyed on " + str(ship.server_ip))
 	script = f"""
-		getPlayerShip(getPlayerShipIndexByName({callsign})):destroy()
+		idx = getPlayerShipIndex("{ship.callsign}")
+		ship = getPlayerShip(idx)
+		ship:destroy()
 	"""
+	log.debug(script)
 	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
 	log.debug(result)
 

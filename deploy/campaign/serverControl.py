@@ -51,6 +51,13 @@ class GameServerData:
 		srv = self.getOrCreateServer(serverName)
 		return srv["ships"]
 
+	def setShips(self, ships, serverName):
+		assert isinstance(ships, list)
+		for s in ships:
+			assert isinstance(s, str)
+		srv = self.getOrCreateServer(serverName)
+		srv["ships"] = ships
+
 	def storeData(self):
 		db = GameServerData.db
 		with open(db, "w") as file:

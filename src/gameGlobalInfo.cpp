@@ -424,7 +424,8 @@ REGISTER_SCRIPT_FUNCTION(getPlayerShip);
 static int getPlayerShipIndex(lua_State* L)
 {
     string callsign = luaL_checkstring(L, 1);
-    return gameGlobalInfo->getPlayerShipIndexByName(callsign);
+    lua_pushnumber(L, gameGlobalInfo->getPlayerShipIndexByName(callsign)+1);
+    return 1;
 }
 /// int getPlayerShipIndex(string callsign)
 /// Return the player's ship index

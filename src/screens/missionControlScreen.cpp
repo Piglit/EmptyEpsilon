@@ -217,8 +217,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
 
     (new GuiLabel(station_content, "STATION_INFO_LABEL", tr("Station info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
 
-    station_name = new GuiKeyValueDisplay(station_content, "STATION_NAME", 0.4, tr("Docked with "), callsign);
-    station_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+    //station_name = new GuiKeyValueDisplay(station_content, "STATION_NAME", 0.4, tr("Docked with "), callsign);
+    //station_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
 
     ship_destroy_button = new GuiButton(station_content, "DESTROY_SHIP_BUTTON", tr("Change ship"), [this]() {
         if ((!gameGlobalInfo->allow_new_player_ships) || !(my_spaceship))
@@ -430,14 +430,11 @@ void MissionControlScreen::update(float delta)
         ship_drive->setValue(drive);
 
         // station panel when docked
-        P<SpaceStation> station = my_spaceship->getDockedWith();    // only on server
-        station_panel->setVisible(!!station);
-        if (station) {
-            station_name->setValue(station->getTypeName() + " " + station->getCallSign());
-        }
+        bool docked = my_spaceship->docking_state == DS_Docked;
+        station_panel->setVisible(docked);
 
         // fighter panel when not docked
-        if (templ && !templ->spawnable_ships.empty() && !station) {
+        if (templ && !templ->spawnable_ships.empty() && !docked) {
             fighter_panel->show();
             if (templ->spawnable_ships.size() != fighter_template_selector->entryCount()) { 
                 while (fighter_template_selector->entryCount() > 0) {

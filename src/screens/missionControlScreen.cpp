@@ -13,10 +13,12 @@
 #include "random.h"
 
 MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
-: GuiCanvas(render_layer)
+: MissionControlScreen(render_layer, glm::vec2(random(-100, 100), random(-100, 100)), random(0, 360)) {}
+
+MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 spawnPos, int spawnRota): GuiCanvas(render_layer)
 {
-    spawn_pos = glm::vec2(random(-100, 100), random(-100, 100));
-    spawn_rota = random(0, 360);
+    spawn_pos = spawnPos;
+    spawn_rota= spawnRota;
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
@@ -130,7 +132,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     // Right side, Dynamic content: ship
 
     ship_panel = new GuiPanel(right_container, "SHIP_PANEL");
-    ship_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 560);
+    ship_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440);
     auto ship_content = new GuiElement(ship_panel, "");
     ship_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     ship_content->setAttribute("layout", "vertical");
@@ -140,7 +142,12 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     // Ship type selection
     (new GuiLabel(ship_content, "SELECT_SHIP_LABEL", tr("Select ship type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
 
-    ship_template_selector = new GuiSelector(ship_content, "CREATE_SHIP_SELECTOR", nullptr);
+    ship_template_selector = new GuiSelector(ship_content, "CREATE_SHIP_SELECTOR", [this](int index, string value){
+        if (database_view->findAndDisplayEntry(value))
+            LOG(INFO) << value << " found";
+        else
+            LOG(INFO) << value << " not found";
+    });
     // List only ships with templates designated for player use.
     std::vector<string> template_names = campaign_client->getShips();
 
@@ -209,13 +216,13 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     // Station Info
 
     station_panel = new GuiPanel(right_container, "STATION_PANEL");
-    station_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 560)->hide();
+    station_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440)->hide();
     auto station_content = new GuiElement(station_panel, "");
     station_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     station_content->setAttribute("layout", "vertical");
     station_content->setAttribute("alignment", "topleft");
 
-    (new GuiLabel(station_content, "STATION_INFO_LABEL", tr("Station info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+    (new GuiLabel(station_content, "STATION_INFO_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
 
     //station_name = new GuiKeyValueDisplay(station_content, "STATION_NAME", 0.4, tr("Docked with "), callsign);
     //station_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
@@ -231,13 +238,15 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
             //proxy
             campaign_client->destroyShipOnProxy(PreferencesManager::get("proxy_addr"), my_spaceship->getCallSign());
         }
+        destroy();
+        new MissionControlScreen(getRenderLayer(), spawn_pos, spawn_rota);
     });
     ship_destroy_button->setSize(GuiElement::GuiSizeMax, 50);
 
     // spawn fighters
 
     fighter_panel = new GuiPanel(right_container, "FIGHTER_PANEL");
-    fighter_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 560)->hide();
+    fighter_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440)->hide();
     auto fighters_content = new GuiElement(fighter_panel, "");
     fighters_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     fighters_content->setAttribute("layout", "vertical");
@@ -247,7 +256,12 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     
     // Ship type selection
     (new GuiLabel(fighters_content, "SELECT_FIGHTER_LABEL", tr("Select fighters type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    fighter_template_selector = new GuiSelector(fighters_content, "CREATE_FIGHTER_SELECTOR", nullptr);
+    fighter_template_selector = new GuiSelector(fighters_content, "CREATE_FIGHTER_SELECTOR", [this](int index, string value){
+        if (database_view->findAndDisplayEntry(value))
+            LOG(INFO) << value << " found";
+        else
+            LOG(INFO) << value << " not found";
+    });
     fighter_template_selector->setSize(GuiElement::GuiSizeMax, 50);
     fighter_template_selector->setSelectionIndex(0);
 
@@ -295,6 +309,13 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer)
     fighter_create_button->disable();
 
     fighter_delay = 0.0f;
+
+    database_container = new GuiElement(this, "");
+    database_container->setPosition(370, 480)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    
+    database_view = new DatabaseViewComponent(database_container, false);
+    database_view->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+
 
     // mission control
     /*
@@ -450,6 +471,7 @@ void MissionControlScreen::update(float delta)
         }
     } else {
         // !my_spaceship
+        // ship was probably destroyed or has never existed
         fighter_panel->hide();
         station_panel->hide();
         ship_panel->setVisible(!!gameGlobalInfo->allow_new_player_ships);

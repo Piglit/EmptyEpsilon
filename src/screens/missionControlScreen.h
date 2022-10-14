@@ -14,6 +14,7 @@
 #include "gui/gui2_button.h"
 #include "gui/gui2_textentry.h"
 #include "spaceObjects/spaceStation.h"
+#include "screenComponents/databaseView.h"
 
 class GuiAdvancedScrollText;
 class GuiCustomShipFunctions;
@@ -50,10 +51,14 @@ private:
     GuiTextEntry* fighter_password;
     float fighter_delay;
 
+    GuiElement* database_container;
+    DatabaseViewComponent* database_view;
+
     glm::vec2 spawn_pos;
     int spawn_rota;
 public:
     MissionControlScreen(RenderLayer* render_layer);
+    MissionControlScreen(RenderLayer* render_layer, glm::vec2 spawn_pos, int spawn_rota);
     virtual void update(float delta) override;
 };
 

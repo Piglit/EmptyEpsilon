@@ -1,6 +1,5 @@
 #include "scenarioInfo.h"
 #include "resources.h"
-#include "campaign_client.h"
 #include "preferenceManager.h"
 #include <i18n.h>
 #include <unordered_set>
@@ -12,6 +11,7 @@ ScenarioInfo::ScenarioInfo(string filename)
 {
     this->filename = filename;
     name = filename.substr(9, -4);
+	proxy = "";
 
     // load scenario from file
     P<ResourceStream> stream = getResourceStream(filename);
@@ -106,6 +106,10 @@ void ScenarioInfo::addKeyValue(string key, string value)
         setting.description = locale->tr("setting", value);
         settings.push_back(setting);
     }
+    else if (key.lower() == "proxy")
+    {
+        proxy = value;
+    }
     else if (additional == "" || !addSettingOption(key, additional, value))
     {
         LOG(WARNING) << "Unknown scenario meta data: " << key << ": " << value;
@@ -152,7 +156,10 @@ bool ScenarioInfo::addSettingOption(string key, string option, string descriptio
 
 void ScenarioInfo::filterSettings(const std::map<string, std::vector<string> >& filter){
 
-    for (auto& [setting_key, options] : filter) {
+//    for (auto& [setting_key, options] : filter) {    // needs c++17, breaks current macos build
+    for (auto const &kv : filter) {
+        auto setting_key = kv.first;
+        auto options = kv.second;
         // ignore empty options, keep full selectivity
         if (!options.empty()) {
 

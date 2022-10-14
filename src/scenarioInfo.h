@@ -30,6 +30,7 @@ public:
     std::vector<string> categories;
     string author;
     std::vector<Setting> settings;
+    string proxy;
 
     ScenarioInfo(string filename);
     bool hasCategory(const string& category) const;

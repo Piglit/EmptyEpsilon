@@ -5,6 +5,8 @@
 #include "shipSelectionScreen.h"
 #include "gameGlobalInfo.h"
 #include "epsilonServer.h"
+#include "multiplayer_proxy.h"
+#include "multiplayer_client.h"
 #include "gui/scriptError.h"
 #include "gui/gui2_overlay.h"
 #include "gui/gui2_label.h"
@@ -18,6 +20,8 @@
 #include "main.h"
 #include "campaign_client.h"
 #include "screens/missionControlScreen.h"
+#include "serverBrowseMenu.h"
+#include "joinServerMenu.h"
 
 
 ServerSetupScreen::ServerSetupScreen()
@@ -194,6 +198,11 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
         ScenarioInfo info(value);
         description_text->setText(info.description);
         start_button->enable();
+        if (info.proxy == "") {
+            start_button->setText(tr("Start scenario"));
+        } else {
+            start_button->setText(tr("Join scenario"));
+        }
     });
     scenario_list->setSize(GuiElement::GuiSizeMax, 700);
     (new GuiLabel(right, "GENERAL_LABEL", tr("Description"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
@@ -234,6 +243,29 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
                 returnToShipSelection(getRenderLayer());
             }
             new ScriptErrorRenderer();
+        }
+        else if (info.proxy != "")
+        {
+            string host_name = info.proxy;
+            auto host = sp::io::network::Address(host_name);
+            PreferencesManager::set("proxy_addr", host.getHumanReadable()[0]);
+            int port = defaultServerPort;
+            string password = "";
+            int listenPort = game_server->getPort();
+            string proxyName = PreferencesManager::get("shipname", "");
+
+            disconnectFromServer();
+            new GameServerProxy(host, port, password, listenPort, proxyName);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
+            if (campaign_client)
+            {
+                campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
+                    {"filename", info.filename.c_str()},
+                    {"name", info.name.c_str()},
+                });
+            }
+            destroy();
         }
         else
         {

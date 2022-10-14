@@ -53,6 +53,9 @@ CampaignMenu::CampaignMenu()
     pos_y += 70;
 
     string label;
+    if (campaign_client && !campaign_client->isOnline())
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     if (campaign_client && campaign_client->isOnline()){
         label = tr("To Mission Selection");
     } else {

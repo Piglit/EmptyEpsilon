@@ -160,7 +160,6 @@ int main(int argc, char** argv)
             new GameServerProxy(password, listenPort, proxyName);
         else
             new GameServerProxy(host, port, password, listenPort, proxyName);
-        //game_proxy->setShutdownOnDisconnect(true);
         engine->runMainLoop();
         return 0;
     }
@@ -401,7 +400,6 @@ int main(int argc, char** argv)
         new CampaignClient(cs_host, cs_port);
     }
 
-    //returnToMainMenu();    //FIXME: is this line needed?
     engine->runMainLoop();
 
     // Set FSAA and fullscreen defaults from windowManager.

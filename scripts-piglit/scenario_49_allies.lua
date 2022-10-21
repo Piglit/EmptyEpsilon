@@ -8,7 +8,7 @@
 -- Enemies[One]: Only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Enemies[Easy One]: Easy goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Enemies[Hard One]: Hard goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
--- Proxy: 192.168.2.3
+-- Proxy: 192.168.2.227
 
 require("ee.lua")
 require("utils.lua")
@@ -4937,7 +4937,7 @@ function neutralComms(comms_data)
 		else
 			setCommsMessage(_("ship-comms", "We have nothing for you.\nGood day."))
 		end
-		if player.special_buy_ships and comms_target:getFaction() ~= "Human Navy" then
+		if player.special_buy_ships and comms_target:isFriendOrFoeIdentifiedBy(player) and comms_target:getFaction() ~= "Human Navy" then
 			local cost = special_buy_cost(comms_target, player)
 			addCommsReply(string.format(_("special-comms", "The Human Navy demands your support! Join us. [Cost: %s Rep.]"), cost), function()
 				if not player:takeReputationPoints(cost) then

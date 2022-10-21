@@ -177,7 +177,7 @@ async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: 
 		prog = scm.split(":", maxsplit=1)[1]
 		prog = prog.strip()
 		servers.setStatus(scenario_info.name + "\t"+prog, server_name)
-	elif scm.startswith("spyReport:")
+	elif scm.startswith("spyReport:"):
 		msg = scm.split(":", maxsplit=1)[1]
 		log.info(msg)	#TODO send to some message receiver
 

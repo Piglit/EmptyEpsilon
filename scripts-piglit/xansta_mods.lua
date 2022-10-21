@@ -679,7 +679,7 @@ function enemyComms(comms_data)
 	end
 	if comms_source.special_intimidate_ships then
 		local cost = special_buy_cost(comms_target, comms_source)
-		local x,y = comms_target.getPosition()
+		local x,y = comms_target:getPosition()
 		local playership_near = false
 		local friends_near = false
 		for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
@@ -696,23 +696,16 @@ function enemyComms(comms_data)
 		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
 			if not playership_near then
 				setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
-				return true
-			end
-			if comms_target:getHull() >= comms_target:getHullMax() then
+			elseif comms_target:getHull() >= comms_target:getHullMax() then
 				setCommsMessage(_("needRep-comms", "We will not surrender unless our hull is damaged."))
-				return true
-			end
-			if friends_near then
+			elseif friends_near then
 				setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still near."))
-				return true
-			end
-			if not comms_source:takeReputationPoints(cost) then
+			elseif not comms_source:takeReputationPoints(cost) then
 				setCommsMessage(_("needRep-comms", "Insufficient reputation"))
-				return true
 			else
 				comms_target:setFaction("Independent")
+				comms_target:orderRetreat()
 				setCommsMessage(_("special-comms", "Ship has surrendered."))
-				return true
 			end
 		end)
 	end

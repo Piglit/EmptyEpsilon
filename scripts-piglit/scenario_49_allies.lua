@@ -4201,6 +4201,18 @@ function handleUndockedState()
     if comms_target:areEnemiesInRange(20000) then
 		oMsg = oMsg .. _("station-comms", "\nBe aware that if enemies in the area get much closer, we will be too busy to conduct business with you.")
 	end
+	if player.special_buy_stations and comms_target:getFaction() ~= "Human Navy" and comms_target.typeName == "CpuShip" then
+		local cost = special_buy_cost(comms_target, player)
+		addCommsReply(string.format(_("special-comms", "Submit your carrier to the Human Navy. [Cost: %s Rep.]"), cost), function()
+			if not player:takeReputationPoints(cost) then
+				setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+			else
+				comms_target:setFaction(player:getFaction())
+				local gain = comms_target:getHullMax() * 4 / 60
+				setCommsMessage(string.format(_("special-comms", "This carrier now belongs to the Human Navy, Sir.\n\nAs long as the Human Navy keeps the carrier alive, your reputation will rise by %d per minute."), math.floor(gain)))
+			end
+		end)
+	end
 	if comms_target.nukeAvail == nil then
 		if math.random(1,10) <= (4 - scenario.difficulty) then
 			comms_target.nukeAvail = true

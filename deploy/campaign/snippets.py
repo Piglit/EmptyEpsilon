@@ -116,6 +116,10 @@ def startTimedEnemies():
 	scenario.spawnDefensiveFleet(300, "Exuari")
 	""")
 
+def ktlitanPlotStep():
+	execLua("""getScriptStorage().scenario.ktlitanOrders()""")
+	execLua("""getScriptStorage().scenario.spawnDefensiveFleet(100, "Ktlitans")""")
+
 def setDifficulty(difficulty):
 	assert isinstance(difficulty, int)
 	execLua(f"""getScriptStorage().scenario.difficulty = {difficulty}""")

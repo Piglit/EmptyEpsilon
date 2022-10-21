@@ -66,6 +66,7 @@ function init()
 	--'curl --data "getScriptStorage().scenario.spawnDefensiveFleet(100, 'Kraylor')" http://localhost:8080/exec.lua'
 	scenario.spawnDefensiveFleet = spawnDefensiveFleet
 	scenario.makeFleetAggro = makeFleetAggro 
+	scenario.ktlitanOrders = ktlitanOrders
 	scenario.stationList = stationList
 	scenario.scarceResources = false
 	scenario.admiralTimeToLive = 600
@@ -3047,6 +3048,26 @@ function spawnDefensiveFleet(resource, faction, factionStationList)
 		station = tableRemoveRandom(stationsAvail)
 	end
 	return fleetList 
+end
+function ktlitanOrders()
+	local fleet = tableRemoveRandom(ktlitanFleetList)
+	local stations = {}
+	for _,station in ipairs(humanStationList) do
+		if station ~= nil and station:isValid() then
+			table.insert(stations, station)
+		end
+	end
+	if #stations == 0 then
+		return
+	end
+	station = stations[math.random(1,#stations)]
+	if fleet ~= nil and #fleet > 0 then
+		for _,ship in ipairs(fleet) do
+			if ship:isValid() then
+				ship:orderDefendTarget(station)
+			end
+		end
+	end
 end
 function setKraylorDefensiveFleet()	
 	kraylorResource = 100 + scenario.difficulty*200

@@ -8,7 +8,7 @@
 -- Enemies[One]: Only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Enemies[Easy One]: Easy goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
 -- Enemies[Hard One]: Hard goals and/or enemies, only one mission randomly chosen from several possible missions (Default is all missions in random order)
--- Proxy: 192.168.2.227
+-- Proxy: 192.168.2.3
 
 require("ee.lua")
 require("utils.lua")

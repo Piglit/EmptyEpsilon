@@ -34,7 +34,7 @@ def showCode(ship):
 	print()
 
 def execLua(code):
-	return requests.get(f"http://192.168.2.227:8080/exec.lua", data=code).content	# TODO change ip
+	return requests.get(f"http://192.168.2.3:8080/exec.lua", data=code).content	# TODO change ip
 
 def prepareForAllies(ship):
 	clearCode(ship)

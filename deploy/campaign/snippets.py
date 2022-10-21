@@ -100,3 +100,21 @@ def spawnSpySat(spawnX, spawnY):
 		ship:setCallSign("SpySat")
 	"""
 	execLua(script)
+
+def startTimedEnemies():
+	round_timer.on_pause("""
+	scenario = getScriptStorage().scenario
+	scenario.makeFleetAggro("Kraylor")
+	scenario.makeFleetAggro("Exuari")
+	""")
+	round_timer.on_round("""
+	scenario = getScriptStorage().scenario
+	scenario.spawnDefensiveFleet(300, "Kraylor")
+	scenario.spawnDefensiveFleet(300, "Exuari")
+	""")
+
+def setDifficulty(difficulty):
+	assert isinstance(difficulty, int)
+	execLua(f"""getScriptStorage().scenario.difficulty = {difficulty}""")
+
+

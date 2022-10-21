@@ -30,6 +30,7 @@ function init()
 	healthDiagnostic = false
 	defaultGameTimeLimitInMinutes = 30	--final: 30 (lowered for test) Drop time limit: short missions, inherent time limits
 	repeatExitBoundary = 100
+	scenario = {}
 	setSettings()
 	setConstants()	--missle type names, template names and scores, deployment directions, player ship names, etc.
 	local universeCreateRetryCount = 0
@@ -63,7 +64,6 @@ function init()
 
 	--Example of calling a function via http API, assuming you start EE with parameter httpserver=8080 (or it's in options.ini):
 	--'curl --data "getScriptStorage().scenario.spawnDefensiveFleet(100, 'Kraylor')" http://localhost:8080/exec.lua'
-	scenario = {}
 	scenario.spawnDefensiveFleet = spawnDefensiveFleet
 	scenario.makeFleetAggro = makeFleetAggro 
 	scenario.stationList = stationList
@@ -146,19 +146,19 @@ function triggerAdmiralExuariAttack()
 	end
 end
 function setSettings()
-	difficulty = 1 --default (normal)
+	scenario.difficulty = 1 --default (normal)
 	if string.find(getScenarioSetting("Enemies"),"Easy") then
-		difficulty = .5
+		scenario.difficulty = .5
 		adverseEffect = .999
 		coolant_loss = .99999
 		coolant_gain = .01
 	elseif string.find(getScenarioSetting("Enemies"),"Hard") then
-		difficulty = 2
+		scenario.difficulty = 2
 		adverseEffect = .99
 		coolant_loss = .9999
 		coolant_gain = .0001
 	elseif string.find(getScenarioSetting("Enemies"),"Normal") then
-		difficulty = 1		--default (normal)
+		scenario.difficulty = 1		--default (normal)
 		adverseEffect = .995
 		coolant_loss = .99995
 		coolant_gain = .001
@@ -3040,7 +3040,7 @@ function spawnDefensiveFleet(resource, faction, factionStationList)
 	return fleetList 
 end
 function setKraylorDefensiveFleet()	
-	kraylorResource = 100 + difficulty*200
+	kraylorResource = 100 + scenario.difficulty*200
 	spawnDefensiveFleet(kraylorResource, "Kraylor", kraylorStationList)
 	--[[kraylorFleet1base = kraylorStationList[math.random(1,#kraylorStationList)]
 	local f1bx, f1by = kraylorFleet1base:getPosition()
@@ -3119,7 +3119,7 @@ function setKraylorDefensiveFleet()
 	--]]
 end
 function setExuariDefensiveFleet()	
-	exuariResource = 100 + difficulty*200
+	exuariResource = 100 + scenario.difficulty*200
 	spawnDefensiveFleet(exuariResource, "Exuari", exuariStationList)
 	--[[exuariFleetList = {}
 	exuariDefensiveFleetList = {}
@@ -3200,7 +3200,7 @@ function setExuariDefensiveFleet()
 	--]]
 end
 function setArlenianDefensiveFleet()	
-	arlenianResource = 100 + difficulty*200
+	arlenianResource = 100 + scenario.difficulty*200
 	spawnDefensiveFleet(arlenianResource, "Arlenians", arlenianStationList)
 	--[[
 	arlenianFleetList = {}
@@ -3283,7 +3283,7 @@ function setArlenianDefensiveFleet()
 end
 
 function setKtlitanDefensiveFleet()	
-	ktlitanResource = 100 + difficulty*200
+	ktlitanResource = 100 + scenario.difficulty*200
 	spawnDefensiveFleet(ktlitanResource, "Ktlitans", ktlitanStationList)
 end
 function setHumanDefensiveFleet()	
@@ -3368,7 +3368,7 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 	if danger == nil then 
 		danger = 1
 	end
-	enemyStrength = math.max(power * danger * difficulty, 5)
+	enemyStrength = math.max(power * danger * scenario.difficulty, 5)
 	enemyList, fleetPower = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	if enemyFaction == "Kraylor" then
 		rawKraylorShipStrength = rawKraylorShipStrength + fleetPower
@@ -3396,7 +3396,7 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 			ship:onDestruction(neutralVesselDestroyed)
 		end
 	end
-	fleetPower = math.max(fleetPower/danger/difficulty, 5)
+	fleetPower = math.max(fleetPower/danger/scenario.difficulty, 5)
 	return enemyList, fleetPower
 end
 -----------------------------
@@ -3525,27 +3525,27 @@ function handleDockedState()
 	end
 	if missilePresence > 0 then
 		if comms_target.nukeAvail == nil then
-			if math.random(1,10) <= (4 - difficulty) then
+			if math.random(1,10) <= (4 - scenario.difficulty) then
 				comms_target.nukeAvail = true
 			else
 				comms_target.nukeAvail = false
 			end
-			if math.random(1,10) <= (5 - difficulty) then
+			if math.random(1,10) <= (5 - scenario.difficulty) then
 				comms_target.empAvail = true
 			else
 				comms_target.empAvail = false
 			end
-			if math.random(1,10) <= (6 - difficulty) then
+			if math.random(1,10) <= (6 - scenario.difficulty) then
 				comms_target.homeAvail = true
 			else
 				comms_target.homeAvail = false
 			end
-			if math.random(1,10) <= (7 - difficulty) then
+			if math.random(1,10) <= (7 - scenario.difficulty) then
 				comms_target.mineAvail = true
 			else
 				comms_target.mineAvail = false
 			end
-			if math.random(1,10) <= (9 - difficulty) then
+			if math.random(1,10) <= (9 - scenario.difficulty) then
 				comms_target.hvliAvail = true
 			else
 				comms_target.hvliAvail = false
@@ -3944,7 +3944,7 @@ function handleDockedState()
 			setCommsMessage(ordMsg)
 			addCommsReply(_("Back"), commsStation)
 		end)
-		if math.random(1,5) <= (3 - difficulty) then
+		if math.random(1,5) <= (3 - scenario.difficulty) then
 			if player:getRepairCrewCount() < player.maxRepairCrew then
 				hireCost = math.random(30,60)
 			else
@@ -3960,7 +3960,7 @@ function handleDockedState()
 			end)
 		end
 	else
-		if math.random(1,5) <= (3 - difficulty) then
+		if math.random(1,5) <= (3 - scenario.difficulty) then
 			if player:getRepairCrewCount() < player.maxRepairCrew then
 				hireCost = math.random(45,90)
 			else
@@ -4208,27 +4208,27 @@ function handleUndockedState()
 		oMsg = oMsg .. _("station-comms", "\nBe aware that if enemies in the area get much closer, we will be too busy to conduct business with you.")
 	end
 	if comms_target.nukeAvail == nil then
-		if math.random(1,10) <= (4 - difficulty) then
+		if math.random(1,10) <= (4 - scenario.difficulty) then
 			comms_target.nukeAvail = true
 		else
 			comms_target.nukeAvail = false
 		end
-		if math.random(1,10) <= (5 - difficulty) then
+		if math.random(1,10) <= (5 - scenario.difficulty) then
 			comms_target.empAvail = true
 		else
 			comms_target.empAvail = false
 		end
-		if math.random(1,10) <= (6 - difficulty) then
+		if math.random(1,10) <= (6 - scenario.difficulty) then
 			comms_target.homeAvail = true
 		else
 			comms_target.homeAvail = false
 		end
-		if math.random(1,10) <= (7 - difficulty) then
+		if math.random(1,10) <= (7 - scenario.difficulty) then
 			comms_target.mineAvail = true
 		else
 			comms_target.mineAvail = false
 		end
-		if math.random(1,10) <= (9 - difficulty) then
+		if math.random(1,10) <= (9 - scenario.difficulty) then
 			comms_target.hvliAvail = true
 		else
 			comms_target.hvliAvail = false
@@ -5087,7 +5087,7 @@ function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction)
 	if danger == nil then 
 		danger = 1
 	end
-	local enemyStrength = math.max(danger * difficulty * playerPower(),5)
+	local enemyStrength = math.max(danger * scenario.difficulty * playerPower(),5)
 	local enemyList = spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction)
 	return enemyList
 end
@@ -5236,7 +5236,7 @@ function doomsday(delta)
 	if setUpDoomsday == nil then
 		startDoomsday()
 	end
---	scenario.doomsdayTimer = 800 - difficulty*150
+--	scenario.doomsdayTimer = 800 - scenario.difficulty*150
 	halfDoom = scenario.doomsdayTimer/2
 	quarterDoom = halfDoom/2
 	plot1 = checkDoomsdayEvents
@@ -5622,7 +5622,7 @@ function sickArlenianAdmiral(delta)
 	if setUpSickArlenianAdmiral == nil then
 		startSickArlenianAdmiral()
 	end
---	scenario.admiralTimeToLive = 700 - difficulty*100
+--	scenario.admiralTimeToLive = 700 - scenario.difficulty*100
 	plot1 = checkSickArlenianAdmiralEvents
 end
 function checkSickArlenianAdmiralEvents(delta)
@@ -5665,7 +5665,7 @@ function checkSickArlenianAdmiralEvents(delta)
 		removeGMFunction(GMAdmiral)
 		GMAdmiral = _("buttonGM" ,"Exuari attack Admiral")
 		addGMFunction(GMAdmiral,triggerAdmiralExuariAttack)
-		local kafx, kafy = vectorFromAngle(random(borderStartAngle+240,borderStartAngle+270),random(20000,30000) - (7000*difficulty))
+		local kafx, kafy = vectorFromAngle(random(borderStartAngle+240,borderStartAngle+270),random(20000,30000) - (7000*scenario.difficulty))
 		local aasx, aasy = arlenianFleet2base:getPosition()
 		menaceAdmiralFleet = spawnEnemies(aasx+kafx,aasy+kafy,2,"Kraylor")
 		for _,enemy in ipairs(menaceAdmiralFleet) do
@@ -5926,7 +5926,7 @@ function setPlayers()
 				initialRep = true
 			end
 --			if pobj.initialRep == nil then
---				pobj:addReputationPoints(100-(difficulty*20))
+--				pobj:addReputationPoints(100-(scenario.difficulty*20))
 --				pobj.initialRep = true
 --			end
 			if setPlayerDiagnostic then print("set reputation") end

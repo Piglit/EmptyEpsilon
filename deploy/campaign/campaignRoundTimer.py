@@ -35,6 +35,8 @@ class CampaignRoundTimer:
 		self.started = datetime.now()
 		self.until = datetime.now()
 		self.EEServer = "127.0.0.1"
+		self.on_pause = ""
+		self.on_round = ""
 		self.startRound()
 
 	def _sendEEcmd(self, cmd):
@@ -55,6 +57,8 @@ class CampaignRoundTimer:
 		self._sendEEcmd("globalMessage('', 0)")
 		self.timer = Timer(self.round_time, self.startPause)
 		self.timer.start()
+		if self.on_round:
+			self._sendEEcmd(self.on_round)
 
 	def startPause(self):
 		print(f"Start pause ({self.pause_time//60} minutes)")
@@ -67,12 +71,20 @@ class CampaignRoundTimer:
 		self._sendEEcmd(f"""globalMessage('Flottenbesprechung bis {self.until.strftime("%H:%M")}')""")
 		self.timer = Timer(self.pause_time, self.startRound)
 		self.timer.start()
+		if self.on_pause:
+			self._sendEEcmd(self.on_pause)
 
 	def setRoundTime(self, seconds):
 		self.round_time = seconds
 
 	def setPauseTime(self, seconds):
 		self.pause_time = seconds
+
+	def setOnPause(self, code):
+		self.on_pause = code
+
+	def setOnRound(self, code):
+		self.on_round = code
 
 	def nextPhase(self):
 		if self.state == "Round":

@@ -679,21 +679,21 @@ function enemyComms(comms_data)
 	end
 	if comms_source.special_intimidate_ships then
 		local cost = special_buy_cost(comms_target, comms_source)
-		local x,y = comms_target:getPosition()
-		local playership_near = false
-		local friends_near = false
-		for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
-			print(obj.typeName)
-			if obj.typeName == "PlayerSpaceship" then	--TODO test
-				playership_near = true
-			elseif obj.typeName == "SpaceShip" then
-				if comms_target:isFriendly(obj) then
-					friends_near = true
+		print("in intimidate")
+		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+			local x,y = comms_target:getPosition()
+			local playership_near = false
+			local friends_near = false
+			for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
+				print(obj.typeName)
+				if obj.typeName == "PlayerSpaceship" then
+					playership_near = true
+				elseif obj.typeName == "Cpu" then
+					if comms_target:isFriendly(obj) then
+						friends_near = true
+					end
 				end
 			end
-
-		end
-		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
 			if not playership_near then
 				setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
 			elseif comms_target:getHull() >= comms_target:getHullMax() then
@@ -711,8 +711,10 @@ function enemyComms(comms_data)
 	end
 
 	if comms_data.friendlyness > 50 or comms_source.special_intimidate_ships then
+		print("ret true")
 		return true
 	end
+	print("ret false")
 	return false
 end
 

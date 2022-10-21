@@ -2992,7 +2992,11 @@ function makeFleetAggro(faction)
 	end
 	for _, sat in ipairs(scenario.spySats) do
 		if sat ~= nil and sat:isValid() and count > 1 then
-            sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
+			if faction == "Kraylor" and kraylorZone:isInside(sat) then
+				sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
+			elseif faction == "Exuari" and exuariZone:isInside(sat) then
+				sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
+			end
 		end
 	end
 	return count, sector 

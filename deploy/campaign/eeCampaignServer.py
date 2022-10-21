@@ -158,7 +158,6 @@ async def scenario_victory(scenario_info: ScenarioInfoVictory, server_name: str 
 
 @app.post("/script_message")
 async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: str = Body(...)):
-	# unused
 	scm = scenario_info.script_message
 	log.info(server_name + "\tscript message   " + str(scenario_info) + "\t" + scm)
 	if scm.startswith("unlockScenarios:[") and scm.endswith("]"):

@@ -70,7 +70,7 @@ class CampaignRoundTimer:
 		self.until = datetime.now() + timedelta(seconds=self.pause_time)
 		self.state = "Pause"
 		self._sendEEcmd("slowGame()")
-		self._sendEEcmd("setScanningComplexity('simple')")
+		self._sendEEcmd("setScanningComplexity('none')")
 		self._sendEEcmd("setHackingDifficulty(3)")
 		self._sendEEcmd(f"""globalMessage('Flottenbesprechung bis {self.until.strftime("%H:%M")}')""")
 		self.timer = Timer(self.pause_time, self.startRound)

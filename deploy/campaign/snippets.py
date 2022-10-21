@@ -34,7 +34,7 @@ def showCode(ship):
 	print()
 
 def execLua(code):
-	return requests.get(f"http://192.168.2.3:8080/exec.lua", data=code).content	# TODO change ip
+	return requests.get(f"http://127.0.0.1:8080/exec.lua", data=code).content	# TODO change ip
 
 def prepareForAllies(ship):
 	clearCode(ship)
@@ -105,12 +105,12 @@ def spawnSpySat(spawnX, spawnY):
 	print("If there are multiple SpySats, consider renaming them to make then distinguishable")
 
 def startTimedEnemies():
-	round_timer.on_pause("""
+	roundTimer.setOnPause("""
 	scenario = getScriptStorage().scenario
 	scenario.makeFleetAggro("Kraylor")
 	scenario.makeFleetAggro("Exuari")
 	""")
-	round_timer.on_round("""
+	roundTimer.setOnRound("""
 	scenario = getScriptStorage().scenario
 	scenario.spawnDefensiveFleet(300, "Kraylor")
 	scenario.spawnDefensiveFleet(300, "Exuari")

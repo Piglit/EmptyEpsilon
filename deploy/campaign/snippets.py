@@ -98,8 +98,11 @@ def spawnSpySat(spawnX, spawnY):
 		ship:setPosition({spawnX}, {spawnY})
 		ship:setTemplate("SpySat")
 		ship:setCallSign("SpySat")
+		table.insert(getScriptStorage().scenario.spySats, ship)
 	"""
 	execLua(script)
+	print("Note: SpySat sets its control code to the name of the closest ship.")
+	print("If there are multiple SpySats, consider renaming them to make then distinguishable")
 
 def startTimedEnemies():
 	round_timer.on_pause("""
@@ -117,4 +120,8 @@ def setDifficulty(difficulty):
 	assert isinstance(difficulty, int)
 	execLua(f"""getScriptStorage().scenario.difficulty = {difficulty}""")
 
-
+def getShip(callsign):
+	return f"""
+	idx = getPlayerShipIndex("{ship.callsign}")
+	ship = getPlayerShip(idx)
+	"""

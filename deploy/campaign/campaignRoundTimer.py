@@ -54,6 +54,8 @@ class CampaignRoundTimer:
 		self.until = datetime.now() + timedelta(seconds=self.round_time)
 		self.state = "Round"
 		self._sendEEcmd("unslowGame()")
+		self._sendEEcmd("setScanningComplexity('normal')")
+		self._sendEEcmd("setHackingDifficulty(2)")
 		self._sendEEcmd("globalMessage('', 0)")
 		self.timer = Timer(self.round_time, self.startPause)
 		self.timer.start()
@@ -68,6 +70,8 @@ class CampaignRoundTimer:
 		self.until = datetime.now() + timedelta(seconds=self.pause_time)
 		self.state = "Pause"
 		self._sendEEcmd("slowGame()")
+		self._sendEEcmd("setScanningComplexity('simple')")
+		self._sendEEcmd("setHackingDifficulty(3)")
 		self._sendEEcmd(f"""globalMessage('Flottenbesprechung bis {self.until.strftime("%H:%M")}')""")
 		self.timer = Timer(self.pause_time, self.startRound)
 		self.timer.start()

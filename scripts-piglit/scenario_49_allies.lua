@@ -78,6 +78,7 @@ function init()
 	scenario.triggerAdmiralKraylorAttack = triggerAdmiralKraylorAttack
 	scenario.triggerAdmiralExuariAttack = triggerAdmiralExuariAttack
 	scenario.secondaryOrders = "Defend the stations of the Human Navy and their allies, the Interplanetary Union and the Arlenians against the Kraylor and Exuari forces."
+	scenario.spySats = {}
 	local storage = getScriptStorage()
 	storage.scenario = scenario
 end
@@ -2980,7 +2981,6 @@ function makeFleetAggro(faction)
 	end
 	local count = 0
 	local sector = nil
-	local targetSector = nil
 	if fleet ~= nil and #fleet > 0 then
 		for _,ship in ipairs(fleet) do
 			if ship:isValid() then
@@ -2988,6 +2988,11 @@ function makeFleetAggro(faction)
 				ship:orderRoaming()
 				count = count + 1
 			end
+		end
+	end
+	for _, sat in ipairs(scenario.spySats) do
+		if sat ~= nil and sat:isValid() and count > 1 then
+            sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
 		end
 	end
 	return count, sector 
@@ -6236,6 +6241,18 @@ function stationGainRep(delta)
 		end
 	end
 end
+function spySatHandle(delta)
+	for _, sat in ipairs(scenario.spySats) do
+		if sat ~= nil and sat:isValid() then
+			local closest = closestPlayerTo(sat)
+			if closest ~= nil and distance(closest, sat) < 5000 then
+				sat:setControlCode(closest:getCallSign())
+			else
+				sat:setControlCode("youwillneverfindthissupersecretaccesscode")
+			end
+		end
+	end
+end
 function update(delta)
 	if delta == 0 then
 		--game paused
@@ -6253,6 +6270,7 @@ function update(delta)
 		plotManager(delta)
 	end
 	stationGainRep(delta)
+	spySatHandle(delta)
 	if updateDiagnostic then print("plot1") end
 	if plot1 ~= nil then	--randomly chosen plot
 		plot1(delta)

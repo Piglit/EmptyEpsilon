@@ -597,11 +597,10 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 		if enemyFaction == "Kraylor" then
 			--kraylor formation
 			formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
-		end
-		if enemyFaction == "Ktlitans" then
+			ship:setCommsScript(""):setCommsFunction(commsShip)
+		elseif enemyFaction == "Ktlitans" then
 			ship:setCommsScript(""):setCommsFunction(nil)	-- they do not communicate
-		end
-		if enemyFaction == "Exuari" then
+		elseif enemyFaction == "Exuari" then
 			ship:setCommsScript("comms_exuari.lua")
 			--TODO check if multiple onDamage/onDestruction are possible. If true, raise frenzy in combat, otherwise slowly lower
 			--Update: no, it is not possible.
@@ -630,7 +629,7 @@ end
 
 function enemyComms(comms_data)
 	-- called instead enemyComms() of xanstas scenarios, as long it is deleted there.
-	if comms_data.friendlyness > 50 then
+	if comms_data.friendlyness > 50 or comms_source.special_intimidate_ships then
 		local faction = comms_target:getFaction()
 		local taunt_option = "We will see to your destruction!"
 		local taunt_success_reply = "Your bloodline will end here!"
@@ -676,45 +675,42 @@ function enemyComms(comms_data)
 				setCommsMessage(taunt_failed_reply);
 			end
 		end)
-	end
-	if comms_source.special_intimidate_ships then
-		local cost = special_buy_cost(comms_target, comms_source)
-		print("in intimidate")
-		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
-			local x,y = comms_target:getPosition()
-			local playership_near = false
-			local friends_near = false
-			for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
-				print(obj.typeName)
-				if obj.typeName == "PlayerSpaceship" then
-					playership_near = true
-				elseif obj.typeName == "Cpu" then
-					if comms_target:isFriendly(obj) then
-						friends_near = true
+
+		if comms_source.special_intimidate_ships then
+			local cost = special_buy_cost(comms_target, comms_source)
+			addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+				local x,y = comms_target:getPosition()
+				local playership_near = false
+				local friends_near = false
+				for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
+					if obj ~= nil and obj:isValid() and obj ~= comms_target then
+						if obj.typeName == "PlayerSpaceship" then
+							playership_near = true
+						elseif obj.typeName == "CpuShip" then
+							if comms_target:isFriendly(obj) then
+								friends_near = true
+							end
+						end
 					end
 				end
-			end
-			if not playership_near then
-				setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
-			elseif comms_target:getHull() >= comms_target:getHullMax() then
-				setCommsMessage(_("needRep-comms", "We will not surrender unless our hull is damaged."))
-			elseif friends_near then
-				setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still near."))
-			elseif not comms_source:takeReputationPoints(cost) then
-				setCommsMessage(_("needRep-comms", "Insufficient reputation"))
-			else
-				comms_target:setFaction("Independent")
-				comms_target:orderRetreat()
-				setCommsMessage(_("special-comms", "Ship has surrendered."))
-			end
-		end)
-	end
-
-	if comms_data.friendlyness > 50 or comms_source.special_intimidate_ships then
-		print("ret true")
+				if not playership_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender to cowardly weaklings who do not have even the courage to face us directly."))
+				elseif comms_target:getHull() >= comms_target:getHullMax() then
+					setCommsMessage(_("needRep-comms", "Our ship is not even damaged and you want us to surrender? Come here and fight!"))
+				elseif friends_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still close."))
+				elseif not comms_source:takeReputationPoints(cost) then
+					setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+				else
+					comms_target:setFaction("Independent")
+					comms_target:orderRoaming()
+					setCommsMessage(_("special-comms", "Ship has surrendered."))
+				end
+			end)
+		end
 		return true
 	end
-	print("ret false")
+
 	return false
 end
 
@@ -938,7 +934,13 @@ function x_healthCheck(delta, p)
 				x_crewFate(p,fatalityChance)
 			end
 		else	--no repair crew left
-			if feature_crewFate and random(1,100) <= (4 - difficulty) then	-- assume difficulty is defined
+			local diff = 1
+			if difficulty ~= nil then
+				diff = difficulty
+			elseif scenario ~= nil and scenario.difficulty ~= nil then
+				diff = scenario.difficulty
+			end
+			if feature_crewFate and random(1,100) <= (4 - diff) then
 				p:setRepairCrewCount(1)
 				if p:hasPlayerAtPosition("Engineering") then
 					local repairCrewRecovery = "repairCrewRecovery"
@@ -1239,6 +1241,7 @@ end
 -- comms functions. Remove the corresponding part from the functions in the script and call the functions defined here instead
 
 function undockedGoods()
+	if goods[comms_target] ~= nil then
 		local goodsQuantityAvailable = 0
 		local gi = 1
 		repeat
@@ -1285,6 +1288,7 @@ function undockedGoods()
 				addCommsReply(_("Back"), commsStation)
 			end
 		end)
+	end
 end
 
 function dockedGoods()
@@ -1487,3 +1491,40 @@ function dockedGoods()
 		end	
 	end	--end of goods present on comms target if branch
 end
+function special_buy_cost(target, player)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(player) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(player) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	if target:getFaction() == "Interplanetary Union" then
+		cost = cost *1
+	elseif target:getFaction() == "Independent" then
+		cost = cost *2
+	elseif target:getFaction() == "Arlenians" then
+		cost = cost *4
+	elseif target:getFaction() == "Exuari" then	-- because stations are ships
+		cost = cost *4
+	else	-- other neutral and enemies
+		cost = cost *2
+	end
+	if target.typeName == "SpaceStation" then
+		cost = cost *2
+	else -- SpaceShip
+		cost = cost *1
+	end
+	return math.floor(cost)
+end
+

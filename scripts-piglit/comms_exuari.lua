@@ -32,10 +32,12 @@ local hangup = {
 
 function mainMenu()
 	if comms_target.comms_data == nil then
-		comms_target.comms_data = {friendlyness = random(0.0, 75.0)}
+		comms_target.comms_data = {}
 	end
-	comms_data = comms_target.comms_data
-	
+	local comms_data = comms_target.comms_data
+	if comms_data.friendlyness == nil then
+   		comms_data.friendlyness = random(0.0, 75.0)
+	end
 	if player:isFriendly(comms_target) then
 		return friendlyComms(comms_data)
 	end
@@ -225,7 +227,7 @@ function enemyComms(comms_data)
 	if comms_data.friendlyness < 0 then
 		return false
 	end
-	comms_target.friendlyness = comms_target.friendlyness + random(1,5)
+	comms_data.friendlyness = comms_data.friendlyness + random(1,5)
 	if comms_data.friendlyness < 25 then
 		setCommsMessage(hangup[math.random(1,#hangup)] .. "\nOr do you suggest blowing holes in your hulk?")
 		change = 100 - 1.5*comms_data.friendlyness	-- [100, 62.5]
@@ -240,10 +242,10 @@ function enemyComms(comms_data)
 		change = 150 - 1.5*comms_data.friendlyness	-- [37.5, 0]
 	end
 
-	local taunts = {"Proud and insolent creature, prepare to meet your doom.", "It's time to duell!", "Wouldn't you rather play chess? It's less destructive of ships.", "I have not time to spare while you cruise around; prepare instead for death."}
+	local taunts = {"Proud and insolent creature, prepare to meet your doom.", "It's time to duell!", "Wouldn't you rather play chess? It's less destructive of ships.", "I have not time to spare while you cruise around; prepare for death."}
 	for _,taunt in ipairs(taunts) do
 		addCommsReply(taunt, function()
-			comms_target.friendlyness = comms_target.friendlyness + random(5,25)
+			comms_data.friendlyness = comms_data.friendlyness + random(5,25)
 			if random(0, 100) < change then
 				-- ignore everything else and attack player
 				comms_target:orderAttack(player)
@@ -272,48 +274,39 @@ function enemyComms(comms_data)
 	end
 	if comms_source.special_intimidate_ships then
 		local cost = special_buy_cost(comms_target, comms_source)
-		local x,y = comms_target.getPosition()
-		local playership_near = false
-		local friends_near = false
-		for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
-			print(obj.typeName)
-			if obj.typeName == "PlayerSpaceship" then	--TODO test
-				playership_near = true
-			elseif obj.typeName == "SpaceShip" then
-				if comms_target:isFriendly(obj) then
-					friends_near = true
+		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+			comms_data.friendlyness = comms_data.friendlyness + random(5,25)
+			local x,y = comms_target:getPosition()
+			local playership_near = false
+			local friends_near = false
+			for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
+				if obj ~= nil and obj:isValid() and obj ~= comms_target then
+					if obj.typeName == "PlayerSpaceship" then
+						playership_near = true
+					elseif obj.typeName == "CpuShip" then
+						if comms_target:isFriendly(obj) then
+							friends_near = true
+						end
+					end
 				end
 			end
-
-		end
-		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
-			if not comms_data.friendlyness > 75 then
+			if comms_data.friendlyness > 75 then
 				setCommsMessage(_("needRep-comms", "SURRENDER? NEVER! YOU COME HERE TO DIE!!"))
-				return true
-			end
-			if not playership_near then
-				setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
-				return true
-			end
-			if comms_target:getHull() >= comms_target:getHullMax() then
-				setCommsMessage(_("needRep-comms", "We will not surrender unless our hull is damaged."))
-				return true
-			end
-			if friends_near then
-				setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still near."))
-				return true
-			end
-			if not comms_source:takeReputationPoints(cost) then
+			elseif not playership_near then
+				setCommsMessage(_("needRep-comms", "You boring people are so far away, we can barely understand you silly requests. Why don't you come a little bit closer. In our weapons range would be a great spot to talk."))
+			elseif comms_target:getHull() >= comms_target:getHullMax() then
+				setCommsMessage(_("needRep-comms", "What? Surrender? Without even a scratch in our hull? We have a better idea: why don't you lower your shields and let us drill some holes into your life support systems?"))
+			elseif friends_near then
+				setCommsMessage(_("needRep-comms", "Surrender? With so much of us around? Can we talk again after some slaughter has happend here?"))
+			elseif not comms_source:takeReputationPoints(cost) then
 				setCommsMessage(_("needRep-comms", "Insufficient reputation"))
-				return true
 			else
 				comms_target:setFaction("Independent")
+				comms_target:orderRoaming()
 				setCommsMessage(_("special-comms", "Ship has surrendered."))
-				return true
 			end
 		end)
 	end
-
 	return true
 end
 
@@ -331,6 +324,27 @@ function neutralComms(comms_data)
 	end
 	comms_data.friendlyness = comms_data.friendlyness - random(0, 10)	--reduce friendlyness after each interaction
 	return true
+end
+function special_buy_cost(target, player)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(player) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(player) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	cost = cost *4
+	return math.floor(cost)
 end
 
 mainMenu()

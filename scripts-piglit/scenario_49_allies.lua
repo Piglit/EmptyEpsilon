@@ -4072,42 +4072,6 @@ function handleBuyShips()
 	addCommsReply("Back", mainMenu)
 end
 --]]
-function special_buy_cost(target, player)
-	cost = target:getHullMax()
-	--[[
-	-- stations:			IU (*4)	Inde(*8)	gain
-	--	Small Station	150	 600	1200	600/h
-	--	Medium Station	400	1600	3200
-	--	Large Station	500	2000	4000
-	--	Huge Station	800	3200	6400
-	-- Phobos			 70	 120	 240
-	--]]
-	if target:isEnemy(player) then
-		health = target:getHull() / target:getHullMax()
-		cost = cost *4 *health
-	elseif target:isFriendly(player) then
-		cost = cost *1
-	else	-- Neutral
-		cost = cost *2
-	end
-	if target:getFaction() == "Interplanetary Union" then
-		cost = cost *1
-	elseif target:getFaction() == "Independent" then
-		cost = cost *2
-	elseif target:getFaction() == "Arlenians" then
-		cost = cost *4
-	elseif target:getFaction() == "Exuari" then	-- because stations are ships
-		cost = cost *4
-	else	-- other neutral and enemies
-		cost = cost *2
-	end
-	if target.typeName == "SpaceStation" then
-		cost = cost *2
-	else -- SpaceShip
-		cost = cost *1
-	end
-	return math.floor(cost)
-end
 function setOptionalOrders()
 	local optionalOrders = "\n"
 	if player.special_buy_stations then

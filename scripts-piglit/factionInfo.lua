@@ -34,7 +34,6 @@ Destroying an Arlenian ship does not kill its crew. They simply phase out of exi
 
 exuari = FactionInfo():setName("Exuari"):setLocaleName(_("Exuari"))
 exuari:setGMColor(255, 0, 128)
-exuari:setEnemy(neutral)
 exuari:setEnemy(human)
 exuari:setEnemy(kraylor)
 exuari:setEnemy(arlenians)

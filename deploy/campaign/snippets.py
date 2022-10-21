@@ -61,6 +61,7 @@ def grantSpecial(ship, special):
 	code = campaign.getShipAdditionalCode(ship)
 	code += "\nship.special_"+special+" = true"
 	campaign.setShipAdditionalCode(code, ship)
+    print("Special granted. It will work when ship spawns, but not yet if ship already exists.")
 
 def spawnablePrototypes(ship, otherCallsign, otherPW, spawnX, spawnY):
 	script = """

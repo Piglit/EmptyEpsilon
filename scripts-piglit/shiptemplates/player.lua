@@ -552,7 +552,7 @@ template:weaponTubeDisallowMissle(0, "Mine")
 template:weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(0, -90)
 template:setTubeDirection(1,  90)
-template:setTubeDirection(2, 180):setWeaponTubeExclusiveFor(4, "Mine")
+template:setTubeDirection(2, 180):setWeaponTubeExclusiveFor(2, "Mine")
 template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
 template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
 

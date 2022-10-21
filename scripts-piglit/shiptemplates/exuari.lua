@@ -276,7 +276,7 @@ template:setRestocksScanProbes(true)
 
 -- medium station
 variation = template:copy("Zeppelin")
-variation:setDescription("TODO")
+variation:setDescription(_("The Exuari 'Zeppelin' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Zeppelin off the sensor range of the desired target, while fighters and artillery start from the carrier."))
 --                  Arc, Dir, Range, CycleTime, Dmg
 variation:setBeam(0,  20, -90, 1800.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
 variation:setBeam(1,  20, -90, 1800.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
@@ -296,7 +296,7 @@ variation:setHull(300)
 
 -- large station
 variation = template:copy("Craver")
-variation:setDescription("TODO")
+variation:setDescription(_("The Exuari Craver is a huge carrier with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive. The shields of this base carrier are saied to be very strong."))
 --                  Arc, Dir, Range, CycleTime, Dmg
 variation:setBeam(0,  20, -90, 2200.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
 variation:setBeam(1,  20, -90, 2200.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)

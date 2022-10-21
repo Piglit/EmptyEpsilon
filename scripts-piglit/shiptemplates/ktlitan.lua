@@ -193,7 +193,7 @@ template:setTubes(2, 15.0) -- Amount of torpedo tubes
 template:setWeaponStorage("Nuke", 5)
 template:setWeaponStorage("EMP", 5)
 template:setWeaponStorage("Homing", 5)
-template:setSpeed(500, 10, 20)	-- default values
+template:setSpeed(2, 10, 20)	-- default values
 
 variation = template:copy("Diva"):setLocaleName(_("ship", "Diva"))
 variation:setSpeed(35, 8, 5)
@@ -215,6 +215,6 @@ variation:setHull(600)
 variation:setShields(100, 100, 100)
 variation:setDefaultAI("fighter")
 variation:setDescription(_(descr .. "Undiscovered type of Ktlitan warship", "Ktlitan Tsarina is a subtype of Ktlitan Queen. It's twice as agile and durable.  " .. "It focuses on using beams and dumbfire weapons. "))
-variation:setSpeed(500, 20, 20)
+variation:setSpeed(50, 20, 20)
 
 

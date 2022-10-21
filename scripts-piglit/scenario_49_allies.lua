@@ -4411,48 +4411,74 @@ function handleUndockedState()
         end)
     end
     if isAllowedTo(comms_target.comms_data.services.reinforcements) then
-        addCommsReply(string.format(_("stationAssist-comms", "Please send Adder MK5 reinforcements! (%.1f rep)"),getServiceCost("reinforcements")), function()
-            if player:getWaypointCount() < 1 then
-                setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
-            else
-                setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
-                for n=1,player:getWaypointCount() do
-                    addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-						if player:takeReputationPoints(getServiceCost("reinforcements")) then
-							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
-							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
-							table.insert(friendlyHelperFleet,ship)
-							setCommsMessage(string.format(_("stationAssist-comms", "We have dispatched %s to assist at waypoint %i"),ship:getCallSign(),n))
-						else
-							setCommsMessage(_("needRep-comms", "Not enough reputation!"))
-						end
-                        addCommsReply(_("Back"), commsStation)
-                    end)
-                end
-            end
-            addCommsReply(_("Back"), commsStation)
-        end)
-        addCommsReply(string.format(_("stationAssist-comms", "Please send Phobos T3 reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements")), function()
-            if player:getWaypointCount() < 1 then
-                setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
-            else
-                setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
-                for n=1,player:getWaypointCount() do
-                    addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-						if player:takeReputationPoints(getServiceCost("phobosReinforcements")) then
-							ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Phobos T3"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
-							ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
-							table.insert(friendlyHelperFleet,ship)
-							setCommsMessage(string.format(_("stationAssist-comms", "We have dispatched %s to assist at waypoint %i"),ship:getCallSign(),n))
-						else
-							setCommsMessage(_("needRep-comms", "Not enough reputation!"))
-						end
-                        addCommsReply(_("Back"), commsStation)
-                    end)
-                end
-            end
-            addCommsReply(_("Back"), commsStation)
-        end)
+		if comms_target.typeName == "SpaceStation" then
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Adder MK5 reinforcements! (%.1f rep)"),getServiceCost("reinforcements")), function()
+				if player:getWaypointCount() < 1 then
+					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
+				else
+					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
+					for n=1,player:getWaypointCount() do
+						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
+							if player:takeReputationPoints(getServiceCost("reinforcements")) then
+								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
+								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
+								--table.insert(friendlyHelperFleet,ship)
+								setCommsMessage(string.format(_("stationAssist-comms", "We have dispatched %s to assist at waypoint %i"),ship:getCallSign(),n))
+							else
+								setCommsMessage(_("needRep-comms", "Not enough reputation!"))
+							end
+							addCommsReply(_("Back"), commsStation)
+						end)
+					end
+				end
+				addCommsReply(_("Back"), commsStation)
+			end)
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Phobos T3 reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements")), function()
+				if player:getWaypointCount() < 1 then
+					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
+				else
+					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
+					for n=1,player:getWaypointCount() do
+						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
+							if player:takeReputationPoints(getServiceCost("phobosReinforcements")) then
+								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Phobos T3"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
+								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
+								--table.insert(friendlyHelperFleet,ship)
+								setCommsMessage(string.format(_("stationAssist-comms", "We have dispatched %s to assist at waypoint %i"),ship:getCallSign(),n))
+							else
+								setCommsMessage(_("needRep-comms", "Not enough reputation!"))
+							end
+							addCommsReply(_("Back"), commsStation)
+						end)
+					end
+				end
+				addCommsReply(_("Back"), commsStation)
+			end)
+		elseif comms_target.typeName == "CpuShip" then
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Exuari Fighter reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements")), function()
+				if player:getWaypointCount() < 1 then
+					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
+				else
+					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
+					for n=1,player:getWaypointCount() do
+						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
+							if player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+								local templs = {"Dagger", "Blade", "Gunner", "Shooter", "Jagger"}
+								local templ = templs[irandom(1, #templs)]
+								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate(templ):setScanned(true):orderDefendLocation(player:getWaypoint(n))
+								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
+								--table.insert(friendlyHelperFleet,ship)
+								setCommsMessage(string.format(_("stationAssist-comms", "We have dispatched %s to assist at waypoint %i"),ship:getCallSign(),n))
+							else
+								setCommsMessage(_("needRep-comms", "Not enough reputation!"))
+							end
+							addCommsReply(_("Back"), commsStation)
+						end)
+					end
+				end
+				addCommsReply(_("Back"), commsStation)
+			end)
+		end
     end
 end
 function getServiceCost(service)

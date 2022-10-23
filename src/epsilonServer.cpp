@@ -3,6 +3,7 @@
 #include "gameGlobalInfo.h"
 #include "soundManager.h"
 #include "multiplayer_client.h"
+#include "multiplayer_proxy.h"
 #include "preferenceManager.h"
 #include "GMActions.h"
 #include "main.h"
@@ -51,6 +52,8 @@ void disconnectFromServer()
         game_client->destroy();
     if (game_server)
         game_server->destroy();
+    if (game_proxy)
+        game_proxy->destroy();  // FIXME This one does not get properly destroyed. Pointer is still valid afterwards
     if (gameGlobalInfo)
         gameGlobalInfo->destroy();
     if (gameMasterActions)

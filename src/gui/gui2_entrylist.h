@@ -46,7 +46,6 @@ public:
     int getSelectionIndex() const;
     GuiEntryList* setSelectionIndex(int index);
     string getSelectionValue() const;
-protected:
     void callback();
 private:
     virtual void entriesChanged();

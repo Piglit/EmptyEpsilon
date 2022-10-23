@@ -25,7 +25,7 @@ GuiIndicatorOverlays::GuiIndicatorOverlays(GuiContainer* owner)
     if (game_server)
     {
         (new GuiButton(pause_overlay, "PAUSE_RESUME", tr("Unpause"), []() {
-            engine->setGameSpeed(1.0);
+            gameGlobalInfo->setPause(false);
         }))->setPosition(0, 75, sp::Alignment::Center)->setSize(500, 50);
     }
 

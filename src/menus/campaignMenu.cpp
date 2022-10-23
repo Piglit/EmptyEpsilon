@@ -49,7 +49,7 @@ CampaignMenu::CampaignMenu()
     (new GuiTextEntry(this, "PASSWORD", PreferencesManager::get("password")))->callback([](string text) {
         PreferencesManager::set("password", text);
         PreferencesManager::set("headless_password", text);
-    })->setPosition({pos_x, pos_y}, sp::Alignment::TopCenter)->setSize(input_size_x, 50);
+    })->setHidePassword()->setPosition({pos_x, pos_y}, sp::Alignment::TopCenter)->setSize(input_size_x, 50);
     pos_y += 70;
 
     string label;
@@ -72,21 +72,16 @@ CampaignMenu::CampaignMenu()
             game_server->setPassword(PreferencesManager::get("password").upper());
             if (campaign_client && campaign_client->isOnline()) {
                 gameGlobalInfo->campaign_running = true;
+                new ServerScenarioSelectionScreen();
+                destroy();
+            } else {
+                disconnectFromServer();
             }
-            new ServerScenarioSelectionScreen();
-            destroy();
         }
     }))->setPosition({0, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);
     pos_y += 50;
 
-
 /*
-    join_campaign_button = (new GuiButton(this, "JOIN_CAMPAIGN", tr("Join Campaign"), [this]() {
-        new ServerBrowserMenu(ServerBrowserMenu::Local);
-        destroy();
-    }));
-    join_campaign_button->setPosition({0, pos_y}, sp::Alignment::TopCenter)->setSize(300, 50);//->hide();
-
     (new GuiButton(this, "COLOR", tr("COLOR"), [this]() {
         new ColorSchemeMenu();
         destroy();

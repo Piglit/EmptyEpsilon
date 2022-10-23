@@ -94,7 +94,7 @@ void JoinServerScreen::update(float delta)
                     my_player_info = i;
             if (my_player_info && gameGlobalInfo)
             {
-                if (PreferencesManager::get("campaign_server") != "") {
+                if (gameGlobalInfo->campaign_running) {
                     new MissionControlScreen(getRenderLayer());
                 } else {
                     returnToShipSelection(getRenderLayer());

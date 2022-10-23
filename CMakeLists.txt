@@ -245,10 +245,12 @@ set(MAIN_SOURCES
     src/menus/joinServerMenu.cpp
     src/menus/serverBrowseMenu.cpp
     src/menus/mainMenus.cpp
+    src/menus/campaignMenu.cpp
     src/menus/serverCreationScreen.cpp
     src/menus/tutorialMenu.cpp
     src/menus/optionsMenu.cpp
     src/menus/shipSelectionScreen.cpp
+    #    src/menus/scenarioSelectionScreen.cpp
     src/menus/autoConnectScreen.cpp
     src/menus/hotkeyMenu.cpp
     src/menus/luaConsole.cpp
@@ -272,6 +274,7 @@ set(MAIN_SOURCES
     src/screens/extra/databaseScreen.cpp
     src/screens/extra/commsScreen.cpp
     src/screens/extra/shipLogScreen.cpp
+    src/screens/missionControlScreen.cpp
     src/screens/gm/gameMasterScreen.cpp
     src/screens/gm/objectCreationView.cpp
     src/screens/gm/globalMessageEntryView.cpp

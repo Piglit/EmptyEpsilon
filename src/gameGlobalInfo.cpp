@@ -1,6 +1,9 @@
 #include <i18n.h>
 #include "menus/luaConsole.h"
+#include <io/json.h>
+#include <campaign_client.h>
 #include "gameGlobalInfo.h"
+#include "scenarioInfo.h"
 #include "preferenceManager.h"
 #include "scenarioInfo.h"
 #include "scienceDatabase.h"
@@ -39,6 +42,7 @@ GameGlobalInfo::GameGlobalInfo()
     allow_main_screen_long_range_radar = true;
     gm_control_code = "";
     elapsed_time = 0.0f;
+    campaign_running = false;
 
     intercept_all_comms_to_gm = false;
 
@@ -83,6 +87,15 @@ void GameGlobalInfo::setPlayerShip(int index, P<PlayerSpaceship> ship)
         playerShipId[index] = ship->getMultiplayerId();
     else
         playerShipId[index] = -1;
+}
+
+int GameGlobalInfo::getPlayerShipIndexByName(string callsign)
+{
+    for(int n=0; n<max_player_ships; n++)
+        if (getPlayerShip(n))
+            if (getPlayerShip(n)->getCallSign() == callsign)
+                return n;
+    return -1;
 }
 
 int GameGlobalInfo::findPlayerShip(P<PlayerSpaceship> ship)
@@ -166,7 +179,16 @@ void GameGlobalInfo::reset()
     foreach(SpaceObject, o, space_object_list)
         o->destroy();
     if (engine->getObject("scenario"))
+    {
+        if (campaign_client)
+        {
+            campaign_client->notifyCampaignServer("scenario_end", nlohmann::json {
+                {"filename", scenario_filename.c_str()},
+                {"name", scenario.c_str()},
+            });
+        }
         engine->getObject("scenario")->destroy();
+    }
 
     foreach(Script, s, script_list)
     {
@@ -247,6 +269,15 @@ void GameGlobalInfo::startScenario(string filename, std::unordered_map<string, s
     P<ScriptObject> scienceInfoScript = new ScriptObject("science_db.lua");
     if (scienceInfoScript->getError() != "") exit(1);
     scienceInfoScript->destroy();
+
+    scenario_filename = filename;
+    if (campaign_client)
+    {
+        campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
+            {"filename", filename.c_str()},
+            {"name", scenario.c_str()},
+        });
+    }
 
     P<ScriptObject> script = new ScriptObject();
     int max_cycles = PreferencesManager::get("script_cycle_limit", "0").toInt();
@@ -375,7 +406,18 @@ static int victory(lua_State* L)
 {
     gameGlobalInfo->setVictory(luaL_checkstring(L, 1));
     if (engine->getObject("scenario"))
+    {
+        if (campaign_client)
+        {
+            campaign_client->notifyCampaignServer("scenario_victory", nlohmann::json {
+                {"faction", string(luaL_checkstring(L, 1)).c_str()},
+                {"filename", gameGlobalInfo->scenario_filename.c_str()},
+                {"name", gameGlobalInfo->scenario.c_str()},
+//                {"variation", gameGlobalInfo->variation.c_str()},
+            });
+        }
         engine->getObject("scenario")->destroy();
+    }
     engine->setGameSpeed(0.0);
     return 0;
 }
@@ -449,6 +491,16 @@ static int getPlayerShip(lua_State* L)
 /// Pass -2 to return the current player ship.
 /// Example: getPlayerShip(2) -- returns the second-indexed ship, if it exists
 REGISTER_SCRIPT_FUNCTION(getPlayerShip);
+
+static int getPlayerShipIndex(lua_State* L)
+{
+    string callsign = luaL_checkstring(L, 1);
+    lua_pushnumber(L, gameGlobalInfo->getPlayerShipIndexByName(callsign)+1);
+    return 1;
+}
+/// int getPlayerShipIndex(string callsign)
+/// Return the player's ship index
+REGISTER_SCRIPT_FUNCTION(getPlayerShipIndex);
 
 static int getActivePlayerShips(lua_State* L)
 {
@@ -556,6 +608,8 @@ public:
 
     virtual void update(float delta) override
     {
+        ScenarioInfo info(script_name);
+        gameGlobalInfo->scenario = info.name;
         gameGlobalInfo->startScenario(script_name, settings);
         destroy();
     }
@@ -1001,4 +1055,24 @@ static int luaFromJSON(lua_State* L)
 /// table/value fromJSON(data)
 /// Returns a table/value converted from a json string
 REGISTER_SCRIPT_FUNCTION_NAMED(luaFromJSON, "fromJSON");
+static int sendMessageToCampaignServer(lua_State* L)
+{
+    if (campaign_client)
+    {
+        string value = luaL_checkstring(L, 1);
+        campaign_client->notifyCampaignServer("script_message", nlohmann::json {
+            {"script_message", value.c_str()},
+            {"filename", gameGlobalInfo->scenario_filename.c_str()},
+            {"name", gameGlobalInfo->scenario.c_str()},
+//            {"variation", gameGlobalInfo->variation.c_str()},
+        });
+        return 1;
+    }
+    return 0;
+}
+/// int sendMessageToCampaignServer(string message)
+/// Send a message to the campaign server, if a campaign server is configured
+/// Accepts one string as parameter.
+REGISTER_SCRIPT_FUNCTION(sendMessageToCampaignServer);
+
 #include "gameGlobalInfo.hpp"

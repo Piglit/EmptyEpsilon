@@ -9,8 +9,8 @@
 
 #include "screenComponents/rotatingModelView.h"
 
-DatabaseViewComponent::DatabaseViewComponent(GuiContainer* owner)
-: GuiElement(owner, "DATABASE_VIEW")
+DatabaseViewComponent::DatabaseViewComponent(GuiContainer* owner, bool displayItemList)
+: GuiElement(owner, "DATABASE_VIEW"), display_item_list(displayItemList)
 {
     item_list = new GuiListbox(this, "DATABASE_ITEM_LIST", [this](int index, string value) {
         P<ScienceDatabase> entry;
@@ -20,7 +20,10 @@ DatabaseViewComponent::DatabaseViewComponent(GuiContainer* owner)
         display();
     });
     setAttribute("layout", "horizontal");
-    item_list->setMargins(20, 20, 20, 120)->setSize(navigation_width, GuiElement::GuiSizeMax);
+    if (displayItemList)
+        item_list->setMargins(20, 20, 20, 120)->setSize(navigation_width, GuiElement::GuiSizeMax);
+    else
+        item_list->setSize(0,0)->hide();
     display();
 }
 

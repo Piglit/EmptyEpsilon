@@ -3060,13 +3060,18 @@ function ktlitanOrders()
 	if #stations == 0 then
 		return
 	end
+	local count = 0
 	station = stations[math.random(1,#stations)]
 	if fleet ~= nil and #fleet > 0 then
 		for _,ship in ipairs(fleet) do
 			if ship:isValid() then
 				ship:orderDefendTarget(station)
+				count = count + 1
 			end
 		end
+	end
+	if count > 1 then
+		sendMessageToCampaignServer(string.format("petgReport: detected %s Ktlitans on course to station %s in %s.", count, station:getCallSign(), station:getSectorName()))
 	end
 end
 function setKraylorDefensiveFleet()	

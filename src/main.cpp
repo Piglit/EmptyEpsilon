@@ -199,12 +199,12 @@ int main(int argc, char** argv)
     if (getenv("HOME"))
     {
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/");
-        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts/");
         PackResourceProvider::addPackResourcesForDirectory(string(getenv("HOME")) + "/.emptyepsilon/packs/");
     }
 #ifdef RESOURCE_BASE_DIR
     new DirectoryResourceProvider(RESOURCE_BASE_DIR "resources/");
     new DirectoryResourceProvider(RESOURCE_BASE_DIR "scripts/");
+    new DirectoryResourceProvider(RESOURCE_BASE_DIR "mod_spacelan/");
     PackResourceProvider::addPackResourcesForDirectory(RESOURCE_BASE_DIR "packs");
 #endif
     textureManager.setDefaultSmooth(true);

@@ -28,7 +28,7 @@ else()
     # - PROJECT_VERSION_MAJOR
     # - PROJECT_VERSION_MINOR
     # - PROJECT_VERSION_PATCH
-    string(TIMESTAMP MAJOR "2020")
+    string(TIMESTAMP MAJOR "2022")
     string(TIMESTAMP MINOR "10")
     string(TIMESTAMP PATCH "29")
 endif()

@@ -64,6 +64,9 @@ private:
     GuiToggleButton* topdown_button;
     GuiScrollText* station_info;
     string station_info_text;
+    GuiPanel* standard_crew_panel;
+    GuiPanel* limited_crew_panel;
+    GuiPanel* space_screens_panel;
 };
 
 class SecondMonitorScreen : public GuiCanvas, public Updatable

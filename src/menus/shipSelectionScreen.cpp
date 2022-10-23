@@ -6,8 +6,11 @@
 #include "soundManager.h"
 #include "random.h"
 #include "multiplayer_client.h"
+#include "io/network/address.h"
+#include "multiplayer_proxy.h"
 
 #include "serverCreationScreen.h"
+//#include "scenarioSelectionScreen.h"
 #include "epsilonServer.h"
 #include "main.h"
 #include "playerInfo.h"
@@ -17,6 +20,7 @@
 #include "screens/cinematicViewScreen.h"
 #include "screens/spectatorScreen.h"
 #include "screens/gm/gameMasterScreen.h"
+#include "menus/serverCreationScreen.h"
 
 #include "gui/gui2_panel.h"
 #include "gui/gui2_label.h"
@@ -389,8 +393,23 @@ ShipSelectionScreen::ShipSelectionScreen()
         // selection/server creation screen.
         (new GuiButton(left_container, "DISCONNECT", tr("Scenario selection"), [this]() {
             destroy();
-            new ServerScenarioSelectionScreen();
+//            if (PreferencesManager::get("alternative_server").toInt())
+//                new ScenarioSelectionScreen();
+//            else
+                new ServerScenarioSelectionScreen();
         }))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(300, 50);
+    }else if(game_proxy){
+        /*(new GuiButton(left_container, "DISCONNECT", tr("Back"), [this]() {
+            destroy();
+            soundManager->stopMusic();
+            if (game_client)
+                game_client->destroy();
+            if (gameGlobalInfo)
+                gameGlobalInfo->destroy();
+            if (my_player_info)
+                my_player_info->destroy();
+            returnToMainMenu(getRenderLayer());
+        }))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(300, 50);*/
     }else{
         // If this is a client, the "back" button disconnects from the server
         // and returns to the main menu.
@@ -413,6 +432,36 @@ ShipSelectionScreen::ShipSelectionScreen()
         crew_position_selection->spawnUI(getRenderLayer());
         destroy();
     });
+
+    // if we come from the proxy menu, our ship should already exist, so select it.
+    if (game_proxy && gameGlobalInfo)
+    {
+        int id = gameGlobalInfo->getPlayerShipIndexByName(PreferencesManager::get("shipname", ""));
+        if (id != -1)
+        {
+            P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(id);
+            if (ship->control_code.length() > 0)
+            {
+                if(ship->control_code.upper() == PreferencesManager::get("password", ""))
+                {
+                    my_player_info->commandSetShipId(ship->getMultiplayerId());
+                    my_player_info->player_ship_type = ship->player_ship_type;
+                    crew_position_selection_overlay->show();
+                }
+            }else{
+                my_player_info->commandSetShipId(ship->getMultiplayerId());
+                my_player_info->player_ship_type = ship->player_ship_type;
+                crew_position_selection_overlay->show();
+            }
+        } else {
+            // our ship does no longer exist. Return to spawn menu.
+            destroy();
+            string host_name = PreferencesManager::get("proxy_addr", "");
+            auto host = sp::io::network::Address(host_name);
+            int listenPort = PreferencesManager::get("proxy_listen_port", "0").toInt();
+            new ProxyJoinScreen(host, listenPort);
+        }
+    }
 }
 
 void ShipSelectionScreen::update(float delta)
@@ -525,7 +574,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
 
 
     // 3-4-crew panel
-    auto limited_crew_panel = new GuiPanel(left_container, "");
+    limited_crew_panel = new GuiPanel(left_container, "");
     limited_crew_panel->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);;
     (new GuiLabel(limited_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("4/3/1 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(limited_crew_panel, "");
@@ -534,8 +583,8 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
         create_crew_position_button(layout, n);
 
     // 3d views panel
-    auto space_screens_panel= new GuiPanel(center_container,"");
-    space_screens_panel->setSize(GuiElement::GuiSizeMax, 215)->setMargins(0, 0, 0, 25);
+    space_screens_panel= new GuiPanel(center_container,"");
+    space_screens_panel->setSize(GuiElement::GuiSizeMax, 215-50)->setMargins(0, 0, 0, 25);
     (new GuiLabel(space_screens_panel, "CREW_POSITION_SELECT_LABEL", tr("3D screens"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(space_screens_panel, "");
     layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
@@ -571,7 +620,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     topdown_button = new GuiToggleButton(layout, "TOP_DOWN_3D_BUTTON", tr("Top-down 3D view"), [this](bool value) {
         disableAllExcept(topdown_button);
     });
-    topdown_button->setSize(GuiElement::GuiSizeMax, 50);
+    topdown_button->setSize(GuiElement::GuiSizeMax, 50)->hide();
 
     if (on_cancel) {
         auto cancel_button = new GuiButton(this, "CANCEL", tr("button", "Cancel"), on_cancel);

@@ -1,8 +1,12 @@
 #ifndef SERVER_CREATION_SCREEN_H
 #define SERVER_CREATION_SCREEN_H
 
+#include <vector>
+
 #include "gui/gui2_canvas.h"
 #include "Updatable.h"
+#include "screenComponents/helpOverlay.h"
+#include "io/network/address.h"
 
 class GuiScrollText;
 class GuiSelector;
@@ -10,6 +14,7 @@ class GuiTextEntry;
 class GuiListbox;
 class GuiButton;
 class GuiLabel;
+class GuiHelpOverlay;
 
 
 class ServerSetupScreen : public GuiCanvas
@@ -48,6 +53,7 @@ private:
     GuiListbox* scenario_list;
     GuiScrollText* description_text;
     GuiButton* start_button;
+    GuiHelpOverlay* splash_briefing;
 };
 
 class ServerScenarioOptionsScreen : public GuiCanvas
@@ -61,4 +67,37 @@ private:
     std::unordered_map<string, GuiScrollText*> description_per_setting;
 };
 
+class ServerCampaignScreen: public GuiCanvas, Updatable
+{
+public:
+    ServerCampaignScreen();
+    virtual void update(float delta) override;
+
+private:
+    void loadCampaign();
+    void displayDetails(string caption, std::vector<std::pair<string, string> > details);
+    GuiElement* right;
+    GuiElement* layout;
+    GuiListbox* first_list;
+    GuiListbox* scenario_list;
+    GuiButton* start_button;
+    GuiHelpOverlay* splash_briefing;
+	GuiLabel* crew_text_label = nullptr;
+	GuiLabel* crew_amount_label = nullptr;
+    string crew_text;
+    string briefing_text;
+	std::map<string, string> score;
+};
+
+class ProxyJoinScreen: public GuiCanvas//, Updatable
+{
+private:
+    GuiSelector* ship_template_selector;
+    GuiSelector* ship_drive_selector;
+    GuiButton* ship_create_button;
+public:
+    ProxyJoinScreen(sp::io::network::Address host, int listenPort);
+    //virtual void update(float delta) override;
+    bool proxySpawn(string templ, string drive);
+};
 #endif//SERVER_CREATION_SCREEN_H

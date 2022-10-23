@@ -4,6 +4,7 @@
 #include <string.h>
 #include <i18n.h>
 #include <multiplayer_proxy.h>
+#include <campaign_client.h>
 #ifdef _MSC_VER
 #include <direct.h>
 #else
@@ -23,6 +24,7 @@
 #include "menus/mainMenus.h"
 #include "menus/autoConnectScreen.h"
 #include "menus/shipSelectionScreen.h"
+#include "menus/campaignMenu.h"
 #include "menus/optionsMenu.h"
 #include "menus/luaConsole.h"
 #include "factionInfo.h"
@@ -196,7 +198,7 @@ int main(int argc, char** argv)
     if (getenv("HOME"))
     {
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/");
-        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts/");
+        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts-piglit/");
         PackResourceProvider::addPackResourcesForDirectory(string(getenv("HOME")) + "/.emptyepsilon/packs/");
     }
 #ifdef RESOURCE_BASE_DIR
@@ -429,6 +431,18 @@ int main(int argc, char** argv)
         // Load the scenario and open the ship selection screen.
         gameGlobalInfo->startScenario(PreferencesManager::get("server_scenario"), loadScenarioSettingsFromPrefs());
         new ShipSelectionScreen();
+    }
+
+
+    if (PreferencesManager::get("campaign_server") != "")
+    {
+        auto parts = PreferencesManager::get("campaign_server").split(":");
+        string cs_host = parts[0];
+        int cs_port = 8888;
+        if (parts.size() > 1) cs_port = parts[1].toInt();
+		if (PreferencesManager::get("instance_name") == "" && PreferencesManager::get("shipname") != "")
+			PreferencesManager::set("instance_name", PreferencesManager::get("shipname"));
+        new CampaignClient(cs_host, cs_port, PreferencesManager::get("instance_name", "unknown"));
     }
 
     engine->runMainLoop();

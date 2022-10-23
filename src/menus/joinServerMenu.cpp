@@ -5,6 +5,7 @@
 #include "playerInfo.h"
 #include "preferenceManager.h"
 #include "gameGlobalInfo.h"
+#include "screens/missionControlScreen.h"
 #include "gui/gui2_label.h"
 #include "gui/gui2_panel.h"
 
@@ -93,7 +94,11 @@ void JoinServerScreen::update(float delta)
                     my_player_info = i;
             if (my_player_info && gameGlobalInfo)
             {
-                returnToShipSelection(getRenderLayer());
+                if (gameGlobalInfo->campaign_running) {
+                    new MissionControlScreen(getRenderLayer());
+                } else {
+                    returnToShipSelection(getRenderLayer());
+                }
                 destroy();
             }
         }

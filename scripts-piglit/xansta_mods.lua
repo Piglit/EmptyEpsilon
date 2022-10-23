@@ -598,8 +598,6 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 			--kraylor formation
 			formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
 			ship:setCommsScript(""):setCommsFunction(commsShip)
-		elseif enemyFaction == "Ktlitans" then
-			ship:setCommsScript(""):setCommsFunction(nil)	-- they do not communicate
 		elseif enemyFaction == "Exuari" then
 			ship:setCommsScript("comms_exuari.lua")
 			--TODO check if multiple onDamage/onDestruction are possible. If true, raise frenzy in combat, otherwise slowly lower

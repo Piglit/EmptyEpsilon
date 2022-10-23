@@ -56,7 +56,7 @@ def prepareForAlliesFirstShip(ship):
 	print("Ship is now fixed to Adder MK7. Clean up that code after ship spawned!")
 
 def grantSpecial(ship, special):
-	assert special in ["buy_stations", "buy_ships", "intimidate_stations", "intimidate_ships"]
+	assert special in ["buy_stations", "buy_ships", "intimidate_stations", "intimidate_ships", "petg"]
 	campaign = getCampaign()
 	code = campaign.getShipAdditionalCode(ship)
 	code += "\nship.special_"+special+" = true"
@@ -109,16 +109,14 @@ def startTimedEnemies():
 	scenario = getScriptStorage().scenario
 	scenario.makeFleetAggro("Kraylor")
 	scenario.makeFleetAggro("Exuari")
+	scenario.ktlitanOrders()
 	""")
 	roundTimer.setOnRound("""
 	scenario = getScriptStorage().scenario
 	scenario.spawnDefensiveFleet(300, "Kraylor")
 	scenario.spawnDefensiveFleet(300, "Exuari")
+	scenario.spawnDefensiveFleet(100, "Ktlitans")
 	""")
-
-def ktlitanPlotStep():
-	execLua("""getScriptStorage().scenario.ktlitanOrders()""")
-	execLua("""getScriptStorage().scenario.spawnDefensiveFleet(100, "Ktlitans")""")
 
 def setDifficulty(difficulty):
 	assert isinstance(difficulty, int)

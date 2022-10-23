@@ -178,9 +178,10 @@ async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: 
 		servers.setStatus(scenario_info.name + "\t"+prog, server_name)
 	elif scm.startswith("spyReport:"):
 		msg = scm.split(":", maxsplit=1)[1]
-		#TODO send to some message receiver
+		pyrohelper.connect_to_named("spysatReceiver").recv(msg)
 	elif scm.startswith("petgReport:"):
 		msg = scm.split(":", maxsplit=1)[1]
+		pyrohelper.connect_to_named("petgReceiver").recv(msg)
 
 class ScenarioResponse(BaseModel):
 	scenarios: List[str]

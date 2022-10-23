@@ -3071,7 +3071,7 @@ function ktlitanOrders()
 		end
 	end
 	if count > 1 then
-		sendMessageToCampaignServer(string.format("petgReport: detected %s Ktlitans on course to station %s in %s.", count, station:getCallSign(), station:getSectorName()))
+		sendMessageToCampaignServer(string.format("petgReport:PETG detected %s Ktlitans on course to station %s in %s.", count, station:getCallSign(), station:getSectorName()))
 	end
 end
 function setKraylorDefensiveFleet()	
@@ -4568,6 +4568,13 @@ function commsShip()
 			end
 		end
 	end	
+	if comms_target:getFaction() == "Ktlitans" then
+		if player.special_petg == true then
+			return friendlyComms(comms_data)
+		else
+			return false
+		end
+	end
 	if player:isFriendly(comms_target) then
 		return friendlyComms(comms_data)
 	end

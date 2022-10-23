@@ -4,6 +4,7 @@
 #include <string.h>
 #include <i18n.h>
 #include <multiplayer_proxy.h>
+#include <campaign_client.h>
 #ifdef _MSC_VER
 #include <direct.h>
 #else
@@ -23,6 +24,7 @@
 #include "menus/mainMenus.h"
 #include "menus/autoConnectScreen.h"
 #include "menus/shipSelectionScreen.h"
+#include "menus/campaignMenu.h"
 #include "menus/optionsMenu.h"
 #include "factionInfo.h"
 #include "gameGlobalInfo.h"
@@ -186,12 +188,12 @@ int main(int argc, char** argv)
     }
 
     new DirectoryResourceProvider("resources/");
-    new DirectoryResourceProvider("scripts/");
+    new DirectoryResourceProvider("scripts-piglit/");
     PackResourceProvider::addPackResourcesForDirectory("packs/");
     if (getenv("HOME"))
     {
         new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/resources/");
-        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts/");
+        new DirectoryResourceProvider(string(getenv("HOME")) + "/.emptyepsilon/scripts-piglit/");
         PackResourceProvider::addPackResourcesForDirectory(string(getenv("HOME")) + "/.emptyepsilon/packs/");
     }
 #ifdef RESOURCE_BASE_DIR
@@ -396,6 +398,16 @@ int main(int argc, char** argv)
         new ShipSelectionScreen();
     }
 
+
+    if (PreferencesManager::get("campaign_server") != "")
+    {
+        auto parts = PreferencesManager::get("campaign_server").split(":");
+        string cs_host = parts[0];
+        int cs_port = 8888;
+        if (parts.size() > 1) cs_port = parts[1].toInt();
+        new CampaignClient(cs_host, cs_port);
+    }
+
     engine->runMainLoop();
 
     // Set FSAA and fullscreen defaults from windowManager.
@@ -462,6 +474,10 @@ void returnToMainMenu(RenderLayer* render_layer)
     else if (PreferencesManager::get("tutorial").toInt())
     {
         new TutorialGame(true);
+    }
+    else if (PreferencesManager::get("campaign_server") != "")
+    {
+        new CampaignMenu();
     }else{
         new MainMenu();
     }

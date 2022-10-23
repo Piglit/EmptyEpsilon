@@ -30,13 +30,16 @@ public:
     std::vector<string> categories;
     string author;
     std::vector<Setting> settings;
+    string proxy;
 
     ScenarioInfo(string filename);
     bool hasCategory(const string& category) const;
+    void filterSettings(const std::map<string, std::vector<string> >& filter);
 
     static std::vector<string> getCategories();
     static const std::vector<ScenarioInfo>& getScenarios();
     static std::vector<ScenarioInfo> getScenarios(const string& category);
+
 private:
     void addKeyValue(string key, string value);
     bool addSettingOption(string key, string option, string description);

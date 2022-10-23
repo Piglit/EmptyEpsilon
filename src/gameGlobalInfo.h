@@ -69,6 +69,8 @@ public:
     float elapsed_time;
     string scenario;
     std::unordered_map<string, string> scenario_settings;
+    string scenario_filename;
+    bool campaign_running;
 
     //List of script functions that can be called from the GM interface (Server only!)
     std::list<GMScriptCallback> gm_callback_functions;
@@ -88,6 +90,7 @@ public:
     P<PlayerSpaceship> getPlayerShip(int index);
     void setPlayerShip(int index, P<PlayerSpaceship> ship);
 
+    int getPlayerShipIndexByName(string callsign);
     int findPlayerShip(P<PlayerSpaceship> ship);
     int insertPlayerShip(P<PlayerSpaceship> ship);
     /*!

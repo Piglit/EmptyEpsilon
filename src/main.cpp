@@ -395,7 +395,7 @@ int main(int argc, char** argv)
     {
         auto parts = PreferencesManager::get("campaign_server").split(":");
         string cs_host = parts[0];
-        int cs_port = 0;
+        int cs_port = 8888;
         if (parts.size() > 1) cs_port = parts[1].toInt();
         new CampaignClient(cs_host, cs_port);
     }

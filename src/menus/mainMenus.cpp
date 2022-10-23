@@ -11,6 +11,7 @@
 #include "menus/optionsMenu.h"
 #include "menus/tutorialMenu.h"
 #include "menus/serverBrowseMenu.h"
+#include "menus/campaignMenu.h"
 #include "screens/gm/gameMasterScreen.h"
 #include "screenComponents/rotatingModelView.h"
 
@@ -69,7 +70,7 @@ MainMenu::MainMenu()
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
     (new GuiImage(this, "LOGO", "logo_full.png"))->setPosition(0, title_y, sp::Alignment::TopCenter)->setSize(logo_size_x, logo_size_y);
-    (new GuiLabel(this, "VERSION", tr("Credits", "Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size, sp::Alignment::TopCenter)->setSize(0, 20);
+    (new GuiLabel(this, "VERSION", tr("Credits", "Space LAN Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size, sp::Alignment::TopCenter)->setSize(0, 20);
 
     (new GuiLabel(this, "", tr("mainMenu", "Your name:"), 30))->setAlignment(sp::Alignment::CenterLeft)->setPosition({50, -400}, sp::Alignment::BottomLeft)->setSize(300, 50);
     (new GuiTextEntry(this, "USERNAME", PreferencesManager::get("username")))->callback([](string text) {
@@ -99,6 +100,13 @@ MainMenu::MainMenu()
         new TutorialMenu();
         destroy();
     }))->setPosition({370, -50}, sp::Alignment::BottomLeft)->setSize(300, 50);
+
+    if (PreferencesManager::get("campaign_server") != "") {
+        (new GuiButton(this, "", "Join Campaign", [this]() {
+            new CampaignMenu();
+            destroy();
+        }))->setPosition({370, -230}, sp::Alignment::BottomLeft)->setSize(300, 50);
+    }
 
     float y = 100;
     (new GuiLabel(this, "CREDITS", tr("Credits", "Credits"), 25))->setAlignment(sp::Alignment::CenterRight)->setPosition(-50, y, sp::Alignment::TopRight)->setSize(0, 25); y += 25;

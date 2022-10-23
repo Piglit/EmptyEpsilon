@@ -1,9 +1,16 @@
 #include <i18n.h>
 #include "preferenceManager.h"
 #include "serverCreationScreen.h"
+#include "campaignMenu.h"
 #include "shipSelectionScreen.h"
 #include "gameGlobalInfo.h"
 #include "epsilonServer.h"
+<<<<<<< HEAD
+=======
+#include "multiplayer_proxy.h"
+#include "multiplayer_client.h"
+#include "gui/scriptError.h"
+>>>>>>> ab832d8d (Campaign Client and mission control 2022)
 #include "gui/gui2_overlay.h"
 #include "gui/gui2_label.h"
 #include "gui/gui2_togglebutton.h"
@@ -14,6 +21,10 @@
 #include "gui/gui2_scrolltext.h"
 #include "scenarioInfo.h"
 #include "main.h"
+#include "campaign_client.h"
+#include "screens/missionControlScreen.h"
+#include "serverBrowseMenu.h"
+#include "joinServerMenu.h"
 
 
 ServerSetupScreen::ServerSetupScreen()
@@ -33,7 +44,7 @@ ServerSetupScreen::ServerSetupScreen()
     GuiElement* row = new GuiElement(main_panel, "");
     row->setSize(GuiElement::GuiSizeMax, 50)->setAttribute("layout", "horizontal");
     (new GuiLabel(row, "NAME_LABEL", tr("Server name: "), 30))->setAlignment(sp::Alignment::CenterRight)->setSize(250, GuiElement::GuiSizeMax);
-    server_name = new GuiTextEntry(row, "SERVER_NAME", "server");
+    server_name = new GuiTextEntry(row, "SERVER_NAME", PreferencesManager::get("headless_name", "server"));
     server_name->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
     // Server password row.
@@ -181,18 +192,26 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
     GuiElement* container = new GuiElement(this, "");
     container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
 
-    GuiElement* left = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
-    left->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    if (gameGlobalInfo->campaign_running) {}
+    else {
+        GuiElement* left = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
+        left->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+        (new GuiLabel(left, "GENERAL_LABEL", tr("Category"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+        category_list = new GuiListbox(left, "SCENARIO_CATEGORY", [this](int index, string value) {
+            loadScenarioList(value);
+        });
+        category_list->setSize(GuiElement::GuiSizeMax, 700);
+        for(const auto& category : ScenarioInfo::getCategories())
+            category_list->addEntry(category, category);
+    }
+
     GuiElement* middle = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
     middle->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     GuiElement* right = new GuiElement((new GuiElement(container, ""))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax), "");
     right->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(400, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
-    (new GuiLabel(left, "GENERAL_LABEL", tr("Category"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-    category_list = new GuiListbox(left, "SCENARIO_CATEGORY", [this](int index, string value) {
-        loadScenarioList(value);
-    });
-    category_list->setSize(GuiElement::GuiSizeMax, 700);
+    if (gameGlobalInfo->campaign_running) {
+        right->setSize(600, GuiElement::GuiSizeMax);
+    }
 
     (new GuiLabel(middle, "GENERAL_LABEL", tr("Scenario"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     scenario_list = new GuiListbox(middle, "SCENARIO_LIST", [this](int index, string value)
@@ -200,21 +219,28 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
         ScenarioInfo info(value);
         description_text->setText(info.description);
         start_button->enable();
+        if ((info.proxy != "") && (gameGlobalInfo->campaign_running)) {
+            start_button->setText(tr("Join scenario"));
+        } else {
+            start_button->setText(tr("Start scenario"));
+        }
     });
     scenario_list->setSize(GuiElement::GuiSizeMax, 700);
     (new GuiLabel(right, "GENERAL_LABEL", tr("Description"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     description_text = new GuiScrollText(right, "SCENARIO_DESCRIPTION", tr("Select a scenario..."));
     description_text->setSize(GuiElement::GuiSizeMax, 700);
 
-    for(const auto& category : ScenarioInfo::getCategories())
-        category_list->addEntry(category, category);
 
     //======== Bottom buttons
     // Close server button.
     (new GuiButton(this, "CLOSE_SERVER", tr("Close"), [this]() {
         destroy();
         disconnectFromServer();
-        new ServerSetupScreen();
+        if (campaign_client) {
+            new CampaignMenu();
+        } else {
+            new ServerSetupScreen();
+        }
     }))->setPosition(-250, -50, sp::Alignment::BottomCenter)->setSize(300, 50);
 
     // Start server button.
@@ -232,7 +258,35 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
 
             // Destroy this screen and move on to ship selection.
             destroy();
-            returnToShipSelection(getRenderLayer());
+            if (gameGlobalInfo->campaign_running) {
+                new MissionControlScreen(getRenderLayer());
+            } else {
+                returnToShipSelection(getRenderLayer());
+            }
+            new ScriptErrorRenderer(mouseLayer);
+        }
+        else if ((info.proxy != "") && (gameGlobalInfo->campaign_running))
+        {
+            string host_name = info.proxy;
+            auto host = sp::io::network::Address(host_name);
+            PreferencesManager::set("proxy_addr", host.getHumanReadable()[0]);
+            int port = defaultServerPort;
+            string password = "";
+            int listenPort = game_server->getPort();
+            string proxyName = PreferencesManager::get("shipname", "");
+
+            disconnectFromServer();
+            new GameServerProxy(host, port, password, listenPort, proxyName);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
+            if (campaign_client)
+            {
+                campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
+                    {"filename", info.filename.c_str()},
+                    {"name", info.name.c_str()},
+                });
+            }
+            destroy();
         }
         else
         {
@@ -242,15 +296,23 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50)->disable();
 
+    if (gameGlobalInfo->campaign_running)
+        loadScenarioListFromCampaignServer();
     // Select the previously selected scenario.
     for(const auto& info : ScenarioInfo::getScenarios()) {
         if (info.name == gameGlobalInfo->scenario) {
-            for(int n=0; n<category_list->entryCount(); n++) {
-                if (info.hasCategory(category_list->getEntryValue(n))) {
-                    category_list->setSelectionIndex(n);
-                    category_list->scrollTo(n);
-                    loadScenarioList(category_list->getEntryValue(n));
-                    break;
+            if (gameGlobalInfo->campaign_running) {
+                loadScenarioListFromCampaignServer();
+            }
+            else
+            {
+                for(int n=0; n<category_list->entryCount(); n++) {
+                    if (info.hasCategory(category_list->getEntryValue(n))) {
+                        category_list->setSelectionIndex(n);
+                        category_list->scrollTo(n);
+                        loadScenarioList(category_list->getEntryValue(n));
+                        break;
+                    }
                 }
             }
             for(int n=0; n<scenario_list->entryCount(); n++) {
@@ -280,10 +342,26 @@ void ServerScenarioSelectionScreen::loadScenarioList(const string& category)
     description_text->setText(tr("Select a scenario..."));
 }
 
+void ServerScenarioSelectionScreen::loadScenarioListFromCampaignServer()
+{
+    scenario_list->setSelectionIndex(-1);
+    scenario_list->setOptions({});
+    for (string filename: campaign_client->getScenarios())
+    {
+        ScenarioInfo info(filename);
+        scenario_list->addEntry(info.name, info.filename);
+    }
+    start_button->disable();
+    description_text->setText(tr("Select a scenario..."));
+}
+
 ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
 {
     ScenarioInfo info(filename);
     scenario_settings = {};
+    if (gameGlobalInfo->campaign_running) {
+        info.filterSettings(campaign_client->getScenarioSettings(filename));
+    }
 
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
@@ -341,7 +419,13 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
 
         // Destroy this screen and move on to ship selection.
         destroy();
-        returnToShipSelection(getRenderLayer());
+
+        if (gameGlobalInfo->campaign_running) {
+            new MissionControlScreen(getRenderLayer());
+        } else {
+            returnToShipSelection(getRenderLayer());
+        }
+        new ScriptErrorRenderer(mouseLayer);
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50);
     start_button->setEnable(scenario_settings.size() >= info.settings.size());

@@ -75,7 +75,7 @@ scenarioInfos = {
 	"50_gaps":				{},
 
 	# Missions - unlock for specific Crews
-	"08_atlantis":			{"@start": [P(S.unlockScenario, "00_basic"), P(S.unlockShip, "Atlantis")]},
+	"08_atlantis":			{"@start": P(S.unlockScenario, "03_waves")},
 	"05_beacon":			{"@start": P(S.unlockScenario, "03_waves")},
 	"06_edgeofspace":		{"@start": P(S.unlockScenario, "03_waves")},
 	"07_gftp":				{"@start": P(S.unlockScenario, "03_waves")},
@@ -89,7 +89,7 @@ scenarioInfos = {
 	"55_defenderHunter":	{},
 	"57_shoreline":			{},
 	"59_border":			{},
-	"49_allies":			{"@spawn": "P(spawn, posx=100000, posy=0, dir=270)"},
+	"49_allies":			{},
 
 #	"06_battlefield":		{},
 #	"48_visitors":			{},

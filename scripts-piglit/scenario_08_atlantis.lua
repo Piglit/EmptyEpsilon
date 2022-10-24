@@ -317,7 +317,7 @@ Good, your communication systems seems to be working.
 
 As you well know, you are aboard the newest version of the Atlantis space explorer. We will take you through a few quick tests to see if the ship is operating as expected.
 
-First, have your engineer power up all systems to 100%, as you are currently in powered down mode.]]), player:getCallSign())
+First, have your engineer power up all systems to 100%%, as you are currently in powered down mode.]]), player:getCallSign())
         )
         mission_state = phase1WaitForPowerup
     end

@@ -233,7 +233,7 @@ The E.O.S. scope is on the border of Kraylor space, so maintain contact and keep
 Dock with the E.O.S. scope and investigate the damage. Transmitting your report via standard communications channels is too dangerous given the already delicate nature of our treaty with the Kraylor, so return to Central Command to report your findings.
 
 Reopen communications if you have any questions.]])
-    ), Player:getCallSign())
+    , Player:getCallSign()))
 
     Central_Command.mission_state = 1
     kraylor_threat = 0
@@ -248,7 +248,7 @@ end
 
 function goto_war_early()
     --start end game not; bno upgrades for the player.
-    Central_Command:sendCommsMessage(Player, string.format(_([[%s, you've incited a war! What a disaster... ]])), Player:getCallSign())
+    Central_Command:sendCommsMessage(Player, string.format(_([[%s, you've incited a war! What a disaster... ]]), Player:getCallSign()))
     kraylor_g1:orderRoaming()
     kraylor_g2:orderRoaming()
     kraylor_g3:orderRoaming()
@@ -543,7 +543,7 @@ That means you, %s!]]), Player:getCallSign(),Player:getCallSign())
                         string.format(_("human-incCall", [[%s, HM1 here.
 
 Central Command has no choice but to declare war. We're moving into Kraylor territory for our retaliatory strike. Attack the Kraylor Endline station!]])
-                    ),Player:getCallSign())
+                    ,Player:getCallSign()))
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -564,7 +564,7 @@ Central Command has no choice but to declare war. We're moving into Kraylor terr
                         string.format(_("centralcommand-incCall", [[%s, come in.
 
 We have no choice but to declare war. Move into Kraylor territory and retaliate on their defenseless Endline station!]])
-                    ), Player:getCallSign())
+                    , Player:getCallSign()))
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -589,7 +589,7 @@ We have no choice but to declare war. Move into Kraylor territory and retaliate 
 Our cease-fire with the Kraylor is at a bitter end, and aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-                    ), Player:getCallSign())
+                    , Player:getCallSign()))
 
                     Human_m1:orderDefendLocation(31875, 38653)
                     Human_m2:orderDefendLocation(37493, 37185)
@@ -626,7 +626,7 @@ Human scum, we warned you to stay out of Kraylor territory!]])
                             string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylor ships threatening our E.O.S. territory!]])
-                        ), Player:getCallSign())
+                        , Player:getCallSign()))
 
                         kraylor_m1:orderRoaming()
                         kraylor_m2:orderRoaming()
@@ -656,7 +656,7 @@ Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylo
 Our cease-fire with the Kraylor is at a bitter end, and aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-                ), Player:getCallSign())
+                , Player:getCallSign()))
 
                 Human_m1:orderDefendLocation(31875, 38653)
                 Human_m2:orderDefendLocation(37493, 37185)
@@ -692,7 +692,7 @@ Human scum, we warned you to stay out of Kraylor territory!]])
                         string.format(_("centralcommand-incCall", [[%s, come in.
 
 Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylor ships threatening our E.O.S. territory!]])
-                    ), Player:getCallSign())
+                    , Player:getCallSign()))
 
                     kraylor_m1:orderRoaming()
                     kraylor_m2:orderRoaming()
@@ -724,7 +724,7 @@ Our cease-fire with the Kraylor is at a bitter end. Destroy the remaining Kraylo
 Kraylor aggression will only rise from here. It is imperative that our ships be equipped with all counter-measures necessary to keep them safe.
 
 Dock with the E.O.S. scope. We are re-fitting your ship in preparation for wartime.]])
-            ), Player:getCallSign())
+            , Player:getCallSign()))
 
             Human_m1:orderDefendLocation(31875, 38653)
             Human_m2:orderDefendLocation(37493, 37185)
@@ -778,7 +778,7 @@ When your ship is finished being outfitted for war, move up to the nebula, but b
                 string.format(_("centralcommand-incCall", [[%s, come in!
 
 Reports are coming in from core human space that a massive Kraylor strike force is attacking! Get through that wormhole and attack from within their ranks to hold them off. We'll send all our available ships to converge there.]])
-            ), Player:getCallSign())
+            , Player:getCallSign()))
 
             --Let's get crazy up in here
             k01 = createKraylorGunship():setCallSign("BR21"):setPosition(-50654, 32238):orderRoaming()
@@ -827,6 +827,8 @@ Reports are coming in from core human space that a massive Kraylor strike force 
             victory("Human Navy")
         end
     end
+    progress = Central_Command.mission_state / 12 
+    sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress*100))
 end
 
 function commsCentralCommandStation()

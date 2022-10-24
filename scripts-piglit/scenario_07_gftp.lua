@@ -798,6 +798,8 @@ Escort our recovery team to infiltrate and extract information from the Swarm Co
         globalMessage(_("msgMainscreen", "The Swarm Command is down! With the information extracted, the Navy is aware of the physical location of the rogue AI and can track it down. Congratulations!"))
         victory("Human Navy")
     end
+	progress = main_mission / 14
+	sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress*100))
 end
 
 -- Spawn and return a hacker transport

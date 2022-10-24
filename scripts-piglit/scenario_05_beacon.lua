@@ -74,9 +74,10 @@ function init()
 We lost contact with one of our transports, callsign RT-4, transporting the diplomat named J.J. Johnson. They were heading from our research station to Orion-5.
 
 Our last contact with RT-4 was before it entered the nebula at sector G5. The nebula is blocking our long-range scans, so we're asking you to investigate and recover RT-4 if possible.]])
-    ), player:getCallSign())
+    , player:getCallSign()))
     -- Set the initial mission state
     mission_state = missionStartState
+    sendMessageToCampaignServer("setProgress: 0%")
 end
 
 function missionStartState(delta)
@@ -178,6 +179,7 @@ To ensure Refugee-X is aware of your peaceful intentions, we have stripped you o
         player:setWeaponStorageMax("EMP", 0)
 
         mission_state = missionRetrieveCriminals
+        sendMessageToCampaignServer("setProgress: 30%")
     end
 end
 function missionRT4Died(delta)
@@ -222,6 +224,7 @@ function missionWaitForAmbush(delta)
 
 Your translator has difficulty translating the message, but it seems to come down to the fact that they want you dead and that your death will bring them great fun.]])
         )
+        sendMessageToCampaignServer("setProgress: 50%")
     end
 end
 
@@ -393,6 +396,7 @@ Lead the assault on the Exuari base in sector E2. Expect heavy resistance.]])
         CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
         CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(player)
         mission_state = nil
+        sendMessageToCampaignServer("setProgress:80%")
     end
 end
 

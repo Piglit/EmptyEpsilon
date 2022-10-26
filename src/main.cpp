@@ -371,7 +371,7 @@ int main(int argc, char** argv)
         {
             if (used_model_data.find(name) == used_model_data.end())
             {
-                LOG(INFO) << "Model data: " << name << " is not used by any ship template";
+                LOG(DEBUG) << "Model data: " << name << " is not used by any ship template";
             }
         }
     }

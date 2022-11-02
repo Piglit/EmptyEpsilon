@@ -3,7 +3,7 @@
 --template:setModel("MultiGunCorvetteBlue")
 --template:setDescription([[This is a modified Phobos Cruiser which is the workhorse of the human navy. Its basic stats aren't impressive, and it has less power then the normal Cruisers used hy the human navy. But it can be retro-fitted and made war-ready in a breeze. However the Beam Weapons are optimised for close range repair or salvage operations and about twice as powerful as the unmodified Phobos' variation.
 --]])
---template:setRadarTrace("radar_cruiser.png")
+--template:setRadarTrace("cruiser.png")
 --template:setBeamWeapon(0, 90, -15, 1000, 6, 10)
 --template:setBeamWeapon(1, 90,  15, 1000, 6, 10)
 --template:setTubes(1, 10.0)
@@ -52,7 +52,7 @@
 --[[Corvette Melonidas--]]
 --template = ShipTemplate():setName("Melonidas"):setClass("Corvette", "Destroyer"):setModel("AtlasDreadnoughtGreen"):setType("playership")
 --template:setDescription([[The Melonidas is the smallest model of destroyer, and its combination of frigate-like size and corvette-like power makes it an excellent escort ship when defending larger ships against multiple smaller enemies. Because the Melonidas is fitted with a jump drive, it can also serve as an intersystem patrol craft.]])
---template:setRadarTrace("radar_melon.png")
+--template:setRadarTrace("melon.png")
 --template:setJumpDrive(true)
 --template:setShields(200, 200)
 --template:setHull(250)
@@ -119,7 +119,7 @@
 --[[ Station/Transport--]]
 -- The battle station is a huge ship with many defensive features. It can be docked by smaller ships.
 template = ShipTemplate():setName("Citadel"):setModel("Ender Battlecruiser"):setClass("Exuari","Carrier")
-template:setRadarTrace("radar_battleship.png")
+template:setRadarTrace("battleship.png")
 template:setDescription("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier.")
 --                  Arc, Dir, Range, CycleTime, Dmg
 template:setBeam(0,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)

@@ -966,6 +966,9 @@ void PlayerSpaceship::applyTemplateValues()
     can_combat_maneuver = ship_template->can_combat_maneuver;
     can_self_destruct = ship_template->can_self_destruct;
     can_launch_probe = ship_template->can_launch_probe;
+    auto_repair_enabled = ship_template->auto_repair_enabled;
+    auto_coolant_enabled = ship_template->auto_coolant_enabled;
+    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
     if (!on_new_player_ship_called)
     {
         on_new_player_ship_called = true;

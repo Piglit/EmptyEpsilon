@@ -307,6 +307,9 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, copy);
     /// Sets auto missile reload
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoCoolant);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoRepair);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
 }
 
 std::unordered_map<string, P<ShipTemplate> > ShipTemplate::templateMap;

@@ -122,6 +122,10 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setCanCombatManeuver);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setCanSelfDestruct);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setCanLaunchProbe);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoCoolant);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoRepair);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setSpawnShips);
     /// Return a new template with the given name, which is an exact copy of this template.
     /// Used to make easy variations of templates.
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, copy);

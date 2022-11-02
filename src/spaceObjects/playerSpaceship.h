@@ -298,6 +298,7 @@ public:
     void setMaxCoolant(float coolant);
     float getMaxCoolant() { return max_coolant; }
     void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
+    void setAutoRepair(bool active) { auto_repair_enabled = active; }
     void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
     int getRepairCrewCount();
     void setRepairCrewCount(int amount);

@@ -354,6 +354,10 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Control codes are case-insensitive.
     /// Example: player:setControlCode("abcde") -- matches "abcde", "ABCDE", "aBcDe"
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
+    /// repair crews to automatically move to damaged subsystems.
+    /// Use this on ships to require less player interaction, especially
+    /// when combined with setAutoCoolant/auto_coolant_enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoRepair);
     /// Sets weapon_tube automatic weapon tube reload is enabled.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
     /// Defines a function to call when this PlayerSpaceship launches a probe.
@@ -2271,7 +2275,7 @@ string PlayerSpaceship::getExportLine()
     if (auto_coolant_enabled)
         result += ":setAutoCoolant(true)";
     if (auto_repair_enabled)
-        result += ":commandSetAutoRepair(true)";
+        result += ":setAutoRepair(true)";
     if (auto_reload_tube_enabled)
         result += ":setAutoMissileReload(true)";
 

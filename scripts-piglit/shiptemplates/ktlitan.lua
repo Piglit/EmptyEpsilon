@@ -193,7 +193,7 @@ template:setTubes(2, 15.0) -- Amount of torpedo tubes
 template:setWeaponStorage("Nuke", 5)
 template:setWeaponStorage("EMP", 5)
 template:setWeaponStorage("Homing", 5)
-template:setSpeed(500, 10, 20)	-- default values
+template:setSpeed(2, 10, 20)	-- default values
 
 variation = template:copy("Diva"):setLocaleName(_("ship", "Diva"))
 variation:setSpeed(35, 8, 5)
@@ -201,21 +201,20 @@ variation:setTubeDirection(1, 180)
 variation:setDescription(_(descr .. "The Diva is a mobile version of the Ktlitan Queen with one tube pointed to the rear"))
 
 variation = template:copy("Tsarina"):setLocaleName(_("ship", "Tsarina"))
-variation:setBeam()
 variation:setBeamWeapon(0, 90, -15, 1000.0, 6.0, 10)
 variation:setBeamWeapon(1, 90, -45, 1000.0, 6.0, 10)
 variation:setBeamWeapon(3, 90, 15, 1000.0, 6.0, 10)
-variation:setBeamWeapon(4, 90, 45, 1000.0, 6.0, 10:
+variation:setBeamWeapon(4, 90, 45, 1000.0, 6.0, 10)
 variation:setTubeSize(0, "small")
 variation:setTubeSize(1, "small")
 variation:setWeaponStorage("Nuke", 0)
 variation:setWeaponStorage("EMP", 0)
 variation:setWeaponStorage("Homing", 0)
 variation:setWeaponStorage("HVLI", 100)
-variation:setHull(600:
+variation:setHull(600)
 variation:setShields(100, 100, 100)
-variation:setAI("fighter")
+variation:setDefaultAI("fighter")
 variation:setDescription(_(descr .. "Undiscovered type of Ktlitan warship", "Ktlitan Tsarina is a subtype of Ktlitan Queen. It's twice as agile and durable.  " .. "It focuses on using beams and dumbfire weapons. "))
-variation:setSpeed(500, 20, 20)
+variation:setSpeed(50, 20, 20)
 
 

@@ -55,7 +55,7 @@ function init()
     gu = 7500   -- grid unit for enemy spawns
 
     --player ship
-    player = createPlayerShip():setCallSign("Rookie 1"):setPosition(gu/6, -gu/6):setHeading(90)
+    player = createPlayerShip():setPosition(gu/6, -gu/6):setHeading(90)
     player:setLongRangeRadarRange(30000)
     player:addReputationPoints(240.0)
 

@@ -18,7 +18,7 @@ for cnt=1,5 do
     template:setHull(100)
     template:setShields(50, 50)
     template:setSpeed(60 - 5 * cnt, 6, 10)
-    template:setRadarTrace("radar_transport.png")
+    template:setRadarTrace("transport.png")
     
     if cnt > 2 then
         variation = template:copy("Personnel Jump Freighter " .. cnt)
@@ -30,7 +30,7 @@ for cnt=1,5 do
     template:setHull(100)
     template:setShields(50, 50)
     template:setSpeed(60 - 5 * cnt, 6, 10)
-    template:setRadarTrace("radar_transport.png")
+    template:setRadarTrace("transport.png")
     
     if cnt > 2 then
         variation = template:copy("Goods Jump Freighter " .. cnt)
@@ -42,7 +42,7 @@ for cnt=1,5 do
     template:setHull(100)
     template:setShields(50, 50)
     template:setSpeed(60 - 5 * cnt, 6, 10)
-    template:setRadarTrace("radar_transport.png")
+    template:setRadarTrace("transport.png")
     
     if cnt > 2 then
         variation = template:copy("Garbage Jump Freighter " .. cnt)
@@ -54,7 +54,7 @@ for cnt=1,5 do
     template:setHull(100)
     template:setShields(50, 50)
     template:setSpeed(60 - 5 * cnt, 6, 10)
-    template:setRadarTrace("radar_transport.png")
+    template:setRadarTrace("transport.png")
     
     if cnt > 2 then
         variation = template:copy("Equipment Jump Freighter " .. cnt)
@@ -66,7 +66,7 @@ for cnt=1,5 do
     template:setHull(100)
     template:setShields(50, 50)
     template:setSpeed(60 - 5 * cnt, 6, 10)
-    template:setRadarTrace("radar_transport.png")
+    template:setRadarTrace("transport.png")
     
     if cnt > 2 then
         variation = template:copy("Fuel Jump Freighter " .. cnt)

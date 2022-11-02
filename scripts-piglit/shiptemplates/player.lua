@@ -11,7 +11,7 @@ color_player = "White" --change it if you want another style
 
 template = ShipTemplate():setName("MP52 Hornet"):setClass("Starfighter", "Interceptor"):setType("playership")
 template:setModel("WespeFighter"..color_player)
-template:setRadarTrace("radar_fighter.png")
+template:setRadarTrace("fighter.png")
 template:setDescription([[The Hornet is a basic interceptor found in many corners of the galaxy. 
 The MP52 Hornet is a significantly upgraded version of MU52 Hornet, with nearly twice the hull strength, nearly three times the shielding, better acceleration, impulse boosters, and a second laser cannon. Combat maneuver systems are included.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
@@ -40,7 +40,7 @@ addSystemsWespe(template)
 
 template = ShipTemplate():setName("ZX-Lindworm"):setClass("Starfighter", "Bomber"):setType("playership")
 template:setModel("LindwurmFighter"..color_player)
-template:setRadarTrace("radar_fighter.png")
+template:setRadarTrace("fighter.png")
 template:setDescription([[The WX-Lindworm, or "Worm" as it's often called, is a bomber-class starfighter. While one of the least-shielded starfighters in active duty, the Worm's two launchers can pack quite a punch. Its goal is to fly in, destroy its target, and fly out or be destroyed. The engine can be overloaded to cause a massive explotion - however this destroys the bomber, too.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
@@ -76,7 +76,7 @@ addSystemsLindwurm(template)
 --[[Scout--]]
 template = ShipTemplate():setName("Adder MK7"):setClass("Starfighter", "Scout"):setType("playership")
 template:setModel("AdlerLongRangeScout"..color_player)
-template:setRadarTrace("radar_cruiser.png")
+template:setRadarTrace("cruiser.png")
 template:setDescription([[The Adder mark 7 is a superior scout with scanning and hacking capabilities.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
@@ -111,7 +111,7 @@ template:setModel("MultiGunCorvette"..color_player)
 template:setDescription([[The Phobos is the workhorse of the human navy. It's extremely easy to modify, which makes retro-fitting this ship a breeze. Its basic stats aren't impressive, but due to its modular nature, it's fairly easy to produce in large quantities.
 
 This prototype variant of the Phobos M3 military light cruiser is outfitted like a battlecruiser. Not as strong as the atlantis, but has a mine-laying tube and two front firing missile tubes, making it an easier to use ship in some missions.]])
-template:setRadarTrace("radar_cruiser.png")
+template:setRadarTrace("cruiser.png")
 template:setBeamWeapon(0, 90, -15, 1200, 8, 6)
 template:setBeamWeapon(1, 90,  15, 1200, 8, 6)
 template:setTubes(3, 10.0)
@@ -136,7 +136,7 @@ addSystemsMulitGun(template)
 template = ShipTemplate():setName("Hathcock"):setLocaleName(_("playerShip", "Hathcock")):setClass(_("class", "Frigate"), _("subclass", "Torpedoboat Destroyer")):setType("playership") 
 template:setModel("LaserCorvette"..color_player)
 template:setDescription("The Hathcock Torpedoboat Destroyer is a light escort vessel for larger Battleships. It is fast enough to outmaneuver missiles and armed with a quick-firing beam array.")
-template:setRadarTrace("radar_laser.png")
+template:setRadarTrace("laser.png")
 --						Arc, Dir, Range, CycleTime, Dmg
 template:setBeamWeapon(0, 4,   0, 1400.0, 6.0, 4)
 template:setBeamWeapon(1,20,   0, 1200.0, 6.0, 4)
@@ -165,7 +165,7 @@ template:setModel("HeavyCorvette"..color_player)
 template:setDescription([[The Piranha is a light artillery cruiser, designed to fire from broadside weapon tubes. It comes to use as a escort or defensive spacecraft, since it can quickly react to ambushes. However since it comes without beam weapons, it has proven to be useless against starfighters.
 
 This combat-specialized Piranha M5P adds nukes, mine-laying tubes, combat maneuvering systems, and a jump drive.]])
-template:setRadarTrace("radar_missile_cruiser_thin.png")
+template:setRadarTrace("missile_cruiser_thin.png")
 template:setTubes(6, 10.0)
 template:setWeaponStorage("HVLI", 20)
 template:setWeaponStorage("Homing", 12)
@@ -191,7 +191,7 @@ addSystemsHeavy(template)
 --[[Player Transport--]]
 template = ShipTemplate():setName("Flavia P.Falcon"):setClass("Frigate", "Light transport"):setType("playership")
 template:setModel("LightCorvette"..color_player)
-template:setRadarTrace("radar_tug.png")
+template:setRadarTrace("tug.png")
 template:setDescription([[Popular among traders and smugglers, the Flavia is a small cargo and passenger transport. It's cheaper than a freighter for small loads and short distances, and is often used to carry high-value cargo discreetly.
 
 The Flavia Falcon is a Flavia transport modified for faster flight, and adds rear-mounted lasers to keep enemies off its back.
@@ -217,7 +217,7 @@ template:setRepairCrewCount(8)
 addSystemsLight(template)
 
 template = ShipTemplate():setName("Repulse"):setClass("Frigate", "Armored Transport"):setModel("LightCorvette"..color_player):setType("playership")
-template:setRadarTrace("radar_tug.png")
+template:setRadarTrace("tug.png")
 template:setDescription("Jump/Turret version of Flavia Falcon")
 template:setHull(120)
 template:setShields(80, 80)
@@ -244,7 +244,7 @@ addSystemsLight(template)
 --[[Mine Layer--]]
 template = ShipTemplate():setName("Nautilus"):setType("playership"):setClass("Frigate","Mine Layer"):setModel("MineLayerCorvette"..color_player)
 template:setDescription("Small mine laying vessel with minimal armament, shields and hull")
-template:setRadarTrace("radar_tug.png")
+template:setRadarTrace("tug.png")
 template:setSpeed(100, 10, 20)
 template:setShields(60,60)
 template:setHull(100)
@@ -272,7 +272,7 @@ addSystemsMineLayer(template)
 template = ShipTemplate():setName("Atlantis"):setClass("Corvette", "Destroyer"):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
 template:setDescription([[The Atlantis X23 is the smallest model of destroyer, and its combination of frigate-like size and corvette-like power makes it an excellent escort ship when defending larger ships against multiple smaller enemies. Because the Atlantis X23 is fitted with a jump drive, it can also serve as an intersystem patrol craft.
 This is a refitted Atlantis X23 for more general tasks. The large shield system has been replaced with an advanced combat maneuvering systems and improved impulse engines. Its missile loadout is also more diverse. Mistaking the modified Atlantis for an Atlantis X23 would be a deadly mistake.]])
-template:setRadarTrace("radar_melon.png")
+template:setRadarTrace("melon.png")
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
@@ -302,7 +302,7 @@ addSystemsAtlasAlt(template)
 --[[Missile Corvette--]]
 template = ShipTemplate():setName("Crucible"):setLocaleName(_("Crucible")):setClass(_("Corvette"),_("Popper")):setModel("AtlasMissileDreadnought"..color_player):setType("playership")
 template:setDescription(_("A number of missile tubes range around this ship. Beams were deemed lower priority, though they are still present. Stronger defenses than a frigate, but not as strong as the Atlantis"))
-template:setRadarTrace("radar_melon.png")
+template:setRadarTrace("melon.png")
 template:setHull(160)
 template:setShields(160,160)
 template:setSpeed(80,8,10)
@@ -339,7 +339,7 @@ addSystemsAtlas(template)
 --[[Beam Corvette--]]
 template = ShipTemplate():setName("Maverick"):setLocaleName(_("Maverick")):setClass(_("Corvette"),_("Gunner")):setModel("AtlasLaserDreadnought"..color_player):setType("playership")
 template:setDescription(_("A number of beams bristle from various points on this gunner. Missiles were deemed lower priority, though they are still present. Stronger defenses than a frigate, but not as strong as the Atlantis"))
-template:setRadarTrace("radar_melon.png")
+template:setRadarTrace("melon.png")
 template:setHull(160)
 template:setShields(160,160)
 template:setSpeed(80,8,10)
@@ -379,7 +379,7 @@ template:setType("playership")
 template:setDescription([[The Jump Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized jump drive and the energy storage required to run this jump drive.
 It is designed to carry other ships deep into space. So it has special docking parameters, allowing other ships to attach themselves to this ship.
 Benedict is an improved version of the Jump Carrier]])
-template:setRadarTrace("radar_transport.png")
+template:setRadarTrace("transport.png")
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)

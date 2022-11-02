@@ -48,7 +48,7 @@ function init()
 
     gu = 5000   -- grid unit for enemy spawns
 
-    player = createPlayerShip():setCallSign("Rookie 1"):setPosition(0, 0):setHeading(90)
+    player = createPlayerShip():setPosition(0, 0):setHeading(90)
     player:setLongRangeRadarRange(30000)
     player:addReputationPoints(100.0)
 
@@ -99,6 +99,7 @@ Try to defeat all enemies with your mines. Your beam turrets will not help you m
 The key to success might be the clever use of your impulse and jump drives.
 
 Commander Saberhagen out.]])
+    enemyCountStart = #enemyList
 
 end
 
@@ -129,17 +130,27 @@ end
 function update(delta)
     script_hangar.update(delta)
     timer = timer + delta
+    local enemyCountChanged = false
+
 	for i, enemy in ipairs(enemyList) do
 		if enemy == nil or not enemy:isValid() then
 			table.remove(enemyList, i)
+            enemyCountChanged = true
 			-- Note: table.remove() inside iteration causes the next element to be skipped.
 			-- This means in each update-cycle max half of the elements are removed.
 			-- It does not matter here, since update is called regulary.
 		end
 	end
+
+    if enemyCountChanged then
+        local progress = 100 - 100 * (#enemyList / enemyCountStart)
+        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
+    end
+
     if #enemyList == 0 then
         finished(delta)
     end
+
     if revenge:isValid() and not revenge_active then
         if not freighter:isValid() or not enemy_station:isValid() then
             revenge_active = true

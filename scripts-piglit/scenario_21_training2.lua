@@ -1,41 +1,48 @@
 -- Name: Training: Close Combat
 -- Type: Mission
--- Description: Combat Training Course
+-- Description: Close Combat Training Course
 ---
 --- Objective: Defend your mothership against enemy fighters and destroy the enemy carrier.
 ---
 --- Description:
---- In this training you will face different armed oppenents that you must destroy one by one. The difficulty will start low and will increase slowly with every destroyed enemy.
+--- In this training you will face different armed oppenents that you must destroy one by one. The difficulty will start low and will increase slowly with every destroyed enemy squadron.
 ---
---- Your ship is a Hathcock Battle Cruiser - a warp-driven cruiser with great beam power and few missiles.
+--- Your ship is a warp-driven Hathcock Battle Cruiser - a cruiser with great beam power but few missiles.
 ---
 --- This is a short mission for inexperienced players who prefer close combat.
--- Variation[Hard]: All enemies (and more of the stonger ones) are present at the beginning of the scenario.
+-- Setting[Difficulty]: Select the difficulty of this mission.
+-- Difficulty[Easy]: Each enemy wave consists of only one single ship. Intedned for inexperienced players.
+-- Difficulty[Normal|Default]: Each enemy wave becomes more difficult than the previous one.
+-- Difficulty[Hard]: More enemies, and they are present at the beginning of the scenario.
 
--- secondary design goal: Test and example for script_formation (Hard variation)
-
+-- secondary design goal: Test and example for utils_formations
 
 require "utils.lua"
 require "script_formation.lua"
+local spawn = script_formation.spawnFormation
 
 --- Ship creation functions
-function createExuariFighterSquad(amount, posx, posy)
-    local enemyList = script_formation.spawnFormation("Dagger", amount, posx, posy, "Exuari", "Alpha-")
+
+function createExuariStrikerSquad(amount, posx, posy)
+    local enemyList = spawn("Dash", amount, posx, posy, "Exuari", "Alpha-")
+    for _,ship in ipairs(enemyList) do
+        ship:setWarpDrive(false)
+    end
     return enemyList
 end
 
-function createExuariInterceptorSquad(amount, posx, posy)
-    local enemyList = script_formation.spawnFormation("Blade", amount, posx, posy, "Exuari", "Beta-")
+function createExuariFighterSquad(amount, posx, posy)
+    local enemyList = spawn("Dagger", amount, posx, posy, "Exuari", "Beta-")
     return enemyList
 end
 
 function createExuariBomberSquad(amount, posx, posy)
-    local enemyList = script_formation.spawnFormation("Gunner", amount, posx, posy, "Exuari", "Gamma-")
+    local enemyList = spawn("Gunner", amount, posx, posy, "Exuari", "Gamma-")
     return enemyList
 end
 
-function createExuariStrikerSquad(amount, posx, posy)
-    local enemyList = script_formation.spawnFormation("Strike", amount, posx, posy, "Exuari", "Delta-")
+function createExuariArtillerySquad(amount, posx, posy)
+    local enemyList = spawn("Ranger", amount, posx, posy, "Exuari", "Delta-")
     return enemyList
 end
 
@@ -57,7 +64,8 @@ function createHumanMothership()
 end
 
 function createPlayerShip()
-	return PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
+    local ship = PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
+    return ship
 end
 
 function init()
@@ -72,23 +80,24 @@ function init()
     -- player and ally
     allowNewPlayerShips(false)
     player = createPlayerShip()
-	player:setCallSign("Rookie 1"):setPosition(gu/4, -gu/4):setHeading(90):setLongRangeRadarRange(5*gu):addReputationPoints(140.0)
-    dread = createHumanMothership():setCallSign("Liberator"):setPosition(-gu/4, gu/4):setHeading(90):orderAttack(boss)
- 
+    player:setPosition(gu/4, -gu/4):setHeading(90):setLongRangeRadarRange(5*gu):addReputationPoints(140.0)
+    dread = createHumanMothership():setCallSign("Liberator"):setPosition(-gu/4, gu/4):setHeading(90):orderAttack(boss):setCommsScript(""):setCommsFunction(mainMenu)
+    dreadSpeed = dread:getImpulseMaxSpeed()
+
     -- terrain
-    createRandomAlongArc(Asteroid, 100, 2*gu, -1*gu, gu, 60, 220, 200)
-    createRandomAlongArc(VisualAsteroid, 100, 2*gu, -1*gu, gu, 400, 270, 400)
-    placeRandomAroundPoint(Nebula, 4, gu, 2*gu, 3.5*gu, 1.5*gu)
-    placeRandomAroundPoint(Nebula, 4, gu, 3*gu, 6*gu, -2.5*gu)
-    createRandomAlongArc(Asteroid, 80, 7*gu, 2*gu, 1.5*gu, 180, 270, 400)
-    createRandomAlongArc(VisualAsteroid, 100, 7*gu, 2*gu, 1.5*gu, 180, 270, 1000)
+    createRandomAlongArc(Asteroid,       100, 2*gu, -1*gu,     gu,  60, 220, 200)
+    createRandomAlongArc(VisualAsteroid, 100, 2*gu, -1*gu,     gu, 400, 270, 400)
+    createRandomAlongArc(Asteroid,        80, 7*gu,  2*gu, 1.5*gu, 180, 270, 400)
+    createRandomAlongArc(VisualAsteroid, 100, 7*gu,  2*gu, 1.5*gu, 180, 270, 1000)
+    placeRandomAroundPoint(Nebula,         4,   gu,  2*gu, 3.5*gu,  1.5*gu)
+    placeRandomAroundPoint(Nebula,         4,   gu,  3*gu, 6  *gu, -2.5*gu)
     createObjectsOnLine(8*gu, -gu, 8*gu, gu, 1000, Mine, 2)
 
     -- scenario script details
-    enemyWaveIndex = 1
+    enemyWaveIndex = 0
     enemyList = {}
-    nextWaveDreadPos = 0
-    plot = "waves" 
+    dreadNextPosx = 0
+    dreadProgress = 0
 
     instr1 = false
     timer = 0
@@ -97,63 +106,86 @@ function init()
 
     -- start action
     spwanNextWave()
+    if getScenarioSetting("Difficulty") == "Hard" then
+        spwanNextWave()
+        spwanNextWave()
+        spwanNextWave()
+        spwanNextWave()
+    end
     instructions()
+    dread:orderFlyTowardsBlind(dreadNextPosx, gu/4)
+
 end
 
 function spwanNextWave()
+    -- waves are:
+    -- 1. slow Striker
+    -- 2. Fighter Squad (attacking player)
+    -- 3. Bomber Squad
+    -- 4. Artillery
+    -- 5. Boss (already present)
+
+    enemyWaveIndex = enemyWaveIndex + 1
 
     local amount
-    if getScenarioVariation() == "Hard" then
-        amount = enemyWaveIndex
+    if getScenarioSetting("Difficulty") == "Hard" then
+        amount = enemyWaveIndex * 2
+    elseif getScenarioSetting("Difficulty") == "Easy" then
+        amount = 1
     else
-        amount = enemyWaveIndex % 4 + 1
+        amount = enemyWaveIndex
     end
 
+    -- spwan and determine squad leaders target
     if enemyWaveIndex == 1 then
-        enemyList = createExuariFighterSquad(amount, 2*gu, -1*gu)
+        enemyList = createExuariStrikerSquad(amount, 2*gu, -1*gu)
         enemyList[1]:orderRoaming()
     elseif enemyWaveIndex == 2 then
-        enemyList = createExuariInterceptorSquad(amount, 3.5*gu, 1.5*gu)
+        enemyList = createExuariFighterSquad(amount, 3.5*gu, 1.5*gu)
         enemyList[1]:orderAttack(player)
     elseif enemyWaveIndex == 3 then
         enemyList = createExuariBomberSquad(amount, 6*gu, -2.5*gu)
         enemyList[1]:orderAttack(dread)
     elseif enemyWaveIndex == 4 then
-        enemyList = createExuariStrikerSquad(amount, 7*gu, 2*gu)
+        enemyList = createExuariArtillerySquad(amount, 7*gu, 2*gu)
         enemyList[1]:orderAttack(dread)
-        if getScenarioVariation() == "Hard" then
-            enemyList[2]:orderAttack(player)
-        end
     elseif enemyWaveIndex == 5 then
         -- only boss may be left
         enemyList = {boss, guard}
         if dread:isValid() then
-            dread:setWeaponStorage("HVLI", 20)  -- restore full fire power, in case some was fired upon fighters
-        end
-    elseif enemyWaveIndex >= 6 then
-        if #enemyList == 0 then
-            return false
-        else
-            return true
+            -- restore full fire power, in case some was fired upon fighters
+            dread:setWeaponStorage("HVLI", 20) 
         end
     end
 
-    enemyWaveIndex = enemyWaveIndex + 1
-    nextWaveDreadPos = nextWaveDreadPos + 2*gu
-    dread:orderAttack(boss)
+    if enemyWaveIndex <= 6 then
+        local progress = (enemyWaveIndex-1)*20
+        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
+    end
+    -- half of each squad attack the player
+    -- but only if the wave is big enough; depends on difficulty
+    -- in exuari sqads, fighter with index 4 follows index 3.
+    -- Index higher than 5 follow index 5.
+    if dread:isValid() then
+        if #enemyList > 2 then
+            enemyList[math.ceil(#enemyList/2)+1]:orderAttack(player)
+        end
+    end
+
+    dread:setImpulseMaxSpeed(dreadSpeed)
     return true
 end
 
 function instructions()
     if dread:isValid() and not instr1 then
-        if getScenarioVariation() == "Hard" then
+        if getScenarioSetting("Difficulty") == "Hard" then
             instr1 = true
             dread:sendCommsMessage(player, [[This is Commander Saberhagen onboard the Liberator.
 
 Your goal is to keep yourself and the Liberator alive until the enemy carrier and it's guards are destroyed. You chose the hard mode, so prepare for some resistance.
 
 Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 2 then
+        elseif enemyWaveIndex == 1 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen onboard the Liberator.
 
 In this combat training you will practise your abilities with a Hathcock battlecruiser.
@@ -168,7 +200,7 @@ Each group will be more difficult then the previous one.
 If you need any kind of help or strategic hints, feel free to contact us.
 
 Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 3 and dread:isValid() then
+        elseif enemyWaveIndex == 2 and dread:isValid() then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 You can dock at the Liberator if you need to restore your energy or if you need repairs.
@@ -178,7 +210,7 @@ If you run into more trouble than you can handle, feel free to contact us for he
 Commander Saberhagen out.
 ]])
 
-        elseif enemyWaveIndex == 4 then
+        elseif enemyWaveIndex == 3 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 Remember to use all of your capabilities to your advantage: warp drive, hacking, shield and beam frequencies, the database, energy management etc.
@@ -187,14 +219,14 @@ If you need more information on how to use those systems, contact us.
 
 Commander Saberhagen out.
 ]])
-        elseif enemyWaveIndex == 5 then
+        elseif enemyWaveIndex == 4 then
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
 We need you to find a way for the Liberator to get across that mine-field ahead.
 
 Commander Saberhagen out.
 ]])
-        elseif enemyWaveIndex == 6 then
+        elseif enemyWaveIndex == 5 then
             instr1 = true
             dread:sendCommsMessage(player, [[This is Commander Saberhagen.
 
@@ -204,7 +236,36 @@ Commander Saberhagen out.
 ]])
 
         end
+    end
+end
 
+function update_dread(delta)
+    if dread:isValid() then
+        local dreadPosx, dreadPosy = dread:getPosition()
+        if dreadPosx > dreadNextPosx - 200 then
+            -- target reached
+            dreadProgress = dreadProgress + 1
+            dreadNextPosx = dreadProgress * gu
+            if dreadProgress > 8 or enemyWaveIndex >= 5 then
+                -- fight boss
+                if boss:isValid() then
+                    dread:orderAttack(boss)
+                else
+                    dread:orderRoaming()
+                end
+                dread:setImpulseMaxSpeed(dreadSpeed)
+            else
+                -- still in waves
+                dread:orderFlyTowardsBlind(dreadNextPosx, dreadPosy)
+                if enemyWaveIndex*2 > dreadProgress then
+                    dread:setImpulseMaxSpeed(dreadSpeed)
+                elseif enemyWaveIndex*2 == dreadProgress then
+                    dread:setImpulseMaxSpeed(dreadSpeed/2)
+                else
+                    dread:setImpulseMaxSpeed(dreadSpeed/4)
+                end
+            end
+        end
     end
 end
 
@@ -247,26 +308,22 @@ function update(delta)
         end
     end
 
-    continue = false
-    if dread:isValid() then
-        dreadPosx, dreadPosy = dread:getPosition()
-        if dreadPosx > nextWaveDreadPos then
-            continue = true
-        end
-    end
     if #enemyList == 0 then
-        continue = true
-    end
-    if getScenarioVariation() == "Hard" then
-        continue = true
+        spwanNextWave() 
+        instructions()
     end
 
-    if continue then
-        if not spwanNextWave() then
+    -- Adjust mothership speed, depending on player progress
+    update_dread(delta)
+
+    if enemyWaveIndex >= 5 then
+        if #enemyList == 0 then
             finished(delta)
-        else
-            instructions()
+            return
         end
+    end
+    if not player:isValid() then
+        victory("Exuari")
     end
 end
 

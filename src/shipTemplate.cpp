@@ -305,6 +305,8 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// template = ShipTemplate():setName("Stalker Q7"):setHull(50):setShields(50)
     /// variation = template:copy("Stalker Q5"):setShields(25,25)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, copy);
+    /// Sets auto missile reload
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
 }
 
 std::unordered_map<string, P<ShipTemplate> > ShipTemplate::templateMap;

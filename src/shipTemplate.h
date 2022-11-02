@@ -105,6 +105,9 @@ public:
     bool can_self_destruct = true;
     bool can_launch_probe = true;
 
+    // Ship automation features, mostly for single-person ships like fighters
+    bool auto_reload_tube_enabled = false;
+
     float energy_storage_amount;
     int repair_crew_count;
     string default_ai_name;
@@ -153,6 +156,7 @@ public:
     void setCanCombatManeuver(bool enabled) { can_combat_maneuver = enabled; }
     void setCanSelfDestruct(bool enabled) { can_self_destruct = enabled; }
     void setCanLaunchProbe(bool enabled) { can_launch_probe = enabled; }
+    void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
     void setMesh(string model, string color_texture, string specular_texture, string illumination_texture);
     void setEnergyStorage(float energy_amount);
     void setRepairCrewCount(int amount);

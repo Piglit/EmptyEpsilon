@@ -234,13 +234,6 @@ function mergeTables(table_a, table_b)
     end
 end
 
--- currying
--- curried = curry (function) (arg)
--- curried() calls actual function(arg)
-function curry_simple(f)
-	return function (x) return function () return f(x) end end
-end
-
 -- create amount of object_type, at a distance between dist_min and dist_max around the point (x0, y0)
 function placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
     for n = 1, amount do
@@ -313,6 +306,7 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
         end
     end
 end
+
 -- Extract coordinates between two objects, two points, object and point or point and object
 -- This is only helper function for distance(a,b,c,d) and angle(a,b,c,d). 
 -- Returns two sets of coordinates: x1, y1, x2, y2.

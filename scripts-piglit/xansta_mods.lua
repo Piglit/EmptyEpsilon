@@ -91,7 +91,6 @@ function init_constants_xansta()
 			["Ranger"]= 17,
 			["Buster"]= 17,
 			["Ryder"]= 65,
-			["Fortress"]= 260,
 		},
 		["Ktlitans"]= {
 			["Ktlitan Drone"]= 5,	
@@ -113,6 +112,8 @@ function init_constants_xansta()
 			["Nirvana R5"]= 19,
 		}
 	}
+	stl["Interplanetary Union"] = stl["Mining Corporation"]
+	stl["Arlenians"] = stl["Blue Star Cartell"]
 	stln = {}
 	stnl = {}
 	stsl = {}
@@ -130,19 +131,31 @@ function init_constants_xansta()
 	--Player Ship Beams
 	psb = {}
 	psb["MP52 Hornet"] = 2
+	psb["MP56 Bumblebee"] = 2
+	psb["MP58 Mole"] = 2
 	psb["Adder MK7"] = 4
 	psb["Phobos M3P"] = 2
 	psb["Flavia P.Falcon"] = 2
 	psb["Atlantis"] = 2
+	psb["Poseidon"] = 2
+	psb["Neptune"] = 0
 	psb["Striker"] = 2
 	psb["ZX-Lindworm"] = 1
+	psb["Peluda"] = 0
+	psb["Drac"] = 0
+	psb["Cuelebre"] = 0
+	psb["Bashe"] = 0
+	psb["Ryu"] = 0
+	psb["Zomok"] = 0
 	psb["Citadel"] = 12
 	psb["Repulse"] = 2
 	psb["Benedict"] = 2
 	psb["Kiriya"] = 2
 	psb["Nautilus"] = 2
 	psb["Hathcock"] = 4
+	psb["Anvil"] = 4
 	psb["Piranha M5P"] = 0
+	psb["Hammer"] = 0
 	psb["Crucible"] = 2
 	psb["Maverick"] = 6
 	-- square grid deployment
@@ -305,8 +318,9 @@ function init_constants_xansta()
 	feature_cargoInventory = true
 	feature_autoCoolant = true
 	feature_crewFate = true
-	--Damage to ship can kill repair crew members
-	feature_coolantNebulae = false
+	--Damage to ship can kill repair crew members, deplete coolant and --disable ship functions--
+	--ship functions may no be repairable, make sure, stations can heal it.
+	feature_coolantNebulae = true
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 end
@@ -317,12 +331,14 @@ function modify_player_ships(pobj)
 	if not pobj.modsAssigned then
 		pobj.modsAssigned = true
 		local tempPlayerType = pobj:getTypeName()
-		if tempPlayerType == "MP52 Hornet" then
+		if tempPlayerType == "MP52 Hornet" or
+			tempPlayerType == "MP56 Bumblebee" or
+			tempPlayerType == "MP58 Mole" then
 			if #playerShipNamesForMP52Hornet > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				local ni = math.random(1,#playerShipNamesForMP52Hornet)
-				pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
-				table.remove(playerShipNamesForMP52Hornet,ni)
+				--local ni = math.random(1,#playerShipNamesForMP52Hornet)
+				--pobj:setCallSign(playerShipNamesForMP52Hornet[ni])
+				--table.remove(playerShipNamesForMP52Hornet,ni)
 			end
 			pobj.shipScore = 7
 			pobj.maxCargo = 3
@@ -330,12 +346,18 @@ function modify_player_ships(pobj)
 			pobj:commandSetAutoRepair(true)
 			pobj.autoCoolant = true
 --			pobj:setWarpDrive(true)
-		elseif tempPlayerType == "ZX-Lindworm" then
+		elseif tempPlayerType == "ZX-Lindworm" or
+			tempPlayerType == "Peluda" or
+			tempPlayerType == "Drac" or
+			tempPlayerType == "Cuelebre" or
+			tempPlayerType == "Bashe" or
+			tempPlayerType == "Ryu" or
+			tempPlayerType == "Zomok" then
 			if #playerShipNamesForLindworm > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForLindworm)
-				pobj:setCallSign(playerShipNamesForLindworm[ni])
-				table.remove(playerShipNamesForLindworm,ni)
+				--ni = math.random(1,#playerShipNamesForLindworm)
+				--pobj:setCallSign(playerShipNamesForLindworm[ni])
+				--table.remove(playerShipNamesForLindworm,ni)
 			end
 			pobj.shipScore = 8
 			pobj.maxCargo = 3
@@ -347,9 +369,9 @@ function modify_player_ships(pobj)
 			print("Adder")
 			if #playerShipNamesForStriker > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForStriker)
-				pobj:setCallSign(playerShipNamesForStriker[ni])
-				table.remove(playerShipNamesForStriker,ni)
+				--ni = math.random(1,#playerShipNamesForStriker)
+				--pobj:setCallSign(playerShipNamesForStriker[ni])
+				--table.remove(playerShipNamesForStriker,ni)
 			end
 			pobj.shipScore = 8
 			pobj.maxCargo = 4
@@ -368,7 +390,8 @@ function modify_player_ships(pobj)
 			pobj.shipScore = 19
 			pobj.maxCargo = 10
 --			pobj:setWarpDrive(true)
-		elseif tempPlayerType == "Hathcock" then
+		elseif tempPlayerType == "Hathcock" or
+			tempPlayerType == "Anvil" then
 			if #playerShipNamesForHathcock > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				--ni = math.random(1,#playerShipNamesForHathcock)
@@ -377,7 +400,8 @@ function modify_player_ships(pobj)
 			end
 			pobj.shipScore = 30
 			pobj.maxCargo = 6
-		elseif tempPlayerType == "Piranha M5P" then
+		elseif tempPlayerType == "Piranha M5P" or 
+			tempPlayerType == "Hammer" then
 			if #playerShipNamesForPiranha > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				--ni = math.random(1,#playerShipNamesForPiranha)
@@ -443,6 +467,26 @@ function modify_player_ships(pobj)
 			pobj.carrier = true
 			pobj.shipScore = 52
 			pobj.maxCargo = 6
+		elseif tempPlayerType == "Poseidon" then
+			if #playerShipNamesForAtlantis > 0 and not pobj.nameAssigned then
+				pobj.nameAssigned = true
+				--ni = math.random(1,#playerShipNamesForAtlantis)
+				--pobj:setCallSign(playerShipNamesForAtlantis[ni])
+				--table.remove(playerShipNamesForAtlantis,ni)
+			end
+			pobj.carrier = true
+			pobj.shipScore = 32
+			pobj.maxCargo = 6
+		elseif tempPlayerType == "Neptune" then
+			if #playerShipNamesForAtlantis > 0 and not pobj.nameAssigned then
+				pobj.nameAssigned = true
+				--ni = math.random(1,#playerShipNamesForAtlantis)
+				--pobj:setCallSign(playerShipNamesForAtlantis[ni])
+				--table.remove(playerShipNamesForAtlantis,ni)
+			end
+			pobj.carrier = true
+			pobj.shipScore = 16
+			pobj.maxCargo = 6
 		elseif tempPlayerType == "Benedict" then
 			if #playerShipNamesForBenedict > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
@@ -463,7 +507,8 @@ function modify_player_ships(pobj)
 			pobj.carrier = true
 			pobj.shipScore = 10
 			pobj.maxCargo = 9
-		elseif tempPlayerType == "Ender" then
+		elseif tempPlayerType == "Ender" or 
+				tempPlayerType == "Converted Carrier" then
 			if #playerShipNamesForEnder > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
 				--ni = math.random(1,#playerShipNamesForEnder)
@@ -472,12 +517,21 @@ function modify_player_ships(pobj)
 			end
 			pobj.shipScore = 100
 			pobj.maxCargo = 20
+		elseif tempPlayerType == "SpySat" then 
+			if #playerShipNamesForEnder > 0 and not pobj.nameAssigned then
+				pobj.nameAssigned = true
+				--ni = math.random(1,#playerShipNamesForEnder)
+				--pobj:setCallSign(playerShipNamesForEnder[ni])
+				--table.remove(playerShipNamesForEnder,ni)
+			end
+			pobj.shipScore = 1
+			pobj.maxCargo = 1
 		else
 			if #playerShipNamesForLeftovers > 0 and not pobj.nameAssigned then
 				pobj.nameAssigned = true
-				ni = math.random(1,#playerShipNamesForLeftovers)
-				pobj:setCallSign(playerShipNamesForLeftovers[ni])
-				table.remove(playerShipNamesForLeftovers,ni)
+				--ni = math.random(1,#playerShipNamesForLeftovers)
+				--pobj:setCallSign(playerShipNamesForLeftovers[ni])
+				--table.remove(playerShipNamesForLeftovers,ni)
 			end
 			pobj.shipScore = 24
 			pobj.maxCargo = 5
@@ -543,8 +597,8 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 		if enemyFaction == "Kraylor" then
 			--kraylor formation
 			formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
-		end
-		if enemyFaction == "Exuari" then
+			ship:setCommsScript(""):setCommsFunction(commsShip)
+		elseif enemyFaction == "Exuari" then
 			ship:setCommsScript("comms_exuari.lua")
 			--TODO check if multiple onDamage/onDestruction are possible. If true, raise frenzy in combat, otherwise slowly lower
 			--Update: no, it is not possible.
@@ -562,11 +616,6 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 			if shipTemplateType == "Ryder" then
 				local fighterTemplate = enemyFactionNameList[ irandom(1,5) ]
 				script_hangar.create(ship, fighterTemplate, 3)
-			elseif shipTemplateType == "Fortress" then
-				local fighterTemplate = enemyFactionNameList[ irandom(1,5) ]
-				script_hangar.create(ship, fighterTemplate, 3)
-				fighterTemplate = enemyFactionNameList[ irandom(1,5) ]
-				script_hangar.append(ship, fighterTemplate, 3)
 			end
 		else
 			ship:setCommsScript(""):setCommsFunction(commsShip)
@@ -578,7 +627,7 @@ end
 
 function enemyComms(comms_data)
 	-- called instead enemyComms() of xanstas scenarios, as long it is deleted there.
-	if comms_data.friendlyness > 50 then
+	if comms_data.friendlyness > 50 or comms_source.special_intimidate_ships then
 		local faction = comms_target:getFaction()
 		local taunt_option = "We will see to your destruction!"
 		local taunt_success_reply = "Your bloodline will end here!"
@@ -624,8 +673,42 @@ function enemyComms(comms_data)
 				setCommsMessage(taunt_failed_reply);
 			end
 		end)
+
+		if comms_source.special_intimidate_ships then
+			local cost = special_buy_cost(comms_target, comms_source)
+			addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+				local x,y = comms_target:getPosition()
+				local playership_near = false
+				local friends_near = false
+				for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
+					if obj ~= nil and obj:isValid() and obj ~= comms_target then
+						if obj.typeName == "PlayerSpaceship" then
+							playership_near = true
+						elseif obj.typeName == "CpuShip" then
+							if comms_target:isFriendly(obj) then
+								friends_near = true
+							end
+						end
+					end
+				end
+				if not playership_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender to cowardly weaklings who do not have even the courage to face us directly."))
+				elseif comms_target:getHull() >= comms_target:getHullMax() then
+					setCommsMessage(_("needRep-comms", "Our ship is not even damaged and you want us to surrender? Come here and fight!"))
+				elseif friends_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still close."))
+				elseif not comms_source:takeReputationPoints(cost) then
+					setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+				else
+					comms_target:setFaction("Independent")
+					comms_target:orderRoaming()
+					setCommsMessage(_("special-comms", "Ship has surrendered."))
+				end
+			end)
+		end
 		return true
 	end
+
 	return false
 end
 
@@ -650,7 +733,7 @@ function xanstas_player_update(delta)
 		assert(coolantNebulae == nil)
 		assert(updateCoolantGivenPlayer == nil)
 		assert(getCoolantGivenPlayer == nil)
-		assert(coolant_nebulae ~= nil)	--table
+		assert(coolant_nebula ~= nil)	--table, sometimes calles coolant_nebulae
 		assert(coolant_loss ~= nil)
 		assert(adverseEffect ~= nil)
 		assert(coolant_gain ~= nil)
@@ -849,7 +932,13 @@ function x_healthCheck(delta, p)
 				x_crewFate(p,fatalityChance)
 			end
 		else	--no repair crew left
-			if feature_crewFate and random(1,100) <= (4 - difficulty) then	-- assume difficulty is defined
+			local diff = 1
+			if difficulty ~= nil then
+				diff = difficulty
+			elseif scenario ~= nil and scenario.difficulty ~= nil then
+				diff = scenario.difficulty
+			end
+			if feature_crewFate and random(1,100) <= (4 - diff) then
 				p:setRepairCrewCount(1)
 				if p:hasPlayerAtPosition("Engineering") then
 					local repairCrewRecovery = "repairCrewRecovery"
@@ -930,26 +1019,26 @@ function x_crewFate(p, fatalityChance)
 			local consequence = 0
 			local upper_consequence = 2
 			local consequence_list = {}
-			if p:getCanLaunchProbe() then
-				upper_consequence = upper_consequence + 1
-				table.insert(consequence_list,"probe")
-			end
-			if p:getCanHack() then
-				upper_consequence = upper_consequence + 1
-				table.insert(consequence_list,"hack")
-			end
-			if p:getCanScan() then
-				upper_consequence = upper_consequence + 1
-				table.insert(consequence_list,"scan")
-			end
-			if p:getCanCombatManeuver() then
-				upper_consequence = upper_consequence + 1
-				table.insert(consequence_list,"combat_maneuver")
-			end
-			if p:getCanSelfDestruct() then
-				upper_consequence = upper_consequence + 1
-				table.insert(consequence_list,"self_destruct")
-			end
+--			if p:getCanLaunchProbe() then
+--				upper_consequence = upper_consequence + 1
+--				table.insert(consequence_list,"probe")
+--			end
+--			if p:getCanHack() then
+--				upper_consequence = upper_consequence + 1
+--				table.insert(consequence_list,"hack")
+--			end
+--			if p:getCanScan() then
+--				upper_consequence = upper_consequence + 1
+--				table.insert(consequence_list,"scan")
+--			end
+--			if p:getCanCombatManeuver() then
+--				upper_consequence = upper_consequence + 1
+--				table.insert(consequence_list,"combat_maneuver")
+--			end
+--			if p:getCanSelfDestruct() then
+--				upper_consequence = upper_consequence + 1
+--				table.insert(consequence_list,"self_destruct")
+--			end
 			consequence = math.random(1,upper_consequence)
 			if consequence == 1 then
 				p:setRepairCrewCount(p:getRepairCrewCount() - 1)
@@ -1037,7 +1126,7 @@ function x_coolantNebulae(delta, p)
 	for i=1,#coolant_nebula do
 		if distance(p,coolant_nebula[i]) < 5000 then
 			if coolant_nebula[i].lose then
-				p:setMaxCoolant(p:getMaxCoolant()*coolant_loss)
+				p:setMaxCoolant(p:getMaxCoolant()*coolant_loss*delta)
 			end
 			if coolant_nebula[i].gain then
 				inside_gain_coolant_nebula = true
@@ -1100,18 +1189,18 @@ function x_updateCoolantGivenPlayer(p, delta)
 		p.deploy_coolant_timer = p.deploy_coolant_timer - delta
 		if p.deploy_coolant_timer < 0 then
 			gather_coolant_status = "Gathering Coolant"
-			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain)
+			p:setMaxCoolant(p:getMaxCoolant() + coolant_gain*delta)
 			if p:getMaxCoolant() > 50 and random(1,100) <= 13 then
 				local engine_choice = math.random(1,3)
 				if engine_choice == 1 then
-					p:setSystemHealth("impulse",p:getSystemHealth("impulse")*adverseEffect)
+					p:setSystemHealth("impulse",p:getSystemHealth("impulse")*adverseEffect*delta)
 				elseif engine_choice == 2 then
 					if p:hasWarpDrive() then
-						p:setSystemHealth("warp",p:getSystemHealth("warp")*adverseEffect)
+						p:setSystemHealth("warp",p:getSystemHealth("warp")*adverseEffect*delta)
 					end
 				else
 					if p:hasJumpDrive() then
-						p:setSystemHealth("jumpdrive",p:getSystemHealth("jumpdrive")*adverseEffect)
+						p:setSystemHealth("jumpdrive",p:getSystemHealth("jumpdrive")*adverseEffect*delta)
 					end
 				end
 			end
@@ -1144,5 +1233,296 @@ function x_getCoolantGivenPlayer(p)
 		end
 	end
 	p.coolant_trigger = true
+end
+
+
+-- comms functions. Remove the corresponding part from the functions in the script and call the functions defined here instead
+
+function undockedGoods()
+	if goods[comms_target] ~= nil then
+		local goodsQuantityAvailable = 0
+		local gi = 1
+		repeat
+			if goods[comms_target][gi][2] > 0 then
+				goodsQuantityAvailable = goodsQuantityAvailable + goods[comms_target][gi][2]
+			end
+			gi = gi + 1
+		until(gi > #goods[comms_target])
+		if goodsQuantityAvailable > 0 then
+			addCommsReply(_("trade-comms", "What goods do you have available for sale or trade?"), function()
+				oMsg = string.format(_("trade-comms", "Station %s:\nGoods or components available: quantity, cost in reputation\n"),comms_target:getCallSign())
+				gi = 1		-- initialize goods index
+				repeat
+					goodsType = goods[comms_target][gi][1]
+					goodsQuantity = goods[comms_target][gi][2]
+					goodsRep = goods[comms_target][gi][3]
+					oMsg = oMsg .. string.format(_("trade-comms", "   %14s: %2i, %3i\n"),goodsType,goodsQuantity,goodsRep)
+					gi = gi + 1
+				until(gi > #goods[comms_target])
+				setCommsMessage(oMsg)
+				addCommsReply(_("Back"), commsStation)
+			end)
+		end
+		addCommsReply(_("trade-comms", "Where can I find particular goods?"), function()
+			gkMsg = _("trade-comms", "Friendly stations generally have food or medicine or both. Neutral stations often trade their goods for food, medicine or luxury.")
+			if comms_target.goodsKnowledge == nil then
+				gkMsg = gkMsg .. _("trade-comms", " Beyond that, I have no knowledge of specific stations.\n\nCheck back later, someone else may have better knowledge")
+				setCommsMessage(gkMsg)
+				addCommsReply(_("Back"), commsStation)
+				fillStationBrains()
+			else
+				if #comms_target.goodsKnowledge == 0 then
+					gkMsg = gkMsg .. _("trade-comms", " Beyond that, I have no knowledge of specific stations")
+				else
+					gkMsg = gkMsg .. _("trade-comms", "\n\nWhat goods are you interested in?\nI've heard about these:")
+					for gk=1,#comms_target.goodsKnowledge do
+						addCommsReply(comms_target.goodsKnowledgeType[gk],function()
+							setCommsMessage(string.format(_("trade-comms", "Station %s in sector %s has %s%s"),comms_target.goodsKnowledge[gk],comms_target.goodsKnowledgeSector[gk],comms_target.goodsKnowledgeType[gk],comms_target.goodsKnowledgeTrade[gk]))
+							addCommsReply(_("Back"), commsStation)
+						end)
+					end
+				end
+				setCommsMessage(gkMsg)
+				addCommsReply(_("Back"), commsStation)
+			end
+		end)
+	end
+end
+
+function dockedGoods()
+	if goods[comms_target] ~= nil then
+		addCommsReply(_("explainGoods-comms", "No tutorial covered goods or cargo. Explain"), function()
+			setCommsMessage(_("explainGoods-comms", "Different types of cargo or goods may be obtained from stations, freighters or other sources. They go by one word descriptions such as dilithium, optic, warp, etc. Certain mission goals may require a particular type or types of cargo. Each player ship differs in cargo carrying capacity. Goods may be obtained by spending reputation points or by trading other types of cargo (typically food, medicine or luxury)"))
+			addCommsReply(_("explainGoodsComponent-comms", "Explain the component goods"), explainComponents)
+			addCommsReply(_("explainGoodsMineral-comms", "Explain the mineral goods"), explainMinerals)
+			addCommsReply(_("explainGoodsTrade-comms", "Explain the trade goods"), explainTradeGoods)
+			addCommsReply(_("explainGoodsVapor-comms", "Explain vapor goods"), function()
+				setCommsMessage(_("explainGoodsVapor-comms", "On rare occasions, the system cannot determine an appropriate good. In that case one of these 'vapor' or fake goods will be listed:\n   gold pressed latinum, unobtanium, eludium, impossibrium\n\nIf you see one of these, that means that the good is not available. The need or desire for that good will go unmet or the mission will have to be satisfied in some other fashion."))
+				addCommsReply(_("Back"), commsStation)
+			end)
+			addCommsReply(_("Back"), commsStation)
+		end)
+		addCommsReply(_("trade-comms", "Buy, sell, trade"), function()
+			oMsg = string.format(_("trade-comms", "Station %s:\nGoods or components available: quantity, cost in reputation\n"),comms_target:getCallSign())
+			local gi = 1		-- initialize goods index
+			repeat
+				local goodsType = goods[comms_target][gi][1]
+				local goodsQuantity = goods[comms_target][gi][2]
+				local goodsRep = goods[comms_target][gi][3]
+				oMsg = oMsg .. string.format(_("trade-comms", "     %s: %i, %i\n"),goodsType,goodsQuantity,goodsRep)
+				gi = gi + 1
+			until(gi > #goods[comms_target])
+			oMsg = oMsg .. _("trade-comms", "Current Cargo:\n")
+			gi = 1
+			local cargoHoldEmpty = true
+			repeat
+				local playerGoodsType = goods[player][gi][1]
+				local playerGoodsQuantity = goods[player][gi][2]
+				if playerGoodsQuantity > 0 then
+					oMsg = oMsg .. string.format(_("trade-comms", "     %s: %i\n"),playerGoodsType,playerGoodsQuantity)
+					cargoHoldEmpty = false
+				end
+				gi = gi + 1
+			until(gi > #goods[player])
+			if cargoHoldEmpty then
+				oMsg = oMsg .. _("trade-comms", "     Empty\n")
+			end
+			local playerRep = math.floor(player:getReputationPoints())
+			oMsg = oMsg .. string.format(_("trade-comms", "Available Space: %i, Available Reputation: %i\n"),player.cargo,playerRep)
+			setCommsMessage(oMsg)
+			-- Buttons for reputation purchases
+			gi = 1
+			repeat
+				local goodsType = goods[comms_target][gi][1]
+				local goodsQuantity = goods[comms_target][gi][2]
+				local goodsRep = goods[comms_target][gi][3]
+				addCommsReply(string.format(_("trade-comms", "Buy one %s for %i reputation"),goods[comms_target][gi][1],goods[comms_target][gi][3]), function()
+					oMsg = string.format(_("trade-comms", "Type: %s, Quantity: %i, Rep: %i"),goodsType,goodsQuantity,goodsRep)
+					if player.cargo < 1 then
+						oMsg = oMsg .. _("trade-comms", "\nInsufficient cargo space for purchase")
+					elseif goodsRep > playerRep then
+						oMsg = oMsg .. _("needRep-comms", "\nInsufficient reputation for purchase")
+					elseif goodsQuantity < 1 then
+						oMsg = oMsg .. _("trade-comms", "\nInsufficient station inventory")
+					else
+						if not player:takeReputationPoints(goodsRep) then
+							oMsg = oMsg .. _("needRep-comms", "\nInsufficient reputation for purchase")
+						else
+							player.cargo = player.cargo - 1
+							decrementStationGoods(goodsType)
+							incrementPlayerGoods(goodsType)
+							oMsg = oMsg .. _("trade-comms", "\npurchased")
+						end
+					end
+					setCommsMessage(oMsg)
+					addCommsReply(_("Back"), commsStation)
+				end)	--end buy goods from station for player reputation comms reply branch
+				gi = gi + 1
+			until(gi > #goods[comms_target])
+			-- Buttons for food trades
+			if tradeFood[comms_target] ~= nil then
+				gi = 1
+				local foodQuantity = 0
+				repeat
+					if goods[player][gi][1] == "food" then
+						foodQuantity = goods[player][gi][2]
+					end
+					gi = gi + 1
+				until(gi > #goods[player])
+				if foodQuantity > 0 then
+					gi = 1
+					repeat
+						local goodsType = goods[comms_target][gi][1]
+						local goodsQuantity = goods[comms_target][gi][2]
+						addCommsReply(string.format(_("trade-comms", "Trade food for %s"),goods[comms_target][gi][1]), function()
+							oMsg = string.format(_("trade-comms", "Type: %s,  Quantity: %i"),goodsType,goodsQuantity)
+							if goodsQuantity < 1 then
+								oMsg = oMsg .. _("trade-comms", "\nInsufficient station inventory")
+							else
+								decrementStationGoods(goodsType)
+								incrementPlayerGoods(goodsType)
+								decrementPlayerGoods("food")
+								oMsg = oMsg .. _("trade-comms", "\nTraded")
+							end
+							setCommsMessage(oMsg)
+							addCommsReply(_("Back"), commsStation)
+						end)	--end trade food on player ship for goods on station comms reply branch
+						gi = gi + 1
+					until(gi > #goods[comms_target])
+				end	--end food available on player ship if branch
+			end	--end food trade if branch
+			-- Buttons for luxury trades
+			if tradeLuxury[comms_target] ~= nil then
+				gi = 1
+				local luxuryQuantity = 0
+				repeat
+					if goods[player][gi][1] == "luxury" then
+						luxuryQuantity = goods[player][gi][2]
+					end
+					gi = gi + 1
+				until(gi > #goods[player])
+				if luxuryQuantity > 0 then
+					gi = 1
+					repeat
+						local goodsType = goods[comms_target][gi][1]
+						local goodsQuantity = goods[comms_target][gi][2]
+						addCommsReply(string.format(_("trade-comms", "Trade luxury for %s"),goods[comms_target][gi][1]), function()
+							oMsg = string.format(_("trade-comms", "Type: %s,  Quantity: %i"),goodsType,goodsQuantity)
+							if goodsQuantity < 1 then
+								oMsg = oMsg .. _("trade-comms", "\nInsufficient station inventory")
+							else
+								decrementStationGoods(goodsType)
+								incrementPlayerGoods(goodsType)
+								decrementPlayerGoods("luxury")
+								oMsg = oMsg .. _("trade-comms", "\nTraded")
+							end
+							setCommsMessage(oMsg)
+							addCommsReply(_("Back"), commsStation)
+						end)	--end trade luxury on player ship for goods on station comms reply branch
+						gi = gi + 1
+					until(gi > #goods[comms_target])
+				end	--end luxury available on player ship if branch
+			end	--end luxury trade if branch
+			-- Buttons for medicine trades
+			if tradeMedicine[comms_target] ~= nil then
+				gi = 1
+				local medicineQuantity = 0
+				repeat
+					if goods[player][gi][1] == "medicine" then
+						medicineQuantity = goods[player][gi][2]
+					end
+					gi = gi + 1
+				until(gi > #goods[player])
+				if medicineQuantity > 0 then
+					gi = 1
+					repeat
+						local goodsType = goods[comms_target][gi][1]
+						local goodsQuantity = goods[comms_target][gi][2]
+						addCommsReply(string.format(_("trade-comms", "Trade medicine for %s"),goods[comms_target][gi][1]), function()
+							oMsg = string.format(_("trade-comms", "Type: %s,  Quantity: %i"),goodsType,goodsQuantity)
+							if goodsQuantity < 1 then
+								oMsg = oMsg .. _("trade-comms", "\nInsufficient station inventory")
+							else
+								decrementStationGoods(goodsType)
+								incrementPlayerGoods(goodsType)
+								decrementPlayerGoods("medicine")
+								oMsg = oMsg .. _("trade-comms", "\nTraded")
+							end
+							setCommsMessage(oMsg)
+							addCommsReply(_("Back"), commsStation)
+						end)	--end trade medicine on player ship for goods on station comms reply branch
+						gi = gi + 1
+					until(gi > #goods[comms_target])
+				end	--end medicine available on player ship if branch
+			end	--end medicine trade if branch
+			addCommsReply(_("Back"), commsStation)
+		end)	--end of buy, sell trade comms reply branch
+		gi = 1
+		cargoHoldEmpty = true
+		repeat
+			playerGoodsType = goods[player][gi][1]
+			playerGoodsQuantity = goods[player][gi][2]
+			if playerGoodsQuantity > 0 then
+				cargoHoldEmpty = false
+			end
+			gi = gi + 1
+		until(gi > #goods[player])
+		if not cargoHoldEmpty then
+			addCommsReply(_("trade-comms", "Jettison cargo"), function()
+				setCommsMessage(string.format(_("trade-comms", "Available space: %i\nWhat would you like to jettison?"),player.cargo))
+				gi = 1
+				repeat
+					local goodsType = goods[player][gi][1]
+					local goodsQuantity = goods[player][gi][2]
+					if goodsQuantity > 0 then
+						addCommsReply(goodsType, function()
+							decrementPlayerGoods(goodsType)
+							player.cargo = player.cargo + 1
+							setCommsMessage(string.format("One %s jettisoned",goodsType))
+							addCommsReply("Back", commsStation)
+						end)
+					end
+					gi = gi + 1
+				until(gi > #goods[player])
+				addCommsReply("Back", commsStation)
+			end)	--end of cargo present, allow jettison if and comms reply branch
+		end	
+	end	--end of goods present on comms target if branch
+end
+function special_buy_cost(target, player)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(player) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(player) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	if target:getFaction() == "Interplanetary Union" then
+		cost = cost *1
+	elseif target:getFaction() == "Independent" then
+		cost = cost *2
+	elseif target:getFaction() == "Arlenians" then
+		cost = cost *4
+	elseif target:getFaction() == "Exuari" then	-- because stations are ships
+		cost = cost *4
+	else	-- other neutral and enemies
+		cost = cost *2
+	end
+	if target.typeName == "SpaceStation" then
+		cost = cost *2
+	else -- SpaceShip
+		cost = cost *1
+	end
+	return math.floor(cost)
 end
 

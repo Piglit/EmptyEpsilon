@@ -434,30 +434,6 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 -- @treturn string the status
-function getFriendStatus(comms_source, comms_target)
-    if comms_source:isFriendly(comms_target) then
-function isAllowedTo(state)
-    if state == "friend" and player:isFriendly(comms_target) then
-        return true
-    end
-    if state == "neutral" and not player:isEnemy(comms_target) then
-        return true
-    end
-    return false
-end
-
--- Return the number of reputation points that a specified weapon costs for the
--- current player.
-function getWeaponCost(weapon)
-    return math.ceil(comms_data.weapon_cost[weapon] * comms_data.reputation_cost_multipliers[getFriendStatus()])
-end
-
--- Return the number of reputation points that a specified service costs for
--- the current player.
-function getServiceCost(service)
-    return math.ceil(comms_data.service_cost[service])
-end
-
 function getFriendStatus()
     if player:isFriendly(comms_target) then
         return "friend"

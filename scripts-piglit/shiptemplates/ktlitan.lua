@@ -184,7 +184,7 @@ template:setDefaultAI('missilevolley')
 descr = ""
 template = ShipTemplate():setName("Ktlitan Queen"):setModel("sci_fi_alien_ship_8"):setClass("Ktlitan", "Queen")
 template:setDescription(_(descr))
-template:setRadarTrace("radar_ktlitan_queen.png")
+template:setRadarTrace("ktlitan_queen.png")
 template:setHull(650)
 --template:setShields(100, 100, 100)
 -- shields were removed for stronger hull

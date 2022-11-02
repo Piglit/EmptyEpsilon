@@ -58,6 +58,7 @@ public:
             {
                 // Notify the player.
                 label->setText(tr("Control code accepted.\nGranting access."));
+                my_player_info->last_password = password;
                 // Reset and hide the password field.
                 entry->setText("");
                 entry->hide();
@@ -81,13 +82,14 @@ public:
         confirmation->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(250, 50)->hide();
     }
 
-    void open(string label, std::function<bool(string)> on_password_check, std::function<void()> on_ready, std::function<void()> on_cancel)
+    void open(string label, string preset_password, std::function<bool(string)> on_password_check, std::function<void()> on_ready, std::function<void()> on_cancel)
     {
         this->label->setText(label);
         this->on_password_check = on_password_check;
         this->on_ready = on_ready;
         this->on_cancel = on_cancel;
 
+        entry->setText(preset_password);
         entry->show();
         cancel->show();
         entry_ok->show();
@@ -134,7 +136,7 @@ ShipSelectionScreen::ShipSelectionScreen()
             if (gameGlobalInfo->gm_control_code.length() > 0)
             {
                 LOG(INFO) << "Player selected gm mode, which has a control code.";
-                password_dialog->open(tr("Enter the GM control code:"), [this](string code) {
+                password_dialog->open(tr("Enter the GM control code:"), "", [this](string code) {
                     return code == gameGlobalInfo->gm_control_code;
                 }, [this](){
                     my_player_info->commandSetShipId(-1);
@@ -160,7 +162,7 @@ ShipSelectionScreen::ShipSelectionScreen()
         if (gameGlobalInfo->gm_control_code.length() > 0)
         {
             LOG(INFO) << "Player selected Spectate mode, which has a control code.";
-            password_dialog->open(tr("Enter the GM control code:"), [this](string code) {
+            password_dialog->open(tr("Enter the GM control code:"), "", [this](string code) {
                 return code == gameGlobalInfo->gm_control_code;
             }, [this](){
                 my_player_info->commandSetShipId(-1);
@@ -270,7 +272,7 @@ ShipSelectionScreen::ShipSelectionScreen()
                 left_container->hide();
                 right_container->hide();
                 // Show the control code entry dialog.
-                password_dialog->open(tr("Enter this ship's control code:"), [this, ship](string code) {
+                password_dialog->open(tr("Enter this ship's control code:"), my_player_info->last_password, [this, ship](string code) {
                     return ship && ship->control_code == code;
                 }, [this, ship](){
                     my_player_info->commandSetShipId(ship->getMultiplayerId());

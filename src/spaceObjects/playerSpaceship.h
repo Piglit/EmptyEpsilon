@@ -92,9 +92,9 @@ public:
     // Time in seconds it takes to recalibrate shields
     float shield_calibration_delay;
     // Ship automation features, mostly for single-person ships like fighters
-    bool auto_repair_enabled;
-    bool auto_coolant_enabled;
-    bool auto_reload_tube_enabled;
+    bool auto_repair_enabled = false;
+    bool auto_coolant_enabled = false;
+    bool auto_reload_tube_enabled = false;
     // Whether shields are up (true) or down
     bool shields_active;
     // Password to join a ship. Default is empty.

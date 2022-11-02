@@ -212,6 +212,8 @@ public:
     P<SpaceObject> docking_target; //Server only
     glm::vec2 docking_offset{0, 0}; //Server only
 
+    bool auto_reload_tube_enabled;
+
     SpaceShip(string multiplayerClassName, float multiplayer_significant_range=-1);
     virtual ~SpaceShip();
 

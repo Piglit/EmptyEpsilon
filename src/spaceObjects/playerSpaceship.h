@@ -94,6 +94,7 @@ public:
     // Ship automation features, mostly for single-person ships like fighters
     bool auto_repair_enabled;
     bool auto_coolant_enabled;
+    bool auto_reload_tube_enabled;
     // Whether shields are up (true) or down
     bool shields_active;
     // Password to join a ship. Default is empty.
@@ -297,6 +298,7 @@ public:
     void setMaxCoolant(float coolant);
     float getMaxCoolant() { return max_coolant; }
     void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
+    void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
     int getRepairCrewCount();
     void setRepairCrewCount(int amount);
     EAlertLevel getAlertLevel() { return alert_level; }

@@ -1222,6 +1222,12 @@ GuiShipTweakPlayer2::GuiShipTweakPlayer2(GuiContainer* owner)
         target->commandSetAutoRepair(value);
     });
     auto_repair_enabled->setSize(GuiElement::GuiSizeMax, 40);
+
+    auto_reload_tube_enabled = new GuiToggleButton(right_col, "", tr("button", "Auto reload tube"), [this](bool value) {
+        target->setAutoMissileReload(value);
+    });
+    auto_reload_tube_enabled->setSize(GuiElement::GuiSizeMax, 40);
+
 }
 
 void GuiShipTweakPlayer2::onDraw(sp::RenderTarget& renderer)
@@ -1238,6 +1244,7 @@ void GuiShipTweakPlayer2::onDraw(sp::RenderTarget& renderer)
     can_launch_probe->setValue(target->getCanLaunchProbe());
     auto_coolant_enabled->setValue(target->auto_coolant_enabled);
     auto_repair_enabled->setValue(target->auto_repair_enabled);
+    auto_reload_tube_enabled->setValue(target->auto_reload_tube_enabled);
     
     energy_warp_per_second->setText(tr("player_tweak", "Warp (E/s): {energy_per_second}").format({ {"energy_per_second", string(target->getEnergyWarpPerSecond())} }));
     energy_shield_per_second->setText(tr("player_tweak", "Shields (E/s): {energy_per_second}").format({ {"energy_per_second", string(target->getEnergyShieldUsePerSecond())} }));

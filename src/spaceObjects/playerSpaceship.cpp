@@ -354,6 +354,8 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Control codes are case-insensitive.
     /// Example: player:setControlCode("abcde") -- matches "abcde", "ABCDE", "aBcDe"
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
+    /// Sets weapon_tube automatic weapon tube reload is enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
     /// Defines a function to call when this PlayerSpaceship launches a probe.
     /// Passes the launching PlayerSpaceship and launched ScanProbe.
     /// Example:
@@ -537,6 +539,7 @@ PlayerSpaceship::PlayerSpaceship()
     shield_calibration_delay = 0.0;
     auto_repair_enabled = false;
     auto_coolant_enabled = false;
+    auto_reload_tube_enabled = false;
     max_coolant = max_coolant_per_system;
     scan_probe_stock = max_scan_probes;
     alert_level = AL_Normal;
@@ -572,6 +575,7 @@ PlayerSpaceship::PlayerSpaceship()
     registerMemberReplication(&auto_repair_enabled);
     registerMemberReplication(&max_coolant);
     registerMemberReplication(&auto_coolant_enabled);
+    registerMemberReplication(&auto_reload_tube_enabled);
     registerMemberReplication(&beam_system_target);
     registerMemberReplication(&comms_state);
     registerMemberReplication(&comms_open_delay, 1.0);
@@ -2268,6 +2272,8 @@ string PlayerSpaceship::getExportLine()
         result += ":setAutoCoolant(true)";
     if (auto_repair_enabled)
         result += ":commandSetAutoRepair(true)";
+    if (auto_reload_tube_enabled)
+        result += ":setAutoMissileReload(true)";
 
     // Update power factors, only for the systems where it changed.
     for (unsigned int sys_index = 0; sys_index < SYS_COUNT; ++sys_index)

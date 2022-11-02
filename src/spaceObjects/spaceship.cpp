@@ -494,6 +494,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     energy_level = 1000;
     max_energy_level = 1000;
     turnSpeed = 0.0f;
+    auto_reload_tube_enabled = false;
 
     registerMemberReplication(&target_rotation, 1.5f);
     registerMemberReplication(&turnSpeed, 0.1f);

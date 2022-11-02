@@ -9,7 +9,7 @@ import os
 import random
 import urllib
 
-from srvData import servers
+from serverControl import servers
 
 testClient = TestClient(eeCampaignServer.app)
 
@@ -19,7 +19,7 @@ def scenario_info():
 		"scenario_info": {
 			"filename": "scenario_00_test.lua",
 			"name": "Test",
-			"variation": "None",
+#			"variation": "None",
 		},
 		"server_name": "Server",
 	}
@@ -51,7 +51,7 @@ def test_scenario_start(scenario_info):
 	assert response.status_code == 200, response.reason
 	assert "01_test2" in servers.getScenarios(scenario_info["server_name"])
 
-def test_scenario_join(scenario_info_proxy):
+def _test_scenario_join(scenario_info_proxy):
 	response = testClient.post("/proxySpawn", json = scenario_info_proxy)
 	assert response.status_code == 200, response.reason
 
@@ -109,7 +109,7 @@ def test_getScenarios():
 	response = testClient.get("/scenarios/"+server_name)
 	assert response.status_code == 200, response.reason
 
-def test_getShips():
+def _test_getShips():
 	server_name = "Testserver"
 	response = testClient.get("/ships_available/"+server_name)
 	assert response.status_code == 200, response.reason
@@ -119,7 +119,7 @@ def test_getShips():
 	assert response.status_code == 200, response.reason
 	assert "Hathcock" in response.json()["ships"]
 	
-def test_getScenarioInfo():
+def _test_getScenarioInfo():
 	server_name = "Testserver"
 	missionId = "00_basic"
 	servers.unlockScenario(missionId, server_name)
@@ -143,7 +143,26 @@ def test_getScenarioInfo():
 	assert "Proxy" in response.json()["scenarioInfo"]
 	assert response.json()["scenarioInfo"]["Proxy"] == "192.168.2.3"
 
-def test_fuzzy_workflow():
+def test_getScenarioSettings():
+	server_name = "Testserver"
+	missionId = "00_basic"
+	servers.unlockScenario(missionId, server_name, settings={"Time": ["30min"]})
+	missionId = "scenario_00_basic.lua"
+	response = testClient.get("/scenario_settings/"+server_name+"/"+missionId)
+	assert response.status_code == 200, response.reason
+	assert "Time" in response.json()
+	assert len(response.json()["Time"]) == 1
+	assert "30min" in response.json()["Time"]
+
+def test_getSpawnPosition():
+	server_name = "Testserver"
+	missionId = "00_basic"
+	response = testClient.get("/spawn_position/"+server_name+"/"+missionId)
+	assert -100 <= response["posx"] <= 100
+	assert -100 <= response["posy"] <= 100
+	assert 0 <= response["dir"] <= 360
+
+def _test_fuzzy_workflow():
 	server_name = "Testserver"
 	response = testClient.get("/scenarios/"+server_name)
 	assert response.status_code == 200, response.reason
@@ -157,13 +176,13 @@ def test_fuzzy_workflow():
 		scenario = random.choice(scenarios)
 		response = testClient.get("/scenario_info/"+server_name+"/"+scenario)
 		assert response.status_code == 200, response.reason
-		variations = servers.getScenarioVariations(eeCampaignServer.scenarioFileNameToMissionId(scenario), server_name)
-		variation = random.choice(variations)
+		#variations = servers.getScenarioVariations(eeCampaignServer.scenarioFileNameToMissionId(scenario), server_name)
+		#variation = random.choice(variations)
 		reqdata = {
 			"scenario_info": {
 				"filename": scenario,
 				"name": "TestDummyDane",
-				"variation": str(variation),
+		#		"variation": str(variation),
 			},
 			"server_name": server_name,
 		}
@@ -190,6 +209,7 @@ def test_fuzzy_workflow():
 		assert response.status_code == 200, response.reason
 		scenarios = response.json()["scenarios"]
 	servers.storeData()
+
 
 if __name__ == "__main__":
 	uvicorn.run("eeCampaignServer:app", host="0.0.0.0", reload=False, port=8888)

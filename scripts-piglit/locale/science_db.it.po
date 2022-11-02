@@ -1,0 +1,554 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.1\n"
+#: scripts/science_db.lua:5
+#, fuzzy
+msgid "Natural"
+msgstr "Naturali"
+#: scripts/science_db.lua:6
+msgid "Asteroid"
+msgstr "Asteroide"
+#: scripts/science_db.lua:7
+msgid ""
+"Asteroids are minor planets, usually smaller than a few kilometers. Larger "
+"variants are sometimes refered to as planetoids."
+msgstr ""
+"Gli asteroidi sono pianeti minori, generalmente più piccoli di pochi "
+"chilometri. Le varianti più grandi sono a volte indicate come planetoidi."
+#: scripts/science_db.lua:8
+msgid "Nebula"
+msgstr "Nebulosa"
+#: scripts/science_db.lua:9
+msgid ""
+"Nebulae are the birthing places of new stars. These gas fields, usually "
+"created by the death of an old star, slowly form new stars due to the "
+"gravitational pull of its gas molecules. Because of the ever-changing nature "
+"of gas nebulae, most radar and scanning technologies are unable to penetrate "
+"them. Science officers are therefore advised to rely on probes and visual "
+"observations."
+msgstr ""
+"Le nebulose sono i luoghi di nascita di nuove stelle. Questi campi di gas, "
+"solitamente creati dalla morte di una vecchia stella, formano lentamente "
+"nuove stelle a causa dell'attrazione gravitazionale delle sue molecole di "
+"gas. A causa della natura in continua evoluzione delle nebulose gassose, la "
+"maggior parte delle tecnologie radar e di scansione non sono in grado di "
+"penetrarle. Si consiglia pertanto agli ufficiali scientifici di fare "
+"affidamento su sonde e osservazioni visive."
+#: scripts/science_db.lua:11
+msgid "Black hole"
+msgstr "Buco nero"
+#: scripts/science_db.lua:12
+msgid ""
+"A black hole is a point of supercondensed mass with a gravitational pull so "
+"powerful that not even light can escape it. It has no locally detectable "
+"features, and can only be seen indirectly by blocking the view and "
+"distorting its surroundings, creating a strange circular mirror image of the "
+"galaxy. The black disc in the middle marks the event horizon, the boundary "
+"where even light can't escape it anymore. \n"
+"\t\n"
+"On the sensors, a black hole appears as a disc indicating the zone where the "
+"gravitational pull is getting dangerous, and soon will be stronger then the "
+"ship's impulse engines. An object that crosses a black hole is drawn toward "
+"its center and quickly ripped apart by the gravitational forces."
+msgstr ""
+"Un buco nero è un punto di massa super condensata con un'attrazione "
+"gravitazionale così potente che nemmeno la luce può sfuggirgli. Non ha "
+"caratteristiche rilevabili localmente e può essere visto solo indirettamente "
+"bloccando la vista e distorcendo l'ambiente circostante, creando una strana "
+"immagine speculare circolare della galassia. Il disco nero al centro segna "
+"l'orizzonte degli eventi, il confine dove nemmeno la luce può più "
+"sfuggirle.\n"
+"\n"
+"Sui sensori, un buco nero appare come un disco che indica la zona in cui "
+"l'attrazione gravitazionale diventa pericolosa, e presto sarà più forte dei "
+"motori a impulsi della nave. Un oggetto che attraversa un buco nero viene "
+"attirato verso il suo centro e rapidamente lacerato dalle forze "
+"gravitazionali."
+#: scripts/science_db.lua:16
+msgid "Wormhole"
+msgstr "Wormhole"
+#: scripts/science_db.lua:17
+msgid ""
+"A wormhole, also known as an Einstein-Rosen bridge, is a phenomena that "
+"connects two points of spacetime. Jump drives operate in a similar fashion, "
+"but instead of being created at will, a wormhole occupies a specific "
+"location in space. Objects that enter a wormhole instantaneously emerge from "
+"the other end, which might be anywhere from a few feet to thousands of light "
+"years away. \n"
+"\n"
+"Wormholes are rare, and most can move objects in only one direction. "
+"Traversable wormholes, which are stable and allow for movement in both "
+"directions, are even rarer. All wormholes generate tremendous sensor "
+"activity, which an astute science officer can detect even through "
+"disruptions such as nebulae."
+msgstr ""
+"Un wormhole, noto anche come ponte di Einstein-Rosen, è un fenomeno che "
+"collega due punti dello spaziotempo. I motori di salto funzionano in modo "
+"simile, ma invece di essere create a piacere, un wormhole occupa una "
+"posizione specifica nello spazio. Gli oggetti che entrano in un wormhole "
+"emergono istantaneamente dall'altra estremità, che potrebbe trovarsi ovunque "
+"da pochi metri a migliaia di anni luce di distanza.\n"
+"\n"
+"I wormhole sono rari e la maggior parte può spostare gli oggetti in una sola "
+"direzione. I wormhole attraversabili, che sono stabili e consentono il "
+"movimento in entrambe le direzioni, sono ancora più rari. Tutti i wormhole "
+"generano un'enorme attività dei sensori, che un astuto ufficiale scientifico "
+"può rilevare anche attraverso interruzioni come le nebulose."
+#: scripts/science_db.lua:21
+msgid "Weapons"
+msgstr "Armi"
+#: scripts/science_db.lua:22
+msgid ""
+"This database only covers the basic versions of the missiles used throughout "
+"the galaxy.\n"
+"\n"
+"It has been reported that some battleships started using larger variations "
+"of those missiles. Small fighters and even frigates should not have too much "
+"trouble dodging them, but space captains of bigger ships should be wary of "
+"their doubled damage potential.\n"
+"\n"
+"Smaller variations of these missiles have become common in the galaxy, too. "
+"Fighter pilots praise their speed and maneuverability, because it gives them "
+"an edge against small and fast-moving targets. They only deal half the "
+"damage of their basic counterparts, but what good is a missile if it does "
+"not hit its target."
+msgstr ""
+"Questo database copre solo le versioni di base dei missili utilizzati in "
+"tutta la galassia.\n"
+"\n"
+"È stato riferito che alcune corazzate hanno iniziato a utilizzare varianti "
+"più grandi di questi missili. I piccoli caccia e persino le fregate non "
+"dovrebbero avere troppi problemi a schivarli, ma i capitani spaziali delle "
+"navi più grandi dovrebbero fare attenzione al loro potenziale di danno "
+"raddoppiato.\n"
+"\n"
+"Anche varianti più piccole di questi missili sono diventate comuni nella "
+"galassia. I piloti di caccia lodano la loro velocità e manovrabilità, perché "
+"dà loro un vantaggio contro bersagli piccoli e in rapido movimento. "
+"Infliggono solo la metà del danno delle loro controparti di base, ma a che "
+"serve un missile se non colpisce il bersaglio?"
+#: scripts/science_db.lua:28
+#, fuzzy
+msgid "Homing missile"
+msgstr "Missile autoguidato"
+#: scripts/science_db.lua:29 scripts/science_db.lua:34
+#: scripts/science_db.lua:53 scripts/science_db.lua:60
+msgid "Range"
+msgstr "Portata"
+#: scripts/science_db.lua:30 scripts/science_db.lua:61
+msgid "Damage"
+msgstr "Danno"
+#: scripts/science_db.lua:31
+msgid ""
+"This target-seeking missile is the workhorse of many space combat arsenals. "
+"It's compact enough to be fitted on frigates, and packs enough punch to be "
+"used on larger ships, though usually in more than a single missile tube."
+msgstr ""
+"Questo missile a ricerca è il pane quotidiano di molti arsenali da "
+"combattimento spaziale. È abbastanza compatto da poter essere montato su "
+"fregate e ha una potenza sufficiente per essere utilizzato su navi più "
+"grandi, sebbene di solito in più di un singolo tubo missilistico."
+#: scripts/science_db.lua:33
+msgid "Nuke"
+msgstr "Nucleari"
+#: scripts/science_db.lua:35 scripts/science_db.lua:45
+#: scripts/science_db.lua:54
+msgid "Blast radius"
+msgstr "Raggio esplosione"
+#: scripts/science_db.lua:36 scripts/science_db.lua:46
+#: scripts/science_db.lua:55
+#, fuzzy
+msgid "Damage at center"
+msgstr "Danno al centro"
+#: scripts/science_db.lua:37 scripts/science_db.lua:47
+#: scripts/science_db.lua:56
+#, fuzzy
+msgid "Damage at edge"
+msgstr "Danno al bordo"
+#: scripts/science_db.lua:38
+msgid ""
+"A nuclear missile is similar to a homing missile in that it can seek a "
+"target, but it moves and turns more slowly and explodes a greatly increased "
+"payload. Its nuclear explosion spans 1U of space and can take out multiple "
+"ships in a single shot.\n"
+"\n"
+"Some captains oppose the use of nuclear weapons because their large "
+"explosions can lead to 'fragging', or unintentional friendly fire. Shields "
+"should protect crews from harmful radiation, but because these weapons are "
+"often used in the thick of battle, there's no way of knowing if hull plating "
+"or shields can provide enough protection."
+msgstr ""
+"Un missile nucleare è simile a un missile autoguidato in quanto può cercare "
+"un bersaglio, ma si muove e gira più lentamente e fa esplodere un carico "
+"utile notevolmente maggiore. La sua esplosione nucleare copre 1u di spazio e "
+"può eliminare più navi in un solo colpo.\n"
+"\n"
+"Alcuni capitani si oppongono all'uso di armi nucleari perché le loro grandi "
+"esplosioni possono portare a \"fragging\" o fuoco amico involontario. Gli "
+"scudi dovrebbero proteggere gli equipaggi dalle radiazioni nocive, ma poiché "
+"queste armi sono spesso utilizzate nel vivo della battaglia, non c'è modo di "
+"sapere se il rivestimento dello scafo o gli scudi possono fornire una "
+"protezione sufficiente."
+#: scripts/science_db.lua:42
+#, fuzzy
+msgid "Mine"
+msgstr "Mine"
+#: scripts/science_db.lua:43
+#, fuzzy
+msgid "Drop distance"
+msgstr "Distanza di rilascio"
+#: scripts/science_db.lua:44
+msgid "Trigger distance"
+msgstr "Distanza di innesco"
+#: scripts/science_db.lua:48
+msgid ""
+"Mines are often placed in defensive perimeters around stations. There are "
+"also old minefields scattered around the galaxy from older wars.\n"
+"\n"
+"Some fearless captains use mines as offensive weapons, but their delayed "
+"detonation and blast radius make this use risky at best."
+msgstr ""
+"Le mine sono spesso collocate nei perimetri difensivi intorno alle stazioni. "
+"Ci sono anche vecchi campi minati sparsi per la galassia da guerre più "
+"antiche.\n"
+"\n"
+"Alcuni capitani senza paura usano le mine come armi offensive, ma la loro "
+"detonazione ritardata e il raggio dell'esplosione rendono questo uso "
+"rischioso nel migliore dei casi."
+#: scripts/science_db.lua:52
+#, fuzzy
+msgid "EMP"
+msgstr "EMP"
+#: scripts/science_db.lua:57
+#, fuzzy
+msgid ""
+"The electromagnetic pulse missile (EMP) reproduces the disruptive effects of "
+"a nuclear explosion, but without the destructive properties. This causes it "
+"to only affect shields within its blast radius, leaving their hulls intact. "
+"The EMP missile is also smaller and easier to store than heavy nukes. Many "
+"captains (and pirates) prefer EMPs over nukes for these reasons, and use "
+"them to knock out targets' shields before closing to disable them with "
+"focused beam fire."
+msgstr ""
+"Il missile a impulsi elettromagnetici (EMP) riproduce gli effetti dirompenti "
+"di un'esplosione nucleare, ma senza le proprietà distruttive. Questo fa sì "
+"che agisca solo sugli scudi entro il suo raggio di esplosione, lasciando "
+"intatti i loro scafi. Il missile EMP è anche più piccolo e più facile da "
+"immagazzinare rispetto alle armi nucleari pesanti. Molti capitani (e pirati) "
+"preferiscono gli EMP alle armi nucleari per questi motivi e li usano per "
+"abbattere gli scudi dei bersagli prima di avvicinarsi per disabilitarli "
+"sparando raggi focalizzati."
+#: scripts/science_db.lua:59
+#, fuzzy
+msgid "HVLI"
+msgstr "HVLI"
+#: scripts/science_db.lua:62
+#, fuzzy
+msgid "Burst"
+msgstr "Esplosione"
+#: scripts/science_db.lua:63
+msgid ""
+"A high-velocity lead impactor (HVLI) fires a simple slug of lead at a high "
+"velocity. This weapon is usually found in simpler ships since it does not "
+"require guidance computers. This also means its projectiles fly in a "
+"straight line from its tube and can't pursue a target.\n"
+"\n"
+"Each shot from an HVLI fires a burst of 5 projectiles, which increases the "
+"chance to hit but requires precision aiming to be effective. It reaches its "
+"full damage potential at a range of 2u."
+msgstr ""
+"Un impattore di piombo ad alta velocità (HVLI) spara un semplice proiettile "
+"di piombo ad alta velocità. Quest'arma si trova di solito nelle navi più "
+"semplici poiché non richiede computer di guida. Ciò significa anche che i "
+"suoi proiettili volano in linea retta dal suo tubo e non possono inseguire "
+"un bersaglio.\n"
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+# destroyer->incrociatore come hanno fatto per star wars
+# letteralmente sarebbe cacciatorpediniere
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy
+#, fuzzy

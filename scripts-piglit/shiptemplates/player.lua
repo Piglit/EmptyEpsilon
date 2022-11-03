@@ -7,207 +7,207 @@ color_player = "White" --change it if you want another style
 
 
 
---[[Starfighter--]]
--- what is fun: always having to maneuver to keep behind the enemy.
-template = ShipTemplate():setName("MP52 Hornet"):setClass(_("class", "Starfighter"), _("subclass", "Interceptor")):setType("playership")
-template:setModel("WespeFighterYellow")
-template:setRadarTrace("fighter.png")
-template:setDescription([[The MP52 Hornet interceptor is a fast but fragile starfighter of the Human Navy. Conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
-template:setImpulseSoundFile("sfx/engine_fighter.wav")
-
-template:setHull(70)
-template:setShields(60)
---				spped, turn, accel, rev-speed, rev-accel
-template:setSpeed(125, 32, 40, 125, 20)
-template:setCombatManeuver(600, 0)
-template:setBeam(0, 30,-5, 900.0, 4.0, 2.5)
-template:setBeam(1, 30, 5, 900.0, 4.0, 2.5)
-template:setEnergyStorage(400)
-template:setRepairCrewCount(1)
-template:setLongRangeRadarRange(5000)
-template:setShortRangeRadarRange(5000)
-
-template:setCanScan(false)
-template:setCanHack(false)
-template:setCanDock(true)
-template:setCanCombatManeuver(false)
-template:setCanLaunchProbe(false)
-template:setCanSelfDestruct(false)
-
-template:setAutoCoolant(true)
-template:setAutoMissileReload(true)
-template:setAutoRepair(true)
-
-addSystemsWespe(template)
-
-var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
--- what is fun: difficult to outmaneuver enemies if they have high turn rate
-var:setClass(_("class", "Starfighter"), _("subclass", "Laser Drill"))
-var:setDescription([[The Mole mobile drill was long used to mine small asteroids. Outfitted with a state of the art starfighter impulse engine the MP58 Mole is capable of digging holes into enemy ships.]])
-var:setModel("WespeFighterBlue")
-var:setBeam(0, 30,-5, 900.0, 3.0, 2.5)
-var:setBeam(1, 30, 5, 900.0, 3.0, 2.5)
-var:setSpeed(80, 16, 20, 70, 10)
-
--- what is fun: same as starfighter but wider beam range makes it a bit more easy
-var = template:copy("MP56 Bumblebee")	-- Wider beam range
-var:setDescription([[The MP58 Bumblebee interceptor is the upgraded version of the MP52 Hornet interceptor. Fast but fragile starfighter, conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
-var:setClass(_("class", "Starfighter"), _("subclass", "Advanced Interceptor"))
-var:setModel("WespeFighterRed")
-var:setBeam(0, 45,-5, 700.0, 4.0, 2.5)
-var:setBeam(1, 45, 5, 700.0, 4.0, 2.5)
-
-
---[[Bomber--]]
--- Dragon Names:
--- Peluda: shoots quills from back - hvli
--- Ryu: grants wishes, three claws - Rockets
--- Drac: poison breath - Mine rear
--- Cuelebre: poison breath, eat cattle, Mine Fwd
--- Zomok: bad weather - emp
--- Bashe: eaths elefants - nuke
-
--- legacy; try not to use:
-template = ShipTemplate():setName("ZX-Lindworm"):setClass(_("class", "Starfighter"), _("subclass", "Bomber")):setType("playership")
-template:setModel("LindwurmFighter"..color_player)
-template:setRadarTrace("fighter.png")
-template:setDescription([[The WX-Lindworm, or "Worm" as it's often called, is a bomber-class starfighter. While one of the least-shielded starfighters in active duty, the Worm's two launchers can pack quite a punch. Its goal is to fly in, destroy its target, and fly out or be destroyed. The engine can be overloaded to cause a massive explotion - however this destroys the bomber, too.]])
-template:setImpulseSoundFile("sfx/engine_fighter.wav")
-
-template:setHull(75)
-template:setShields(40)
-template:setSpeed(70, 15, 25, 40, 15)
-template:setTubes(3, 10.0)
-template:setTubeSize(0, "small")
-template:setTubeSize(1, "small")
-template:setTubeSize(2, "small")
-template:setWeaponStorage("HVLI", 12)
-template:setWeaponStorage("Homing", 3)
-template:setTubeDirection(1,-1):setWeaponTubeExclusiveFor(1, "HVLI")
-template:setTubeDirection(2, 1):setWeaponTubeExclusiveFor(2, "HVLI")
---                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 10, 180, 700, 6.0, 2)
---								  Arc, Dir, Rotate speed
-template:setBeamWeaponTurret( 0, 270, 180, 4)
-template:setCombatManeuver(250, 150)
-template:setEnergyStorage(400)
-template:setRepairCrewCount(1)
-template:setLongRangeRadarRange(5000)
-template:setShortRangeRadarRange(5000)
-
-template:setCanScan(false)
-template:setCanHack(false)
-template:setCanDock(true)
-template:setCanCombatManeuver(false)
-template:setCanLaunchProbe(false)
-template:setCanSelfDestruct(false)
-
-template:setAutoCoolant(true)
-template:setAutoMissileReload(true)
-template:setAutoRepair(true)
-
-addSystemsLindwurm(template)
-
---what is fun: destroying bigger enemies. Player should always consider weather keeping up the attack or escaping is adequate. Reverse drive should be slower than enemies forward drive. But forward faster.
---Challenge: you have to sustain firing, but are too slow to escape using reverse
-var = template:copy("Peluda")	-- HVLI
-var:setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
-var:setModel("LindwurmFighterGreen")
-var:setDescription([[The Peluda assault Bomber is a basic starfighter of the Human Navy; being ideally suited for attacking slow or stationary targets.]])
-var:setTubes(1,7)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("HVLI", 6)
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
-var = template:copy("Drac")	-- Mine Rear
---what is fun: short range but huge AOE
---more challenging than front mines, since reverse is slow
-var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setModel("LindwurmFighterYellow")
-var:setDescription([[The Dray tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
-var:setTubes(1,20)
-var:setWeaponStorage("HVLI", 0)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("Mine", 1)
-var:setTubeDirection(0,180)
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
-var = template:copy("Cuelebre")	-- Mine Front
---what is fun: frontal mines are awesome. short range but huge AOE -> fun to place
-var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setModel("LindwurmFighterBlue")
-var:setDescription([[The Cuelebre tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
-var:setTubes(1,20)
-var:setWeaponStorage("HVLI", 0)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("Mine", 1)
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
-var = template:copy("Bashe")	-- Nuke
---what is fun: the firepower of nukes from a fighter.
---not really a challenge, it is just delivery and some dodging
-var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setModel("LindwurmFighterRed")
-var:setDescription([[The Bashe tactical nuke delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
-var:setTubes(1,20)	-- take quite long, so combat may evolve
-var:setWeaponStorage("HVLI", 0)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("Nuke", 1)
-var:setBeam(0,0,0,0,0,0)
-var:setBeamWeaponTurret(0,0,0,0)
-
---[[Still Bombers, but with Scout hull--]]
-template = ShipTemplate():setName("Ryu"):setClass(_("class", "Starfighter"), _("subclass", "Rocket Fighter")):setType("playership")
---what is fun: double torpedo insta-destroys enemy fighters!
-template:setModel("AdlerLongRangeFighterRed")
-template:setRadarTrace("fighter.png")
-template:setImpulseSoundFile("sfx/engine_fighter.wav")
-template:setDescription([[The Ryu Rocket Fighter is a basic starfighter of the Human Navy; Designed for escort and anti-fighter missions.]])
-template:setTubes(2,7)
-template:setTubeSize(0, "small")
-template:setTubeSize(1, "small")
-template:setWeaponStorage("Homing", 4)
-template:setHull(75)
-template:setShields(40)
-template:setSpeed(70, 15, 25, 40, 15)
-
-template:setCombatManeuver(250, 150)
-template:setEnergyStorage(400)
-template:setRepairCrewCount(1)
-template:setLongRangeRadarRange(5000)
-template:setShortRangeRadarRange(5000)
-
-template:setCanScan(false)
-template:setCanHack(false)
-template:setCanDock(true)
-template:setCanCombatManeuver(false)
-template:setCanLaunchProbe(false)
-template:setCanSelfDestruct(false)
-
-template:setAutoCoolant(true)
-template:setAutoMissileReload(true)
-template:setAutoRepair(true)
-
-addSystemsAdler(template)
-
-
--- switch to model with two primary tubes
--- switch to model with two primary tubes
---what is fun: 
---Can not destroy enemies, since it has only emps
-var = template:copy("Zomok")	-- EMP
-var:setModel("AdlerLongRangeFighterBlue")
-var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
-var:setDescription([[The Zomok tactical EMP delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
-var:setTubes(2,10)	-- may hide two rockets in tubes while docking. So we can change loadout!
-var:setWeaponStorage("HVLI", 1)
-var:setWeaponStorage("Homing", 0)
-var:setWeaponStorage("EMP", 1)
-var:setAutoMissileReload(false)
-
+----[[Starfighter--]]
+---- what is fun: always having to maneuver to keep behind the enemy.
+--template = ShipTemplate():setName("MP52 Hornet"):setClass(_("class", "Starfighter"), _("subclass", "Interceptor")):setType("playership")
+--template:setModel("WespeFighter"..color_player)
+--template:setRadarTrace("tie_fighter.png")
+--template:setDescription([[The MP52 Hornet interceptor is a fast but fragile starfighter of the Human Navy. Conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
+--template:setImpulseSoundFile("sfx/engine_fighter.wav")
+--
+--template:setHull(70)
+--template:setShields(60)
+----				spped, turn, accel, rev-speed, rev-accel
+--template:setSpeed(125, 32, 40, 125, 20)
+--template:setCombatManeuver(600, 0)
+--template:setBeam(0, 30,-5, 900.0, 4.0, 2.5)
+--template:setBeam(1, 30, 5, 900.0, 4.0, 2.5)
+--template:setEnergyStorage(400)
+--template:setRepairCrewCount(1)
+--template:setLongRangeRadarRange(10000)
+--template:setShortRangeRadarRange(5000)
+--
+--template:setCanScan(false)
+--template:setCanHack(false)
+--template:setCanDock(true)
+--template:setCanCombatManeuver(false)
+--template:setCanLaunchProbe(false)
+--template:setCanSelfDestruct(false)
+--
+--template:setAutoCoolant(true)
+--template:setAutoMissileReload(true)
+--template:setAutoRepair(true)
+--
+--addSystemsWespe(template)
+--
+--var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
+---- what is fun: difficult to outmaneuver enemies if they have high turn rate
+--var:setClass(_("class", "Starfighter"), _("subclass", "Laser Drill"))
+--var:setDescription([[The Mole mobile drill was long used to mine small asteroids. Outfitted with a state of the art starfighter impulse engine the MP58 Mole is capable of digging holes into enemy ships.]])
+--var:setModel("WespeFighterBlue")
+--var:setBeam(0, 30,-5, 900.0, 3.0, 2.5)
+--var:setBeam(1, 30, 5, 900.0, 3.0, 2.5)
+--var:setSpeed(80, 16, 20, 70, 10)
+--
+---- what is fun: same as starfighter but wider beam range makes it a bit more easy
+--var = template:copy("MP56 Bumblebee")	-- Wider beam range
+--var:setDescription([[The MP58 Bumblebee interceptor is the upgraded version of the MP52 Hornet interceptor. Fast but fragile starfighter, conveived for high-speed surgical strikes, distraction maneuvers and escor fighter duty.]])
+--var:setClass(_("class", "Starfighter"), _("subclass", "Advanced Interceptor"))
+--var:setModel("WespeFighterRed")
+--var:setBeam(0, 45,-5, 700.0, 4.0, 2.5)
+--var:setBeam(1, 45, 5, 700.0, 4.0, 2.5)
+--
+--
+----[[Bomber--]]
+---- Dragon Names:
+---- Peluda: shoots quills from back - hvli
+---- Ryu: grants wishes, three claws - Rockets
+---- Drac: poison breath - Mine rear
+---- Cuelebre: poison breath, eat cattle, Mine Fwd
+---- Zomok: bad weather - emp
+---- Bashe: eaths elefants - nuke
+--
+---- legacy; try not to use:
+--template = ShipTemplate():setName("ZX-Lindworm"):setClass(_("class", "Starfighter"), _("subclass", "Bomber")):setType("playership")
+--template:setModel("LindwurmFighter"..color_player)
+--template:setRadarTrace("tie_bomber.png")
+--template:setDescription([[The WX-Lindworm, or "Worm" as it's often called, is a bomber-class starfighter. While one of the least-shielded starfighters in active duty, the Worm's two launchers can pack quite a punch. Its goal is to fly in, destroy its target, and fly out or be destroyed. The engine can be overloaded to cause a massive explotion - however this destroys the bomber, too.]])
+--template:setImpulseSoundFile("sfx/engine_fighter.wav")
+--
+--template:setHull(75)
+--template:setShields()
+--template:setSpeed(70, 15, 25, 40, 15)
+--template:setTubes(3, 10.0)
+--template:setTubeSize(0, "small")
+--template:setTubeSize(1, "small")
+--template:setTubeSize(2, "small")
+--template:setWeaponStorage("HVLI", 12)
+--template:setWeaponStorage("Homing", 3)
+--template:setTubeDirection(1,-1):setWeaponTubeExclusiveFor(1, "HVLI")
+--template:setTubeDirection(2, 1):setWeaponTubeExclusiveFor(2, "HVLI")
+----                  Arc, Dir, Range, CycleTime, Dmg
+--template:setBeam(0, 10, 180, 700, 6.0, 2)
+----								  Arc, Dir, Rotate speed
+--template:setBeamWeaponTurret( 0, 270, 180, 4)
+--template:setCombatManeuver(250, 150)
+--template:setEnergyStorage(400)
+--template:setRepairCrewCount(1)
+--template:setLongRangeRadarRange(10000)
+--template:setShortRangeRadarRange(5000)
+--
+--template:setCanScan(true)
+--template:setCanHack(false)
+--template:setCanDock(true)
+--template:setCanCombatManeuver(false)
+--template:setCanLaunchProbe(false)
+--template:setCanSelfDestruct(true)
+--
+--template:setAutoCoolant(true)
+--template:setAutoMissileReload(true)
+--template:setAutoRepair(true)
+--
+--addSystemsLindwurm(template)
+--
+----what is fun: destroying bigger enemies. Player should always consider weather keeping up the attack or escaping is adequate. Reverse drive should be slower than enemies forward drive. But forward faster.
+----Challenge: you have to sustain firing, but are too slow to escape using reverse
+--var = template:copy("Peluda")	-- HVLI
+--var:setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
+--var:setModel("LindwurmFighterGreen")
+--var:setDescription([[The Peluda assault Bomber is a basic starfighter of the Human Navy; being ideally suited for attacking slow or stationary targets.]])
+--var:setTubes(1,7)
+--var:setWeaponStorage("Homing", 0)
+--var:setWeaponStorage("HVLI", 6)
+--var:setBeam(0,0,0,0,0,0)
+--var:setBeamWeaponTurret(0,0,0,0)
+--
+--var = template:copy("Drac")	-- Mine Rear
+----what is fun: short range but huge AOE
+----more challenging than front mines, since reverse is slow
+--var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+--var:setModel("LindwurmFighterYellow")
+--var:setDescription([[The Dray tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+--var:setTubes(1,20)
+--var:setWeaponStorage("HVLI", 0)
+--var:setWeaponStorage("Homing", 0)
+--var:setWeaponStorage("Mine", 1)
+--var:setTubeDirection(0,180)
+--var:setBeam(0,0,0,0,0,0)
+--var:setBeamWeaponTurret(0,0,0,0)
+--
+--var = template:copy("Cuelebre")	-- Mine Front
+----what is fun: frontal mines are awesome. short range but huge AOE -> fun to place
+--var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+--var:setModel("LindwurmFighterBlue")
+--var:setDescription([[The Cuelebre tactical mine delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+--var:setTubes(1,20)
+--var:setWeaponStorage("HVLI", 0)
+--var:setWeaponStorage("Homing", 0)
+--var:setWeaponStorage("Mine", 1)
+--var:setBeam(0,0,0,0,0,0)
+--var:setBeamWeaponTurret(0,0,0,0)
+--
+--var = template:copy("Bashe")	-- Nuke
+----what is fun: the firepower of nukes from a fighter.
+----not really a challenge, it is just delivery and some dodging
+--var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+--var:setModel("LindwurmFighterRed")
+--var:setDescription([[The Bashe tactical nuke delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+--var:setTubes(1,20)	-- take quite long, so combat may evolve
+--var:setWeaponStorage("HVLI", 0)
+--var:setWeaponStorage("Homing", 0)
+--var:setWeaponStorage("Nuke", 1)
+--var:setBeam(0,0,0,0,0,0)
+--var:setBeamWeaponTurret(0,0,0,0)
+--
+----[[Still Bombers, but with Scout hull--]]
+--template = ShipTemplate():setName("Ryu"):setClass(_("class", "Starfighter"), _("subclass", "Rocket Fighter")):setType("playership")
+----what is fun: double torpedo insta-destroys enemy fighters!
+--template:setModel("AdlerLongRangeFighterRed")
+--template:setRadarTrace("tie_bomber.png")
+--template:setImpulseSoundFile("sfx/engine_fighter.wav")
+--template:setDescription([[The Ryu Rocket Fighter is a basic starfighter of the Human Navy; Designed for escort and anti-fighter missions.]])
+--template:setTubes(2,7)
+--template:setTubeSize(0, "small")
+--template:setTubeSize(1, "small")
+--template:setWeaponStorage("Homing", 4)
+--template:setHull(75)
+--template:setShields(40)
+--template:setSpeed(70, 15, 25, 40, 15)
+--
+--template:setCombatManeuver(250, 150)
+--template:setEnergyStorage(400)
+--template:setRepairCrewCount(1)
+--template:setLongRangeRadarRange(10000)
+--template:setShortRangeRadarRange(5000)
+--
+--template:setCanScan(false)
+--template:setCanHack(false)
+--template:setCanDock(true)
+--template:setCanCombatManeuver(false)
+--template:setCanLaunchProbe(false)
+--template:setCanSelfDestruct(false)
+--
+--template:setAutoCoolant(true)
+--template:setAutoMissileReload(true)
+--template:setAutoRepair(true)
+--
+--addSystemsAdler(template)
+--
+--
+---- switch to model with two primary tubes
+---- switch to model with two primary tubes
+----what is fun: 
+----Can not destroy enemies, since it has only emps
+--var = template:copy("Zomok")	-- EMP
+--var:setModel("AdlerLongRangeFighterBlue")
+--var:setClass(_("class", "Starfighter"), _("subclass", "Delivery"))
+--var:setDescription([[The Zomok tactical EMP delivery fighter is an advanced starfighter of the Human Navy, designed for surgical strikes.]])
+--var:setTubes(2,10)	-- may hide two rockets in tubes while docking. So we can change loadout!
+--var:setWeaponStorage("HVLI", 1)
+--var:setWeaponStorage("Homing", 0)
+--var:setWeaponStorage("EMP", 1)
+--var:setAutoMissileReload(false)
+--
 
 --[[Scout--]]
 template = ShipTemplate():setName("Adder MK7"):setClass(_("class", "Starfighter"), _("subclass", "Scout")):setType("playership")
@@ -304,6 +304,47 @@ var:setModel("LaserCorvetteBlue")
 var:setSharesEnergyWithDocked(true)
 var:setClass(_("class", "Prototype"), _("subclass", "Torpedoboat Destroyer"))
 var:setDockClasses(_("class", "Prototype"))
+
+var = template:copy("Light Cruiser")
+var:setLocaleName(_("playerShip", "Light Cruiser")):setClass(_("class", "Cruiser"), _("subclass", "Light Cruiser"))
+var:setModel("LaserBehemoth"..color_player)
+var:setRadarTrace("star_destroyer.png")
+var:setDescription("An Imperial Carrier")
+--					Arc, Dir, Range, CycleTime, Dmg
+var:setBeamWeapon(0,10,   0, 2000.0, 8.0, 6)
+var:setBeamWeapon(1,10, -45, 2000.0, 8.0, 6)
+var:setBeamWeapon(2,10,  45, 2000.0, 8.0, 6)
+var:setBeamWeapon(3,10, -90, 2000.0, 8.0, 6)
+var:setBeamWeapon(4,10,  90, 2000.0, 8.0, 6)
+--							Arc, Dir, Rotate speed
+var:setBeamWeaponTurret(0, 200,  0, 5)
+var:setBeamWeaponTurret(1, 180, -45, 5)
+var:setBeamWeaponTurret(2, 180,  45, 5)
+var:setBeamWeaponTurret(3, 120, -90, 5)
+var:setBeamWeaponTurret(4, 120,  90, 5)
+var:setHull(400)
+var:setShields(400, 400)
+var:setSpeed(30, 3, 8)
+var:setTubes(2, 16.0)
+var:setCombatManeuver(200, 150)
+var:setWeaponStorage("Homing", 16)
+var:setWeaponStorage("EMP", 8)
+var:setWeaponStorage("Mine", 4)
+var:setWeaponStorage("Nuke", 4)
+var:setWeaponStorage("HVLI", 16)
+var:setTubeSize(0, "medium")
+var:setTubeSize(1, "medium")
+var:setJumpDrive(true)
+var:setWarpDrive(false)
+var:setExternalDockClasses(_("class", "Satellite"))
+var:setInternalDockClasses(_("class", "Starfighter"))
+var:setEnergyStorage(5000)
+var:setRestocksMissilesDocked("all")
+var:setSharesEnergyWithDocked(true)
+var:setRestocksScanProbes(true)
+var:setRepairDocked(true)
+
+
 
 --[[Player Missile Cruiser--]]
 template = ShipTemplate():setName("Piranha M5P"):setClass(_("class", "Frigate"), _("subclass", "Missile Cruiser")):setType("playership")
@@ -545,7 +586,7 @@ template:setBeam(1,100,  20, 1500.0, 6.0, 8)
 template:setWeaponStorage("Homing", 12)
 template:setWeaponStorage("Nuke", 0)
 template:setWeaponStorage("Mine", 4)
-template:setWeaponStorage("EMP", 0)
+template:setWeaponStorage("EMP", 4)
 template:setWeaponStorage("HVLI", 10)
 template:setTubes(3, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
 template:weaponTubeDisallowMissle(0, "Mine")
@@ -553,7 +594,7 @@ template:weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(0, -90)
 template:setTubeDirection(1,  90)
 template:setTubeDirection(2, 180):setWeaponTubeExclusiveFor(2, "Mine")
-template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
+template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"), _("subclass", "Fighter"))	-- do not allow heavy bombers
 template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
 
 template:setRestocksMissilesDocked("all")

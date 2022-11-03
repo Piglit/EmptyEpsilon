@@ -76,7 +76,7 @@ Carriers:
 -- Fighters are quick agile ships that do not do a lot of damage, but usually come in larger groups. They are easy to take out, but should not be underestimated.
 template = ShipTemplate():setName("Dagger"):setClass(_("class", "Exuari"), _("subclass", "Starfighter - Fighter"))
 template:setModel("small_fighter_1")
-template:setRadarTrace("exuari_fighter.png")
+template:setRadarTrace("xwing.png")
 template:setDescription(_("The Exuari fighter 'Dagger' is a single-seated spacecraft, very quick and agile, that does not do a lot of damage, but usually comes in larger groups. They are able to dodge most missiles and attack undefended areas of their enemies ships. However most of the Exuari fighter pilots expect their own death and do not care much about the enemies weapons ranges. Fighters are easy to take out, but should not be underestimated."))
 --                  Arc, Dir, Range, CycleTime, Dmg
 template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
@@ -96,7 +96,7 @@ variation:setSpeed(130, 35, 30)
 
 template = ShipTemplate():setName("Gunner"):setClass(_("class", "Exuari"), _("subclass", "Starfighter - Light Bomber"))
 template:setModel("small_fighter_1")
-template:setRadarTrace("exuari_fighter.png")
+template:setRadarTrace("ywing.png")
 template:setDescription(_("The Exuari light bomber 'Gunner' is a single-seated spacecraft, designed to circumvent their enemies defense lines and bring its deadly load to slow moving targets. Gunners are not as agile as other fighters, but still faster than most capitol ships. A group of Gunners can do a lot of damage to a single stationary target if not destroyed before their target is inside their weapons range. Piloting a Gunner is considered to be a recreational (and often lethal) activity within the Exuari society, so don't expect experienced pilots."))
 template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
 template:setHull(40)

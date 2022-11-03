@@ -21,6 +21,7 @@ require("shiptemplates/kraylor.lua")
 require("shiptemplates/ktlitan.lua")
 require("shiptemplates/satellites.lua")
 require("shiptemplates/special.lua")
+require("shiptemplates/tie.lua")
 
 --For now, we add our old ship templates as well. These should be removed at some point.
 --require("shiptemplates/OLD.lua")

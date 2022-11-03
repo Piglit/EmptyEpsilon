@@ -421,6 +421,7 @@ sizes = {
     Scout={30,45},
     Corvette={50,80},
     Dreadnought={100,160},
+    Behemoth={200,260},
 }
 for sizeName, sizeValues in pairs(sizes) do
   for _, color in ipairs({"Blue", "Green", "Grey", "Red", "White", "Yellow"}) do

@@ -137,7 +137,7 @@ imp:setEnemy(reds)
 imp:setFriendly(human)
 
 alliance = FactionInfo():setName("Rebel Alliance")
-alliance:setGMColor(255, 128, 128)
+alliance:setGMColor(255, 0, 0)
 alliance:setDescription(_([[The Rebel Alliance]]))
 alliance:setEnemy(imp)
 alliance:setEnemy(Hive)

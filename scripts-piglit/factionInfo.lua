@@ -126,3 +126,22 @@ iu:setDescription(_([[The Interplanetary Union is mostly present in the uncivili
 iu:setEnemy(exuari)
 iu:setEnemy(kraylor)
 
+imp = FactionInfo():setName("Imperial")
+imp:setGMColor(128, 255, 128)
+imp:setDescription(_([[Imperial Forces]]))
+imp:setEnemy(exuari)
+imp:setEnemy(kraylor)
+imp:setEnemy(Hive)
+imp:setEnemy(GITM)
+imp:setEnemy(reds)
+imp:setFriendly(human)
+
+alliance = FactionInfo():setName("Rebel Alliance")
+alliance:setGMColor(255, 128, 128)
+alliance:setDescription(_([[The Rebel Alliance]]))
+alliance:setEnemy(imp)
+alliance:setEnemy(Hive)
+alliance:setEnemy(GITM)
+alliance:setEnemy(reds)
+alliance:setFriendly(human)
+

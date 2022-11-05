@@ -29,6 +29,7 @@ void GuiShieldsEnableButton::onDraw(sp::RenderTarget& target)
 {
     if (my_spaceship)
     {
+        setVisible(my_spaceship->hasSystem(SYS_FrontShield));
         if (my_spaceship->shield_calibration_delay > 0.0f)
         {
             button->hide();

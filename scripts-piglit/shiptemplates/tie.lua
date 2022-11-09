@@ -80,7 +80,7 @@ addSystemsLindwurm(template)
 
 var = template:copy("TIE Bomber")
 var:setType("playership")
-
+--[[
 var2 = var:copy("TIE Bomber (assault)")
 var2:setTubes(1,7)
 var2:setWeaponStorage("Homing", 0)
@@ -116,4 +116,4 @@ var7:setWeaponStorage("Homing", 0)
 var7:setWeaponStorage("EMP", 1)
 var7:setAutoMissileReload(false)
 
-
+--]]

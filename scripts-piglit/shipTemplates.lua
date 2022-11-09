@@ -13,15 +13,21 @@ These are:
 Player ships are in general large frigates to small corvette class
 --]]
 require("shiptemplates/stations.lua")
-require("shiptemplates/transport.lua")
+
+require("shiptemplates/starFighters.lua")
+require("shiptemplates/frigates.lua")
+require("shiptemplates/corvette.lua")
+require("shiptemplates/dreadnaught.lua")
+
 require("shiptemplates/player.lua")
-require("shiptemplates/humans.lua")
+--require("shiptemplates/humans.lua")
 require("shiptemplates/exuari.lua")
 require("shiptemplates/kraylor.lua")
 require("shiptemplates/ktlitan.lua")
+require("shiptemplates/transport.lua")
 require("shiptemplates/satellites.lua")
 require("shiptemplates/special.lua")
 require("shiptemplates/tie.lua")
 
 --For now, we add our old ship templates as well. These should be removed at some point.
---require("shiptemplates/OLD.lua")
+require("shiptemplates/OLD.lua")

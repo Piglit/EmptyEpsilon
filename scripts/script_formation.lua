@@ -11,7 +11,7 @@ The goal is to manage several ships at once without the need to calculate format
 Usage:
 ------
 The functions provided here are stored in the global script_formation object.
-To call them, write: script_formation.<function name>.
+To call them, write: script_formation.<function name>
 Look at the examples at the functions below.
 
 Functions:
@@ -28,7 +28,6 @@ buildFormationIncremental: lowest level function. This orders a given ship into 
 --Blue Star Cartell: line formation: behind each other
 --Mining Corporation: undisciplined 4-finger
 function factionalOffsets(faction, pos)
-
 	local x,y -- x - to the front, y - to starport
 	if faction == "Kraylor" then
 		x = 300
@@ -36,10 +35,10 @@ function factionalOffsets(faction, pos)
 	elseif faction == "Exuari" then
 		x = -300
 		y = 300
-	elseif faction == "Mining Corporation" then
+	elseif faction == "TSN" or faction == "USN" or faction == "CUF" then
 		x = random(-200,-1000)
 		y = random(200,600)
-	elseif faction == "Blue Star Cartell" then
+	elseif faction == "Independent" then
 		x = -300
 		if pos == 3 then
 			x = 2*x
@@ -48,12 +47,15 @@ function factionalOffsets(faction, pos)
 	elseif faction == "Human Navy" then
 		x = 0
 		y = 300
+	elseif faction == "square" then
+		-- TODO
+	elseif faction == "hex" then
+		-- TODO
 	else
 		x = -1000
 		y = 1000
 	end
 	return x,y
-
 end
 
 --returns leader, second
@@ -137,106 +139,107 @@ function script_formation.spawnFormation(shipTemplate, amount, posx, posy, facti
 	return ships
 end
 
---[[
 
-def rotate(coords):
-	"""rotate (x,y) by 45 degrees"""
-	x_0,y_0 = coords
-	x_1 = x_0+y_0
-	y_1 = -x_0+y_0
-	return (x_1, y_1)
+local function rotate(x, y)
+	--rotate (x,y) by 45 degrees
+	return (x+y, -x+y)
 
-def scale(coords, factor):
-	x,y = coords
+local function scale(x, y, factor)
 	return (x*factor, y*factor)
 
-def add(coords, other):
-	x_0,y_0 = coords
-	x_1,y_1 = other 
+local function add(x_0, y_0, x_1, y_1)
 	return (x_0+x_1, y_0+y_1)
 
-def diff(coords, other):
-	x_0,y_0 = coords
-	x_1,y_1 = other 
-	return (x_1-x_0, y_1-y_0)
+-- not used:
+--function diff(coords, other)
+--	x_0,y_0 = coords
+--	x_1,y_1 = other 
+--	return (x_1-x_0, y_1-y_0)
+--
+--function invert(x, y)
+--	-- point reflection
+--	return (-x,-y)
 
-def invert(coords):
-	"""point reflection"""
-	x,y = coords
-	return (-x,-y)
 
-def square(limit):
-	matrix = [
-		( 1, 0),
-		(-1, 0),
-		( 0, 1),
-		( 0,-1),
-	]
-	fill = [
-		( 0, 1),
-		( 0,-1),
-		(-1, 0),
-		( 1, 0),
-		( 0, 1),
-		( 0,-1),
-		(-1, 0),
-		( 1, 0),
-	]
-	for i in range(1,limit+1):
-		# 1 <- 1..
-		cpos = (i-2)%4	# <- 0..3
+local function square_formation(limit)
+	matrix = {
+		{ 1, 0},
+		{-1, 0},
+		{ 0, 1},
+		{ 0,-1},
+	}
+	fill = {
+		{ 0, 1},
+		{ 0,-1},
+		{-1, 0},
+		{ 1, 0},
+		{ 0, 1},
+		{ 0,-1},
+		{-1, 0},
+		{ 1, 0},
+	}
+	result = {}
+	for i = 1, limit do
+		-- 1 <- 1..
+		cpos = (i-2)%4	-- <- 0..3
 		rpos = 0
 		itr = 0
 		offset = 0
 		rot = (i-2) // 4 +1
-		ring = ceil(sqrt(i))//2
+		ring = ceil(math.sqrt(i))//2
 		ring_last = ((ring-1)*2+1)**2
-		pos = matrix[cpos]
-		pos = scale(pos, ring)
-		if rot % 2 == 0:
-			pos = rotate(pos)
-		if i > ring_last+8:
-			rpos = i - ring_last - 8 -1
+		pos = matrix[cpos+1]
+		pos = scale(unpack(pos), ring)
+		if rot % 2 == 0 then
+			pos = rotate(unpack(pos))
+		end
+		if i > ring_last+8 then
+			rpos = i - ring_last - 8
 			offset = fill[rpos % 8]
-			itr = rpos // 8 + 1
-			offset = scale(offset, itr)
-			pos = add(pos, offset)
-		print(i, rot, ring, ring_last, rpos, offset, itr, pos)
-		yield pos
-	
-#c = [x for x in square(25)]
+			itr = rpos // 8
+			offset = scale(unpack(offset), itr)
+			pos = add(unpack(pos), unpack(offset))
+		end
+		--print(i, rot, ring, ring_last, rpos, offset, itr, pos)
+		table.insert(result, pos)
+	end
+	return result
+end
+--c = [x for x in square(25)]
 
-def hexagon(limit):
-	matrix = [
-		( 2, 0),
-		(-2, 0),
-		( 1, 1),
-		(-1,-1),
-		( 1,-1),
-		(-1, 1),
-	]
-	fill = [
-		(-1, 1),
-		( 1,-1),
-		(-2, 0),
-		( 2, 0),
-		( 1, 1),
-		(-1,-1),
-	]
+local function hexagon_formation(limit)
+	matrix = {
+		{ 2, 0},
+		{-2, 0},
+		{ 1, 1},
+		{-1,-1},
+		{ 1,-1},
+		{-1, 1},
+	}
+	fill = {
+		{-1, 1},
+		{ 1,-1},
+		{-2, 0},
+		{ 2, 0},
+		{ 1, 1},
+		{-1,-1},
+	}
 
-	for i in range(1,limit+1):
-		cpos = (i-2)%6	# <- 0..5
-		ring = ceil((sqrt(8*((i-1)/6)+1)-1)/2)
+	for i = 1, limit do
+		cpos = (i-2)%6	-- <- 0..5
+		ring = math.ceil((math.sqrt(8*((i-1)/6)+1)-1)/2)
 		ring_last = (ring*(ring-1))*3+1
-		pos = matrix[cpos]
-		pos = scale(pos, ring)
-		if i > ring_last +6:
-			rpos = i - ring_last - 6 -1
+		pos = matrix[cpos+1]
+		pos = scale(unpack(pos), ring)
+		if i > ring_last +6 then
+			rpos = i - ring_last - 6
 			offset = fill[rpos % 6]
-			itr = rpos // 6 + 1
-			offset = scale(offset, itr)
-			pos = add(pos, offset)
-		yield pos
+			itr = rpos // 6
+			offset = scale(unpack(offset), itr)
+			pos = add(unpack(pos), unpack(offset))
+		end
+		table.insert(result, pos)
+	end
+	return result
+end
 
-
---]]

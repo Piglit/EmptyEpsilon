@@ -102,6 +102,7 @@ public:
     static void commandClearScienceLink();
     static void commandLoadTube(int8_t tubeNumber, EMissileWeapons missileType);
     static void commandUnloadTube(int8_t tubeNumber);
+    static void commandSetAutoReloadTube(int8_t tubeNumber, bool value);
     static void commandFireTube(int8_t tubeNumber, float missile_target_angle);
     static void commandFireTubeAtTarget(int8_t tubeNumber, sp::ecs::Entity target);
     static void commandSetShields(bool enabled);

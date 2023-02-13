@@ -515,6 +515,7 @@ static const int16_t CMD_SET_MAIN_SCREEN_OVERLAY = 0x0027;
 static const int16_t CMD_HACKING_FINISHED = 0x0028;
 static const int16_t CMD_CUSTOM_FUNCTION = 0x0029;
 static const int16_t CMD_TURN_SPEED = 0x002A;
+static const int16_t CMD_SET_AUTO_RELOAD_TUBE = 0x002B;
 
 
 REGISTER_MULTIPLAYER_CLASS(PlayerSpaceship, "PlayerSpaceship");
@@ -886,6 +887,17 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
             auto missiletubes = entity.getComponent<MissileTubes>();
             if (missiletubes && tube_nr >= 0 && tube_nr < missiletubes->count)
                 MissileSystem::startUnload(entity, missiletubes->mounts[tube_nr]);
+        }
+        break;
+    case CMD_SET_AUTO_RELOAD_TUBE:
+        {
+            int8_t tube_nr;
+            bool value;
+            packet >> tube_nr >> value;
+
+            auto missiletubes = entity.getComponent<MissileTubes>();
+            if (missiletubes && tube_nr >= 0 && tube_nr < missiletubes->count)
+                missiletubes->mounts[tube_nr].auto_reload = value;
         }
         break;
     case CMD_FIRE_TUBE:
@@ -1275,6 +1287,13 @@ void PlayerSpaceship::commandUnloadTube(int8_t tubeNumber)
 {
     sp::io::DataBuffer packet;
     packet << CMD_UNLOAD_TUBE << tubeNumber;
+    dynamic_cast<PlayerSpaceship*>(*my_spaceship.getComponent<SpaceObject*>())->sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandSetAutoReloadTube(int8_t tubeNumber, bool value)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_AUTO_RELOAD_TUBE << tubeNumber << value;
     dynamic_cast<PlayerSpaceship*>(*my_spaceship.getComponent<SpaceObject*>())->sendClientCommand(packet);
 }
 

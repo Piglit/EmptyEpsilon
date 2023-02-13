@@ -43,6 +43,15 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
             }
         });
         row.load_button->setSize(130, 50);
+
+        row.auto_reload_button = new GuiToggleButton(row.layout, id + "_" + string(n) + "_AUTO_RELOAD_BUTTON", "AutoLoad", [this, n](bool value) {
+            if (!my_spaceship) return;
+            auto tubes = my_spaceship.getComponent<MissileTubes>();
+            if (!tubes) return;
+            PlayerSpaceship::commandSetAutoReloadTube(n, value);
+        });
+        row.auto_reload_button->setSize(130, 50);
+
         row.fire_button = new GuiButton(row.layout, id + "_" + string(n) + "_FIRE_BUTTON", "Fire", [this, n]() {
             if (!my_spaceship) return;
             auto tubes = my_spaceship.getComponent<MissileTubes>();
@@ -123,6 +132,7 @@ void GuiMissileTubeControls::onUpdate()
     {
         auto& tube = tubes->mounts[n];
         rows[n].layout->show();
+        rows[n].auto_reload_button->setValue(tube.auto_reload);
         if (tube.canOnlyLoad(MW_Mine))
             rows[n].fire_button->setIcon("gui/icons/weapon-mine", sp::Alignment::CenterLeft);
         else

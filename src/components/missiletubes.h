@@ -32,6 +32,7 @@ public:
         State state = State::Empty;
         float delay = 0.0f;
         int fire_count = 0;
+        bool auto_reload = false;
 
         bool canLoad(EMissileWeapons type) {
             return (type_allowed_mask & (1 << type));

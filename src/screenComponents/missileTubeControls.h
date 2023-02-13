@@ -15,6 +15,7 @@ private:
     struct TubeRow {
         GuiElement* layout;
         GuiButton* load_button;
+        GuiToggleButton* auto_reload_button;
         GuiButton* fire_button;
         GuiProgressbar* loading_bar;
         GuiLabel* loading_label;

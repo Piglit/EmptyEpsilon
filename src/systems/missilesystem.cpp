@@ -41,7 +41,14 @@ void MissileSystem::update(float delta)
                         else
                         {
                             tube.state = MissileTubes::MountPoint::State::Empty;
-                            tube.type_loaded = MW_None;
+                            if (tube.auto_reload)
+                            {
+                                startLoad(entity, tube, tube.type_loaded);
+                            }
+                            else
+                            {
+                                tube.type_loaded = MW_None;
+                            }
                         }
                     }
                     break;
@@ -109,7 +116,12 @@ void MissileSystem::fire(sp::ecs::Entity source, MissileTubes::MountPoint& tube,
     }else{
         spawnProjectile(source, tube, target_angle, target);
         tube.state = MissileTubes::MountPoint::State::Empty;
-        tube.type_loaded = MW_None;
+        if (tube.auto_reload)
+        {
+            startLoad(source, tube, tube.type_loaded);
+        }else{
+            tube.type_loaded = MW_None;
+        }
     }
 }
 

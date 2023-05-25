@@ -4,7 +4,7 @@
 ---Duration: Plan for 3+ hours on Easy, with harder difficulties taking longer
 ---Player ships: 1
 ---
----Author: Chris Sibbitt. Revisions: Xansta, Muerte Jan2023
+---Author: Chris Sibbit. Revisions: Xansta, Muerte Jan2023
 ---Created: Dec2022
 ---Feedback: USN Discord: https://discord.gg/7Kr32ezJFF in the #ee-scenario-feedback channel
 -- Type: Replayable Mission
@@ -14,6 +14,9 @@
 -- Difficulty[Hard]: Significant enemy resistance.
 
 require("utils.lua")
+require("plots/lost_mission.lua")
+require("plots/salvage_repair_mission.lua")
+require("plots/patrol_mission.lua")
 
 function init()
 
@@ -36,15 +39,7 @@ function init()
   }
 
   -- Patrol Stations
-  Patrol_stations = {
-    SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("NW Checkpoint"):onTakingDamage(CommsBeingAttacked):setPosition(-14904, -31057):setRepairDocked(true):setRestocksScanProbes(true):setSharesEnergyWithDocked(true),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("SW Checkpoint"):onTakingDamage(CommsBeingAttacked):setPosition(-29095, 37628):setRepairDocked(true):setRestocksScanProbes(true):setSharesEnergyWithDocked(true),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("SE Checkpoint"):onTakingDamage(CommsBeingAttacked):setPosition(73035, 26331):setRepairDocked(true):setRestocksScanProbes(true):setSharesEnergyWithDocked(true),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("NE Checkpoint"):onTakingDamage(CommsBeingAttacked):setPosition(75919, -30678):setRepairDocked(true):setRestocksScanProbes(true):setSharesEnergyWithDocked(true)
-  }
-  for _, stn in ipairs(Patrol_stations) do
-    stn:setCommsFunction(CommsPatrolStation)
-  end
+  -- XXX patrol_mission.Patrol_stations -> patrol_mission.lua
 
   -- Convoy visibility
   Lookout_stations = {
@@ -379,93 +374,22 @@ function init()
   end
 
   -- == Drone area
-  Drone_stations = {
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6223"):setPosition(-80404, 26565),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6224"):setPosition(-84704, 30527),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6225"):setPosition(-81989, 28198),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6222"):setPosition(-80788, 21186),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6226"):setPosition(-81508, 32713),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6234"):setPosition(-83718, 24644),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1425"):setPosition(-104181, 26524),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1435"):setPosition(-106339, 23746),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6241"):setPosition(-104996, 21138),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1453"):setPosition(-101798, 22233),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1433"):setPosition(-98728, 27731),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1426"):setPosition(-99716, 24125),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6271"):setPosition(-98611, 20912),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6231"):setPosition(-87191, 27553),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6232"):setPosition(-88233, 24260),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6230"):setPosition(-93180, 27670),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6229"):setPosition(-90154, 21282),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6254"):setPosition(-113187, 33418),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6257"):setPosition(-114746, 30023),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6263"):setPosition(-118876, 34875),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6249"):setPosition(-116859, 37036),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6243"):setPosition(-113257, 21426),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6244"):setPosition(-117291, 21330),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6247"):setPosition(-115322, 26325),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1420"):setPosition(-109366, 27152),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1418"):setPosition(-107908, 34572),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1436"):setPosition(-106339, 30558),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1419"):setPosition(-110691, 30558),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1454"):setPosition(-109745, 22233),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6210"):setPosition(-84102, 34490),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6227"):setPosition(-88817, 30377),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1447"):setPosition(-94418, 22044),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1427"):setPosition(-95334, 24236),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1449"):setPosition(-94229, 33207),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1445"):setPosition(-89499, 34153),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6269"):setPosition(-96064, 35728),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6262"):setPosition(-98980, 34974),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1443"):setPosition(-103193, 34904),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1422"):setPosition(-102933, 30937),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1428"):setPosition(-95411, 29922),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS1437"):setPosition(-98909, 31499),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6264"):setPosition(-118415, 29798),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6246"):setPosition(-118973, 24308),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6266"):setPosition(-118721, 38835),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6250"):setPosition(-113497, 38189),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6251"):setPosition(-109558, 37660),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6204"):setPosition(-97263, 38093),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6252"):setPosition(-107349, 38717),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6211"):setPosition(-81220, 38285),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6206"):setPosition(-85591, 38429),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6214"):setPosition(-91067, 37228),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6205"):setPosition(-92844, 39053),
-    SpaceStation():setTemplate("Small Station"):setFaction("Ghosts"):setCallSign("DS6268"):setPosition(-102543, 39055)
-  }
+  -- XXX patrol_mission.Drone_stations -> patrol_mission.lua
 
-  -- Using NE instead of more intuitive NW to be backwards compatible with old grid system
-  local droneNEx, droneNEy = sectorToXY("G1")
-  Drone_artifacts = {}
-  for i = 1, 3 + Difficulty do -- 4, 6, or 8 artifacts
-    local a = Artifact():setPosition(droneNEx - irandom(2000, 38000), droneNEy + irandom(2000, 18000)):setModel("artifact"..i)
-    table.insert(Drone_artifacts, a)
-  end
+
+  -- XXX patrol_mission.Drone_artifacts -> patrol_mission.lua
 
 -- == Other side of the wormhole
 
-  Parts_station = SpaceStation():setTemplate("Small Station"):setFaction("Exuari"):setCallSign("X472"):setPosition(361326, 527812)
+  -- XXX salvage_repair_mission.Parts_station -> salvage_repair_mission.lua
 
-  Kw_enemies = {
-    CpuShip():setFaction("Kraylor"):setTemplate("Strikeship"):setCallSign("BR5"):setPosition(377672, 540642):orderStandGround(),
-    CpuShip():setFaction("Kraylor"):setTemplate("Strikeship"):setCallSign("BR6"):setPosition(377541, 545431):orderStandGround(),
-    CpuShip():setFaction("Kraylor"):setTemplate("Missile Cruiser"):setCallSign("CSS4"):setPosition(373724, 542711):orderStandGround()
-  }
-  Investigator = Kw_enemies[1]
+  -- XXX salvage_repair_mission.Kw_enemies -> salvage_repair_mission.lua
+  -- XXX salvage_repair_mission.Investigator -> salvage_repair_mission.lua
 
-  Kw_stations = {
-    SpaceStation():setTemplate("Large Station"):setFaction("Kraylor"):setCallSign("KZ2346"):setPosition(376303, 543016),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Kraylor"):setCallSign("KZ2682"):setPosition(400931, 541600),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Kraylor"):setCallSign("KZ2683"):setPosition(360825, 561407)
-  }
-  Kw_mainStation = Kw_stations[1]
+  -- XXX salvage_repair_mission.Kw_stations -> salvage_repair_mission.lua
+  -- XXX salvage_repair_mission.Kw_mainStation -> salvage_repair_mission.lua
 
-  Exuari_junk_stations = {
-    SpaceStation():setTemplate("Medium Station"):setFaction("Exuari"):setCallSign("X6775"):setPosition(315754, 449577),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Exuari"):setCallSign("X6774"):setPosition(333160, 452975),
-    SpaceStation():setTemplate("Medium Station"):setFaction("Exuari"):setCallSign("XS6773"):setPosition(326495, 458049)
-  }
+  -- XXX salvage_repair_mission.Exuari_junk_stations -> salvage_repair_mission.lua
   SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("OP722"):setPosition(328913, 490292)
   SpaceStation():setTemplate("Medium Station"):setFaction("Independent"):setCallSign("DS456"):setPosition(327511, 477797)
 
@@ -681,59 +605,7 @@ function init()
   -- Northern colony
   Colony_area_station = SpaceStation():setTemplate("Medium Station"):setFaction("Human Navy"):setCallSign("DS806"):setPosition(40015, -60153)
   Planet():setPosition(41835, -78305):setPlanetRadius(5000):setPlanetCloudRadius(5200.00):setPlanetAtmosphereColor(0.8,0.20,0.40):setPlanetSurfaceTexture("planets/gas-2.png")
-  Colony_stations = {
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E437"):setPosition(34457, -71084):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E146"):setPosition(31997, -76192):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E544"):setPosition(23031, -75857):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E236"):setPosition(25371, -73885):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E245"):setPosition(29204, -74511):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E335"):setPosition(25371, -78805):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E338"):setPosition(27077, -70894):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E465"):setPosition(37335, -71048):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E939"):setPosition(35632, -65750):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E869"):setPosition(29010, -63480):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E166"):setPosition(23668, -68398):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E770"):setPosition(30334, -67832):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("E671"):setPosition(29388, -79374):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z649"):setPosition(31984, -82788):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z128"):setPosition(26390, -83457):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z342"):setPosition(22418, -88122):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z929"):setPosition(21252, -84484):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z243"):setPosition(27527, -87933):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z750"):setPosition(31280, -87888):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z848"):setPosition(33846, -85391):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z417"):setPosition(26361, -95457):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z359"):setPosition(29766, -97160):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z532"):setPosition(32257, -91906):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z118"):setPosition(32037, -93754):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z441"):setPosition(23248, -92193):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("Z260"):setPosition(35632, -98484):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H419"):setPosition(43760, -87132):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H823"):setPosition(51901, -87244):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H663"):setPosition(52483, -91098):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H524"):setPosition(52658, -82703):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H158"):setPosition(48343, -89446):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H251"):setPosition(43488, -97649):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H320"):setPosition(42444, -94700):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H252"):setPosition(43958, -91294):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H425"):setPosition(56016, -90406):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H922"):setPosition(57203, -94511):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H762"):setPosition(54743, -97917):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H121"):setPosition(49445, -94511):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("H364"):setPosition(47845, -98361):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X627"):setPosition(51248, -69291):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X957"):setPosition(43438, -68261):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X726"):setPosition(55485, -68625):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X547"):setPosition(49960, -63472):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X856"):setPosition(46654, -65612):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X254"):setPosition(53771, -63981):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X155"):setPosition(43248, -64098):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X267"):setPosition(53986, -71427):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X134"):setPosition(56067, -75779):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X468"):setPosition(49256, -78617):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X333"):setPosition(50794, -73146):setCommsFunction(CommsColonyStation),
-    SpaceStation():setTemplate("Small Station"):setFaction("Independent"):setCallSign("X361"):setPosition(45996, -70975):setCommsFunction(CommsColonyStation)
-  }
+  -- XXX lost_mission.Colony_stations -> lost_mission.lua
 
   Asteroid():setPosition(-86049, 1110):setSize(119)
   Asteroid():setPosition(-85670, 1677):setSize(120)
@@ -787,12 +659,15 @@ function init()
   Wormhole_station.insults = {}
 
   -- XXX init plots
+  lost_mission.init(Admin_station, CHEEVOS, CommsBeingAttacked, Wormhole_station)
+  salvage_repair_mission.init(Admin_station, CHEEVOS, Defence_station, SpawnEnemies, Wormhole_station)
+  patrol_mission.init(Admin_station, CHEEVOS, CommsBeingAttacked, Defence_station, PP1, SpawnEnemies, Wormhole_station, Difficulty)
 
-  Investigator:setCommsFunction(CommsInvestigator)
+  salvage_repair_mission.Investigator:setCommsFunction(salvage_repair_mission.CommsInvestigator)
 
-  InitKraylor()
-  InitPartsStation()
-  InitDroneStations()
+  salvage_repair_mission.InitKraylor()
+  salvage_repair_mission.InitPartsStation()
+  patrol_mission.InitDroneStations()
   InitCheevos()
   InitTraffic()
 
@@ -833,76 +708,38 @@ end
 function gmSpawnStuff()
 	clearGMFunctions()
 	addGMFunction(_("buttonGM","-From Spawn Stuff"),InitGM)
-	addGMFunction(_("buttonGM","Convoy Enemies"), SpawnConvoyEnemies)
+	addGMFunction(_("buttonGM","Convoy Enemies"), patrol_mission.SpawnConvoyEnemies)
 	addGMFunction(_("buttonGM","Harrasment"), SpawnHarrasment)
 end
 function gmFinishMission()
 	clearGMFunctions()
 	addGMFunction(_("buttonGM","-From Finish Mission"),InitGM)
-	addGMFunction(_("buttonGM","Lost"),FinishMissionLost)
-	addGMFunction(_("buttonGM","Spare Parts"),FinishMissionSpareParts)
-	addGMFunction(_("buttonGM","Drone Nest"),FinishMissionDroneNest)
-	addGMFunction(_("buttonGM","Repair"),FinishMissionRepair)
+	addGMFunction(_("buttonGM","Lost"),lost_mission.FinishMissionLost)
+	addGMFunction(_("buttonGM","Spare Parts"),salvage_repair_mission.FinishMissionSpareParts)
+	addGMFunction(_("buttonGM","Drone Nest"),patrol_mission.FinishMissionDroneNest)
+	addGMFunction(_("buttonGM","Repair"),salvage_repair_mission.FinishMissionRepair)
 end
 function gmStartMission()
 	clearGMFunctions()
 	addGMFunction(_("buttonGM","-From Start Mission"),InitGM)
-	addGMFunction(_("buttonGM","Lost"), StartMissionLost)
+	addGMFunction(_("buttonGM","Lost"), lost_mission.StartMissionLost)
 	addGMFunction(_("buttonGM","Patrol"),function ()
 		Defence_station.mission_state = "patrol attack"
-		SpawnPatrolEnemies()
+		patrol_mission.SpawnPatrolEnemies()
 	end)
-	addGMFunction(_("buttonGM","Spare Parts"),StartMissionSpareParts)
-	addGMFunction(_("buttonGM","Drone Nest"), StartMissionDroneNest)
+	addGMFunction(_("buttonGM","Spare Parts"),salvage_repair_mission.StartMissionSpareParts)
+	addGMFunction(_("buttonGM","Drone Nest"), patrol_mission.StartMissionDroneNest)
 	addGMFunction(_("buttonGM","Repair"), function ()
 		Wormhole_station.tier2_attack_countdown = 0
 		Wormhole_station.tier2_mission_state = "wait for attack"
 	end)
 end
-function InitDroneStations()
-  Defence_station.drones_think_were_friendly = false
-  Defence_station.convoy_enemies = {}
-  for _, stn in ipairs(Drone_stations) do
-    stn.spawns_left = 5
-    stn:setCanBeDestroyed(false)
-    stn:onTakingDamage(DroneStationGoAggro)
-  end
-  Drone_control_station = Drone_stations[irandom(1,#Drone_stations)]
-  Drone_control_station.x, Drone_control_station.y = Drone_control_station:getPosition()
-  Drone_control_station:setCanBeDestroyed(true)
-  Drone_control_station:setShieldsMax(Drone_control_station:getShieldMax(0) - 50)
-  Drone_control_station:setShields(Drone_control_station:getShieldMax(0))
-  Drone_control_station:setHullMax(Drone_control_station:getHullMax() - 50)
-  Drone_control_station:setHull(Drone_control_station:getHullMax())
-  Drone_control_station:setRadarSignatureInfo(1,1,1) --Not working? Only two of the lines are high, but still higher than others
-  Drone_control_station.spawns_left = 1
-  Drone_control_station:onDestroyed(FinishMissionDroneNest)
-end
+-- XXX patrol_mission.InitDroneStations -> patrol_mission.lua
 
 
-function InitPartsStation()
-  Parts_station:setCanBeDestroyed(false)
-  Parts_station:setShieldsMax(1)
-  Parts_station:setShields(1)
-  Parts_station:onTakingDamage(function()
-    Player:addToShipLog(_("wormhole-shipLog", "Firing on invulnerable target"), "Yellow")
-    if Parts_station.warned == nil then
-     Parts_station.warned = true
-      Wormhole_station:sendCommsMessage(Player, _("wormhole-incCall", [[Captain, Stop!
+-- XXX salvage_repair_mission.InitPartsStation -> salvage_repair_mission.lua
 
-Don't waste your time shooting at that station. It has an Exuari emergency integrity field that will prevent catastrophic hull breach. Just a waste of energy, I promise you.]]))
-    end
-  end)
-end
-
-function InitKraylor()
-  for _, e in ipairs(Kw_stations) do
-    e:onTakingDamage(KWGoAggro)
-  end
-  for _, e in ipairs(Kw_enemies) do
-    e:onTakingDamage(KWGoAggro)
-  end
-end
+-- XXX salvage_repair_mission.InitKraylor -> salvage_repair_mission.lua
 
 function InitTraffic()
   Traffic = {}
@@ -913,7 +750,7 @@ function InitTraffic()
   Traffic.types = {'Atlantis', 'Transport1x2', 'Maverick', 'Kiriya', 'Hathcock', 'Flavia P.Falcon'}
   Traffic.srcdest = {'J2','D0','B10','J8','zz1','zz6','zz8','D10','H11','K5'}
   Traffic.stations = {Admin_station, Defence_station, Wormhole_station, Colony_area_station}
-  for _, stn in ipairs(Patrol_stations) do
+  for _, stn in ipairs(patrol_mission.Patrol_stations) do
     table.insert(Traffic.stations,stn)
   end
   for _, stn in ipairs(Resupply_stations) do
@@ -984,6 +821,8 @@ end
 --==================================================
 
 function SpawnEnemies(xOrigin, yOrigin, danger, enemyFaction)
+    return spawn_enemies_faction(xOrigin, yOrigin, danger, enemyFaction)
+    --[[
   -- square grid deployment
   local fleetPosDelta1x = {0,1,0,-1, 0,1,-1, 1,-1,2,0,-2, 0,2,-2, 2,-2,2, 2,-2,-2,1,-1, 1,-1}
   local fleetPosDelta1y = {0,0,1, 0,-1,1,-1,-1, 1,0,2, 0,-2,2,-2,-2, 2,1,-1, 1,-1,2, 2,-2,-2}
@@ -1025,171 +864,24 @@ function SpawnEnemies(xOrigin, yOrigin, danger, enemyFaction)
     enemyStrength = enemyStrength - stsl[shipTemplateType]
   end
   return enemyList
+  --]]
 end
 
-function SpawnPatrolEnemies()
-  local x, y = Patrol_stations[2]:getPosition()
-  Defence_station.patrol_enemies = SpawnEnemies(x - 5000, y - 5000, random(1.6,2), "Ghosts")
+-- XXX patrol_mission.SpawnPatrolEnemies -> patrol_mission.lua
 
-  for _, enemy in ipairs(Defence_station.patrol_enemies) do
-    enemy:orderAttack(Patrol_stations[2])
-  end
-  Defence_station:sendCommsMessage(Player, _("defenceStnCheckpoint-IncCall",[[RED ALERT!
+-- XXX patrol_mission.SpawnConvoyEnemies -> patrol_mission.lua
 
-The SW Checkpoint is under attack. Don't mess around, get down there and help them!]]))
-  Player:addToShipLog(_("defenceStnCheckpoint-shipLog","Defend the SW checkpoint"), "Red")
-end
+-- XXX patrol_mission.ConvoyGoAggro -> patrol_mission.lua
 
-function SpawnConvoyEnemies()
-  local x, y = sectorToXY("F3") -- Rand nest location
-  Defence_station.convoy_enemies = SpawnEnemies(x + 10000, y + 15000, 40, "Ghosts")
-  Defence_station.convites_arrived = 0
-  local dx, dy = sectorToXY("G0") -- Rand nest location
-  dx = dx + 10000
-  dy = dy + 10000
-  for i, enemy in ipairs(Defence_station.convoy_enemies) do
-    enemy.dx = dx
-    enemy.dy = dy
-    enemy:setCallSign("D0-" .. i+42)
-    enemy:setWarpDrive(true)
-    enemy:setWarpSpeed(400);
-    enemy:setJumpDrive(false)
-    if Defence_station.mission_state == "drone convoy" or
-       Defence_station.drones_think_were_friendly == true or
-       Defence_station.tier2_mission_state == "pre-start" or
-       Defence_station.tier2_mission_state == "joinconvoy" then
-      enemy:orderFlyTowardsBlind(dx,dy)
-    else
-      enemy:orderAttack(Player)
-    end
-    enemy:onTakingDamage(ConvoyGoAggro)
-  end
-end
+-- XXX patrol_mission.DroneStationGoAggro -> patrol_mission.lua
 
-function ConvoyGoAggro(__, instigator)
-  if instigator ~= Player then return end
+-- XXX salvage_repair_mission.SpawnKWEnemies -> salvage_repair_mission.lua
 
-  if #Defence_station.convoy_enemies > 0 then
-  	if Player.aggro_message == nil then
-	    Defence_station:sendCommsMessage(Player, _("defenceStn-incCall", "It looks like you've aggro'd the convoy.\nGood luck to you! Try to keep them from destroying our stations!"))
-	    Player.aggro_message = "sent"
-	end
-  end
+-- XXX salvage_repair_mission.KWGoAggro -> salvage_repair_mission.lua
 
-  Player:setFaction("Human Navy")
-  Defence_station.drones_think_were_friendly = false
-  for _, e in ipairs(Defence_station.convoy_enemies) do
-    if e.goneAggro ~= nil then return end   -- Bail if already activated
-    e.goneAggro = true
-    if e:isValid() then e:orderAttack(Player)end
-  end
-end
+-- XXX patrol_mission.SpawnMockDroneShip -> patrol_mission.lua
 
-function DroneStationGoAggro(self, instigator)
-  if instigator ~= Player then return end
-
-  Defence_station.drones_think_were_friendly = false
-  Player:setFaction("Human Navy")
-
-  if self.spawns_left > 0 then
-    self.spawns_left = self.spawns_left - 1
-    local x, y = self:getPosition()
-    local spx, spy = vectorFromAngle(irandom(0, 360), 1500)
-    local defenders = SpawnEnemies(x + spx, y + spy, random(.8,1.2), "Ghosts")
-    for _, ship in ipairs(defenders) do
-      table.insert(Defence_station.ghost_defenders, ship)
-    end
-  end
-
-  if not self:getCanBeDestroyed() then
-    self:setShields(self:getShieldMax(0))
-    self:setHull(self:getHullMax(0))
-    Player:addToShipLog(_("warning-shipLog", "This station appears immune to our attacks"), "Yellow")
-  end
-
-  ConvoyGoAggro(nil, instigator)
-end
-
-function SpawnKWEnemies(start_aggro)
-  if Difficulty >= 1 then
-    local x, y = sectorToXY("AI23")
-    local enemies = SpawnEnemies(x, y, random(.8,1.2), "Kraylor")
-    for _, e in ipairs(enemies) do
-      table.insert(Kw_enemies, e)
-    end
-  end
-  if Difficulty >= 3 then
-    local x, y = sectorToXY("AG26")
-    local enemies = SpawnEnemies(x, y, random(.8,1.2), "Kraylor")
-    for _, e in ipairs(enemies) do
-      table.insert(Kw_enemies, e)
-    end
-  end
-  if Difficulty == 5 then
-    local x, y = sectorToXY("AI25")
-    local enemies = SpawnEnemies(x, y, random(.8,1.2), "Kraylor")
-    for _, e in ipairs(enemies) do
-      table.insert(Kw_enemies, e)
-    end
-  end
-
-  for _, e in ipairs(Kw_enemies) do
-    if start_aggro then
-      e:orderAttack(Player)
-    else
-      e:orderStandGround()
-      e:onTakingDamage(KWGoAggro)
-    end
-  end
-end
-
-function KWGoAggro(self, instigator)
-  if instigator ~= Player then return end
-  for _, e in ipairs(Kw_enemies) do
-    if e.goneAggro == true then return end
-    e.goneAggro = true
-    e:orderAttack(Player)
-  end
-  local repToLose = 10 * Difficulty
-  Player:takeReputationPoints(repToLose)
-  Player:addToShipLog(string.format(_("KraylorWarning-shipLog", "We have lost %s reputation for breaking the treaty"),repToLose), "Red")
-  Kw_mainStation:sendCommsMessage(Player, _("KraylorWarning-IncCall",[[You will regret this!
-
-You have violated our non-aggression treaty, and will soon regret your actions.]]))
-  StartMissionRepair()
-end
-
-function SpawnMockDroneShip()
-  if MockDroneShip == nil then
-    local sx, sy = Defence_station:getPosition()
-    MockDroneShip = CpuShip():setFaction("Ghosts"):setTemplate("Hathcock"):setCallSign("DD007"):setPosition(sx+1000,sy+1000):orderIdle()
-    MockDroneShip:setCommsFunction(function ()
-      setCommsMessage(_("drone-comms","Do not communicate on this channel."))
-    end)
-    MockDroneShip:setCanBeDestroyed(false)
-    MockDroneShip:onTakingDamage(function ()
-      Defence_station:sendCommsMessage(Player, _("drone-incCall",[[DISENGAGE!
-
-Captain, it's not what it looks like. Please dock with us and we will explain everything.]]))
-    end)
-  end
-end
-
-function SpawnRepairEnemies()
-  local x, y = Wormhole_station:getPosition()
-  Wormhole_station.repair_enemies = SpawnEnemies(x - 5000, y - 5000, random(1.8,2.2), "Kraylor")
-
-  -- This is needed to get the Kraylor to actually attack it
-  Wormhole_station:setFaction("Human Navy")
-
-  for _, enemy in ipairs(Wormhole_station.repair_enemies) do
-    enemy:orderAttack(Wormhole_station)
-  end
-  Wormhole_station:sendCommsMessage(Player, _("wormhole-incCall",[[RED ALERT!
-
-Captain, a bomb has just gone off on our station and we are under attack from the Kraylor. We need your help immediately!]]))
-  Player:addToShipLog(_("wormhole-shipLog","Defend the Wormhole Station"), "Red")
-end
+-- XXX salvage_repair_mission.SpawnRepairEnemies -> salvage_repair_mission.lua
 
 function SpawnHarrasment()
   local x, y = Player:getPosition()
@@ -1248,7 +940,7 @@ We're studying the energy radiating from the wormhole, and the similarities to b
       setCommsMessage(_("wormhole-comms", [[Thanks for dropping by, Captain.
 
 Our research is going well, but we could use some spare stabilizers for our Hawking Scanner. Would you mind salvaging some for us from the other side of the wormhole?]]))
-      addCommsReply(_("wormhole-comms", "Okay, we can help with that."), StartMissionSpareParts)
+      addCommsReply(_("wormhole-comms", "Okay, we can help with that."), salvage_repair_mission.StartMissionSpareParts)
       addCommsReply(_("wormhole-comms", "Do you pay tips?"), function()
         setCommsMessage(_("wormhole-comms", [[Maybe later, then. Goodbye.]]))
         Player:takeReputationPoints(2)
@@ -1265,12 +957,12 @@ These spare parts will really help with the program budget.]]))
           setCommsMessage(_("wormhole-comms", [[You get half of what would have with a smarter attitude! So rude.]]))
           Player:addReputationPoints(5)
           Wormhole_station.insults["errands"] = true
-          FinishMissionSpareParts()
+          salvage_repair_mission.FinishMissionSpareParts()
         end)
         addCommsReply(_("wormhole-comms", "We're so glad we could help"), function()
           setCommsMessage(_("wormhole-comms", [[We are too. Thanks a bunch.]]))
           Player:addReputationPoints(10)
-          FinishMissionSpareParts()
+          salvage_repair_mission.FinishMissionSpareParts()
         end)
       else
         setCommsMessage(_("wormhole-comms", [[We still need those spare parts from X472 on the other side of the wormhole!]]))
@@ -1321,7 +1013,7 @@ That's amazing, Captain. Thank you so much! You and your crew are true heros of 
 Glory to you and your kin.]]))
       addCommsReply(_("wormhole-comms", "You're very welcome."), function()
         setCommsMessage(_("wormhole-comms", "Goodbye captain. May peace be with you."))
-        FinishMissionRepair()
+        salvage_repair_mission.FinishMissionRepair()
       end)
       addCommsReply(_("wormhole-comms", "Kiss my feet!"), function()
         Wormhole_station.insults["kissmyfeet"] = true
@@ -1333,63 +1025,15 @@ YOU MAY BE A HERO, BUT YOU'RE ALSO A JERK!]]))
         else
           setCommsMessage(_("wormhole-comms", [[A real peach, you are.]]))
         end
-        FinishMissionRepair()
+        salvage_repair_mission.FinishMissionRepair()
       end)
     end
   end
 end
 
-function CommsColonyStation(comms_source, comms_target)
-  setCommsMessage(_("colony-comms", "Well, what I can do for you?"))
+-- XXX lost_mission.CommsColonyStation -> lost_mission.lua
 
-  if Admin_station.mission_state == "done" and Wormhole_station.tier2_mission_state == "rma" then
-    addCommsReply(_("colony-comms", "We're looking for Dr. Hendrix"), function ()
-      if comms_target ~= Admin_station.hendrix_station then
-        CHEEVOS["eyeondr"] = false
-        HendrixHints(comms_target)
-        setCommsMessage(comms_target.hendrix_hint)
-      else
-        if not comms_source:isDocked(comms_target) then
-          setCommsMessage(_("colony-comms", [[I.....zzzZ
-Hello?
-...
-The nearby NeZula somzzzzzzimes messssssses with our long range commcommcommcomm somet...
-
-...
-
-....dock...pr...b..
-...r]]))
-        else
-          setCommsMessage(_("colony-comms", [[I am Dr. Hendrix.
-
-If I remember that voice correctly, you are the crew from the Navy ship that saved me when I was stranded in the nebula!
-
-What can I do for you?]]))
-          addCommsReply(_("colony-comms", "Can you fix this Hawking Scanner?"), function ()
-            setCommsMessage(_("colony-comms", [[Let me have a look...
-
-Ah, I see why it's giving you trouble. Everything reads as okay, but the Graviton Lens is mis-calibrated somehow so it's throwing off the whole system.
-
-The good news is that it's easy to swap these out, the tech at the wormhole station should be able to do it. The bad news is that we have a shortage of Graviton Lenses right now because of those drone convoys.
-
-I've put in a requisition for one in your name. If you can find one in a Navy storehouse, bring it to the wormhole station and they should be good to go.]]))
-          Player:addToShipLog(_("colony-shipLog", "Find a Graviton Lens"), "Green")
-          Admin_station.req_lens = true
-          end)
-        end
-      end
-    end)
-  else
-    -- Variations on the colony station comms (NEEDED)
-    addCommsReply(_("colony-comms", "Some filler text and whatever. What are we even doing here?"), function ()
-      setCommsMessage(_("colony-comms", "Dude, where even ARE we?"))
-    end)
-  end
-end
-
-function CommsPatrolStation(comms_source, comms_target)
-  setCommsMessage(_("checkpointsStn-comms", "Not much here bud, just doing checkpoint kinda things, ya know?"))
-end
+-- XXX patrol_mission.CommsPatrolStation -> patrol_mission.lua
 
 function CommsDefenceStation(comms_source, comms_target)
 
@@ -1412,7 +1056,7 @@ function CommsDefenceStation(comms_source, comms_target)
   elseif Defence_station.tier2_mission_state == "done" and Defence_station.tier2_final_comms == nil then
     Defence_station.tier2_final_comms = "done"
     local extra_string = ""
-    if DroneShip ~= nil then
+    if patrol_mission.DroneShip ~= nil then
       extra_string = _("defenceStn-comms", "We are keeping the 007, and you can continue to fly it, or switch back to the Propitious 1 at any time. We'll keep it docked here at the station for you.")
     end
     setCommsMessage(string.format(_("defenceStn-comms","Great work, Captain!\nDestroying the central control eliminated all the other drone stations and stopped the convoys in their tracks! Of course, you are authorized to mop up any resistance that might remain, but we're calling this a job well done.\n%s"),extra_string))
@@ -1431,7 +1075,7 @@ We shouldn't talk over this channel, please dock to the station when you have a 
       setCommsMessage(_("defenceStn-comms", [[Welcome aboard.
 
 We need you to patrol the area. It's not exciting work, but it's got to be done. No rush, just make sure you visit each checkpoint in order, and we'll let you know if anything more pressing comes up.]]))
-      addCommsReply(_("defenceStn-comms", "Okay. We're ready to start the patrol"), StartMissionPatrol)
+      addCommsReply(_("defenceStn-comms", "Okay. We're ready to start the patrol"), patrol_mission.StartMissionPatrol)
     end
 
     if Defence_station.tier2_mission_state == "pre-start" then
@@ -1442,7 +1086,7 @@ We've tracked that convoy to a huge nest of drone stations in the west. The stat
 There is a drone ship docked here which you can use to infiltrate the nests. If you arrive with a convoy, you should automatically be granted access and we think the proximity defences will remain disabled while you stay in the area. Of course, if you start firing, then all bets are probably off.
 
 Hop in that drone ship, find the beacons, and get close enough to scan them - EASY!]]))
-      addCommsReply(_("defenceStn-comms", "We're ready to infiltrate the drone nest"), StartMissionDroneNest)
+      addCommsReply(_("defenceStn-comms", "We're ready to infiltrate the drone nest"), patrol_mission.StartMissionDroneNest)
       addCommsReply(_("defenceStn-comms", "(Object) Isn't that a treaty violation!?"), function ()
         setCommsMessage(_("defenceStn-comms", [[(Objecting)
 Sir, decoding the communications of alien defence systems is a violation of the Deepspace Militarized Citizenry Accord (DMCA).
@@ -1450,7 +1094,7 @@ Sir, decoding the communications of alien defence systems is a violation of the 
 Captain, are you angling for a good samaritan's award or something? Get out of here with that legal mumbo-jumbo.
 
 However you want to do it, you need to find that central control. Get on it!]]))
-        addCommsReply(_("defenceStn-comms", "Okay, we'll figure it out."), StartMissionDroneNest)
+        addCommsReply(_("defenceStn-comms", "Okay, we'll figure it out."), patrol_mission.StartMissionDroneNest)
       end)
     end
 
@@ -1466,11 +1110,11 @@ Remember, your primary orders are to support the research facilities in the area
           setCommsMessage(_("defenceStn-comms", [[Very well. Good Hunting.]]))
         end)
       else
-        if DroneShip ~= nil then
+        if patrol_mission.DroneShip ~= nil then
           addCommsReply(_("defenceStn-comms", "We'd rather crew the DD007"), function ()
-            Player:transferPlayersToShip(DroneShip)
+            Player:transferPlayersToShip(patrol_mission.DroneShip)
             CHEEVOS["ourship"] = false
-            Player = DroneShip
+            Player = patrol_mission.DroneShip
             setCommsMessage(_("defenceStn-comms", [[Very well. Good Hunting.]]))
           end)
         end
@@ -1553,11 +1197,11 @@ If you're not busy, please drop by to learn more about our projects.]]))
     -- Docked comms
     if Admin_station.mission_state == nil then
       setCommsMessage(_("adminStn-comms", [[We are so glad to have you aboard. What can we help you with?]]))
-      addCommsReply(_("adminStn-comms", "How long have you been operating in this system?"), StartMissionLost)
-      addCommsReply(_("adminStn-comms", "Where is the colony where your researchers live?"), StartMissionLost)
-      addCommsReply(_("adminStn-comms", "Tell us about the nearby nebulae."), StartMissionLost)
-      addCommsReply(_("adminStn-comms", "Are there any Kraylor in the area?"), StartMissionLost)
-      addCommsReply(_("adminStn-comms", "Are there any Exuari in the area?"), StartMissionLost)
+      addCommsReply(_("adminStn-comms", "How long have you been operating in this system?"), lost_mission.StartMissionLost)
+      addCommsReply(_("adminStn-comms", "Where is the colony where your researchers live?"), lost_mission.StartMissionLost)
+      addCommsReply(_("adminStn-comms", "Tell us about the nearby nebulae."), lost_mission.StartMissionLost)
+      addCommsReply(_("adminStn-comms", "Are there any Kraylor in the area?"), lost_mission.StartMissionLost)
+      addCommsReply(_("adminStn-comms", "Are there any Exuari in the area?"), lost_mission.StartMissionLost)
     elseif Admin_station.mission_state == "lost" then
         setCommsMessage(_("adminStn-comms", "Please bring our researchers home!"))
     elseif Admin_station.mission_state == "found" or Admin_station.mission_state == "done" then
@@ -1593,71 +1237,11 @@ Did you know that it's a popular place to hunt for treasure?]]))
   end
 end
 
-function CommsFoundShip(comms_source, comms_target)
-  if Admin_station.mission_state == "almost found" then
-      setCommsMessage(_("found-comms", [[Come in? Dr. Hendrix here... Come in?
+-- XXX lost_mission.CommsFoundShip -> lost_mission.lua
 
-Oh thank heavens, we're found! We thought we might be stuck here for good!
+-- XXX salvage_repair_mission.CommsInvestigator -> salvage_repair_mission.lua
 
-We need to install a new hyperplasma full bridge rectifier, but our plasma conduit driver has gone missing. You must have one in your engine room? If you let us borrow it, we will upgrade your sensors with our new experimental modifications.]]))
-      addCommsReply(_("found-comms", "Sure, you can borrow our conduit driver!"), function ()
-        setCommsMessage(_("found-comms", [[Great. Your sensors are upgraded. We'll get this rectifier installed and be on our way.
-
-Thanks again, Captain. If you ever need some help with your Hawking Scanners, look me up!]]))
-      end)
-
-      FinishMissionLost()
-
-  elseif Admin_station.mission_state == "found" then
-      setCommsMessage(_("found-comms", "Thanks so much for finding us!"))
-  end
-end
-
-function CommsInvestigator(comms_source, comms_target)
-  setCommsMessage(_("investigate-comms", "What do you have to say for yourself?"))
-  addCommsReply(_("investigate-comms", "We're just running a salvage mission."), function ()
-    setCommsMessage(_("investigate-comms", "Carry on, then, we're keeping our eye on you."))
-  end)
-  addCommsReply(_("investigate-comms", "Back off, this is a special military operation"), function ()
-    setCommsMessage(_("investigate-comms", "You want to back up that escalation with some weapons fire?"))
-  end)
-end
-
-function CommsDroneStation(comms_source, comms_target)
-  if not comms_source:isDocked(comms_target) then
-    setCommsMessage(_("drone-comms", [[We oversee the B-3 liquidation of the Ghosts assets.
-
-Dock with us to check out what we've got.]]))
-  else -- DOCKED COMMS
-    setCommsMessage(_("drone-comms", [[You need any of this stuff?
-
-It's not for sale, as such. You'll need to get a requisition from the Admin Station in order to carry anything out.
-]]))
-    addCommsReply(_("drone-comms", "Proximity Sensor"), function ()
-      setCommsMessage(_("drone-comms", "Activates when ships get too close"))
-      addCommsReply(_("<- Back"), CommsDroneStation)
-    end)
-    addCommsReply(_("drone-comms", "Intelligence Accelerator"), function ()
-      setCommsMessage(_("drone-comms", "Too expensive to use for video games."))
-      addCommsReply(_("<- Back"), CommsDroneStation)
-    end)
-    addCommsReply(_("drone-comms", "Graviton Lens"), function ()
-      if Admin_station.req_lens == true then
-        Wormhole_station.tier2_mission_state = "fixed"
-        setCommsMessage(_("drone-comms", [[Ooooh, a requisition!
-
-Alright, enjoy... focusing your gravitons, I guess!]]))
-      else
-        setCommsMessage(_("drone-comms", "For focusing the gravitational field."))
-        addCommsReply(_("<- Back"), CommsDroneStation)
-      end
-    end)
-    addCommsReply(_("drone-comms", "Holographic Projector"), function ()
-      setCommsMessage(_("drone-comms", "Shows very convincing drone stations"))
-      addCommsReply(_("<- Back"), CommsDroneStation)
-    end)
-  end
-end
+-- XXX patrol_mission.CommsDroneStation -> patrol_mission.lua
 
 
 function CommsBeingAttacked (self, instigator)
@@ -1687,88 +1271,12 @@ end
 --==
 --==================================================
 
-function StartMissionLost()
-  -- for bonus, art in pairs(Admin_station.nebula_bonuses) do
-  --   local nx, ny = art:getPosition()
-  --   Player:addToShipLog("DEBUG: "..bonus.." @ "..nx..", "..ny, "Blue")
-  -- end
-  setCommsMessage(_("adminStn-comms",
-[[Sorry to interrupt, but we've just recieved an urgent call.
-
-It seems one of our researchers, Dr. Hendrix, and her crew have lost their way in a nearby nebula and need our help. They were running experiments in the nebula when their engines and transponder went offline. Please follow our scout vessel, SR7, to the nebula and search for them.]]))
-
-  Admin_station.x, Admin_station.y = Admin_station:getPosition()
-  Admin_station.assist_ship = CpuShip():setCallSign("SR7"):setPosition(Admin_station.x + 200, Admin_station.y):orderFlyTowardsBlind(sectorToXY("D6")):setFaction("Human Navy"):setTemplate("Ktlitan Scout"):setWarpDrive(true):setCommsScript(""):setCommsFunction(function ()
-    if Admin_station.assist_ship.state == "flyToNebula" or Admin_station.assist_ship.state == "waiting" then
-      setCommsMessage(_("adminStn-comms", "Meet me at the edge of the nebula"))
-    end
-  end) -- Rand Nebula location
-  Admin_station.assist_ship.state = "flyToNebula"
-  Admin_station.mission_state = "lost"
-  Admin_station.lost_ship:destroy()
-end
+-- XXX lost_mission.StartMissionLost -> lost_mission.lua
 
 
-function UpdateMissionLost()
-  if Admin_station.mission_state == nil or Admin_station.mission_state == "done" then return end
+-- XXX lost_mission.UpdateMissionLost -> lost_mission.lua
 
-  if Admin_station.assist_ship.state == "flyToNebula" and distance(Admin_station.assist_ship, sectorToXY("D6")) <= 1000 then
-    Admin_station.assist_ship.state = "waiting"
-    Admin_station.assist_ship:orderStandGround()
-  end
-
-  if Admin_station.assist_ship.state == "waiting" and distance(Admin_station.assist_ship, Player) <= 20000 then
-    Admin_station.assist_ship:sendCommsMessage(Player, _("adminStn-incCall", [[Ready to head in?
-
-The nebula is very thick, so we will need to get close to find a ship with no transponder. Probes won't show the ship, but your relay station should be able to pick it up at 20U or less. There may be hazards, so be careful.
-
-I'll follow you. Let's find Dr. Hendrix and bring her crew home.]]))
-    Player:addToShipLog(_("adminStn-shipLog", "Fly into the Nebula and find Dr. Hendrix"), "Green")
-    Admin_station.assist_ship:orderFlyFormation(Player, 2300, 1700)
-    Admin_station.assist_ship.state = "done"
-    Admin_station.assist_ship:setCommsScript("comms_ship.lua")
-  end
-
-  if Admin_station.mission_state == "lost" then
-    if distance(Player, Admin_station.lost_location_x, Admin_station.lost_location_y) <= 20000 then -- Must be 20U from lost ship to find it
-      Admin_station.found_ship = CpuShip():setFaction("Human Navy"):onTakingDamage(CommsBeingAttacked):setTemplate("Equipment Freighter 2"):setWarpDrive(true):setCallSign("SV1"):setPosition(Admin_station.lost_location_x, Admin_station.lost_location_y):setCanBeDestroyed(false)
-      Admin_station.mission_state = "almost found"
-      Admin_station.found_ship:setCommsFunction(CommsFoundShip)
-    end
-  end
-
-  if Admin_station.mission_state == "found" and Admin_station.found_ship:isDocked(Admin_station.hendrix_station) then
-    Admin_station.mission_state = "done"
-    Admin_station.found_ship:setCanBeDestroyed(true)
-    Admin_station.found_ship:destroy()
-  end
-end
-
-function FinishMissionLost()
-  Player:setLongRangeRadarRange(35000)
-  Player:addToShipLog(_("finishMissionNebulae-shipLog","Sensors have been upgraded."),"Green")
-  Player:addReputationPoints(5)
-
-  -- Send to a random colony station
-  Admin_station.hendrix_station = Colony_stations[irandom(1, #Colony_stations)]
-  --Player:addToShipLog("DEBUG hedrix station is: "..Admin_station.hendrix_station:getCallSign(), "Magenta")
-
-  if Admin_station.found_ship == nil then -- To account for GM force-finish
-    Admin_station.mission_state = "done"
-  else
-    -- Temporarily adjust the call sign so that the station name doesn't show in ship log
-    local tmpCall = Admin_station.hendrix_station:getCallSign()
-    Admin_station.hendrix_station:setCallSign("Colony Station")
-    Admin_station.found_ship:orderDock(Admin_station.hendrix_station)
-    Admin_station.hendrix_station:setCallSign(tmpCall)
-    Admin_station.mission_state = "found"
-  end
-  if Admin_station.assist_ship ~= nil and Admin_station.assist_ship:isValid() then
-    Admin_station.assist_ship:orderDefendTarget(Admin_station)
-    Admin_station.assist_ship.state = "done"
-    Admin_station.assist_ship:setCommsScript("comms_ship.lua")
-  end
-end
+-- XXX lost_mission.FinishMissionLost -> lost_mission.lua
 
 --==================================================
 --==
@@ -1787,106 +1295,12 @@ end
 --==
 --==================================================
 
-function StartMissionPatrol()
-  setCommsMessage(_("defenceStn-comms", [[Great!
-
-Start at the checkpoint in the North West. You'll need to dock at each station before proceeding to the next.]]))
-  Defence_station.patrol_index = 1
-  -- Defence_station.patrolled = [0,0,0,0]
-  Defence_station.next_station = Patrol_stations[Defence_station.patrol_index]:getCallSign()
-  Defence_station.mission_state = "patrolling"
-end
+-- XXX patrol_mission.StartMissionPatrol -> patrol_mission.lua
 
 
-function UpdateMissionPatrol()
+-- XXX patrol_mission.UpdateMissionPatrol -> patrol_mission.lua
 
-  if Defence_station.mission_state == nil or Defence_station.mission_state == "done" then return end
-
-  if Defence_station.mission_state == "patrolling" then
-
-    if(Player:isDocked(Patrol_stations[Defence_station.patrol_index])) then
-
-      Defence_station.patrol_index = Defence_station.patrol_index + 1
-      if Defence_station.patrol_index > #Patrol_stations then
-        Defence_station.patrol_index = Defence_station.patrol_index - #Patrol_stations
-        Defence_station.patrol_second_round = true
-      end
-
-      Defence_station.next_station = Patrol_stations[Defence_station.patrol_index]:getCallSign()
-
-      -- Start attack on SW station
-      if Defence_station.patrol_second_round ~= nil and Defence_station.patrol_index == 1 then
-        Defence_station.mission_state = "patrol attack"
-        SpawnPatrolEnemies()
-      else
-        Defence_station:sendCommsMessage(Player, string.format(_("defenceStn-incCall","Please proceed to %s"),Defence_station.next_station))
-        Player:addToShipLog(string.format(_("defenceStn-shipLog","Please proceed to %s"),Defence_station.next_station), "Green")
-      end
-      Player:addReputationPoints(2)
-    end
-  end
-
-  if Defence_station.mission_state == "patrol attack" then
-    local allDestroyed = true
-    for _, enemy in ipairs(Defence_station.patrol_enemies) do
-      if enemy:isValid() then
-        allDestroyed = false
-        if distance(enemy,Player) < 2000 then
-          enemy:orderAttack(Player)
-        else
-          enemy:orderAttack(Patrol_stations[2])
-        end
-      end
-    end
-    if allDestroyed then
-      Defence_station:sendCommsMessage(Player, _("defenceStn-incCall",[[Great work captain!
-
-You have repelled the attackers and the SW Checkpoint is safe for now, but intelligence reports show a huge drone convoy in your vicinity to the NW.
-
-INVESTIGATE BUT DO NOT ENGAGE! We have it on good word that attacking this convoy is extremely risky. Keep your distance, but we'd like to know where they are going.]]))
-      Player:addToShipLog("defenceStn-shipLog","Investigte the convoy, but DO NOT ENGAGE", "Red")
-
-      Defence_station.mission_state = "drone convoy"
-      SpawnConvoyEnemies()
-    end
-  end
-
-  if Defence_station.mission_state == "drone convoy" then
-    CheckConvoyArrived()
-  end
-end
-
-function CheckConvoyArrived()
-  for _, enemy in ipairs(Defence_station.convoy_enemies) do
-    -- Make them disappear when they get to G0
-    if enemy:isValid() then
-      if distance(enemy, enemy.dx, enemy.dy) < 1000 and not enemy.goneAggro then
-        enemy:destroy()
-      end
-    else
-      if enemy.arrived == nil then
-        enemy.arrived = true -- 'arrived' even if it's to valhala
-        Defence_station.convites_arrived = Defence_station.convites_arrived + 1
-      end
-    end
-  end
-
-  -- Wait for half the convites to arrive during first tier patrol mission
-  if Defence_station.convites_arrived > (#Defence_station.convoy_enemies / 2) and Defence_station.tier2_mission_state == nil then
-    Defence_station.tier2_mission_state = "pre-start"
-    Defence_station:sendCommsMessage(Player, _("defenceStn-incCall","Come in, Captain.\nWe have the info we need about that convoy and strongly discourage any further engagement.\nYour assistance is required with a secret mission. Dock with us to receive further instructions when you're ready."))
-    Player:addToShipLog(_("defenceStn-shipLog","Dock with the Defence Station to start another mission"), "Green")
-    SpawnMockDroneShip()
-  end
-
-  if Defence_station.convites_arrived == #Defence_station.convoy_enemies then
-    Defence_station.mission_state = "done"
-    Defence_station.convoy_enemies = {}
-    if Defence_station.tier2_mission_state == "joinconvoy" or Defence_station.tier2_mission_state == "arrived" then
-      SpawnConvoyEnemies()
-    end
-  end
-end
+-- XXX patrol_mission.CheckConvoyArrived -> patrol_mission.lua
 
 --==================================================
 --==
@@ -1905,114 +1319,11 @@ end
 --==
 --==================================================
 
-function StartMissionSpareParts()
+-- XXX salvage_repair_mission.StartMissionSpareParts -> salvage_repair_mission.lua
 
-  local lastpart
-  local missiles = Player:getWeaponStorage("Homing")
-  for i = 0, Player:getWeaponTubeCount() do
-    local t = Player:getWeaponTubeLoadType(i)
-    if t == "homing" then
-      missiles = missiles + 1
-    end
-    --if t ~= nil then Player:addToShipLog("DEBUG tube "..i.." type "..t.." total "..missiles, "Magenta") end
-  end
+-- XXX salvage_repair_mission.UpdateMissionSpareParts -> salvage_repair_mission.lua
 
-  if missiles >= 6 or Difficulty == 5 then
-    lastpart = _("wormhole-comms", "and when in doubt - apply missiles.")
-  elseif Difficulty == 1 then
-    lastpart = _("wormhole-comms", "and we've given you some extra missiles to help get the job done.")
-    Player:setWeaponStorage("Homing", 6 - missiles + Player:getWeaponStorage("Homing"))
-  elseif Difficulty == 3 then
-    lastpart = _("wormhole-comms", "and go find some extra missiles to help get the job done.")
-  end
-
-  setCommsMessage(string.format(_("wormhole-comms","Great!\nThere is an old Exuari station, callsign X472, to the SE on the other side of the wormhole. It used to study the planet forming nearby, but it's been abandoned for over a century now, no one aboard and no weapons, a historical relic, really. We need you to demolish it and bring us the stabilizers from its jump drive which we can use to maintain our Hawking Scanners.\nWe have hacked the emergency integrity field so that the station can be destroyed, but there were strange disturbances when we deactivated it. We're not sure what it means, but we advise you to exercise caution...\n%s"),lastpart))
-
-  Wormhole_station.mission_state = "get parts"
-
-  Parts_station:setCanBeDestroyed(true)
-  Parts_station:onDestroyed(function ()
-    CHEEVOS["relic"] = false
-    Wormhole_station.mission_state = "return parts"
-    local hailer = nil
-    if Investigator:isValid() then -- Investigator can hail on his own if alive
-      hailer = Investigator
-    end
-    if hailer ~= nil and Kw_mainStation:isValid() then -- hail from station if they are both alive
-      hailer = Kw_mainStation
-    end
-
-    if hailer ~= nil then -- If is alive, give a warning
-      hailer:sendCommsMessage(Player, _("KraylorWarning-incCall", [[Ugh, humans.
-
-This is the Kraylor Advanced "Reasearch" Project Agency (KARPA), we have detected your suspicious activity in the vicinity.
-
-We are sending a team to investigate what you are up to. If you fire on us, there will be trouble!]]))
-      Player:addToShipLog(_("KraylorWarning-shipLog", "The Kraylor are investigating our activities and have warned us not to escalate"), "Yellow")
-      SpawnKWEnemies(false)
-    else
-      SpawnKWEnemies(true) -- If not alive, make all reinforcements immediately aggro
-    end
-    SupplyDrop():setFaction("Human Navy"):setPosition(Parts_station:getPosition()):setEnergy(200):onPickUp(function ()
-      Wormhole_station:sendCommsMessage(Player, _("wormhole-incCall", [[Great, you got the parts!
-
-You'd better hurry back, we've seen some Kraylor activity in the area. Hopefully your salvage mission didn't attract the wrong sort of attention.]]
-      ))
-      Player:addToShipLog(_("wormhole-shipLog", "Return the spare parts to the Wormhole Station"), "Green")
-      Player.hasSpareParts = true
-    end)
-
-  end)
-  Parts_station:onTakingDamage(function ()
-    local x, y = Parts_station:getPosition()
-    local x_t, y_t = Player:getPosition()
-    local x_d = x - (2 * (x - x_t)) + irandom(-1000, 1000)
-    local y_d = y - (2 * (y - y_t)) + irandom(-1000, 1000)
-    Parts_station:setPosition(x_d, y_d)
-    Player:addReputationPoints(1)
-    Player:addToShipLog(_("wormhole-shipLog", "Jump Defence Activated"),"Yellow")
-  end)
-end
-
-function UpdateMissionSpareParts()
-  if Wormhole_station.mission_state == nil or Wormhole_station.mission_state == "done" then return end
-
-  if Wormhole_station.mission_state == "return parts" then
-
-    -- Handle Investigator following Player
-    if Investigator.warned == nil and Investigator:isValid() then
-      if distance(Investigator, Player) < 7000 then
-        Investigator:orderStandGround()
-      else
-        Investigator:orderFlyTowardsBlind(Player:getPosition())
-      end
-      if distance(Investigator, Player) > 200000 then
-        local dx, dy = Player:getPosition()
-        dx = dx + 7000
-        dy = dy + 7000
-        Investigator:setPosition(dx, dy)
-      end
-
-      if distance(Player, Wormhole_station) < 5000 and Player.hasSpareParts == true then
-        Investigator.warned = true
-        Investigator:sendCommsMessage(Player, _("KraylorWarning-incCall", [[Watch your back, Hugh Mon!
-
-We don't know what you're up to, but we don't like the look of it. Keep your distance and maybe we'll leave you alone.
-
-<The Kraylor Vessel jumps back through the wormhole>]]))
-        Player:addToShipLog(_("KraylorWarning-shipLog", "The Kraylor seem hostile and have warned us to keep our distance"), "Yellow")
-        Investigator:setPosition(377672, 540642)
-        Investigator:orderStandGround()
-        StartMissionRepair()
-      end
-    end
-  end
-end
-
-function FinishMissionSpareParts()
-  Wormhole_station.mission_state = "done"
-  StartMissionRepair()
-end
+-- XXX salvage_repair_mission.FinishMissionSpareParts -> salvage_repair_mission.lua
 --==================================================
 --==
 --==
@@ -2030,97 +1341,11 @@ end
 --==
 --==================================================
 
-function StartMissionDroneNest()
-  setCommsMessage(_("defenceStn-comms", [[Good luck]]))
-  SpawnMockDroneShip()
-  TransferToDrone()
-  Defence_station.convoy_timer = getScenarioTime()
-  Defence_station.tier2_mission_state = "joinconvoy"
-end
+-- XXX patrol_mission.StartMissionDroneNest -> patrol_mission.lua
 
-function UpdateMissionDroneNest()
-  if Defence_station.tier2_mission_state == nil or Defence_station.tier2_mission_state == "done" then return end
+-- XXX patrol_mission.UpdateMissionDroneNest -> patrol_mission.lua
 
-  if Defence_station.tier2_mission_state == "joinconvoy" then
-    if (getScenarioTime() - Defence_station.convoy_timer >= 60) and #Defence_station.convoy_enemies == 0 then
-      SpawnConvoyEnemies()
-    end
-
-    local with_convoy = false
-    if #Defence_station.convoy_enemies ~= 0 then
-      CheckConvoyArrived()
-      for _, enemy in ipairs(Defence_station.convoy_enemies) do
-        if enemy:isValid() and distance(Player, enemy) < 5000 then
-          with_convoy = true
-        end
-      end
-    end
-
-    local px, py = Player:getPosition()
-    local gx, gy = sectorToXY("G-1")  -- -120000, 20000    (-120848, 27550)
-    if (px - gx > -2500) and (px - gx < 42500) and (py - gy > -2500) and (py - gy < 22500) then  -- Inside nest area
-      if with_convoy and Player:getFaction() == "Ghosts" and not Defence_station.cover_blown then
-        Defence_station.tier2_mission_state = "arrived"
-        Defence_station.drones_think_were_friendly = true
-        Defence_station:sendCommsMessage(Player, _("defenceStn-incCall", [[Arrived, scan the security beacons]]))
-      else
-        if not Defence_station.cover_blown then
-          Defence_station.cover_blown = true
-          Defence_station:sendCommsMessage(Player, _("defenceStn-incCall", [[Your cover has been blown and the proximity defence system remains active. We suggest leaving and trying again to arrive with a future convoy.]]))
-          Player:addToShipLog(_("defenceStn-shipLog", "Our cover has been blown"), "Red")
-        end
-      end
-    else
-      if Defence_station.cover_blown then
-        Player:addToShipLog(_("defenceStn-shipLog", "We should be good to try again"), "Green")
-        Defence_station.cover_blown = false
-      end
-    end
-  end
-
-  if Defence_station.tier2_mission_state == "arrived" then
-    CheckConvoyArrived()
-  end
-end
-
-function FinishMissionDroneNest ()
-  if MockDroneShip ~= nil and MockDroneShip:isValid() then
-    MockDroneShip:destroy()
-  end
-  for _, e in ipairs(Defence_station.convoy_enemies) do
-    if Difficulty == 5 then
-      e:orderRoaming()
-    else
-      e:orderIdle()
-    end
-  end
-  for _, stn in ipairs(Drone_stations) do
-    if stn:isValid() then
-      if stn == Drone_control_station then
-        stn:onDestroyed(function ()
-          print(Player) --https://github.com/daid/EmptyEpsilon/issues/690
-        end)
-      end
-      stn:destroy()
-    end
-  end
-  Player:setFaction("Human Navy")
-  Liquidation_station = SpaceStation():setTemplate("Small Station"):setFaction("Human Navy"):onTakingDamage(CommsBeingAttacked):setCallSign("DB-3"):setPosition(Drone_control_station.x, Drone_control_station.y):setCommsFunction(CommsDroneStation)
-  Liquidation_station:sendCommsMessage(Player, _("drone-incCall", [[Great work, Captain!
-
-We have taken control of this station and will be liquidating spare parts from the wreckage.]]))
-  Player:addToShipLog(_("drone-shipLog", "DB-3 has a collection of spare parts"), "Green")
-  Player:addReputationPoints(20)
-
-  -- If all other discoverable missions are done, shorten the fuze on the repair mission start
-  if Admin_station.mission_state == "done" and
-  Wormhole_station.mission_state == "done" and
-  Wormhole_station.tier2_attack_countdown > 120 then
-    Wormhole_station.tier2_attack_countdown = 120
-  end
-  Defence_station.tier2_mission_state = "done"
-  Defence_station.mission_state = "done"
-end
+-- XXX patrol_mission.FinishMissionDroneNest -> patrol_mission.lua
 
 --==================================================
 --==
@@ -2139,73 +1364,11 @@ end
 --==
 --==================================================
 
-function StartMissionRepair()
+-- XXX salvage_repair_mission.StartMissionRepair -> salvage_repair_mission.lua
 
-  if Wormhole_station.tier2_mission_state == nil then
-    Wormhole_station.tier2_mission_state = "wait for attack"
-  end
+-- XXX salvage_repair_mission.UpdateMissionRepair -> salvage_repair_mission.lua
 
-  -- If all the other missions are done, bump this to 2 minutes
-  if Admin_station.mission_state == "done" and
-  Wormhole_station.mission_state == "done" and
-  Defence_station.tier2_mission_state == "done" then
-    Wormhole_station.tier2_attack_countdown = 120
-  else
-    if Wormhole_station.tier2_attack_countdown == nil then
-      Wormhole_station.tier2_attack_countdown = 900
-    end
-  end
-
-  --Player:addToShipLog("DEBUG tier2_attack_countdown: ".. Wormhole_station.tier2_attack_countdown, "Magenta")
-end
-
-function UpdateMissionRepair(delta)
-  if Wormhole_station.tier2_mission_state == nil then return end
-
-  if Wormhole_station.tier2_mission_state == "wait for attack" then
-    Wormhole_station.tier2_attack_countdown = Wormhole_station.tier2_attack_countdown - delta
-    if Wormhole_station.tier2_attack_countdown <= 0 then
-      Wormhole_station.tier2_mission_state = "attack"
-      SpawnRepairEnemies()
-    end
-  end
-
-  if Wormhole_station.tier2_mission_state == "attack" then
-    local allDestroyed = true
-    for _, enemy in ipairs(Wormhole_station.repair_enemies) do
-      if enemy:isValid() then
-        allDestroyed = false
-        if distance(enemy,Player) < 2000 then
-          enemy:orderAttack(Player)
-        else
-          enemy:orderAttack(Wormhole_station)
-        end
-        if distance(enemy, Wormhole_station) > 200000 then
-          enemy:setPosition(69274, 36128)  -- Landing point when entering southern wormhole
-        end
-      end
-    end
-    if allDestroyed then
-      Player:addReputationPoints(20)
-      Wormhole_station.tier2_mission_state = "damaged"
-      Wormhole_station:sendCommsMessage(Player, _("wormhole-incCall",[[Thanks so much, captain!
-
-You really saved our ass there. Unfortunately our Hawking Scanner was damaged by the bomb, and we haven't been able to get it back online. Do you think you could get it fixed for us?
-
-Please dock with us to pick up the scanner.]]))
-      Player:addToShipLog(_("wormhole-shipLog", "Get the Hawking Scanner from the Wormhole Station"), "Green")
-    end
-  end
-
-  if Wormhole_station.tier2_mission_state == "done" and Player:getDockingState() == 0 and Wormhole_station.victory_comms == nil  then
-    Wormhole_station.victory_comms = true
-    Admin_station:openCommsTo(Player)
-  end
-end
-
-function FinishMissionRepair()
-  Wormhole_station.tier2_mission_state = "done"
-end
+-- XXX salvage_repair_mission.FinishMissionRepair -> salvage_repair_mission.lua
 
 
 --==================================================
@@ -2225,31 +1388,7 @@ end
 --==
 --==================================================
 
-function TransferToDrone()
-  local swapx, swapy = MockDroneShip:getPosition()
-  local swapRotate = MockDroneShip:getRotation()
-  MockDroneShip:setPosition(500,500)
-  DroneShip = PlayerSpaceship():setFaction("Ghosts"):setTemplate("Hathcock"):setCallSign("DD007"):setPosition(swapx, swapy)
-  DroneShip:setRotation(swapRotate)
-  DroneShip:commandTargetRotation(swapRotate)
-  MockDroneShip:destroy()
-
-  DroneShip:setWeaponStorage("Homing", 3)
-  DroneShip:setWeaponStorageMax("Homing", 6)
-  DroneShip:setWeaponStorage("HVLI", 6)
-  DroneShip:setWeaponStorage("Nuke", 2)
-  DroneShip:setWeaponStorageMax("Nuke", 2)
-  DroneShip:setWeaponStorage("EMP", 2)
-  DroneShip:setWarpDrive(true)
-  DroneShip:setWarpSpeed(400)
-  DroneShip:setJumpDrive(false)
-
-  Player:transferPlayersToShip(DroneShip)
-  CHEEVOS["ourship"] = false
-  Player = DroneShip
-
-  Player:addToShipLog(_("drone-shipLog", "This ship will not activate the drone station proximity defences as long as you arrive with a convoy."),"Yellow")
-end
+-- XXX patrol_mission.TransferToDrone -> patrol_mission.lua
 
 function TransferToPP1()
   Player:addToShipLog(_("drone-shipLog", "It's nice to be back aboard the Propitious 1"),"Yellow")
@@ -2267,59 +1406,7 @@ function UpdateNebulaBonuses()
   end
 end
 
-function UpdateDroneStations()
-
-  -- Proximity Defence
-  if Defence_station.drones_think_were_friendly ~= true then
-    for _, stn in ipairs(Drone_stations) do
-      if stn:isValid() then
-        if distance(Player, stn) > 80000 then return end -- Exit early (don't iterate all stations) if player is far
-        if distance(Player, stn) < 2000 and stn.prox_spawned == nil then
-          stn.prox_spawned = true
-          local x, y = stn:getPosition()
-          local x_t, y_t = Player:getPosition()
-          local x_d = x - (2 * (x - x_t)) + irandom(-2000, 2000)
-          local y_d = y - (2 * (y - y_t)) + irandom(-2000, 2000)
-          local defenders = SpawnEnemies(x_d, y_d, random(0.1,0.3), "Ghosts")
-          for _, d in ipairs(defenders) do
-            d:orderAttack(Player)
-            table.insert(Defence_station.ghost_defenders, d)
-          end
-          stn:sendCommsMessage(Player, _("drone-incCall", [[PROXIMITY DEFENCE SYSTEM ACTIVATED]]))
-          Player:addToShipLog(_("drone-shipLog", "We got too close to a drone station and it launched defences."), "Red")
-          CHEEVOS["distancing"] = false
-        end
-      end
-    end
-  end
-
-  -- Security beacons
-  if Defence_station.tier2_mission_state ~= nil then
-    if Defence_station.all_beacons_scanned ~= true then
-      local scanned = 0
-      local desc = _("scienceDescription-beacons", "The Ghosts drone security beacons. If we scan them all, we should be able to find the control station. We'll need to get pretty close.")
-      for __, a in ipairs(Drone_artifacts) do
-        if a:isScannedBy(Player) then
-          CHEEVOS["DMCA"] = false
-          scanned = scanned + 1
-        elseif distance(Player, a) < 2500 then
-          if a.close_latch ~= true then
-            a.close_latch = true
-            a:setDescriptions(desc, _("scienceDescription-beacons", "The beamforming configuration from this beacon will help the boffins triangulate the location of the central control.")):setScanningParameters(1,1)
-          end
-        else
-            a.close_latch = false
-            a:setDescriptions(desc, ""):setScanningParameters(0,0)
-        end
-      end
-      if scanned >= #Drone_artifacts then
-        Defence_station.all_beacons_scanned = true
-        Defence_station:sendCommsMessage(Player,string.format(_("defenceStn-incCall","Great work!\nOur boffins were able to piece together the data and figure out where the commands are coming from.\nYou must destroy station %s"),Drone_control_station:getCallSign()))
-        Player:addToShipLog(string.format(_("defenceStn-shipLog","The drone control station is %s"),Drone_control_station:getCallSign()), "Green")
-      end
-    end
-  end
-end
+-- XXX patrol_mission.UpdateDroneStations -> patrol_mission.lua
 
 function UpdateHarassment()
   local alldead = true
@@ -2389,48 +1476,9 @@ function UpdateTraffic()
   table.insert(Traffic.new_ships, new_ship)
 end
 
-function HendrixHints(stn)
-  if stn.hendrix_hint ~= nil then return end
+-- XXX lost_mission.HendrixHints -> lost_mission.lua
 
-  if Difficulty ~= 1 and irandom(1,13 - Difficulty) == 1 then -- Hints every time on easy, but unhelpful 1/10 on med and 1/8 on hard
-    stn.hendrix_hint = _("hendrixHints-comms", "Sorry, I don't know where Dr. Hendrix lives")
-    return
-  end
-
-  local hendrix_callsign = Admin_station.hendrix_station:getCallSign()
-  local char = irandom(1,4)
-  local hint = hendrix_callsign:sub(char,char)
-  if char == 1 then
-    stn.hendrix_hint = string.format(_("hendrixHints-comms","Dr. Hendrix, of course! I'm pretty sure she was on a %s-class station, but darned if I can remember which one."),hint)
-  else
-    stn.hendrix_hint = string.format(_("hendrixHints-comms","Gosh, Dr. Hendrix. Okay. Sorry, but honestly all I remember is that her address definitely has a '%s' in it."),hint)
-  end
-end
-
-function CheckDefeatConditions()
-  for _, stn in ipairs(Patrol_stations) do
-    if not stn:isValid() then
-      Player:addToShipLog(_("defeat-shipLog","DEFEAT - A Patrol Station has been destroyed"), "Red")
-      victory("Exuari")
-    end
-  end
-
-  for _, stn in ipairs({Admin_station, Defence_station, Wormhole_station}) do
-    if not stn:isValid() then
-      Player:addToShipLog(_("defeat-shipLog","DEFEAT - A Core station (Admin, Defence, Wormhole) has been destroyed"), "Red")
-      victory("Exuari")
-    end
-  end
-
-  if Defence_station.tier2_mission_state == "done" then
-    if not Liquidation_station:isValid() then
-      Player:addToShipLog(_("defeat-shipLog","DEFEAT - Station B-3 has been destroyed"), "Red")
-      victory("Exuari")
-    end
-  end
-
-  if not Player:isValid() then victory("Exuari") end
-end
+-- XXX patrol_mission.CheckDefeatConditions -> patrol_mission.lua
 
 function CheckCheevoTreasure()
   CHEEVOS["treasure"] = true
@@ -2442,15 +1490,7 @@ function CheckCheevoTreasure()
   end
 end
 
-function CheckCheevoJunk()
-  CHEEVOS["junk"] = true
-  for _, stn in ipairs(Exuari_junk_stations) do
-    if stn:isValid() then
-      CHEEVOS["junk"] = false
-      return
-    end
-  end
-end
+-- XXX salvage_repair_mission.CheckCheevoJunk -> salvage_repair_mission.lua
 
 function CheckCheevoNoGhosts()
   CHEEVOS["noghosts"] = true
@@ -2479,17 +1519,7 @@ function CheckCheevoNoWormhole()
   end
 end
 
-function CheckCheevoHeros()
-  local total = PP1:getReputationPoints()
-  if DroneShip ~= nil then
-    total = total + DroneShip:getReputationPoints()
-  end
-  if total > 100 then
-    CHEEVOS["heros"] = true
-  else
-    CHEEVOS["heros"] = false
-  end
-end
+-- XXX patrol_mission.CheckCheevoHeros -> patrol_mission.lua
 
 function CheckCheevoGrandSlam()
   CHEEVOS["grandslam"] = true
@@ -2503,10 +1533,10 @@ end
 
 function CheckCheevos()
   CheckCheevoTreasure()
-  CheckCheevoJunk()
+  salvage_repair_mission.CheckCheevoJunk()
   CheckCheevoNoGhosts()
   CheckCheevoNoWormhole()
-  CheckCheevoHeros()
+  patrol_mission.CheckCheevoHeros()
   CheckCheevoGrandSlam()
 end
 
@@ -2519,14 +1549,14 @@ function CheevoString(name)
 end
 
 function update(delta)
-  CheckDefeatConditions()
+  patrol_mission.CheckDefeatConditions()
   UpdateNebulaBonuses()
-  UpdateDroneStations()
-  UpdateMissionLost()
-  UpdateMissionPatrol()
-  UpdateMissionSpareParts()
-  UpdateMissionDroneNest()
-  UpdateMissionRepair(delta)
+  patrol_mission.UpdateDroneStations()
+  lost_mission.UpdateMissionLost()
+  patrol_mission.UpdateMissionPatrol()
+  salvage_repair_mission.UpdateMissionSpareParts()
+  patrol_mission.UpdateMissionDroneNest()
+  salvage_repair_mission.UpdateMissionRepair(delta)
   UpdateHarassment()
   UpdateTraffic()
 end

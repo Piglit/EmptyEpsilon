@@ -1,0 +1,30 @@
+[scenario]
+# paths are relative to this config file
+source="../scenario_30_brokenglass.lua"
+#intermediate="scenario_30_brokenglass.intermediate.lua"
+target="scenario_30_brokenglass.new.lua"
+initMark="-- XXX init plots"
+
+[cut_functions_from_scenario]
+lost_mission=["StartMissionLost","UpdateMissionLost","FinishMissionLost","CommsFoundShip", "CommsColonyStation", "HendrixHints"]
+salvage_repair_mission=["InitPartsStation", "InitKraylor","StartMissionSpareParts","UpdateMissionSpareParts","FinishMissionSpareParts","SpawnKWEnemies","KWGoAggro","CheckCheevoJunk", "StartMissionRepair","UpdateMissionRepair","FinishMissionRepair","SpawnRepairEnemies", "CommsInvestigator"]	# combined spareParts and repair missions
+patrol_mission=["InitDroneStations", "StartMissionPatrol", "UpdateMissionPatrol", "CheckConvoyArrived", "StartMissionDroneNest", "UpdateMissionDroneNest", "FinishMissionDroneNest", "UpdateDroneStations", "CheckDefeatConditions", "CommsDroneStation", "DroneStationGoAggro", "SpawnMockDroneShip", "TransferToDrone", "SpawnConvoyEnemies", "SpawnPatrolEnemies", "ConvoyGoAggro", "CheckCheevoHeros", "CommsPatrolStation"]	# combines patrol and drones missions
+
+[claim_variables]
+lost_mission=["Colony_stations"]
+salvage_repair_mission=["Kw_enemies","Kw_stations","Exuari_junk_stations","Investigator","Kw_mainStation","Parts_station"]
+patrol_mission=["Liquidation_station", "Drone_control_station", "Drone_stations", "MockDroneShip", "DroneShip", "Drone_artifacts", "Patrol_stations"]
+# FIXME: PP1 <-> Player switch may cause trouble, since global Player is touched but not patrol_mission.Player
+
+[relevant_objects]
+lost_mission=["Player", "Admin_station", "Wormhole_station"]
+salvage_repair_mission=["Player", "Admin_station", "Wormhole_station", "Defense_station"]
+patrol_mission=["Player", "Admin_station", "Wormhole_station", "Defense_station"]
+
+[setable_parameters]
+lost_mission=["Player", "Difficulty"]
+salvage_repair_mission=["Player", "Difficulty"]
+patrol_mission=["Player", "Difficulty"]
+
+[ignore]
+functions=["vectorFromAngle", "sub"]

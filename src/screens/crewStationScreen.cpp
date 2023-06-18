@@ -18,6 +18,7 @@
 #include "gui/gui2_panel.h"
 #include "gui/gui2_scrolltext.h"
 #include "gui/joystickConfig.h"
+#include "gui/theme.h"
 
 #include <i18n.h>
 
@@ -33,6 +34,18 @@ CrewStationScreen::CrewStationScreen(RenderLayer* render_layer, bool with_main_s
         viewport->hide();
     }
 
+    if (my_spaceship)
+    {
+        if (my_spaceship->callsign.lower().find("kraken") >= 0)
+        {
+            GuiTheme::loadTheme("kraken", "gui/kraken.theme.txt");
+            theme = GuiTheme::getTheme("kraken");
+        }
+        else
+        {
+            theme = GuiTheme::getTheme("default");
+        }
+    }
     main_panel = new GuiElement(this, "MAIN");
     main_panel->setSize(1200, GuiElement::GuiSizeMax);
 

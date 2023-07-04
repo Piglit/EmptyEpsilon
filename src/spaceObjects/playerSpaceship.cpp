@@ -284,7 +284,7 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Example: player:commandSetAutoRepair(true)
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamFrequency);
     /// Sets weapon_tube automatic weapon tube reload is enabled.
-    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoReloadTube);
+    //REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetAutoReloadTube); // FIXME
     /// Commands this PlayerSpaceship to target the given ship system with its beam weapons.
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandSetBeamSystemTarget);
     /// Sets this SpaceShip's shield frequency index.

@@ -66,6 +66,9 @@ PostProcessor* glitchPostProcessor;
 PostProcessor* warpPostProcessor;
 PVector<Window> windows;
 std::vector<RenderLayer*> window_render_layers;
+std::vector<RenderLayer*> window_mouse_render_layers;
+std::vector<MouseRenderer*> window_mouse_renderers;
+std::vector<SecondMonitorScreen*> second_monitor_screens;
 
 #include "gui/layout/vertical.h"
 #include "gui/layout/horizontal.h"
@@ -273,11 +276,13 @@ int main(int argc, char** argv)
             while(int(windows.size()) < SDL_GetNumVideoDisplays())
             {
                 auto wrl = new RenderLayer();
-                auto ml = new RenderLayer(wrl);
-                new MouseRenderer(ml);
-                windows.push_back(new Window({width, height}, fullscreen, ml, fsaa));
                 window_render_layers.push_back(wrl);
-                new SecondMonitorScreen(windows.size() - 1);
+                auto ml = new RenderLayer(wrl);
+                window_mouse_render_layers.push_back(ml);
+                auto mr = new MouseRenderer(ml);
+                window_mouse_renderers.push_back(mr);
+                windows.push_back(new Window({width, height}, fullscreen, ml, fsaa));
+                second_monitor_screens.push_back(new SecondMonitorScreen(windows.size() - 1));
             }
         }
 

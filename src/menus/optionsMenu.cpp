@@ -6,7 +6,9 @@
 #include "preferenceManager.h"
 #include "soundManager.h"
 #include "windowManager.h"
+#include "menus/shipSelectionScreen.h"
 
+#include "gui/mouseRenderer.h"
 #include "gui/gui2_overlay.h"
 #include "gui/gui2_button.h"
 #include "gui/gui2_togglebutton.h"
@@ -164,7 +166,7 @@ void OptionsMenu::setupGraphicsOptions()
     // Fullscreen toggle.
     (new GuiButton(graphics_page, "FULLSCREEN_TOGGLE", tr("Fullscreen toggle"), []() {
         foreach(Window, window, windows) {
-            window->setMode(window->getMode() == Window::Mode::Window ? Window::Mode::Fullscreen : Window::Mode::Window);
+        window->setMode(window->getMode() == Window::Mode::Window ? Window::Mode::Fullscreen : Window::Mode::Window);
         }
     }))->setSize(GuiElement::GuiSizeMax, 50);
 
@@ -204,9 +206,30 @@ void OptionsMenu::setupGraphicsOptions()
     graphics_fov_overlay_label->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
     // Multi Monitor.
-    (new GuiToggleButton(graphics_page, "MULTIMONITOR", tr("Multimonitor"), [](bool value)
+    (new GuiToggleButton(graphics_page, "MULTIMONITOR", tr("Multimonitor"), [fsaa](bool value)
     {
         PreferencesManager::set("multimonitor", value ? "1" : "0");
+        if (value)
+        {
+            while(int(windows.size()) < SDL_GetNumVideoDisplays())
+            {
+                auto wrl = new RenderLayer();
+                window_render_layers.push_back(wrl);
+                auto ml = new RenderLayer(wrl);
+                window_mouse_render_layers.push_back(ml);
+                auto mr = new MouseRenderer(ml);
+                window_mouse_renderers.push_back(mr);
+                windows.push_back(new Window({1200, 900}, windows[0]->getMode(), ml, fsaa));
+                second_monitor_screens.push_back(new SecondMonitorScreen(windows.size() - 1));
+            }
+        }
+        else if (windows.size() > 1) {
+            windows.erase(windows.begin()+1, windows.end());
+            window_render_layers.erase(window_render_layers.begin()+1, window_render_layers.end());
+            window_mouse_render_layers.clear();
+            window_mouse_renderers.clear();
+            second_monitor_screens.clear();
+        }
     }))->setValue(PreferencesManager::get("multimonitor", "1") == "1")->setSize(GuiElement::GuiSizeMax, 50);
 }
 

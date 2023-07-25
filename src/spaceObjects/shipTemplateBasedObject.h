@@ -36,6 +36,7 @@ public:
     bool shares_energy_with_docked;       //[config]
     bool repair_docked;                   //[config]
     bool restocks_scan_probes;
+    bool is_fighter;
     ERestockMissileBehaviour restocks_missiles_docked;
 
     ScriptSimpleCallback on_destruction;
@@ -112,6 +113,8 @@ public:
     ERestockMissileBehaviour getRestocksMissilesDocked() { return restocks_missiles_docked; }
     void setRestocksMissilesDocked(ERestockMissileBehaviour behaviour) { restocks_missiles_docked = behaviour; }
 
+    bool getIsFighter() { return is_fighter; }
+    void setIsFighter(bool enabled) { is_fighter = enabled; }
     void onTakingDamage(ScriptSimpleCallback callback);
     void onDestruction(ScriptSimpleCallback callback);
 

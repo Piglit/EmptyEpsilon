@@ -37,6 +37,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
+template:setIsFighter(true)
 
 addSystemsWespe(template)
 
@@ -105,6 +106,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
+template:setIsFighter(true)
 
 addSystemsLindwurm(template)
 
@@ -190,6 +192,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
+template:setIsFighter(true)
 
 addSystemsAdler(template)
 
@@ -240,6 +243,7 @@ template:setCanDock(true)
 template:setCanCombatManeuver(false)
 template:setCanLaunchProbe(true)
 template:setCanSelfDestruct(false)
+template:setIsFighter(true)
 addSystemsAdler(template)
 
 --[[ Player Light Cruiser--]]

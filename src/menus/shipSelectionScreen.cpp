@@ -283,7 +283,15 @@ ShipSelectionScreen::ShipSelectionScreen()
 
     // Player ship selection panel
     (new GuiPanel(left_container, "SHIP_SELECTION_BOX"))->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(550, 560);
-    (new GuiLabel(left_container, "SHIP_SELECTION_LABEL", tr("Select ship"), 30))->addBackground()->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(510, 50);
+
+    fighter_toggle_selector = new GuiSelector(left_container, "FIGHTER_TOGGLE_SELECTOR", [this](int index, string value)
+    {});
+    fighter_toggle_selector->addEntry(tr("Select ship"), "ship");
+    fighter_toggle_selector->addEntry(tr("Select fighter"), "fighter");
+    fighter_toggle_selector->setSelectionIndex((int) my_player_info->fighter_pilot);
+    fighter_toggle_selector->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(490, 50);
+
+//    (new GuiLabel(left_container, "SHIP_SELECTION_LABEL", tr("Select ship"), 30))->addBackground()->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(510, 50);
     no_ships_label = new GuiLabel(left_container, "SHIP_SELECTION_NO_SHIPS_LABEL", tr("Waiting for server to spawn a ship"), 30);
     no_ships_label->setPosition(0, 100, sp::Alignment::TopCenter)->setSize(460, 50);
 
@@ -307,6 +315,7 @@ ShipSelectionScreen::ShipSelectionScreen()
                     return ship && ship->control_code == code;
                 }, [this, ship](){
                     my_player_info->commandSetShipId(ship->getMultiplayerId());
+                    my_player_info->fighter_pilot = ship->getIsFighter();
                     crew_position_selection_overlay->show();
                     my_player_info->last_ship_password = ship->control_code;
                     left_container->show();
@@ -320,6 +329,7 @@ ShipSelectionScreen::ShipSelectionScreen()
             else
             {
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
+                my_player_info->fighter_pilot = ship->getIsFighter();
                 crew_position_selection_overlay->show();
             }
         // If the selected item isn't a ship, reset the ship ID in player info.
@@ -355,7 +365,7 @@ ShipSelectionScreen::ShipSelectionScreen()
 
         // Spawn a ship of the selected template near 0,0 and give it a random
         // heading.
-        (new GuiButton(left_container, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [ship_template_selector]() {
+        (new GuiButton(left_container, "CREATE_SHIP_BUTTON", tr("Spawn player ship"), [this, ship_template_selector]() {
             if (!gameGlobalInfo->allow_new_player_ships)
                 return;
             P<PlayerSpaceship> ship = new PlayerSpaceship();
@@ -367,6 +377,7 @@ ShipSelectionScreen::ShipSelectionScreen()
                 ship->target_rotation = ship->getRotation();
                 ship->setPosition(glm::vec2(random(-100, 100), random(-100, 100)));
                 ship->setTemplate(ship_template_selector->getSelectionValue());
+                fighter_toggle_selector->setSelectionIndex(ship->getIsFighter());
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
             }
         }))->setPosition(0, 680, sp::Alignment::TopCenter)->setSize(490, 50);
@@ -425,6 +436,8 @@ void ShipSelectionScreen::update(float delta)
     {
         P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(n);
         if (ship)
+             LOG(DEBUG) << ship->getCallSign() << "\t" << int(ship->is_fighter) << "\t" << int(ship->getIsFighter()) << "\t" << fighter_toggle_selector->getSelectionIndex();
+        if (ship && (int(ship->getIsFighter()) == fighter_toggle_selector->getSelectionIndex()))
         {
             string ship_name = ship->getLocaleFaction() + " " + ship->getTypeName() + " " + ship->getCallSign();
 
@@ -609,6 +622,17 @@ void CrewPositionSelection::onUpdate()
         string button_text = getCrewPositionName(ECrewPosition(n));
         if (my_spaceship)
         {
+            if (n <= relayOfficer)
+            {
+                if (my_spaceship->getIsFighter())
+                {
+                    crew_position_button[n]->hide();
+                    crew_position_button[n]->setValue(false);
+                    my_player_info->commandSetCrewPosition(window_index, ECrewPosition(n), false);
+                } else {
+                    crew_position_button[n]->show();
+                }
+            }
             std::vector<string> players;
             foreach(PlayerInfo, i, player_info_list)
             {

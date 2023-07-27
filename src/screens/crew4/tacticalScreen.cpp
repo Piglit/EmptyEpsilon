@@ -72,6 +72,9 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
     heading_display->setIcon("gui/icons/heading")->setTextSize(20)->setSize(240, 40);
     velocity_display = new GuiKeyValueDisplay(stats, "VELOCITY_DISPLAY", 0.45, tr("Speed"), "");
     velocity_display->setIcon("gui/icons/speed")->setTextSize(20)->setSize(240, 40);
+
+    hull_display = new GuiKeyValueDisplay(stats, "HULL_DISPLAY", 0.45, tr("health","Hull"), "");
+    hull_display->setIcon("gui/icons/hull")->setTextSize(20)->setSize(240, 40);
     shields_display = new GuiKeyValueDisplay(stats, "SHIELDS_DISPLAY", 0.45, tr("Shields"), "");
     shields_display->setIcon("gui/icons/shields")->setTextSize(20)->setSize(240, 40);
 
@@ -84,10 +87,10 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
     if (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage)
     {
         GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
-        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(500, 50);
-        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(80, 50);
-        (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(80, 0, sp::Alignment::BottomLeft)->setSize(132, 50);
-        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
+        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(460, 50);
+        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams Target"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
+
+        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
         (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
     }
 
@@ -108,6 +111,8 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
     jump_controls = (new GuiJumpControls(engine_layout, "JUMP"))->setSize(100, GuiElement::GuiSizeMax);
     (new GuiDockingButton(this, "DOCKING"))->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(280, 50);
 
+    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(250, 50);
+
     (new GuiCustomShipFunctions(this, tacticalOfficer, ""))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 }
 
@@ -122,6 +127,11 @@ void TacticalScreen::onDraw(sp::RenderTarget& renderer)
 
         warp_controls->setVisible(my_spaceship->has_warp_drive);
         jump_controls->setVisible(my_spaceship->has_jump_drive);
+        hull_display->setValue(string(int(nearbyint(100.0f * my_spaceship->hull_strength / my_spaceship->hull_max))) + "%");
+        if (my_spaceship->hull_strength < my_spaceship->hull_max / 4.0f)
+            hull_display->setColor(glm::u8vec4(255, 0, 0, 255));
+        else
+            hull_display->setColor(glm::u8vec4{255,255,255,255});
 
         string shields_value = string(my_spaceship->getShieldPercentage(0)) + "%";
         if (my_spaceship->hasSystem(SYS_RearShield))

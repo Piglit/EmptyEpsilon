@@ -19,6 +19,7 @@ private:
     GuiKeyValueDisplay* energy_display;
     GuiKeyValueDisplay* heading_display;
     GuiKeyValueDisplay* velocity_display;
+    GuiKeyValueDisplay* hull_display;
     GuiKeyValueDisplay* shields_display;
     GuiElement* warp_controls;
     GuiElement* jump_controls;

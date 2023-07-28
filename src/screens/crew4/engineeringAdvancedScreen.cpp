@@ -15,11 +15,14 @@ EngineeringAdvancedScreen::EngineeringAdvancedScreen(GuiContainer* owner)
         //The shield frequency selection includes a shield enable button.
         (new GuiShieldFrequencySelect(this, "SHIELD_FREQ"))->setPosition(20, 310, sp::Alignment::TopLeft)->setSize(240, 100);
 
-        GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
-        beam_info_box->setPosition(20, 410, sp::Alignment::TopLeft)->setSize(240, 50);
-        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(20, 0, sp::Alignment::TopLeft)->setSize(80, 50);
-        (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(120, 0, sp::Alignment::TopLeft)->setSize(120, 50);
-        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(240, 50);
+        if (my_spaceship && my_spaceship->hasSystem(SYS_BeamWeapons))
+        {
+            GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
+            beam_info_box->setPosition(20, 410, sp::Alignment::TopLeft)->setSize(240, 50);
+            (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(20, 0, sp::Alignment::TopLeft)->setSize(80, 50);
+            (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(120, 0, sp::Alignment::TopLeft)->setSize(120, 50);
+            (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(240, 50);
+        }
     }else{
         (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(20, 310, sp::Alignment::TopLeft)->setSize(240, 50);
     }

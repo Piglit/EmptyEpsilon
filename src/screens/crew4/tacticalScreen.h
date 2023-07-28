@@ -22,6 +22,7 @@ private:
     GuiKeyValueDisplay* shields_display;
     GuiElement* warp_controls;
     GuiElement* jump_controls;
+    GuiElement* beam_info_box;
 
     TargetsContainer targets;
     GuiRadarView* radar;

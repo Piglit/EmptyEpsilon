@@ -86,11 +86,10 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
     // Beam controls beneath the radar.
     if (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage)
     {
-        GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
-        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(500, 50);
-        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(80, 50);
-        (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(80, 0, sp::Alignment::BottomLeft)->setSize(132, 50);
-        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
+        beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
+        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(460, 50);
+        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams Target"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
+        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
         (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
     }
 
@@ -125,6 +124,7 @@ void TacticalScreen::onDraw(sp::RenderTarget& renderer)
 
         warp_controls->setVisible(my_spaceship->has_warp_drive);
         jump_controls->setVisible(my_spaceship->has_jump_drive);
+        beam_info_box->setVisible(my_spaceship->hasSystem(SYS_BeamWeapons));
 
         string shields_value = string(my_spaceship->getShieldPercentage(0)) + "%";
         if (my_spaceship->hasSystem(SYS_RearShield))

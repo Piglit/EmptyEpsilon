@@ -46,6 +46,11 @@ void GuiShieldsEnableButton::onDraw(sp::RenderTarget& target)
             else
                 button->setText(tr("Shields: {status}").format({{"status", shield_status}}));
         }
+        if (!(my_spaceship->hasSystem(SYS_FrontShield) || my_spaceship->hasSystem(SYS_RearShield)))
+        {
+            button->hide();
+            bar->hide();
+        }
     }
 }
 

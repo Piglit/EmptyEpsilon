@@ -24,6 +24,11 @@ void AimLockButton::onUpdate()
 {
     if (!isVisible())
         return;
+    if (my_spaceship && !my_spaceship->hasSystem(SYS_MissileSystem))
+    {
+        setVisible(false);
+        return;
+    }
     if (keys.weapons_toggle_aim_lock.getDown())
     {
         setAimLock(!getValue());
@@ -60,6 +65,12 @@ AimLock::AimLock(GuiContainer* owner, string id, GuiRadarView* radar, float min_
 
 void AimLock::onDraw(sp::RenderTarget& renderer)
 {
+    if (my_spaceship && !my_spaceship->hasSystem(SYS_MissileSystem))
+    {
+        setVisible(false);
+        return;
+    }
+
     auto center = getCenterPoint();
     float view_rotation = radar->getViewRotation();
     float radius = std::min(rect.size.x, rect.size.y);

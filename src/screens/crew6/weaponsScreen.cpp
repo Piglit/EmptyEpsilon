@@ -57,7 +57,7 @@ WeaponsScreen::WeaponsScreen(GuiContainer* owner)
 
     lock_aim = new AimLockButton(this, "LOCK_AIM", tube_controls, missile_aim);
     lock_aim->setPosition(250, 20, sp::Alignment::TopCenter)->setSize(130, 50);
-    if (my_spaceship->hasSystem(SYS_BeamWeapons) && (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage))
+    if (my_spaceship && my_spaceship->hasSystem(SYS_BeamWeapons) && (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage))
     {
         GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
         beam_info_box->setPosition(-20, -120, sp::Alignment::BottomRight)->setSize(280, 150);

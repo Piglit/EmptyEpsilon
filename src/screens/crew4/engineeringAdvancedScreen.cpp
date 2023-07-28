@@ -15,7 +15,7 @@ EngineeringAdvancedScreen::EngineeringAdvancedScreen(GuiContainer* owner)
         //The shield frequency selection includes a shield enable button.
         (new GuiShieldFrequencySelect(this, "SHIELD_FREQ"))->setPosition(20, 310, sp::Alignment::TopLeft)->setSize(240, 100);
 
-        if (my_spaceship->hasSystem(SYS_BeamWeapons))
+        if (my_spaceship && my_spaceship->hasSystem(SYS_BeamWeapons))
         {
             GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
             beam_info_box->setPosition(20, 410, sp::Alignment::TopLeft)->setSize(240, 50);

@@ -435,8 +435,6 @@ void ShipSelectionScreen::update(float delta)
     for(int n = 0; n < GameGlobalInfo::max_player_ships; n++)
     {
         P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(n);
-        if (ship)
-             LOG(DEBUG) << ship->getCallSign() << "\t" << int(ship->is_fighter) << "\t" << int(ship->getIsFighter()) << "\t" << fighter_toggle_selector->getSelectionIndex();
         if (ship && (int(ship->getIsFighter()) == fighter_toggle_selector->getSelectionIndex()))
         {
             string ship_name = ship->getLocaleFaction() + " " + ship->getTypeName() + " " + ship->getCallSign();

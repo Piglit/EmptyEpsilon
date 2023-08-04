@@ -212,6 +212,7 @@ public:
     EDockingState docking_state;
     DockStyle docked_style = DockStyle::None;
     P<SpaceObject> docking_target; //Server only
+    int32_t docking_target_id;
     glm::vec2 docking_offset{0, 0}; //Server only
 
     float missile_resupply_delay = missile_resupply_time;
@@ -341,7 +342,7 @@ public:
 
     P<SpaceObject> getTarget();
 
-    bool isDocked(P<SpaceObject> target) { return docking_state == DS_Docked && docking_target == target; }
+    bool isDocked(P<SpaceObject> target) { return docking_state == DS_Docked && target && docking_target_id == target->getMultiplayerId(); }
     P<SpaceObject> getDockedWith() { if (docking_state == DS_Docked) return docking_target; return NULL; }
     bool canStartDocking() { return current_warp <= 0.0f && (!has_jump_drive || jump_delay <= 0.0f); }
     EDockingState getDockingState() { return docking_state; }

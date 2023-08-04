@@ -160,7 +160,7 @@ void GuiMissileTubeControls::onUpdate()
     if (my_spaceship->missile_resupply_delay < my_spaceship->missile_resupply_time){
         docked_loading_bar->show();
         docked_loading_label->show();
-        docked_loading_bar->setValue(my_spaceship->missile_resupply_delay / my_spaceship->missile_resupply_time);
+        docked_loading_bar->setValue(1 - (my_spaceship->missile_resupply_delay / my_spaceship->missile_resupply_time));
     } else {
         docked_loading_bar->hide();
         docked_loading_label->hide();

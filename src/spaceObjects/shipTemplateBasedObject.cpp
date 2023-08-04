@@ -201,8 +201,10 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
     short_range_radar_range = 5000.0f;
     restocks_missiles_docked = R_None;
     is_fighter = false;
+    model_name = "";
 
     registerMemberReplication(&template_name);
+    registerMemberReplication(&model_name);
     registerMemberReplication(&type_name);
     registerMemberReplication(&shield_count);
     for(int n=0; n<max_shield_count; n++)
@@ -223,6 +225,10 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
     can_be_destroyed = true;
     registerMemberReplication(&can_be_destroyed);
     registerMemberReplication(&is_fighter);
+    registerMemberReplication(&restocks_missiles_docked, 0.5);
+    registerMemberReplication(&restocks_scan_probes, 0.5);
+    registerMemberReplication(&shares_energy_with_docked, 0.5);
+    registerMemberReplication(&repair_docked, 0.5);
 }
 
 void ShipTemplateBasedObject::drawShieldsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, float sprite_scale, bool show_levels)
@@ -321,7 +327,10 @@ void ShipTemplateBasedObject::update(float delta)
 
         // If it does exist, set up its collider and model.
         ship_template->setCollisionData(this);
-        model_info.setData(ship_template->model_data);
+        if (model_name == "")
+            model_info.setData(ship_template->model_data);
+        else
+            model_info.setData(model_name);
     }
 
     for(int n=0; n<shield_count; n++)

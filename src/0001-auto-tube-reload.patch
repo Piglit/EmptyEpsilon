@@ -1,0 +1,166 @@
+From bd23b3fd7fbb45b43d7614cf9f6a06f16ee90d92 Mon Sep 17 00:00:00 2001
+From: Pithlit <piglit@mail.de>
+Date: Wed, 2 Nov 2022 15:58:09 +0100
+Subject: [PATCH 1/7] auto tube reload
+
+---
+ src/screens/gm/tweak.cpp                       |  7 +++++++
+ src/screens/gm/tweak.h                         |  1 +
+ src/spaceObjects/playerSpaceship.cpp           |  6 ++++++
+ src/spaceObjects/playerSpaceship.h             |  2 ++
+ src/spaceObjects/spaceship.cpp                 |  1 +
+ src/spaceObjects/spaceship.h                   |  2 ++
+ src/spaceObjects/spaceshipParts/weaponTube.cpp | 10 ++++++++--
+ 7 files changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/src/screens/gm/tweak.cpp b/src/screens/gm/tweak.cpp
+index 31e406e9..c9604387 100644
+--- a/src/screens/gm/tweak.cpp
++++ b/src/screens/gm/tweak.cpp
+@@ -1077,6 +1077,12 @@ GuiShipTweakPlayer2::GuiShipTweakPlayer2(GuiContainer* owner)
+         target->commandSetAutoRepair(value);
+     });
+     auto_repair_enabled->setSize(GuiElement::GuiSizeMax, 40);
++
++    auto_reload_tube_enabled = new GuiToggleButton(right_col, "", tr("button", "Auto reload tube"), [this](bool value) {
++        target->setAutoMissileReload(value);
++    });
++    auto_reload_tube_enabled->setSize(GuiElement::GuiSizeMax, 40);
++
+ }
+ 
+ void GuiShipTweakPlayer2::onDraw(sp::RenderTarget& renderer)
+@@ -1092,6 +1098,7 @@ void GuiShipTweakPlayer2::onDraw(sp::RenderTarget& renderer)
+     can_launch_probe->setValue(target->getCanLaunchProbe());
+     auto_coolant_enabled->setValue(target->auto_coolant_enabled);
+     auto_repair_enabled->setValue(target->auto_repair_enabled);
++    auto_reload_tube_enabled->setValue(target->auto_reload_tube_enabled);
+     
+     energy_warp_per_second->setText(tr("player_tweak", "Warp (E/s): {energy_per_second}").format({ {"energy_per_second", string(target->getEnergyWarpPerSecond())} }));
+     energy_shield_per_second->setText(tr("player_tweak", "Shields (E/s): {energy_per_second}").format({ {"energy_per_second", string(target->getEnergyShieldUsePerSecond())} }));
+diff --git a/src/screens/gm/tweak.h b/src/screens/gm/tweak.h
+index 64f89a34..7c960508 100644
+--- a/src/screens/gm/tweak.h
++++ b/src/screens/gm/tweak.h
+@@ -269,6 +269,7 @@ private:
+     GuiToggleButton* can_launch_probe;
+     GuiToggleButton* auto_coolant_enabled;
+     GuiToggleButton* auto_repair_enabled;
++    GuiToggleButton* auto_reload_tube_enabled;
+ 
+     GuiLabel* energy_warp_per_second{};
+     GuiTextEntry* desired_energy_warp_per_second{};
+diff --git a/src/spaceObjects/playerSpaceship.cpp b/src/spaceObjects/playerSpaceship.cpp
+index 00967c5c..a46b2e66 100644
+--- a/src/spaceObjects/playerSpaceship.cpp
++++ b/src/spaceObjects/playerSpaceship.cpp
+@@ -148,6 +148,8 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
+     /// Use this command on ships to require less player interaction, especially
+     /// when combined with commandSetAutoRepair/auto_repair_enabled.
+     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoCoolant);
++    /// Sets weapon_tube automatic weapon tube reload is enabled.
++    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
+     /// Set a password to join the ship.
+     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
+     /// Callback when this ship launches a probe.
+@@ -332,6 +334,7 @@ PlayerSpaceship::PlayerSpaceship()
+     shield_calibration_delay = 0.0;
+     auto_repair_enabled = false;
+     auto_coolant_enabled = false;
++    auto_reload_tube_enabled = false;
+     max_coolant = max_coolant_per_system;
+     scan_probe_stock = max_scan_probes;
+     alert_level = AL_Normal;
+@@ -367,6 +370,7 @@ PlayerSpaceship::PlayerSpaceship()
+     registerMemberReplication(&auto_repair_enabled);
+     registerMemberReplication(&max_coolant);
+     registerMemberReplication(&auto_coolant_enabled);
++    registerMemberReplication(&auto_reload_tube_enabled);
+     registerMemberReplication(&beam_system_target);
+     registerMemberReplication(&comms_state);
+     registerMemberReplication(&comms_open_delay, 1.0);
+@@ -2063,6 +2067,8 @@ string PlayerSpaceship::getExportLine()
+         result += ":setAutoCoolant(true)";
+     if (auto_repair_enabled)
+         result += ":commandSetAutoRepair(true)";
++    if (auto_reload_tube_enabled)
++        result += ":setAutoMissileReload(true)";
+ 
+     // Update power factors, only for the systems where it changed.
+     for (unsigned int sys_index = 0; sys_index < SYS_COUNT; ++sys_index)
+diff --git a/src/spaceObjects/playerSpaceship.h b/src/spaceObjects/playerSpaceship.h
+index f691272a..d8ecfe8b 100644
+--- a/src/spaceObjects/playerSpaceship.h
++++ b/src/spaceObjects/playerSpaceship.h
+@@ -94,6 +94,7 @@ public:
+     // Ship automation features, mostly for single-person ships like fighters
+     bool auto_repair_enabled;
+     bool auto_coolant_enabled;
++    bool auto_reload_tube_enabled;
+     // Whether shields are up (true) or down
+     bool shields_active;
+     // Password to join a ship. Default is empty.
+@@ -297,6 +298,7 @@ public:
+     void setMaxCoolant(float coolant);
+     float getMaxCoolant() { return max_coolant; }
+     void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
++    void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
+     int getRepairCrewCount();
+     void setRepairCrewCount(int amount);
+     EAlertLevel getAlertLevel() { return alert_level; }
+diff --git a/src/spaceObjects/spaceship.cpp b/src/spaceObjects/spaceship.cpp
+index e1d3dd9c..4eee40e0 100644
+--- a/src/spaceObjects/spaceship.cpp
++++ b/src/spaceObjects/spaceship.cpp
+@@ -215,6 +215,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
+     energy_level = 1000;
+     max_energy_level = 1000;
+     turnSpeed = 0.0f;
++    auto_reload_tube_enabled = false;
+ 
+     registerMemberReplication(&target_rotation, 1.5f);
+     registerMemberReplication(&turnSpeed, 0.1f);
+diff --git a/src/spaceObjects/spaceship.h b/src/spaceObjects/spaceship.h
+index d517aca6..1fadd2f7 100644
+--- a/src/spaceObjects/spaceship.h
++++ b/src/spaceObjects/spaceship.h
+@@ -212,6 +212,8 @@ public:
+     P<SpaceObject> docking_target; //Server only
+     glm::vec2 docking_offset{0, 0}; //Server only
+ 
++    bool auto_reload_tube_enabled;
++
+     SpaceShip(string multiplayerClassName, float multiplayer_significant_range=-1);
+     virtual ~SpaceShip();
+ 
+diff --git a/src/spaceObjects/spaceshipParts/weaponTube.cpp b/src/spaceObjects/spaceshipParts/weaponTube.cpp
+index 478a100b..ae14578a 100644
+--- a/src/spaceObjects/spaceshipParts/weaponTube.cpp
++++ b/src/spaceObjects/spaceshipParts/weaponTube.cpp
+@@ -105,7 +105,10 @@ void WeaponTube::fire(float target_angle)
+     }else{
+         spawnProjectile(target_angle);
+         state = WTS_Empty;
+-        type_loaded = MW_None;
++        if (parent->auto_reload_tube_enabled)
++            startLoad(type_loaded);
++        else
++            type_loaded = MW_None;
+     }
+ }
+ 
+@@ -243,7 +246,10 @@ void WeaponTube::update(float delta)
+                 else
+                 {
+                     state = WTS_Empty;
+-                    type_loaded = MW_None;
++                    if (parent->auto_reload_tube_enabled)
++                        startLoad(MW_HVLI);
++                    else
++                        type_loaded = MW_None;
+                 }
+             }
+             break;
+-- 
+2.39.1
+

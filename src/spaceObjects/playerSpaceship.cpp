@@ -502,6 +502,10 @@ static const int16_t CMD_SET_MAIN_SCREEN_OVERLAY = 0x0027;
 static const int16_t CMD_HACKING_FINISHED = 0x0028;
 static const int16_t CMD_CUSTOM_FUNCTION = 0x0029;
 static const int16_t CMD_TURN_SPEED = 0x002A;
+static const int16_t CMD_SET_REPAIR_DOCKED = 0x002B;
+static const int16_t CMD_SET_SHARES_ENERGY = 0x002C;
+static const int16_t CMD_SET_RESTOCKS_PROBES = 0x002D;
+static const int16_t CMD_SET_RESTOCKS_MISSILES = 0x002E;
 
 string alertLevelToString(EAlertLevel level)
 {
@@ -553,6 +557,8 @@ PlayerSpaceship::PlayerSpaceship()
     alert_level = AL_Normal;
     shields_active = false;
     control_code = "";
+    color = "";
+    equipment = "";
 	
 
     setFactionId(1);
@@ -599,6 +605,8 @@ PlayerSpaceship::PlayerSpaceship()
     registerMemberReplication(&alert_level);
     registerMemberReplication(&linked_science_probe_id);
     registerMemberReplication(&control_code);
+    registerMemberReplication(&color);
+    registerMemberReplication(&equipment);
     registerMemberReplication(&custom_functions);
 
     // Determine which stations must provide self-destruct confirmation codes.
@@ -1857,6 +1865,26 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
                 obj->hackFinished(this, target_system);
         }
         break;
+    case CMD_SET_REPAIR_DOCKED:
+        {
+            packet >> repair_docked;
+        }
+        break;
+    case CMD_SET_SHARES_ENERGY:
+        {
+            packet >> shares_energy_with_docked;
+        }
+        break;
+    case CMD_SET_RESTOCKS_PROBES:
+        {
+            packet >> restocks_scan_probes;
+        }
+        break;
+    case CMD_SET_RESTOCKS_MISSILES:
+        {
+            packet >> restocks_missiles_docked;
+        }
+        break;
     case CMD_CUSTOM_FUNCTION:
         {
             string name;
@@ -2224,6 +2252,33 @@ void PlayerSpaceship::commandClearScienceLink()
 
     packet << CMD_SET_SCIENCE_LINK;
     packet << int32_t(-1);
+    sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandSetRepairDocked(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_REPAIR_DOCKED << enabled;
+    sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandSetSharesEnergyWithDocked(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_SHARES_ENERGY << enabled;
+    sendClientCommand(packet);
+}
+void PlayerSpaceship::commandSetRestocksScanProbes(bool enabled)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_RESTOCKS_PROBES << enabled;
+    sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandSetRestocksMissilesDocked(ERestockMissileBehaviour behaviour)
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_SET_RESTOCKS_MISSILES << behaviour;
     sendClientCommand(packet);
 }
 

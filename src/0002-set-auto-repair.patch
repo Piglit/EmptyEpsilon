@@ -1,0 +1,63 @@
+From 02d2b8b9eb6322f0bb20d76ce64d93786ac35111 Mon Sep 17 00:00:00 2001
+From: Pithlit <piglit@mail.de>
+Date: Wed, 2 Nov 2022 16:03:59 +0100
+Subject: [PATCH 2/7] set auto repair
+
+---
+ src/screens/gm/tweak.cpp             | 2 +-
+ src/spaceObjects/playerSpaceship.cpp | 6 +++++-
+ src/spaceObjects/playerSpaceship.h   | 1 +
+ 3 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/screens/gm/tweak.cpp b/src/screens/gm/tweak.cpp
+index c9604387..8e18f061 100644
+--- a/src/screens/gm/tweak.cpp
++++ b/src/screens/gm/tweak.cpp
+@@ -1074,7 +1074,7 @@ GuiShipTweakPlayer2::GuiShipTweakPlayer2(GuiContainer* owner)
+     auto_coolant_enabled->setSize(GuiElement::GuiSizeMax, 40);
+ 
+     auto_repair_enabled = new GuiToggleButton(right_col, "", tr("button", "Auto repair"), [this](bool value) {
+-        target->commandSetAutoRepair(value);
++        target->setAutoRepair(value);
+     });
+     auto_repair_enabled->setSize(GuiElement::GuiSizeMax, 40);
+ 
+diff --git a/src/spaceObjects/playerSpaceship.cpp b/src/spaceObjects/playerSpaceship.cpp
+index a46b2e66..3773d187 100644
+--- a/src/spaceObjects/playerSpaceship.cpp
++++ b/src/spaceObjects/playerSpaceship.cpp
+@@ -148,6 +148,10 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
+     /// Use this command on ships to require less player interaction, especially
+     /// when combined with commandSetAutoRepair/auto_repair_enabled.
+     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoCoolant);
++    /// repair crews to automatically move to damaged subsystems.
++    /// Use this on ships to require less player interaction, especially
++    /// when combined with setAutoCoolant/auto_coolant_enabled.
++    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoRepair);
+     /// Sets weapon_tube automatic weapon tube reload is enabled.
+     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
+     /// Set a password to join the ship.
+@@ -2066,7 +2070,7 @@ string PlayerSpaceship::getExportLine()
+     if (auto_coolant_enabled)
+         result += ":setAutoCoolant(true)";
+     if (auto_repair_enabled)
+-        result += ":commandSetAutoRepair(true)";
++        result += ":setAutoRepair(true)";
+     if (auto_reload_tube_enabled)
+         result += ":setAutoMissileReload(true)";
+ 
+diff --git a/src/spaceObjects/playerSpaceship.h b/src/spaceObjects/playerSpaceship.h
+index d8ecfe8b..4eff6876 100644
+--- a/src/spaceObjects/playerSpaceship.h
++++ b/src/spaceObjects/playerSpaceship.h
+@@ -298,6 +298,7 @@ public:
+     void setMaxCoolant(float coolant);
+     float getMaxCoolant() { return max_coolant; }
+     void setAutoCoolant(bool active) { auto_coolant_enabled = active; }
++    void setAutoRepair(bool active) { auto_repair_enabled = active; }
+     void setAutoMissileReload(bool active) { auto_reload_tube_enabled = active; }
+     int getRepairCrewCount();
+     void setRepairCrewCount(int amount);
+-- 
+2.39.1
+

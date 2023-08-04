@@ -110,7 +110,7 @@ public:
     void setRepairDocked(bool enabled) { repair_docked = enabled; }
     bool getRestocksScanProbes() { return restocks_scan_probes; }
     void setRestocksScanProbes(bool enabled) { restocks_scan_probes = enabled; }
-    bool getRestocksMissilesDocked() { return restocks_missiles_docked; }
+    ERestockMissileBehaviour getRestocksMissilesDocked() { return restocks_missiles_docked; }
     void setRestocksMissilesDocked(ERestockMissileBehaviour behaviour) { restocks_missiles_docked = behaviour; }
 
     bool getIsFighter() { return is_fighter; }

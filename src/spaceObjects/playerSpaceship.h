@@ -100,6 +100,8 @@ public:
     bool shields_active;
     // Password to join a ship. Default is empty.
     string control_code;
+    string color;
+    string equipment;
 
 private:
     bool on_new_player_ship_called=false;
@@ -287,6 +289,10 @@ public:
     void commandSetAlertLevel(EAlertLevel level);
     void commandHackingFinished(P<SpaceObject> target, string target_system);
     void commandCustomFunction(string name);
+    void commandSetRepairDocked(bool enable);
+    void commandSetSharesEnergyWithDocked(bool enable);
+    void commandSetRestocksScanProbes(bool enable);
+    void commandSetRestocksMissilesDocked(ERestockMissileBehaviour behaviour);
 
     virtual void onReceiveServerCommand(sp::io::DataBuffer& packet) override;
 
@@ -342,6 +348,14 @@ public:
 
     // Ship control code/password setter
     void setControlCode(string code) { control_code = code.upper(); }
+
+    // Set color
+    void setColor(string col) { color = col; }
+    string getColor() { return color; }
+
+    // Set equipment
+    void setEquipment(string eq) { equipment = eq; }
+    string getEquipment() { return equipment; }
 
     // Radar function
     virtual void drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;

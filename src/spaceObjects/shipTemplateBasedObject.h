@@ -25,6 +25,7 @@ public:
     string radar_trace;
     string impulse_sound_file;
     P<ShipTemplate> ship_template;
+    string model_name;
 
     int shield_count;
     float shield_level[max_shield_count];
@@ -119,6 +120,9 @@ public:
     void onDestruction(ScriptSimpleCallback callback);
 
     string getShieldDataString();
+
+    // Set model
+    void setModel(string model) { model_name = model; }
 };
 
 #endif//SHIP_TEMPLATE_BASED_OBJECT_H

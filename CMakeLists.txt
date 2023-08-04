@@ -274,6 +274,7 @@ set(MAIN_SOURCES
     src/screens/extra/databaseScreen.cpp
     src/screens/extra/commsScreen.cpp
     src/screens/extra/shipLogScreen.cpp
+    src/screens/extra/hangar.cpp
     src/screens/missionControlScreen.cpp
     src/screens/gm/gameMasterScreen.cpp
     src/screens/gm/objectCreationView.cpp
@@ -486,6 +487,7 @@ set(MAIN_SOURCES
     src/screens/extra/databaseScreen.h
     src/screens/extra/powerManagement.h
     src/screens/extra/shipLogScreen.h
+    src/screens/extra/hangar.h
     src/screens/gm/chatDialog.h
     src/screens/gm/gameMasterScreen.h
     src/screens/gm/globalMessageEntryView.h

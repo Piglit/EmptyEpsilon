@@ -35,6 +35,7 @@
 SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
 : GuiOverlay(owner, "SINGLEPILOT_SCREEN", colorConfig.background)
 {
+    last_turn_speed_sent = 999; // so we always update it initially
 
     // Render the radar shadow and background decorations.
     (new GuiImage(this, "BACKGROUND_GRADIENT", "gui/background/gradientSingle.png"))->setPosition(glm::vec2(0, 0), sp::Alignment::Center)->setSize(1200, 900);
@@ -172,10 +173,11 @@ void SinglePilotScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
-        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue()) * 5.0f;
-        if (angle != 0.0f)
+        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue());
+        if (last_turn_speed_sent != angle)
         {
-            my_spaceship->commandTargetRotation(my_spaceship->getRotation() + angle);
+            last_turn_speed_sent = angle;
+            my_spaceship->commandTurnSpeed(angle);
         }
 
         if (keys.weapons_enemy_next_target.getDown())

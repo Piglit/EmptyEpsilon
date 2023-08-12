@@ -207,7 +207,7 @@ void GameGlobalInfo::reset()
 
     foreach(PlayerInfo, p, player_info_list)
     {
-        p->reset();
+        p->ship_id = -1;//reset();
     }
 }
 

@@ -44,13 +44,6 @@ private:
     GuiKeyValueDisplay* station_name;
     GuiButton* ship_destroy_button;
 
-    GuiPanel* fighter_panel;
-    GuiSelector* fighter_template_selector; 
-    GuiButton* fighter_create_button;
-    GuiTextEntry* fighter_callsign;
-    GuiTextEntry* fighter_password;
-    float fighter_delay;
-
     GuiElement* database_container;
     DatabaseViewComponent* database_view;
 

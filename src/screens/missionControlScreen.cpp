@@ -243,112 +243,12 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     });
     ship_destroy_button->setSize(GuiElement::GuiSizeMax, 50);
 
-    // spawn fighters
-
-    fighter_panel = new GuiPanel(right_container, "FIGHTER_PANEL");
-    fighter_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440)->hide();
-    auto fighters_content = new GuiElement(fighter_panel, "");
-    fighters_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    fighters_content->setAttribute("layout", "vertical");
-    fighters_content->setAttribute("alignment", "topleft");
-
-    (new GuiLabel(fighters_content, "FIGHTER_CONFIG_LABEL", tr("Fighter configuration"), 30))->addBackground()->setSize(510, 50);
-    
-    // Ship type selection
-    (new GuiLabel(fighters_content, "SELECT_FIGHTER_LABEL", tr("Select fighters type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    fighter_template_selector = new GuiSelector(fighters_content, "CREATE_FIGHTER_SELECTOR", [this](int index, string value){
-        if (database_view->findAndDisplayEntry(value))
-            LOG(INFO) << value << " found";
-        else
-            LOG(INFO) << value << " not found";
-    });
-    fighter_template_selector->setSize(GuiElement::GuiSizeMax, 50);
-
-    // callsign
-    (new GuiLabel(fighters_content, "FIGHTER_CALLSIGN_LABEL", tr("Callsign:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    fighter_callsign = new GuiTextEntry(fighters_content, "FIGHTER_CALLSIGN", "");
-    fighter_callsign->setSize(GuiElement::GuiSizeMax, 50);
-
-    // password
-    (new GuiLabel(fighters_content, "FIGHTER_PASSWORD_LABEL", tr("Control Code:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    fighter_password = new GuiTextEntry(fighters_content, "FIGHTER_PASSWORD", "");
-    fighter_password->setSize(GuiElement::GuiSizeMax, 50);
-
-    // Spawn a ship of the selected template near carrier and give it a random
-    // heading.
-    fighter_create_button = new GuiButton(fighters_content, "CREATE_FIGHTER_BUTTON", tr("Launch fighter"), [this]() {
-        if (!my_spaceship)
-            return;
-        if (game_server) {
-            P<PlayerSpaceship> ship = new PlayerSpaceship();
-            string templ = fighter_template_selector->getSelectionValue();
-            LOG(INFO) << templ;
-            if (ship && ShipTemplate::getTemplate(templ))
-            {
-                // set the position before the template so that onNewPlayerShip has as much data as possible
-                ship->setRotation(my_spaceship->getRotation());
-                ship->target_rotation = my_spaceship->getRotation();
-                ship->setPosition(my_spaceship->getPosition());
-                ship->setCallSign(fighter_callsign->getText());
-                ship->setTemplate(templ);
-                ship->setControlCode(fighter_password->getText());
-                fighter_create_button->disable();
-                fighter_create_button->setText("Fighter launched!");
-                fighter_delay = 2.0f;
-            }
-        } else {
-            // proxy
-            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), fighter_callsign->getText(), fighter_template_selector->getSelectionValue(), "impulse", fighter_password->getText(), my_spaceship->getPosition().x, my_spaceship->getPosition().y, my_spaceship->getRotation());
-            fighter_create_button->disable();
-            fighter_create_button->setText("Fighter launched!");
-            fighter_delay = 2.0f;
-        }
-    });
-    fighter_create_button->setSize(GuiElement::GuiSizeMax, 50);
-    fighter_create_button->disable();
-
-    fighter_delay = 0.0f;
-
     database_container = new GuiElement(this, "");
     database_container->setPosition(370, 480)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     
     database_view = new DatabaseViewComponent(database_container, false);
     database_view->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
-
-    // mission control
-    /*
-    gm_script_label = new GuiLabel(right_panel, "SERVER_GM_LABEL", tr("Mission control"), 30);
-    gm_script_label->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-    gm_script_options = new GuiListbox(right_panel, "GM_SCRIPT_OPTIONS", [this](int index, string value)
-    {
-        gm_script_options->setSelectionIndex(-1);
-        int n = 0;
-        for(GMScriptCallback& callback : gameGlobalInfo->gm_callback_functions)
-        {
-            if (n == index)
-            {
-                gm_script_options->setSelectionIndex(n);
-                gm_script_button_response_time = 0.1;
-                callback.callback.call<void>();
-                return;
-            }
-            n++;
-        }
-    });
-    gm_script_options->setPosition(0, 20, sp::Alignment::TopRight)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    if (!game_server || gameGlobalInfo->gm_callback_functions.empty())
-    {
-        gm_script_options->hide();
-        gm_script_label->hide();
-    }
-    gm_script_button_response_time = 0.0;
-*/
-/*
-    log_text = new GuiAdvancedScrollText(mission_control_layout, "SHIP_LOG");
-    log_text->enableAutoScrollDown();
-    log_text->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-*/
 }
 
 void MissionControlScreen::update(float delta)
@@ -378,34 +278,11 @@ void MissionControlScreen::update(float delta)
     /* no ship  -> show ship_panel 
                 -> hide ship_infos
                 -> hide station_panel
-                -> hide fighter_panel
         ship    -> show ship_infos
                 -> hide ship_panel
        docking  -> show station_panel
        not dock -> hide station_panel
-        & fighters  -> show fighter_panel
-            else    -> hide fighter_panel
     */
-
-    // Fighter Bay
-    string text = fighter_callsign->getText();
-    if (fighter_delay > 0.0f) {
-        // launched recently 
-        fighter_create_button->setText(tr("Fighter launched!"));
-        fighter_create_button->disable();
-    } else if (text == "") {
-        // no callsign
-        fighter_create_button->setText(tr("Please set callsign"));
-        fighter_create_button->disable();
-    } else if (gameGlobalInfo->getPlayerShipIndexByName(text) != -1) {
-        // ship exists
-        fighter_create_button->setText(tr("Please set unused callsign"));
-        fighter_create_button->disable();
-    } else {
-        fighter_create_button->setText(tr("Launch fighter"));
-        fighter_create_button->enable();
-    }
-    fighter_delay -= delta;
 
     // set my_spaceship
     if (!my_spaceship) {
@@ -453,95 +330,12 @@ void MissionControlScreen::update(float delta)
         bool docked = my_spaceship->docking_state == DS_Docked;
         station_panel->setVisible(docked);
 
-        // fighter panel when not docked
-        if (templ && !templ->spawnable_ships.empty() && !docked) {
-            fighter_panel->show();
-            if (templ->spawnable_ships.size() != fighter_template_selector->entryCount()) { 
-                while (fighter_template_selector->entryCount() > 0) {
-                    fighter_template_selector->removeEntry(0);
-                }
-                for(string& template_name : templ->spawnable_ships) {
-                    templ = ShipTemplate::getTemplate(template_name);
-                    fighter_template_selector->addEntry(template_name + " (" + templ->getClass() + ": " + templ->getSubClass() + ")", template_name);
-                }
-            }
-        } else {
-            fighter_panel->hide();
-        }
     } else {
         // !my_spaceship
         // ship was probably destroyed or has never existed
-        fighter_panel->hide();
         station_panel->hide();
         ship_panel->setVisible(!!gameGlobalInfo->allow_new_player_ships);
         ship_infos->hide();
     }
-
-
-/*
-    bool gm_functions_changed = gm_script_options->entryCount() != int(gameGlobalInfo->gm_callback_functions.size());
-    auto it = gameGlobalInfo->gm_callback_functions.begin();
-    for(int n=0; !gm_functions_changed && n<gm_script_options->entryCount(); n++)
-    {
-        if (gm_script_options->getEntryName(n) != it->name)
-            gm_functions_changed = true;
-        it++;
-    }
-    if (gm_script_button_response_time > 0.0)
-    {
-        gm_script_button_response_time -= delta;
-        if (gm_script_button_response_time <= 0.0)
-        {
-            gm_functions_changed = true;
-        }
-    }
-    if (gm_functions_changed)
-    {
-        gm_script_options->setOptions({});
-        for(const GMScriptCallback& callback : gameGlobalInfo->gm_callback_functions)
-        {
-            gm_script_options->addEntry(callback.name, callback.name);
-        }
-        gm_script_options->setSelectionIndex(-1);
-    }
-*/
-    // upate log
-    /*
-    if (my_spaceship)
-    {
-
-        const std::vector<PlayerSpaceship::ShipLogEntry>& logs = my_spaceship->getShipsLog();
-        if (log_text->getEntryCount() > 0 && logs.size() == 0)
-            log_text->clearEntries();
-
-        while(log_text->getEntryCount() > logs.size())
-        {
-            log_text->removeEntry(0);
-        }
-
-        if (log_text->getEntryCount() > 0 && logs.size() > 0 && log_text->getEntryText(0) != logs[0].text)
-        {
-            bool updated = false;
-            for(unsigned int n=1; n<log_text->getEntryCount(); n++)
-            {
-                if (log_text->getEntryText(n) == logs[0].text)
-                {
-                    for(unsigned int m=0; m<n; m++)
-                        log_text->removeEntry(0);
-                    updated = true;
-                    break;
-                }
-            }
-            if (!updated)
-                log_text->clearEntries();
-        }
-
-        while(log_text->getEntryCount() < logs.size())
-        {
-            int n = log_text->getEntryCount();
-            log_text->addEntry(logs[n].prefix, logs[n].text, logs[n].color);
-        }
-    }
-*/
 }
 

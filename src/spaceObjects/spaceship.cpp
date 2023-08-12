@@ -1041,11 +1041,16 @@ void SpaceShip::update(float delta)
 
     float rotationDiff;
     if (fabs(turnSpeed) < 0.0005f) {
+        // use target_rotation
         rotationDiff = angleDifference(getRotation(), target_rotation);
     } else {
+        // use turnSpeed
         rotationDiff = turnSpeed;
     }
 
+    // Smooth turn when turn speed is high and frame rate is low
+    if (fabs(rotationDiff) < delta * 10.0f)
+        rotationDiff *= delta;
     if (rotationDiff > 1.0f)
         setAngularVelocity(turn_speed * getSystemEffectiveness(SYS_Maneuver));
     else if (rotationDiff < -1.0f)

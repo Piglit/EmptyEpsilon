@@ -84,6 +84,8 @@ ServerBrowserMenu::ServerBrowserMenu(SearchSource source, std::optional<GameClie
     if (PreferencesManager::get("last_server", "") != "") {
         server_list->addEntry(tr("Last Session ({last})").format({{"last", PreferencesManager::get("last_server", "")}}),
             PreferencesManager::get("last_server", ""));
+        if (manual_ip->getText() == "")
+            manual_ip->setText(PreferencesManager::get("last_server", ""));
     }
     scanner->addCallbacks([this](sp::io::network::Address address, string name) {
         //New server found

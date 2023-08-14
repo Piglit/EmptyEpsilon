@@ -530,6 +530,8 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&combat_maneuver_strafe_speed);
     registerMemberReplication(&radar_trace);
     registerMemberReplication(&docking_target_id);
+    registerMemberReplication(&missile_resupply_delay);
+
 
     for(unsigned int n=0; n<SYS_COUNT; n++)
     {

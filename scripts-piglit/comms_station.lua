@@ -28,7 +28,7 @@ function commsStationMainMenu(comms_source, comms_target)
         comms_target.comms_data,
         {
             friendlyness = random(0.0, 100.0),
-        	surrender_hull_threshold = math.random(40,80),
+            surrender_hull_threshold = math.random(40,80),
             weapons = {
                 Homing = "neutral",
                 HVLI = "neutral",
@@ -51,13 +51,13 @@ function commsStationMainMenu(comms_source, comms_target)
                 supplydrop = 100,
                 reinforcements = 150,
                 phobos_reinforcement = 300,
-                amk3_reinforcement = 100,
+                lindworm_reinforcement = 100,
                 hornet_reinforcement = 100,
-                amk8_reinforcement = 200,
-				fighterInterceptor = 150,
-            	fighterBomber = 175,
-            	fighterScout = 200,
-            	refitDrive = 150,
+                adder_reinforcement = 200,
+                fighterInterceptor = 150,
+                fighterBomber = 175,
+                fighterScout = 200,
+                refitDrive = 150,
             },
             reputation_cost_multipliers = {
                 friend = 1.0,
@@ -66,12 +66,25 @@ function commsStationMainMenu(comms_source, comms_target)
             max_weapon_refill_amount = {
                 friend = 1.0,
                 neutral = 0.5
-            }
+            },
+            docked_comms_functions = {},
+            undocked_comms_functions = {},
+            enemy_comms_functions = {},
         }
     )
 
+    local ret = nil
     if comms_source:isEnemy(comms_target) then
-        return false
+        if #comms_target.comms_data.enemy_comms_functions == 0 then
+            return false
+        end
+        for _,f in ipairs(comms_target.comms_data.enemy_comms_functions) do
+            ret = f(comms_source, comms_target)
+            if ret ~= nil then
+                return ret
+            end
+        end
+        return true 
     end
 
     if comms_target:areEnemiesInRange(5000) then
@@ -79,9 +92,24 @@ function commsStationMainMenu(comms_source, comms_target)
         return true
     end
     if not comms_source:isDocked(comms_target) then
-        commsStationUndocked(comms_source, comms_target)
+        for _,f in ipairs(comms_target.comms_data.undocked_comms_functions) do
+            ret = f(comms_source, comms_target)
+            if ret ~= nil then
+                return ret
+            end
+        end
+        ret = commsStationUndocked(comms_source, comms_target)
     else
-        commsStationDocked(comms_source, comms_target)
+        for _,f in ipairs(comms_target.comms_data.docked_comms_functions) do
+            ret = f(comms_source, comms_target)
+            if ret ~= nil then
+                return ret
+            end
+        end
+        ret = commsStationDocked(comms_source, comms_target)
+    end
+    if ret ~= nil then
+        return ret
     end
     return true
 end
@@ -91,6 +119,7 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 function commsStationDocked(comms_source, comms_target)
+    print(_ENV)
     local message
     if comms_source:isFriendly(comms_target) then
         message = string.format(_("commsStation", "Good day, officer! Welcome to %s.\nWhat can we do for you today?"), comms_target:getCallSign())
@@ -117,14 +146,14 @@ function commsStationDocked(comms_source, comms_target)
             )
         end
     end
-    local ptype = player:getTypeName()
-    if isAllowedTo(comms_target.comms_data.services.fighters) then
-            if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
-                addCommsReply("Visit fighter bay", function()
-                    handleBuyShips()
-                end)
-            end
-    end
+--    local ptype = player:getTypeName()
+--    if isAllowedTo(comms_target.comms_data.services.fighters) then
+--            if ptype == "Atlantis" or ptype == "Crucible" or ptype == "Maverick" or ptype == "Benedict" or ptype == "Kiriya" then
+--                addCommsReply("Visit fighter bay", function()
+--                    handleBuyShips()
+--                end)
+--            end
+--    end
     if isAllowedTo(comms_target.comms_data.services.refitDrive) then
         if player:hasWarpDrive() ~= player:hasJumpDrive() then
             -- logical XOR with hasWarpDrive and hasJumpDrive
@@ -266,6 +295,7 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 function commsStationUndocked(comms_source, comms_target)
+    print(_ENV)
     local message
     if comms_source:isFriendly(comms_target) then
         message = string.format(_("commsStation", "This is %s. Good day, officer.\nIf you need supplies, please dock with us first."), comms_target:getCallSign())
@@ -300,6 +330,7 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 function commsStationSupplyDrop(comms_source, comms_target)
+    print(_ENV)
     if comms_source:getWaypointCount() < 1 then
         setCommsMessage(_("commsStation", "You need to set a waypoint before you can request backup."))
     else
@@ -334,27 +365,24 @@ end
 -- @tparam PlayerSpaceship comms_source
 -- @tparam SpaceStation comms_target
 function commsStationReinforcements(comms_source, comms_target)
-	setCommsMessage(_("commsStation", "What kind of reinforcement ship would you like?"))
-	addCommsReply(string.format(_("commsStation", "Adder MK3 (%d rep)"), getServiceCost(comms_source, comms_target, "amk3_reinforcement")), function()
-		string.format("")
-		commsStationSpecificReinforcement(comms_source, comms_target, "amk3_reinforcement")
-	end)
-	addCommsReply(string.format(_("commsStation", "MU52 Hornet (%d rep)"), getServiceCost(comms_source, comms_target, "hornet_reinforcement")), function()
-		string.format("")
-		commsStationSpecificReinforcement(comms_source, comms_target, "hornet_reinforcement")
-	end)
-	addCommsReply(string.format(_("commsStation", "Standard Adder MK5 (%d rep)"), getServiceCost(comms_source, comms_target, "reinforcements")), function()
-		string.format("")
-		commsStationSpecificReinforcement(comms_source, comms_target, "reinforcements")
-	end)
-	addCommsReply(string.format(_("commsStation", "Adder MK8 (%d rep)"), getServiceCost(comms_source, comms_target, "amk8_reinforcement")), function()
-		string.format("")
-		commsStationSpecificReinforcement(comms_source, comms_target, "amk8_reinforcement")
-	end)
-	addCommsReply(string.format(_("commsStation", "Phobos T3 (%d rep)"), getServiceCost(comms_source, comms_target, "phobos_reinforcement")), function()
-		string.format("")
-		commsStationSpecificReinforcement(comms_source, comms_target, "phobos_reinforcement")
-	end)
+    print(_ENV)
+    setCommsMessage(_("commsStation", "What kind of reinforcement ship would you like?"))
+    addCommsReply(string.format(_("commsStation", "MT52 Hornet (%d rep)"), getServiceCost(comms_source, comms_target, "hornet_reinforcement")), function()
+        string.format("")
+        commsStationSpecificReinforcement(comms_source, comms_target, "hornet_reinforcement")
+    end)
+    addCommsReply(string.format(_("commsStation", "WX-Lindworm (%d rep)"), getServiceCost(comms_source, comms_target, "lindworm_reinforcement")), function()
+        string.format("")
+        commsStationSpecificReinforcement(comms_source, comms_target, "lindworm_reinforcement")
+    end)
+    addCommsReply(string.format(_("commsStation", "Adder MK5 (%d rep)"), getServiceCost(comms_source, comms_target, "adder_reinforcement")), function()
+        string.format("")
+        commsStationSpecificReinforcement(comms_source, comms_target, "adder_reinforcement")
+    end)
+    addCommsReply(string.format(_("commsStation", "Phobos T3 (%d rep)"), getServiceCost(comms_source, comms_target, "phobos_reinforcement")), function()
+        string.format("")
+        commsStationSpecificReinforcement(comms_source, comms_target, "phobos_reinforcement")
+    end)
     addCommsReply(_("button", "Back"), commsStationMainMenu)
 end
 function commsStationSpecificReinforcement(comms_source, comms_target, reinforcement_type)
@@ -368,13 +396,12 @@ function commsStationSpecificReinforcement(comms_source, comms_target, reinforce
                 function(comms_source, comms_target)
                     local message
                     if comms_source:takeReputationPoints(getServiceCost(comms_source, comms_target, reinforcement_type)) then
-                    	local reinforcement_template = {
-                    		["amk3_reinforcement"] = 	"Adder MK3",
-                    		["hornet_reinforcement"] =	"MU52 Hornet",
-                    		["reinforcements"] =		"Adder MK5",
-                    		["amk8_reinforcement"] =	"Adder MK8",
-                    		["phobos_reinforcement"] =	"Phobos T3",
-                    	}
+                        local reinforcement_template = {
+                            ["hornet_reinforcement"] =	    "MT52 Hornet",
+                            ["lindworm_reinforcement"] =	"WX-Lindworm",
+                            ["adder_reinforcement"] =       "Adder MK5",
+                            ["phobos_reinforcement"] =	    "Phobos T3",
+                        }
                         local ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate(reinforcement_template[reinforcement_type]):setScanned(true):orderDefendLocation(comms_source:getWaypoint(n))
                         message = string.format(_("commsStation", "We have dispatched %s to assist at %s."), ship:getCallSign(), formatWaypoint(n))
                     else

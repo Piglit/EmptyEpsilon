@@ -57,7 +57,7 @@ function init()
     --player ship
     player = createPlayerShip():setPosition(gu/6, -gu/6):setHeading(90)
     player:setLongRangeRadarRange(30000)
-    player:addReputationPoints(240.0)
+    player:addReputationPoints(800)
 
     --wingman
     command = createWingman():setCallSign("April"):setPosition(-gu/6, gu/6):setHeading(90):orderIdle()
@@ -66,7 +66,7 @@ function init()
     stationPosx = 2*gu
     stationPosy = 0
     station = SpaceStation():setTemplate('Small Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Kraylor"):setPosition(stationPosx,stationPosy)
-    station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80}
+    station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80, enemy_comms_functions={comms_resign}}
 
 
     --enemies
@@ -220,5 +220,68 @@ function update(delta)
     --util scripts
     script_hangar.update(delta)
     commsInstr()
+end
+
+function comms_resign(comms_source, comms_target)
+    print(_ENV)
+    setCommsMessage(_("special-comms", "You are our declared enemy. What do you want?"))
+    local cost = special_buy_cost(comms_target, comms_source)
+    addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+        local current_faction = comms_target:getFaction()
+        if not comms_target:areEnemiesInRange(5000) then
+            setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
+        elseif not (comms_target:getHull() < comms_target:getHullMax()) then
+            setCommsMessage(_("needRep-comms", "We will not surrender until our hull is damaged."))
+        else
+            comms_target:setFaction("Human Navy")
+            if comms_target:areEnemiesInRange(5000) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "We will not surrender as long as enemies of the Human Navy are still near."))
+            elseif not comms_source:takeReputationPoints(cost) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+            else
+                comms_target:setFaction("Independent")
+                setCommsMessage(_("special-comms", "Station surrendered."))
+            end
+        end
+    end)
+end
+function special_buy_cost(target, source)
+    print(_ENV)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(source) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(source) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	if target:getFaction() == "Interplanetary Union" then
+		cost = cost *1
+	elseif target:getFaction() == "Independent" then
+		cost = cost *2
+	elseif target:getFaction() == "Arlenians" then
+		cost = cost *4
+	elseif target:getFaction() == "Exuari" then	-- because stations are ships
+		cost = cost *4
+	else	-- other neutral and enemies
+		cost = cost *2
+	end
+	if target.typeName == "SpaceStation" then
+		cost = cost *2
+	else -- SpaceShip
+		cost = cost *1
+	end
+	return math.floor(cost)
 end
 

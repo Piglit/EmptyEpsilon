@@ -236,13 +236,15 @@ end
 
 -- create amount of object_type, at a distance between dist_min and dist_max around the point (x0, y0)
 function placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
+    local created = {}
     for n = 1, amount do
         local r = random(0, 360)
         local distance = random(dist_min, dist_max)
         local x = x0 + math.cos(r / 180 * math.pi) * distance
         local y = y0 + math.sin(r / 180 * math.pi) * distance
-        object_type():setPosition(x, y)
+        table.insert(created, object_type():setPosition(x, y))
     end
+    return created
 end
 
 -- Place random objects in a line, from point x1,y1 to x2,y2 with a random distance of random_amount
@@ -286,6 +288,7 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
     local perlin_section_i = random(0, 1000)
     local perlin_section_j = random(0, 1000)
 
+    local created = {}
     -- Create a XY intensity map
     for i = 1, x_grids do
         for j = 1, y_grids do
@@ -301,10 +304,14 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
                 local x_start = ((i - x_grids / 2) * grid_size) + x
                 local y_start = ((j - x_grids / 2) * grid_size) + y
 
-                placeRandomAroundPoint(object_type, nr_of_objects, 0, grid_size / 1.5, x_start, y_start)
+                local cr = placeRandomAroundPoint(object_type, nr_of_objects, 0, grid_size / 1.5, x_start, y_start)
+                for _,v in ipairs(cr) do
+                    table.insert(created, v)
+                end
             end
         end
     end
+    return created
 end
 
 -- Extract coordinates between two objects, two points, object and point or point and object

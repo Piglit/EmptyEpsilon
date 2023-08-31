@@ -121,8 +121,8 @@ transporter:setFriendly(blues)
 transporter:setEnemy(exuari)
 
 iu = FactionInfo():setName("Interplanetary Union")
-iu:setGMColor(128, 255, 128)
+iu:setGMColor(0, 255, 255)
 iu:setDescription(_([[The Interplanetary Union is mostly present in the uncivilised outer edges of the human expansion. Their goal is to colonise uninhabited systems and gain profit in the process. A comon strategy is to drop a station with shipyard and supplies in an unknown system and hire mercenaries and colonists to bring wealth to the system.]]))
 iu:setEnemy(exuari)
-iu:setEnemy(kraylor)
+iu:setEnemy(GITM)
 

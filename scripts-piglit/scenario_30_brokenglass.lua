@@ -49,9 +49,8 @@ function init()
   SpaceStation():setTemplate("Medium Station"):setFaction("Ghosts"):setCallSign("DS820"):setPosition(-38789, 14192)
   SpaceStation():setTemplate("Medium Station"):setFaction("Ghosts"):setCallSign("DS821"):setPosition(-47557, 15983)
 
-  -- Wormholes
-  WormHole():setPosition(71274, 38128):setTargetPosition(334910, 473961)
-  WormHole():setPosition(332910, 471961):setTargetPosition(69274, 36128)
+
+  -- Wormholes -> salvage_repair_mission
 
   -- == Western Belt
   Asteroid():setPosition(11802, 69624):setSize(128)
@@ -655,18 +654,14 @@ function init()
   Defence_station:setCommsFunction(CommsDefenceStation)
   Defence_station.harass_enemies = {}
   Defence_station.ghost_defenders = {}
-  Wormhole_station:setCommsFunction(CommsWormholeStation)
-  Wormhole_station.insults = {}
+
 
   -- XXX init plots
   lost_mission.init(Admin_station, CHEEVOS, CommsBeingAttacked, Wormhole_station)
   salvage_repair_mission.init(Admin_station, CHEEVOS, Defence_station, SpawnEnemies, Wormhole_station)
   patrol_mission.init(Admin_station, CHEEVOS, CommsBeingAttacked, Defence_station, PP1, SpawnEnemies, Wormhole_station, Difficulty)
 
-  salvage_repair_mission.Investigator:setCommsFunction(salvage_repair_mission.CommsInvestigator)
 
-  salvage_repair_mission.InitKraylor()
-  salvage_repair_mission.InitPartsStation()
   patrol_mission.InitDroneStations()
   InitCheevos()
   InitTraffic()
@@ -913,123 +908,6 @@ end
 --==
 --==================================================
 
-function CommsWormholeStation(comms_source, comms_target)
-
-  if Wormhole_station.tier2_mission_state ~= nil and
-  Wormhole_station.tier2_mission_state ~= "wait for attack" then
-    CommsWormholeStationTier2(comms_source,comms_target)
-    return
-  end
-
-  if not comms_source:isDocked(comms_target) then
-    if Wormhole_station.mission_state == nil then
-      setCommsMessage(_("wormhole-comms", [[
-Hello Captain. Have you noticed our cool wormhole?
-
-We're studying the energy radiating from the wormhole, and the similarities to black holes are astonishing. Please drop by if you'd like to help out.]]))
-    elseif Wormhole_station.mission_state == "get parts" or Wormhole_station.mission_state == "return parts" then
-      setCommsMessage(_("wormhole-comms", "Please bring us the spare parts!"))
-    elseif Wormhole_station.mission_state == "done" then
-      setCommsMessage(_("wormhole-comms", "Thanks so much for your help!"))
-    end
-
-  else
-    -- Docked comms
-    if Wormhole_station.mission_state == nil then
-      Wormhole_station.insults["tips"] = false
-      setCommsMessage(_("wormhole-comms", [[Thanks for dropping by, Captain.
-
-Our research is going well, but we could use some spare stabilizers for our Hawking Scanner. Would you mind salvaging some for us from the other side of the wormhole?]]))
-      addCommsReply(_("wormhole-comms", "Okay, we can help with that."), salvage_repair_mission.StartMissionSpareParts)
-      addCommsReply(_("wormhole-comms", "Do you pay tips?"), function()
-        setCommsMessage(_("wormhole-comms", [[Maybe later, then. Goodbye.]]))
-        Player:takeReputationPoints(2)
-        Wormhole_station.insults["tips"] = true
-      end)
-    elseif Wormhole_station.mission_state == "get parts" or Wormhole_station.mission_state == "return parts" then
-
-      if Player.hasSpareParts ~= nil then
-        Wormhole_station.insults["errands"] = false
-        setCommsMessage(_("wormhole-comms", [[Thanks for your help, Captain!
-
-These spare parts will really help with the program budget.]]))
-        addCommsReply(_("wormhole-comms", "What do we get for being your errand boy?"), function()
-          setCommsMessage(_("wormhole-comms", [[You get half of what would have with a smarter attitude! So rude.]]))
-          Player:addReputationPoints(5)
-          Wormhole_station.insults["errands"] = true
-          salvage_repair_mission.FinishMissionSpareParts()
-        end)
-        addCommsReply(_("wormhole-comms", "We're so glad we could help"), function()
-          setCommsMessage(_("wormhole-comms", [[We are too. Thanks a bunch.]]))
-          Player:addReputationPoints(10)
-          salvage_repair_mission.FinishMissionSpareParts()
-        end)
-      else
-        setCommsMessage(_("wormhole-comms", [[We still need those spare parts from X472 on the other side of the wormhole!]]))
-      end
-    elseif Wormhole_station.mission_state == "done" then
-        setCommsMessage(_("wormhole-comms", [[Thanks that was awesome]]))
-    end
-  end
-end
-
-function CommsWormholeStationTier2(comms_source, comms_target)
-
-  -- DOCKER OR UNDOCKED
-  if Wormhole_station.tier2_mission_state == "attack" then
-    setCommsMessage(_("wormhole-comms", [[We're under attack. Help us!]]))
-    return
-  end
-
-  if not comms_source:isDocked(comms_target) then -- UNDOCKED
-    if Wormhole_station.tier2_mission_state == "damaged" then
-      setCommsMessage(_("wormhole-comms", [[Come pick up our Hawking Scanner for repairs.]]))
-    elseif Wormhole_station.tier2_mission_state == "rma" or Wormhole_station.tier2_mission_state == "fixed" then
-      setCommsMessage(_("wormhole-comms", [[Please find someone to repair our Hawking Scanner.]]))
-    end
-  else -- DOCKED
-    if Wormhole_station.tier2_mission_state == "damaged" or Wormhole_station.tier2_mission_state == "rma" then
-      Wormhole_station.tier2_mission_state = "rma"
-      Wormhole_station.insults["shoveit"] = false
-      setCommsMessage(_("wormhole-comms", [[Thanks again, Captain.
-
-We need you to find someone to repair this Hawking Scanner. Please bring it back once it's working again.]]))
-      addCommsReply(_("wormhole-comms", "Any idea where we should take it?"), function()
-        setCommsMessage(_("wormhole-comms", [[One of the nebula researchers should be able to point you in the right direction.
-
-If you're not sure where to find them, ask for directions at the Admin Station]]))
-      end)
-      addCommsReply(_("wormhole-comms", "Have you considered shoving it where the sun don't shine?"), function()
-        setCommsMessage(_("wormhole-comms", [[What is it with you, anyways?]]))
-        Player:takeReputationPoints(2)
-        Wormhole_station.insults["shoveit"] = true
-      end)
-    elseif Wormhole_station.tier2_mission_state == "fixed" then
-      Wormhole_station.insults["kissmyfeet"] = false
-      setCommsMessage(_("wormhole-comms", [[You got it fixed?
-
-That's amazing, Captain. Thank you so much! You and your crew are true heros of our system; may your names live on through history.
-
-Glory to you and your kin.]]))
-      addCommsReply(_("wormhole-comms", "You're very welcome."), function()
-        setCommsMessage(_("wormhole-comms", "Goodbye captain. May peace be with you."))
-        salvage_repair_mission.FinishMissionRepair()
-      end)
-      addCommsReply(_("wormhole-comms", "Kiss my feet!"), function()
-        Wormhole_station.insults["kissmyfeet"] = true
-        CheckCheevoNoWormhole()
-        if CHEEVOS["nowormhole"] then
-         setCommsMessage(_("wormhole-comms", [[I was about to call this in to Admin and have them declare you victorious, but I've had enough of you.
-
-YOU MAY BE A HERO, BUT YOU'RE ALSO A JERK!]]))
-        else
-          setCommsMessage(_("wormhole-comms", [[A real peach, you are.]]))
-        end
-        salvage_repair_mission.FinishMissionRepair()
-      end)
-    end
-  end
-end
 
 -- XXX lost_mission.CommsColonyStation -> lost_mission.lua
 
@@ -1124,7 +1002,7 @@ Remember, your primary orders are to support the research facilities in the area
 end
 
 function CommsAdminStation(comms_source, comms_target)
-
+--[[
   if Wormhole_station.tier2_mission_state == "done" then
     CheckCheevos()
     -- Does the _() translation work here?
@@ -1182,7 +1060,7 @@ function CommsAdminStation(comms_source, comms_target)
     end)
     return
   end
-
+--]]
   if not comms_source:isDocked(comms_target) then
     if Admin_station.mission_state == nil then
       setCommsMessage(_("adminStn-comms", [[We are the station that co-ordinates research activities in the nearby nebulae.

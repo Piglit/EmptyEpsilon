@@ -14,13 +14,14 @@ require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
 require("script_hangar.lua")
+require("plots/salvage_repair_mission.lua")
 
 ----------------------
 --	Initialization  --
 ----------------------
 function init()
 	print(_VERSION)
-	diagnostic = false
+	diagnostic = false 
 	endStatDiagnostic = false
 	updateDiagnostic = false
 	setPlayerDiagnostic = false
@@ -40,14 +41,15 @@ function init()
 		setListOfStations()
 		setTerritoryZones()
 		buildStationsPlus()
-		if #kraylorStationList < 5 or #humanStationList < 5 or #exuariStationList < 5 or #arlenianStationList < 5 then
+		if #kraylorStationList < 5 or #humanStationList < 5 or #exuariStationList < 5 or #arlenianStationList < 5 or #ktlitanStationList < 5 then
 			resetStationsPlus()
 			universeCreateRetryCount = universeCreateRetryCount + 1
 		end
-	until(#kraylorStationList >= 5 and #humanStationList >= 5 and #exuariStationList >= 5 and #arlenianStationList >= 5)
+	until(#kraylorStationList >= 5 and #humanStationList >= 5 and #exuariStationList >= 5 and #arlenianStationList >= 5 and #ktlitanStationList >= 5)
 	if universeCreateRetryCount > 0 then
 		if diagnostic then print("universe create retry count: " .. universeCreateRetryCount) end
 	end
+	print(string.format("Human stations: %i, Kraylor stations: %i, Exuari stations: %i, Ktlitan stations: %i, Arlenian stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#exuariStationList,#ktlitanStationList,#arlenianStationList,#neutralStationList)) 
 	setFleets()
 	primaryOrders = ""
 	setPlots()
@@ -55,12 +57,22 @@ function init()
 	plotM = movingObjects
 
 	doctorSearch = false
-	GMAdmiral = _("buttonGM" ,"Admiral")
-	addGMFunction(GMAdmiral,triggerAdmiral)
-	GMMining = _("buttonGM" ,"Mining")
-	addGMFunction(GMMining,triggerMining)
-	GMDoomsday = _("buttonGM" ,"Doomsday")
-	addGMFunction(GMDoomsday,triggerDoomsday)
+--	GMAdmiral = _("buttonGM" ,"Admiral")
+--	addGMFunction(GMAdmiral,triggerAdmiral)
+--	GMMining = _("buttonGM" ,"Mining")
+--	addGMFunction(GMMining,triggerMining)
+--	GMDoomsday = _("buttonGM" ,"Doomsday")
+--	addGMFunction(GMDoomsday,triggerDoomsday)
+
+    local ws = nil
+    for _,station in ipairs(humanStationList) do
+		if station ~= nil and station:isValid() and kraylorZone:isInside(station) then
+            ws = station
+        end
+    end
+    assert(ws~=nil, "ws is nil - this may happen if no human stations are spawned in kraylor territory. please restart.")
+    print(string.format("Wormhole station: %s in %s", ws:getCallSign(), ws:getSectorName()))
+    salvage_repair_mission.init(spawnEnemies, ws, placeKraylor)
 
 	--Example of calling a function via http API, assuming you start EE with parameter httpserver=8080 (or it's in options.ini):
 	--'curl --data "getScriptStorage().scenario.spawnDefensiveFleet(100, 'Kraylor')" http://localhost:8080/exec.lua'
@@ -398,6 +410,52 @@ function setTerritoryZones()
 		zpi = zpi + 1
 	end
 	humanZone = Zone()
+        :setPoints(humanRightX[21],			humanRightY[21],
+				   humanRightX[20],			humanRightY[20],
+				   humanRightX[19],			humanRightY[19],
+				   humanRightX[18],			humanRightY[18],
+				   humanRightX[17],			humanRightY[17],
+				   humanRightX[16],			humanRightY[16],
+				   humanRightX[15],			humanRightY[15],
+				   humanRightX[14],			humanRightY[14],
+				   humanRightX[13],			humanRightY[13],
+				   humanRightX[12],			humanRightY[12],
+				   humanRightX[11],			humanRightY[11],
+				   humanRightX[10],			humanRightY[10],
+				   humanRightX[9],			humanRightY[9],
+				   humanRightX[8],			humanRightY[8],
+				   humanRightX[7],			humanRightY[7],
+				   humanRightX[6],			humanRightY[6],
+				   humanRightX[5],			humanRightY[5],
+				   humanRightX[4],			humanRightY[4],
+				   humanRightX[3],			humanRightY[3],
+				   humanRightX[2],			humanRightY[2],
+				   humanRightX[1],			humanRightY[1],
+				   sharedZoneBorderRightX,	sharedZoneBorderRightY,
+				   sharedZoneBorderLeftX,	sharedZoneBorderLeftY,
+				   arlenianLeftX[1],		arlenianLeftY[1],
+				   arlenianLeftX[2],		arlenianLeftY[2],
+				   arlenianLeftX[3],		arlenianLeftY[3],
+				   arlenianLeftX[4],		arlenianLeftY[4],
+				   arlenianLeftX[5],		arlenianLeftY[5],
+				   arlenianLeftX[6],		arlenianLeftY[6],
+				   arlenianLeftX[7],		arlenianLeftY[7],
+				   arlenianLeftX[8],		arlenianLeftY[8],
+				   arlenianLeftX[9],		arlenianLeftY[9],
+				   arlenianLeftX[10],		arlenianLeftY[10],
+				   arlenianLeftX[11],		arlenianLeftY[11],
+				   arlenianLeftX[12],		arlenianLeftY[12],
+				   arlenianLeftX[13],		arlenianLeftY[13],
+				   arlenianLeftX[14],		arlenianLeftY[14],
+				   arlenianLeftX[15],		arlenianLeftY[15],
+				   arlenianLeftX[16],		arlenianLeftY[16],
+				   arlenianLeftX[17],		arlenianLeftY[17],
+				   arlenianLeftX[18],		arlenianLeftY[18],
+				   arlenianLeftX[19],		arlenianLeftY[19],
+				   arlenianLeftX[20],		arlenianLeftY[20],
+				   arlenianLeftX[21],		arlenianLeftY[21],
+				   humanLeftX[21],			humanLeftY[21])
+	ktlitanZone = Zone()
 		:setPoints(humanLeftX[21],			humanLeftY[21],
 				   humanLeftX[20],			humanLeftY[20],
 				   humanLeftX[19],			humanLeftY[19],
@@ -575,10 +633,11 @@ function setTerritoryZones()
 				   arlenianRightX[19],		arlenianRightY[19],
 				   arlenianRightX[20],		arlenianRightY[20],
 				   arlenianRightX[21],		arlenianRightY[21])
-	humanZone:setColor(0,54,0):setLabel(_("ZoneLabelDescription-faction", "Human"))
+	humanZone:setColor(0,0,0)--:setLabel(_("ZoneLabelDescription-faction", "Human"))
+	ktlitanZone:setColor(27,54,0):setLabel(_("ZoneLabelDescription-faction", "Ktlitan"))
 	arlenianZone:setColor(0,0,54):setLabel(_("ZoneLabelDescription-faction", "Arlenian"))
 	kraylorZone:setColor(54,0,0):setLabel(_("ZoneLabelDescription-faction", "Kraylor"))
-	exuariZone:setColor(54,0,0):setLabel(_("ZoneLabelDescription-faction", "Exuari"))
+	exuariZone:setColor(54,0,27):setLabel(_("ZoneLabelDescription-faction", "Exuari"))
 end
 function resetStationsPlus()
 	for i=1,#stationList do
@@ -662,7 +721,7 @@ function buildStationsPlus()
 		psy = (gRegion[sri][2] - (gbHigh/2))*gSize + random(-gSize/2*.95,gSize/2*.95)	--place station y coordinate
 		ta = VisualAsteroid():setPosition(psx,psy)
 		pStation = nil
-		if humanZone:isInside(ta) then
+		if humanZone:isInside(ta) and (math.random() <= 0.5) then
 			placeHuman()
 		elseif arlenianZone:isInside(ta) then
 			placeArlenian()
@@ -670,6 +729,8 @@ function buildStationsPlus()
 			placeKraylor()
 		elseif exuariZone:isInside(ta) then
 			placeExuari()
+		elseif ktlitanZone:isInside(ta) then
+			placeKtlitan()
 		else
 			placeNeutral()
 		end	
@@ -685,11 +746,12 @@ function buildStationsPlus()
 		rn = math.random(1,#adjList)	--random next station start location
 		gx = adjList[rn][1]
 		gy = adjList[rn][2]
-	until(not neutralStationsRemain or not humanStationsRemain or not kraylorStationsRemain or not exuariStationsRemain)
+	until(not neutralStationsRemain or not humanStationsRemain or #placeGenericStation < 12 or not exuariStationsRemain or not ktlitanStationsRemain)
 	local oobCount = 0
 	local humanOob = 0
 	local kraylorOob = 0
 	local exuariOob = 0
+	local ktlitanOob = 0
 	local arlenianOob = 0
 	local neutralOob = 0
 	for i=1,#stationList do
@@ -707,6 +769,10 @@ function buildStationsPlus()
 			oobCount = oobCount + 1
 			exuariOob = exuariOob + 1
 		end
+		if psf == "Ktlitans" and not ktlitanZone:isInside(extractStation) then
+			oobCount = oobCount + 1
+			ktlitanOob = ktlitanOob + 1
+		end
 		if psf == "Arlenians" and not arlenianZone:isInside(extractStation) then
 			oobCount = oobCount + 1
 			arlenianOob = arlenianOob + 1
@@ -714,15 +780,17 @@ function buildStationsPlus()
 		if psf == "Independent" and (humanZone:isInside(extractStation) 
 								or kraylorZone:isInside(extractStation) 
 								or exuariZone:isInside(extractStation) 
+								or ktlitanZone:isInside(extractStation) 
 								or arlenianZone:isInside(extractStation)) then
 			oobCount = oobCount + 1
 			neutralOob = neutralOob + 1
 		end
 	end
 	if oobCount > 0 then
-		if diagnostic then print(string.format("OOB: %i, Human: %i, Kraylor: %i, Exuari: %i, Arlenian: %i, Neutral: %i",oobCount,humanOob,kraylorOob,exuariOob,arlenianOob,neutralOob)) end
+		if diagnostic then print(string.format("OOB: %i, Human: %i, Kraylor: %i, Exuari: %i, Ktlitan: %i, Arlenian: %i, Neutral: %i",oobCount,humanOob,kraylorOob,exuariOob,ktlitanOob,arlenianOob,neutralOob)) end
 	end
-	if diagnostic then print(string.format("Human stations: %i, Kraylor stations: %i, Exuari stations: %i, Arlenian stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#exuariStationList,#arlenianStationList,#neutralStationList)) end
+	if diagnostic then print(string.format("Human stations: %i, Kraylor stations: %i, Exuari stations: %i, Ktlitan stations: %i, Arlenian stations: %i, Neutral stations: %i",#humanStationList,#kraylorStationList,#exuariStationList,#ktlitanStationList,#arlenianStationList,#neutralStationList)) end
+
 	if not diagnostic then
 		local nebula_count = 25--math.random(7,25)
 		local nebula_list = placeRandomListAroundPoint(Nebula,nebula_count,1,100000,0,0)
@@ -743,9 +811,6 @@ function buildStationsPlus()
 			end
 		end
 	end
-	psx = 150000
-	psy =  50000
-	placeKtlitan()
 end
 function placeHuman()
 	if stationFaction ~= "Interplanetary Union" then
@@ -816,6 +881,7 @@ function placeKraylor()
 		pStation:onDestruction(kraylorStationDestroyed)
 		table.insert(stationList,pStation)			--save station in general station list
 		table.insert(kraylorStationList,pStation)	--save station in enemy station list
+        return pStation
 	end
 end
 function placeExuari()
@@ -890,14 +956,36 @@ function placeArlenian()
 	end
 end
 function placeKtlitan()
-	stationFaction = "Ktlitans"				--set station faction
-	pStation = placeRlyeh()					--place selected station
-	pStation.strength = 10
-	ktlitanStationStrength = ktlitanStationStrength + 10
-	pStation:onDestruction(ktlitanStationDestroyed)
-	table.insert(stationList,pStation)			--save station in general station list
-	table.insert(ktlitanStationList,pStation)	--save station in neutral station list
-	addStationHangar(pStation)
+	if stationFaction ~= "Ktlitans" then
+		fb = gp									--set faction boundary
+	end
+	stationFaction = "Ktlitans"
+	if #placeStation > 0 then
+		si = math.random(1,#placeStation)			--station index
+		pStation = placeStation[si]()				--place selected station
+		table.remove(placeStation,si)				--remove station from placement list
+		addStationHangar(pStation)
+	else
+		ktlitanStationsRemain = false
+	end
+	if ktlitanStationsRemain then
+		if sizeTemplate == "Huge Station" then
+			ktlitanStationStrength = ktlitanStationStrength + 10
+			pStation.strength = 10
+		elseif sizeTemplate == "Large Station" then
+			ktlitanStationStrength = ktlitanStationStrength + 5
+			pStation.strength = 5
+		elseif sizeTemplate == "Medium Station" then
+			ktlitanStationStrength = ktlitanStationStrength + 3
+			pStation.strength = 3
+		else
+			ktlitanStationStrength = ktlitanStationStrength + 1
+			pStation.strength = 1
+		end
+		pStation:onDestruction(ktlitanStationDestroyed)
+		table.insert(stationList,pStation)			--save station in general station list
+		table.insert(ktlitanStationList,pStation)	--save station in enemy station list
+	end
 end
 function placeNeutral()
 	if stationFaction ~= "Independent" then
@@ -3437,7 +3525,7 @@ end
 -----------------------------
 --	Station communication  --
 -----------------------------
-function commsStation()
+function commsStation(comms_source, comms_target)
     if comms_target.comms_data == nil then
         comms_target.comms_data = {}
     end
@@ -3479,42 +3567,26 @@ function commsStation()
         max_weapon_refill_amount = {
             friend = 1.0,
             neutral = 0.5
-        }
+        },
     })
     comms_data = comms_target.comms_data
 	setPlayers()
-	for p4idx=1, MAX_PLAYER_SHIPS do
-		local p4obj = getPlayerShip(p4idx)
-		if p4obj ~= nil and p4obj:isValid() then
-			if p4obj:isCommsOpening() then
-				player = p4obj
-			end
-		end
-	end	
+--	for p4idx=1, MAX_PLAYER_SHIPS do
+--		local p4obj = getPlayerShip(p4idx)
+--		if p4obj ~= nil and p4obj:isValid() then
+--			if p4obj:isCommsOpening() then
+--				player = p4obj
+--			end
+--		end
+--	end	
+    local player = comms_source
     if player:isEnemy(comms_target) then
-		if player.special_intimidate_stations then
-			setCommsMessage(_("special-comms", "You are our declared enemy. What do you want?"))
-			local cost = special_buy_cost(comms_target, player)
-			addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
-				local current_faction = comms_target:getFaction()
-				if not comms_target:areEnemiesInRange(5000) then
-					setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
-				elseif not (comms_target:getHull() < comms_target:getHullMax()) then
-					setCommsMessage(_("needRep-comms", "We will not surrender until our hull is damaged."))
-				else
-					comms_target:setFaction("Human Navy")
-					if comms_target:areEnemiesInRange(5000) then
-						comms_target:setFaction(current_faction)
-						setCommsMessage(_("needRep-comms", "We will not surrender as long as enemies of the Human Navy are still near."))
-					elseif not player:takeReputationPoints(cost) then
-						comms_target:setFaction(current_faction)
-						setCommsMessage(_("needRep-comms", "Insufficient reputation"))
-					else
-						comms_target:setFaction("Independent")
-						setCommsMessage(_("special-comms", "Station surrendered."))
-					end
-				end
-			end)
+        local current_faction = comms_target:getFaction()
+        if current_faction == "Ktlitans" then
+            liberateKtlitanStationComms(comms_source, comms_target)
+			return true
+        elseif player.special_intimidate_stations then
+            intimidateStationComms(comms_source, comms_target)
 			return true
 		else
 			return false
@@ -3524,14 +3596,97 @@ function commsStation()
         setCommsMessage(_("station-comms", "We are under attack! No time for chatting!"))
         return true
     end
+    local ret
     if not player:isDocked(comms_target) then
-        handleUndockedState()
+        if comms_data.undocked_comms_functions ~= nil then
+            for _,f in ipairs(comms_data.undocked_comms_functions) do
+                ret = f(comms_source, comms_target)
+                if ret ~= nil then
+                    return ret
+                end
+            end
+        end
+        ret = handleUndockedState(comms_source, comms_target)
     else
-        handleDockedState()
+        if comms_data.docked_comms_functions ~= nil then
+            for _,f in ipairs(comms_data.docked_comms_functions) do
+                ret = f(comms_source, comms_target)
+                if ret ~= nil then
+                    return ret
+                end
+            end
+        end
+        ret = handleDockedState(comms_source, comms_target)
+    end
+    if ret ~= nil then
+        return ret
     end
     return true
 end
-function handleDockedState()
+function intimidateStationComms(comms_source, comms_target)
+    local current_faction = comms_target:getFaction()
+    setCommsMessage(_("special-comms", "You are our declared enemy. What do you want?"))
+    local cost = special_buy_cost(comms_target, comms_source)
+    addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+
+        if not comms_target:areEnemiesInRange(5000) then
+            setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
+        elseif not (comms_target:getHull() < comms_target:getHullMax()) then
+            setCommsMessage(_("needRep-comms", "We will not surrender until our hull is damaged."))
+        else
+            comms_target:setFaction("Human Navy")
+            if comms_target:areEnemiesInRange(5000) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "We will not surrender as long as enemies of the Human Navy are still near."))
+            elseif not comms_source:takeReputationPoints(cost) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+            else
+                comms_target:setFaction("Independent")
+                setCommsMessage(_("special-comms", "Station surrendered."))
+            end
+        end
+    end)
+end
+function liberateKtlitanStationComms(comms_source, comms_target)
+    local current_faction = comms_target:getFaction()
+    setCommsMessage(_("special-comms", "This stations belongs to the Interplanetary Union. We host a Ktlitan hive here. The station is therefore closed to visitors. How can we help you?"))
+    local cost = special_buy_cost(comms_target, comms_source)
+    addCommsReply(string.format(_("special-comms", "Get rid of that infestation! [Cost: %s Rep.]"), cost), function()
+        if not comms_target:areEnemiesInRange(5000) then
+            setCommsMessage(_("needRep-comms", "We will not surrender our guests unless threatened."))
+        elseif not (comms_target:getHull() < comms_target:getHullMax()) then
+            setCommsMessage(_("needRep-comms", "We can not surrender our guests until our hull is damaged."))
+        else
+            comms_target:setFaction("Human Navy")
+            if comms_target:areEnemiesInRange(5000) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "We can not surrender our guests as long as there is fighting outside."))
+            elseif not comms_source:takeReputationPoints(cost) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+            else
+                comms_target:setFaction("Interplanetary Union")
+                setCommsMessage(_("special-comms", "Station surrendered."))
+                -- spawn escape ship
+                local escape_target = comms_target
+                local remaining = ktlitanStationList
+                while #remaining > 0 and escape_target ~= nil and escape_target:isValid() and escape_target:getFaction() ~= "Ktlitans" do
+                    escape_target, remaining = nearStations(comms_target, remaining)
+                end
+                local esc = CpuShip():setFaction("Ktlitans"):setTemplate("Personnel Freighter 2"):setPosition(comms_target:getPosition())
+                if escape_target ~= nil and escape_target:isValid() then
+                    esc:orderRetreat(escape_target)
+                else
+                    esc:orderRoaming()
+                end
+            end
+        end
+    end)
+end
+
+
+function handleDockedState(player, comms_target)
     if player:isFriendly(comms_target) then
 		oMsg = _("station-comms", "Good day, officer!\nWhat can we do for you today?\n")
     else
@@ -3596,8 +3751,8 @@ function handleDockedState()
 						else
 							nukePrompt = _("ammo-comms", "We really need some nukes (")
 						end
-						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), nukePrompt, getWeaponCost("Nuke")), function()
-							handleWeaponRestock("Nuke")
+						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), nukePrompt, getWeaponCost("Nuke", player, comms_target)), function()
+							handleWeaponRestock("Nuke", player, comms_target)
 						end)
 					end	--end station has nuke available if branch
 				end	--end player can accept nuke if branch
@@ -3608,8 +3763,8 @@ function handleDockedState()
 						else
 							empPrompt = _("ammo-comms", "Got any EMPs? (")
 						end
-						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), empPrompt, getWeaponCost("EMP")), function()
-							handleWeaponRestock("EMP")
+						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), empPrompt, getWeaponCost("EMP", player, comms_target)), function()
+							handleWeaponRestock("EMP", player, comms_target)
 						end)
 					end	--end station has EMP available if branch
 				end	--end player can accept EMP if branch
@@ -3620,8 +3775,8 @@ function handleDockedState()
 						else
 							homePrompt = _("ammo-comms", "Do you have extra homing missiles? (")
 						end
-						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), homePrompt, getWeaponCost("Homing")), function()
-							handleWeaponRestock("Homing")
+						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), homePrompt, getWeaponCost("Homing", player, comms_target)), function()
+							handleWeaponRestock("Homing", player, comms_target)
 						end)
 					end	--end station has homing for player if branch
 				end	--end player can accept homing if branch
@@ -3632,8 +3787,8 @@ function handleDockedState()
 						else
 							minePrompt = _("ammo-comms", "How about mines? (")
 						end
-						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), minePrompt, getWeaponCost("Mine")), function()
-							handleWeaponRestock("Mine")
+						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), minePrompt, getWeaponCost("Mine", player, comms_target)), function()
+							handleWeaponRestock("Mine", player, comms_target)
 						end)
 					end	--end station has mine for player if branch
 				end	--end player can accept mine if branch
@@ -3644,8 +3799,8 @@ function handleDockedState()
 						else
 							hvliPrompt = _("ammo-comms", "Could you provide HVLI? (")
 						end
-						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), hvliPrompt, getWeaponCost("HVLI")), function()
-							handleWeaponRestock("HVLI")
+						addCommsReply(string.format(_("ammo-comms", "%s%d rep each)"), hvliPrompt, getWeaponCost("HVLI", player, comms_target)), function()
+							handleWeaponRestock("HVLI", player, comms_target)
 						end)
 					end	--end station has HVLI for player if branch
 				end	--end player can accept HVLI if branch
@@ -3970,7 +4125,7 @@ function handleDockedState()
 	end
 	if player:isFriendly(comms_target) then
 		addCommsReply(_("orders-comms" , "What are my current orders?"), function()
-			local optionalOrders = setOptionalOrders()
+			local optionalOrders = setOptionalOrders(player)
 --			setSecondaryOrders()
 			ordMsg = primaryOrders .. "\n" .. scenario.secondaryOrders .. optionalOrders
 			if playWithTimeLimit then
@@ -4023,15 +4178,15 @@ function handleDockedState()
 			end)
 		end
 	end
-	dockedGoods()
+	dockedGoods(player, comms_target)
 end	--end of handleDockedState function
 
 --[[
 function handleChangeDrive()
 	if player:hasWarpDrive() and not player:hasJumpDrive() then
-		setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive")))
+		setCommsMessage(string.format("Do you want us to change your warp drive to a jump drive? For only %i reputation.", getServiceCost("refitDrive", comms_data)))
 		addCommsReply("Make it so!", function()
-			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+			if not player:takeReputationPoints(getServiceCost("refitDrive", comms_data)) then
 				setCommsMessage("Insufficient reputation")
 			else
 				player:setWarpDrive(false)
@@ -4042,9 +4197,9 @@ function handleChangeDrive()
 		end)
 	end
 	if player:hasJumpDrive() and not player:hasWarpDrive() then
-		setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive")))
+		setCommsMessage(string.format("Do you want us to change your jump drive to a warp drive? For only %i reputation.", getServiceCost("refitDrive", comms_data)))
 		addCommsReply("Make it so!", function()
-			if not player:takeReputationPoints(getServiceCost("refitDrive")) then
+			if not player:takeReputationPoints(getServiceCost("refitDrive", comms_data)) then
 				setCommsMessage("Insufficient reputation")
 			else
 				player:setWarpDrive(true)
@@ -4060,8 +4215,8 @@ end
 --[[
 function handleBuyShips()
 	setCommsMessage("Here you can start fighters that can be taken by your pilots. You do have a fighter pilot waiting, do you?")
-	addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor")), function()
-		if not player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+	addCommsReply(string.format("Purchase unmanned MP52 Hornet Interceptor for %i reputation", getServiceCost("fighterInterceptor", comms_data)), function()
+		if not player:takeReputationPoints(getServiceCost("fighterInterceptor", comms_data)) then
 			setCommsMessage("Insufficient reputation")
 		else
 			local ship = PlayerSpaceship():setTemplate("MP52 Hornet"):setFactionId(player:getFactionId())
@@ -4073,8 +4228,8 @@ function handleBuyShips()
 		end
 		addCommsReply("Back", mainMenu)
 	end)
-	addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber")), function()
-		if not player:takeReputationPoints(getServiceCost("fighterBomber")) then
+	addCommsReply(string.format("Purchase unmanned ZX-Lindworm Bomber for %i reputation", getServiceCost("fighterBomber", comms_data)), function()
+		if not player:takeReputationPoints(getServiceCost("fighterBomber", comms_data)) then
 			setCommsMessage("Insufficient reputation")
 		else
 			local ship = PlayerSpaceship():setTemplate("ZX-Lindworm"):setFactionId(player:getFactionId())
@@ -4086,8 +4241,8 @@ function handleBuyShips()
 		end
 		addCommsReply("Back", mainMenu)
 	end)
-	addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout")), function()
-		if not player:takeReputationPoints(getServiceCost("fighterScout")) then
+	addCommsReply(string.format("Purchase unmanned Adder MK7 Scout for %i reputation", getServiceCost("fighterScout", comms_data)), function()
+		if not player:takeReputationPoints(getServiceCost("fighterScout", comms_data)) then
 			setCommsMessage("Insufficient reputation")
 		else
 			local ship = PlayerSpaceship():setTemplate("Adder MK7"):setFactionId(player:getFactionId())
@@ -4102,7 +4257,7 @@ function handleBuyShips()
 	addCommsReply("Back", mainMenu)
 end
 --]]
-function setOptionalOrders()
+function setOptionalOrders(player)
 	local optionalOrders = "\n"
 	if player.special_buy_stations then
 		optionalOrders = optionalOrders .. "You may claim allied or neutral stations for the Human Navy.\n"
@@ -4121,7 +4276,7 @@ end
 function setSecondaryOrders()
 	secondaryOrders = ""
 end
-function isAllowedTo(state)
+function isAllowedTo(state, player, comms_target)
     if state == "friend" and player:isFriendly(comms_target) then
         return true
     end
@@ -4130,25 +4285,25 @@ function isAllowedTo(state)
     end
     return false
 end
-function handleWeaponRestock(weapon)
+function handleWeaponRestock(weapon, player, comms_target)
     if not player:isDocked(comms_target) then 
 		setCommsMessage(_("ammo-comms", "You need to stay docked for that action."))
 		return
 	end
-    if not isAllowedTo(comms_data.weapons[weapon]) then
+    if not isAllowedTo(comms_data.weapons[weapon], player, comms_target) then
         if weapon == "Nuke" then setCommsMessage(_("ammo-comms", "We do not deal in weapons of mass destruction."))
         elseif weapon == "EMP" then setCommsMessage(_("ammo-comms", "We do not deal in weapons of mass disruption."))
         else setCommsMessage(_("ammo-comms", "We do not deal in those weapons.")) end
         return
     end
-    local points_per_item = getWeaponCost(weapon)
+    local points_per_item = getWeaponCost(weapon, player, comms_target)
     local scarcity = 1
     scarcityMsg = _("ammo-comms", " The Kraylor threat to mineral resources has reduced ordnance availablilty")
     if scenario.scarceResources then
     	scarcityMsg = ""
     	scarcity = .5
     end
-    local item_amount = math.floor(player:getWeaponStorageMax(weapon) * comms_data.max_weapon_refill_amount[getFriendStatus()] * scarcity) - player:getWeaponStorage(weapon)
+    local item_amount = math.floor(player:getWeaponStorageMax(weapon) * comms_data.max_weapon_refill_amount[getFriendStatus(player, comms_target)] * scarcity) - player:getWeaponStorage(weapon)
     if item_amount <= 0 then
         if weapon == "Nuke" then
             setCommsMessage(_("ammo-comms", "All nukes are charged and primed for destruction.") .. scarcityMsg);
@@ -4193,10 +4348,10 @@ function handleWeaponRestock(weapon)
         addCommsReply(_("Back"), commsStation)
     end
 end
-function getWeaponCost(weapon)
-    return math.ceil(comms_data.weapon_cost[weapon] * comms_data.reputation_cost_multipliers[getFriendStatus()])
+function getWeaponCost(weapon, player, comms_target)
+    return math.ceil(comms_data.weapon_cost[weapon] * comms_data.reputation_cost_multipliers[getFriendStatus(player, comms_target)])
 end
-function handleUndockedState()
+function handleUndockedState(player, comms_target)
     --Handle communications when we are not docked with the station.
     if player:isFriendly(comms_target) then
         oMsg = _("station-comms", "Good day, officer.\nIf you need supplies, please dock with us first.")
@@ -4306,7 +4461,7 @@ function handleUndockedState()
 		end
 	    if player:isFriendly(comms_target) then
 			addCommsReply(_("orders-comms", "What are my current orders?"), function()
-				local optionalOrders = setOptionalOrders()
+				local optionalOrders = setOptionalOrders(player)
 --				setSecondaryOrders()
 				ordMsg = primaryOrders .. "\n" .. scenario.secondaryOrders .. optionalOrders
 				if playWithTimeLimit then
@@ -4349,7 +4504,7 @@ function handleUndockedState()
 			setCommsMessage(oMsg)
 			addCommsReply(_("Back"), commsStation)
 		end)
-		undockedGoods()
+		undockedGoods(player, comms_target)
 		if comms_target.publicRelations then
 			addCommsReply(_("station-comms", "Tell me more about your station"), function()
 				setCommsMessage(_("station-comms", "What would you like to know?"))
@@ -4389,15 +4544,15 @@ function handleUndockedState()
 			addCommsReply(_("Back"), commsStation)
 		end)
 	end)
-	if isAllowedTo(comms_target.comms_data.services.supplydrop) then
-        addCommsReply(string.format(_("stationAssist-comms", "Can you send a supply drop? (%.1f rep)"),getServiceCost("supplydrop")), function()
+	if isAllowedTo(comms_target.comms_data.services.supplydrop, player, comms_target) then
+        addCommsReply(string.format(_("stationAssist-comms", "Can you send a supply drop? (%.1f rep)"),getServiceCost("supplydrop"), comms_target.comms_data), function()
             if player:getWaypointCount() < 1 then
                 setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request supplies."))
             else
                 setCommsMessage(_("stationAssist-comms", "To which waypoint should we deliver your supplies?"))
                 for n=1,player:getWaypointCount() do
                     addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-						if player:takeReputationPoints(getServiceCost("supplydrop")) then
+						if player:takeReputationPoints(getServiceCost("supplydrop", comms_target.comms_data)) then
 							local position_x, position_y = comms_target:getPosition()
 							local target_x, target_y = player:getWaypoint(n)
 							local script = Script()
@@ -4415,16 +4570,16 @@ function handleUndockedState()
             addCommsReply(_("Back"), commsStation)
         end)
     end
-    if isAllowedTo(comms_target.comms_data.services.reinforcements) then
+    if isAllowedTo(comms_target.comms_data.services.reinforcements, player, comms_target) then
 		if comms_target.typeName == "SpaceStation" then
-			addCommsReply(string.format(_("stationAssist-comms", "Please send Adder MK5 reinforcements! (%.1f rep)"),getServiceCost("reinforcements")), function()
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Adder MK5 reinforcements! (%.1f rep)"),getServiceCost("reinforcements", comms_target.comms_data)), function()
 				if player:getWaypointCount() < 1 then
 					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
 				else
 					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
 					for n=1,player:getWaypointCount() do
 						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-							if player:takeReputationPoints(getServiceCost("reinforcements")) then
+							if player:takeReputationPoints(getServiceCost("reinforcements", comms_target.comms_data)) then
 								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Adder MK5"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
 								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
 								--table.insert(friendlyHelperFleet,ship)
@@ -4438,14 +4593,14 @@ function handleUndockedState()
 				end
 				addCommsReply(_("Back"), commsStation)
 			end)
-			addCommsReply(string.format(_("stationAssist-comms", "Please send Phobos T3 reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements")), function()
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Phobos T3 reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements", comms_target.comms_data)), function()
 				if player:getWaypointCount() < 1 then
 					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
 				else
 					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
 					for n=1,player:getWaypointCount() do
 						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-							if player:takeReputationPoints(getServiceCost("phobosReinforcements")) then
+							if player:takeReputationPoints(getServiceCost("phobosReinforcements", comms_target.comms_data)) then
 								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate("Phobos T3"):setScanned(true):orderDefendLocation(player:getWaypoint(n))
 								ship:setCommsScript(""):setCommsFunction(commsShip):onDestruction(humanVesselDestroyed)
 								--table.insert(friendlyHelperFleet,ship)
@@ -4460,14 +4615,14 @@ function handleUndockedState()
 				addCommsReply(_("Back"), commsStation)
 			end)
 		elseif comms_target.typeName == "CpuShip" then
-			addCommsReply(string.format(_("stationAssist-comms", "Please send Exuari Fighter reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements")), function()
+			addCommsReply(string.format(_("stationAssist-comms", "Please send Exuari Fighter reinforcements! (%.1f rep)"),getServiceCost("phobosReinforcements", comms_target.comms_data)), function()
 				if player:getWaypointCount() < 1 then
 					setCommsMessage(_("stationAssist-comms", "You need to set a waypoint before you can request reinforcements."))
 				else
 					setCommsMessage(_("stationAssist-comms", "To which waypoint should we dispatch the reinforcements?"))
 					for n=1,player:getWaypointCount() do
 						addCommsReply(string.format(_("stationAssist-comms", "Waypoint %i"),n), function()
-							if player:takeReputationPoints(getServiceCost("fighterInterceptor")) then
+							if player:takeReputationPoints(getServiceCost("fighterInterceptor", comms_target.comms_data)) then
 								local templs = {"Dagger", "Blade", "Gunner", "Shooter", "Jagger"}
 								local templ = templs[irandom(1, #templs)]
 								ship = CpuShip():setFactionId(comms_target:getFactionId()):setPosition(comms_target:getPosition()):setTemplate(templ):setScanned(true):orderDefendLocation(player:getWaypoint(n))
@@ -4486,12 +4641,13 @@ function handleUndockedState()
 		end
     end
 end
-function getServiceCost(service)
+function getServiceCost(service, comms_data)
 -- Return the number of reputation points that a specified service costs for
 -- the current player.
     return math.ceil(comms_data.service_cost[service])
 end
-function fillStationBrains()
+-- TODO not called:
+function fillStationBrains(comms_target)
 	comms_target.goodsKnowledge = {}
 	comms_target.goodsKnowledgeSector = {}
 	comms_target.goodsKnowledgeType = {}
@@ -4541,7 +4697,7 @@ function fillStationBrains()
 		end
 	end
 end
-function getFriendStatus()
+function getFriendStatus(player, comms_target)
     if player:isFriendly(comms_target) then
         return "friend"
     else
@@ -4996,20 +5152,20 @@ end	--end neutral communications function
 function incrementPlayerGoods(goodsType)
 	local gi = 1
 	repeat
-		if goods[player][gi][1] == goodsType then
-			goods[player][gi][2] = goods[player][gi][2] + 1
+		if goods[comms_source][gi][1] == goodsType then
+			goods[comms_source][gi][2] = goods[comms_source][gi][2] + 1
 		end
 		gi = gi + 1
-	until(gi > #goods[player])
+	until(gi > #goods[comms_source])
 end
 function decrementPlayerGoods(goodsType)
 	local gi = 1
 	repeat
-		if goods[player][gi][1] == goodsType then
-			goods[player][gi][2] = goods[player][gi][2] - 1
+		if goods[comms_source][gi][1] == goodsType then
+			goods[comms_source][gi][2] = goods[comms_source][gi][2] - 1
 		end
 		gi = gi + 1
-	until(gi > #goods[player])
+	until(gi > #goods[comms_source])
 end
 function decrementStationGoods(goodsType)
 	local gi = 1
@@ -6072,6 +6228,10 @@ end
 function exuariStationDestroyed(self, instigator)
 	table.insert(exuariStationDestroyedNameList,self:getCallSign())
 	table.insert(exuariStationDestroyedValue,self.strength)
+end
+function ktlitanStationDestroyed(self, instigator)
+	table.insert(ktlitanStationDestroyedNameList,self:getCallSign())
+	table.insert(ktlitanStationDestroyedValue,self.strength)
 end
 function arlenianStationDestroyed(self, instigator)
 	table.insert(arlenianStationDestroyedNameList,self:getCallSign())

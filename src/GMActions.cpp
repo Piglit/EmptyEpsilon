@@ -161,6 +161,37 @@ void GameMasterActions::equipFighter(P<PlayerSpaceship> ship, sp::io::DataBuffer
             ship->impulse_acceleration = ship_template->impulse_acceleration;
             ship->impulse_reverse_acceleration = ship_template->impulse_reverse_acceleration;
         }
+        else if (old_equipment == "Cut-Las")
+        {
+            // TODO get ship object right
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_buy_stations = false";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+        else if (old_equipment == "Puppy-Ray")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_buy_ships = false";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+
+        else if (old_equipment == "Cylon'cher")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_intimidate_stations= false";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+        else if (old_equipment == "Psycho-Traktor")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_intimidate_ships = false";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+
 
         // place new equipment
         if (equipment == "+1 Beam")
@@ -286,7 +317,36 @@ void GameMasterActions::equipFighter(P<PlayerSpaceship> ship, sp::io::DataBuffer
             ship->impulse_acceleration = 1.5f * ship_template->impulse_acceleration;
             ship->impulse_reverse_acceleration = 1.5f * ship_template->impulse_reverse_acceleration;
         }
+        else if (equipment == "Cut-Las")
+        {
+            // TODO get ship object right
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_buy_stations = true";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+        else if (equipment == "Puppy-Ray")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_buy_ships = true";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
 
+        else if (equipment == "Cylon'cher")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_intimidate_stations= true";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
+        else if (equipment == "Psycho-Traktor")
+        {
+            string code = "getPlayerShip("+string(gameGlobalInfo->getPlayerShipIndexByName(ship->getCallSign())+1)+").special_intimidate_ships = true";
+            P<ScriptObject> so = new ScriptObject();
+            so->runCode(code);
+            so->destroy();
+        }
 
         ship->setEquipment(equipment);
     }

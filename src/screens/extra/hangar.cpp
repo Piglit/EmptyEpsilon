@@ -308,7 +308,8 @@ void HangarScreen::getAvailableEquipment(string template_name)
     else if (template_name == "Ryu")
         equipment_selector->setOptions({"None", "+2 Beams", "+2 HVLI-Tubes", "Speed-Booster", "Sensors"});
     else
-        equipment_selector->setOptions({"None"});
+        equipment_selector->setOptions({"None", "Cut-Las", "Puppy-Ray", "Cylon'cher", "Psycho-Traktor"});
+        //equipment_selector->setOptions({"None"});
 
 }
 
@@ -320,6 +321,24 @@ string HangarScreen::getModelName(string template_name, string color){
         prefix = "LindwurmFighter";
     else if (template_name == "Ryu")
         prefix = "AdlerLongRangeFighter";
+    else if (template_name == "Adder MK7")
+        prefix = "AdlerLongRangeScout";
+    else if (template_name == "Phobos M3P")
+        prefix = "MultiGunCorvette";
+    else if (template_name == "Hathcock")
+        prefix = "LaserCorvette";
+    else if (template_name == "Piranha M5P")
+        prefix = "HeavyCorvette";
+    else if (template_name == "Nautilus")
+        prefix = "MineLayerCorvette";
+    else if (template_name == "Atlantis")
+        prefix = "AtlasHeavyDreadnought";
+    else if (template_name == "Crucible")
+        prefix = "AtlasMissileDreadnought";
+    else if (template_name == "Maverick")
+        prefix = "AtlasLaserDreadnought";
+    else if (template_name == "Poseidon")
+        prefix = "AtlasCarrierDreadnought";
     else
         prefix = "";
     return prefix + color;

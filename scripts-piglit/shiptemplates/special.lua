@@ -206,3 +206,33 @@ template:setAutoRepair(true)
 addSystemsHeavy(template)
 
 
+--------------------------------------------------------------------------------
+-- Station
+--------------------------------------------------------------------------------
+
+template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
+template:setRadarTrace("largestation.png")
+template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
+
+template:setJumpDrive(true)
+template:setEnergyStorage(5000)
+template:setTubes(4, 6.0)
+template:setWeaponStorage("Homing", 40)
+for n=0,4 do
+    template:setBeamWeapon(n, 90,  n * 90, 2200, 6, 5)
+    template:setTubeDirection(n, n * 90)
+    template:setTubeSize(n, "large")
+end
+template:setHull(1000)
+template:setShields(1200)
+template:setSpeed(0, 1, 0)
+template:setJumpDriveRange(50000,200000)
+template:setCombatManeuver(10, 10)
+
+template:setSharesEnergyWithDocked(true)
+template:setRestocksScanProbes(true)
+template:setRepairDocked(true)
+template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"), _("class", "Prototype"))
+template:setInternalDockClasses(_("class", "Starfighter"))
+template:setSpawnShips("Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon")
+addSystemsHeavy(template)

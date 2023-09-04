@@ -10,7 +10,9 @@
 --- Your ship is a Piranha missile cruiser - a jump-driven cruiser with broadside missiles, but without beam weapons.
 ---
 --- This is a short mission for players who prefer tactical combat.
--- Variation[Hard]: Every enemy ship has drones.
+-- Setting[Difficulty]: Configures the difficulty of this mission.
+-- Difficulty[Normal|Default]: A good difficulty if you have never played a missile cruiser before.
+-- Difficulty[Hard]: A challenge for experienced players. Every enemy ship has drones.
 
 -- secondary goal: Test and example for script_hangar (Hard variation)
 
@@ -44,6 +46,8 @@ function init()
     stationTakenTime = 0
     stationDestroyedTime = 0
 
+    targetNumber = 4 
+
     finishedTimer = 5
     finishedFlag = false
     instr1 = false
@@ -67,6 +71,7 @@ function init()
     stationPosy = 0
     station = SpaceStation():setTemplate('Small Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Kraylor"):setPosition(stationPosx,stationPosy)
     station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80, enemy_comms_functions={comms_resign}}
+    stationDone = false
 
 
     --enemies
@@ -79,7 +84,7 @@ function init()
     createRandomAlongArc(VisualAsteroid, 100, 2*gu, -4*gu, gu, 80, 360, 300)
     placeRandomAroundPoint(Nebula, 2, 2*gu, gu, 2*gu, 4*gu)
 
-    if getScenarioVariation() == "Hard" then
+    if getScenarioSetting("Difficulty") == "Hard" then
         for _, enemy in ipairs(enemyList) do
             script_hangar.create(enemy, "Drone", 3)
         end
@@ -135,11 +140,11 @@ Commander Saberhagen out.]])
             instr3 = true
             command:sendCommsMessage(player, [[This is Commander Saberhagen.
 
-The maintainance dock was destroyed. There is no way for you now to restock your missiles.
+The maintainance dock was destroyed. There is no way for you to restock your missiles now.
 
 Some Kraylor ships are approaching. Ambush them before they notice something is wrong.
 
-Use probes and science scans to find them and jump into a good firing position. It you run into trouble, escape and attack from a different angle or refill your missiles at the maintainance dock.
+Use probes and science scans to find them and jump into a good firing position. It you run into trouble, escape and attack from a different angle.
 
 Plan each attack run carefully - a jump gone wrong will cost you much time and energy.
 
@@ -151,7 +156,7 @@ Commander Saberhagen out.]])
             instr3 = true
             command:sendCommsMessage(player, [[This is Commander Saberhagen.
 
-The maintainance dock was destroyed. There is no way for you now to restock your missiles or to repair your hull.
+The maintainance dock was destroyed. There is no way for you to restock your missiles or to repair your hull now.
 
 You may still be able to destroy the incomming enemies with your existing resources. Good Luck.
 
@@ -190,11 +195,13 @@ end
 
 function update(delta)
     timer = timer + delta
+    local enemyCountChanged = false
 
     -- Count all surviving enemies.
     for i, enemy in ipairs(enemyList) do
         if not enemy:isValid() then
             table.remove(enemyList, i)
+            enemyCountChanged = true
             -- Note: table.remove() inside iteration causes the next element to be skipped.
             -- This means in each update-cycle max half of the elements are removed.
             -- It does not matter here, since update is called regulary.
@@ -204,18 +211,39 @@ function update(delta)
     -- story
     if #enemyList == 1 then
         promoteToBoss()
+        enemyCountChanged = true
     elseif #enemyList == 0 and boss ~= nil and not boss:isValid() then
         finished(delta)
     end
 
     --station
-    if station:isValid() and station:getFaction() == "Independent" then
-        station:setFaction("Human Navy")
-        stationTakenTime = timer
+    if not stationDone then
+        if station:isValid() and station:getFaction() == "Independent" then
+            station:setFaction("Human Navy")
+            stationTakenTime = timer
+            stationDone = true
+            enemyCountChanged = true
+        end
+        if not station:isValid() then
+            stationDestroyedTime = timer
+            stationDone = true
+            enemyCountChanged = true
+        end
     end
-    if not station:isValid() then
-        stationDestroyedTime = timer
+
+    -- report progress
+    if enemyCountChanged then
+        local remaining = #enemyList
+        if not stationDone then
+            remaining = remaining + 1
+        end
+        if boss ~= nil and boss:isValid() then
+            remaining = remaining + 1
+        end
+        local progress = 100 - 100 * (remaining / targetNumber)
+        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
     end
+
 
     --util scripts
     script_hangar.update(delta)
@@ -223,7 +251,6 @@ function update(delta)
 end
 
 function comms_resign(comms_source, comms_target)
-    print(_ENV)
     setCommsMessage(_("special-comms", "You are our declared enemy. What do you want?"))
     local cost = special_buy_cost(comms_target, comms_source)
     addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
@@ -248,7 +275,6 @@ function comms_resign(comms_source, comms_target)
     end)
 end
 function special_buy_cost(target, source)
-    print(_ENV)
 	cost = target:getHullMax()
 	--[[
 	-- stations:			IU (*4)	Inde(*8)	gain

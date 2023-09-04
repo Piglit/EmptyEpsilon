@@ -25,7 +25,6 @@ class MissionControlScreen: public GuiCanvas, public Updatable
 {
 private:
     GuiKeyValueDisplay* clock;
-    GuiKeyValueDisplay* victory;
     GuiToggleButton* pause_button;
 
     GuiElement* ship_infos;

@@ -70,10 +70,6 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     clock->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
     posy += 40;
 
-    victory = new GuiKeyValueDisplay(left_container, "VICTORY", 0.4, tr("Mission Winner"), "-");
-    victory->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-
     
     // Buttons and controls
     if (game_server) {
@@ -263,12 +259,6 @@ void MissionControlScreen::update(float delta)
 
     // Update mission clock
     clock->setValue(string(buf));
-
-    // Update victory display
-    if (gameGlobalInfo->getVictoryFactionId() < 0) {
-        if (factionInfo[gameGlobalInfo->getVictoryFactionId()])
-            victory->setValue(tr("{faction}").format({{"faction", factionInfo[gameGlobalInfo->getVictoryFactionId()]->getLocaleName()}}));
-    }
 
     // Update pause button
     if (game_server)

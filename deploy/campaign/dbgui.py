@@ -24,67 +24,6 @@ SCENARIO_DIR = "../../scripts-piglit/"
 
 sg.set_options(font=("Arial Bold",14))
 
-# Timer
-timerSource = Pyro4.Proxy("PYRONAME:round_timer")
-timerNow = [sg.T("Time:", size=6), sg.T("00:00:00", key="timer.now")]
-timerRound = [sg.T("", key="timer.state", size=6), sg.T("", key="timer.left"), sg.T("", key="timer.until"), sg.B("Skip", key="timer.skip", visible=False), sg.B("Edit", key="timer.edit", visible=False)]
-
-# Ship Tree
-with open("serverDB.json", "r") as file:
-    data = json.load(file)
-
-treedata = sg.TreeData()
-
-def translate_scenario_name(scenario):
-    try:
-        with open(SCENARIO_DIR+"scenario_"+scenario+".lua", "r") as file:
-            for line in file:
-                if line.startswith("--") and "Name:" in line:
-                    return line.split(":", maxsplit=1)[1].strip()
-    except OSError:
-        pass
-    return scenario
-
-
-for ship, shipData in data.items():
-    status = shipData["status"]
-    fields = []
-    if "\t" in status:
-        fields = [""] + status.split("\t")
-    else:
-        fields = [status]
-
-    treedata.Insert("", ship, ship, fields)
-
-    treedata.Insert(ship, ship+"_scenarios", "Scenarios available", [])
-    for scenario in sorted(shipData["scenarios"]):
-        fields = [[]]
-        if shipData["scenarioSettings"] and scenario in shipData["scenarioSettings"]:
-            for val in shipData["scenarioSettings"][scenario].values():
-                if val:
-                    fields[0].append(val)
-        treedata.Insert(ship+"_scenarios", scenario, translate_scenario_name(scenario), fields)
-
-    treedata.Insert(ship, ship+"_ships", "Ships available", [])
-    for shipAvail in sorted(shipData["ships"]):
-        treedata.Insert(ship+"_ships", shipAvail, shipAvail, [])
-
-
-tree=sg.Tree(data=treedata,
-        headings=['status', 'scenario', 'progress'],
-        auto_size_columns=True,
-        select_mode=sg.TABLE_SELECT_MODE_EXTENDED,
-        num_rows=10,
-        col0_width=15,
-        key='-TREE-',
-        show_expanded=False,
-        enable_events=True,
-        expand_x=True,
-        expand_y=True,
-        )
-
-
-
 def error(msg, window=None):
     if window:
         window.hide()
@@ -100,9 +39,40 @@ def confirm(msg, window=None):
         window.un_hide()
     return e == "ok"
 
+with open("serverDB.json", "r") as file:
+    data = json.load(file)
 
-layout=[timerNow, timerRound, [tree]]
+def translate_scenario_name(scenario):
+    try:
+        with open(SCENARIO_DIR+"scenario_"+scenario+".lua", "r") as file:
+            for line in file:
+                if line.startswith("--") and "Name:" in line:
+                    return line.split(":", maxsplit=1)[1].strip()
+    except OSError:
+        pass
+    return scenario
+
+
+
+# Timer
+timerSource = Pyro4.Proxy("PYRONAME:round_timer")
+timerNow = [sg.T("Time:", size=6), sg.T("00:00:00", key="timer.now")]
+timerRound = [sg.T("", key="timer.state", size=6), sg.T("", key="timer.left"), sg.T("", key="timer.until"), sg.B("Skip", key="timer.skip", visible=False), sg.B("Edit", key="timer.edit", visible=False)]
+
+# Ship status list
+campaign = Pyro4.Proxy("PYRONAME:campaign_state")
+shipList = sg.Table([[]], key="shipList", headings=["Ship", "Status/Mission", "Progress"], enable_events=True,auto_size_columns=True, expand_x=True, expand_y=True, select_mode=sg.TABLE_SELECT_MODE_BROWSE)
+
+# Ship->scenario list
+shipScenarios = [[sg.T("Available missions:")], [sg.Listbox([], k="ship.scenarios", size=(20,10))], [sg.B("Edit", key="ship.scenarios.edit")]]
+
+# Ship->ships list
+shipShips = [[sg.T("Available ship types:")], [sg.Listbox([], k="ship.ships", size=(20,10))], [sg.B("Edit", key="ship.ships.edit")]]
+
+layout=[timerNow, timerRound, [shipList], [sg.Column(shipScenarios), sg.Column(shipShips)]]
 window=sg.Window("Flottenkommando", layout, size=(1200, 800), resizable=True, text_justification="r")
+selection = None
+selection_index = None
 while True:
     event, values = window.read(timeout=1000)
     if event == sg.WIN_CLOSED:
@@ -134,11 +104,44 @@ while True:
                 window.un_hide()
                 break
     elif event == "__TIMEOUT__":
-        pass
+        # update shipList
+        # note: this triggers event shipList, so use another branch.
+        try:
+            values = []
+            selection_index = None
+            for ship, status in campaign.getStatusAll().items():
+                if "\t" in status:
+                    mission, progress = status.split("\t", maxsplit=1)
+                    values.append([ship, mission, progress])
+                else:
+                    values.append([ship, status])
+                if ship == selection:
+                    selection_index = len(values) -1
+            if selection_index is not None:
+                window["shipList"].update(values, select_rows=[selection_index])
+            else:
+                window["shipList"].update(values)
+        except:
+            window["shipList"].update([])
+    elif event == "shipList":
+        selection = values["shipList"]
+        if selection:
+            selection = window["shipList"].get()[selection[0]][0]
+        try:
+            scenarios = campaign.getScenarios(selection)
+            scenarios = [translate_scenario_name(sc) for sc in scenarios]
+            window["ship.scenarios"].update(scenarios)
+            window["ship.ships"].update(campaign.getShips(selection))
+        except:
+            pass
+    elif event == "ship.scenarios.edit":
+        error("not implemented", window)
+    elif event == "ship.ships.edit":
+        error("not implemented", window)
     else:
         print ("event:",event, "values:",values)
-    # update timer
 
+    # update timer
     try:
         t = timerSource.getTimer()
         window["timer.now"].update(t["now"])

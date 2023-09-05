@@ -26,7 +26,12 @@ class GameServerData:
 				"additionalCode": ""
 			}
 		return self.servers[serverName]
-	
+
+	def deleteServer(self, serverName):
+		if serverName in self.servers:
+			del self.servers[serverName]
+		#self.storeData()   # not called yet, for safety reasons
+
 	def getScenarios(self, serverName):
 		srv = self.getOrCreateServer(serverName)
 		return srv["scenarios"]
@@ -57,6 +62,7 @@ class GameServerData:
 			assert isinstance(s, str)
 		srv = self.getOrCreateServer(serverName)
 		srv["ships"] = ships
+		self.storeData()
 
 	def storeData(self):
 		db = GameServerData.db

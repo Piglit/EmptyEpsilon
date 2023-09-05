@@ -8,6 +8,7 @@ function salvage_repair_mission.init(SpawnEnemies, Wormhole_station, placeKraylo
 --	salvage_repair_mission.Defence_station = Defence_station
 	salvage_repair_mission.SpawnEnemies = SpawnEnemies
 	salvage_repair_mission.Wormhole_station = Wormhole_station
+    salvage_repair_mission.goneAggro = false 
     local x, y = Wormhole_station:getPosition() -- 77152, 32816
     x = x-5878
     y = y+5312
@@ -78,11 +79,7 @@ function salvage_repair_mission.init(SpawnEnemies, Wormhole_station, placeKraylo
     salvage_repair_mission.Wormhole_station.insults = {}
 
 	local storage = getScriptStorage()
-	storage.salvage_repair_mission = {}
-	storage.salvage_repair_mission.set_Difficulty = salvage_repair_mission.set_Difficulty
-	storage.salvage_repair_mission.set_Player = salvage_repair_mission.set_Player
-	storage.salvage_repair_mission.set_parameters = salvage_repair_mission.set_parameters
-	storage.salvage_repair_mission.Wormhole_station = salvage_repair_mission.Wormhole_station
+	storage.salvage_repair_mission = salvage_repair_mission
 end
 
 function salvage_repair_mission.set_Difficulty(Difficulty)
@@ -110,7 +107,7 @@ function salvage_repair_mission.InitPartsStation()
   salvage_repair_mission.Parts_station:setShields(1)
   salvage_repair_mission.Parts_station:onTakingDamage(function(self, instigator)
     if instigator == nil or not instigator:isValid() then return end
-    instigator.Player:addToShipLog(_("wormhole-shipLog", "Firing on invulnerable target"), "Yellow")
+    instigator:addToShipLog(_("wormhole-shipLog", "Firing on invulnerable target"), "Yellow")
     if salvage_repair_mission.Parts_station.warned == nil then
      salvage_repair_mission.Parts_station.warned = true
       salvage_repair_mission.Wormhole_station:sendCommsMessage(instigator, _("wormhole-incCall", [[Captain, Stop!
@@ -304,6 +301,7 @@ end
 function salvage_repair_mission.KWGoAggro(self, instigator)
   if not salvage_repair_mission.check() then return end
   if instigator == nil or not instigator:isValid() or instigator ~= salvage_repair_mission.Player then return end
+  salvage_repair_mission.goneAggro = true
   sendMessageToCampaignServer("event:Kraylor beyond wormhole were attacked")
   for _, e in ipairs(salvage_repair_mission.Kw_enemies) do
     if e.goneAggro == true then return end

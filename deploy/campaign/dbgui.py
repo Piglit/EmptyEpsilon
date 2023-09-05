@@ -52,7 +52,47 @@ def translate_scenario_name(scenario):
         pass
     return scenario
 
+def subWindowTimerEdit(window):
+    window.hide()
+    layoutTimerEdit = [
+            [sg.Push(), sg.T("Round time:"), sg.Input(timerSource.getRoundTime()//60, size=4, key="timer.round_time"), sg.T("minutes")],
+            [sg.Push(), sg.T("Pause time:"), sg.Input(timerSource.getPauseTime()//60, size=4, key="timer.pause_time"), sg.T("minutes")],
+            [sg.B("OK", k="ok"), sg.B("Cancel", k="cancel")]
+    ]
+    windowTimerEdit = sg.Window("Edit timer", layoutTimerEdit, text_justification="r")
+    while True:
+        event2, values2 = windowTimerEdit.read()
+        if event2 == "ok":
+            try:
+                round_time = int(values2["timer.round_time"])
+                pause_time = int(values2["timer.pause_time"])
+                timerSource.setRoundTime(60*round_time)
+                timerSource.setPauseTime(60*pause_time)
+            except:
+                event2 = "error"
+                error("Input must be a number", windowTimerEdit)
+        if event2 in (sg.WIN_CLOSED, "cancel", "ok"):
+            windowTimerEdit.close()
+            window.un_hide()
+            break
+    return
 
+def subWindowShipsEdit(window, selection):
+    window.hide()
+    avail = campaign.getShips(selection)
+    layoutShipsEdit = [[sg.Listbox(avail, size=(20,10)), sg.B("Delete selected", k="delete")], [sg.Input("", k="add.name", size=20), sg.B("Add new ship", k="add")], [sg.B("Close", k="close")]]
+    windowShipsEdit = sg.Window(f"Edit ships {selection}", layoutShipsEdit)
+    while True:
+        event2, values2 = windowShipsEdit.read()
+        if event2 == "delete":
+            print(values2)
+        elif event2 == "add":
+            print(values2)
+        if event2 in (sg.WIN_CLOSED, "close"):
+            windowShipsEdit.close()
+            window.un_hide()
+            break
+    return
 
 # Timer
 timerSource = Pyro4.Proxy("PYRONAME:round_timer")
@@ -63,13 +103,17 @@ timerRound = [sg.T("", key="timer.state", size=6), sg.T("", key="timer.left"), s
 campaign = Pyro4.Proxy("PYRONAME:campaign_state")
 shipList = sg.Table([[]], key="shipList", headings=["Ship", "Status/Mission", "Progress"], enable_events=True,auto_size_columns=True, expand_x=True, expand_y=True, select_mode=sg.TABLE_SELECT_MODE_BROWSE)
 
-# Ship->scenario list
-shipScenarios = [[sg.T("Available missions:")], [sg.Listbox([], k="ship.scenarios", size=(20,10))], [sg.B("Edit", key="ship.scenarios.edit")]]
+# Ship details
+shipDetails = [
+    sg.Column(
+        [[sg.T("Available missions:")], [sg.Listbox([], k="ship.scenarios", size=(20,10))], [sg.B("Edit", key="ship.scenarios.edit")]]),
+    sg.Column(
+        [[sg.T("Available ship types:")], [sg.Listbox([], k="ship.ships", size=(20,10))], [sg.B("Edit", key="ship.ships.edit")]]),
+    sg.Column(
+        [[sg.B("Delete selected ship", key="ship.delete")]]
+    )]
 
-# Ship->ships list
-shipShips = [[sg.T("Available ship types:")], [sg.Listbox([], k="ship.ships", size=(20,10))], [sg.B("Edit", key="ship.ships.edit")]]
-
-layout=[timerNow, timerRound, [shipList], [sg.Column(shipScenarios), sg.Column(shipShips)]]
+layout=[timerNow, timerRound, [shipList], shipDetails]
 window=sg.Window("Flottenkommando", layout, size=(1200, 800), resizable=True, text_justification="r")
 selection = None
 selection_index = None
@@ -81,28 +125,7 @@ while True:
         if confirm("Skip current phase?", window):
             timerSource.nextPhase()
     elif event == "timer.edit":
-        window.hide()
-        layoutTimerEdit = [
-                [sg.Push(), sg.T("Round time:"), sg.Input(timerSource.getRoundTime()//60, size=4, key="timer.round_time"), sg.T("minutes")],
-                [sg.Push(), sg.T("Pause time:"), sg.Input(timerSource.getPauseTime()//60, size=4, key="timer.pause_time"), sg.T("minutes")],
-                [sg.B("OK", k="ok"), sg.B("Cancel", k="cancel")]
-        ]
-        windowTimerEdit = sg.Window("Edit timer", layoutTimerEdit, text_justification="r")
-        while True:
-            event2, values2 = windowTimerEdit.read()
-            if event2 == "ok":
-                try:
-                    round_time = int(values2["timer.round_time"])
-                    pause_time = int(values2["timer.pause_time"])
-                    timerSource.setRoundTime(60*round_time)
-                    timerSource.setPauseTime(60*pause_time)
-                except:
-                    event2 = "error"
-                    error("Input must be a number", windowTimerEdit)
-            if event2 in (sg.WIN_CLOSED, "cancel", "ok"):
-                windowTimerEdit.close()
-                window.un_hide()
-                break
+        subWindowTimerEdit(window)
     elif event == "__TIMEOUT__":
         # update shipList
         # note: this triggers event shipList, so use another branch.
@@ -134,10 +157,23 @@ while True:
             window["ship.ships"].update(campaign.getShips(selection))
         except:
             pass
+    elif event == "ship.delete":
+        if selection:
+            if confirm(f"Delete {selection}?", window):
+                campaign.deleteServer(selection)
+                selection = None
+                window["shipList"].update(select_rows=[])
+                window.write_event_value("__TIMEOUT__", "")
+        else:
+            error("No ship selected", window)
     elif event == "ship.scenarios.edit":
         error("not implemented", window)
     elif event == "ship.ships.edit":
-        error("not implemented", window)
+        if not selection:
+            error("no ship selected", window)
+        else:
+            error("not implemented", window)
+#           subWindowShipsEdit(window, selection)
     else:
         print ("event:",event, "values:",values)
 

@@ -79,7 +79,9 @@ function init()
 	scenario.spawnDefensiveFleet = spawnDefensiveFleet
 	scenario.makeFleetAggro = makeFleetAggro 
 	scenario.ktlitanOrders = ktlitanOrders
+	scenario.exuariCarrierAttack = exuariCarrierAttack 
 	scenario.stationList = stationList
+	scenario.securedWormhole = false
 	scenario.scarceResources = false
 	scenario.admiralTimeToLive = 600
 	scenario.admiralKraylorAttack = 250	-- time until admiralTimeToLive == 0
@@ -207,6 +209,18 @@ function setGossipSnippets()
 	table.insert(gossipSnippets,_("gossip-comms", "I think the shuttle pilot has a tame miniature Ktlitan caged in his quarters. Sometimes I hear it at night"))	--9
 	table.insert(gossipSnippets,_("gossip-comms", "Did you hear the screaming chase in the corridors on level 4 last night? Three Kraylors were captured and put in the brig"))	--10
 	table.insert(gossipSnippets,_("gossip-comms", "Rumor has it that the two Lichten brothers are on the verge of a new discovery. And it's not another wine flavor either"))		--11
+	table.insert(gossipSnippets,_("gossip-comms", "I hear the Exuari love to kill everything that comes in their view. But recently the carriers head straight for Arlenian stations."))
+	table.insert(gossipSnippets,_("gossip-comms", "Did you hear? Some Arlenian scientist developed a device that makes her attractive to Exuari navigators."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Exuari do not live in stations as we do. They live on huge cruise liners and their fighter pilots are just touristis on an alien safari."))
+	table.insert(gossipSnippets,_("gossip-comms", "In the last war the Kraylor were utterly defeated by the Interplanetary Union. Since then they do not dare to attack us again."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Kraylor were defeated by the Arlenians in the last war. Since then they respect the borders."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Human Navy beat the Kraylor in the last war. But the Kraylor just wait to break the treaty again."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Interplanetary Union protects the Ktlitan hives from the Exuari. But who protects the hives from the Human Navy?"))
+	table.insert(gossipSnippets,_("gossip-comms", "I hear some Human Navy commander works for the PETG and helped creating the Ktlitan hives inside some human stations."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Ktlitans do not attack the Interplanetary Union or the Arlenians. It is said, that is because of a specific dance that ships perform before Ktlitan drones that makes them friens."))
+	table.insert(gossipSnippets,_("gossip-comms", "I think, there was never a conflict between the Ktlitans and the Arlenians. But for some reason the Ktlitans seem to like human build stations for their hives."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Arlenians are long term allies of the Human Navy. Some say it is because they use humans as test-subjects for their scientific experiments."))
+	table.insert(gossipSnippets,_("gossip-comms", "The Interplanetary Union does not have the military strength of the Human Navy. They rely on the protection of the Human Navy."))
 end
 function setGoodsList()
 	--list of goods available to buy, sell or trade (sell still under development)
@@ -735,12 +749,13 @@ function buildStationsPlus()
 			placeNeutral()
 		end	
 		ta:destroy()
-		if #gossipSnippets > 0 and stationFaction == "Interplanetary Union" and pStation ~= nil then
-			if gp % 2 == 0 then
+--		if #gossipSnippets > 0 and stationFaction == "Interplanetary Union" and pStation ~= nil then
+		if pStation ~= nil then
+			--if gp % 2 == 0 then
 				ni = math.random(1,#gossipSnippets)
 				pStation.gossip = gossipSnippets[ni]
-				table.remove(gossipSnippets,ni)
-			end
+--				table.remove(gossipSnippets,ni)
+			--end
 		end
 		gp = gp + 1						--set next station number
 		rn = math.random(1,#adjList)	--random next station start location
@@ -892,6 +907,7 @@ function placeExuari()
 	if #placeEnemyStation > 0 then
 		si = math.random(1,#placeEnemyStation)		--station index
 		pStation = placeEnemyStation[si]()			--place selected station
+        pStation:setScanningParameters(2,2)
 		table.remove(placeEnemyStation,si)			--remove station from placement list
 		addStationHangar(pStation)
 --	elseif #placeGenericStation > 0 then
@@ -3073,6 +3089,9 @@ function makeFleetAggro(faction)
 	if fleet ~= nil and #fleet > 0 then
 		for _,ship in ipairs(fleet) do
 			if ship:isValid() then
+                if faction == "Kraylor" and not kraylorZone:isInside(ship) and not scenario.securedWormhole then
+                    ship:setPosition(salvage_repair_mission.Wormhole_x-3000, salvage_repair_mission.Wormhole_y-3000)
+                end
 				sector = ship:getSectorName()
 				ship:orderRoaming()
 				count = count + 1
@@ -3084,6 +3103,8 @@ function makeFleetAggro(faction)
 			if faction == "Kraylor" and kraylorZone:isInside(sat) then
 				sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
 			elseif faction == "Exuari" and exuariZone:isInside(sat) then
+				sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
+			elseif faction == "Ktlitans" and ktlitanZone:isInside(sat) then
 				sendMessageToCampaignServer(string.format("spyReport:%s detected %s %s ships in sector %s setting course to attack.", sat:getCallSign(), count, faction, sector))
 			end
 		end
@@ -3136,6 +3157,27 @@ function spawnDefensiveFleet(resource, faction, factionStationList)
 		station = tableRemoveRandom(stationsAvail)
 	end
 	return fleetList 
+end
+function exuariCarrierAttack()
+    station = tableRemoveRandom(exuariStationList)
+	target = arlenianStationList[math.random(1,#arlenianStationList)]
+    if station ~= nil and station:isValid() then
+        if target ~= nil and target:isValid() then
+            station:orderDefendTarget(target)
+        else
+            station:orderRoaming()
+        end
+        spawnDefensiveFleet(120, "Exuari", {station})
+        for _, sat in ipairs(scenario.spySats) do
+            if sat ~= nil and sat:isValid()then
+                if exuariZone:isInside(sat) and exuariZone:isInside(station) then
+                    sendMessageToCampaignServer(string.format("spyReport:%s detected an Exuari carrier in sector %s setting course to attack.", sat:getCallSign(), sector))
+                end
+            end
+        end
+    else
+        makeFleetAggro("Exuari")
+    end
 end
 function ktlitanOrders()
 	local fleet = tableRemoveRandom(ktlitanFleetList)
@@ -3508,6 +3550,12 @@ function spawnEnemyFleet(xOrigin, yOrigin, power, danger, enemyFaction)
 		for _,ship in ipairs(enemyList) do
 			ship:onDestruction(exuariVesselDestroyed)
 		end
+	elseif enemyFaction == "Ktlitans" then
+		rawKtlitanShipStrength = rawKtlitanShipStrength + fleetPower
+		for _,ship in ipairs(enemyList) do
+            ship:setScanningParameters(3,1)
+			ship:onDestruction(ktlitanVesselDestroyed)
+		end
 	elseif enemyFaction == "Arlenians" then
 		rawArlenianShipStrength = rawArlenianShipStrength + fleetPower
 		for _,ship in ipairs(enemyList) do
@@ -3820,7 +3868,7 @@ function handleDockedState(player, comms_target)
 					addCommsReply(_("Back"), commsStation)
 				end)
 			end
-			if player:isFriendly(comms_target) then
+--			if player:isFriendly(comms_target) then
 				if comms_target.gossip ~= nil then
 					if random(1,100) < 70 then
 						addCommsReply(_("gossip-comms", "Gossip"), function()
@@ -3829,7 +3877,7 @@ function handleDockedState(player, comms_target)
 						end)
 					end
 				end
-			end
+--			end
 		end)	--end station info comms reply branch
 	end	--end public relations if branch
 	if comms_target == professorStation then
@@ -4518,7 +4566,7 @@ function handleUndockedState(player, comms_target)
 						addCommsReply(_("Back"), commsStation)
 					end)
 				end
-				if player:isFriendly(comms_target) then
+--				if player:isFriendly(comms_target) then
 					if comms_target.gossip ~= nil then
 						if random(1,100) < 50 then
 							addCommsReply(_("gossip-comms", "Gossip"), function()
@@ -4527,7 +4575,7 @@ function handleUndockedState(player, comms_target)
 							end)
 						end
 					end
-				end
+--				end
 			end)	--end station info comms reply branch
 		end	--end public relations if branch
 		addCommsReply(_("station-comms", "Report status"), function()
@@ -6194,6 +6242,16 @@ function exuariVesselDestroyed(self, instigator)
 	for k=1,#stnl do
 		if tempShipType == stnl[k] then
 			table.insert(exuariVesselDestroyedValue,stsl[k])
+		end
+	end
+end
+function ktlitanVesselDestroyed(self, instigator)
+	tempShipType = self:getTypeName()
+	table.insert(ktlitanVesselDestroyedNameList,self:getCallSign())
+	table.insert(ktlitanVesselDestroyedType,tempShipType)
+	for k=1,#stnl do
+		if tempShipType == stnl[k] then
+			table.insert(ktlitanVesselDestroyedValue,stsl[k])
 		end
 	end
 end

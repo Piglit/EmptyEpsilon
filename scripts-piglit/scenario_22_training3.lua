@@ -10,7 +10,9 @@
 --- Your ship is a Piranha missile cruiser - a jump-driven cruiser with broadside missiles, but without beam weapons.
 ---
 --- This is a short mission for players who prefer tactical combat.
--- Variation[Hard]: Every enemy ship has drones.
+-- Setting[Difficulty]: Configures the difficulty of this mission.
+-- Difficulty[Normal|Default]: A good difficulty if you have never played a missile cruiser before.
+-- Difficulty[Hard]: A challenge for experienced players. Every enemy ship has drones.
 
 -- secondary goal: Test and example for script_hangar (Hard variation)
 
@@ -44,6 +46,8 @@ function init()
     stationTakenTime = 0
     stationDestroyedTime = 0
 
+    targetNumber = 4 
+
     finishedTimer = 5
     finishedFlag = false
     instr1 = false
@@ -57,7 +61,7 @@ function init()
     --player ship
     player = createPlayerShip():setPosition(gu/6, -gu/6):setHeading(90)
     player:setLongRangeRadarRange(30000)
-    player:addReputationPoints(240.0)
+    player:addReputationPoints(800)
 
     --wingman
     command = createWingman():setCallSign("April"):setPosition(-gu/6, gu/6):setHeading(90):orderIdle()
@@ -66,7 +70,8 @@ function init()
     stationPosx = 2*gu
     stationPosy = 0
     station = SpaceStation():setTemplate('Small Station'):setCallSign("Maintainance Dock"):setRotation(random(0, 360)):setFaction("Kraylor"):setPosition(stationPosx,stationPosy)
-    station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80}
+    station.comms_data = {friendlyness = 80, surrender_hull_threshold = 80, enemy_comms_functions={comms_resign}}
+    stationDone = false
 
 
     --enemies
@@ -79,7 +84,7 @@ function init()
     createRandomAlongArc(VisualAsteroid, 100, 2*gu, -4*gu, gu, 80, 360, 300)
     placeRandomAroundPoint(Nebula, 2, 2*gu, gu, 2*gu, 4*gu)
 
-    if getScenarioVariation() == "Hard" then
+    if getScenarioSetting("Difficulty") == "Hard" then
         for _, enemy in ipairs(enemyList) do
             script_hangar.create(enemy, "Drone", 3)
         end
@@ -135,11 +140,11 @@ Commander Saberhagen out.]])
             instr3 = true
             command:sendCommsMessage(player, [[This is Commander Saberhagen.
 
-The maintainance dock was destroyed. There is no way for you now to restock your missiles.
+The maintainance dock was destroyed. There is no way for you to restock your missiles now.
 
 Some Kraylor ships are approaching. Ambush them before they notice something is wrong.
 
-Use probes and science scans to find them and jump into a good firing position. It you run into trouble, escape and attack from a different angle or refill your missiles at the maintainance dock.
+Use probes and science scans to find them and jump into a good firing position. It you run into trouble, escape and attack from a different angle.
 
 Plan each attack run carefully - a jump gone wrong will cost you much time and energy.
 
@@ -151,7 +156,7 @@ Commander Saberhagen out.]])
             instr3 = true
             command:sendCommsMessage(player, [[This is Commander Saberhagen.
 
-The maintainance dock was destroyed. There is no way for you now to restock your missiles or to repair your hull.
+The maintainance dock was destroyed. There is no way for you to restock your missiles or to repair your hull now.
 
 You may still be able to destroy the incomming enemies with your existing resources. Good Luck.
 
@@ -190,11 +195,13 @@ end
 
 function update(delta)
     timer = timer + delta
+    local enemyCountChanged = false
 
     -- Count all surviving enemies.
     for i, enemy in ipairs(enemyList) do
         if not enemy:isValid() then
             table.remove(enemyList, i)
+            enemyCountChanged = true
             -- Note: table.remove() inside iteration causes the next element to be skipped.
             -- This means in each update-cycle max half of the elements are removed.
             -- It does not matter here, since update is called regulary.
@@ -204,21 +211,103 @@ function update(delta)
     -- story
     if #enemyList == 1 then
         promoteToBoss()
+        enemyCountChanged = true
     elseif #enemyList == 0 and boss ~= nil and not boss:isValid() then
         finished(delta)
     end
 
     --station
-    if station:isValid() and station:getFaction() == "Independent" then
-        station:setFaction("Human Navy")
-        stationTakenTime = timer
+    if not stationDone then
+        if station:isValid() and station:getFaction() == "Independent" then
+            station:setFaction("Human Navy")
+            stationTakenTime = timer
+            stationDone = true
+            enemyCountChanged = true
+        end
+        if not station:isValid() then
+            stationDestroyedTime = timer
+            stationDone = true
+            enemyCountChanged = true
+        end
     end
-    if not station:isValid() then
-        stationDestroyedTime = timer
+
+    -- report progress
+    if enemyCountChanged then
+        local remaining = #enemyList
+        if not stationDone then
+            remaining = remaining + 1
+        end
+        if boss ~= nil and boss:isValid() then
+            remaining = remaining + 1
+        end
+        local progress = 100 - 100 * (remaining / targetNumber)
+        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
     end
+
 
     --util scripts
     script_hangar.update(delta)
     commsInstr()
+end
+
+function comms_resign(comms_source, comms_target)
+    setCommsMessage(_("special-comms", "You are our declared enemy. What do you want?"))
+    local cost = special_buy_cost(comms_target, comms_source)
+    addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+        local current_faction = comms_target:getFaction()
+        if not comms_target:areEnemiesInRange(5000) then
+            setCommsMessage(_("needRep-comms", "We will not surrender unless threatened."))
+        elseif not (comms_target:getHull() < comms_target:getHullMax()) then
+            setCommsMessage(_("needRep-comms", "We will not surrender until our hull is damaged."))
+        else
+            comms_target:setFaction("Human Navy")
+            if comms_target:areEnemiesInRange(5000) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "We will not surrender as long as enemies of the Human Navy are still near."))
+            elseif not comms_source:takeReputationPoints(cost) then
+                comms_target:setFaction(current_faction)
+                setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+            else
+                comms_target:setFaction("Independent")
+                setCommsMessage(_("special-comms", "Station surrendered."))
+            end
+        end
+    end)
+end
+function special_buy_cost(target, source)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(source) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(source) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	if target:getFaction() == "Interplanetary Union" then
+		cost = cost *1
+	elseif target:getFaction() == "Independent" then
+		cost = cost *2
+	elseif target:getFaction() == "Arlenians" then
+		cost = cost *4
+	elseif target:getFaction() == "Exuari" then	-- because stations are ships
+		cost = cost *4
+	else	-- other neutral and enemies
+		cost = cost *2
+	end
+	if target.typeName == "SpaceStation" then
+		cost = cost *2
+	else -- SpaceShip
+		cost = cost *1
+	end
+	return math.floor(cost)
 end
 

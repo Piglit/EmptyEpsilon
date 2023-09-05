@@ -1238,7 +1238,7 @@ end
 
 -- comms functions. Remove the corresponding part from the functions in the script and call the functions defined here instead
 
-function undockedGoods()
+function undockedGoods(player, comms_target)
 	if goods[comms_target] ~= nil then
 		local goodsQuantityAvailable = 0
 		local gi = 1
@@ -1289,7 +1289,7 @@ function undockedGoods()
 	end
 end
 
-function dockedGoods()
+function dockedGoods(player, comms_target)
 	if goods[comms_target] ~= nil then
 		addCommsReply(_("explainGoods-comms", "No tutorial covered goods or cargo. Explain"), function()
 			setCommsMessage(_("explainGoods-comms", "Different types of cargo or goods may be obtained from stations, freighters or other sources. They go by one word descriptions such as dilithium, optic, warp, etc. Certain mission goals may require a particular type or types of cargo. Each player ship differs in cargo carrying capacity. Goods may be obtained by spending reputation points or by trading other types of cargo (typically food, medicine or luxury)"))
@@ -1511,6 +1511,8 @@ function special_buy_cost(target, player)
 		cost = cost *1
 	elseif target:getFaction() == "Independent" then
 		cost = cost *2
+	elseif target:getFaction() == "Ktlitans" then
+		cost = cost *1
 	elseif target:getFaction() == "Arlenians" then
 		cost = cost *4
 	elseif target:getFaction() == "Exuari" then	-- because stations are ships

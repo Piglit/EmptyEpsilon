@@ -40,6 +40,7 @@ end
 function init()
     allowNewPlayerShips(false)
     enemyList = {}
+    enemyFightersList = {}
     revenge_active = false
 
     timer = 0
@@ -100,11 +101,13 @@ The key to success might be the clever use of your impulse and jump drives.
 
 Commander Saberhagen out.]])
     enemyCountStart = #enemyList
+    enemyFightersRemaining = 15
 
 end
 
 function addToEnemiesList(_, ship, _)
-    table.insert(enemyList, ship)
+    table.insert(enemyFightersList, ship)
+    enemyFightersRemaining = enemyFightersRemaining - 1
 end
 
 function finished(delta)
@@ -141,13 +144,24 @@ function update(delta)
 			-- It does not matter here, since update is called regulary.
 		end
 	end
+	for i, enemy in ipairs(enemyFightersList) do
+		if enemy == nil or not enemy:isValid() then
+			table.remove(enemyFightersList, i)
+            enemyCountChanged = true
+		end
+	end
 
     if enemyCountChanged then
-        local progress = 100 - 100 * (#enemyList / enemyCountStart)
+        local targetNumber = enemyCountStart + 15
+        local remaining = #enemyList + #enemyFightersList
+        if enemy_station ~= nil and enemy_station:isValid() then
+            remaining = remaining + enemyFightersRemaining
+        end
+        local progress = 100 - 100 * (remaining / targetNumber)
         sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
     end
 
-    if #enemyList == 0 then
+    if #enemyList == 0 and #enemyFightersList == 0 then
         finished(delta)
     end
 

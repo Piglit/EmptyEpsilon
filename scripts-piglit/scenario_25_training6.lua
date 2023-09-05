@@ -1,6 +1,6 @@
--- Name: Training: Fighter
+-- Name: Training: Corvette
 -- Type: Basic
--- Description: Fighter Training Cource
+-- Description: Corvette Training Ground
 ---
 
 require("utils.lua")
@@ -42,7 +42,6 @@ function init()
         x,y = radialPosition(0,0, 3*gu, i*360/#enemy_list)
         CpuShip():setTemplate(enemy):setPosition(x,y):orderDefendLocation(x,y)
     end
-    PlayerSpaceship():setTemplate("Poseidon"):setFaction("Human Navy")
 end
 
 function update(delta)

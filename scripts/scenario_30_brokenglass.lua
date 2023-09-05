@@ -785,6 +785,9 @@ function init()
   Defence_station.ghost_defenders = {}
   Wormhole_station:setCommsFunction(CommsWormholeStation)
   Wormhole_station.insults = {}
+
+  -- XXX init plots
+
   Investigator:setCommsFunction(CommsInvestigator)
 
   InitKraylor()

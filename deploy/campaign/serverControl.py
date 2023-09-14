@@ -26,7 +26,12 @@ class GameServerData:
 				"additionalCode": ""
 			}
 		return self.servers[serverName]
-	
+
+	def deleteServer(self, serverName):
+		if serverName in self.servers:
+			del self.servers[serverName]
+		#self.storeData()   # not called yet, for safety reasons
+
 	def getScenarios(self, serverName):
 		srv = self.getOrCreateServer(serverName)
 		return srv["scenarios"]
@@ -57,6 +62,7 @@ class GameServerData:
 			assert isinstance(s, str)
 		srv = self.getOrCreateServer(serverName)
 		srv["ships"] = ships
+		self.storeData()
 
 	def storeData(self):
 		db = GameServerData.db
@@ -88,6 +94,15 @@ class GameServerData:
 			srv["scenarios"].append(scenarioName)
 		self.storeData()
 
+	def lockScenario(self, scenarioName, serverName):
+		assert serverName in self.servers
+		srv = self.servers[serverName]
+		if scenarioName in srv["scenarios"]:
+			srv["scenarios"].remove(scenarioName)
+		if scenarioName in srv["scenarioSettings"]:
+			del srv["scenarioSettings"][scenarioName]
+		self.storeData()
+
 	def unlockScenarios(self, scenarios, serverName):
 		assert isinstance(scenarios, list)
 		for scenario in scenarios:
@@ -103,6 +118,13 @@ class GameServerData:
 		srv = self.getOrCreateServer(serverName)
 		if shipName not in srv["ships"]:
 			srv["ships"].append(shipName)
+		self.storeData()
+
+	def lockShip(self, shipName, serverName):
+		assert serverName in self.servers
+		srv = self.servers[serverName]
+		if shipName in srv["ships"]:
+			srv["ships"].remove(shipName)
 		self.storeData()
 
 	def unlockShips(self, shipNames, serverName):

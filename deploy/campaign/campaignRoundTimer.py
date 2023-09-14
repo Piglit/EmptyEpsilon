@@ -79,10 +79,16 @@ class CampaignRoundTimer:
 			self._sendEEcmd(self.on_pause)
 
 	def setRoundTime(self, seconds):
-		self.round_time = seconds
+		self.round_time = int(seconds)
 
 	def setPauseTime(self, seconds):
-		self.pause_time = seconds
+		self.pause_time = int(seconds)
+
+	def getRoundTime(self):
+		return self.round_time
+
+	def getPauseTime(self):
+		return self.pause_time
 
 	def setOnPause(self, code):
 		self.on_pause = code

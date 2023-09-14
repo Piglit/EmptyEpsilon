@@ -39,12 +39,10 @@ def execLua(code):
 def prepareForAllies(ship):
 	clearCode(ship)
 	addCode(ship, """
-if math.abs({ship.x}) < 100 and math.abs({ship.y}) < 100 then 
-	ship:setRotation(180)
-	ship:commandTargetRotation(180)
-	ship:setPosition(100000, random(-100, 100))
+	ship:setRotation(270)
+	ship:commandTargetRotation(270)
+	ship:setPosition(100000, 100000)
 	ship:commandImpulse(1)
-end
 """)
 	campaign.unlockScenario("49_allies", ship)
 	print(f"unlocked scenario 49_allies for {ship}")
@@ -92,6 +90,17 @@ def spawnablePrototypes(ship, otherCallsign, otherPW, spawnX, spawnY):
 	print(f"unlocked Hammer and Anvil for {ship}.")
 	print(f"Do not forget to unlock them for {otherCallsign}, too.")
 
+def spawnShip(ship, template, password):
+	campaign = getCampaign()
+	code = campaign.getShipAdditionalCode(ship)
+    script = f"""
+        ship = PlayerSpaceship()
+        ship.setCallSign("{selection}")
+        ship.setTemplate("{template}")
+        ship.setControlCode("{password}")
+    """ + code
+	execLua(script)
+
 def spawnSpySat(spawnX, spawnY):
 	script = f"""
 		ship = PlayerSpaceship()
@@ -106,19 +115,24 @@ def spawnSpySat(spawnX, spawnY):
 
 def startTimedEnemies():
 	roundTimer.setOnPause("""
-	scenario = getScriptStorage().scenario
-	scenario.makeFleetAggro("Kraylor")
-	scenario.makeFleetAggro("Exuari")
+	storage = getScriptStorage()
+	scenario = storage.scenario
+	salvage_repair_mission = storage.salvage_repair_mission
+    scenario.exuariCarrierAttack()
+    if salvage_repair_mission.goneAggro then
+        scenario.makeFleetAggro("Kraylor")
+    end
 	scenario.ktlitanOrders()
 	""")
 	roundTimer.setOnRound("""
 	scenario = getScriptStorage().scenario
-	scenario.spawnDefensiveFleet(300, "Kraylor")
+	scenario.spawnDefensiveFleet(400, "Kraylor")
 	scenario.spawnDefensiveFleet(300, "Exuari")
-	scenario.spawnDefensiveFleet(100, "Ktlitans")
+	scenario.spawnDefensiveFleet(200, "Ktlitans")
 	""")
 
 def setDifficulty(difficulty):
+	"""should be between .5 (Easy) and 2 (Hard)"""
 	assert isinstance(difficulty, int)
 	execLua(f"""getScriptStorage().scenario.difficulty = {difficulty}""")
 
@@ -127,3 +141,13 @@ def getShip(callsign):
 	idx = getPlayerShipIndex("{ship.callsign}")
 	ship = getPlayerShip(idx)
 	"""
+
+def makeKraylorAggro():
+	execLua("getScriptStorage().salvage_repair_mission.goneAggro = true")
+
+def wormholeIsSecured(val):
+	if val:
+	    val = "true"
+	else:
+	    val = "false"
+	execLua(f"getScriptStorage().scenario.securedWormhole = {val}")

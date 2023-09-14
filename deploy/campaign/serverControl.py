@@ -94,6 +94,15 @@ class GameServerData:
 			srv["scenarios"].append(scenarioName)
 		self.storeData()
 
+	def lockScenario(self, scenarioName, serverName):
+		assert serverName in self.servers
+		srv = self.servers[serverName]
+		if scenarioName in srv["scenarios"]:
+			srv["scenarios"].remove(scenarioName)
+		if scenarioName in srv["scenarioSettings"]:
+			del srv["scenarioSettings"][scenarioName]
+		self.storeData()
+
 	def unlockScenarios(self, scenarios, serverName):
 		assert isinstance(scenarios, list)
 		for scenario in scenarios:
@@ -109,6 +118,13 @@ class GameServerData:
 		srv = self.getOrCreateServer(serverName)
 		if shipName not in srv["ships"]:
 			srv["ships"].append(shipName)
+		self.storeData()
+
+	def lockShip(self, shipName, serverName):
+		assert serverName in self.servers
+		srv = self.servers[serverName]
+		if shipName in srv["ships"]:
+			srv["ships"].remove(shipName)
 		self.storeData()
 
 	def unlockShips(self, shipNames, serverName):

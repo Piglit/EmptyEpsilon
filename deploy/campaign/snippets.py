@@ -39,12 +39,10 @@ def execLua(code):
 def prepareForAllies(ship):
 	clearCode(ship)
 	addCode(ship, """
-if math.abs({ship.x}) < 100 and math.abs({ship.y}) < 100 then 
 	ship:setRotation(270)
 	ship:commandTargetRotation(270)
 	ship:setPosition(100000, 100000)
 	ship:commandImpulse(1)
-end
 """)
 	campaign.unlockScenario("49_allies", ship)
 	print(f"unlocked scenario 49_allies for {ship}")
@@ -91,6 +89,17 @@ def spawnablePrototypes(ship, otherCallsign, otherPW, spawnX, spawnY):
 	campaign.unlockShips(["Hammer", "Anvil"], ship)
 	print(f"unlocked Hammer and Anvil for {ship}.")
 	print(f"Do not forget to unlock them for {otherCallsign}, too.")
+
+def spawnShip(ship, template, password):
+	campaign = getCampaign()
+	code = campaign.getShipAdditionalCode(ship)
+    script = f"""
+        ship = PlayerSpaceship()
+        ship.setCallSign("{selection}")
+        ship.setTemplate("{template}")
+        ship.setControlCode("{password}")
+    """ + code
+	execLua(script)
 
 def spawnSpySat(spawnX, spawnY):
 	script = f"""

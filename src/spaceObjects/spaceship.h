@@ -211,6 +211,7 @@ public:
 
     EDockingState docking_state;
     DockStyle docked_style = DockStyle::None;
+    int32_t docking_target_id;
     P<SpaceObject> docking_target; //Server only
     glm::vec2 docking_offset{0, 0}; //Server only
 

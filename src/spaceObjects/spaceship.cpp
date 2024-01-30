@@ -640,6 +640,7 @@ void SpaceShip::applyTemplateValues()
         weapon_storage[n] = weapon_storage_max[n] = ship_template->weapon_storage[n];
 
     auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
+    restocks_missiles_docked = ship_template->restocks_missiles_docked;
     ship_template->setCollisionData(this);
     model_info.setData(ship_template->model_data);
 }

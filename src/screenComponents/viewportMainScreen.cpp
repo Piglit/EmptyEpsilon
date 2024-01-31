@@ -7,7 +7,7 @@
 GuiViewportMainScreen::GuiViewportMainScreen(GuiContainer* owner, string id)
 : GuiViewport3D(owner, id)
 {
-    uint8_t flags = PreferencesManager::get("main_screen_flags","7").toInt();
+    uint8_t flags = PreferencesManager::get("main_screen_flags","1").toInt();
 
     if (flags & flag_callsigns)
       showCallsigns();

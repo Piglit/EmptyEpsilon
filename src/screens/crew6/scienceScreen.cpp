@@ -130,6 +130,9 @@ ScienceScreen::ScienceScreen(GuiContainer* owner, ECrewPosition crew_position)
     sidebar_pager = new GuiSelector(info_sidebar, "SIDEBAR_PAGER", [this](int index, string value) {});
     sidebar_pager->setSize(GuiElement::GuiSizeMax, 50)->hide();
 
+    // Add sidebar page for a description.
+    sidebar_pager->addEntry(tr("scienceTab", "Description"), "Description");
+
     // If the server uses frequencies, add the Tactical sidebar page.
     if (gameGlobalInfo->use_beam_shield_frequencies)
     {
@@ -138,9 +141,6 @@ ScienceScreen::ScienceScreen(GuiContainer* owner, ECrewPosition crew_position)
 
     // Add sidebar page for systems.
     sidebar_pager->addEntry(tr("scienceTab", "Systems"), "Systems");
-
-    // Add sidebar page for a description.
-    sidebar_pager->addEntry(tr("scienceTab", "Description"), "Description");
 
     // Default the pager to the first item.
     sidebar_pager->setSelectionIndex(0);

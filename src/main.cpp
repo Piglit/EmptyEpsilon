@@ -402,6 +402,8 @@ int main(int argc, char** argv)
 
         // Load the scenario and open the ship selection screen.
         gameGlobalInfo->startScenario(PreferencesManager::get("server_scenario"));
+        if (PreferencesManager::get("startpaused", "1") != "1")
+            engine->setGameSpeed(1.0);
         new ShipSelectionScreen();
     }
 

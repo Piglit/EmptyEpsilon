@@ -14,34 +14,35 @@
 
 require("utils.lua")
 
+enemy_faction = "Raider"
 
 --- Ship creation functions
 function createExuariWeakInterceptor()
-	return CpuShip():setFaction("Exuari"):setTemplate("Dagger"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+	return CpuShip():setFaction(enemy_faction):setTemplate("T-Wing"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariWeakBomber()
-	return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setWeaponTubeCount(0):setWeaponStorageMax("HVLI", 0):setWeaponStorage("HVLI", 0):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+	return CpuShip():setFaction(enemy_faction):setTemplate("BTL-B Y-Wing"):setWeaponTubeCount(0):setWeaponStorageMax("HVLI", 0):setWeaponStorage("HVLI", 0):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariInterceptor()
-	return CpuShip():setFaction("Exuari"):setTemplate("Dagger")
+	return CpuShip():setFaction(enemy_faction):setTemplate("X-Wing")
 end
 
 function createExuariBomber()
-	return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+	return CpuShip():setFaction(enemy_faction):setTemplate("BTL-A4 Y-Wing"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariTransport()
-	return CpuShip():setFaction("Exuari"):setTemplate("Personnel Freighter 1"):setTypeName("Exuari transport")
+	return CpuShip():setFaction(enemy_faction):setTemplate("Personnel Freighter 1")
 end
 
 function createExuariFreighter()
-	return CpuShip():setFaction("Exuari"):setTemplate("Goods Freighter 5"):setTypeName("Exuari freighter")
+	return CpuShip():setFaction(enemy_faction):setTemplate("Goods Freighter 5")
 end
 
 function createExuariShuttle()
-	return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
+	return CpuShip():setFaction(enemy_faction):setTemplate("Racer"):setTypeName("Shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
 end
 
 
@@ -55,6 +56,8 @@ function init()
 
     bonusAvail = true
     bonus = createExuariShuttle():setCallSign("bonus"):setPosition(-2341, -17052):orderFlyTowardsBlind(-80000, -40000):setHeading(-60)
+
+    ground=SpaceStation():setTemplate("Small Station"):setFaction("Transport"):setCallSign("Dock"):setPosition(3000, -9000):setDescription(_("You can dock here to restore energy."))
 
     table.insert(enemyList, createExuariWeakInterceptor():setCallSign("Fgt1"):setPosition(2341, -5191):setHeading(60))
     table.insert(enemyList, createExuariWeakInterceptor():setCallSign("Fgt2"):setPosition(2933, -6555):setHeading(60))
@@ -70,21 +73,34 @@ function init()
     table.insert(enemyList, createExuariFreighter():setCallSign("FTR1"):setPosition(2787, -1822):orderFlyTowards(-42873, -13865):setHeading(-60))
 
     enemyCountStart = #enemyList
-    player = PlayerSpaceship():setTemplate("Phobos M3P"):setPosition(18, -48):setJumpDrive(false):setLongRangeRadarRange(20000)
+    --player = PlayerSpaceship():setTemplate("Phobos M3P"):setPosition(18, -48):setJumpDrive(false):setLongRangeRadarRange(20000)
     command = CpuShip():setFaction("Human Navy"):setTemplate("Phobos M3"):setCallSign("Command"):setPosition(-100000, -100000):orderIdle()
+
+    Script():run("util_proximity_scan.lua")
+end
+
+function setPlayer()
+    player = getPlayerShip(-1)
+    if player ~= nil and player:isValid() then
+        player:setPosition(18, -48):setJumpDrive(false):setLongRangeRadarRange(20000)
+    end
 end
 
 function commsInstr()
-    if not instr1 and timer > 8.0 then
+    if not instr1 and player ~= nil and player:isValid() and timer > 8.0 then
         instr1 = true
         command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
 
-In this training mission you will practice the basic controls of a Phobos light cruiser.
-Since this is not a tutorial, you will be on your own to decide how to destroy all enemy targets in an Exuari training ground.
+In this training mission you will practice the basic controls of your ship.
+Since this is not a tutorial, you will be on your own to decide how to destroy all enemy targets in an enemy training ground.
 There will be not much resistance, so you can try different approaches and tactics savely.
 
 Here's your chance to beat up some helpless opponents.
 Commander Saberhagen out.]]))
+        -- XXX hack to make players the same faction after auto-connect clients entered
+        for i,p in ipairs(getActivePlayerShips()) do
+            p:setFaction("Transport")
+        end
     end
 end
 
@@ -112,6 +128,10 @@ with different stations assigned to your crew members.]]), formatTime(timer), bo
 end
 
 function update(delta)
+    if player == nil or not player:isValid() then
+        setPlayer()
+        return
+    end
     timer = timer + delta
     local enemyCountChanged = false
 

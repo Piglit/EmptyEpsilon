@@ -26,6 +26,9 @@ function init()
     planet1:setOrbit(sun1, 40)
     moon1:setOrbit(planet1, 20.0)
 
+    CpuShip():setTemplate("TIE-Fighter"):setCallSign("Alpha-1"):setPosition(1050, -150):setRotation(180):setFaction("Raider"):setScanState("simplescan")
+    CpuShip():setTemplate("TIE-Fighter"):setCallSign("Alpha-2"):setPosition(1250, 250):setRotation(180):setFaction("Raider"):setScanState("simplescan")
+
     addGMFunction(
         "Random asteroid field",
         function()

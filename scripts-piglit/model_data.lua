@@ -560,8 +560,12 @@ for sizeName, sizeValues in pairs(sizes) do
     model:setScale(sizeValues[1])
     model:setRadius(sizeValues[2])
 
-    model:addBeamPosition(1.15,-0.13, -0.03)
-    model:addBeamPosition(1.15, 0.13, -0.03)
+    --original: 
+    --model:addBeamPosition(1.15,-0.13, -0.03)
+    --model:addBeamPosition(1.15, 0.13, -0.03)
+    --moved to match radar trace (pos is now outside of the ship)
+    model:addBeamPosition(2.15,-1.13, -0.03)
+    model:addBeamPosition(2.15, 1.13, -0.03)
     model:addEngineEmitter(-0.2, 0.44, -0.03,  0.5, 0.5, 1.0, 0.4)
     model:addEngineEmitter(-0.2,-0.44, -0.03,  0.5, 0.5, 1.0, 0.4)
 
@@ -648,8 +652,8 @@ for sizeName, sizeValues in pairs(sizes) do
     model:setScale(sizeValues[1])
     model:setRadius(sizeValues[2])
 
-    model:addBeamPosition(1.18,-0.23, 0.08)
-    model:addBeamPosition(1.18, 0.23, 0.08)
+--    model:addBeamPosition(1.18,-0.23, 0.08)
+--    model:addBeamPosition(1.18, 0.23, 0.08)
     model:addEngineEmitter(-0.75, 0.2,-0.03,  0.5, 0.5, 1.0, 0.2)
     model:addEngineEmitter(-0.75, 0.0,-0.03,  0.5, 0.5, 1.0, 0.2)
     model:addEngineEmitter(-0.75,-0.2,-0.03,  0.5, 0.5, 1.0, 0.2)

@@ -233,6 +233,8 @@ def BeamsToSides(ship):
     beam_config = Counter()
     beam_dps = Counter()
     for n,beam in beams.items():
+        if isinstance(beam, list):
+            beam = beam[-1]
         direction = beam[1]
         dps = beam[4]/beam[3]
         d = ""
@@ -286,10 +288,13 @@ def print_descr(ships):
     descr = []
     select_keys = ["Name", "Hull"]
     for _, ship in ships.items():
-        d = {
-            "Class": ship["Class"][0],
-            "Subclass": ship["Class"][1],
-        }
+        d={}
+#        c = ship["Class"]
+#        print(c)
+#        d = {
+#            "Class": ship.get("Class", (None,None))[0],
+#            "Subclass": ship.get("Class", (None,None))[1],
+#        }
         for k in select_keys:
             d[k] = ship.get(k)
         shields = ship["Shields"]
@@ -309,10 +314,10 @@ def print_descr(ships):
             drive.append("Jump")
             if "JumpDriveRange" in ship:
                 drive[-1] += " ("+str(ship["JumpDriveRange"][1]//1000)+"u)"
-        drive.append("Impulse ("+str(ship["Speed"][0])+")")
+        drive.append("Impulse ("+str(ship.get("Speed", (None,None,None))[0])+")")
         d["Drive"] = ", ".join(drive)
-        d["Turn Speed"] = ship["Speed"][1]
-        d["Acceleration"] = ship["Speed"][2]
+        d["Turn Speed"] = ship.get("Speed", (None,None,None))[1]
+        d["Acceleration"] = ship.get("Speed", (None,None,None))[2]
         d["Energy"] = ship.get("EnergyStorage", 1000)
         d["Repair Crew"] = ship.get("RepairCrewCount", 3)
         bay = ship.get("DockClasses")

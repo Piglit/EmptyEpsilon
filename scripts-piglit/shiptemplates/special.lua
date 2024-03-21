@@ -181,10 +181,10 @@ addSystemsHeavy(template)
 -- GM: adjust Hull, Shields, Beam-Ranges
 
 
-template = ShipTemplate():setName("SpySat"):setClass(_("class", "Satellite"), _("subclass", "SpySat")):setType("playership")
+template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Navigation")):setType("playership")
 template:setModel("cubesat")
 template:setRadarTrace("satellite.png")
-template:setDescription([[Just some innocent looking satellite.]])
+template:setDescription([[The eyes of flight control]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
 template:setHull(10)
@@ -205,4 +205,25 @@ template:setAutoRepair(true)
 
 addSystemsHeavy(template)
 
+-- Station
+template = ShipTemplate():setName("Ground Station"):setLocaleName(_("Medium Station")):setModel("space_station_3"):setType("playership")
+template:setDescription(_([[Large enough to accommodate small crews for extended periods of times, stations of this size are often trading posts, refuelling bases, mining operations, and forward military bases. While their shields are strong, concerted attacks by many ships can bring them down quickly.]]))
+template:setHull(400)
+--template:setShields(800)
+template:setRadarTrace("mediumstation.png")
+--				spped, turn, accel, rev-speed, rev-accel
+template:setSpeed(1, 1, 1)
+template:setCombatManeuver(20, 15)
+template:setEnergyStorage(100)
+template:setRepairCrewCount(1)
+template:setLongRangeRadarRange(50000)
+template:setShortRangeRadarRange(20000)
+
+template:setCanLaunchProbe(false)
+template:setCanSelfDestruct(false)
+
+template:setAutoCoolant(true)
+template:setAutoRepair(true)
+template:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"), _("class", "Cruiser"))
+addSystemsHeavy(template)
 

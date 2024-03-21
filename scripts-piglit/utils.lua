@@ -236,17 +236,20 @@ end
 
 -- create amount of object_type, at a distance between dist_min and dist_max around the point (x0, y0)
 function placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
+    local created = {}
     for n = 1, amount do
         local r = random(0, 360)
         local distance = random(dist_min, dist_max)
         local x = x0 + math.cos(r / 180 * math.pi) * distance
         local y = y0 + math.sin(r / 180 * math.pi) * distance
-        object_type():setPosition(x, y)
+        table.insert(created, object_type():setPosition(x, y))
     end
+    return created
 end
 
 -- Place random objects in a line, from point x1,y1 to x2,y2 with a random distance of random_amount
 function placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
+    local created = {}
     for n=1,amount do
         local f = random(0, 1)
         local x = x1 + (x2 - x1) * f
@@ -256,8 +259,9 @@ function placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
         x = x + math.cos(r / 180 * math.pi) * distance
         y = y + math.sin(r / 180 * math.pi) * distance
 
-        object_type():setPosition(x, y)
+        table.insert(created, object_type():setPosition(x, y))
     end
+    return created
 end
 
 -- Place semi-random object_types around point (x,y) in a (x_grids by y_grids) area

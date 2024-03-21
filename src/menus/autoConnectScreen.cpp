@@ -65,7 +65,7 @@ void AutoConnectScreen::update(float delta)
         string autoconnect_address = PreferencesManager::get("autoconnect_address", "");
 
         if (autoconnect_address != "") {
-            status_label->setText("Using autoconnect server " + autoconnect_address);
+            //status_label->setText("Using autoconnect server " + autoconnect_address);
             connect_to_address = autoconnect_address;
             new GameClient(VERSION_NUMBER, autoconnect_address);
             scanner->destroy();
@@ -82,9 +82,9 @@ void AutoConnectScreen::update(float delta)
         {
         case GameClient::Connecting:
         case GameClient::Authenticating:
-            if (!connect_to_address.getHumanReadable().empty())
-                status_label->setText("Connecting: " + connect_to_address.getHumanReadable()[0]);
-            else
+            //if (!connect_to_address.getHumanReadable().empty())
+            //    status_label->setText("Connecting: " + connect_to_address.getHumanReadable()[0]);
+            //else
                 status_label->setText("Connecting...");
             break;
         case GameClient::WaitingForPassword: //For now, just disconnect when we found a password protected server.

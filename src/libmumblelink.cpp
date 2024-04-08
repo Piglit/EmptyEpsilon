@@ -46,10 +46,10 @@ static HANDLE hMapObject = NULL;
 
 int mumble::link()
 {
-	LOG(DEBUG) << "Mumble link";
+	//LOG(DEBUG) << "Mumble link";
 	if(lm)
 		return 0;
-	LOG(DEBUG) << "Mumble link connecting...";
+	//LOG(DEBUG) << "Mumble link connecting...";
 
 #ifdef WIN32
 	hMapObject = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, L"MumbleLink");

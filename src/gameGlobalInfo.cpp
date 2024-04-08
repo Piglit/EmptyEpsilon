@@ -3,7 +3,6 @@
 #include <io/json.h>
 #include <campaign_client.h>
 #include "gameGlobalInfo.h"
-#include "scenarioInfo.h"
 #include "preferenceManager.h"
 #include "scienceDatabase.h"
 #include "multiplayer_client.h"
@@ -143,7 +142,7 @@ void GameGlobalInfo::update(float delta)
                 my_spaceship = game_client->getObjectById(my_player_info->ship_id);
 
 			// retry and update mumble link, whenever the ship changes
-            if (mumble::link() == 0)
+            if (PreferencesManager::get("mumble", "0").toInt() == 1 && mumble::link() == 0)
             {
                 if (my_spaceship)
 				{
@@ -154,7 +153,7 @@ void GameGlobalInfo::update(float delta)
 					mumble::reset();
 			}
         }
-        if (my_spaceship)
+        if (PreferencesManager::get("mumble", "0").toInt() == 1 && my_spaceship)
         {
             auto pos = my_spaceship->getPosition();
             float dir = my_spaceship->getRotation();
@@ -167,7 +166,7 @@ void GameGlobalInfo::update(float delta)
     }
     else
     {
-		if (mumble::islinked())
+		if (PreferencesManager::get("mumble", "0").toInt() == 1 && mumble::islinked())
 			mumble::reset();
     }
     elapsed_time += delta;
@@ -240,7 +239,7 @@ void GameGlobalInfo::reset()
         p->ship_id = -1;//reset();
     }
 
-	if (mumble::islinked())
+	if (PreferencesManager::get("mumble", "0").toInt() == 1 && mumble::islinked())
 		mumble::reset();
 }
 

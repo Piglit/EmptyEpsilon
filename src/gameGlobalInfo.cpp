@@ -3,7 +3,6 @@
 #include <io/json.h>
 #include <campaign_client.h>
 #include "gameGlobalInfo.h"
-#include "scenarioInfo.h"
 #include "preferenceManager.h"
 #include "scienceDatabase.h"
 #include "multiplayer_client.h"

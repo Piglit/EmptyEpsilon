@@ -367,6 +367,7 @@ set(MAIN_SOURCES
     src/hardware/devices/uDMXDevice.cpp
     src/hardware/devices/virtualOutputDevice.cpp
     src/hardware/devices/philipsHueDevice.cpp
+	src/libmumblelink.cpp
 
     src/ai/aiFactory.h
     src/ai/ai.h
@@ -526,6 +527,7 @@ set(MAIN_SOURCES
     src/spaceObjects/zone.h
     src/threatLevelEstimate.h
     src/tutorialGame.h
+	src/libmumblelink.h
 )
 
 if (WITH_DISCORD)

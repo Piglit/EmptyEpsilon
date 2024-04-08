@@ -68,6 +68,7 @@ public:
     string gm_control_code;
     float elapsed_time;
     string scenario;
+    string server_name;
     std::unordered_map<string, string> scenario_settings;
 
     //List of script functions that can be called from the GM interface (Server only!)

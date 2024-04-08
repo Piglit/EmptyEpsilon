@@ -405,7 +405,7 @@ int main(int argc, char** argv)
 #if STEAMSDK
     new SteamRichPresence();
 #endif //STEAMSDK
-
+ 
     string tutorial = PreferencesManager::get("tutorial");   // use "00_all.lua" for all tutorials
     if (tutorial != "")
     {

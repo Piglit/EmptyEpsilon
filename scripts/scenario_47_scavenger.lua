@@ -3235,6 +3235,60 @@ function handleUndockedState()
 				addCommsReply(_("Back"), commsStation)
 			end)
 		end
+		addCommsReply(_("trade-comms", "Where can I find particular goods?"), function()
+			local ctd = comms_target.comms_data
+			gkMsg = _("trade-comms", "Friendly stations often have food or medicine or both. Neutral stations may trade their goods for food, medicine or luxury.")
+			if ctd.goodsKnowledge == nil then
+				ctd.goodsKnowledge = {}
+				local knowledgeCount = 0
+				local knowledgeMax = 10
+				for i=1,#humanStationList do	-- FIXME nil value
+					local station = humanStationList[i]
+					if station ~= nil and station:isValid() then
+						local brainCheckChance = 60
+						if distance(comms_target,station) > 75000 then
+							brainCheckChance = 20
+						end
+						for good, goodData in pairs(ctd.goods) do
+							if random(1,100) <= brainCheckChance then
+								local stationCallSign = station:getCallSign()
+								local stationSector = station:getSectorName()
+								ctd.goodsKnowledge[good] =	{	station = stationCallSign,
+																sector = stationSector,
+																cost = goodData["cost"] }
+								knowledgeCount = knowledgeCount + 1
+								if knowledgeCount >= knowledgeMax then
+									break
+								end
+							end
+						end
+					end
+					if knowledgeCount >= knowledgeMax then
+						break
+					end
+				end
+			end
+			local goodsKnowledgeCount = 0
+			for good, goodKnowledge in pairs(ctd.goodsKnowledge) do
+				goodsKnowledgeCount = goodsKnowledgeCount + 1
+				addCommsReply(good, function()
+					local ctd = comms_target.comms_data
+					local stationName = ctd.goodsKnowledge[good]["station"]
+					local sectorName = ctd.goodsKnowledge[good]["sector"]
+					local goodName = good
+					local goodCost = ctd.goodsKnowledge[good]["cost"]
+					setCommsMessage(string.format(_("trade-comms", "Station %s in sector %s has %s for %i reputation"),stationName,sectorName,goodName,goodCost))
+					addCommsReply(_("Back"), commsStation)
+				end)
+			end
+			if goodsKnowledgeCount > 0 then
+				gkMsg = gkMsg .. _("trade-comms", "\n\nWhat goods are you interested in?\nI've heard about these:")
+			else
+				gkMsg = gkMsg .. _("trade-comms", " Beyond that, I have no knowledge of specific stations")
+			end
+			setCommsMessage(gkMsg)
+			addCommsReply(_("Back"), commsStation)
+		end)
 		local has_gossip = random(1,100) < (100 - (30 * (difficulty - .5)))
 		if (comms_target.comms_data.general ~= nil and comms_target.comms_data.general ~= "") or
 			(comms_target.comms_data.history ~= nil and comms_target.comms_data.history ~= "") or
@@ -3978,6 +4032,256 @@ function neutralComms(comms_data)
 	end	--end non-freighter communications else branch
 	return true
 end	--end neutral communications function
+--	Non-standard enemy ships
+function adderMk3(enemyFaction)
+	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK4"):orderRoaming()
+	ship:setTypeName("Adder MK3")
+	ship:setHullMax(35)		--weaker hull (vs 40)
+	ship:setHull(35)
+	ship:setShieldsMax(15)	--weaker shield (vs 20)
+	ship:setShields(15)
+	ship:setRotationMaxSpeed(35)	--faster maneuver (vs 20)
+	local ships_key = _("scienceDB","Ships")
+	local fighter_key = _("scienceDB","Starfighter")
+	local adder_3_key = _("scienceDB","Adder MK3")
+	local adder_4_key = _("scienceDB","Adder MK4")
+	local adder_3_db = queryScienceDatabase(ships_key,fighter_key,adder_3_key)
+	if adder_3_db == nil then
+		local fighter_db = queryScienceDatabase(ships_key,fighter_key)
+		if fighter_db ~= nil then
+			fighter_db:addEntry(adder_3_key)
+			adder_3_db = queryScienceDatabase(ships_key,fighter_key,adder_3_key)
+			local tube_key = _("scienceDB","Small tube 0")
+			local load_val = _("scienceDB","20 sec")
+			addShipToDatabase(
+				queryScienceDatabase(ships_key,fighter_key,adder_4_key),	--base ship database entry
+				queryScienceDatabase(ships_key,fighter_key,adder_3_key),	--modified ship database entry
+				ship,			--ship just created, long description on the next line
+				_("scienceDB", "The Adder MK3 is one of the first of the Adder line to meet with some success. A large number of them were made before the manufacturer went through its first bankruptcy. There has been a recent surge of purchases of the Adder MK3 in the secondary market due to its low price and its similarity to subsequent models. Compared to the Adder MK4, the Adder MK3 has weaker shields and hull, but a faster turn speed"),
+				{
+					{key = tube_key, value = load_val},	--torpedo tube direction and load speed
+				},
+				nil
+			)
+		end
+	end
+	return ship
+end
+function adderMk7(enemyFaction)
+	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK6"):orderRoaming()
+	ship:setTypeName("Adder MK7")
+	ship:setShieldsMax(40)	--stronger shields (vs 30)
+	ship:setShields(40)
+	ship:setBeamWeapon(0,30,0,900,5.0,2.0)	--narrower (30 vs 35) but longer (900 vs 800) beam
+	if queryScienceDatabase("Ships","Starfighter","Adder MK7") == nil then
+		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+		starfighter_db:addEntry("Adder MK7")	-- FIXME nil value
+		addShipToDatabase(
+			queryScienceDatabase("Ships","Starfighter","Adder MK6"),	--base ship database entry
+			queryScienceDatabase("Ships","Starfighter","Adder MK7"),	--modified ship database entry
+			ship,			--ship just created, long description on the next line
+			_("scienceDB", "The release of the Adder Mark 7 sent the manufacturer into a second bankruptcy. They made improvements to the Mark 7 over the Mark 6 like stronger shields and longer beams, but the popularity of their previous models, especially the Mark 5, prevented them from raising the purchase price enough to recoup the development and manufacturing costs of the Mark 7"),
+			{
+				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
+			},
+			nil
+		)
+	end
+	return ship
+end
+function adderMk8(enemyFaction)
+	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Adder MK5"):orderRoaming()
+	ship:setTypeName("Adder MK8")
+	ship:setShieldsMax(50)					--stronger shields (vs 30)
+	ship:setShields(50)
+	ship:setBeamWeapon(0,30,0,900,5.0,2.3)	--narrower (30 vs 35) but longer (900 vs 800) and stronger (2.3 vs 2.0) beam
+	ship:setRotationMaxSpeed(30)			--faster maneuver (vs 25)
+	if queryScienceDatabase("Ships","Starfighter","Adder MK8") == nil then
+		local starfighter_db = queryScienceDatabase("Ships","Starfighter")
+		starfighter_db:addEntry("Adder MK8")
+		addShipToDatabase(
+			queryScienceDatabase("Ships","Starfighter","Adder MK5"),	--base ship database entry
+			queryScienceDatabase("Ships","Starfighter","Adder MK8"),	--modified ship database entry
+			ship,			--ship just created, long description on the next line
+			_("scienceDB", "New management after bankruptcy revisited their most popular Adder Mark 5 model with improvements: stronger shields, longer and stronger beams and a faster turn speed. Thus was born the Adder Mark 8 model. Targeted to the practical but nostalgic buyer who must purchase replacements for their Adder Mark 5 fleet"),
+			{
+				{key = "Small tube 0", value = "15 sec"},	--torpedo tube direction and load speed
+			},
+			nil
+		)
+	end
+	return ship
+end
+function phobosR2(enemyFaction)
+	local ship = CpuShip():setFaction(enemyFaction):setTemplate("Phobos T3"):orderRoaming()
+	ship:setTypeName("Phobos R2")
+	ship:setWeaponTubeCount(1)			--one tube (vs 2)
+	ship:setWeaponTubeDirection(0,0)	
+	ship:setImpulseMaxSpeed(55)			--slower impulse (vs 60)
+	ship:setRotationMaxSpeed(15)		--faster maneuver (vs 10)
+	if queryScienceDatabase("Ships","Frigate","Phobos R2") == nil then
+		local frigate_db = queryScienceDatabase("Ships","Frigate")
+		frigate_db:addEntry("Phobos R2")
+		addShipToDatabase(
+			queryScienceDatabase("Ships","Frigate","Phobos T3"),	--base ship database entry
+			queryScienceDatabase("Ships","Frigate","Phobos R2"),	--modified ship database entry
+			ship,			--ship just created, long description on the next line
+			_("scienceDB", "The Phobos R2 model is very similar to the Phobos T3. It's got a faster turn speed, but only one missile tube"),
+			{
+				{key = "Tube 0", value = "60 sec"},	--torpedo tube direction and load speed
+			},
+			nil
+		)
+	end
+	return ship
+end
+function addShipToDatabase(base_db,modified_db,ship,description,tube_directions,jump_range)
+	modified_db:setLongDescription(description)
+	modified_db:setImage(base_db:getImage())
+	modified_db:setKeyValue("Class",base_db:getKeyValue("Class"))
+	modified_db:setKeyValue("Sub-class",base_db:getKeyValue("Sub-class"))
+	modified_db:setKeyValue("Size",base_db:getKeyValue("Size"))
+	local shields = ship:getShieldCount()
+	if shields > 0 then
+		local shield_string = ""
+		for i=1,shields do
+			if shield_string == "" then
+				shield_string = string.format(_("%i"),math.floor(ship:getShieldMax(i-1)))
+			else
+				shield_string = string.format(_("%s/%i"),shield_string,math.floor(ship:getShieldMax(i-1)))
+			end
+		end
+		modified_db:setKeyValue("Shield",shield_string)
+	end
+	modified_db:setKeyValue("Hull",string.format(_("scienceDB", "%i"),math.floor(ship:getHullMax())))
+	modified_db:setKeyValue("Move speed",string.format(_("scienceDB", "%.1f u/min"),ship:getImpulseMaxSpeed()*60/1000))
+	modified_db:setKeyValue("Turn speed",string.format(_("scienceDB", "%.1f deg/sec"),ship:getRotationMaxSpeed()))
+	if ship:hasJumpDrive() then
+		if jump_range == nil then
+			local base_jump_range = base_db:getKeyValue("Jump range")
+			if base_jump_range ~= nil and base_jump_range ~= "" then
+				modified_db:setKeyValue("Jump range",base_jump_range)
+			else
+				modified_db:setKeyValue("Jump range","5 - 50 u")
+			end
+		else
+			modified_db:setKeyValue("Jump range",jump_range)
+		end
+	end
+	if ship:hasWarpDrive() then
+		modified_db:setKeyValue(_("scienceDB", "Warp Speed"),string.format(_("scienceDB", "%.1f u/min"),ship:getWarpSpeed()*60/1000))
+	end
+	local key = ""
+	if ship:getBeamWeaponRange(0) > 0 then
+		local bi = 0
+		repeat
+			local beam_direction = ship:getBeamWeaponDirection(bi)
+			if beam_direction > 315 and beam_direction < 360 then
+				beam_direction = beam_direction - 360
+			end
+			key = string.format(_("scienceDB", "Beam weapon %i:%i"),ship:getBeamWeaponDirection(bi),ship:getBeamWeaponArc(bi))
+			while(modified_db:getKeyValue(key) ~= "") do
+				key = " " .. key
+			end
+			modified_db:setKeyValue(key,string.format(_("scienceDB", "%.1f Dmg / %.1f sec"),ship:getBeamWeaponDamage(bi),ship:getBeamWeaponCycleTime(bi)))
+			bi = bi + 1
+		until(ship:getBeamWeaponRange(bi) < 1)
+	end
+	local tubes = ship:getWeaponTubeCount()
+	if tubes > 0 then
+		if tube_directions ~= nil then
+			for i=1,#tube_directions do
+				modified_db:setKeyValue(tube_directions[i].key,tube_directions[i].value)
+			end
+		end
+		local missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
+		for i, missile_type in ipairs(missile_types) do
+			local max_storage = ship:getWeaponStorageMax(missile_type)
+			if max_storage > 0 then
+				modified_db:setKeyValue(string.format(_("scienceDB", "Storage %s"),missile_type),string.format("%i",max_storage))
+			end
+		end
+	end
+end
+function spawnEnemies(xOrigin, yOrigin, danger, enemyFaction, perimeter_min, perimeter_max)
+	if spawn_enemy_diagnostic then print("top of spawnEnemies function") end
+	if enemyFaction == nil then
+		enemyFaction = "Kraylor"
+	end
+	if danger == nil then 
+		danger = 1
+	end
+	if spawn_enemy_diagnostic then print(string.format("x: %.1f, y: %.1f, danger: %.1f, faction: %s",xOrigin,yOrigin,danger,enemyFaction)) end
+	local enemyStrength = math.max(danger * enemy_power * playerPower(),5)
+	local enemyPosition = 0
+	local sp = irandom(400,900)			--random spacing of spawned group
+	local deployConfig = random(1,100)	--randomly choose between squarish formation and hexagonish formation
+	if spawn_enemy_diagnostic then print(string.format("enemy strength: %.1f, spacing: %i, deploy config: %.1f",enemyStrength,sp,deployConfig)) end
+	local enemyList = {}
+	-- Reminder: stsl and stnl are ship template score and name list
+	local prefix = generateCallSignPrefix(1)
+	while enemyStrength > 0 do
+		if spawn_enemy_diagnostic then print("top of spawn while loop") end
+		local shipTemplateType = irandom(1,#stsl)
+		if spawn_enemy_diagnostic then print(string.format("temporary ship template type: %s",shipTemplateType)) end
+		while stsl[shipTemplateType] > enemyStrength * 1.1 + 5 do
+			shipTemplateType = irandom(1,#stsl)
+			if spawn_enemy_diagnostic then print(string.format("temporary ship template type: %s",shipTemplateType)) end
+		end		
+		if spawn_enemy_diagnostic then print(string.format("chosen ship template type: %s",shipTemplateType)) end
+		local ship = nil
+		if stbl[shipTemplateType] then
+			ship = CpuShip():setFaction(enemyFaction):setTemplate(stnl[shipTemplateType]):orderRoaming()
+		else
+			ship = nsfl[shipTemplateType](enemyFaction)
+		end
+		enemyPosition = enemyPosition + 1
+		if deployConfig < 50 then
+			ship:setPosition(xOrigin+fleetPosDelta1x[enemyPosition]*sp,yOrigin+fleetPosDelta1y[enemyPosition]*sp)
+		else
+			ship:setPosition(xOrigin+fleetPosDelta2x[enemyPosition]*sp,yOrigin+fleetPosDelta2y[enemyPosition]*sp)
+		end
+		ship:setCommsScript(""):setCommsFunction(commsShip)
+		table.insert(enemyList, ship)
+		enemyStrength = enemyStrength - stsl[shipTemplateType]
+		ship:setCallSign(generateCallSign(prefix))
+		if spawn_enemy_diagnostic then print(string.format("Adjusted enemy strength (loop control): %.1f",enemyStrength)) end
+		if spawn_enemy_diagnostic then print("end of spawn while loop") end
+	end
+	if perimeter_min ~= nil then
+		if spawn_enemy_diagnostic then print("perimeter minimum is not nil") end
+		local enemy_angle = random(0,360)
+		local circle_increment = 360/#enemyList
+		local perimeter_deploy = perimeter_min
+		if spawn_enemy_diagnostic then print(string.format("enemy angle: %.1f, circle increment: %.1f, perimeter deploy: %i",enemy_angle,circle_increment,perimeter_deploy)) end
+		if perimeter_max ~= nil then
+			perimeter_deploy = random(perimeter_min,perimeter_max)
+		end
+		for i, enemy in pairs(enemyList) do
+			local dex, dey = vectorFromAngle(enemy_angle,perimeter_deploy)
+			enemy:setPosition(xOrigin+dex, yOrigin+dey)
+			if spawn_enemy_diagnostic then print(string.format("deploy coordinates: x: %.1f, y: %.f, angle: %.1f",xOrigin+dex,yOrigin+dey,enemy_angle)) end
+			enemy_angle = enemy_angle + circle_increment
+		end
+	end
+	if spawn_enemy_diagnostic then print("end of spawn spawn enemies function") end
+	return enemyList
+end
+function playerPower()
+--evaluate the players for enemy strength and size spawning purposes
+	local playerShipScore = 0
+	for p5idx=1,8 do
+		local p5obj = getPlayerShip(p5idx)
+		if p5obj ~= nil and p5obj:isValid() then
+			if p5obj.shipScore == nil then
+				playerShipScore = playerShipScore + 24
+			else
+				playerShipScore = playerShipScore + p5obj.shipScore
+			end
+		end
+	end
+	return playerShipScore
+end
 --	Player ship improvements
 function addForwardBeam()
 	if comms_source.add_forward_beam == nil then

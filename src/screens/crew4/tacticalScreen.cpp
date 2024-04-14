@@ -143,7 +143,7 @@ void TacticalScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
-        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue()) * 5.0f;
+        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue());
         if (angle != 0.0f)
         {
             my_spaceship->commandTargetRotation(my_spaceship->getRotation() + angle);

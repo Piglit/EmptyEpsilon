@@ -1015,7 +1015,8 @@ void SpaceShip::update(float delta)
                         }
                     }
 
-                    if (needs_missile) {
+                    if (needs_missile)
+                    {
                         P<SpaceShip> docked_with_ship = docking_target;
                         if (docked_with_ship)
                         {
@@ -1029,10 +1030,6 @@ void SpaceShip::update(float delta)
                 }
             }
             setImpulseRequest(0.f);
-        }
-        else
-        {
-            missile_resupply_delay = missile_resupply_time;
         }
         else
         {

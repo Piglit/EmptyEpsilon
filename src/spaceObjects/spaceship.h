@@ -213,7 +213,6 @@ public:
     DockStyle docked_style = DockStyle::None;
     int32_t docking_target_id;
     P<SpaceObject> docking_target; //Server only
-    int32_t docking_target_id;
     glm::vec2 docking_offset{0, 0}; //Server only
 
     float missile_resupply_delay = missile_resupply_time;

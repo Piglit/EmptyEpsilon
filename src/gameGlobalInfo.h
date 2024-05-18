@@ -6,6 +6,7 @@
 #include "GMScriptCallback.h"
 #include "GMMessage.h"
 #include "gameStateLogger.h"
+#include <io/json.h>
 
 class GameStateLogger;
 class GameGlobalInfo;
@@ -109,12 +110,15 @@ public:
     void reset();
     void setScenarioSettings(const string filename, std::unordered_map<string, string> new_settings);
     void startScenario(string filename, std::unordered_map<string, string> new_settings = {});
-
+    void setPause(bool paused);
     virtual void update(float delta) override;
     virtual void destroy() override;
     string getMissionTime();
 
     string getNextShipCallsign();
+
+    void notifyCampaignServerScenario(string event, nlohmann::json info = {});
+    void notifyCampaignServerScript(string event, string filename, string name, nlohmann::json extra);
 };
 
 string getSectorName(glm::vec2 position);

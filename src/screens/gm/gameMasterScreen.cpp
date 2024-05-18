@@ -39,19 +39,19 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
 
     pause_button = new GuiToggleButton(this, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
         if (!value) {
-            engine->setGameSpeed(1.0f);
+            gameGlobalInfo->setPause(false);
             slow_button->setValue(false);
         }
         else
         {
-            engine->setGameSpeed(0.0f);
+            gameGlobalInfo->setPause(true);
             slow_button->setValue(false);
         }
     });
     pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
     slow_button = new GuiToggleButton(this, "SLOW_BUTTON", tr("button", "Slow"), [this](bool value) {
         if (!value) {
-            engine->setGameSpeed(1.0f);
+            gameGlobalInfo->setPause(true);
             pause_button->setValue(false);
         }
         else
@@ -290,7 +290,7 @@ void GameMasterScreen::update(float delta)
     if (keys.pause.getDown())
     {
         if (game_server)
-            engine->setGameSpeed(0.0);
+            gameGlobalInfo->setPause(true);
     }
     if (engine->getGameSpeed() == 0.0f) {
         pause_button->setValue(true);

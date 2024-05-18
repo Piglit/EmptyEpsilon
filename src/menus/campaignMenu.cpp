@@ -33,6 +33,11 @@ CampaignMenu::CampaignMenu()
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
+    if (PreferencesManager::get("instance_name") != "")
+    {
+        (new GuiLabel(this, "", PreferencesManager::get("instance_name"), 25))->setAlignment(sp::Alignment::CenterLeft)->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(0, 18);
+    }
+
     (new GuiImage(this, "LOGO", "logo_full.png"))->setPosition(0, title_y, sp::Alignment::TopCenter)->setSize(logo_size_x, logo_size_y);
     (new GuiLabel(this, "VERSION", tr("Space LAN Version: {version}").format({{"version", string(VERSION_NUMBER)}}), 20))->setPosition(0, title_y + logo_size_y, sp::Alignment::TopCenter)->setSize(0, 20);
 
@@ -72,9 +77,12 @@ CampaignMenu::CampaignMenu()
             game_server->setPassword(PreferencesManager::get("password").upper());
             if (campaign_client && campaign_client->isOnline()) {
                 gameGlobalInfo->campaign_running = true;
-                new ServerScenarioSelectionScreen();
+                new ServerCampaignScreen();
                 destroy();
             } else {
+				campaign_client->notifyCampaignServer("eesrv_status", nlohmann::json {
+					{"screen", "quit"}
+				});
                 disconnectFromServer();
             }
         }

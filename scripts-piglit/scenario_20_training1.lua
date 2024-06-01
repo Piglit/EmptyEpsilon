@@ -12,36 +12,36 @@
 --- This is a short mission for inexperienced players.
 
 
-require("utils.lua")
-
+require("utils.lua")    -- formatTime
+require("luax.lua")     -- table.filter
 
 --- Ship creation functions
 function createExuariWeakInterceptor()
-	return CpuShip():setFaction("Exuari"):setTemplate("Dagger"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+    return CpuShip():setFaction("Exuari"):setTemplate("Dagger"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariWeakBomber()
-	return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setWeaponTubeCount(0):setWeaponStorageMax("HVLI", 0):setWeaponStorage("HVLI", 0):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+    return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setWeaponTubeCount(0):setWeaponStorageMax("HVLI", 0):setWeaponStorage("HVLI", 0):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariInterceptor()
-	return CpuShip():setFaction("Exuari"):setTemplate("Dagger")
+    return CpuShip():setFaction("Exuari"):setTemplate("Dagger")
 end
 
 function createExuariBomber()
-	return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
+    return CpuShip():setFaction("Exuari"):setTemplate("Gunner"):setBeamWeapon(0, 0, 0, 0, 0.1, 0.1)
 end
 
 function createExuariTransport()
-	return CpuShip():setFaction("Exuari"):setTemplate("Personnel Freighter 1"):setTypeName("Exuari transport")
+    return CpuShip():setFaction("Exuari"):setTemplate("Personnel Freighter 1"):setTypeName("Exuari transport")
 end
 
 function createExuariFreighter()
-	return CpuShip():setFaction("Exuari"):setTemplate("Goods Freighter 5"):setTypeName("Exuari freighter")
+    return CpuShip():setFaction("Exuari"):setTemplate("Goods Freighter 5"):setTypeName("Exuari freighter")
 end
 
 function createExuariShuttle()
-	return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
+    return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
 end
 
 
@@ -52,6 +52,7 @@ function init()
     finishedTimer = 5
     finishedFlag = false
     instr1 = false
+    assist = false
 
     bonusAvail = true
     bonus = createExuariShuttle():setCallSign("bonus"):setPosition(-2341, -17052):orderFlyTowardsBlind(-80000, -40000):setHeading(-60)
@@ -75,7 +76,7 @@ function init()
 end
 
 function commsInstr()
-    if not instr1 and timer > 8.0 then
+    if not instr1 and player:isValid() and timer > 8.0 then
         instr1 = true
         command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
 
@@ -88,6 +89,16 @@ Commander Saberhagen out.]]))
     end
 end
 
+function needHelp()
+    if not assist and player:isValid() and not player:areEnemiesInRange(20000) then
+        -- send enemies towards the player, if the player got lost.
+        assist = true
+        for _,obj in ipairs(enemyList) do
+            obj:orderDefendTarget(player)
+        end
+    end
+end
+
 function finished(delta)
     finishedTimer = finishedTimer - delta
     if finishedTimer < 0 then
@@ -95,36 +106,35 @@ function finished(delta)
     end
     if finishedFlag == false then
         finishedFlag = true
+	local score = {
+            time = timer,
+            bonus = not bonus:isValid()
+        }
+        sendMessageToCampaignServer("score", toJSON(score))
         local bonusString = _("msgMainscreen-bonusTarget", "escaped.")
         if not bonus:isValid() then
             bonusString = _("msgMainscreen-bonusTarget", "destroyed.")
         end
         globalMessage(string.format(_("msgMainscreen", [[Mission Complete.
 Your Time: %d
-Bonus target %s
-
-If you feel ready for combat, play scenario 'Basic Battle'.
-If you want to try another ship, play the next training mission.
-
-If you need more practice, play this training again
-with different stations assigned to your crew members.]]), formatTime(timer), bonusString))
+Bonus target %s]]), formatTime(timer), bonusString))
     end
 end
 
 function update(delta)
     timer = timer + delta
-    local enemyCountChanged = false
+    local enemyCount = #enemyList
 
-    -- Count all surviving enemies.
-    for i, enemy in ipairs(enemyList) do
-        if not enemy:isValid() then
-            table.remove(enemyList, i)
-            enemyCountChanged = true
-        -- Note: table.remove() inside iteration causes the next element to be skipped.
-        -- This means in each update-cycle max half of the elements are removed.
-        -- It does not matter here, since update is called regulary.
-        end
+    -- remove all objects enemies from the list
+    table.filter(enemyList, function(obj)
+        return obj:isValid()
+    end)
+
+    -- if enemy count changed
+    if #enemyList ~= enemyCount then
+        sendProgressToCampaignServer(enemyCountStart - #enemyList, enemyCountStart)
     end
+
     if #enemyList == 0 then
         if not bonusAvail then
             finished(delta)
@@ -133,11 +143,6 @@ function update(delta)
                 finished(delta)
             end
         end
-    end
-
-    if enemyCountChanged then
-        local progress = 100 - 100 * (#enemyList / enemyCountStart)
-        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
     end
 
     if bonus:isValid() then
@@ -151,5 +156,6 @@ function update(delta)
     end
 
     commsInstr()
+    needHelp()
 end
 

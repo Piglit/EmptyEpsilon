@@ -27,6 +27,8 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// If this ShipTemplate lacks a localized name (ShipTemplate:setLocaleName()), it defaults to this reference name.
     /// Example: template:setName("Phobos T3")
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setName);
+    /// Returns the name of the ShipTemplate
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, getName);
     /// Sets the displayed vessel model designation for ShipTemplateBasedObjects created from this ShipTemplate.
     /// Use with the _ function to expose the localized name to translation.
     /// Examples:

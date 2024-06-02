@@ -391,6 +391,7 @@ end
 --   radialPosition(100, 500, 3000, 65)
 --   radialPosition(obj, 3000, 65)
 function radialPosition(a, b, c, d)
+	local x,y,dist,arc
     if type(a) == "number" and type(b) == "number" and type(c) == "number" and type(d) == "number" then
         -- Assume radialPosition(x, y, dist, arc)
 		x = a

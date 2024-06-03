@@ -39,6 +39,14 @@ function commsShipFriendly(comms_source, comms_target)
     else
         setCommsMessage(_("commsShipAssist", "Sir, how can we assist?"))
     end
+	if comms_data.can_take_over ~= nil then
+		addCommsReply(
+			_("commsShipAssist", "Transfer crew"),
+			function(comms_source, comms_target)
+				return true	-- TODO	
+			end
+		)
+	end
     addCommsReply(
         _("commsShipAssist", "Defend a waypoint"),
         function(comms_source, comms_target)

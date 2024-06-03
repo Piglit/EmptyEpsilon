@@ -1,15 +1,12 @@
 -- Name: Training: Cruiser
--- Type: Basic
--- Description: Basic Training Cource
----
---- Objective: Destroy all enemy ships in the area.
----
---- Description:
---- During this training your will learn to coordinate the actions of your crew and destoy an Exuari training ground.
----
+-- Type: Training
+-- Short Description: Basic Training Cource
+-- Objective: Destroy all enemy ships in the area.
+-- Duration: 15 minutes
+-- Difficulty: short mission for inexperienced players.
+-- Description: Coordinate the actions of your crew to destoy an undefended Exuari training ground.
+--- 
 --- Your ship is a Phobos light cruiser - the most common vessel in the navy.
----
---- This is a short mission for inexperienced players.
 
 
 require("utils.lua")    -- formatTime
@@ -52,7 +49,7 @@ function init()
     finishedTimer = 5
     finishedFlag = false
     instr1 = false
-    assist = false
+	assist_timer = 60
 
     bonusAvail = true
     bonus = createExuariShuttle():setCallSign("bonus"):setPosition(-2341, -17052):orderFlyTowardsBlind(-80000, -40000):setHeading(-60)
@@ -89,14 +86,33 @@ Commander Saberhagen out.]]))
     end
 end
 
-function needHelp()
-    if not assist and player:isValid() and not player:areEnemiesInRange(20000) then
-        -- send enemies towards the player, if the player got lost.
-        assist = true
-        for _,obj in ipairs(enemyList) do
-            obj:orderDefendTarget(player)
-        end
-    end
+function needHelp(delta)
+	if not player:isValid() then
+		return
+	end
+	if player:areEnemiesInRange(20000) then
+		assist_timer = 60
+	else
+		assist_timer = assist_timer - delta
+		if assist_timer < 0 then
+			assist_timer = 120
+			local nearest_dist = 99999999
+			local nearest_enemy = nil
+			for _,enemy in ipairs(enemyList) do
+				if enemy:isValid() then
+					local dist = distance(enemy, player)
+					if dist < nearest_dist then
+						nearest_dist = dist
+						nearest_enemy = enemy
+					end
+				end
+			end
+			if nearest_enemy ~= nil then
+				command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
+According to our sensors there are still enemies in sector ]]) .. nearest_enemy:getSectorName())
+			end
+		end
+	end
 end
 
 function finished(delta)
@@ -156,6 +172,6 @@ function update(delta)
     end
 
     commsInstr()
-    needHelp()
+    needHelp(delta)
 end
 

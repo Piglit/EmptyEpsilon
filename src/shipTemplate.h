@@ -45,6 +45,16 @@ enum ERestockMissileBehaviour
 /* Define script conversion function for the ERestockMissileBehaviour enum. */
 template<> void convert<ERestockMissileBehaviour>::param(lua_State* L, int& idx, ERestockMissileBehaviour& er);
 
+enum EPlayerShipType
+{
+    PST_Ship = 0,
+    PST_Fighter,
+    PST_Station
+};
+
+/* Define script conversion function for the ERestockMissileBehaviour enum. */
+template<> void convert<EPlayerShipType>::param(lua_State* L, int& idx, EPlayerShipType& er);
+
 class ShipRoomTemplate
 {
 public:
@@ -109,7 +119,7 @@ public:
     bool shares_energy_with_docked;
     bool repair_docked;
     bool restocks_scan_probes;
-    bool is_fighter;
+    EPlayerShipType player_ship_type;
     ERestockMissileBehaviour restocks_missiles_docked;
     bool can_scan = true;
     bool can_hack = true;
@@ -168,7 +178,7 @@ public:
     void setSharesEnergyWithDocked(bool enabled);
     void setRepairDocked(bool enabled);
     void setRestocksScanProbes(bool enabled);
-    void setIsFighter(bool enabled);
+    void setPlayerShipType(EPlayerShipType type);
     void setRestocksMissilesDocked(ERestockMissileBehaviour behaviour);
     void setCanScan(bool enabled) { can_scan = enabled; }
     void setCanHack(bool enabled) { can_hack = enabled; }
@@ -239,6 +249,7 @@ string getSystemName(ESystem system);
 string getLocaleSystemName(ESystem system);
 REGISTER_MULTIPLAYER_ENUM(ESystem);
 REGISTER_MULTIPLAYER_ENUM(ERestockMissileBehaviour);
+REGISTER_MULTIPLAYER_ENUM(EPlayerShipType);
 
 /* Define script conversion function for the ShipTemplate::TemplateType enum. */
 template<> void convert<ShipTemplate::TemplateType>::param(lua_State* L, int& idx, ShipTemplate::TemplateType& tt);

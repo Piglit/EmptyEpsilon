@@ -56,4 +56,19 @@ template<> void convert<ERestockMissileBehaviour>::param(lua_State* L, int& idx,
     else
         er = R_None;
 }
+
+/* Define script conversion function for the EPlayerShipType enum. */
+template<> void convert<EPlayerShipType>::param(lua_State* L, int& idx, EPlayerShipType& er)
+{
+    string str = string(luaL_checkstring(L, idx++)).lower();
+    if (str == "ship")
+        er = PST_Ship;
+    else if (str == "fighter")
+        er = PST_Fighter;
+    else if (str == "station")
+        er = PST_Station;
+    else
+        er = PST_Ship;
+}
+
 #endif /* _SHIPTEMPLATE_HPP_ */

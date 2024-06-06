@@ -313,7 +313,7 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoRepair);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setSpawnShips);
-    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setIsFighter);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setPlayerShipType);
 }
 
 std::unordered_map<string, P<ShipTemplate> > ShipTemplate::templateMap;
@@ -328,7 +328,7 @@ ShipTemplate::ShipTemplate()
     shares_energy_with_docked = true;
     repair_docked = false;
     restocks_scan_probes = false;
-    is_fighter = false;
+    player_ship_type = PST_Ship;
     restocks_missiles_docked = R_None;
     energy_storage_amount = 1000;
     repair_crew_count = 3;
@@ -670,9 +670,9 @@ void ShipTemplate::setRestocksScanProbes(bool enabled)
     restocks_scan_probes = enabled;
 }
 
-void ShipTemplate::setIsFighter(bool enabled)
+void ShipTemplate::setPlayerShipType(EPlayerShipType type)
 {
-    is_fighter = enabled;
+    player_ship_type = type;
 }
 
 void ShipTemplate::setRestocksMissilesDocked(ERestockMissileBehaviour behaviour)
@@ -781,7 +781,7 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->shares_energy_with_docked = shares_energy_with_docked;
     result->repair_docked = repair_docked;
     result->restocks_scan_probes = restocks_scan_probes;
-    result->is_fighter = is_fighter;
+    result->player_ship_type = player_ship_type;
     result->restocks_missiles_docked = restocks_missiles_docked;
     result->has_warp_drive = has_warp_drive;
     result->has_jump_drive = has_jump_drive;

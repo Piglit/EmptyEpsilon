@@ -1,7 +1,7 @@
 #include "main.h"
 #include "playerInfo.h"
 #include "spaceObjects/playerSpaceship.h"
-#include "singlePilotScreen.h"
+#include "singleFighterScreen.h"
 #include "preferenceManager.h"
 
 #include "screenComponents/viewport3d.h"
@@ -29,22 +29,21 @@
 #include "gui/gui2_rotationdial.h"
 #include "gui/gui2_image.h"
 
-SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
+SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 : GuiOverlay(owner, "SINGLEPILOT_SCREEN", colorConfig.background)
 {
+    viewport = new GuiViewport3D(this, "VIEWPORT");
+    viewport->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    viewport->showCallsigns();
+    viewport->showHeadings();
+    viewport->showSpacedust();
 
-    // Render the radar shadow and background decorations.
-    (new GuiImage(this, "BACKGROUND_GRADIENT", "gui/background/gradientSingle.png"))->setPosition(glm::vec2(0, 0), sp::Alignment::Center)->setSize(1200, 900);
-
-    background_crosses = new GuiOverlay(this, "BACKGROUND_CROSSES", glm::u8vec4{255,255,255,255});
-    background_crosses->setTextureTiled("gui/background/crosses.png");
     // Render the alert level color overlay.
     (new AlertLevelOverlay(this));
 
     // 5U tactical radar with piloting features.
     radar = new GuiRadarView(this, "TACTICAL_RADAR", &targets);
-
-    radar->setStyle(GuiRadarView::Circular)->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 650);
+    radar->setStyle(GuiRadarView::CircularMasked)->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(200, 200);
     radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators();
     radar->setCallbacks(
         [this](sp::io::Pointer::Button button, glm::vec2 position) {
@@ -80,12 +79,6 @@ SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
     shields_display = new GuiKeyValueDisplay(stats, "SHIELDS_DISPLAY", 0.45, tr("Shields"), "");
     shields_display->setIcon("gui/icons/shields")->setTextSize(20)->setSize(240, 40);
 
-    // Unlocked missile aim dial and lock controls.
-    missile_aim = new AimLock(this, "MISSILE_AIM", radar, -90, 360 - 90, 0, [this](float value){
-        tube_controls->setMissileTargetAngle(value);
-    });
-    missile_aim->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 700);
-
     // Weapon tube controls.
     tube_controls = new GuiMissileTubeControls(this, "MISSILE_TUBES");
     tube_controls->setPosition(20, -20, sp::Alignment::BottomLeft);
@@ -104,14 +97,10 @@ SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
     (new GuiCommsOverlay(this))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(520, 20, sp::Alignment::TopLeft)->setSize(250, 50);
 
-    // Missile lock button near top right of left panel.
-    lock_aim = new AimLockButton(this, "LOCK_AIM", tube_controls, missile_aim);
-    lock_aim->setPosition(250, 70, sp::Alignment::TopCenter)->setSize(130, 50);
-
     (new GuiCustomShipFunctions(this, singlePilot, ""))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 }
 
-void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
+void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
 {
     if (my_spaceship)
     {
@@ -144,14 +133,12 @@ void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
             shields_display->hide();
         }
 
-        missile_aim->setVisible(tube_controls->getManualAim());
-
         targets.set(my_spaceship->getTarget());
     }
     GuiOverlay::onDraw(renderer);
 }
 
-void SinglePilotScreen::onUpdate()
+void SingleFighterScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
@@ -224,13 +211,6 @@ void SinglePilotScreen::onUpdate()
                     return;
                 }
             }
-        }
-
-        auto aim_adjust = keys.weapons_aim_left.getValue() - keys.weapons_aim_right.getValue();
-        if (aim_adjust != 0.0f)
-        {
-            missile_aim->setValue(missile_aim->getValue() - 5.0f * aim_adjust);
-            tube_controls->setMissileTargetAngle(missile_aim->getValue());
         }
     }
 }

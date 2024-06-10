@@ -323,9 +323,9 @@ ServerCampaignScreen::ServerCampaignScreen()
             auto ip = sp::io::network::Address::getLocalAddress().getHumanReadable()[0];
             auto version = string(VERSION_NUMBER);
             (new GuiLabel(layout, "SERVER_INFO", tr("Server"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_NAME", 0.4, tr("Server Name:"), name))->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_IP", 0.4, tr("Server IP:"), ip))->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_VERSION", 0.4, tr("Server Version:"), version))->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_NAME", 0.4, tr("Server Name:"), name))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_IP", 0.4, tr("Server IP:"), ip))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_VERSION", 0.4, tr("Server Version:"), version))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
 
             std::vector<string> players;
             foreach(PlayerInfo, i, player_info_list)

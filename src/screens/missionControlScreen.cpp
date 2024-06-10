@@ -25,57 +25,38 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     // Draw a container with two columns.
     auto container = new GuiElement(this, "");
     container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
-    auto left_container = new GuiElement(container, "");
-    left_container->setSize(350, GuiElement::GuiSizeMax);
+    auto left_panel = new GuiPanel(container, "");
+    left_panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(350, 280);
+    auto left_container = new GuiElement(left_panel, "");
+    left_container->setMargins(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     auto right_container = new GuiElement(container, "");
     right_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
     string callsign = PreferencesManager::get("shipname", "");
     int posy = 20;
 
-    // server info
-
-    (new GuiLabel(left_container, "SERVER_INFO_LABEL", tr("Server info"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-
-    // Server name row.
-    string name;
-    if (game_server) {
-        name = game_server->getServerName();
-    } else {
-        name = callsign;
-    }
-
-
-    (new GuiKeyValueDisplay(left_container, "SERVER_NAME", 0.4, tr("Server Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-    auto ip = sp::io::network::Address::getLocalAddress().getHumanReadable()[0];
-    (new GuiKeyValueDisplay(left_container, "SERVER_IP", 0.4, tr("Server Ip"), ip))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-
     // mission info
 
     posy += 40;
-    (new GuiLabel(left_container, "SCENARIO_INFO_LABEL", tr("Mission info"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+    (new GuiLabel(left_container, "SCENARIO_INFO_LABEL", tr("Mission control"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+//        ->setPosition(20, posy, sp::Alignment::TopLeft);
     posy += 40;
 
     if (game_server) {
-        name = gameGlobalInfo->scenario;
-        (new GuiKeyValueDisplay(left_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+        string name = gameGlobalInfo->scenario;
+        (new GuiKeyValueDisplay(left_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
         posy += 40;
+    } else {
+        left_panel->setSize(350, 100);
     }
 
 
     clock = new GuiKeyValueDisplay(left_container, "CLOCK", 0.4, tr("Mission Time"), "0");
-    clock->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
+    clock->setTextSize(20)->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
 
     
     // Buttons and controls
     if (game_server) {
-        posy += 40;
-        (new GuiLabel(left_container, "BUTTON_LABEL", tr("Mission control"), 30))->addBackground()->setPosition(20,posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        posy += 50;
         pause_button = new GuiToggleButton(left_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
             if (!value) {
                 gameGlobalInfo->setPause(false);
@@ -83,7 +64,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
                 gameGlobalInfo->setPause(true);
             }
         });
-        pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+        pause_button->setValue(engine->getGameSpeed() == 0.0f)->setSize(GuiElement::GuiSizeMax, 50);
+            //->setPosition(20, posy, sp::Alignment::TopLeft);
         posy += 50;
         if (!game_server) {
             pause_button->hide();
@@ -91,15 +73,18 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
             (new GuiButton(left_container, "QUIT", tr("Quit Mission"), [this]() {
                 destroy();
                 new ServerCampaignScreen();
-            }))->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+            }))->setSize(GuiElement::GuiSizeMax, 50);
+                //->setPosition(20, posy, sp::Alignment::TopLeft);
         }
 
         posy += 40;
     }
     posy += 40;
 
+    // Right side, Dynamic content: ship
+
     // Ship Info
-    ship_infos = new GuiElement(left_container, "");
+    ship_infos = new GuiPanel(right_container, "");
     ship_infos->setPosition(0, posy)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     posy = 0;
 
@@ -126,7 +111,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     ship_subclass->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
     posy += 40;
 
-    // Right side, Dynamic content: ship
+    // ship creation panel
 
     ship_panel = new GuiPanel(right_container, "SHIP_PANEL");
     ship_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440);

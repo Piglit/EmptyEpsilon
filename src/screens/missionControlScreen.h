@@ -27,7 +27,7 @@ private:
     GuiKeyValueDisplay* clock;
     GuiToggleButton* pause_button;
 
-    GuiElement* ship_infos;
+    GuiPanel* ship_infos;
     GuiKeyValueDisplay* ship_name;
     GuiKeyValueDisplay* ship_class;
     GuiKeyValueDisplay* ship_subclass;

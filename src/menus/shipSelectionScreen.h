@@ -29,7 +29,7 @@ private:
     GuiLabel* no_ships_label;
     GuiListbox* player_ship_list;
 
-    GuiSelector* fighter_toggle_selector;
+    GuiSelector* ship_type_selector;
 
     GuiOverlay* crew_position_selection_overlay;
     CrewPositionSelection* crew_position_selection;

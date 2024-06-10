@@ -13,7 +13,6 @@ enum ECrewPosition
     engineering,
     scienceOfficer,
     relayOfficer,
-    hangar,
     //4/3 player crew
     tacticalOfficer,    //helms+weapons-shields
     engineeringAdvanced,//engineering+shields
@@ -28,6 +27,7 @@ enum ECrewPosition
     altRelay,
     commsOnly,
     shipLog,
+    hangar,
     max_crew_positions
 };
 

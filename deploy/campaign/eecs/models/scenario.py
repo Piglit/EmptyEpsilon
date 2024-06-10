@@ -27,8 +27,9 @@ class Scenario:
 		assert self.name
 	
 	def getInfo(self):
+		# unused
 		ret = {}
-		for key in ["name", "description", "short", "objective", "duration", "difficulty"]:
+		for key in ["name", "description", "short description", "objective", "duration", "difficulty"]:
 			if hasattr(self, key):
 				ret[key] = getattr(self, key)
 		return ret
@@ -61,7 +62,7 @@ class Scenario:
 		additional = ""
 		if "[" in key and key.endswith("]"):
 			key, additional = key[:-1].split("[", maxsplit=1)
-		if key.lower() in ["name", "description", "author", "proxy", "short", "objective", "duration", "difficulty"]:
+		if key.lower() in ["name", "description", "author", "proxy", "short description", "objective", "duration", "difficulty"]:
 			self.__dict__[key.lower()] = value
 		elif key.lower() in ["type", "category"]:
 			self.categories.append(value)

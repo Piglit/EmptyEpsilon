@@ -189,6 +189,7 @@ async def getScenarios(server_name):
 
 @app.get("/scenario_info/{server_name}/{scenario_name}")
 async def getScenarioInfo(server_name, scenario_name):
+	assert False, "unused"
 	log.debug(server_name + "\tget scenario info for "+scenario_name)
 	scenario = models.scenario.getScenario(scenario_name)
 	return {"scenarioInfo": scenario.getInfo()}

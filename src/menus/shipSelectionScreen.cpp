@@ -284,12 +284,13 @@ ShipSelectionScreen::ShipSelectionScreen()
     // Player ship selection panel
     (new GuiPanel(left_container, "SHIP_SELECTION_BOX"))->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(550, 560);
 
-    fighter_toggle_selector = new GuiSelector(left_container, "FIGHTER_TOGGLE_SELECTOR", [this](int index, string value)
+    ship_type_selector = new GuiSelector(left_container, "SHIP_TYPE_SELECTOR", [this](int index, string value)
     {});
-    fighter_toggle_selector->addEntry(tr("Select ship"), "ship");
-    fighter_toggle_selector->addEntry(tr("Select fighter"), "fighter");
-    fighter_toggle_selector->setSelectionIndex((int) my_player_info->fighter_pilot);
-    fighter_toggle_selector->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(490, 50);
+    ship_type_selector->addEntry(tr("Select ship"), "ship");
+    ship_type_selector->addEntry(tr("Select fighter"), "fighter");
+    ship_type_selector->addEntry(tr("Select station"), "station");
+    ship_type_selector->setSelectionIndex((int) my_player_info->player_ship_type);
+    ship_type_selector->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(490, 50);
 
 //    (new GuiLabel(left_container, "SHIP_SELECTION_LABEL", tr("Select ship"), 30))->addBackground()->setPosition(0, 50, sp::Alignment::TopCenter)->setSize(510, 50);
     no_ships_label = new GuiLabel(left_container, "SHIP_SELECTION_NO_SHIPS_LABEL", tr("Waiting for server to spawn a ship"), 30);
@@ -315,7 +316,7 @@ ShipSelectionScreen::ShipSelectionScreen()
                     return ship && ship->control_code == code;
                 }, [this, ship](){
                     my_player_info->commandSetShipId(ship->getMultiplayerId());
-                    my_player_info->fighter_pilot = ship->getIsFighter();
+                    my_player_info->player_ship_type = ship->player_ship_type;
                     crew_position_selection_overlay->show();
                     my_player_info->last_ship_password = ship->control_code;
                     left_container->show();
@@ -329,7 +330,7 @@ ShipSelectionScreen::ShipSelectionScreen()
             else
             {
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
-                my_player_info->fighter_pilot = ship->getIsFighter();
+                my_player_info->player_ship_type = ship->player_ship_type;
                 crew_position_selection_overlay->show();
             }
         // If the selected item isn't a ship, reset the ship ID in player info.
@@ -377,7 +378,7 @@ ShipSelectionScreen::ShipSelectionScreen()
                 ship->target_rotation = ship->getRotation();
                 ship->setPosition(glm::vec2(random(-100, 100), random(-100, 100)));
                 ship->setTemplate(ship_template_selector->getSelectionValue());
-                fighter_toggle_selector->setSelectionIndex(ship->getIsFighter());
+                ship_type_selector->setSelectionIndex(ship->player_ship_type);
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
             }
         }))->setPosition(0, 680, sp::Alignment::TopCenter)->setSize(490, 50);
@@ -435,7 +436,7 @@ void ShipSelectionScreen::update(float delta)
     for(int n = 0; n < GameGlobalInfo::max_player_ships; n++)
     {
         P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(n);
-        if (ship && (int(ship->getIsFighter()) == fighter_toggle_selector->getSelectionIndex()))
+        if (ship && (int(ship->player_ship_type) == ship_type_selector->getSelectionIndex()))
         {
             string ship_name = ship->getLocaleFaction() + " " + ship->getTypeName() + " " + ship->getCallSign();
 
@@ -632,7 +633,7 @@ void CrewPositionSelection::onUpdate()
         {
             if (n <= relayOfficer)
             {
-                if (my_spaceship->getIsFighter())
+                if (my_spaceship->player_ship_type == PST_Fighter)
                 {
                     crew_position_button[n]->hide();
                     crew_position_button[n]->setValue(false);

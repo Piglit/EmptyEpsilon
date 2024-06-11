@@ -34,8 +34,8 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 {
     viewport = new GuiViewport3D(this, "VIEWPORT");
     viewport->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    viewport->showCallsigns();
-    viewport->showHeadings();
+    //viewport->showCallsigns();
+    //viewport->showHeadings();
     viewport->showSpacedust();
 
     // Render the alert level color overlay.
@@ -43,7 +43,7 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 
     // 5U tactical radar with piloting features.
     radar = new GuiRadarView(this, "TACTICAL_RADAR", &targets);
-    radar->setStyle(GuiRadarView::CircularMasked)->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(200, 200);
+    radar->setStyle(GuiRadarView::CircularMasked)->setPosition(0, 0, sp::Alignment::BottomCenter)->setSize(300, 300);
     radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators();
     radar->setCallbacks(
         [this](sp::io::Pointer::Button button, glm::vec2 position) {
@@ -66,16 +66,19 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 
     // Ship stats and combat maneuver at bottom right corner of left panel.
     combat_maneuver = new GuiCombatManeuver(this, "COMBAT_MANEUVER");
-    combat_maneuver->setPosition(-20, -180, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
+    combat_maneuver->setPosition(-20, -390, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
 
     auto stats = new GuiElement(this, "STATS");
-    stats->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(240, 160)->setAttribute("layout", "vertical");
+    stats->setPosition(20, 100, sp::Alignment::TopLeft)->setSize(240, 160)->setAttribute("layout", "vertical");
     energy_display = new GuiKeyValueDisplay(stats, "ENERGY_DISPLAY", 0.45, tr("Energy"), "");
     energy_display->setIcon("gui/icons/energy")->setTextSize(20)->setSize(240, 40);
     heading_display = new GuiKeyValueDisplay(stats, "HEADING_DISPLAY", 0.45, tr("Heading"), "");
     heading_display->setIcon("gui/icons/heading")->setTextSize(20)->setSize(240, 40);
     velocity_display = new GuiKeyValueDisplay(stats, "VELOCITY_DISPLAY", 0.45, tr("Speed"), "");
     velocity_display->setIcon("gui/icons/speed")->setTextSize(20)->setSize(240, 40);
+
+    hull_display = new GuiKeyValueDisplay(stats, "HULL_DISPLAY", 0.45, tr("health","Hull"), "");
+    hull_display->setIcon("gui/icons/hull")->setTextSize(20)->setSize(240, 40);
     shields_display = new GuiKeyValueDisplay(stats, "SHIELDS_DISPLAY", 0.45, tr("Shields"), "");
     shields_display->setIcon("gui/icons/shields")->setTextSize(20)->setSize(240, 40);
 
@@ -86,16 +89,16 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 
     // Engine layout in top left corner of left panel.
     auto engine_layout = new GuiElement(this, "ENGINE_LAYOUT");
-    engine_layout->setPosition(20, 80, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 250)->setAttribute("layout", "horizontal");
+    engine_layout->setPosition(-20, -80, sp::Alignment::BottomRight)->setSize(GuiElement::GuiSizeMax, 300)->setAttribute("layout", "horizontalright");
     (new GuiImpulseControls(engine_layout, "IMPULSE"))->setSize(100, GuiElement::GuiSizeMax);
     warp_controls = (new GuiWarpControls(engine_layout, "WARP"))->setSize(100, GuiElement::GuiSizeMax);
     jump_controls = (new GuiJumpControls(engine_layout, "JUMP"))->setSize(100, GuiElement::GuiSizeMax);
 
     // Docking, comms, and shields buttons across top.
-    (new GuiDockingButton(this, "DOCKING"))->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
-    (new GuiOpenCommsButton(this, "OPEN_COMMS_BUTTON", tr("Open Comms"), &targets))->setPosition(270, 20, sp::Alignment::TopLeft)->setSize(250, 50);
+    (new GuiDockingButton(this, "DOCKING"))->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(280, 50);
+    (new GuiOpenCommsButton(this, "OPEN_COMMS_BUTTON", tr("Open Comms"), &targets))->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
     (new GuiCommsOverlay(this))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(520, 20, sp::Alignment::TopLeft)->setSize(250, 50);
+    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(280, 20, sp::Alignment::TopLeft)->setSize(250, 50);
 
     (new GuiCustomShipFunctions(this, singlePilot, ""))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 }
@@ -119,6 +122,12 @@ void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
 
         warp_controls->setVisible(my_spaceship->has_warp_drive);
         jump_controls->setVisible(my_spaceship->has_jump_drive);
+
+        hull_display->setValue(string(int(nearbyint(100.0f * my_spaceship->hull_strength / my_spaceship->hull_max))) + "%");
+        if (my_spaceship->hull_strength < my_spaceship->hull_max / 4.0f)
+            hull_display->setColor(glm::u8vec4(255, 0, 0, 255));
+        else
+            hull_display->setColor(glm::u8vec4{255,255,255,255});
 
         string shields_value = string(my_spaceship->getShieldPercentage(0)) + "%";
         if (my_spaceship->hasSystem(SYS_RearShield))

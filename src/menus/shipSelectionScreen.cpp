@@ -533,7 +533,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     limited_crew_panel->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);;
     (new GuiLabel(limited_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("4/3/1 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(limited_crew_panel, "");
-    layout->setMargins(25, 50)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     for(int n=int(tacticalOfficer); n<=int(singleFighter); n++)
         create_crew_position_button(layout, n);
 
@@ -633,8 +633,8 @@ void CrewPositionSelection::onUpdate()
         else
         {
             standard_crew_panel->show();
-            crew_position_button[int(singleFighter)]->setValue(false)->hide();
-            my_player_info->commandSetCrewPosition(window_index, singleFighter, false);
+//            crew_position_button[int(singleFighter)]->setValue(false)->hide();
+//            my_player_info->commandSetCrewPosition(window_index, singleFighter, false);
         }
         for(int n = 0; n < max_crew_positions; n++)
         {

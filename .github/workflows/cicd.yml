@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - spacelan23
+      - lan24
   pull_request:
 jobs:
   linux:
@@ -36,7 +36,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: spacelan23
+          ref: lan24
       - name: EmptyEpsilon Checkout
         uses: actions/checkout@v2
         with:
@@ -63,7 +63,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: spacelan23
+          ref: lan24
       - name: EmptyEpsilon Checkout
         uses: actions/checkout@v2
         with:
@@ -126,7 +126,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: spacelan23
+          ref: lan24
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
       - name: Configure CMake

@@ -14,15 +14,14 @@ If you want to extend this list of ships, consider using variations of the "batt
 
 Strategic use in scenarios
 --------------------------
-FIXME
 Considering the faction description and existing scenarios the following strategies have been developed for the Kraylor fleet.
-  * Raiders: single ships attack from different directions. They look out for the nearest target and attack ships or stations. More advanced ships may use jump drives. 
-  * actual Raid: a small flotilla of multiple ships sets course towards a well defended target. 
+  * Marauders: Few ships invade the territory from different directions. They go from one place to another and attack ships and stations. More advanced ships may use jump drives and drones. When used in small but combat heavy scenarios, the players goal can be to defend their assets and hunt down the marauders. In more story-driven scenarios they often they may occur as nuisance that distracts the players from their primary goal.
+  * Bases: Kraylor stations are scattered over an area of the map. Small Kraylor fleets will defend most of the stations. The stations may regularly launch marauders to attack stations of the players faction. The players goal usually is to destroy Kraylor stations while defending their own assets.
 
 Ship Properties
 ---------------
 The following features were chosen for Kraylor ships, to make them distinguishable from other factions:
-  * Kraylor focus on massive corvettes that project strength and physical might; they do not rely on specialiced ships or fighters.
+  * Kraylor focus on massive corvettes that project strength and physical might; they do not rely on specialised ships or fighters.
   * Shields are stronger than hull, front shield are stronger than rear shields
   * Multiple shield segments, heavier ships use more shield segments
   * Shields are stronger than the shields of most other factions

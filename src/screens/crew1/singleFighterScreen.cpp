@@ -157,7 +157,6 @@ void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
         jump_controls->setVisible(my_spaceship->has_jump_drive);
 
         beam_info_box->setVisible(my_spaceship->hasSystem(SYS_BeamWeapons) && gameGlobalInfo->use_system_damage);
-
         hull_display->setValue(string(int(nearbyint(100.0f * my_spaceship->hull_strength / my_spaceship->hull_max))) + "%");
         if (my_spaceship->hull_strength < my_spaceship->hull_max / 4.0f)
             hull_display->setColor(glm::u8vec4(255, 0, 0, 255));

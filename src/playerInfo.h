@@ -54,7 +54,6 @@ public:
     string last_ship_password;
     EPlayerShipType player_ship_type = PST_Ship;
 
-
     PlayerInfo();
 
     void reset();

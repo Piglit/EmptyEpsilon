@@ -267,6 +267,7 @@ set(MAIN_SOURCES
     src/screens/crew6/weaponsScreen.cpp
     src/screens/crew6/helmsScreen.cpp
     src/screens/crew1/singlePilotScreen.cpp
+    src/screens/crew1/singleFighterScreen.cpp
     src/screens/extra/damcon.cpp
     src/screens/extra/powerManagement.cpp
     src/screens/extra/databaseScreen.cpp
@@ -469,6 +470,7 @@ set(MAIN_SOURCES
     src/screenComponents/warpControls.h
     src/screens/cinematicViewScreen.h
     src/screens/crew1/singlePilotScreen.h
+    src/screens/crew1/singleFighterScreen.h
     src/screens/crew4/engineeringAdvancedScreen.h
     src/screens/crew4/operationsScreen.h
     src/screens/crew4/tacticalScreen.h

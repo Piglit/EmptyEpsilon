@@ -502,7 +502,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     // 5-6-crew panel
 
     standard_crew_panel = new GuiPanel(left_container, "");
-    standard_crew_panel->setSize(GuiElement::GuiSizeMax, 335)->setPosition(0, 0, sp::Alignment::BottomCenter)->setMargins(0, 0, 0, 25);
+    standard_crew_panel->setSize(GuiElement::GuiSizeMax, 315)->setPosition(0, 0, sp::Alignment::BottomCenter)->setMargins(0, 0, 0, 25);
     (new GuiLabel(standard_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("6/5 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     auto layout = new GuiElement(standard_crew_panel, "");
     layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
@@ -533,8 +533,8 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     limited_crew_panel->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);;
     (new GuiLabel(limited_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("4/3/1 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(limited_crew_panel, "");
-    layout->setMargins(25, 50)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-    for(int n=int(tacticalOfficer); n<=int(singlePilot); n++)
+    layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    for(int n=int(tacticalOfficer); n<=int(singleFighter); n++)
         create_crew_position_button(layout, n);
 
     // 3d views panel
@@ -599,7 +599,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     main_screen_controls_button->setValue(my_player_info->main_screen_control)->setSize(GuiElement::GuiSizeMax, 50);
 
     layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-    for(int n=int(singlePilot) + 1; n<int(max_crew_positions); n++)
+    for(int n=int(singleFighter) + 1; n<int(max_crew_positions); n++)
         create_crew_position_button(layout, n);
     // Info text panel
     auto info_panel = new GuiPanel(right_container,"");
@@ -618,30 +618,27 @@ void CrewPositionSelection::onUpdate()
     // indicate that on the button.
     string crew_text = "";
 
-    if (my_spaceship && my_spaceship->getIsFighter())
+    if (my_spaceship)
     {
-        standard_crew_panel->hide();
-    }
-    else
-    {
-        standard_crew_panel->show();
-    }
-    for(int n = 0; n < max_crew_positions; n++)
-    {
-        string button_text = getCrewPositionName(ECrewPosition(n));
-        if (my_spaceship)
+        if (my_spaceship->player_ship_type == PST_Fighter)
         {
-            if (n <= relayOfficer)
+            standard_crew_panel->hide();
+            crew_position_button[int(singleFighter)]->show();
+            for(int n = 0; n <= relayOfficer; n++)
             {
-                if (my_spaceship->player_ship_type == PST_Fighter)
-                {
-                    crew_position_button[n]->hide();
-                    crew_position_button[n]->setValue(false);
-                    my_player_info->commandSetCrewPosition(window_index, ECrewPosition(n), false);
-                } else {
-                    crew_position_button[n]->show();
-                }
+                crew_position_button[n]->setValue(false);
+                my_player_info->commandSetCrewPosition(window_index, ECrewPosition(n), false);
             }
+        }
+        else
+        {
+            standard_crew_panel->show();
+//            crew_position_button[int(singleFighter)]->setValue(false)->hide();
+//            my_player_info->commandSetCrewPosition(window_index, singleFighter, false);
+        }
+        for(int n = 0; n < max_crew_positions; n++)
+        {
+            string button_text = getCrewPositionName(ECrewPosition(n));
             std::vector<string> players;
             foreach(PlayerInfo, i, player_info_list)
             {

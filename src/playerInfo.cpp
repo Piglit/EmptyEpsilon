@@ -14,6 +14,7 @@
 #include "screens/crew4/operationsScreen.h"
 
 #include "screens/crew1/singlePilotScreen.h"
+#include "screens/crew1/singleFighterScreen.h"
 
 #include "screens/extra/damcon.h"
 #include "screens/extra/powerManagement.h"
@@ -205,6 +206,8 @@ void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer)
         //Crew 1
         if (crew_position[singlePilot] & (1 << monitor_index))
             screen->addStationTab(new SinglePilotScreen(container), singlePilot, getCrewPositionName(singlePilot), getCrewPositionIcon(singlePilot));
+        if (crew_position[singleFighter] & (1 << monitor_index))
+            screen->addStationTab(new SingleFighterScreen(container), singleFighter, getCrewPositionName(singleFighter), getCrewPositionIcon(singleFighter));
 
         //Extra
         if (crew_position[damageControl] & (1 << monitor_index))
@@ -259,6 +262,7 @@ string getCrewPositionName(ECrewPosition position)
     case engineeringAdvanced: return tr("station","Engineering+");
     case operationsOfficer: return tr("station","Operations");
     case singlePilot: return tr("station","Single Pilot");
+    case singleFighter: return tr("station","Fighter Cockpit");
     case damageControl: return tr("station","Damage Control");
     case powerManagement: return tr("station","Power Management");
     case databaseView: return tr("station","Database");
@@ -282,6 +286,7 @@ string getCrewPositionIcon(ECrewPosition position)
     case engineeringAdvanced: return "";
     case operationsOfficer: return "";
     case singlePilot: return "";
+    case singleFighter: return "";
     case damageControl: return "";
     case powerManagement: return "";
     case databaseView: return "";
@@ -320,6 +325,8 @@ template<> void convert<ECrewPosition>::param(lua_State* L, int& idx, ECrewPosit
     //1 player crew
     else if (str == "single" || str == "singlepilot")
         cp = singlePilot;
+    else if (str == "fighter" || str == "singlefighter")
+        cp = singleFighter;
 
     //extras
     else if (str == "damagecontrol")

@@ -3,6 +3,7 @@
 
 #include "multiplayer.h"
 #include "scriptInterface.h"
+#include "shipTemplate.h"
 
 enum ECrewPosition
 {
@@ -16,8 +17,9 @@ enum ECrewPosition
     tacticalOfficer,    //helms+weapons-shields
     engineeringAdvanced,//engineering+shields
     operationsOfficer, //science+comms
-    //1 player crew
+    //special crew
     singlePilot,
+    singleFighter,
     //extras
     damageControl,
     powerManagement,
@@ -46,7 +48,7 @@ public:
     int32_t ship_id;
     string name;
     string last_ship_password;
-    bool fighter_pilot = 0;
+    EPlayerShipType player_ship_type = PST_Ship;
 
     PlayerInfo();
 

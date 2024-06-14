@@ -166,11 +166,11 @@ MainMenu::MainMenu()
             destroy();
             new GameMasterScreen(nullptr);
         }
-    }))->setPosition({370, -150}, sp::Alignment::BottomLeft)->setSize(300, 50);
+    }))->setPosition({370, -130}, sp::Alignment::BottomLeft)->setSize(300, 50);
 
     (new GuiButton(this, "", "MODELS!", [this]() {
         destroy();
         new DebugAllModelView();
-    }))->setPosition({370, -200}, sp::Alignment::BottomLeft)->setSize(300, 50);
+    }))->setPosition({370, -180}, sp::Alignment::BottomLeft)->setSize(300, 50);
 #endif
 }

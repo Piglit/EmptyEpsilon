@@ -1,8 +1,7 @@
 #include "main.h"
 #include "playerInfo.h"
-#include "gameGlobalInfo.h"
 #include "spaceObjects/playerSpaceship.h"
-#include "singlePilotScreen.h"
+#include "singleFighterScreen.h"
 #include "preferenceManager.h"
 
 #include "screenComponents/viewport3d.h"
@@ -20,7 +19,6 @@
 #include "screenComponents/shieldsEnableButton.h"
 #include "screenComponents/beamFrequencySelector.h"
 #include "screenComponents/beamTargetSelector.h"
-#include "screenComponents/powerDamageIndicator.h"
 
 #include "screenComponents/openCommsButton.h"
 #include "screenComponents/commsOverlay.h"
@@ -30,24 +28,22 @@
 #include "gui/gui2_keyvaluedisplay.h"
 #include "gui/gui2_rotationdial.h"
 #include "gui/gui2_image.h"
-#include "gui/gui2_label.h"
 
-SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
+SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 : GuiOverlay(owner, "SINGLEPILOT_SCREEN", colorConfig.background)
 {
+    viewport = new GuiViewport3D(this, "VIEWPORT");
+    viewport->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    //viewport->showCallsigns();
+    //viewport->showHeadings();
+    viewport->showSpacedust();
 
-    // Render the radar shadow and background decorations.
-    (new GuiImage(this, "BACKGROUND_GRADIENT", "gui/background/gradientSingle.png"))->setPosition(glm::vec2(0, 0), sp::Alignment::Center)->setSize(1200, 900);
-
-    background_crosses = new GuiOverlay(this, "BACKGROUND_CROSSES", glm::u8vec4{255,255,255,255});
-    background_crosses->setTextureTiled("gui/background/crosses.png");
     // Render the alert level color overlay.
     (new AlertLevelOverlay(this));
 
     // 5U tactical radar with piloting features.
     radar = new GuiRadarView(this, "TACTICAL_RADAR", &targets);
-
-    radar->setStyle(GuiRadarView::Circular)->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 650);
+    radar->setStyle(GuiRadarView::CircularMasked)->setPosition(0, 0, sp::Alignment::BottomCenter)->setSize(300, 300);
     radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators();
     radar->setCallbacks(
         [this](sp::io::Pointer::Button button, glm::vec2 position) {
@@ -70,72 +66,70 @@ SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
 
     // Ship stats and combat maneuver at bottom right corner of left panel.
     combat_maneuver = new GuiCombatManeuver(this, "COMBAT_MANEUVER");
-    combat_maneuver->setPosition(-20, -180, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
+    combat_maneuver->setPosition(-20, -390, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
 
     auto stats = new GuiElement(this, "STATS");
-    stats->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(240, 160)->setAttribute("layout", "vertical");
+    stats->setPosition(20, 100, sp::Alignment::TopLeft)->setSize(240, 160)->setAttribute("layout", "vertical");
     energy_display = new GuiKeyValueDisplay(stats, "ENERGY_DISPLAY", 0.45, tr("Energy"), "");
     energy_display->setIcon("gui/icons/energy")->setTextSize(20)->setSize(240, 40);
     heading_display = new GuiKeyValueDisplay(stats, "HEADING_DISPLAY", 0.45, tr("Heading"), "");
     heading_display->setIcon("gui/icons/heading")->setTextSize(20)->setSize(240, 40);
     velocity_display = new GuiKeyValueDisplay(stats, "VELOCITY_DISPLAY", 0.45, tr("Speed"), "");
     velocity_display->setIcon("gui/icons/speed")->setTextSize(20)->setSize(240, 40);
+
+    hull_display = new GuiKeyValueDisplay(stats, "HULL_DISPLAY", 0.45, tr("health","Hull"), "");
+    hull_display->setIcon("gui/icons/hull")->setTextSize(20)->setSize(240, 40);
     shields_display = new GuiKeyValueDisplay(stats, "SHIELDS_DISPLAY", 0.45, tr("Shields"), "");
     shields_display->setIcon("gui/icons/shields")->setTextSize(20)->setSize(240, 40);
-
-    // Unlocked missile aim dial and lock controls.
-    missile_aim = new AimLock(this, "MISSILE_AIM", radar, -90, 360 - 90, 0, [this](float value){
-        tube_controls->setMissileTargetAngle(value);
-    });
-    missile_aim->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 700);
 
     // Weapon tube controls.
     tube_controls = new GuiMissileTubeControls(this, "MISSILE_TUBES");
     tube_controls->setPosition(20, -20, sp::Alignment::BottomLeft);
     radar->enableTargetProjections(tube_controls);
 
-    // Beam controls beneath the radar.
-    if (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage)
-    {
-        GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
-        beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(500, 50);
-        (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(80, 50);
-        (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(80, 0, sp::Alignment::BottomLeft)->setSize(132, 50);
-        (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(212, 50);
-        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
-    }
-
     // Engine layout in top left corner of left panel.
     auto engine_layout = new GuiElement(this, "ENGINE_LAYOUT");
-    engine_layout->setPosition(20, 80, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 250)->setAttribute("layout", "horizontal");
+    engine_layout->setPosition(-20, -80, sp::Alignment::BottomRight)->setSize(GuiElement::GuiSizeMax, 300)->setAttribute("layout", "horizontalright");
     (new GuiImpulseControls(engine_layout, "IMPULSE"))->setSize(100, GuiElement::GuiSizeMax);
     warp_controls = (new GuiWarpControls(engine_layout, "WARP"))->setSize(100, GuiElement::GuiSizeMax);
     jump_controls = (new GuiJumpControls(engine_layout, "JUMP"))->setSize(100, GuiElement::GuiSizeMax);
 
     // Docking, comms, and shields buttons across top.
-    (new GuiDockingButton(this, "DOCKING"))->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
-    (new GuiOpenCommsButton(this, "OPEN_COMMS_BUTTON", tr("Open Comms"), &targets))->setPosition(270, 20, sp::Alignment::TopLeft)->setSize(250, 50);
+    (new GuiDockingButton(this, "DOCKING"))->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(280, 50);
+    (new GuiOpenCommsButton(this, "OPEN_COMMS_BUTTON", tr("Open Comms"), &targets))->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(250, 50);
     (new GuiCommsOverlay(this))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(520, 20, sp::Alignment::TopLeft)->setSize(250, 50);
-
-    // Missile lock button near top right of left panel.
-    lock_aim = new AimLockButton(this, "LOCK_AIM", tube_controls, missile_aim);
-    lock_aim->setPosition(250, 70, sp::Alignment::TopCenter)->setSize(130, 50);
+    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(280, 20, sp::Alignment::TopLeft)->setSize(250, 50);
 
     (new GuiCustomShipFunctions(this, singlePilot, ""))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 }
 
-void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
+void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
 {
     if (my_spaceship)
     {
-        camera_yaw = my_spaceship->getRotation();
-        camera_pitch = 0.0f;
-        auto position = my_spaceship->getPosition() + rotateVec2(glm::vec2(my_spaceship->getRadius(), 0), camera_yaw);
+        if (my_spaceship->docking_state == DS_Docked)
+        {
+            float target_camera_yaw = my_spaceship->getRotation();
+            float camera_ship_distance = 420.0f;
+            float camera_ship_height = 420.0f;
 
-        camera_position.x = position.x;
-        camera_position.y = position.y;
-        camera_position.z = 0.0;
+            auto cameraPosition2D = my_spaceship->getPosition() + vec2FromAngle(target_camera_yaw) * -camera_ship_distance;
+            glm::vec3 targetCameraPosition(cameraPosition2D.x, cameraPosition2D.y, camera_ship_height);
+
+            camera_position = camera_position * 0.9f + targetCameraPosition * 0.1f;
+            camera_yaw += angleDifference(camera_yaw, target_camera_yaw) * 0.1f;
+            camera_pitch += angleDifference(camera_pitch, 30.0f) * 0.1f;
+        }
+        else
+        {
+            camera_pitch = 0.0f;
+            camera_yaw = my_spaceship->getRotation();
+            auto position = my_spaceship->getPosition() + rotateVec2(glm::vec2(my_spaceship->getRadius(), 0), camera_yaw);
+
+            camera_position.x = position.x;
+            camera_position.y = position.y;
+            camera_position.z = 0.0;
+        }
 
         energy_display->setValue(string(int(my_spaceship->energy_level)));
         heading_display->setValue(string(my_spaceship->getHeading(), 1));
@@ -144,6 +138,12 @@ void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
 
         warp_controls->setVisible(my_spaceship->has_warp_drive);
         jump_controls->setVisible(my_spaceship->has_jump_drive);
+
+        hull_display->setValue(string(int(nearbyint(100.0f * my_spaceship->hull_strength / my_spaceship->hull_max))) + "%");
+        if (my_spaceship->hull_strength < my_spaceship->hull_max / 4.0f)
+            hull_display->setColor(glm::u8vec4(255, 0, 0, 255));
+        else
+            hull_display->setColor(glm::u8vec4{255,255,255,255});
 
         string shields_value = string(my_spaceship->getShieldPercentage(0)) + "%";
         if (my_spaceship->hasSystem(SYS_RearShield))
@@ -158,14 +158,12 @@ void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
             shields_display->hide();
         }
 
-        missile_aim->setVisible(tube_controls->getManualAim());
-
         targets.set(my_spaceship->getTarget());
     }
     GuiOverlay::onDraw(renderer);
 }
 
-void SinglePilotScreen::onUpdate()
+void SingleFighterScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
@@ -238,13 +236,6 @@ void SinglePilotScreen::onUpdate()
                     return;
                 }
             }
-        }
-
-        auto aim_adjust = keys.weapons_aim_left.getValue() - keys.weapons_aim_right.getValue();
-        if (aim_adjust != 0.0f)
-        {
-            missile_aim->setValue(missile_aim->getValue() - 5.0f * aim_adjust);
-            tube_controls->setMissileTargetAngle(missile_aim->getValue());
         }
     }
 }

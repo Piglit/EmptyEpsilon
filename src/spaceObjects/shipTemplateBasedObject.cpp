@@ -205,6 +205,7 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
     short_range_radar_range = 5000.0f;
     restocks_missiles_docked = R_None;
     player_ship_type = PST_Ship;
+    model_name = "";
 
     registerMemberReplication(&template_name);
     registerMemberReplication(&type_name);

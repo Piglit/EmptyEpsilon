@@ -107,13 +107,29 @@ void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
 {
     if (my_spaceship)
     {
-        camera_yaw = my_spaceship->getRotation();
-        camera_pitch = 0.0f;
-        auto position = my_spaceship->getPosition() + rotateVec2(glm::vec2(my_spaceship->getRadius(), 0), camera_yaw);
+        if (my_spaceship->docking_state == DS_Docked)
+        {
+            float target_camera_yaw = my_spaceship->getRotation();
+            float camera_ship_distance = 420.0f;
+            float camera_ship_height = 420.0f;
 
-        camera_position.x = position.x;
-        camera_position.y = position.y;
-        camera_position.z = 0.0;
+            auto cameraPosition2D = my_spaceship->getPosition() + vec2FromAngle(target_camera_yaw) * -camera_ship_distance;
+            glm::vec3 targetCameraPosition(cameraPosition2D.x, cameraPosition2D.y, camera_ship_height);
+
+            camera_position = camera_position * 0.9f + targetCameraPosition * 0.1f;
+            camera_yaw += angleDifference(camera_yaw, target_camera_yaw) * 0.1f;
+            camera_pitch += angleDifference(camera_pitch, 30.0f) * 0.1f;
+        }
+        else
+        {
+            camera_pitch = 0.0f;
+            camera_yaw = my_spaceship->getRotation();
+            auto position = my_spaceship->getPosition() + rotateVec2(glm::vec2(my_spaceship->getRadius(), 0), camera_yaw);
+
+            camera_position.x = position.x;
+            camera_position.y = position.y;
+            camera_position.z = 0.0;
+        }
 
         energy_display->setValue(string(int(my_spaceship->energy_level)));
         heading_display->setValue(string(my_spaceship->getHeading(), 1));

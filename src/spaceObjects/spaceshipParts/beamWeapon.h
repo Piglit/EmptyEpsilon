@@ -83,6 +83,8 @@ protected:
     //Beam runtime state
     float cooldown;
     string beam_texture;
+    bool can_fire;//Server side only?
+    bool auto_fire;
 };
 
 #endif//BEAM_WEAPON_H

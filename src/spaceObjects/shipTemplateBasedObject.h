@@ -113,7 +113,7 @@ public:
     ERestockMissileBehaviour getRestocksMissilesDocked() { return restocks_missiles_docked; }
     void setRestocksMissilesDocked(ERestockMissileBehaviour behaviour) { restocks_missiles_docked = behaviour; }
 
-    bool getPlayerShipType() { return player_ship_type; }
+    EPlayerShipType getPlayerShipType() { return player_ship_type; }
     void setPlayerShipType(EPlayerShipType type) { player_ship_type = type; }
     void onTakingDamage(ScriptSimpleCallback callback);
     void onDestruction(ScriptSimpleCallback callback);

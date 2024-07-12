@@ -132,6 +132,8 @@ HangarScreen::HangarScreen(GuiContainer* owner)
         }
     });
     create_fighter_button->setSize(GuiElement::GuiSizeMax, 40);
+    if (my_spaceship && my_spaceship->getPlayerShipType() == PST_Station)
+        create_fighter_button->setText(tr("Create new ship"));
     if (!gameGlobalInfo->allow_new_player_ships)
         create_fighter_button->hide();
 
@@ -264,6 +266,8 @@ HangarScreen::HangarScreen(GuiContainer* owner)
         select_fighter_label->show();
     });
     create_ship_button->setSize(150,50);
+    if (my_spaceship && my_spaceship->getPlayerShipType() == PST_Station)
+        create_ship_button->setText(tr("Build Ship"));
 
     fighter_create_dialog->hide();
     select_fighter_label->show();

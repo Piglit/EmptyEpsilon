@@ -24,6 +24,8 @@ BeamWeapon::BeamWeapon()
     arc_color = {255, 0, 0, 128};
     arc_color_fire = {255, 255, 0, 128};
     damage_type = DT_Energy;
+    can_fire = false;
+    auto_fire = true;
 }
 
 void BeamWeapon::setParent(SpaceShip* parent)
@@ -199,6 +201,7 @@ void BeamWeapon::update(float delta)
         cooldown -= delta * parent->getSystemEffectiveness(SYS_BeamWeapons);
 
     P<SpaceObject> target = parent->getTarget();
+    can_fire = false;
 
     // Check on beam weapons only if we are on the server, have a target, and
     // not paused, and if the beams are cooled down or have a turret arc.
@@ -248,11 +251,13 @@ void BeamWeapon::update(float delta)
 
             // If the target is in the beam's arc and range, the beam has cooled
             // down, and the beam can consume enough energy to fire ...
-            if (distance < range && cooldown <= 0.0f && fabsf(angle_diff) < arc / 2.0f && parent->useEnergy(energy_per_beam_fire))
+            if (distance < range && cooldown <= 0.0f && fabsf(angle_diff) < arc / 2.0f && parent->energy_level >= energy_per_beam_fire)
             {
-                // ... add heat to the beam and zap the target.
-                parent->addHeat(SYS_BeamWeapons, heat_per_beam_fire);
-                fire(target, parent->beam_system_target);
+                can_fire = true;
+                if (auto_fire)
+                {
+                    fire(target, parent->beam_system_target);
+                }
             }
         }
     // If the beam is turreted and can move, but doesn't have a target, reset it
@@ -269,6 +274,11 @@ void BeamWeapon::update(float delta)
 
 void BeamWeapon::fire(P<SpaceObject> target, ESystem system_target)
 {
+    if (!can_fire) return;
+    // ... add heat to the beam and zap the target.
+    parent->useEnergy(energy_per_beam_fire);
+    parent->addHeat(SYS_BeamWeapons, heat_per_beam_fire);
+
     //When we fire a beam, and we hit an enemy, check if we are not scanned yet, if we are not, and we hit something that we know is an enemy or friendly,
     //  we now know if this ship is an enemy or friend.
     parent->didAnOffensiveAction();
@@ -287,4 +297,5 @@ void BeamWeapon::fire(P<SpaceObject> target, ESystem system_target)
     info.frequency = parent->beam_frequency; // Beam weapons now always use frequency of the ship.
     info.system_target = system_target;
     target->takeDamage(damage, info);
+    can_fire = false;
 }

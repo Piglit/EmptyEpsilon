@@ -149,6 +149,55 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(ShipTemplateBasedObject, SpaceObject)
     /// This also defines the shared radar radius on the relay screen for friendly ships and stations, and how far into nebulae that this SpaceShip can detect objects.
     /// Example: stbo:setShortRangeRadarRange(4000) -- sets the short-range radar range to 4U
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setShortRangeRadarRange);
+    /// Returns the amount of a resource.
+    /// Returns 0, if the resource was never set before.
+    /// Example: stbo:getResourceAmount("empty cargo space")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getResourceAmount);
+    /// Sets the amount of a resource. The amount may be negative.
+    /// Example: stbo:setResourceAmount("empty cargo space", 10)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setResourceAmount);
+    /// Increases the amount of a resource by the specified amount.
+    /// Example: stbo:increaseResourceAmount("empty cargo space", 1)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, increaseResourceAmount);
+    /// Decreases the amount of a resource by the specified amount.
+    /// The amount may get negative.
+    /// Example: stbo:decreaseResourceAmount("empty cargo space", 1)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, decreaseResourceAmount);
+    /// Decreases the amount of a resource by the specified amount, if enough of the resource is available. If the amount of the resource would get negative, this function does nothing.
+    /// Returns true, if the operation was sucessfull; false otherwise.
+    /// Example: stbo:tryDecreaseResourceAmount("empty cargo space", 1)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, tryDecreaseResourceAmount);
+    /// Decreases the amount of resource_name_from by amount_from and increases the amount of resource_name_to by amount_to.
+    /// The amounts may get negative.
+    /// Example: stbo:transformResource("empty cargo space", 1, "trade item", 1) -- decreased "empty cargo space" and increases "trade item" by 1.
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, transformResource);
+    /// Decreases the amount of resource_name_from by amount_from and increases the amount of resource_name_to by amount_to. If the amount of the decreased resource would get negative, this function does nothing.
+    /// Returns true, if the operation was sucessfull; false otherwise.
+    /// Example: stbo:tryTransformResource("empty cargo space", 1, "trade item", 1) -- decreased "empty cargo space" and increases "trade item" by 1, if at least 1 "empty cargo space" is available.
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, tryTransformResource);
+    /// Decreases the amount of a resource on this ShipTemplateBasedObject and increases the same resource about the same amount on another ShipTemplateBasedObject.
+    /// The amount may get negative.
+    /// Example: stbo:transferResource("trade item", 1, otherShip)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, transferResource);
+    /// Decreases the amount of a resource on this ShipTemplateBasedObject and increases the same resource about the same amount on another ShipTemplateBasedObject. If the amount of the decreased resource would get negative, this function does nothing.
+    /// Returns true, if the operation was sucessfull; false otherwise.
+    /// Example: stbo:tryTransferResource("trade item", 1, otherShip)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, tryTransferResource);
+    /// Sets a category for a resource for this ship
+    /// Example: stbo:setResourceCategory("empty cargo space", "Cargo")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setResourceCategory);
+    /// Gets the category for a resource for this ship
+    /// Example: stbo:getResourceCategory("empty cargo space")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getResourceCategory);
+    /// Sets a description for a resource for this ship
+    /// Example: stbo:setResourceCategory("empty cargo space", "Can be filled with cargo")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setResourceDescription);
+    /// Gets the description for a resource for this ship
+    /// Example: stbo:getResourceCategory("empty cargo space")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getResourceDescription);
+    /// Returns all resources of a given category.
+    /// Example: stbo:getResources("cargo")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getResources);
     /// [DEPRECATED]
     /// Use ShipTemplateBasedObject:getShieldLevel() with an index value.
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getFrontShield);
@@ -228,6 +277,8 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
     registerMemberReplication(&restocks_scan_probes, 0.5);
     registerMemberReplication(&shares_energy_with_docked, 0.5);
     registerMemberReplication(&repair_docked, 0.5);
+
+    registerMemberReplication(&resources);
 }
 
 void ShipTemplateBasedObject::drawShieldsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, float sprite_scale, bool show_levels)
@@ -548,3 +599,50 @@ string ShipTemplateBasedObject::getShieldDataString()
     }
     return data;
 }
+
+bool ShipTemplateBasedObject::tryDecreaseResourceAmount(string resource_name, int amount)
+{
+    if (resources[resource_name] < amount)
+        return false;
+    decreaseResourceAmount(resource_name, amount);
+    return true;
+}
+
+void ShipTemplateBasedObject::transformResource(string resource_name_from, int amount_from, string resource_name_to, int amount_to)
+{
+    decreaseResourceAmount(resource_name_from, amount_from);
+    increaseResourceAmount(resource_name_to, amount_to);
+}
+
+bool ShipTemplateBasedObject::tryTransformResource(string resource_name_from, int amount_from, string resource_name_to, int amount_to)
+{
+    if (!tryDecreaseResourceAmount(resource_name_from, amount_from))
+        return false;
+    increaseResourceAmount(resource_name_to, amount_to);
+    return true;
+}
+
+void ShipTemplateBasedObject::transferResource(string resource_name, int amount, P<ShipTemplateBasedObject> other)
+{
+    decreaseResourceAmount(resource_name, amount);
+    other->increaseResourceAmount(resource_name, amount);
+}
+
+bool ShipTemplateBasedObject::tryTransferResource(string resource_name, int amount, P<ShipTemplateBasedObject> other)
+{
+    if (!tryDecreaseResourceAmount(resource_name, amount))
+        return false;
+    other->increaseResourceAmount(resource_name, amount);
+    return true;
+}
+
+std::vector<string> ShipTemplateBasedObject::getResources(string category)
+{
+    std::vector<string> ret;
+    for (auto const& [name,amout] : resources) {
+        if (resource_categories.find(name) != resource_categories.end() && resource_categories[name] == category && amout != 0)
+            ret.push_back(name);
+    }
+    return ret;
+}
+

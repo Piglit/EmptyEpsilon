@@ -38,6 +38,9 @@ public:
     bool restocks_scan_probes;
     EPlayerShipType player_ship_type;
     ERestockMissileBehaviour restocks_missiles_docked;
+	std::map<string, int> resources;
+	std::map<string, string> resource_categories;
+	std::map<string, string> resource_descriptions;
 
     ScriptSimpleCallback on_destruction;
     ScriptSimpleCallback on_taking_damage;
@@ -119,6 +122,24 @@ public:
     void onDestruction(ScriptSimpleCallback callback);
 
     string getShieldDataString();
+
+    // Set model
+    void setModel(string model) { model_name = model; }
+
+	int getResourceAmount(string resource_name) { return resources[resource_name]; }
+	void setResourceAmount(string resource_name, int amount) { resources[resource_name] = amount; }
+	void increaseResourceAmount(string resource_name, int amount) { resources[resource_name] += amount; }
+	void decreaseResourceAmount(string resource_name, int amount) { resources[resource_name] -= amount; }
+	bool tryDecreaseResourceAmount(string resource_name, int amount);
+	void transformResource(string resource_name_from, int amount_from, string resource_name_to, int amount_to);
+	bool tryTransformResource(string resource_name_from, int amount_from, string resource_name_to, int amount_to);
+	void transferResource(string resource_name, int amount, P<ShipTemplateBasedObject> other);
+	bool tryTransferResource(string resource_name, int amount, P<ShipTemplateBasedObject> other);
+    void setResourceCategory(string resource_name, string resource_category) { resource_categories[resource_name] = resource_category; }
+    string getResourceCategory(string resource_name) { return resource_categories[resource_name]; }
+    void setResourceDescription(string resource_name, string resource_description) { resource_descriptions[resource_name] = resource_description; }
+    string getResourceDescription(string resource_name) { return resource_descriptions[resource_name]; }
+    std::vector<string> getResources(string category); 
 };
 
 #endif//SHIP_TEMPLATE_BASED_OBJECT_H

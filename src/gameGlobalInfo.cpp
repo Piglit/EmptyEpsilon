@@ -719,9 +719,20 @@ static int slowGame(lua_State* L)
     return 0;
 }
 /// void slowGame()
-/// slow down the game
+/// slow down the game (factor 10)
 /// Calling this function will slow the game down. Mainly usefull for a larp setup.
 REGISTER_SCRIPT_FUNCTION(slowGame);
+
+static int superSlowGame(lua_State* L)
+{
+    gameGlobalInfo->notifyCampaignServerScenario("slowed");
+    engine->setGameSpeed(1.0/60.0);
+    return 0;
+}
+/// void superSlowGame()
+/// slow down the game (factor 60)
+/// Calling this function will slow the game down. Mainly usefull for a larp setup.
+REGISTER_SCRIPT_FUNCTION(superSlowGame);
 
 static int unslowGame(lua_State* L)
 {

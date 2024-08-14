@@ -4,6 +4,7 @@
 #include "spaceObjects/mine.h"
 #include "spaceObjects/missiles/nuke.h"
 #include "spaceObjects/missiles/hvli.h"
+#include "spaceObjects/missiles/officerMissile.h"
 #include "spaceObjects/spaceship.h"
 #include "multiplayer_server.h"
 #include <SDL_assert.h>
@@ -174,6 +175,19 @@ void WeaponTube::spawnProjectile(float target_angle)
             missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
         }
         break;
+    case MW_Officer:
+        {
+            P<OfficerMissile> missile = new OfficerMissile();
+            missile->owner = parent;
+            missile->setFactionId(parent->getFactionId());
+            missile->target_id = parent->target_id;
+            missile->setPosition(fireLocation);
+            missile->setRotation(parent->getRotation() + direction);
+            missile->target_angle = target_angle;
+            missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
+        }
+        break;
+
     default:
         break;
     }

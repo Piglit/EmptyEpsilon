@@ -13,6 +13,7 @@ enum EMissileWeapons
     MW_Mine,
     MW_EMP,
     MW_HVLI,
+    MW_Officer,
     MW_Count
 };
 

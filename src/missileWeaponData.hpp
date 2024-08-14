@@ -15,6 +15,8 @@ template<> void convert<EMissileWeapons>::param(lua_State* L, int& idx, EMissile
         es = MW_EMP;
     else if (str == "hvli")
         es = MW_HVLI;
+    else if (str == "officer")
+        es = MW_Officer;
     else
         es = MW_None;
 }
@@ -37,6 +39,9 @@ template<> int convert<EMissileWeapons>::returnType(lua_State* L, EMissileWeapon
         return 1;
     case MW_HVLI:
         lua_pushstring(L, "hvli");
+        return 1;
+    case MW_Officer:
+        lua_pushstring(L, "officer");
         return 1;
     default:
         return 0;

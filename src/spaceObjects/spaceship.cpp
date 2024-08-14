@@ -1940,6 +1940,8 @@ string getMissileWeaponName(EMissileWeapons missile)
         return "EMP";
     case MW_HVLI:
         return "HVLI";
+    case MW_Officer:
+        return "Officer";
     default:
         return "UNK: " + string(int(missile));
     }
@@ -1961,6 +1963,8 @@ string getLocaleMissileWeaponName(EMissileWeapons missile)
         return tr("missile","EMP");
     case MW_HVLI:
         return tr("missile","HVLI");
+    case MW_Officer:
+        return tr("missile","Officer");
     default:
         return "UNK: " + string(int(missile));
     }

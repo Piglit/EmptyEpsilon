@@ -316,6 +316,10 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Codes are 0-indexed. Index 0 corresponds to code A, 1 to B, etc.
     /// Example: player:commandConfirmDestructCode(0,46223) -- commands submitting 46223 as self-destruct confirmation code A
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandConfirmDestructCode);
+    /// Commands this PlayerSpaceship to bypass the self-destruct authorization code for the code request with the given index.
+    /// Codes are 0-indexed. Index 0 corresponds to code A, 1 to B, etc.
+    /// Example: player:commandConfirmDestructCode(0) -- commands bypassing self-destruct confirmation code A
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandBypassSelfDestruct);
     /// Commands this PlayerSpaceship to set its forward combat maneuver to the given value.
     /// Valid values are any from -1.0 (full reverse) to 1.0 (full forward).
     /// The maneuver continues until the ship's combat maneuver reserves are depleted.
@@ -502,6 +506,11 @@ static const int16_t CMD_SET_MAIN_SCREEN_OVERLAY = 0x0027;
 static const int16_t CMD_HACKING_FINISHED = 0x0028;
 static const int16_t CMD_CUSTOM_FUNCTION = 0x0029;
 static const int16_t CMD_TURN_SPEED = 0x002A;
+static const int16_t CMD_SET_REPAIR_DOCKED = 0x002B;
+static const int16_t CMD_SET_SHARES_ENERGY = 0x002C;
+static const int16_t CMD_SET_RESTOCKS_PROBES = 0x002D;
+static const int16_t CMD_SET_RESTOCKS_MISSILES = 0x002E;
+static const int16_t CMD_CONFIRM_SELF_DESTRUCT_BYPASS = 0x002F;
 
 string alertLevelToString(EAlertLevel level)
 {
@@ -1784,6 +1793,12 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
                 self_destruct_code_confirmed[index] = true;
         }
         break;
+    case CMD_CONFIRM_SELF_DESTRUCT_BYPASS:
+        {
+            for (int8_t index = 0; index < max_self_destruct_codes; index++)
+                self_destruct_code_confirmed[index] = true;
+        }
+        break;
     case CMD_COMBAT_MANEUVER_BOOST:
         {
             float request_amount;
@@ -2136,6 +2151,13 @@ void PlayerSpaceship::commandConfirmDestructCode(int8_t index, uint32_t code)
 {
     sp::io::DataBuffer packet;
     packet << CMD_CONFIRM_SELF_DESTRUCT << index << code;
+    sendClientCommand(packet);
+}
+
+void PlayerSpaceship::commandBypassSelfDestruct()
+{
+    sp::io::DataBuffer packet;
+    packet << CMD_CONFIRM_SELF_DESTRUCT_BYPASS;
     sendClientCommand(packet);
 }
 

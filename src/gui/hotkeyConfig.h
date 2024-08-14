@@ -132,6 +132,7 @@ public:
     sp::io::Keybinding engineering_repair_crew_right;
     sp::io::Keybinding engineering_self_destruct_start;
     sp::io::Keybinding engineering_self_destruct_confirm;
+    sp::io::Keybinding engineering_self_destruct_bypass;
     sp::io::Keybinding engineering_self_destruct_cancel;
 
     sp::io::Keybinding engineering_set_power_for_system[SYS_COUNT];

@@ -265,6 +265,7 @@ Keys::Keys() :
     engineering_repair_crew_right("ENGINEERING_REPAIR_CREW_RIGHT", "Right"),
     engineering_self_destruct_start("ENGINEERING_SELF_DESTRUCT_START"),
     engineering_self_destruct_confirm("ENGINEERING_SELF_DESTRUCT_CONFIRM"),
+    engineering_self_destruct_bypass("ENGINEERING_SELF_DESTRUCT_BYPASS"),
     engineering_self_destruct_cancel("ENGINEERING_SELF_DESTRUCT_CANCEL"),
     engineering_set_power_for_system{
         {"ENGINEERING_SET_SYSTEM_POWER_REACTOR"},
@@ -470,6 +471,7 @@ void Keys::init()
 
     //Various
     spectator_show_callsigns.setLabel(tr("hotkey_menu", "Various"), tr("hotkey_various", "Show callsigns (spectator)"));
+    engineering_self_destruct_bypass.setLabel(tr("hotkey_menu", "Various"), tr("hotkey_various", "key-operated switch"));
 
     //Debug
     debug_show_fps.setLabel(tr("hotkey_menu", "Various"), tr("hotkey_debug", "Show FPS"));

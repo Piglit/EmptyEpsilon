@@ -49,6 +49,10 @@ void GuiSelfDestructButton::onUpdate()
             confirm_button->hide();
             my_spaceship->commandActivateSelfDestruct();
         }
+        if (keys.engineering_self_destruct_bypass.getDown() && cancel_button->isVisible())
+        {
+            my_spaceship->commandBypassSelfDestruct();
+        }
         if (keys.engineering_self_destruct_cancel.getDown() && cancel_button->isVisible())
         {
             activate_button->show();

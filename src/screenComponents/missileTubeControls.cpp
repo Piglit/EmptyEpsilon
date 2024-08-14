@@ -82,6 +82,7 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
     load_type_rows[MW_EMP].button->setIcon("gui/icons/weapon-emp.png");
     load_type_rows[MW_Nuke].button->setIcon("gui/icons/weapon-nuke.png");
     load_type_rows[MW_HVLI].button->setIcon("gui/icons/weapon-hvli.png");
+    load_type_rows[MW_Officer].button->setIcon("gui/icons/weapon-officer.png");
 
     docked_loading_bar= new GuiProgressbar(this, id + "_DOCKED_LOADING_PROGRESS", 0, 1.0, 0);
     docked_loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(200, 50);
@@ -176,6 +177,8 @@ void GuiMissileTubeControls::onUpdate()
         selectMissileWeapon(MW_EMP);
     if (keys.weapons_select_hvli.getDown())
         selectMissileWeapon(MW_HVLI);
+    if (keys.weapons_select_officer.getDown())
+        selectMissileWeapon(MW_Officer);
 
     for(int n=0; n<my_spaceship->weapon_tube_count; n++)
     {

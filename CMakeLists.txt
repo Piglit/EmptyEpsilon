@@ -335,6 +335,7 @@ set(MAIN_SOURCES
     src/spaceObjects/missiles/homingMissile.cpp
     src/spaceObjects/missiles/hvli.cpp
     src/spaceObjects/missiles/nuke.cpp
+    src/spaceObjects/missiles/officerMissile.cpp
     src/spaceObjects/spaceStation.cpp
     src/spaceObjects/spaceship.cpp
     src/spaceObjects/wormHole.cpp
@@ -515,6 +516,7 @@ set(MAIN_SOURCES
     src/spaceObjects/missiles/hvli.h
     src/spaceObjects/missiles/missileWeapon.h
     src/spaceObjects/missiles/nuke.h
+    src/spaceObjects/missiles/officerMissile.cpp
     src/spaceObjects/nebula.h
     src/spaceObjects/planet.h
     src/spaceObjects/playerSpaceship.h

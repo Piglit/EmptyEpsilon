@@ -317,11 +317,11 @@ void Keys::init()
     //General
     next_station.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to next crew station"));
     prev_station.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to previous crew station"));
-    station_helms.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to helms station"));
-    station_weapons.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to weapons station"));
-    station_engineering.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to engineering station"));
-    station_science.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to science station"));
-    station_relay.setLabel(tr("hotkey_menu", "General"), tr("hotkey_General", "Switch to relay station"));
+    station_helms.setLabel(tr("hotkey_menu", "Helms"), tr("hotkey_General", "Switch to helms station"));
+    station_weapons.setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_General", "Switch to weapons station"));
+    station_engineering.setLabel(tr("hotkey_menu", "Engineering"), tr("hotkey_General", "Switch to engineering station"));
+    station_science.setLabel(tr("hotkey_menu", "Science"), tr("hotkey_General", "Switch to science station"));
+    station_relay.setLabel(tr("hotkey_menu", "Relay"), tr("hotkey_General", "Switch to relay station"));
 
     //Main screen
     mainscreen_forward.setLabel(tr("hotkey_menu", "Main Screen"), tr("hotkey_MainScreen", "View forward"));

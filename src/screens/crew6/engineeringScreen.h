@@ -14,6 +14,7 @@ class GuiArrow;
 class GuiToggleButton;
 class GuiProgressbar;
 class GuiProgressSlider;
+class GuiCustomShipFunctions;
 
 class EngineeringScreen : public GuiOverlay
 {
@@ -26,11 +27,13 @@ private:
     GuiKeyValueDisplay* rear_shield_display;
     GuiKeyValueDisplay* coolant_display;
     GuiSelfDestructButton* self_destruct_button;
+    GuiElement* system_config_container;
     GuiLabel* power_label;
     GuiSlider* power_slider;
     GuiLabel* coolant_label;
     GuiSlider* coolant_slider;
     GuiProgressbar* coolant_remaining_bar;
+    GuiCustomShipFunctions* custom_ship_entries;
 
     class SystemRow
     {

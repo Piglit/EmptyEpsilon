@@ -44,7 +44,7 @@ EngineeringScreen::EngineeringScreen(GuiContainer* owner, ECrewPosition crew_pos
     self_destruct_button = new GuiSelfDestructButton(this, "SELF_DESTRUCT");
     self_destruct_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(240, 100)->setVisible(my_spaceship && my_spaceship->getCanSelfDestruct());
 
-    GuiElement* system_config_container = new GuiElement(this, "");
+    system_config_container = new GuiElement(this, "");
     system_config_container->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(750 + 300, GuiElement::GuiSizeMax);
     GuiElement* system_row_layouts = new GuiElement(system_config_container, "SYSTEM_ROWS");
     system_row_layouts->setPosition(0, 0, sp::Alignment::BottomLeft)->setAttribute("layout", "verticalbottom");
@@ -163,7 +163,8 @@ EngineeringScreen::EngineeringScreen(GuiContainer* owner, ECrewPosition crew_pos
 
     (new GuiShipInternalView(system_row_layouts, "SHIP_INTERNAL_VIEW", 48.0f))->setShip(my_spaceship)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
-    (new GuiCustomShipFunctions(this, crew_position, ""))->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
+    custom_ship_entries = new GuiCustomShipFunctions(this, crew_position, "");
+    custom_ship_entries->setPosition(-20, 120, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
 
     previous_energy_level = 0.0f;
     average_energy_delta = 0.0f;
@@ -174,6 +175,11 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
 {
     if (my_spaceship)
     {
+        if (custom_ship_entries->hasEntries())
+        {
+            system_config_container->setPosition(20, -20, sp::Alignment::BottomLeft)->setSize(750 + 300, GuiElement::GuiSizeMax);
+            custom_ship_entries->setSize(500, GuiElement::GuiSizeMax);
+        }
         // Update the energy usage.
         if (previous_energy_measurement == 0.0f)
         {

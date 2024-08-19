@@ -48,6 +48,8 @@ ScenarioInfo::ScenarioInfo(string filename)
         LOG(WARNING) << "No scenario category for: " << filename;
         categories.push_back("Unknown");
     }
+
+    detailed_description.push_back({"Description", description});
     locale.reset();
 }
 
@@ -76,6 +78,10 @@ void ScenarioInfo::addKeyValue(string key, string value)
     else if (key.lower() == "description")
     {
         description = locale->tr(value);
+    }
+    else if (key.lower() == "short description" || key.lower() == "objective" || key.lower() == "duration" || key.lower() == "difficulty")
+    {
+        detailed_description.push_back({key, locale->tr(value)});
     }
     else if (key.lower() == "author")
     {

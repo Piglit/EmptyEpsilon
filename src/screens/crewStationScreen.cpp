@@ -1,3 +1,4 @@
+#include "gameGlobalInfo.h"
 #include "crewStationScreen.h"
 #include "epsilonServer.h"
 #include "main.h"
@@ -261,7 +262,7 @@ void CrewStationScreen::update(float delta)
     if (keys.pause.getDown())
     {
         if (game_server)
-            engine->setGameSpeed(0.0);
+            gameGlobalInfo->setPause(true);
     }
 
     if (viewport)

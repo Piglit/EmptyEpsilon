@@ -1,8 +1,11 @@
 #ifndef SERVER_CREATION_SCREEN_H
 #define SERVER_CREATION_SCREEN_H
 
+#include <vector>
+
 #include "gui/gui2_canvas.h"
 #include "Updatable.h"
+#include "screenComponents/helpOverlay.h"
 
 class GuiScrollText;
 class GuiSelector;
@@ -10,6 +13,7 @@ class GuiTextEntry;
 class GuiListbox;
 class GuiButton;
 class GuiLabel;
+class GuiHelpOverlay;
 
 
 class ServerSetupScreen : public GuiCanvas
@@ -44,11 +48,11 @@ public:
 
 private:
     void loadScenarioList(const string& category);
-    void loadScenarioListFromCampaignServer();
     GuiListbox* category_list;
     GuiListbox* scenario_list;
     GuiScrollText* description_text;
     GuiButton* start_button;
+    GuiHelpOverlay* splash_briefing;
 };
 
 class ServerScenarioOptionsScreen : public GuiCanvas
@@ -60,6 +64,25 @@ private:
     GuiButton* start_button;
     std::unordered_map<string,string> scenario_settings;
     std::unordered_map<string, GuiScrollText*> description_per_setting;
+};
+
+class ServerCampaignScreen: public GuiCanvas
+{
+public:
+    ServerCampaignScreen();
+
+private:
+    void loadCampaign();
+    void displayDetails(std::vector<std::pair<string, string> > details);
+    GuiElement* right;
+    GuiElement* layout;
+    GuiListbox* first_list;
+    //GuiListbox* second_list;
+    GuiListbox* scenario_list;
+    GuiButton* start_button;
+    GuiHelpOverlay* splash_briefing;
+    string crew_text;
+    std::vector<std::pair<string, string> > briefing_texts;
 };
 
 #endif//SERVER_CREATION_SCREEN_H

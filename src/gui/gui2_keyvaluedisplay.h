@@ -17,6 +17,7 @@ public:
     GuiKeyValueDisplay* setTextSize(float text_size);
     GuiKeyValueDisplay* setColor(glm::u8vec4 color);
     GuiKeyValueDisplay* setIcon(const string& icon_texture);
+    GuiKeyValueDisplay* setMarginTop(float top) {layout.margin.top = top; return this;};
 
 private:
     const GuiThemeStyle* back_style;

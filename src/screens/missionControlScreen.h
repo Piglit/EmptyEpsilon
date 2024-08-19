@@ -34,12 +34,12 @@ private:
     GuiKeyValueDisplay* ship_type;
     GuiKeyValueDisplay* ship_drive;
 
-    GuiPanel* ship_panel;
+    GuiElement* ship_content;
     GuiSelector* ship_template_selector; 
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
 
-    GuiPanel* station_panel;
+    GuiElement* station_content;
     GuiKeyValueDisplay* station_name;
     GuiButton* ship_destroy_button;
 

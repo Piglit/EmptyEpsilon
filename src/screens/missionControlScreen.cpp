@@ -25,117 +25,82 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     // Draw a container with two columns.
     auto container = new GuiElement(this, "");
     container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
-    auto left_container = new GuiElement(container, "");
-    left_container->setSize(350, GuiElement::GuiSizeMax);
-    auto right_container = new GuiElement(container, "");
-    right_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    auto left_panel = new GuiPanel(container, "");
+    left_panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(350, 280);
+    auto right_panel = new GuiPanel(container, "");
+    right_panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 370);
 
     string callsign = PreferencesManager::get("shipname", "");
-    int posy = 20;
-
-    // server info
-
-    (new GuiLabel(left_container, "SERVER_INFO_LABEL", tr("Server info"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-
-    // Server name row.
-    string name;
-    if (game_server) {
-        name = game_server->getServerName();
-    } else {
-        name = callsign;
-    }
-
-
-    (new GuiKeyValueDisplay(left_container, "SERVER_NAME", 0.4, tr("Server Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-    auto ip = sp::io::network::Address::getLocalAddress().getHumanReadable()[0];
-    (new GuiKeyValueDisplay(left_container, "SERVER_IP", 0.4, tr("Server Ip"), ip))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
 
     // mission info
 
-    posy += 40;
-    (new GuiLabel(left_container, "SCENARIO_INFO_LABEL", tr("Mission info"), 30))->addBackground()->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
+    auto mission_info_container = new GuiElement(left_panel, "");
+    mission_info_container->setMargins(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    (new GuiLabel(mission_info_container, "SCENARIO_INFO_LABEL", tr("Mission control"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
 
     if (game_server) {
-        name = gameGlobalInfo->scenario;
-        (new GuiKeyValueDisplay(left_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        posy += 40;
+        string name = gameGlobalInfo->scenario;
+        (new GuiKeyValueDisplay(mission_info_container, "SCENARIO_INFO_NAME", 0.4, tr("Mission Name"), name))->setTextSize(20)->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
+    } else {
+        left_panel->setSize(350, 100);
     }
 
+    clock = new GuiKeyValueDisplay(mission_info_container, "CLOCK", 0.4, tr("Mission Time"), "0");
+    clock->setTextSize(20)->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
 
-    clock = new GuiKeyValueDisplay(left_container, "CLOCK", 0.4, tr("Mission Time"), "0");
-    clock->setTextSize(20)->setPosition(20,posy,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-    posy += 40;
-
-    
     // Buttons and controls
     if (game_server) {
-        posy += 40;
-        (new GuiLabel(left_container, "BUTTON_LABEL", tr("Mission control"), 30))->addBackground()->setPosition(20,posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        posy += 50;
-        pause_button = new GuiToggleButton(left_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
+        pause_button = new GuiToggleButton(mission_info_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
             if (!value) {
                 gameGlobalInfo->setPause(false);
             } else {
                 gameGlobalInfo->setPause(true);
             }
         });
-        pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
-        posy += 50;
+        pause_button->setValue(engine->getGameSpeed() == 0.0f)->setSize(GuiElement::GuiSizeMax, 50);
         if (!game_server) {
             pause_button->hide();
         } else {
-            (new GuiButton(left_container, "QUIT", tr("Quit Mission"), [this]() {
+            (new GuiButton(mission_info_container, "QUIT", tr("Quit Mission"), [this]() {
                 destroy();
                 new ServerCampaignScreen();
-            }))->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+            }))->setSize(GuiElement::GuiSizeMax, 50);
         }
 
-        posy += 40;
     }
-    posy += 40;
-
-    // Ship Info
-    ship_infos = new GuiElement(left_container, "");
-    ship_infos->setPosition(0, posy)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    posy = 0;
-
-    (new GuiLabel(ship_infos, "SHIP_INFO_LABEL", tr("Ship info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
-
-    ship_name = new GuiKeyValueDisplay(ship_infos, "SHIP_NAME", 0.4, tr("Ship Name"), callsign);
-    ship_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
-
-    ship_drive = new GuiKeyValueDisplay(ship_infos, "SHIP_DRIVE", 0.4, tr("Ship Drive"), "");
-    ship_drive->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
-
-    ship_type = new GuiKeyValueDisplay(ship_infos, "SHIP_TYPE", 0.4, tr("Ship Type"), "");
-    ship_type->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
-
-    ship_class = new GuiKeyValueDisplay(ship_infos, "SHIP_CLASS", 0.4, tr("Ship Class"), "");
-    ship_class->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
-
-    ship_subclass = new GuiKeyValueDisplay(ship_infos, "SHIP_SUBCLASS", 0.4, tr("Ship Subclass"), "");
-    ship_subclass->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50)->setPosition(20, posy);
-    posy += 40;
 
     // Right side, Dynamic content: ship
 
-    ship_panel = new GuiPanel(right_container, "SHIP_PANEL");
-    ship_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440);
-    auto ship_content = new GuiElement(ship_panel, "");
-    ship_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    // Ship Info
+    ship_infos = new GuiElement(right_panel, "");
+    ship_infos->setPosition(0,0)->setMargins(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+;
+
+    (new GuiLabel(ship_infos, "SHIP_INFO_LABEL", tr("Ship info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_name = new GuiKeyValueDisplay(ship_infos, "SHIP_NAME", 0.4, tr("Ship Name"), callsign);
+    ship_name->setMarginTop(-10)->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_drive = new GuiKeyValueDisplay(ship_infos, "SHIP_DRIVE", 0.4, tr("Ship Drive"), "");
+    ship_drive->setMarginTop(-10)->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_type = new GuiKeyValueDisplay(ship_infos, "SHIP_TYPE", 0.4, tr("Ship Type"), "");
+    ship_type->setMarginTop(-10)->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_class = new GuiKeyValueDisplay(ship_infos, "SHIP_CLASS", 0.4, tr("Ship Class"), "");
+    ship_class->setMarginTop(-10)->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_subclass = new GuiKeyValueDisplay(ship_infos, "SHIP_SUBCLASS", 0.4, tr("Ship Subclass"), "");
+    ship_subclass->setMarginTop(-10)->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+
+    // ship creation panel
+
+    ship_content = new GuiElement(right_panel, "");
+    ship_content->setMargins(25)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     ship_content->setAttribute("layout", "vertical");
     ship_content->setAttribute("alignment", "topleft");
 
-    (new GuiLabel(ship_content, "SHIP_CONFIG_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(510, 50);
+    (new GuiLabel(ship_content, "SHIP_CONFIG_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     // Ship type selection
     (new GuiLabel(ship_content, "SELECT_SHIP_LABEL", tr("Select ship type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
 
@@ -212,10 +177,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
 
     // Station Info
 
-    station_panel = new GuiPanel(right_container, "STATION_PANEL");
-    station_panel->setPosition(-20, 20, sp::Alignment::TopRight)->setSize(550, 440)->hide();
-    auto station_content = new GuiElement(station_panel, "");
-    station_content->setMargins(20)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    station_content = new GuiElement(right_panel, "");
+    station_content->setMargins(25)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     station_content->setAttribute("layout", "vertical");
     station_content->setAttribute("alignment", "topleft");
 
@@ -266,13 +229,13 @@ void MissionControlScreen::update(float delta)
         pause_button->setValue(engine->getGameSpeed() == 0.0f);
 
     // States of dynamic panel:
-    /* no ship  -> show ship_panel 
+    /* no ship  -> show ship_content
                 -> hide ship_infos
-                -> hide station_panel
+                -> hide station_content
         ship    -> show ship_infos
-                -> hide ship_panel
-       docking  -> show station_panel
-       not dock -> hide station_panel
+                -> hide ship_content
+       docking  -> show station_content
+       not dock -> hide station_content
     */
 
     // set my_spaceship
@@ -286,8 +249,8 @@ void MissionControlScreen::update(float delta)
     }
 
     if (my_spaceship) {
-        // Update ship panel_
-        ship_panel->hide();
+        // Update ship_content
+        ship_content->hide();
         ship_create_button->enable();   // but is hidden. Was disabled through button pressed. Kept is disabled until ship arrived
 
         // Update ship_infos 
@@ -317,15 +280,15 @@ void MissionControlScreen::update(float delta)
         }
         ship_drive->setValue(drive);
 
-        // station panel when docked
+        // station content when docked
         bool docked = my_spaceship->docking_state == DS_Docked;
-        station_panel->setVisible(docked);
+        station_content->setVisible(docked);
 
     } else {
         // !my_spaceship
         // ship was probably destroyed or has never existed
-        station_panel->hide();
-        ship_panel->setVisible(!!gameGlobalInfo->allow_new_player_ships);
+        station_content->hide();
+        ship_content->setVisible(!!gameGlobalInfo->allow_new_player_ships);
         ship_infos->hide();
     }
 }

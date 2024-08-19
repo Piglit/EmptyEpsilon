@@ -311,12 +311,44 @@ ServerCampaignScreen::ServerCampaignScreen()
         if (value == "Instructions")
         {
             (new GuiLabel(layout, "GENERAL_LABEL", tr("Instructions"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiScrollText(layout, "SCENARIO_DESCRIPTION", briefing_texts[0].second))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-//            displayDetails(briefing_texts);
+            (new GuiScrollText(layout, "SCENARIO_DESCRIPTION", briefing_text))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         }
         else if (value == "Score")
         {
-            displayDetails({{"Nope", "Not implemented yet"}});
+            (new GuiLabel(layout, "SCORE_HEADING", tr("Score of ") + score["current_scenario_name"], 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+			if (score.find("current_progress") != score.end())
+			{
+				auto line = new GuiElement(layout, "");
+				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+	            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.6, tr("Progress:"), score["current_progress"]))->setSize(150, 50);
+	            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS_BEST", 0.5, tr("Best:"), score["best_progress"]))->setSize(125, 50);
+            	(new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.3, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]))->setSize(325, 50);
+
+			}
+			if (score.find("current_time") != score.end())
+			{
+				auto line = new GuiElement(layout, "");
+				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+            	(new GuiKeyValueDisplay(line, "SCORE_TIME", 0.6, tr("Time:"), score["current_time"]))->setSize(150, 50);
+            	(new GuiKeyValueDisplay(line, "SCORE_TIME_BEST", 0.5, tr("Best:"), score["best_time"]))->setSize(125, 50);
+            	(new GuiKeyValueDisplay(line, "SCORE_TIME_FLEET", 0.3, tr("Fleet best:"), score["fleet_time"] + score["fleet_time_name"]))->setSize(325, 50);
+			}
+			if (score.find("current_artifacts") != score.end())
+			{
+				auto line = new GuiElement(layout, "");
+				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS", 0.6, tr("Artifacts:"), score["current_artifacts"]))->setSize(150, 50);
+	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_BEST", 0.5, tr("Best:"), score["best_artifacts"]))->setSize(125, 50);
+	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_FLEET", 0.3, tr("Fleet best:"), score["fleet_artifacts"] + score["fleet_artifacts_name"]))->setSize(325, 50);
+			}
+			if (score.find("reputation") != score.end())
+			{
+				auto line = new GuiElement(layout, "");
+				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+	            (new GuiKeyValueDisplay(line, "SCORE_REPUTATION", 0.7, tr("Reputation Bonus:"), score["reputation"]))->setSize(200, 50);
+//	            (new GuiLabel(line, "SCORE_REP_HINT", tr("You will start future missions with this bonus. The reputation bonus depends on your highest progress."), 30))->setSize(300, 50); //TODO difficulty
+			}
+
         }
         else if (value == "Network")
         {
@@ -324,9 +356,9 @@ ServerCampaignScreen::ServerCampaignScreen()
             auto ip = sp::io::network::Address::getLocalAddress().getHumanReadable()[0];
             auto version = string(VERSION_NUMBER);
             (new GuiLabel(layout, "SERVER_INFO", tr("Server"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_NAME", 0.4, tr("Server Name:"), name))->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_IP", 0.4, tr("Server IP:"), ip))->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiKeyValueDisplay(layout, "SERVER_INFO_VERSION", 0.4, tr("Server Version:"), version))->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_NAME", 0.4, tr("Server Name:"), name))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_IP", 0.4, tr("Server IP:"), ip))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, "SERVER_INFO_VERSION", 0.4, tr("Server Version:"), version))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
 
             std::vector<string> players;
             foreach(PlayerInfo, i, player_info_list)
@@ -342,7 +374,8 @@ ServerCampaignScreen::ServerCampaignScreen()
             if (amount > 0)
             {
                 (new GuiLabel(layout, "CREW", tr("Crew") +" (" + string(amount) + ")", 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-                (new GuiLabel(layout, "CREW_CONNECTED", crew_text, 30))->setSize(GuiElement::GuiSizeMax, 50);
+                crew_text_label = new GuiLabel(layout, "CREW_CONNECTED", crew_text, 30);
+				crew_text_label->setSize(GuiElement::GuiSizeMax, 50);
                 (new GuiLabel(layout, "CREW_NOTICE","(notice: this list does not get refreshed automatically)" , 30))->setSize(GuiElement::GuiSizeMax, 50);
             }
             else
@@ -353,7 +386,7 @@ ServerCampaignScreen::ServerCampaignScreen()
             }
 
             (new GuiLabel(layout, "HELP", tr("Help"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiScrollText(layout, "HELP_DESCRIPTION", "If the server is not shown in the server selection menu, try to enter the Server IP manually."))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+            (new GuiScrollText(layout, "HELP_DESCRIPTION", "If the server is not shown in the client's server selection menu, try to enter the Server IP manually."))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         }
         else if (value == "Chat")
         {
@@ -436,19 +469,28 @@ ServerCampaignScreen::ServerCampaignScreen()
     loadCampaign();
 //    campaign_client->notifyCampaignServerScreen("scenario selection");
 
-    if (!briefing_texts.empty()) {
+    if (!briefing_text.empty()) {
         splash_briefing = new GuiHelpOverlay(this, "Instructions");
         splash_briefing->frame->setSize(1000, 800)->setVisible(true);
         splash_briefing->moveToFront();
         splash_briefing->text->setSize(950, 620);
-        splash_briefing->setText(briefing_texts[0].second);
+        splash_briefing->setText(briefing_text);
         first_list->addEntry("Instructions", "Instructions");
+
+    }
+
+    if (!score.empty()) {
+        first_list->addEntry("Score", "Score");
     }
 
     // add other stuff to info panel
-    first_list->addEntry("Score", "Score");
     first_list->addEntry("Network Info", "Network");
-    first_list->addEntry("Contact Fleet Command", "Chat");
+    //first_list->addEntry("Contact Fleet Command", "Chat");
+
+    if (!briefing_text.empty()) {
+        first_list->setSelectionIndex(1);
+        first_list->callback();
+    }
 
     gameGlobalInfo->reset();
     gameGlobalInfo->scenario_settings.clear();
@@ -469,6 +511,8 @@ void ServerCampaignScreen::loadCampaign()
     nlohmann::json campaign = campaign_client->getCampaign();
     LOG(INFO) << campaign.dump();
 
+    briefing_text = campaign["briefing"].get<std::string>();
+
     scenario_list->setSelectionIndex(-1);
     scenario_list->setOptions({});
     auto scenarios = campaign["scenarios"];
@@ -478,11 +522,12 @@ void ServerCampaignScreen::loadCampaign()
         ScenarioInfo info(filename);
         scenario_list->addEntry(info.name, info.filename);
     }
-
-    auto briefing = campaign["briefing"];
-    for (auto& [key, value] : briefing.items()){
-        briefing_texts.push_back({key, value.get<std::string>()});
+    auto score_json = campaign["score"];
+    for (auto const& [key, value]: score_json.items())
+    {
+        score[key] = value;
     }
+
 }
 
 void ServerCampaignScreen::displayDetails(std::vector<std::pair<string, string> > details)
@@ -575,4 +620,23 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50);
     start_button->setEnable(scenario_settings.size() >= info.settings.size());
+}
+
+void ServerCampaignScreen::update(float delta) 
+{
+    // does not work
+    /*
+	if (crew_text_label && crew_text_label->isVisible())
+	{
+		std::vector<string> players;
+		foreach(PlayerInfo, i, player_info_list)
+		{
+			if (!i->name.empty())
+				players.push_back(i->name);
+		}
+		std::sort(players.begin(), players.end());
+		players.resize(std::distance(players.begin(), std::unique(players.begin(), players.end())));
+		crew_text = string(", ").join(players) + "";
+		crew_text_label->setText(crew_text);
+	}*/
 }

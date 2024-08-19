@@ -97,7 +97,7 @@ void ScreenMainScreen::update(float delta)
     if (keys.pause.getDown())
     {
         if (game_server)
-            engine->setGameSpeed(0.0);
+            gameGlobalInfo->setPause(true);
     }
 
     if (game_client && game_client->getStatus() == GameClient::Disconnected)

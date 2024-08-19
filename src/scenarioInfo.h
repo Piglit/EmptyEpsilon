@@ -27,6 +27,7 @@ public:
     string filename;
     string name;
     string description;
+    std::vector<std::pair<string, string> > detailed_description;
     std::vector<string> categories;
     string author;
     std::vector<Setting> settings;

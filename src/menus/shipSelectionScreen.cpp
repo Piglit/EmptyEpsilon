@@ -499,7 +499,8 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     right_container->setMargins(25, 50, 25, 100);
 
     // 5-6-crew panel
-    auto standard_crew_panel = new GuiPanel(left_container, "");
+
+    standard_crew_panel = new GuiPanel(left_container, "");
     standard_crew_panel->setSize(GuiElement::GuiSizeMax, 335)->setPosition(0, 0, sp::Alignment::BottomCenter)->setMargins(0, 0, 0, 25);
     (new GuiLabel(standard_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("6/5 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     auto layout = new GuiElement(standard_crew_panel, "");
@@ -527,7 +528,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
 
 
     // 3-4-crew panel
-    auto limited_crew_panel = new GuiPanel(left_container, "");
+    limited_crew_panel = new GuiPanel(left_container, "");
     limited_crew_panel->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);;
     (new GuiLabel(limited_crew_panel, "CREW_POSITION_SELECT_LABEL", tr("4/3/1 player crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(limited_crew_panel, "");
@@ -536,8 +537,8 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
         create_crew_position_button(layout, n);
 
     // 3d views panel
-    auto space_screens_panel= new GuiPanel(center_container,"");
-    space_screens_panel->setSize(GuiElement::GuiSizeMax, 215)->setMargins(0, 0, 0, 25);
+    space_screens_panel= new GuiPanel(center_container,"");
+    space_screens_panel->setSize(GuiElement::GuiSizeMax, 215-50)->setMargins(0, 0, 0, 25);
     (new GuiLabel(space_screens_panel, "CREW_POSITION_SELECT_LABEL", tr("3D screens"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->setMargins(15, 0);
     layout = new GuiElement(space_screens_panel, "");
     layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
@@ -573,7 +574,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
     topdown_button = new GuiToggleButton(layout, "TOP_DOWN_3D_BUTTON", tr("Top-down 3D view"), [this](bool value) {
         disableAllExcept(topdown_button);
     });
-    topdown_button->setSize(GuiElement::GuiSizeMax, 50);
+    topdown_button->setSize(GuiElement::GuiSizeMax, 50)->hide();
 
     if (on_cancel) {
         auto cancel_button = new GuiButton(this, "CANCEL", tr("button", "Cancel"), on_cancel);
@@ -598,7 +599,7 @@ CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int
 
     layout->setMargins(25, 50, 25, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
     for(int n=int(singlePilot) + 1; n<int(max_crew_positions); n++)
-    create_crew_position_button(layout, n);
+        create_crew_position_button(layout, n);
     // Info text panel
     auto info_panel = new GuiPanel(right_container,"");
     station_info_text = tr("You can select multiple stations and switch between them during the game.\nIf mainscreen is selected alongside stations, it will be shown next to the current station (if the total screen size is wide enough).");
@@ -615,6 +616,15 @@ void CrewPositionSelection::onUpdate()
     // If a position already has a player on the currently selected player ship,
     // indicate that on the button.
     string crew_text = "";
+
+    if (my_spaceship && my_spaceship->getIsFighter())
+    {
+        standard_crew_panel->hide();
+    }
+    else
+    {
+        standard_crew_panel->show();
+    }
     for(int n = 0; n < max_crew_positions; n++)
     {
         string button_text = getCrewPositionName(ECrewPosition(n));

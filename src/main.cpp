@@ -430,7 +430,9 @@ int main(int argc, char** argv)
         string cs_host = parts[0];
         int cs_port = 8888;
         if (parts.size() > 1) cs_port = parts[1].toInt();
-        new CampaignClient(cs_host, cs_port);
+		if (PreferencesManager::get("instance_name") == "" && PreferencesManager::get("shipname") != "")
+			PreferencesManager::set("instance_name", PreferencesManager::get("shipname"));
+        new CampaignClient(cs_host, cs_port, PreferencesManager::get("instance_name", "unknown"));
     }
 
     engine->runMainLoop();

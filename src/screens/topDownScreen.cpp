@@ -137,7 +137,7 @@ void TopDownScreen::update(float delta)
     if (keys.pause.getDown())
     {
         if (game_server)
-            engine->setGameSpeed(0.0);
+            gameGlobalInfo->setPause(true);
     }
 
     // Add and remove entries from the player ship list.

@@ -180,13 +180,7 @@ void GameGlobalInfo::reset()
         o->destroy();
     if (engine->getObject("scenario"))
     {
-        if (campaign_client)
-        {
-            campaign_client->notifyCampaignServer("scenario_end", nlohmann::json {
-                {"filename", scenario_filename.c_str()},
-                {"name", scenario.c_str()},
-            });
-        }
+        gameGlobalInfo->notifyCampaignServerScenario("quit");
         engine->getObject("scenario")->destroy();
     }
 
@@ -271,13 +265,7 @@ void GameGlobalInfo::startScenario(string filename, std::unordered_map<string, s
     scienceInfoScript->destroy();
 
     scenario_filename = filename;
-    if (campaign_client)
-    {
-        campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
-            {"filename", filename.c_str()},
-            {"name", scenario.c_str()},
-        });
-    }
+    gameGlobalInfo->notifyCampaignServerScenario("started");
 
     P<ScriptObject> script = new ScriptObject();
     int max_cycles = PreferencesManager::get("script_cycle_limit", "0").toInt();
@@ -297,6 +285,18 @@ void GameGlobalInfo::startScenario(string filename, std::unordered_map<string, s
     }
 }
 
+void GameGlobalInfo::setPause(bool paused)
+{
+    if (paused)
+    {
+        gameGlobalInfo->notifyCampaignServerScenario("paused");
+        engine->setGameSpeed(0.0);
+    } else {
+        gameGlobalInfo->notifyCampaignServerScenario("unpaused");
+        engine->setGameSpeed(1.0);
+    }
+}
+
 void GameGlobalInfo::destroy()
 {
     reset();
@@ -312,6 +312,31 @@ string GameGlobalInfo::getMissionTime() {
     std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
     return string(buf);
 }
+
+void GameGlobalInfo::notifyCampaignServerScenario(string event, nlohmann::json info) {
+    if (!campaign_client) return;
+    info.update({
+        {"scenario", {
+                         {"filename", scenario_filename.c_str()},
+                         {"name", scenario.c_str()}
+                     }
+        }
+    });
+    campaign_client->notifyCampaignServer("scenario/"+event, info);
+};
+
+void GameGlobalInfo::notifyCampaignServerScript(string event, string filename, string name, nlohmann::json extra) {
+    if (!campaign_client) return;
+    nlohmann::json info = {
+        {"scenario", {
+                         {"filename", filename.c_str()},
+                         {"name", name.c_str()}
+                     }
+        },
+        {"data", extra}
+    };
+    campaign_client->notifyCampaignServer("script/"+event, info);
+};
 
 string getSectorName(glm::vec2 position)
 {
@@ -404,17 +429,17 @@ REGISTER_SCRIPT_FUNCTION(sectorToXY);
 
 static int victory(lua_State* L)
 {
-    gameGlobalInfo->setVictory(luaL_checkstring(L, 1));
+    string faction = luaL_checkstring(L, 1);
+    gameGlobalInfo->setVictory(faction);
     if (engine->getObject("scenario"))
     {
-        if (campaign_client)
-        {
-            campaign_client->notifyCampaignServer("scenario_victory", nlohmann::json {
-                {"faction", string(luaL_checkstring(L, 1)).c_str()},
-                {"filename", gameGlobalInfo->scenario_filename.c_str()},
-                {"name", gameGlobalInfo->scenario.c_str()},
-//                {"variation", gameGlobalInfo->variation.c_str()},
-            });
+        if (my_spaceship) {
+            if (my_spaceship->getFaction().lower() == faction.lower())
+                gameGlobalInfo->notifyCampaignServerScenario("victory");
+            else
+                gameGlobalInfo->notifyCampaignServerScenario("defeat");
+        } else {
+            gameGlobalInfo->notifyCampaignServerScenario("end");
         }
         engine->getObject("scenario")->destroy();
     }
@@ -667,7 +692,7 @@ REGISTER_SCRIPT_FUNCTION(shutdownGame);
 
 static int pauseGame(lua_State* L)
 {
-    engine->setGameSpeed(0.0);
+    gameGlobalInfo->setPause(true);
     return 0;
 }
 /// void pauseGame()
@@ -678,7 +703,7 @@ REGISTER_SCRIPT_FUNCTION(pauseGame);
 
 static int unpauseGame(lua_State* L)
 {
-    engine->setGameSpeed(1.0);
+    gameGlobalInfo->setPause(false);
     return 0;
 }
 /// void unpauseGame()
@@ -689,6 +714,7 @@ REGISTER_SCRIPT_FUNCTION(unpauseGame);
 
 static int slowGame(lua_State* L)
 {
+    gameGlobalInfo->notifyCampaignServerScenario("slowed");
     engine->setGameSpeed(0.1);
     return 0;
 }
@@ -710,7 +736,7 @@ REGISTER_SCRIPT_FUNCTION(superSlowGame);
 
 static int unslowGame(lua_State* L)
 {
-    engine->setGameSpeed(1.0);
+    gameGlobalInfo->setPause(false);
     return 0;
 }
 /// void unslowGame()
@@ -1090,20 +1116,36 @@ static int sendMessageToCampaignServer(lua_State* L)
 {
     if (campaign_client)
     {
-        string value = luaL_checkstring(L, 1);
-        campaign_client->notifyCampaignServer("script_message", nlohmann::json {
-            {"script_message", value.c_str()},
-            {"filename", gameGlobalInfo->scenario_filename.c_str()},
-            {"name", gameGlobalInfo->scenario.c_str()},
-//            {"variation", gameGlobalInfo->variation.c_str()},
-        });
+        string topic = luaL_checkstring(L, 1);
+        string details = luaL_checkstring(L, 2);
+        gameGlobalInfo->notifyCampaignServerScript("message", gameGlobalInfo->scenario_filename, gameGlobalInfo->scenario, {{"topic", topic.c_str()}, {"details", details.c_str()}});
         return 1;
     }
     return 0;
 }
-/// int sendMessageToCampaignServer(string message)
+/// int sendMessageToCampaignServer(string topic, string details)
 /// Send a message to the campaign server, if a campaign server is configured
-/// Accepts one string as parameter.
+/// Wants tow strings as parameter, a topic (usually one word or command) and details (usually json data for the handler of the topic)
 REGISTER_SCRIPT_FUNCTION(sendMessageToCampaignServer);
+
+static int sendProgressToCampaignServer(lua_State* L)
+{
+    if (campaign_client)
+    {
+        float current = luaL_checknumber(L, 1);
+        float max = luaL_checknumber(L, 2);
+        if (max != 0.0f)
+            current = current/max;
+        gameGlobalInfo->notifyCampaignServerScript("progress", gameGlobalInfo->scenario_filename, gameGlobalInfo->scenario, {{"progress", current}});
+        return 1;
+    }
+    return 0;
+}
+/// int sendProgressToCampaignServer(float current, float max)
+/// Send the current scenario progress to the campaign server, if a campaign server is configured.
+/// first parameter 'current': the current progress as float,
+/// second parameter 'max': the maximum progress as float.
+/// progress will be calculated as a percentage. If max is 0, current will be used.
+REGISTER_SCRIPT_FUNCTION(sendProgressToCampaignServer);
 
 #include "gameGlobalInfo.hpp"

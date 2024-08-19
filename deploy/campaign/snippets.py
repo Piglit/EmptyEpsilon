@@ -93,12 +93,12 @@ def spawnablePrototypes(ship, otherCallsign, otherPW, spawnX, spawnY):
 def spawnShip(ship, template, password):
 	campaign = getCampaign()
 	code = campaign.getShipAdditionalCode(ship)
-    script = f"""
-        ship = PlayerSpaceship()
-        ship.setCallSign("{selection}")
-        ship.setTemplate("{template}")
-        ship.setControlCode("{password}")
-    """ + code
+	script = f"""
+		ship = PlayerSpaceship()
+		ship.setCallSign("{selection}")
+		ship.setTemplate("{template}")
+		ship.setControlCode("{password}")
+	""" + code
 	execLua(script)
 
 def spawnSpySat(spawnX, spawnY):
@@ -118,10 +118,10 @@ def startTimedEnemies():
 	storage = getScriptStorage()
 	scenario = storage.scenario
 	salvage_repair_mission = storage.salvage_repair_mission
-    scenario.exuariCarrierAttack()
-    if salvage_repair_mission.goneAggro then
-        scenario.makeFleetAggro("Kraylor")
-    end
+	scenario.exuariCarrierAttack()
+	if salvage_repair_mission.goneAggro then
+		scenario.makeFleetAggro("Kraylor")
+	end
 	scenario.ktlitanOrders()
 	""")
 	roundTimer.setOnRound("""
@@ -147,7 +147,7 @@ def makeKraylorAggro():
 
 def wormholeIsSecured(val):
 	if val:
-	    val = "true"
+		val = "true"
 	else:
-	    val = "false"
+		val = "false"
 	execLua(f"getScriptStorage().scenario.securedWormhole = {val}")

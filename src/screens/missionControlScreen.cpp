@@ -77,10 +77,11 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
         (new GuiLabel(left_container, "BUTTON_LABEL", tr("Mission control"), 30))->addBackground()->setPosition(20,posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
         posy += 50;
         pause_button = new GuiToggleButton(left_container, "PAUSE_BUTTON", tr("button", "Pause"), [this](bool value) {
-            if (!value)
-                engine->setGameSpeed(1.0f);
-            else
-                engine->setGameSpeed(0.0f);
+            if (!value) {
+                gameGlobalInfo->setPause(false);
+            } else {
+                gameGlobalInfo->setPause(true);
+            }
         });
         pause_button->setValue(engine->getGameSpeed() == 0.0f)->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
         posy += 50;
@@ -89,7 +90,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
         } else {
             (new GuiButton(left_container, "QUIT", tr("Quit Mission"), [this]() {
                 destroy();
-                new ServerScenarioSelectionScreen();
+                new ServerCampaignScreen();
             }))->setPosition(20, posy, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
         }
 
@@ -250,10 +251,10 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
 void MissionControlScreen::update(float delta)
 {
 
-    int seconds = gameGlobalInfo->elapsed_time;
-    int minutes = (seconds / 60) % 60;
-    int hours =(seconds / 60 / 60);
-    seconds = (seconds % 60);
+    unsigned int seconds = gameGlobalInfo->elapsed_time;
+    unsigned int minutes = (seconds / 60) % 60;
+    unsigned int hours = (seconds / 60 / 60) % 24;
+    seconds = seconds % 60;
     char buf[9];
     std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
 

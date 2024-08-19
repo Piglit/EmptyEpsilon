@@ -45,7 +45,7 @@ void SpectatorScreen::update(float delta)
     if (keys.pause.getDown())
     {
         if (game_server)
-            engine->setGameSpeed(0.0);
+            gameGlobalInfo->setPause(true);
     }
     if (keys.spectator_show_callsigns.getDown())
     {

@@ -6,10 +6,15 @@ Objects of the crew class are stored in a file on change or read from file on fi
 
 import core
 import models.scenario
+from interfaces import storage
 from models.scenario import Scenario
-import pickle
+from outbound import luaExecutor
+from utils import lua
+
 import os
 from datetime import timedelta
+from pprint import pprint
+import json
 
 class Crew:
 	def __init__(self, instance_name, crew_name, template):
@@ -22,7 +27,7 @@ class Crew:
 		self.ships = template["ships"].copy()
 		self.setBriefing(template["briefing"])
 		self.scores = {}
-		self.artifacts = set()
+		self.artifacts = {}
 		self.code = ""
 
 	def setCrewName(self, name):
@@ -41,6 +46,7 @@ class Crew:
 
 	def setScenarios(self, scenarios):
 		assert isinstance(scenarios, list)
+		self.scenarios.clear()
 		for s in scenarios:
 			if isinstance(s, str):
 				s = models.scenario.getScenario(s)
@@ -54,7 +60,7 @@ class Crew:
 		assert isinstance(s, Scenario)
 		if settings:
 			assert isinstance(settings, dict)
-			if scenarioName not in self.scenario_settings:
+			if s.filename not in self.scenario_settings:
 				self.scenario_settings[s.filename] = {}
 			for setting, options in settings.items():
 				assert isinstance(options, list)
@@ -119,18 +125,24 @@ class Crew:
 			self.unlockShip(sn)
 
 	def getBriefing(self):
-		return self.briefing.format(crew_name=self.crew_name)
+		return self.briefing.format(crew_name=self.crew_name, ships=", ".join(self.ships))
+
+	def getBriefingRaw(self):
+		return self.briefing
 
 	def setBriefing(self, text):
 		assert isinstance(text, str)
 		self.briefing = text
 		self.storeCrew()
 
+	def getScoreRaw(self, key):
+		return self.scores.get(key, {})
+
 	def getScenarioScore(self, s):
 		if isinstance(s, str):
 			s = models.scenario.getScenario(s)
 		assert isinstance(s, Scenario)
-		return self.scores.get(s.filename, {})
+		return self.getScoreRaw(s.filename)
 
 	def getRecentScore(self):
 		current = self.scores.get("current")
@@ -138,7 +150,7 @@ class Crew:
 			return dict()
 		ret = {
 			"current_scenario_name": "",
-			"artifacts": ", ".join(sorted(list(self.artifacts))),
+			"artifacts": json.dumps(self.artifacts),
 		}
 		scenario = current["scenario"]
 		ss = self.scores[scenario]
@@ -159,6 +171,8 @@ class Crew:
 			ret["best_artifacts"] = str(int(ss["artifacts"]))
 			ret["fleet_artifacts"] = str(int(hi["artifacts"][0]))
 			ret["fleet_artifacts_name"] = "" if len(hi["artifacts"][1]) != 1 else " (" + str(list(hi["artifacts"][1])[0]) + ")"
+		if "difficulty" in current:
+			ret["current_difficulty"] = str(int(current["difficulty"]))
 		if "reputation" in current:
 			ret["reputation"] = str(int(ss["reputation"]))
 		return ret
@@ -206,13 +220,73 @@ class Crew:
 		self.scores["current"] = currentScore
 		self.storeCrew()
 
-	def addArtifact(self, artifact_name):
-		self.artifacts.add(artifact_name)
+	def clearCurrentScore(self):
+		self.scores["current"] = {}	# clear current score on scenario start
+
+	def getTotalReputationBonus(self, apply_reductions):
+		amount = 0
+		for k,ss in self.scores.items():
+			if k == "current":
+				continue
+			if k == "delivered" and not apply_reductions:
+				continue
+			if "reputation" in ss:
+				amount += int(ss["reputation"])
+		return amount
+
+	def addArtifact(self, artifact_name, artifact_description):
+		self.artifacts[artifact_name] = artifact_description
+
+	def hasArtifact(self, artifact_name):
+		return artifact_name in self.artifacts
+
+	def rmArtifact(self, artifact_name):
+		del self.artifacts[artifact_name]
+
+	def sendArtifacts(self):
+		"""send artifacts to server, granting them to the current ship"""
+		amount = len(self.artifacts)
+		if amount <= 0:
+			return
+		script_artifacts = ""
+		for name,descr in self.artifacts.items():
+			name = lua.sanitize_lua_string(name)
+			descr = lua.sanitize_lua_string(descr)
+			script_artifacts += f"""
+			_OBJECT_:setResourceAmount("{name}", 1)
+			_OBJECT_:setResourceDescription("{name}", "{descr}")
+			_OBJECT_:setResourceCategory("{name}", "Campaign Artifacts")"""
+		script = f"""
+			_OBJECT_=getPlayerShip(-1)
+			_OBJECT_:addToShipLog("You carry {amount} artifact{"s" if amount > 1 else ""} from previous missions to deliver to the fleet command station.", "green")"""
+		script += script_artifacts
+		luaExecutor.exec(script, self.instance_name+":8080", 0, Crew._artifactCallback, [self])
+
+	def _artifactCallback(self, success):
+		if success:
+			self.artifacts.clear()
+
+	def sendReputation(self, reduce=False):
+		"""send reputation bonus to server, granting it the current ship"""
+		amount = self.getTotalReputationBonus(reduce)
+		if amount <= 0:
+			return
+		script = f"""
+			_OBJECT_=getPlayerShip(-1)
+			_OBJECT_:addReputationPoints({amount})
+			_OBJECT_:addToShipLog("Reputation: +{amount} from previous missions", "green")
+		"""
+		luaExecutor.exec(script, self.instance_name+":8080", 1, Crew._repCallback, [self, reduce])
+
+	def _repCallback(self, reduce, success):
+		if success and reduce:
+			if "delivered" not in self.scores:
+				self.scores["delivered"] = {"reputation": 0}
+			self.scores["delivered"]["reputation"] -= amount# TODO test
+
 
 	def storeCrew(self):
-		os.makedirs("data/crews", exist_ok=True)
-		with open("data/crews/"+self.instance_name, "wb") as file:
-			pickle.dump(self, file)
+		storage.storeInfo(self, self.instance_name, subdir="crews")
 	
 	def __str__(self):
 		return self.crew_name
@@ -236,6 +310,11 @@ def setCrewStatus(crew, status, **kwargs):
 def getCrew(instance_name):
 	return crews.get(instance_name)
 
+def getCrewByCallsign(crew_name):
+	for crew in crews.values():
+		if crew.crew_name == crew_name:
+			return crew
+
 def getOrCreateCrew(instance_name, crew_name):
 	if instance_name not in crews and not loadCrew(instance_name):
 		crews[instance_name] = Crew(instance_name, crew_name, template)
@@ -248,11 +327,11 @@ def removeCrew(instance_name):
 		del crews[instance_name]
 
 def loadCrew(instance_name):
-	try:
-		with open("data/crews/"+instance_name, "rb") as file:
-			crews[instance_name] = pickle.load(file)
+	loaded = storage.loadInfo(instance_name, subdir="crews")
+	if loaded is not None:
+		crews[instance_name] = loaded
 		return True
-	except:
+	else:
 		return False
 
 core.subscribe("activity", setCrewStatus)

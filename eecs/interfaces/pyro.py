@@ -1,16 +1,17 @@
 import Pyro4
-from models import crew
+from copy import deepcopy
+from models import crew, scenario
 
 @Pyro4.expose
 class Crews:
-	def __init__(self):
-		self.crew_servers = {}
-
 	def ping(self):
 		return True
 
 	def get(self, instance):
 		return crew.crews[instance].__dict__
+
+	def getCrewByName(self, callsign):
+		return crew.getCrewByCallsign(callsign).__dict__
 
 	def list(self):
 		ret = {}
@@ -37,6 +38,22 @@ class Crews:
 		crew.crews[instance].lockShip(shipName)
 	def setBriefing(self, instance, text):
 		crew.crews[instance].setBriefing(text)
+	def addArtifact(self, instance, text):
+		crew.crews[instance].addArtifact(text, "")
+	def rmArtifact(self, instance, text):
+		crew.crews[instance].rmArtifact(text)
 
+@Pyro4.expose
+class Scenarios:
+	def ping(self):
+		return True
 
-		
+	def list(self):
+		ret = {}
+		for id, sc in scenario.scenarios_unique.items():
+			ret[id] = deepcopy(sc.__dict__)
+			del ret[id]["settings"]	# not serializable
+		return ret
+
+	def get(self, id):
+		return scenario.getScenario(id).__dict__

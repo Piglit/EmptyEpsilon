@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from pathlib import Path
 
-PATH = Path(__file__).parent.parent.parent.parent.parent / "scripts-piglit"
+PATH = Path(__file__).parent.parent.parent / "scripts-piglit"
 
 class ScenarioSetting:
 	def __init__(self, key: str, description: str):
@@ -94,6 +94,7 @@ class Scenario:
 
 # the same scenario will get stored under different names!
 scenarios = {}
+scenarios_unique = {}
 def loadScenarios(filenames):
 	if isinstance(filenames, str):
 		filenames = [filenames]
@@ -102,6 +103,7 @@ def loadScenarios(filenames):
 		s = Scenario(fn)
 		assert fn not in scenarios
 		scenarios[fn] = s
+		scenarios_unique[fn] = s
 		assert s.scriptId not in scenarios
 		scenarios[s.scriptId] = s
 		assert s.gmId not in scenarios

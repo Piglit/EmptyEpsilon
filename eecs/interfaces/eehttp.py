@@ -68,7 +68,7 @@ class ScriptProgress(BaseModel):
 @app.post("/script/progress")
 async def scriptProgress(scenario: EEScenario, server: EEServer, data: ScriptProgress):
 	c = models.crew.getOrCreateCrew(server.instance_name, server.crew_name)
-	prog = int(data.progress * 100)
+	prog = round(data.progress * 100)
 	progress(c, "is pursuing " + str(scenario) + f" ({prog}%)", scenario.getScenario(), {"progress": prog})
 
 class ScriptMessage(BaseModel):

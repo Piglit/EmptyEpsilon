@@ -8,8 +8,9 @@ import core
 from models import crew
 from outbound import log
 from outbound import stationsComms
+from outbound import luaExecutor
 from interfaces import eehttp
-from interfaces import crew_pyro 
+from interfaces import pyro 
 import campaign
 
 import Pyro4
@@ -25,16 +26,23 @@ logging.getLogger("uvicorn.access").propagate = False
 if __name__ == "__main__":
 	#pyrohelper.start_nameserver()
 	# load stored crews
+	os.makedirs("data/crews", exist_ok=True)
 	files = os.listdir("data/crews")
 	for file in files:
 		crew.loadCrew(file)
 
+	# start luaExecutor
+	luaExecutor.start()
+
 	# host crew edit pyro interface
-	servers = crew_pyro.Crews()
-	#Pyro4.util.SerializerBase.register_class_to_dict(crew.Crew, lambda c: c.__dict__)
-	pyrohelper.host_named_server(servers, "campaign_crews")
+	crews = pyro.Crews()
+	scenarios = pyro.Scenarios()
+	pyrohelper.host_named_server(crews, "campaign_crews")
+	pyrohelper.host_named_server(scenarios, "campaign_scenarios")
 
 	# host http interface
 	uvicorn.run("main:eehttp.app", host="0.0.0.0", reload=False, port=8888)
-	pyrohelper.cleanup()
 
+	# shutdown
+	pyrohelper.cleanup()
+	luaExecutor.stop()

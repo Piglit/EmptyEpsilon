@@ -1,29 +1,11 @@
 #!/usr/bin/env python3
 
 import Pyro4
+import json
 from pprint import pprint
 
-print("usage: ipython")
-print("%run editCrew.py")
-print()
 crews = Pyro4.Proxy("PYRONAME:campaign_crews")
 crews.ping()
-print("Crew-instances:")
-print("---------------")
-pprint(crews.list().keys())
-print()
-print("Methods:")
-print("--------")
-meth = dir(crews)
-print("list() - lists all instances")
-print("get(instance) - gets all stats of that instance")
-for m in meth:
-	if not m.startswith("_") and m not in ["list", "get"]:
-		print(m + "(instance, param)")
-print()
-print("main object: crews")
-
-
 ### Dialog interface, just run the script
 
 from dialog import Dialog
@@ -33,7 +15,10 @@ d.set_background_title("GM-Interface for crew status")
 
 def selectCrew():
 	instances = crews.list()
-	menu_items = [(i,o['crew_name']) for i,o in instances.items()]
+	menu_items = [(i,json.dumps(o['crew_name'])) for i,o in instances.items()]
+	for mi in menu_items:
+		assert mi[0].isascii()
+		assert mi[1].isascii()
 	code, tag = d.menu("Select crew", choices=menu_items)
 	if code == d.OK:
 		return tag
@@ -53,7 +38,9 @@ def showCrew(instance):
 			"lockScenario": ("lock a scenario", "lockScenario"),
 			"unlockShip": ("unlock a ship", "unlockShip"),
 			"lockShip": ("lock a ship", "lockShip"),
-#			"setBriefing": ("change the briefing text", "setBriefing", "briefing"),
+			"addArtifact": ("add an artifact", "addArtifact"),
+			"rmArtifact": ("remove an artifact", "rmArtifact"),
+			"setBriefing": ("change the briefing text", "setBriefing", "briefing"),
 		}
 		code, tag = d.menu(msg, choices=[(k, v[0]) for k,v in choice_details.items()])
 		if code == d.OK:

@@ -412,16 +412,6 @@ template:setRepairCrewCount(8)
 addSystemsLight(template)
 npc = template:copy(" "..template:getName()):setType("ship")
 
---[ Escape Pod--]]
-template = ShipTemplate():setName("Pod"):setClass(_("class", "Shuttle"), _("subclass", "Transport Pod")):setType("playership")
-template:setModel("space_tug")
-template:setRadarTrace("tug.png")
-template:setDescription([[A small pod to transport few people between ships.]])
-template:setHull(40)
-template:setSpeed(60, 10, 20)
-template:setRepairCrewCount(1)
-addSystemsLight(template)
-npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Mine Layer--]]
 template = ShipTemplate():setName("Nautilus"):setType("playership"):setClass("Frigate","Mine Layer"):setModel("MineLayerCorvette"..color_player)

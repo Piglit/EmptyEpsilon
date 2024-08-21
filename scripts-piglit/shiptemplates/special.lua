@@ -203,7 +203,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoRepair(true)
 
-addSystemsHeavy(template)
+addSystemsSat(template)
 
 
 --------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ end
 template:setHull(1000)
 template:setShields(1200)
 template:setSpeed(0, 1, 0)
-template:setJumpDriveRange(50000,200000)
+template:setJumpDriveRange(30000,30000)	-- exactly
 template:setCombatManeuver(10, 10)
 
 template:setSharesEnergyWithDocked(true)
@@ -234,6 +234,18 @@ template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
 template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"), _("class", "Prototype"))
 template:setInternalDockClasses(_("class", "Starfighter"))
-template:setSpawnShips("Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon")
+template:setSpawnShips("MP52 Hornet", "ZX-Lindworm", "Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon")
 template:setPlayerShipType("station")
-addSystemsHeavy(template)
+addSystemsStation(template)
+
+--[ Escape Pod--]]
+template = ShipTemplate():setName("Pod"):setClass(_("class", "Shuttle"), _("subclass", "Transport Pod")):setType("playership")
+template:setModel("space_tug")
+template:setRadarTrace("tug.png")
+template:setDescription([[A small pod to transport few people between ships.]])
+template:setHull(40)
+template:setSpeed(60, 10, 20)
+template:setRepairCrewCount(1)
+addSystemsSat(template)
+npc = template:copy(" "..template:getName()):setType("ship")
+

@@ -42,6 +42,10 @@ Wenn ihr eine Mission abschließt (oder auch nur größtenteils abschließt), we
 """
 models.crew.setCrewTemplate(["20_training1"], ["Phobos M3P"], briefing)
 
+def unlockAtlantis(crew):
+	crew.unlockShip("Atlantis")
+	crew.unlockScenario("21_training2", settings={"Ships": ["Corvettes"]})
+
 def scenario_event(scenario: models.scenario.Scenario, crew: models.crew.Crew, event_topic: str, details=str):
 	global fleetcommand_name
 	s = scenario.scriptId 
@@ -92,7 +96,7 @@ Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt
 	if s == "20_training1":
 		if progress is not None and progress >= 75:
 			crew.unlockScenario("00_basic", settings={"Time": ["30min"], "Enemies": ["Normal"]})
-			crew.unlockScenario("21_training2")
+			crew.unlockScenario("21_training2", settings={"Ships": ["Frigates"]})
 			crew.setBriefing("""Glückwunsch, {crew_name}.
 Euch stehen weitere Missionen zur Auswahl:
 In 'Skirmish' könnt ihr euer Können gegen angreifende Gegner testen.
@@ -163,6 +167,7 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 	
 	if s == "05_beacon":
 		if progress is not None and progress >= 75:
+			unlockAtlantis(crew)
 			crew.lockScenario("05_beacon")
 			crew.unlockScenario("03_waves", settings={"Enemy Faction": ["Exuari"], "Enemies": ["Easy", "Normal"]})
 			if progress == 100:
@@ -170,11 +175,58 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 				crew.setBriefing("""Großartige Leistung {crew_name}!
 Nach der Zerstörung dieses Exuari-Trägerschiffs sollten wir die Oberhand über die Exuari in nahen Sektoren behalten.
 
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
+
 Ihr solltet nun mit dem Flottenkommando in Kontakt treten, um gemeinsam euer weiteres Vorgehen zu planen.""")
 			else:
 				crew.setBriefing("""Willkommen zurück, {crew_name}.
 Nach der Entdeckung des Exuari-Trägerschiffs hat sich dieses aus dem Sektor zurückgezogen.
 Wir vermuten, dass es bald ein anderes unserer Systeme angreifen wird.
+
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
+
+Die Mission 'Siege' ist nur für euch verfügbar, {crew_name}.
+Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkommando in Kontakt treten, um das weitere Vorgehen zu planen.""")
+
+	if s == "07_gftp":	# TODO test this
+		if progress is not None and progress >= 90:
+			unlockAtlantis(crew)
+			crew.lockScenario("07_gftp")
+			crew.unlockScenario("03_waves", settings={"Enemy Faction": ["Ghosts"], "Enemies": ["Easy", "Normal"]})
+			if progress == 100:
+				crew.lockScenario("03_waves")
+				crew.setBriefing("""Großartige Leistung {crew_name}!
+Mit diesem Sieg sollten wir bis auf weiteres sicher sein.
+
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
+
+Ihr solltet nun mit dem Flottenkommando in Kontakt treten, um gemeinsam euer weiteres Vorgehen zu planen.""")
+			else:
+				crew.setBriefing("""Willkommen zurück {crew_name}!
+Nach der Entdeckung einer abtrünigen KI entsendet sie nun die von ihr übernommenen Schiffe unserer Flotte gegen unsere eigenen Systeme!
+
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
+
+Die Mission 'Siege' ist nur für euch verfügbar, {crew_name}.
+Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkommando in Kontakt treten, um das weitere Vorgehen zu planen.""")
+
+	if s == "08_atlantis":	# TODO test this
+		if progress is not None and progress >= 45:
+			unlockAtlantis(crew)
+			crew.lockScenario("08_atlantis")
+			crew.unlockScenario("03_waves", settings={"Enemy Faction": ["Kraylor"], "Enemies": ["Easy", "Normal"]})
+			if progress == 110:
+				crew.lockScenario("03_waves")
+				crew.setBriefing("""Großartige Leistung {crew_name}!
+Nach diesem Gefecht sollten die Kraylor erheblichen Respekt vor uns zeigen.
+
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
+
+Ihr solltet nun mit dem Flottenkommando in Kontakt treten, um gemeinsam euer weiteres Vorgehen zu planen.""")
+			else:
+				crew.setBriefing("""Willkommen zurück {crew_name}!
+
+Der gerade verwendete Schiffstyp 'Atlantis' ist in kampfbasierten Missionen für euch verfügbar. Desweiteren könnt ihr im 'Frigates Testing Ground' nun weitere schwere Schiffstypen testen.
 
 Die Mission 'Siege' ist nur für euch verfügbar, {crew_name}.
 Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkommando in Kontakt treten, um das weitere Vorgehen zu planen.""")

@@ -12,24 +12,28 @@ d = Dialog(autowidgetsize=True)
 d.set_background_title("Flottenkommando: Missionsverteilung")
 
 def start():
-	code, tag = d.menu("Willkommen Flottenkommando", choices=[
-		("Aufgaben", "Übersicht über die Abläufe und Aufgaben des Flottenkommandos"),
-		("Missionen", "Übersicht über die verfügbaren Missionen"),
-		("Mechaniken", "Übersicht über die Spielmechaniken der Kampagne"),
-		("Crew auf Mission schicken", "Lege fest, welche Missionen für welche Crew verfügbar sind."),
-#		("", ""),
-	])
-	if code == d.OK:
-		if tag == "Aufgaben":
-			helpTasks()
-		elif tag == "Missionen":
-			helpMissions()
-		elif tag == "Mechaniken":
-			helpMechanics()
-		elif tag == "Crew auf Mission schicken":
-			selectMissions()
-	else:
-		return
+	while True:
+		code, tag = d.menu("Willkommen Flottenkommando", choices=[
+			("Aufgaben", "Übersicht über die Abläufe und Aufgaben des Flottenkommandos"),
+			("Missionen", "Übersicht über die verfügbaren Missionen"),
+			("Mechaniken", "Übersicht über die Spielmechaniken der Kampagne"),
+			("Crew: auf Mission schicken", "Lege fest, welche Missionen für welche Crew verfügbar sind."),
+			("Crew: Schiff freischalten", "Lege fest, welche Schiffstypen für welche Crew verfügbar sind."),
+	#		("", ""),
+		])
+		if code == d.OK:
+			if tag == "Aufgaben":
+				helpTasks()
+			elif tag == "Missionen":
+				helpMissions()
+			elif tag == "Mechaniken":
+				helpMechanics()
+			elif tag == "Crew: auf Mission schicken":
+				selectMissions()
+			elif tag == "Crew: Schiff freischalten":
+				selectShips()
+		else:
+			return
 
 # Intro:
 # Willkommen - Anleitung:
@@ -199,6 +203,56 @@ ENTER:	 OK
 		else:
 			d.msgbox("Keine Änderungen vorgenommen.")
 
+def selectShips():
+	crew = selectCrew()
+	if not crew:
+		return None
+	msg = """{crew_name} {status}""".format(**crew)
+	ship_dict = {	# descr not used
+		"Adder MK7":	"Scout, sehr schnell und wendig, schwach bewaffnet.",
+		"Phobos M3P":	"Leichter Kreuzer, Allrounder, Standardschiff für unerfahrene Crews.",
+		"Hathcock":		"Laser-Frigatte, spezialisiert gegen Jäger und leichte Torpedoschiffe.",
+		"Piranha M5P":	"Raketen-Frigatte, spezialisiert gegen schwer gepanzerte Ziele.",
+		"Nautilus":		"Minen-Frigatte, kann Minen legen.",
+		"Atlantis":		"Schwerer Kreuzer, Crew muss gut zusammenarbeiten. Standardschiff für Story-Missionen",
+		"Crucible":		"Raketen-Corvette, schweres Schiff für Frontalangriffe.",
+		"Maverick":		"Laser-Corvette, schweres Schiff mit Rundumverteidigung.",
+	}
+	msg += """
+
+Links:   nicht verfügbare Schiffe
+Rechts:  verfügbare Schiffe
+SPACE:   Schiff erlauben/verbieten
+TAB:     Fokus zwischen links und rechts wechseln.
+ENTER:	 OK
+"""
+	code, tags = d.buildlist(msg, visit_items=True, items = [(tag, tag, tag in crew["ships"]) for tag in ship_dict])
+	if code == d.OK:
+		diff_add = set()
+		diff_rm = set()
+		for tag in tags:
+			if tag not in crew["ships"]:
+				diff_add.add(tag)
+		for tag in crew["ships"]:
+			if tag not in tags:
+				diff_rm.add(tag)
+		msg = ""
+		if diff_add:
+			msg += "Folgende Schiffe für {crew_name} freigeschalten:\n\n".format(**crew)
+			msg += ", ".join(list(diff_add))
+		if diff_rm:
+			msg += "\n\nFolgende Schiffe für {crew_name} deaktivieren:\n\n".format(**crew)
+			msg += ", ".join(list(diff_rm))
+		if diff_add or diff_rm:
+			if d.yesno(msg) == "ok":
+				crews.setShips(crew["instance_name"], tags)
+				msg = "Änderung vorgenommen." 
+				if diff_add:
+					msg += "\n\nDie Schiffe sind in den kampfbasierten Missionen 'Skirmish' und 'Siege' verfügbar. Zum kurzen Testen eines Schiffs eignet sich 'Skirmish' am besten, während 'Siege' die Crew irgendwann an ihre Grenzen bringen wird."
+				d.msgbox(msg)
+		else:
+			d.msgbox("Keine Änderungen vorgenommen.")
+
 def showCrew(instance):
 	while True:
 		crew = crews.get(instance)
@@ -232,6 +286,5 @@ def editCrew(instance, descr, function, default_attr=None):
 		crews.__getattr__(function)(instance, entry)
 
 
-while True:
-	start()
+start()
 

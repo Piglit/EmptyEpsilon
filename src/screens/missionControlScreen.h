@@ -38,14 +38,14 @@ private:
     GuiSelector* ship_template_selector; 
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
-
+/*
     GuiElement* station_content;
     GuiKeyValueDisplay* station_name;
     GuiButton* ship_destroy_button;
 
     GuiElement* database_container;
     DatabaseViewComponent* database_view;
-
+*/
     glm::vec2 spawn_pos;
     int spawn_rota;
 public:

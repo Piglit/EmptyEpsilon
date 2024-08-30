@@ -74,7 +74,7 @@ public:
 
 private:
     void loadCampaign();
-    void displayDetails(std::vector<std::pair<string, string> > details);
+    void displayDetails(string caption, std::vector<std::pair<string, string> > details);
     GuiElement* right;
     GuiElement* layout;
     GuiListbox* first_list;
@@ -82,10 +82,21 @@ private:
     GuiButton* start_button;
     GuiHelpOverlay* splash_briefing;
 	GuiLabel* crew_text_label = nullptr;
+	GuiLabel* crew_amount_label = nullptr;
     string crew_text;
     string briefing_text;
 	std::map<string, string> score;
 };
 
-
+class ProxyJoinScreen: public GuiCanvas//, Updatable
+{
+private:
+    GuiSelector* ship_template_selector;
+    GuiSelector* ship_drive_selector;
+    GuiButton* ship_create_button;
+public:
+    ProxyJoinScreen(int listenPort);
+    //virtual void update(float delta) override;
+    bool proxySpawn(string templ, string drive);
+};
 #endif//SERVER_CREATION_SCREEN_H

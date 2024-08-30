@@ -302,6 +302,13 @@ ServerCampaignScreen::ServerCampaignScreen()
     (new GuiLabel(middle, "GENERAL_LABEL", tr("Info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     first_list = new GuiListbox(middle, "INFO_LIST", [this](int index, string value)
     {
+        if (crew_text_label)
+        {
+            crew_text_label->destroy();
+            crew_amount_label->destroy();
+            crew_text_label = nullptr;
+            crew_amount_label = nullptr;
+        }
         layout->destroy();
         layout = new GuiElement(right, "");
         layout->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(600, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
@@ -311,7 +318,7 @@ ServerCampaignScreen::ServerCampaignScreen()
         if (value == "Instructions")
         {
             (new GuiLabel(layout, "GENERAL_LABEL", tr("Instructions"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiScrollText(layout, "SCENARIO_DESCRIPTION", briefing_text))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+            (new GuiScrollText(layout, "SCENARIO_DESCRIPTION", briefing_text))->setTextSize(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         }
         else if (value == "Score")
         {
@@ -359,7 +366,7 @@ ServerCampaignScreen::ServerCampaignScreen()
             (new GuiKeyValueDisplay(layout, "SERVER_INFO_NAME", 0.4, tr("Server Name:"), name))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
             (new GuiKeyValueDisplay(layout, "SERVER_INFO_IP", 0.4, tr("Server IP:"), ip))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
             (new GuiKeyValueDisplay(layout, "SERVER_INFO_VERSION", 0.4, tr("Server Version:"), version))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
-
+/*
             std::vector<string> players;
             foreach(PlayerInfo, i, player_info_list)
             {
@@ -371,36 +378,33 @@ ServerCampaignScreen::ServerCampaignScreen()
             crew_text = string(", ").join(players) + "";
 
             unsigned int amount = players.size();
-            if (amount > 0)
+*/
+            if (!crew_text_label)
             {
-                (new GuiLabel(layout, "CREW", tr("Crew") +" (" + string(amount) + ")", 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-                crew_text_label = new GuiLabel(layout, "CREW_CONNECTED", crew_text, 30);
-				crew_text_label->setSize(GuiElement::GuiSizeMax, 50);
-                (new GuiLabel(layout, "CREW_NOTICE","(notice: this list does not get refreshed automatically)" , 30))->setSize(GuiElement::GuiSizeMax, 50);
-            }
-            else
-            {
-                (new GuiLabel(layout, "CREW", tr("Crew"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-                (new GuiLabel(layout, "CREW_CONNECTED", "No one is connected", 30))->setSize(GuiElement::GuiSizeMax, 50);
-                (new GuiLabel(layout, "CREW_NOTICE","(notice: this list does not get refreshed automatically)" , 30))->setSize(GuiElement::GuiSizeMax, 50);
+                crew_amount_label = new GuiLabel(layout, "CREW", tr("Crew"), 30);
+                crew_amount_label->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+                crew_text_label = new GuiLabel(layout, "CREW_CONNECTED", "No one is connected", 25);
+                crew_text_label->setSize(GuiElement::GuiSizeMax, 50);
             }
 
             (new GuiLabel(layout, "HELP", tr("Help"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiScrollText(layout, "HELP_DESCRIPTION", "If the server is not shown in the client's server selection menu, try to enter the Server IP manually."))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+            (new GuiScrollText(layout, "HELP_DESCRIPTION", "If the server is not shown in the client's server selection menu, try to enter the Server IP manually."))->setTextSize(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         }
         else if (value == "Chat")
         {
-            displayDetails({{"Nope", "Not implemented yet"}});
+            //({{"Nope", "Not implemented yet"}});
         }
     });
-    first_list->setSize(GuiElement::GuiSizeMax, 250);
+    first_list->setSize(GuiElement::GuiSizeMax, 200);
 
     // scenarios
     (new GuiLabel(middle, "GENERAL_LABEL", tr("Scenario"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
     scenario_list = new GuiListbox(middle, "SCENARIO_LIST", [this](int index, string value)
     {
+
         ScenarioInfo info(value);
-        displayDetails(info.detailed_description);
+
+        displayDetails(info.name, info.detailed_description);
         start_button->enable()->show();
         first_list->setSelectionIndex(-1);
         if (info.proxy != "") {
@@ -427,17 +431,7 @@ ServerCampaignScreen::ServerCampaignScreen()
         auto filename = scenario_list->getEntryValue(scenario_list->getSelectionIndex());
         ScenarioInfo info(filename);
 
-        if (info.settings.empty())
-        {
-            // Start the selected scenario.
-            gameGlobalInfo->scenario = info.name;
-            gameGlobalInfo->startScenario(filename);
-
-            // Destroy this screen and move on to control screen 
-            destroy();
-            new MissionControlScreen(getRenderLayer());
-        }
-        else if (info.proxy != "")
+        if (info.proxy != "")
         {
             string host_name = info.proxy;
             auto host = sp::io::network::Address(host_name);
@@ -447,16 +441,27 @@ ServerCampaignScreen::ServerCampaignScreen()
             int listenPort = game_server->getPort();
             string proxyName = PreferencesManager::get("shipname", "");
 
+            // before disconnectFromServer, since it destroys gameGlobalInfo:
+            gameGlobalInfo->scenario = info.name;
+            gameGlobalInfo->scenario_filename = filename;
+            gameGlobalInfo->notifyCampaignServerScenario("joined");
+
             disconnectFromServer();
             new GameServerProxy(host, port, password, listenPort, proxyName);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
-            // FIXME: use the correct event
-            campaign_client->notifyCampaignServer("scenario_start", nlohmann::json {
-                {"filename", info.filename.c_str()},
-                {"name", info.name.c_str()},
-            });
+            //new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
             destroy();
+            new ProxyJoinScreen(listenPort);
+        }
+        else if (info.settings.empty())
+        {
+            // Start the selected scenario.
+            gameGlobalInfo->scenario = info.name;
+            gameGlobalInfo->startScenario(filename);
+
+            // Destroy this screen and move on to control screen 
+            destroy();
+            new MissionControlScreen(getRenderLayer());
         }
         else
         {
@@ -530,21 +535,28 @@ void ServerCampaignScreen::loadCampaign()
 
 }
 
-void ServerCampaignScreen::displayDetails(std::vector<std::pair<string, string> > details)
+void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
 {
+        if (crew_text_label)
+        {
+            crew_text_label->destroy();
+            crew_amount_label->destroy();
+            crew_text_label = nullptr;
+            crew_amount_label = nullptr;
+        }
         layout->destroy();
         layout = new GuiElement(right, "");
         layout->setPosition(0, 20, sp::Alignment::TopCenter)->setSize(600, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
 
+        (new GuiLabel(layout, "SCENARIO_NAME", tr(caption), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
         auto last = details.back();
         details.pop_back();
         for(const auto& [key, value] : details){
-            (new GuiLabel(layout, key, tr(key), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-            (new GuiLabel(layout, key+"_value", tr(value), 30))->setSize(GuiElement::GuiSizeMax, 50);
+            (new GuiKeyValueDisplay(layout, key, 0.25, tr(key), tr(value)))->setMarginTop(-10)->setSize(GuiElement::GuiSizeMax, 50);
         }
 
         (new GuiLabel(layout, last.first, tr(last.first), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-        (new GuiScrollText(layout, "DETAILS_SCROLL", tr(last.second)))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+        (new GuiScrollText(layout, "DETAILS_SCROLL", tr(last.second)))->setTextSize(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 }
 
 ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
@@ -624,9 +636,7 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
 
 void ServerCampaignScreen::update(float delta) 
 {
-    // does not work
-    /*
-	if (crew_text_label && crew_text_label->isVisible())
+	if (crew_text_label && crew_amount_label && crew_text_label->isVisible())
 	{
 		std::vector<string> players;
 		foreach(PlayerInfo, i, player_info_list)
@@ -636,7 +646,105 @@ void ServerCampaignScreen::update(float delta)
 		}
 		std::sort(players.begin(), players.end());
 		players.resize(std::distance(players.begin(), std::unique(players.begin(), players.end())));
-		crew_text = string(", ").join(players) + "";
-		crew_text_label->setText(crew_text);
-	}*/
+        unsigned int amount = players.size();
+        crew_amount_label->setText(tr("Crew") +" (" + string(amount) + ")");
+        if (amount > 0)
+        {
+            crew_text = string(", ").join(players) + "";
+            crew_text_label->setText(crew_text);
+        }
+        else
+        {
+            crew_text_label->setText("No one is connected");
+        }
+	}
 }
+
+ProxyJoinScreen::ProxyJoinScreen(int listenPort) 
+{
+    new GuiOverlay(this, "", colorConfig.background);
+    (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
+
+    auto container = new GuiElement(this, "");
+    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 370+50+50)->setAttribute("layout", "horizontal");
+    auto panel = new GuiPanel(container, "");
+    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 370);
+     
+    // ship creation panel
+    auto ship_content = new GuiElement(panel, "");
+    ship_content->setMargins(25)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+    ship_content->setAttribute("layout", "vertical");
+    ship_content->setAttribute("alignment", "topleft");
+
+    (new GuiLabel(ship_content, "SHIP_CONFIG_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+    // Ship type selection
+    (new GuiLabel(ship_content, "SELECT_SHIP_LABEL", tr("Select ship type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_template_selector = new GuiSelector(ship_content, "CREATE_SHIP_SELECTOR", nullptr);
+
+    // List only ships with templates designated for player use.
+    std::vector<string> template_names = campaign_client->getShips();
+
+    for(string& template_name : template_names)
+    {
+        P<ShipTemplate> ship_template = ShipTemplate::getTemplate(template_name);
+        ship_template_selector->addEntry(template_name + " (" + ship_template->getClass() + ": " + ship_template->getSubClass() + ")", template_name);
+    }
+    ship_template_selector->setSelectionIndex(0);
+    ship_template_selector->setSize(GuiElement::GuiSizeMax, 50);
+
+    // Ship drive selection
+
+    (new GuiLabel(ship_content, "SELECT_DRIVE_LABEL", tr("Select drive type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
+
+    ship_drive_selector = new GuiSelector(ship_content, "SHIP_DRIVE_SELECTOR", nullptr);
+    ship_drive_selector->addEntry("Jump drive", "jump");
+    ship_drive_selector->addEntry("Warp drive", "warp");
+    ship_drive_selector->setSelectionIndex(0);
+    ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
+
+    // Spawn a ship of the selected template near 0,0 and give it a random heading.
+    ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, listenPort]() {
+        ship_create_button->disable();
+        if (proxySpawn(ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue()))
+        {
+            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
+            destroy();
+        }
+        else
+            ship_create_button->enable();
+    });
+    ship_create_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+}
+
+bool ProxyJoinScreen::proxySpawn(string templ, string drive)
+{
+    string callsign = PreferencesManager::get("shipname", "");
+    string instance = PreferencesManager::get("instance_name", "");
+    string password = PreferencesManager::get("password", "");
+    string script = "getScriptStorage().wh_players:onProxySpawn(\""
+        + instance + "\", \""
+        + callsign + "\", \""
+        + templ + "\", \""
+        + drive + "\", \""
+        + password + "\")";
+
+    string server = PreferencesManager::get("proxy_addr");
+    string path = "/exec.lua";
+    sp::io::http::Request request(server, 8080);    // XXX Port is hardcoded!
+//    request.setHeader("Content-Type", "application/json");
+    
+    LOG(INFO) << "Sending Http request: " << server << ":8080" << path;
+
+    sp::io::http::Request::Response response;
+    response = request.request("get", path, script);
+    // warning: this will block until response is received
+    // start this function in a thread to avoid blocking
+    if (!response.success)
+    {
+        LOG(WARNING) << "Http request failed. (status " << response.status << ")";
+        return false;
+    }
+    return true;
+}
+

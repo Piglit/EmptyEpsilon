@@ -1,32 +1,87 @@
---Ships from Kraylor shipyards.
---
---Faction style (equipment):
---moderate hull, even on heavyer ships (Kraylors can survive hull breaches more easily than other species)
---strong shields, more shield segments (counts as pysical strength of the ship)
---heavyer beams
---moderate speed, no warp, heavyer ships may have jump
---homing missiles as standarg equipment. Heavyer ships have also HVLIs.
---focus on capital ships, no fighters, few specialiced ships
---big bulky ships
---naming mentions physical strength and the destructive capabilities of the ship
---Models: battleship_destroyer_*
---
---Tech details:
--- Beams
---  Kraylor standard beam:     Range: 1000-1500 CycleTime: 6.0 Dmg: 8  (dps: 1.33)
---  Kraylor heavy beam:        Range: 1500-2000 CycleTime: 8.0 Dmg: 11 (dps: 1.375) (only doombringer)
---  Kraylor turbo beam:        Range: 3000-4000 CycleTime: 3.0 Dmg: 10 (dps: 3.33)  (stations only)
--- Hull/shields
---  100, 100/80/80
---  70,  100/150
---  70,  5*300
---  100, 4*200
---  200, 450/2*350/2*150
---  150, 6*120
---  => hull: 70-200, shields: 2-6 * 80-300
--- Engines
---  Gunships  60, 5-15, 10-25
---  Destroyer 30-35, 1.5-6, 5-10 jump
+-- Kraylor ships
+
+--[[
+Description
+-----------
+This file describes a set of ships of a similar style that was designed with the background of the Kraylor culture.
+
+Appearance
+----------
+Big blocky ships and a dark texture with window-like bright spots are the primary design features for the Kraylor fleet.
+The models that were chosen for the ships provide those common features.
+Custom radar traces were designed for most of the Kraylor ships. The blocky radar traces in an inverted T-shape are the common distinctive feature for all Kraylor ships, so it should be easy for players to distinguish between Kraylor ships and ships of other factions. A key feature of the Kraylor radar traces is the visible placement of their weapons. If you want to create new ships, make sure to display the most important gun mounts as a pixel in the radar trace.
+If you want to extend this list of ships, consider using variations of the "battleship_destroyer" Models/Meshes or other models that show mentioned features.
+
+Strategic use in scenarios
+--------------------------
+Considering the faction description and existing scenarios the following strategies have been developed for the Kraylor fleet.
+  * Marauders: Few ships invade the territory from different directions. They go from one place to another and attack ships and stations. More advanced ships may use jump drives and drones. When used in small but combat heavy scenarios, the players goal can be to defend their assets and hunt down the marauders. In more story-driven scenarios they often they may occur as nuisance that distracts the players from their primary goal.
+  * Bases: Kraylor stations are scattered over an area of the map. Small Kraylor fleets will defend most of the stations. The stations may regularly launch marauders to attack stations of the players faction. The players goal usually is to destroy Kraylor stations while defending their own assets.
+
+Ship Properties
+---------------
+The following features were chosen for Kraylor ships, to make them distinguishable from other factions:
+  * Kraylor focus on massive corvettes that project strength and physical might; they do not rely on specialised ships or fighters.
+  * Shields are stronger than hull, front shield are stronger than rear shields
+  * Multiple shield segments, heavier ships use more shield segments
+  * Shields are stronger than the shields of most other factions
+  * Hull is only moderate compared to other factions, even on heavier ships
+  * Beams are stronger than the beams of most other factions
+  * Heavy ships may have a jump drive
+  * Homing missiles as standard equipment. Heavy ships also use HVLIs and EMPs
+
+Naming Convention
+-----------------
+The Kraylor ship template names mention physical strength and the destructive capabilities of the ship. The names are compound words including a noun and a verb (like "Rockbreaker"). Ships of the same class use the same verb but a different noun; you can expect similar ships within the "-breaker" class but different ships in the "-bringer" class.
+// TODO better variations
+
+
+Ship Classes
+------------
+Since Kraylor ships are not very specialised, the different ship classes mostly distinguish between the power of the ship:
+  * Drones are used as distraction or defense against missile ships. Heavy ships usually deploy them in battle.
+  * Gunships ("Breakers") TODO
+  * Dreadnoughts ("Bringers") TODO
+
+Overview
+--------
+
+Drones:
+  * Drone
+
+Gunships:
+  * Rockbreaker
+  * Spinebreaker
+
+Dreadnoughts:
+  * Deathbringer
+  * Painbringer
+  * Doombringer
+
+Stations:	// TODO Rename
+  * Battlestation
+  * Goddess of Destruction
+
+TODO mv to bottom
+Component details used for designing the ships above:
+ Beams
+  Kraylor standard beam:     Range: 1000-1500 CycleTime: 6.0 Dmg: 8  (dps: 1.33)
+  Kraylor heavy beam:        Range: 1500-2000 CycleTime: 8.0 Dmg: 11 (dps: 1.375) (only doombringer)
+  Kraylor turbo beam:        Range: 3000-4000 CycleTime: 3.0 Dmg: 10 (dps: 3.33)  (stations only)
+ Hull/shields
+  100, 100/80/80
+  70,  150/100
+  70,  400/2*300/2*200
+  100, 300/2*200/100
+  200, 450/2*350/2*150
+  150, 6*120
+  2000, 6*1200
+  => hull: 70-200, shields: 2-6 * 80-450
+ Engines
+  Gunships  60, 5-15, 10-25
+  Destroyer 30-35, 1.5-6, 5-10 jump	//FIXME name
+--]]
+
 
 --[[Fighter--]]
 template = ShipTemplate():setName("Drone"):setClass("Starfighter", "Interceptor")
@@ -127,7 +182,7 @@ template:setBeam(3,100,  60, 1000.0, 6.0, 8)
 template:setBeam(4, 30,   0, 2000.0, 6.0, 8)
 template:setBeam(5,100, 180, 1200.0, 6.0, 8)
 template:setHull(70)
-template:setShields(300, 300, 300, 300, 300)
+template:setShields(400, 300, 200, 200, 300)
 --Reputation Score: 157
 template:setSpeed(30, 1.5, 5)
 --threat level: 6*1.3=7.8(dps)+(300)/20=15(shields)+0.7(hull) = 7.8+15+0.7=23.5
@@ -137,7 +192,7 @@ template = ShipTemplate():setName("Painbringer"):setClass("Kraylor", "Destroyer"
 template:setDescription([[The Painbringer a small destroyer, and its combination of frigate-like beam weapons and corvette-like shields and a huge torpedo storage make it an excellent strike ship. Because the Painbringer is fitted with a jump drive, it can also serve as an intersystem surprise strike craft.]])
 template:setRadarTrace("radar_kraylor_destroyer_sides.png")
 template:setHull(100)
-template:setShields(200, 200, 200, 200)
+template:setShields(300, 200, 100, 200)
 --Reputation Score: 90
 template:setSpeed(30, 3.5, 5)
 template:setJumpDrive(true)

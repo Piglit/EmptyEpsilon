@@ -394,3 +394,47 @@ function addSystemsAtlasAlt(template)
     template:addDoor(7, 5, true);
 end
 
+function addSystemsSat(template)
+    template:addRoomSystem(1,1,2,2,"RearShield")
+    template:addRoomSystem(1,0,1,1,"Impulse")
+    template:addRoomSystem(2,0,1,1,"Maneuver")
+    template:addRoomSystem(0,1,1,1,"Warp")
+    template:addRoomSystem(0,2,1,1,"JumpDrive")
+    template:addRoomSystem(3,1,1,1,"Reactor")
+    template:addRoomSystem(3,2,1,1,"FrontShield")
+    template:addRoomSystem(1,3,1,1,"BeamWeapons")
+    template:addRoomSystem(2,3,1,1,"MissileSystem")
+	-->
+    template:addDoor(1,1, true)
+    template:addDoor(2,1, true)
+    template:addDoor(1,3, true)
+    template:addDoor(2,3, true)
+	--v
+    template:addDoor(1,1, false)
+    template:addDoor(1,2, false)
+    template:addDoor(3,1, false)
+    template:addDoor(3,2, false)
+end
+
+function addSystemsStation(template)
+    template:addRoomSystem(2,2,4,4,"RearShield")
+    template:addRoomSystem(2,0,2,2,"Impulse")
+    template:addRoomSystem(4,0,2,2,"Maneuver")
+    template:addRoomSystem(0,2,2,2,"Warp")
+    template:addRoomSystem(0,4,2,2,"JumpDrive")
+    template:addRoomSystem(6,2,2,2,"Reactor")
+    template:addRoomSystem(6,4,2,2,"FrontShield")
+    template:addRoomSystem(2,6,2,2,"BeamWeapons")
+    template:addRoomSystem(4,6,2,2,"MissileSystem")
+	-->
+    template:addDoor(2,2, true)
+    template:addDoor(4,2, true)
+    template:addDoor(2,6, true)
+    template:addDoor(4,6, true)
+	--v
+    template:addDoor(2,2, false)
+    template:addDoor(2,4, false)
+    template:addDoor(6,2, false)
+    template:addDoor(6,4, false)
+end
+

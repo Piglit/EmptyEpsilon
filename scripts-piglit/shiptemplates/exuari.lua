@@ -132,6 +132,7 @@ template:setShields(50, 30)
 --Reputation Score: 13
 template:setSpeed(70, 12, 12)
 template:setWarpSpeed(600)
+template:setWarpDrive(true)
 
 variation = template:copy("Hunter")
 variation:setDescription(_("The Exuari beta striker 'Hunter' is a warp-drive equipped reinforement fighter. This spacecraft runs on a small crew and is often sent into battle to aid other Exuari ships when they engage in combat. It has an extra pair of striker beams and improved front shields. It's fast, it's agile, and can clean up what is left of the enemies fleet after an initial strike."))

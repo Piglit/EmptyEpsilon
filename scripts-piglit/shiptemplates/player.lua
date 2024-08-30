@@ -5,6 +5,25 @@ require("shipSystems.lua") -- contains addSystems*
 
 color_player = "White" --change it if you want another style
 
+--[[ Available ships
+MP52 Hornet
+ZX-Lindworm
+Ryu
+Adder MK7
+Phobos M3P
+Hathcock
+Piranha M5P
+Nautilus
+Atlantis
+Crucible
+Maverick
+Poseidon
+Benedict
+Kiriya
+Hammer
+Anvil
+--]]
+
 
 
 --[[Starfighter--]]
@@ -37,9 +56,11 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
-template:setIsFighter(true)
+template:setPlayerShipType("fighter")
 
 addSystemsWespe(template)
+
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --var = template:copy("MP58 Mole")	-- Drill, slower maneuver, but faster beams
 ---- what is fun: difficult to outmaneuver enemies if they have high turn rate
@@ -106,9 +127,11 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
-template:setIsFighter(true)
+template:setPlayerShipType("fighter")
 
 addSystemsLindwurm(template)
+
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --what is fun: destroying bigger enemies. Player should always consider weather keeping up the attack or escaping is adequate. Reverse drive should be slower than enemies forward drive. But forward faster.
 --Challenge: you have to sustain firing, but are too slow to escape using reverse
@@ -192,9 +215,10 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
-template:setIsFighter(true)
+template:setPlayerShipType("fighter")
 
 addSystemsAdler(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 
 -- switch to model with two primary tubes
@@ -242,8 +266,9 @@ template:setCanDock(true)
 template:setCanCombatManeuver(false)
 template:setCanLaunchProbe(true)
 template:setCanSelfDestruct(false)
-template:setIsFighter(true)
+template:setDockClasses(_("class", "Shuttle"))
 addSystemsAdler(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[ Player Light Cruiser--]]
 template = ShipTemplate():setName("Phobos M3P"):setLocaleName(_("playerShip", "Phobos M3P")):setClass(_("class", "Frigate"), _("subclass", "Light Cruiser")):setType("playership")
@@ -270,8 +295,9 @@ template:setWeaponStorage("EMP", 3)
 template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
-template:setDockClasses(_("class", "Satellite"))
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsMulitGun(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[ Player Laser Battlecruiser --]]
 template = ShipTemplate():setName("Hathcock"):setLocaleName(_("playerShip", "Hathcock")):setClass(_("class", "Frigate"), _("subclass", "Torpedoboat Destroyer")):setType("playership") 
@@ -299,14 +325,16 @@ template:setJumpDrive(false)
 template:setWarpDrive(true)
 
 template:setRepairCrewCount(2)
-template:setDockClasses(_("class", "Satellite"))
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsLaserAlt(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 var = template:copy("Anvil")
 var:setModel("LaserCorvetteBlue")
 var:setSharesEnergyWithDocked(true)
 var:setClass(_("class", "Prototype"), _("subclass", "Torpedoboat Destroyer"))
 var:setDockClasses(_("class", "Prototype"))
+npc = var:copy(" "..var:getName()):setType("ship")
 
 --[[Player Missile Cruiser--]]
 template = ShipTemplate():setName("Piranha M5P"):setClass(_("class", "Frigate"), _("subclass", "Missile Cruiser")):setType("playership")
@@ -335,14 +363,16 @@ template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
 template:setRepairCrewCount(2)
-template:setDockClasses(_("class", "Satellite"))
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsHeavy(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 var = template:copy("Hammer")
 var:setModel("HeavyCorvetteBlue")
 var:setSharesEnergyWithDocked(true)
 var:setClass(_("class", "Prototype"), _("subclass", "Missile Cruiser"))
-var:setDockClasses(_("class", "Prototype"))
+var:setDockClasses(_("class", "Prototype"), _("class", "Satellite"), _("class", "Shuttle"))
+npc = var:copy(" "..var:getName()):setType("ship")
 
 --[[Player Transport--]]
 template = ShipTemplate():setName("Flavia P.Falcon"):setClass(_("class", "Frigate"), _("subclass", "Light transport")):setType("playership")
@@ -370,8 +400,9 @@ template:setWeaponStorage("Homing", 3)
 template:setWeaponStorage("Mine", 1)
 template:setWeaponStorage("Nuke", 1)
 template:setRepairCrewCount(8)
-template:setDockClasses(_("class", "Satellite"))
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsLight(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 template = ShipTemplate():setName("Repulse"):setClass(_("class", "Frigate"), _("subclass", "Armored Transport")):setModel("LightCorvette"..color_player):setType("playership")
 template:setRadarTrace("tug.png")
@@ -397,6 +428,8 @@ template:setWeaponStorage("Homing", 4)
 
 template:setRepairCrewCount(8)
 addSystemsLight(template)
+npc = template:copy(" "..template:getName()):setType("ship")
+
 
 --[[Mine Layer--]]
 template = ShipTemplate():setName("Nautilus"):setType("playership"):setClass("Frigate","Mine Layer"):setModel("MineLayerCorvette"..color_player)
@@ -423,8 +456,9 @@ template:setTubeDirection(2, 180)
 template:setWeaponStorage("Mine", 12)
 
 template:setRepairCrewCount(4)
-template:setDockClasses(_("class", "Satellite"))
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsMineLayer(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Corvette--]]
 template = ShipTemplate():setName("Atlantis"):setClass(_("class", "Corvette"), _("subclass", "Destroyer")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")
@@ -454,8 +488,9 @@ template:setTubeDirection(1, -90)
 template:setTubeDirection(2,  90)
 template:setTubeDirection(3,  90)
 template:setTubeDirection(4, 180):setWeaponTubeExclusiveFor(4, "Mine")
-template:setDockClasses(_("class", "Starfighter"))
+template:setDockClasses(_("class", "Starfighter"), _("class", "Satellite"), _("class", "Shuttle"))
 addSystemsAtlasAlt(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Missile Corvette--]]
 template = ShipTemplate():setName("Crucible"):setLocaleName(_("Crucible")):setClass(_("Corvette"),_("Popper")):setModel("AtlasMissileDreadnought"..color_player):setType("playership")
@@ -466,6 +501,7 @@ template:setShields(160,160)
 template:setSpeed(80,8,10)
 template:setCombatManeuver(400, 250)
 template:setWarpSpeed(750)
+template:setWarpDrive(true)
 template:setJumpDriveRange(5000,50000)
 template:setJumpDrive(false)
 --                  Arc, Dir,  Range, CycleTime, Dmg
@@ -489,10 +525,11 @@ template:setWeaponTubeExclusiveFor(1, "HVLI")
 template:weaponTubeDisallowMissle(2, "Mine")
 template:weaponTubeDisallowMissle(3, "Mine")
 template:setWeaponTubeExclusiveFor(4, "Mine")
-template:setDockClasses(_("class", "Starfighter"))
+template:setDockClasses(_("class", "Starfighter"), _("class", "Satellite"), _("class", "Shuttle"))
 
 template:setRepairCrewCount(4)
 addSystemsAtlas(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Beam Corvette--]]
 template = ShipTemplate():setName("Maverick"):setLocaleName(_("Maverick")):setClass(_("Corvette"),_("Gunner")):setModel("AtlasLaserDreadnought"..color_player):setType("playership")
@@ -503,8 +540,9 @@ template:setShields(160,160)
 template:setSpeed(80,8,10)
 template:setCombatManeuver(400, 250)
 template:setWarpSpeed(800)
+template:setWarpDrive(false)
 template:setJumpDriveRange(5000,50000)
-template:setJumpDrive(false)
+template:setJumpDrive(true)
 --                 Arc, Dir,  Range, CycleTime, Dmg
 template:setBeam(0, 10,   0, 2000.0, 6.0, 6)
 template:setBeam(1, 90, -20, 1500.0, 6.0, 8)
@@ -527,9 +565,10 @@ template:weaponTubeDisallowMissle(0, "Mine")
 template:weaponTubeDisallowMissle(1, "Mine")
 template:setWeaponTubeExclusiveFor(2, "Mine")
 
-template:setDockClasses(_("class", "Starfighter"))
+template:setDockClasses(_("class", "Starfighter"), _("class", "Satellite"), _("class", "Shuttle"))
 template:setRepairCrewCount(4)
 addSystemsAtlas(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Carrier Corvette--]]
 template = ShipTemplate():setName("Poseidon"):setClass(_("class", "Corvette"), _("subclass", "Combat Carrier")):setModel("AtlasCarrierDreadnought"..color_player):setType("playership")
@@ -559,14 +598,17 @@ template:weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(0, -90)
 template:setTubeDirection(1,  90)
 template:setTubeDirection(2, 180):setWeaponTubeExclusiveFor(2, "Mine")
-template:setInternalDockClasses(_("subclass", "Interceptor"), _("subclass", "Bomber"), _("subclass", "Rocket Fighter"), _("subclass", "Scout"))	-- do not allow heavy bombers
-template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
+template:setInternalDockClasses(_("class", "Starfighter"), _("class", "Satellite"), _("class", "Shuttle"))
+template:setSpawnShips("MP52 Hornet", "ZX-Lindworm")
 
 template:setRestocksMissilesDocked("all")
 template:setSharesEnergyWithDocked(true)
 template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
 addSystemsAtlasAlt(template)
+
+template:setShortRangeRadarRange(15000)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 --[[Heavy Carrier Corvette--]]
 template = ShipTemplate():setName("Neptune"):setClass(_("class", "Corvette"), _("subclass", "Heavy Carrier")):setType("playership")
@@ -600,7 +642,7 @@ template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
 template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"))
-template:setInternalDockClasses(_("class", "Starfighter"))
+template:setInternalDockClasses(_("class", "Starfighter"), _("class", "Satellite"), _("class", "Shuttle"))
 template:setShields(70, 70)
 template:setHull(200)
 template:setSpeed(60, 6, 8)
@@ -619,6 +661,7 @@ template:setRepairDocked(true)
 template:setSpawnShips("MP52 Hornet", "Peluda", "Ryu")
 template:setRepairCrewCount(6)
 addSystemsTransport(template)
+npc = template:copy(" "..template:getName()):setType("ship")
 
 var2 = template:copy("Kiriya")
 var2:setDescription([[The Warp Carrier is a specialized Freighter. It does not carry any cargo, as it's cargo bay is taken up by a specialized warp drive and a huge ammunition factory to supply docked ships.
@@ -627,5 +670,6 @@ Kiriya is an improved warp drive version of the Jump Carrier]])
 var2:setJumpDrive(false)
 var2:setWarpDrive(true)
 var2:setWarpSpeed(750)
+npc = var2:copy(" "..var2:getName()):setType("ship")
 
 

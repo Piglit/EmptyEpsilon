@@ -24,7 +24,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
 
     // Draw a container with two columns.
     auto container = new GuiElement(this, "");
-    container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
+    container->setPosition(0,0,sp::Alignment::Center)->setSize(350+510+50+50+50, 370+50+50)->setAttribute("layout", "horizontal");
     auto left_panel = new GuiPanel(container, "");
     left_panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(350, 280);
     auto right_panel = new GuiPanel(container, "");
@@ -105,10 +105,10 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     (new GuiLabel(ship_content, "SELECT_SHIP_LABEL", tr("Select ship type:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
 
     ship_template_selector = new GuiSelector(ship_content, "CREATE_SHIP_SELECTOR", [this](int index, string value){
-        if (database_view->findAndDisplayEntry(value))
+        /*if (database_view->findAndDisplayEntry(value))
             LOG(INFO) << value << " found";
         else
-            LOG(INFO) << value << " not found";
+            LOG(INFO) << value << " not found";*/
     });
     // List only ships with templates designated for player use.
     std::vector<string> template_names = campaign_client->getShips();
@@ -134,10 +134,10 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     // Spawn a ship of the selected template near 0,0 and give it a random
     // heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this]() {
-        if ((!gameGlobalInfo->allow_new_player_ships) || (my_spaceship))
-            return;
         string callsign = PreferencesManager::get("shipname", "");
         if (game_server) {
+            if ((!gameGlobalInfo->allow_new_player_ships) || (my_spaceship))
+                return;
             P<PlayerSpaceship> ship = new PlayerSpaceship();
             string templ = ship_template_selector->getSelectionValue();
             if (ship)
@@ -158,16 +158,12 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
                 ship_create_button->disable();
             }
-        } else {
-            // proxy
-            campaign_client->spawnShipOnProxy(PreferencesManager::get("proxy_addr"), callsign, ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue(), PreferencesManager::get("password"), spawn_pos.x, spawn_pos.y, spawn_rota);
-            ship_create_button->disable();
         }
     });
     ship_create_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
 
 
-    if (!my_spaceship) {
+    if (!my_spaceship && game_server) {
         int index = gameGlobalInfo->getPlayerShipIndexByName(callsign); // -1 if not found
         if (index >= 0) {
             auto ship = gameGlobalInfo->getPlayerShip(index);
@@ -176,7 +172,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     }
 
     // Station Info
-
+/*
     station_content = new GuiElement(right_panel, "");
     station_content->setMargins(25)->setPosition(0, 0)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     station_content->setAttribute("layout", "vertical");
@@ -184,8 +180,8 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
 
     (new GuiLabel(station_content, "STATION_INFO_LABEL", tr("Ship configuration"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
 
-    //station_name = new GuiKeyValueDisplay(station_content, "STATION_NAME", 0.4, tr("Docked with "), callsign);
-    //station_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
+    station_name = new GuiKeyValueDisplay(station_content, "STATION_NAME", 0.4, tr("Docked with "), callsign);
+    station_name->setTextSize(20)->setSize(GuiElement::GuiSizeMax, 50);
 
     ship_destroy_button = new GuiButton(station_content, "DESTROY_SHIP_BUTTON", tr("Change ship"), [this]() {
         if ((!gameGlobalInfo->allow_new_player_ships) || !(my_spaceship))
@@ -208,26 +204,27 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
     
     database_view = new DatabaseViewComponent(database_container, false);
     database_view->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-
+*/
 }
 
 void MissionControlScreen::update(float delta)
 {
 
-    unsigned int seconds = gameGlobalInfo->elapsed_time;
-    unsigned int minutes = (seconds / 60) % 60;
-    unsigned int hours = (seconds / 60 / 60) % 24;
-    seconds = seconds % 60;
-    char buf[9];
-    std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
-
-    // Update mission clock
-    clock->setValue(string(buf));
-
-    // Update pause button
     if (game_server)
-        pause_button->setValue(engine->getGameSpeed() == 0.0f);
+    {
+        unsigned int seconds = gameGlobalInfo->elapsed_time;
+        unsigned int minutes = (seconds / 60) % 60;
+        unsigned int hours = (seconds / 60 / 60) % 24;
+        seconds = seconds % 60;
+        char buf[9];
+        std::snprintf(buf, 9, "%02d:%02d:%02d", hours, minutes, seconds);
 
+        // Update mission clock
+        clock->setValue(string(buf));
+
+        // Update pause button
+        pause_button->setValue(engine->getGameSpeed() == 0.0f);
+    }
     // States of dynamic panel:
     /* no ship  -> show ship_content
                 -> hide ship_infos
@@ -239,7 +236,7 @@ void MissionControlScreen::update(float delta)
     */
 
     // set my_spaceship
-    if (!my_spaceship) {
+    if (!my_spaceship && game_server) {
         string callsign = PreferencesManager::get("shipname", "");
         int index = gameGlobalInfo->getPlayerShipIndexByName(callsign); // -1 if not found
         if (index >= 0) {
@@ -281,14 +278,17 @@ void MissionControlScreen::update(float delta)
         ship_drive->setValue(drive);
 
         // station content when docked
-        bool docked = my_spaceship->docking_state == DS_Docked;
-        station_content->setVisible(docked);
+        //bool docked = my_spaceship->docking_state == DS_Docked;
+        //station_content->setVisible(docked);
 
     } else {
         // !my_spaceship
         // ship was probably destroyed or has never existed
-        station_content->hide();
-        ship_content->setVisible(!!gameGlobalInfo->allow_new_player_ships);
+        //station_content->hide();
+        if (game_server)
+            ship_content->setVisible(!!gameGlobalInfo->allow_new_player_ships);
+        else
+            ship_content->hide();
         ship_infos->hide();
     }
 }

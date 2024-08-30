@@ -5,6 +5,25 @@ require("shipSystems.lua") -- contains addSystems*
 
 color_player = "White" --change it if you want another style
 
+--[[ Available ships
+MP52 Hornet
+ZX-Lindworm
+Ryu
+Adder MK7
+Phobos M3P
+Hathcock
+Piranha M5P
+Nautilus
+Atlantis
+Crucible
+Maverick
+Poseidon
+Benedict
+Kiriya
+Hammer
+Anvil
+--]]
+
 
 
 --[[Starfighter--]]
@@ -483,6 +502,7 @@ template:setShields(160,160)
 template:setSpeed(80,8,10)
 template:setCombatManeuver(400, 250)
 template:setWarpSpeed(750)
+template:setWarpDrive(true)
 template:setJumpDriveRange(5000,50000)
 template:setJumpDrive(false)
 --                  Arc, Dir,  Range, CycleTime, Dmg
@@ -521,8 +541,9 @@ template:setShields(160,160)
 template:setSpeed(80,8,10)
 template:setCombatManeuver(400, 250)
 template:setWarpSpeed(800)
+template:setWarpDrive(false)
 template:setJumpDriveRange(5000,50000)
-template:setJumpDrive(false)
+template:setJumpDrive(true)
 --                 Arc, Dir,  Range, CycleTime, Dmg
 template:setBeam(0, 10,   0, 2000.0, 6.0, 6)
 template:setBeam(1, 90, -20, 1500.0, 6.0, 8)

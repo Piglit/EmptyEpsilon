@@ -109,62 +109,6 @@ async def getCampaign(server_name, crew_name):
 		"score": c.getRecentScore(),
 	}
 
-### OLD ###
-
-class EEProxyShipInfo(BaseModel):
-	server_ip: str
-	callsign: str
-	password: str
-	template: str
-	drive: str
-	x: int
-	y: int
-	rota: int
-
-class EEProxyDestroyInfo(BaseModel):
-	server_ip: str
-	callsign: str
-
-
-
-
-@app.post("/proxySpawn")
-async def proxySpawn(ship: EEProxyShipInfo):
-	log.info(ship.callsign + "\tspawned ship " + str(ship.template) + " with "+ str(ship.drive) + " drive on " + str(ship.server_ip))
-	additionalCode = servers.getShipAdditionalCode(ship.callsign)
-	script = """
-		ship = PlayerSpaceship()
-		ship:setRotation({ship.rota})
-		ship:commandTargetRotation({ship.rota})
-		ship:setPosition({ship.x}, {ship.y})
-		ship:setTemplate("{ship.template}")
-		ship:setCallSign("{ship.callsign}")
-		ship:setControlCode("{ship.password}")
-	""" + additionalCode
-	script = script.format(**locals())
-	if ship.drive == "warp":
-		script += "\nship:setWarpDrive(true):setJumpDrive(false)"
-	elif ship.drive == "jump":
-		script += "\nship:setWarpDrive(false):setJumpDrive(true)"
-
-	log.debug(script)
-	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
-	log.debug(result)
-
-@app.post("/proxyDestroy")
-async def proxySpawn(ship: EEProxyDestroyInfo):
-	log.info(ship.callsign + "\tdestroyed on " + str(ship.server_ip))
-	script = f"""
-		idx = getPlayerShipIndex("{ship.callsign}")
-		ship = getPlayerShip(idx)
-		ship:destroy()
-	"""
-	log.debug(script)
-	result = requests.get(f"http://{ship.server_ip}:8080/exec.lua", data=script)
-	log.debug(result)
-
-# NEW
-
 class BriefingResponse(BaseModel):
 	briefing: str
 

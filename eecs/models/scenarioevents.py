@@ -10,6 +10,7 @@ class ScenarioEvents(str, Enum):
 	victory = "victory"
 	defeat = "defeat"
 	end = "end"
+	joined = "joined"
 
 	def fleet_info(self):
 		if self == "started":
@@ -24,5 +25,7 @@ class ScenarioEvents(str, Enum):
 			return "was defeated in"
 		if self == "end":
 			return "reached the end of"
+		if self == "joined":
+			return "joined"
 		return self
 

@@ -7,6 +7,7 @@
 
 -- NOTE this could be imported
 local MISSILE_TYPES = {"Homing", "Nuke", "Mine", "EMP", "HVLI"}
+require "xansta_mods.lua"
 
 --- Main menu of communication.
 --
@@ -99,6 +100,7 @@ end
 -- @tparam SpaceStation comms_target
 function commsShipEnemy(comms_source, comms_target)
     local comms_data = comms_target.comms_data
+	return enemyComms(comms_data) -- from xansta_mods
     if comms_data.friendlyness > 50 then
         local faction = comms_target:getFaction()
         local message
@@ -152,6 +154,7 @@ Stand down or prepare to donate your corpses toward our nutrition.]])
                 end
             end
         )
+
         return true
     end
     return false
@@ -173,6 +176,17 @@ We are on an important mission.]])
 Good day.]])
     end
     setCommsMessage(message)
+	if (comms_source.special_buy_ships or comms_source:getResourceAmount("Diplomatic Crew") > 0) and comms_target:isFriendOrFoeIdentifiedBy(comms_source) and comms_target:getFaction() ~= "Human Navy" then
+		local cost = special_buy_cost(comms_target, comms_source)
+		addCommsReply(string.format(_("special-comms", "The Human Navy demands your support! Join us. [Cost: %s Rep.]"), cost), function()
+			if not comms_source:takeReputationPoints(cost) then
+				setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+			else
+				comms_target:setFaction(comms_source:getFaction())
+				setCommsMessage(_("special-comms", "This ship now accepts orders from the Human Navy, Sir."))
+			end
+		end)
+	end
     return true
 end
 

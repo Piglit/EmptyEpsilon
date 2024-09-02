@@ -68,7 +68,9 @@ Sniper/Artillery:
 
 Carriers:
   * Ryder
-  * Fortress
+  * Zeppelin
+  * Craver
+  * Ridge
 
 --]]
 

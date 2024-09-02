@@ -428,3 +428,52 @@ function formatTime(seconds)
 	end
 	return str
 end
+
+-- Checks if one circle intersects another circle.
+function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, circle2y, radius2 )
+--[[
+	Copyright (c) 2015 Davis Claiborne
+	This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+	Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+	The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgement in the product documentation would be appreciated but is not required.
+	Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+	This notice may not be removed or altered from any source distribution.
+
+	Altered by Pithlit: took only needed functions, changed return values
+--]]
+
+	-- Deals with floats / verify false false values. This can happen because of significant figures.
+	local function checkEqualFuzzy( number1, number2 )
+		return ( number1 - .00001 <= number2 ) and ( number2 <= number1 + .00001 )
+	end
+
+	-- Check if input is actually a number
+	local function validateNumber( n )
+		if type( n ) ~= 'number' then return false
+		elseif n ~= n then return false -- nan
+		elseif math.abs( n ) == math.huge then return false
+		else return true end
+	end
+
+	local length = distance( circle1x, circle1y, circle2x, circle2y )
+	if length > radius1 + radius2 then return {} end -- If the distance is greater than the two radii, they can't intersect.
+	if checkEqualFuzzy( length, 0 ) and checkEqualFuzzy( radius1, radius2 ) then return {} end	-- equal
+	if checkEqualFuzzy( circle1x, circle2x ) and checkEqualFuzzy( circle1y, circle2y ) then return {} end --collinear
+
+	local a = ( radius1 * radius1 - radius2 * radius2 + length * length ) / ( 2 * length )
+	local h = math.sqrt( radius1 * radius1 - a * a )
+
+	local p2x = circle1x + a * ( circle2x - circle1x ) / length
+	local p2y = circle1y + a * ( circle2y - circle1y ) / length
+	local p3x = p2x + h * ( circle2y - circle1y ) / length
+	local p3y = p2y - h * ( circle2x - circle1x ) / length
+	local p4x = p2x - h * ( circle2y - circle1y ) / length
+	local p4y = p2y + h * ( circle2x - circle1x ) / length
+
+	if not validateNumber( p3x ) or not validateNumber( p3y ) or not validateNumber( p4x ) or not validateNumber( p4y ) then
+		return {} -- inside
+	end
+
+	if checkEqualFuzzy( length, radius1 + radius2 ) or checkEqualFuzzy( length, math.abs( radius1 - radius2 ) ) then return {{p3x, p3y}} end -- tangent
+	return {{p3x, p3y}, {p4x, p4y}} --intersection
+end

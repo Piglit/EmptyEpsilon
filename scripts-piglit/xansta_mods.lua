@@ -1,6 +1,6 @@
 require("script_formation.lua")
 require("script_hangar.lua")
-
+require("luax.lua")
 function init_constants_xansta()
 	-- called during or instead of setConstants()
 	missile_types = {'Homing', 'Nuke', 'Mine', 'EMP', 'HVLI'}
@@ -193,6 +193,11 @@ function init_constants_xansta()
 					{"software",0},
 					{"circuit",0},
 					{"battery",0}	}
+	good_desc = {}
+	for i,good in ipairs(goodsList) do
+		local g = good[1]
+		good_desc[g] = g
+	end
 	commonGoods = {"food","medicine","nickel","platinum","gold","dilithium","tritanium","luxury","cobalt","impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
 	componentGoods = {"impulse","warp","shield","tractor","repulsor","beam","optic","robotic","filament","transporter","sensor","communication","autodoc","lifter","android","nanites","software","circuit","battery"}
 	mineralGoods = {"nickel","platinum","gold","dilithium","tritanium","cobalt"}
@@ -674,7 +679,7 @@ function enemyComms(comms_data)
 			end
 		end)
 
-		if comms_source.special_intimidate_ships then
+		if comms_source.special_intimidate_ships or comms_source:getResourceAmount("Xenolinguistic Team") > 0 then
 			local cost = special_buy_cost(comms_target, comms_source)
 			addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
 				local x,y = comms_target:getPosition()
@@ -748,7 +753,9 @@ function xanstas_player_update(delta)
 				x_autoCoolant(p)
 			end
 			if feature_crewFate then
-				x_healthCheck(delta, p)
+				if p.exclude_from_health_check ~= nil then
+					x_healthCheck(delta, p)
+				end
 			end
 			if feature_coolantNebulae then
 				x_coolantNebulae(delta, p)
@@ -928,9 +935,10 @@ function x_healthCheck(delta, p)
 			if p:getRepairCrewCount() == 1 then
 				fatalityChance = fatalityChance/2	-- increase chances of last repair crew standing
 			end
-			if fatalityChance > 0 then
+			if fatalityChance > 0 and not p.skip_next_health_check then
 				x_crewFate(p,fatalityChance)
 			end
+			p.skip_next_crew_fate = false
 		else	--no repair crew left
 			local diff = 1
 			if difficulty ~= nil then
@@ -1019,26 +1027,26 @@ function x_crewFate(p, fatalityChance)
 			local consequence = 0
 			local upper_consequence = 2
 			local consequence_list = {}
---			if p:getCanLaunchProbe() then
---				upper_consequence = upper_consequence + 1
---				table.insert(consequence_list,"probe")
---			end
---			if p:getCanHack() then
---				upper_consequence = upper_consequence + 1
---				table.insert(consequence_list,"hack")
---			end
---			if p:getCanScan() then
---				upper_consequence = upper_consequence + 1
---				table.insert(consequence_list,"scan")
---			end
---			if p:getCanCombatManeuver() then
---				upper_consequence = upper_consequence + 1
---				table.insert(consequence_list,"combat_maneuver")
---			end
---			if p:getCanSelfDestruct() then
---				upper_consequence = upper_consequence + 1
---				table.insert(consequence_list,"self_destruct")
---			end
+			if p:getCanLaunchProbe() then
+				upper_consequence = upper_consequence + 1
+				table.insert(consequence_list,"probe")
+			end
+			if p:getCanHack() then
+				upper_consequence = upper_consequence + 1
+				table.insert(consequence_list,"hack")
+			end
+			if p:getCanScan() then
+				upper_consequence = upper_consequence + 1
+				table.insert(consequence_list,"scan")
+			end
+			if p:getCanCombatManeuver() then
+				upper_consequence = upper_consequence + 1
+				table.insert(consequence_list,"combat_maneuver")
+			end
+			if p:getCanSelfDestruct() then
+				upper_consequence = upper_consequence + 1
+				table.insert(consequence_list,"self_destruct")
+			end
 			consequence = math.random(1,upper_consequence)
 			if consequence == 1 then
 				p:setRepairCrewCount(p:getRepairCrewCount() - 1)
@@ -1073,6 +1081,12 @@ function x_crewFate(p, fatalityChance)
 				end
 			else
 				local named_consequence = consequence_list[consequence-2]
+				if p.damaged_secondary_systems == nil then
+					p.damaged_secondary_systems = {}
+				end
+				if not table.contains(p.damaged_secondary_systems, named_consequence) then
+					table.insert(p.damaged_secondary_systems, named_consequence)
+				end
 				if named_consequence == "probe" then
 					p:setCanLaunchProbe(false)
 					if p:hasPlayerAtPosition("Engineering") then
@@ -1492,12 +1506,12 @@ end
 function special_buy_cost(target, player)
 	cost = target:getHullMax()
 	--[[
-	-- stations:			IU (*4)	Inde(*8)	gain
-	--	Small Station	150	 600	1200	600/h
-	--	Medium Station	400	1600	3200
-	--	Large Station	500	2000	4000
-	--	Huge Station	800	3200	6400
-	-- Phobos			 70	 120	 240
+	-- stations:			IU (*4)	Inde(*4)	gain
+	--	Small Station	150	 600	600		600/h
+	--	Medium Station	400	1600	1600
+	--	Large Station	500	2000	2000
+	--	Huge Station	800	3200	3200
+	-- Phobos			 70	 120	 120
 	--]]
 	if target:isEnemy(player) then
 		health = target:getHull() / target:getHullMax()
@@ -1514,7 +1528,7 @@ function special_buy_cost(target, player)
 	elseif target:getFaction() == "Ktlitans" then
 		cost = cost *1
 	elseif target:getFaction() == "Arlenians" then
-		cost = cost *4
+		cost = cost *2
 	elseif target:getFaction() == "Exuari" then	-- because stations are ships
 		cost = cost *4
 	else	-- other neutral and enemies

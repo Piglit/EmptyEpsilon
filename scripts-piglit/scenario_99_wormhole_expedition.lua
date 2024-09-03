@@ -9,6 +9,7 @@ require "plots/wh_kraylor.lua"
 require "plots/wh_locusts.lua"
 require "plots/wh_players.lua"
 require "plots/wh_stations.lua"
+require "plots/wh_story.lua"
 require "plots/wh_terrain.lua"
 require "plots/wh_turns.lua"
 require "plots/wh_util_rota.lua"
@@ -40,6 +41,7 @@ function init()
 		wh_locusts,
 		wh_exuari,
 		wh_kraylor,
+		wh_story,
 	}
 	onNewPlayerShip(function(ship)
 		for i,plot in ipairs(plots) do

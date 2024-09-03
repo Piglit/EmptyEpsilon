@@ -132,7 +132,6 @@ function wh_kraylor:spawn_enemies_kraylor(xOrigin, yOrigin, enemyStrength)
 		enemyPosition = enemyPosition + 1
 		ship:setPosition(xOrigin+sp*enemyPosition, yOrigin+sp*enemyPosition)
 		formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
-		ship:setCommsScript(""):setCommsFunction(commsShip)	--TODO commsShip is not defined!
 		table.insert(enemyList, ship)
 	end
 
@@ -325,7 +324,6 @@ function wh_kraylor:update(delta)
 					})
 					-- change faction
 					station:setFaction("Kraylor")
-					-- TODO make recapturable!
 				end
 			end
 		end

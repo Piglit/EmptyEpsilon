@@ -7,7 +7,7 @@
 
 -- NOTE this could be imported
 local MISSILE_TYPES = {"Homing", "Nuke", "Mine", "EMP", "HVLI"}
-require "xansta_mods.lua"
+--require "xansta_mods.lua"
 
 --- Main menu of communication.
 --
@@ -154,6 +154,38 @@ Stand down or prepare to donate your corpses toward our nutrition.]])
                 end
             end
         )
+		if comms_source.special_intimidate_ships or comms_source:getResourceAmount("Xenolinguistic Team") > 0 then
+			local cost = special_buy_cost(comms_target, comms_source)
+			addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
+				local x,y = comms_target:getPosition()
+				local playership_near = false
+				local friends_near = false
+				for _, obj in ipairs(getObjectsInRadius(x, y, 5000)) do
+					if obj ~= nil and obj:isValid() and obj ~= comms_target then
+						if obj.typeName == "PlayerSpaceship" then
+							playership_near = true
+						elseif obj.typeName == "CpuShip" then
+							if comms_target:isFriendly(obj) then
+								friends_near = true
+							end
+						end
+					end
+				end
+				if not playership_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender to cowardly weaklings who do not have even the courage to face us directly."))
+				elseif comms_target:getHull() >= comms_target:getHullMax() then
+					setCommsMessage(_("needRep-comms", "Our ship is not even damaged and you want us to surrender? Come here and fight!"))
+				elseif friends_near then
+					setCommsMessage(_("needRep-comms", "We will not surrender as long as our friends are still close."))
+				elseif not comms_source:takeReputationPoints(cost) then
+					setCommsMessage(_("needRep-comms", "Insufficient reputation"))
+				else
+					comms_target:setFaction("Independent")
+					comms_target:orderRoaming()
+					setCommsMessage(_("special-comms", "Ship has surrendered."))
+				end
+			end)
+		end
 
         return true
     end
@@ -226,6 +258,27 @@ end
 -- @treturn string "WP i"
 function formatWaypoint(i)
     return string.format(_("commsShipAssist", "WP %d"), i)
+end
+function special_buy_cost(target, player)
+	cost = target:getHullMax()
+	--[[
+	-- stations:			IU (*4)	Inde(*8)	gain
+	--	Small Station	150	 600	1200	600/h
+	--	Medium Station	400	1600	3200
+	--	Large Station	500	2000	4000
+	--	Huge Station	800	3200	6400
+	-- Phobos			 70	 120	 240
+	--]]
+	if target:isEnemy(player) then
+		health = target:getHull() / target:getHullMax()
+		cost = cost *4 *health
+	elseif target:isFriendly(player) then
+		cost = cost *1
+	else	-- Neutral
+		cost = cost *2
+	end
+	cost = cost *4
+	return math.floor(cost)
 end
 
 -- `comms_source` and `comms_target` are global in comms script.

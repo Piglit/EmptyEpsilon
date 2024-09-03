@@ -602,7 +602,7 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 		if enemyFaction == "Kraylor" then
 			--kraylor formation
 			formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
-			ship:setCommsScript(""):setCommsFunction(commsShip)
+			--ship:setCommsScript(""):setCommsFunction(commsShip)
 		elseif enemyFaction == "Exuari" then
 			ship:setCommsScript("comms_exuari.lua")
 			--TODO check if multiple onDamage/onDestruction are possible. If true, raise frenzy in combat, otherwise slowly lower
@@ -623,7 +623,7 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 				script_hangar.create(ship, fighterTemplate, 3)
 			end
 		else
-			ship:setCommsScript(""):setCommsFunction(commsShip)
+			--ship:setCommsScript(""):setCommsFunction(commsShip)
 		end
 		table.insert(enemyList, ship)
 	end

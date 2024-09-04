@@ -121,7 +121,7 @@ function wh_fleetcommand.spawnFleetCommand()
 	name = "Xenolinguistic Team"
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Ship Upgrades")
-	fc:setResourceDescription(name, "Allows the ship to make enemy ships neutral.")
+	fc:setResourceDescription(name, "Allows the ship to make Kraylor ships neutral.")
 
 	wh_fleetcommand.station = fc
 	wh_fleetcommand.upgrades_done = 0	-- if station gets destroyed, the respawned one will get a number of artifacts, matching the amount of upgrades of the old station.
@@ -263,9 +263,17 @@ function wh_fleetcommand:update(delta)
 							ps:setWarpDrive(false)
 							ps:setJumpDrive(true)
 						end)
+						ps:addCustomButton("Engineering+", "e_drive_refit+", "Equip Jump Drive", function() 
+							ps:setWarpDrive(false)
+							ps:setJumpDrive(true)
+						end)
 					end
 					if ps:hasJumpDrive() and not ps:hasWarpDrive() then
 						ps:addCustomButton("Engineering", "e_drive_refit", "Equip Warp Drive", function() 
+							ps:setWarpDrive(true)
+							ps:setJumpDrive(false)
+						end)
+						ps:addCustomButton("Engineering+", "e_drive_refit+", "Equip Warp Drive", function() 
 							ps:setWarpDrive(true)
 							ps:setJumpDrive(false)
 						end)
@@ -385,7 +393,7 @@ function wh_fleetcommand:update(delta)
 				fc.upgrade_menu_status = "ship"
 				fc.upgrade_selected_ship = ship
 				for _,shipname in ipairs(fc.last_docked_ships) do
-					fc:removeCustom(resource)
+					fc:removeCustom(shipname)
 				end
 				fc:removeCustom("e_Artifacts_descr")
 				fc:removeCustom("e_back")

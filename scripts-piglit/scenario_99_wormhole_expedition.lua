@@ -1,6 +1,6 @@
 -- Name: Wormhole Expedition
 -- Type: Development
--- Proxy: 192.168.2.115
+-- Proxy: 192.168.2.3
 
 require "plots/wh_artifacts.lua"
 require "plots/wh_exuari.lua"
@@ -24,7 +24,7 @@ function table.dump(...)
 	print(serpent.block(...))
 end
 
-TEST = true
+TEST = false
 
 function init()
 	difficulty = 1	-- global var from xanstas stuff

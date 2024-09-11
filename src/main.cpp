@@ -291,7 +291,7 @@ int main(int argc, char** argv)
         windows.push_back(new Window({width, height}, fullscreen, warpPostProcessor, fsaa));
         window_render_layers.push_back(defaultRenderLayer);
 
-        if (PreferencesManager::get("multimonitor", "0").toInt() != 0)
+        if (PreferencesManager::get("multimonitor", "1").toInt() != 0)
         {
             while(int(windows.size()) < SDL_GetNumVideoDisplays())
             {

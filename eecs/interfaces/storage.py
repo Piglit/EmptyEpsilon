@@ -20,6 +20,8 @@ def storeInfo(data, filename, subdir=None):
 def loadInfo(filename, subdir=None):
 	path = _create_dir_path(subdir) + filename
 	try:
+		if not os.path.exists(path):
+			return None
 		with open(path, "rb") as file:
 			return pickle.load(file)
 	except:

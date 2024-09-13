@@ -24,7 +24,7 @@ logging.getLogger("uvicorn.access").handlers = []
 logging.getLogger("uvicorn.access").propagate = False
 
 if __name__ == "__main__":
-	#pyrohelper.start_nameserver()
+	pyrohelper.start_nameserver()
 	# load stored crews
 	os.makedirs("data/crews", exist_ok=True)
 	files = os.listdir("data/crews")

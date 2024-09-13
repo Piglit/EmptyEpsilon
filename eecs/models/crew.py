@@ -16,6 +16,11 @@ from datetime import timedelta
 from pprint import pprint
 import json
 
+import logging
+import coloredlogs
+
+log = logging.getLogger(__name__)
+
 class Crew:
 	def __init__(self, instance_name, crew_name, template):
 		self.instance_name = instance_name
@@ -269,6 +274,7 @@ class Crew:
 	def sendReputation(self, reduce=False):
 		"""send reputation bonus to server, granting it the current ship"""
 		amount = self.getTotalReputationBonus(reduce)
+        log.info(f"{self.crew_name} requested {amount} reputation bonus to {self.instance_name}")
 		if amount <= 0:
 			return
 		script = f"""
@@ -280,9 +286,11 @@ class Crew:
 
 	def _repCallback(self, reduce, success):
 		if success and reduce:
+			amount = self.getTotalReputationBonus(True)
 			if "delivered" not in self.scores:
 				self.scores["delivered"] = {"reputation": 0}
-			self.scores["delivered"]["reputation"] -= amount# TODO test
+			self.scores["delivered"]["reputation"] -= amount
+            log.info(f"{self.crew_name} {amount} reputation has been delivered.")
 
 
 	def storeCrew(self):

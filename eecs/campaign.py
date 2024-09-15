@@ -3,8 +3,10 @@ import core
 import models.crew
 import models.scenario
 import outbound.stationsComms
+import outbound.pyroMessage
 from interfaces import storage
 import json
+import string
 
 # load scenarios, that should be available in the campaign.
 # use the complete filename without the folder.
@@ -41,6 +43,32 @@ Dies ist euer Missionsauswahlbildschirm. Hier werden alle für euch verfügbaren
 Wenn ihr eine Mission abschließt (oder auch nur größtenteils abschließt), werden weitere Missionen für euch bereitgestellt.
 """
 models.crew.setCrewTemplate(["20_training1"], ["Phobos M3P"], briefing)
+
+def cypher(text, key):
+	result = ""
+	key = key.lower()
+	for index,char in enumerate(text):
+		key_index = index % len(key)
+		key_char = key[key_index]
+		key_ord = ord(key_char) - ord("a")
+		if char in string.ascii_lowercase:
+			char = ord(char) + key_ord
+			if char > ord("z"):
+				char -= 26
+			char = chr(char)
+		elif char in string.ascii_uppercase:
+			char = ord(char) + key_ord
+			if char > ord("Z"):
+				char -= 26
+			char = chr(char)
+		elif char in string.digits:
+			char = ord(char) + key_ord
+			while char > ord("9"):
+				char -= 10
+			char = chr(char)
+		result += char
+	return result
+
 
 def unlockAtlantis(crew):
 	crew.unlockShip("Atlantis")
@@ -235,8 +263,12 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		fleetcommand_name = details
 		storage.storeInfo(details, "fleetcommand_name")
 		outbound.stationsComms.subscribe_comms_log(crew.instance_name, details)
-	if event_topic == "fleetcommand-deleted":
+	elif event_topic == "fleetcommand-deleted":
 		outbound.stationsComms.unsubscribe_comms_log()
-
+	elif event_topic == "exuari-comms":
+		msg = details
+		chiffre = cypher(msg, "exuari")
+		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+chiffre
+		outbound.pyroMessage.send("Fernschreiber", msg)
 
 core.subscribe("scenario_event", scenario_event)

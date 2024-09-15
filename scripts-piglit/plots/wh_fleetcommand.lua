@@ -46,7 +46,7 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Dock Upgrades")
 	fc:setResourceDescription(name, "Allows the station to repair the hull of docked ships.")
-	name = "Science Probe Factory"
+	name = "Probe Data Receiver"
 	fc:setResourceAmount(name, -2)
 	fc:setResourceCategory(name, "Dock Upgrades")
 	fc:setResourceDescription(name, "Allows the station to restock docked ships with probes.")
@@ -129,6 +129,10 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc.last_pos_x, fc.last_pos_y = fc:getPosition()
 	fc.jumped_time = 0
 	fc.exclude_from_health_check = true
+
+	if wh_exuari ~= nil then
+		wh_exuari.state = "ambush"
+	end
 	sendMessageToCampaignServer("fleetcommand-spawned", fc:getCallSign())	-- notify campaign server on where the fleet command is and what it's name is.
 end
 
@@ -140,7 +144,7 @@ function wh_fleetcommand.upgrade(resource)
 		fc:setSharesEnergyWithDocked(true)
 	elseif resource == "Hull Repair Scaffold" then
 		fc:setRepairDocked(true)
-	elseif resource == "Science Probe Factory" then
+	elseif resource == "Probe Data Receiver" then
 		fc:setRestocksScanProbes(false)
 	elseif resource == "Torpedo Armory" then
 		fc:setRestocksMissilesDocked("playerships")

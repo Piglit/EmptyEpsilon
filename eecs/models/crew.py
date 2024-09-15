@@ -274,7 +274,7 @@ class Crew:
 	def sendReputation(self, reduce=False):
 		"""send reputation bonus to server, granting it the current ship"""
 		amount = self.getTotalReputationBonus(reduce)
-        log.info(f"{self.crew_name} requested {amount} reputation bonus to {self.instance_name}")
+		log.info(f"{self.crew_name} requested {amount} reputation bonus to {self.instance_name}")
 		if amount <= 0:
 			return
 		script = f"""
@@ -290,7 +290,7 @@ class Crew:
 			if "delivered" not in self.scores:
 				self.scores["delivered"] = {"reputation": 0}
 			self.scores["delivered"]["reputation"] -= amount
-            log.info(f"{self.crew_name} {amount} reputation has been delivered.")
+			log.info(f"{self.crew_name} {amount} reputation has been delivered.")
 
 
 	def storeCrew(self):

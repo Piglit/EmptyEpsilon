@@ -65,9 +65,24 @@ end
 function wh_exuari.onTeleport(wormhole, teleportee)
 	if wh_exuari.state == "ambush" and wormhole == wh_wormhole.wormhole_b and teleportee.typeName == "PlayerSpaceship" then
 		local value = teleportee:getResourceAmount("Artifacts")
-		print(string.format("Exuari behold wormhole use with %d artifacts.", value))
+
 		if value > 1 then
 			wh_exuari:spawnAmbush(teleportee, value)
+			local ship = wh_exuari.ships[#wh_exuari.ships]
+			local msg
+			if ship ~= nil and ship:isValid() then
+				msg = string.format("%s %s reports: death-team arrived in sector %s, intercepting %s %s in %s with %d artifacts.", ship:getTypeName(), ship:getCallSign(), ship:getSectorName(), teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
+			else
+				msg = string.format("Death-team arrived, intercepting %s %s in %s with %d artifacts.", teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
+			end
+			sendMessageToCampaignServer("exuari-comms", msg)
+		end
+	end
+	if teleportee == wh_fleetcommand.station then
+		if wormhole == wh_wormhole.wormhole_a then
+			wh_exuari.state = "idle"
+		else
+			wh_exuari.state = "ambush"
 		end
 	end
 end

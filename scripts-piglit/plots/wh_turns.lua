@@ -85,7 +85,7 @@ end
 function wh_turns.onWormhole(wormhole, teleportee)
 
 	if wh_turns.chapter == "inGame" and teleportee.typeName == "PlayerSpaceship" and wormhole == wh_wormhole.wormhole_a then
-		if (wh_turns.state == "interlude" or self.state == "pause") then
+		if (wh_turns.state == "interlude" or wh_turns.state == "pause") then
 			wh_turns:startTurn()
 		end
 		if teleportee == wh_fleetcommand.station then

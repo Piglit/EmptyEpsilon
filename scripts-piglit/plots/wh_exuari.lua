@@ -6,6 +6,7 @@ After: wormhole
 
 require "luax.lua"
 require "utils.lua"
+require "generate_call_sign_scenario_utility.lua"
 
 wh_exuari = {}
 
@@ -57,7 +58,7 @@ function wh_exuari:initTest()
 	wh_rota.objects = {}
 
 	wh_artifacts:placeDetailedArtifact(-280000,-10000, "CaptureTest", "Has been captured")
-	local ship = CpuShip():setTemplate("Strike"):setPosition(-280000,-20000)
+	local ship = CpuShip():setTemplate("Strike"):setFaction("Exuari"):setPosition(-280000,-20000):setCallSign(generateCallSign(nil, "Exuari"))
 	ship.artifacts = {}
 	table.insert(self.ships, ship)
 end
@@ -71,9 +72,9 @@ function wh_exuari.onTeleport(wormhole, teleportee)
 			local ship = wh_exuari.ships[#wh_exuari.ships]
 			local msg
 			if ship ~= nil and ship:isValid() then
-				msg = string.format("%s %s reports: death-team arrived in sector %s, intercepting %s %s in %s with %d artifacts.", ship:getTypeName(), ship:getCallSign(), ship:getSectorName(), teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
+				msg = string.format("%s %s reports: death-team arrived in sector %s, intercepting %s %s in sector %s with %d artifacts.", ship:getTypeName(), ship:getCallSign(), ship:getSectorName(), teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
 			else
-				msg = string.format("Death-team arrived, intercepting %s %s in %s with %d artifacts.", teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
+				msg = string.format("Death-team arrived, intercepting %s %s in sector %s with %d artifacts.", teleportee:getTypeName(), teleportee:getCallSign(), teleportee:getSectorName(), value)
 			end
 			sendMessageToCampaignServer("exuari-comms", msg)
 		end
@@ -187,7 +188,7 @@ function wh_exuari:spawnAmbush(target, strength)
 	for k,ships in pairs(ambushFleet) do
 		local leader, second = nil, nil
 		for idx,template in ipairs(ships) do
-			local ship = CpuShip():setTemplate(template):setPosition(x,y)
+			local ship = CpuShip():setTemplate(template):setFaction("Exuari"):setPosition(x,y):setCallSign(generateCallSign(nil, "Exuari"))
 			ship.artifacts = {}
 			table.insert(self.ships, ship)
 			leader, second = script_formation.buildFormationIncremental(ship, idx, leader, second)
@@ -222,19 +223,22 @@ function wh_exuari.spawnSiege()
 	end
 
 	-- spawn them!
+	local leader, second
 	for k,ships in pairs(ambushFleet) do
-		local leader, second = nil, nil
+		leader, second = nil, nil
 		for idx,template in ipairs(ships) do
-			local ship = CpuShip():setTemplate(template):setPosition(x+random(-200,200),y+random(-200,200))
+			local ship = CpuShip():setTemplate(template):setFaction("Exuari"):setPosition(x+random(-200,200),y+random(-200,200)):setCallSign(generateCallSign(nil, "Exuari"))
 			ship.artifacts = {}
 			table.insert(wh_exuari.ships, ship)
 			leader, second = script_formation.buildFormationIncremental(ship, idx, leader, second)
+			if leader ~= nil and wh_fleetcommand.station ~= nil and wh_fleetcommand.station:isValid() then
+				leader:orderAttack(wh_fleetcommand.station)
+			end
 		end
-		if leader ~= nil and wh_fleetcommand.station ~= nil and wh_fleetcommand.station:isValid() then
-			leader:orderAttack(wh_fleetcommand.station)
-			msg = string.format("Exuari %s %s reports: Death-fleet has made transit through the wormhole. Preparing to lay siege on Human Navy combat station %s. May the dead bodies of a great battle float through space.", leader:getTypeName(), leader:getCallSign(), wh_fleetcommand.station:getCallSign())
-			sendMessageToCampaignServer("exuari-comms", msg)
-		end
+	end
+	if leader ~= nil and wh_fleetcommand.station ~= nil and wh_fleetcommand.station:isValid() then
+		msg = string.format("Exuari %s %s reports: Death-fleet has made transit through the wormhole. Preparing to lay siege on Human Navy combat station %s. May the dead bodies of a great battle float through space.", leader:getTypeName(), leader:getCallSign(), wh_fleetcommand.station:getCallSign())
+		sendMessageToCampaignServer("exuari-comms", msg)
 	end
 end
 

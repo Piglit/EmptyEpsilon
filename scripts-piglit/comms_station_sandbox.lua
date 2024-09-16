@@ -1,7 +1,6 @@
---TODO require: generateCallSign
-
 require "utils.lua"
 require "luax.lua"
+require "generate_call_sign_scenario_utility.lua"
 
 require "xansta_mods.lua"
 init_constants_xansta()

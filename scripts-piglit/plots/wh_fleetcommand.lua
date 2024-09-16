@@ -132,6 +132,7 @@ function wh_fleetcommand.spawnFleetCommand()
 
 	if wh_exuari ~= nil then
 		wh_exuari.state = "ambush"
+		removeGMFunction("Exuari attack")
 	end
 	sendMessageToCampaignServer("fleetcommand-spawned", fc:getCallSign())	-- notify campaign server on where the fleet command is and what it's name is.
 end
@@ -202,7 +203,7 @@ function wh_fleetcommand:update(delta)
 		return
 	end
 	if not fc:isValid() then
-		sendMessageToCampaignServer("fleetcommand-deleted")
+		sendMessageToCampaignServer("fleetcommand-deleted", "")
 		self.station = nil
 		return
 	end

@@ -5,6 +5,7 @@ Creates two trigger-functions that have to be called from the outside.
 wh_locusts = {}
 
 require("utils.lua")
+require "generate_call_sign_scenario_utility.lua"
 
 function wh_locusts:init()
 	local center_x, center_y = 100000,0
@@ -192,7 +193,7 @@ function wh_locusts:init()
 		oy = oy + center_y
 		local obj_list = getObjectsInRadius(ox, oy, 1500)
 		if #obj_list == 0 then
-			local ship = CpuShip():setTemplate("Ktlitan Drone"):setFaction("Ktlitans"):setPosition(ox,oy)
+			local ship = CpuShip():setTemplate("Ktlitan Drone"):setFaction("Ktlitans"):setPosition(ox,oy):setCallSign(generateCallSign(nil, "Ktlitans"))
 			ship:setAI("fighter")
 			ship:setTypeName("Locust")
 			ship:setImpulseMaxSpeed(300)

@@ -81,7 +81,7 @@ function wh_wormhole.wormholeTax(wormhole, teleportee)
 		if teleportee.typeName == "PlayerSpaceship" then
 			teleportee:setEnergy(teleportee:getEnergy()*0.75)
 		end
-		if teleportee.typeName == "CpuShip" then
+		if teleportee.typeName == "CpuShip" and wormhole == wh_wormhole.wormhole_b then
 			teleportee:orderRoaming()	-- abort current order 
 		end
 		teleportee.skip_next_health_check = true

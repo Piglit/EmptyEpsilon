@@ -6,6 +6,7 @@ wh_kraylor = {}
 
 require "luax.lua"
 require "utils.lua"
+require "generate_call_sign_scenario_utility.lua"
 
 function wh_kraylor:init()
 
@@ -128,9 +129,9 @@ function wh_kraylor:spawn_enemies_kraylor(xOrigin, yOrigin, enemyStrength)
 
 	-- here other formation or spawn logic is possible. E.g. Hangar code
 	for index,shipTemplateType in ipairs(enemyNameList) do
-		local ship = CpuShip():setFaction("Kraylor"):setScannedByFaction("Kraylor", true):setTemplate(shipTemplateType):orderRoaming()
+		local ship = CpuShip():setFaction("Kraylor"):setScannedByFaction("Kraylor", true):setTemplate(shipTemplateType):orderRoaming():setCallSign(generateCallSign(nil, "Kraylor"))
 		enemyPosition = enemyPosition + 1
-		ship:setPosition(xOrigin+sp*enemyPosition, yOrigin+sp*enemyPosition)
+		ship:setPosition(xOrigin+sp*enemyPosition*random(-1,1), yOrigin+sp*enemyPosition*random(-1,1))
 		formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, enemyPosition, formationLeader, formationSecond)
 		table.insert(enemyList, ship)
 	end

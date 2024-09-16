@@ -277,13 +277,13 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+msg
 		outbound.pyroMessage.send("Fernschreiber", msg)
 	elif event_topic == "turn":
-		duration = details
+		duration = int(details)
 		until = datetime.now() + timedelta(seconds=duration)
 		until_human = until.strftime("%H:%M:%S")
 		outbound.stationsComms.turntime(f"Nächste Flottenbesprechung um {until_human}")
 		Timer(duration-5*60, outbound.stationsComms.turnwarning).start()
 	elif event_topic == "pause":
-		duration = details
+		duration = int(details)
 		until = datetime.now() + timedelta(seconds=duration)
 		until_human = until.strftime("%H:%M:%S")
 		outbound.stationsComms.turntime(f"Flottenbesprechung bis {until_human}")

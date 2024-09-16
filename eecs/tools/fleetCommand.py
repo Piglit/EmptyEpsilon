@@ -90,7 +90,7 @@ def helpMechanics():
 	d.msgbox("""Übersicht über die Spielmechaniken der Kampagne:
 
 Reputation:
-* Auf Trainins- und Einzelmissionen hat jede Crew ihr eingenes Reputaions-Konto für die entsprechende Mission. Die Reputation zum Ende einer Mission wird nicht in die nächste übernommen.
+* Auf Trainings- und Einzelmissionen hat jede Crew ihr eigenes Reputations-Konto für die entsprechende Mission. Die Reputation zum Ende einer Mission wird nicht in die nächste übernommen.
 * Während der Wurmloch-Expedition gibt es ein gemeinsames Reputations-Konto für die gesamte Flotte.
 
 Reputations-Bonus:
@@ -102,7 +102,7 @@ Reputations-Bonus:
 
 Artefakte:
 * In jeder Trainings- und Einzelmission ist ein Artefakt versteckt, dass von einer Crew gescannt und eingesammelt werden kann.
-* Um ein Artefakt einzusammeln, muss die Einfangfrequenz ermittelt werden, und die Schilde des Schiffs auf diese Frequenz kalibriert werden. Dann kann das Artefakt mit aktivierten Schilden eingesammelt werden. Ist die Frequenz falsch, oder die Schilde deaktivert, wird das Artefakt beim Einsammeln zerstört und hinterlässt Schaden am Schiff.
+* Um ein Artefakt einzusammeln, muss die Einfangfrequenz ermittelt werden, und die Schilde des Schiffs auf diese Frequenz kalibriert werden. Dann kann das Artefakt mit aktivierten Schilden eingesammelt werden. Ist die Frequenz falsch, oder die Schilde deaktiviert, wird das Artefakt beim Einsammeln zerstört und hinterlässt Schaden am Schiff.
 * Wird ein Artefakt eingesammelt, sind Details dazu im Schiffs-Log der Relay-Station zu sehen.
 * Wurde ein Artefakt einer Mission einmal eingesammelt, bringt ein weiteres Einsammeln des selben Artefakts in einer Wiederholung der Mission keine Vorteile.
 * Sobald ein Schiff auf der Wurmloch-Expedition an der Station des Flottenkommandos dockt, werden alle von der Crew gesammelten Artefakte automatisch übergeben.
@@ -211,12 +211,12 @@ def selectShips():
 	ship_dict = {	# descr not used
 		"Adder MK7":	"Scout, sehr schnell und wendig, schwach bewaffnet.",
 		"Phobos M3P":	"Leichter Kreuzer, Allrounder, Standardschiff für unerfahrene Crews.",
-		"Hathcock":		"Laser-Frigatte, spezialisiert gegen Jäger und leichte Torpedoschiffe.",
-		"Piranha M5P":	"Raketen-Frigatte, spezialisiert gegen schwer gepanzerte Ziele.",
-		"Nautilus":		"Minen-Frigatte, kann Minen legen.",
+		"Hathcock":		"Laser-Fregatte, spezialisiert gegen Jäger und leichte Torpedoschiffe.",
+		"Piranha M5P":	"Raketen-Fregatte, spezialisiert gegen schwer gepanzerte Ziele.",
+		"Nautilus":		"Minen-Fregatte, kann Minen legen.",
 		"Atlantis":		"Schwerer Kreuzer, Crew muss gut zusammenarbeiten. Standardschiff für Story-Missionen",
-		"Crucible":		"Raketen-Corvette, schweres Schiff für Frontalangriffe.",
-		"Maverick":		"Laser-Corvette, schweres Schiff mit Rundumverteidigung.",
+		"Crucible":		"Raketen-Korvette, schweres Schiff für Frontalangriffe.",
+		"Maverick":		"Laser-Korvette, schweres Schiff mit Rundumverteidigung.",
 	}
 	msg += """
 

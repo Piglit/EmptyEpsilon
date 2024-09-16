@@ -248,8 +248,12 @@ class Crew:
 	def rmArtifact(self, artifact_name):
 		del self.artifacts[artifact_name]
 
-	def sendArtifacts(self):
+	def sendArtifacts(self, server=None):
 		"""send artifacts to server, granting them to the current ship"""
+		if not server:
+			_server = self.instance_name
+		else:
+			_server = server
 		amount = len(self.artifacts)
 		if amount <= 0:
 			return
@@ -265,14 +269,18 @@ class Crew:
 			_OBJECT_=getPlayerShip(-1)
 			_OBJECT_:addToShipLog("You carry {amount} artifact{"s" if amount > 1 else ""} from previous missions to deliver to the fleet command station.", "green")"""
 		script += script_artifacts
-		luaExecutor.exec(script, self.instance_name+":8080", 0, Crew._artifactCallback, [self])
+		luaExecutor.exec(script, _server+":8080", 0, Crew._artifactCallback, [self])
 
 	def _artifactCallback(self, success):
 		if success:
 			self.artifacts.clear()
 
-	def sendReputation(self, reduce=False):
+	def sendReputation(self, server=None, reduce=False):
 		"""send reputation bonus to server, granting it the current ship"""
+		if not server:
+			_server = self.instance_name
+		else:
+			_server = server
 		amount = self.getTotalReputationBonus(reduce)
 		log.info(f"{self.crew_name} requested {amount} reputation bonus to {self.instance_name}")
 		if amount <= 0:
@@ -282,7 +290,7 @@ class Crew:
 			_OBJECT_:addReputationPoints({amount})
 			_OBJECT_:addToShipLog("Reputation: +{amount} from previous missions", "green")
 		"""
-		luaExecutor.exec(script, self.instance_name+":8080", 1, Crew._repCallback, [self, reduce])
+		luaExecutor.exec(script, _server + ":8080", 1, Crew._repCallback, [self, reduce])
 
 	def _repCallback(self, reduce, success):
 		if success and reduce:

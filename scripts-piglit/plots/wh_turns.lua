@@ -54,7 +54,7 @@ function wh_turns:startTurn()
 	for id, script in pairs(self.onStart) do
 		script()
 	end
-	sendMessageToCampaignServer("turn", tostring(self.turn))
+	sendMessageToCampaignServer("turn", self.turnTime)
 end
 
 function wh_turns:startPause()
@@ -69,7 +69,7 @@ function wh_turns:startPause()
 	for id, script in pairs(self.onPause) do
 		script()
 	end
-	sendMessageToCampaignServer("pause_until", endTime)
+	sendMessageToCampaignServer("pause", self.pauseTime)
 end
 
 function wh_turns:startInterlude()
@@ -79,7 +79,7 @@ function wh_turns:startInterlude()
 	setHackingDifficulty(2)
 	globalMessage('', 0)
 	-- wait until player uses wormhole to start next turn
-	sendMessageToCampaignServer("interlude", "")
+	sendMessageToCampaignServer("interlude")
 end
 
 function wh_turns.onWormhole(wormhole, teleportee)

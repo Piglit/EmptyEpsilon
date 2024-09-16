@@ -239,6 +239,8 @@ function wh_kraylor:makeFleetAggro()
 	fleet = tableRemoveRandom(self.fleetList)
 	local count = 0
 	local sector = nil
+	local first_target = nil
+	local first_attacker = nil
 	if fleet ~= nil and #fleet > 0 then
 		local leader = fleet[1]
 		if leader ~= nil and leader:isValid() then
@@ -246,9 +248,17 @@ function wh_kraylor:makeFleetAggro()
 			sector = leader:getSectorName()
 			if target ~= nil and target:isValid() and target:getFaction() ~= "Kraylor" then
 				leader:orderDefendTarget(target)
+				if first_target == nil then
+					first_target = target
+					first_attacker = leader
+				end
 			end
 			count = #fleet
 		end
+	end
+	if first_target ~= nil and first_attacker:isValid() then
+		msg = string.format("Kraylor %s %s: Feeble Arlenians and unworthy Humans - we will take what is rightfully ours! Surrender station %s in sector %s or prepare to be eliminated! Any resistance will be crushed!", first_attacker:getTypeName(), first_attacker:getCallSign(), first_target:getCallSign(), first_target:getSectorName())
+		sendMessageToCampaignServer("kraylor-comms", msg)
 	end
 	--[[
 	for _, sat in ipairs(scenario.spySats) do

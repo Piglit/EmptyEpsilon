@@ -77,10 +77,12 @@ function wh_exuari.onTeleport(wormhole, teleportee)
 			end
 			sendMessageToCampaignServer("exuari-comms", msg)
 		end
+		removeGMFunction("Exuari attack")
 	end
 	if teleportee == wh_fleetcommand.station then
 		if wormhole == wh_wormhole.wormhole_a then
 			wh_exuari.state = "idle"
+			addGMFunction("Exuari attack", wh_exuari.spawnSiege)
 		else
 			wh_exuari.state = "ambush"
 		end
@@ -195,6 +197,47 @@ function wh_exuari:spawnAmbush(target, strength)
 		end
 	end
 end
+
+function wh_exuari.spawnSiege()
+	local x,y = wh_wormhole.wormhole_a:getPosition()
+	local ambushFleet = {
+		fighter = {},
+		striker = {},
+		frigate = {},
+		artillery = {},
+		carrier = {},
+	}
+	table.insert(ambushFleet.carrier, tableSelectRandom(wh_exuari.shipClasses.carrier))
+	for i=1,12 do
+		table.insert(ambushFleet.fighter, tableSelectRandom(wh_exuari.shipClasses.fighter))
+		if i % 2 == 0 then
+			table.insert(ambushFleet.striker, tableSelectRandom(wh_exuari.shipClasses.striker))
+		end
+		if i % 3 == 0 then
+			table.insert(ambushFleet.artillery, tableSelectRandom(wh_exuari.shipClasses.artillery))
+		end
+		if i % 4 == 0 then
+			table.insert(ambushFleet.frigate, tableSelectRandom(wh_exuari.shipClasses.frigate))
+		end
+	end
+
+	-- spawn them!
+	for k,ships in pairs(ambushFleet) do
+		local leader, second = nil, nil
+		for idx,template in ipairs(ships) do
+			local ship = CpuShip():setTemplate(template):setPosition(x+random(-200,200),y+random(-200,200))
+			ship.artifacts = {}
+			table.insert(wh_exuari.ships, ship)
+			leader, second = script_formation.buildFormationIncremental(ship, idx, leader, second)
+		end
+		if leader ~= nil and wh_fleetcommand.station ~= nil and wh_fleetcommand.station:isValid() then
+			leader:orderAttack(wh_fleetcommand.station)
+			msg = string.format("Exuari %s %s reports: Death-fleet has made transit through the wormhole. Preparing to lay siege on Human Navy combat station %s. May the dead bodies of a great battle float through space.", leader:getTypeName(), leader:getCallSign(), wh_fleetcommand.station:getCallSign())
+			sendMessageToCampaignServer("exuari-comms", msg)
+		end
+	end
+end
+
 
 function wh_exuari.onDestruction(ship, instigator)
 	if ship.artifacts == nil or #ship.artifacts == 0 then

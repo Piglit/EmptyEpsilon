@@ -953,7 +953,7 @@ function improveStationService(improvements)
                                         end
                                         table.insert(comms_source.instant_energy,comms_target)
                                         comms_target:setSharesEnergyWithDocked(true)
-                                        improvement_msg = _("situationReport-comms","We can recharge again! Come back any time to have your batteries instantly recharged.")
+                                        improvement_msg = _("situationReport-comms","We can recharge again! Come back any time to have your batteries recharged.")
                                         comms_target.comms_data.friendlyness = math.min(comms_target.comms_data.friendlyness + random(friendliness_bonus_lo,friendliness_bonus_hi),100)
                                     elseif improvement == "hull" then
                                         if comms_source.instant_hull == nil then
@@ -961,7 +961,7 @@ function improveStationService(improvements)
                                         end
                                         table.insert(comms_source.instant_hull,comms_target)
                                         comms_target:setRepairDocked(true)
-                                        improvement_msg = _("situationReport-comms","We can repair hulls again! Come back any time to have your hull instantly repaired.")
+                                        improvement_msg = _("situationReport-comms","We can repair hulls again! Come back any time to have your hull repaired.")
                                         comms_target.comms_data.friendlyness = math.min(comms_target.comms_data.friendlyness + random(friendliness_bonus_lo,friendliness_bonus_hi),100)
                                     elseif improvement == "restock_probes" then
                                         if comms_source.instant_probes == nil then
@@ -969,7 +969,7 @@ function improveStationService(improvements)
                                         end
                                         table.insert(comms_source.instant_probes,comms_target)
                                         comms_target:setRestocksScanProbes(true)
-                                        improvement_msg = _("situationReport-comms","We can restock scan probes again! Come back any time to have your scan probes instantly restocked.")
+                                        improvement_msg = _("situationReport-comms","We can restock scan probes again! Come back any time to have your scan probes restocked.")
                                         comms_target.comms_data.friendlyness = math.min(comms_target.comms_data.friendlyness + random(friendliness_bonus_lo,friendliness_bonus_hi),100)
                                     elseif improvement == "Nuke" then
                                         if comms_source.nuke_discount == nil then

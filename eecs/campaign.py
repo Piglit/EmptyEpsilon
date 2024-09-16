@@ -7,6 +7,8 @@ import outbound.pyroMessage
 from interfaces import storage
 import json
 import string
+from datetime import datetime, timedelta
+from threading import Timer
 
 # load scenarios, that should be available in the campaign.
 # use the complete filename without the folder.
@@ -113,12 +115,12 @@ Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt
 	# requests
 	elif event_topic == "request_reputation":
 		if details:
-			models.crew.getCrewByCallsign(details).sendReputation(reduce=True)
+			models.crew.getCrewByCallsign(details).sendReputation(server="localhost", reduce=True)	# XXX server is hacky
 		else:
 			crew.sendReputation()
 	elif event_topic == "request_artifacts":
 		assert isinstance(details, str)
-		models.crew.getCrewByCallsign(details).sendArtifacts()
+		models.crew.getCrewByCallsign(details).sendArtifacts(server="localhost") # XXX server is hacky
 
 	# scenario specific
 	if s == "20_training1":
@@ -270,5 +272,21 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		chiffre = cypher(msg, "exuari")
 		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+chiffre
 		outbound.pyroMessage.send("Fernschreiber", msg)
+	elif event_topic == "kraylor-comms":
+		msg = details
+		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+msg
+		outbound.pyroMessage.send("Fernschreiber", msg)
+	elif event_topic == "turn":
+		duration = details
+		until = datetime.now() + timedelta(seconds=duration)
+		until_human = until.strftime("%H:%M:%S")
+		outbound.stationsComms.turntime(f"Nächste Flottenbesprechung um {until_human}")
+		Timer(duration-5*60, outbound.stationsComms.turnwarning).start()
+	elif event_topic == "pause":
+		duration = details
+		until = datetime.now() + timedelta(seconds=duration)
+		until_human = until.strftime("%H:%M:%S")
+		outbound.stationsComms.turntime(f"Flottenbesprechung bis {until_human}")
+
 
 core.subscribe("scenario_event", scenario_event)

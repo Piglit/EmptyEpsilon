@@ -19,6 +19,31 @@ def sanitize_message(crew, what):
 	instance_name = lua.sanitize_lua_string(crew.instance_name)
 	return f"{crew_name} {what}", instance_name
 
+def turntime(msg):
+	if not existing_subscription:
+		return
+	(station_server, station_name) = existing_subscription
+	color = "yellow"
+	script = f"""
+		local id=getPlayerShipIndex("{station_name}")
+		_OBJECT_=getPlayerShip(id)
+		_OBJECT_:addToShipLog("{msg}", "{color}")
+		_OBJECT_:addCustomInfo("ShipLog", "turntime", "{msg}", 1)"""
+	luaExecutor.exec(script, station_server+":8080", 1)
+
+def turnwarning():
+	if not existing_subscription:
+		return
+	(station_server, station_name) = existing_subscription
+	color = "yellow"
+	msg = "Flottenbesprechung beginnt in 5 Minuten. Bitte Schiffe zurückrufen."
+	script = f"""
+		local id=getPlayerShipIndex("{station_name}")
+		_OBJECT_=getPlayerShip(id)
+		_OBJECT_:addToShipLog("{msg}", "{color}")"""
+	luaExecutor.exec(script, station_server+":8080", 1)
+
+
 def backlog_append(crew, what, **kwargs):
 	msg, instance_name = sanitize_message(crew, what)
 	backlog.append((msg, instance_name))

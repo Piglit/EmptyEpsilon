@@ -270,11 +270,11 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 	elif event_topic == "exuari-comms":
 		msg = details
 		chiffre = cypher(msg, "exuari")
-		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+chiffre
+		msg = "Aufgefangene Subraum-Übertragung:\n\n"+chiffre
 		outbound.pyroMessage.send("Fernschreiber", msg)
 	elif event_topic == "kraylor-comms":
 		msg = details
-		msg = "Wir haben eine Subraum-Übertragung aufgefangen:\n\n"+msg
+		msg = "Aufgefangene Subraum-Übertragung:\n\n"+msg
 		outbound.pyroMessage.send("Fernschreiber", msg)
 	elif event_topic == "turn":
 		duration = int(details)

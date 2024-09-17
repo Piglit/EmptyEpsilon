@@ -257,6 +257,7 @@ class Crew:
 		amount = len(self.artifacts)
 		if amount <= 0:
 			return
+		log.info(f"{self.crew_name} requested artifacts to {_server}")
 		script_artifacts = ""
 		for name,descr in self.artifacts.items():
 			name = lua.sanitize_lua_string(name)
@@ -266,7 +267,8 @@ class Crew:
 			_OBJECT_:setResourceDescription("{name}", "{descr}")
 			_OBJECT_:setResourceCategory("{name}", "Campaign Artifacts")"""
 		script = f"""
-			_OBJECT_=getPlayerShip(-1)
+			local id=getPlayerShipIndex("{self.crew_name}")-- this is a security issue
+	        _OBJECT_=getPlayerShip(id)
 			_OBJECT_:addToShipLog("You carry {amount} artifact{"s" if amount > 1 else ""} from previous missions to deliver to the fleet command station.", "green")"""
 		script += script_artifacts
 		luaExecutor.exec(script, _server+":8080", 0, Crew._artifactCallback, [self])
@@ -282,11 +284,12 @@ class Crew:
 		else:
 			_server = server
 		amount = self.getTotalReputationBonus(reduce)
-		log.info(f"{self.crew_name} requested {amount} reputation bonus to {self.instance_name}")
+		log.info(f"{self.crew_name} requested {amount} reputation bonus to {_server}")
 		if amount <= 0:
 			return
 		script = f"""
-			_OBJECT_=getPlayerShip(-1)
+			local id=getPlayerShipIndex("{self.crew_name}")-- this is a security issue
+	        _OBJECT_=getPlayerShip(id)
 			_OBJECT_:addReputationPoints({amount})
 			_OBJECT_:addToShipLog("Reputation: +{amount} from previous missions", "green")
 		"""

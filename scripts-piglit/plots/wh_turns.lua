@@ -92,6 +92,7 @@ function wh_turns.onWormhole(wormhole, teleportee)
 			wh_turns.lateGame = "lateGame"
 			wh_turns.nextFunctionPause = wh_turns.startTurn
 			wh_turns.turnTime = 45*60
+			wh_turns.pauseTime = 15*60	-- real time
 		end
 	end
 	if wh_turns.chapter == "earlyPause" and teleportee.typeName == "CpuShip" then

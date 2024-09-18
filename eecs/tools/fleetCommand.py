@@ -76,11 +76,16 @@ def helpMissions():
 Trainingsmissionen:
 * Basic Training Course: Einstiegsmission für alle Crews. Bei 75% Missionsfortschritt werden die beiden anderen Trainingsmissionen automatisch für diese Crew freigeschaltet.
 * Skirmish: Kurze Kampfsimulation. Die Crew kann aus allen für sie freigeschalteten Schiffen wählen. Die Mission hat ein 30 Minuten Zeitlimit. Wird mindestens ein gegnerisches Schiff zerstört, kann die Mission auf unterschiedlichen Schwierigkeitsgraden wiederholt werden.
-* Frigates Testing Ground: Verschiedene Schiffstypen können ausprobiert werden. Immer wenn ein gegnerisches Schiff zerstört wird, wird das aktuell von der Crew verwendete Schiff für zukünftige Kampfmissionen (Skirmish, Siege) für diese Crew automatisch freigeschaltet.
+* Frigates Testing Ground: Verschiedene Schiffstypen können ausprobiert werden. Immer wenn ein gegnerisches Schiff zerstört wird, wird das aktuell von der Crew verwendete Schiff für zukünftige Kampfmissionen (Skirmish, Siege) für diese Crew automatisch freigeschaltet. Falls die Atlantis-Korvette durch eine Einzelmission für die Crew freigeschaltet wurde, können hier auch andere Korvetten getestet werden.
+* Waves: Endlos-Kampfmission. Wird nach langen Einzelmissionen automatisch freigeschaltet.
 
 Einzelmissionen (müssen vom Flottenkommando individuell freigeschaltet werden):
 * Edge of Space: relativ einfache Mission für Einsteiger-Crews. Dauer > 1h.
-* Beacon of Light: die diplomatische Mission für Crews mit etwas Erfahrung. Dauer > 1h.
+* Beacon of Light: die diplomatische Mission für Crews mit etwas Erfahrung. Dauer > 1h. Schaltet Atlantis-Korvette frei.
+* Ghosts from the Past: schwierige Mission für Crews mit Erfahrung. Dauer > 1h. Schaltet Atlantis-Korvette frei.
+* Birth of Atlantis: einfache Mission für Crews mit etwas Erfahrung. Dauer > 1h. Schaltet Atlantis-Korvette frei.
+* Outpost Defense: kurze kampfbasierte Mission für Crews mit etwas Erfahrung. Dauer: 15 min.
+* Surrounded: kurze schwierige kampfbasierte Mission für Crews mit Erfahrung. Dauer: 15 min.
 
 Wurmloch-Expedition:
 * Das Szenario, in dem sich auch der Ball als Station befindet.

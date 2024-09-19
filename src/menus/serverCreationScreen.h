@@ -6,6 +6,7 @@
 #include "gui/gui2_canvas.h"
 #include "Updatable.h"
 #include "screenComponents/helpOverlay.h"
+#include "io/network/address.h"
 
 class GuiScrollText;
 class GuiSelector;
@@ -95,7 +96,7 @@ private:
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
 public:
-    ProxyJoinScreen(int listenPort);
+    ProxyJoinScreen(sp::io::network::Address host, int listenPort);
     //virtual void update(float delta) override;
     bool proxySpawn(string templ, string drive);
 };

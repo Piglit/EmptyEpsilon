@@ -439,6 +439,7 @@ ServerCampaignScreen::ServerCampaignScreen()
             int port = defaultServerPort;
             string password = "";
             int listenPort = game_server->getPort();
+            PreferencesManager::set("proxy_listen_port", std::to_string(listenPort));
             string proxyName = PreferencesManager::get("shipname", "");
 
             // before disconnectFromServer, since it destroys gameGlobalInfo:
@@ -451,7 +452,7 @@ ServerCampaignScreen::ServerCampaignScreen()
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             //new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
             destroy();
-            new ProxyJoinScreen(listenPort);
+            new ProxyJoinScreen(host, listenPort);
         }
         else if (info.settings.empty())
         {
@@ -660,7 +661,7 @@ void ServerCampaignScreen::update(float delta)
 	}
 }
 
-ProxyJoinScreen::ProxyJoinScreen(int listenPort) 
+ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort)
 {
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
@@ -704,11 +705,11 @@ ProxyJoinScreen::ProxyJoinScreen(int listenPort)
     ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
 
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
-    ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, listenPort]() {
+    ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();
         if (proxySpawn(ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue()))
         {
-            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
+            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, host, listenPort);
             destroy();
         }
         else

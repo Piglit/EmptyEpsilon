@@ -6,6 +6,8 @@
 #include "soundManager.h"
 #include "random.h"
 #include "multiplayer_client.h"
+#include "io/network/address.h"
+#include "multiplayer_proxy.h"
 
 #include "serverCreationScreen.h"
 //#include "scenarioSelectionScreen.h"
@@ -18,6 +20,7 @@
 #include "screens/cinematicViewScreen.h"
 #include "screens/spectatorScreen.h"
 #include "screens/gm/gameMasterScreen.h"
+#include "menus/serverCreationScreen.h"
 
 #include "gui/gui2_panel.h"
 #include "gui/gui2_label.h"
@@ -395,6 +398,18 @@ ShipSelectionScreen::ShipSelectionScreen()
 //            else
                 new ServerScenarioSelectionScreen();
         }))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(300, 50);
+    }else if(game_proxy){
+        /*(new GuiButton(left_container, "DISCONNECT", tr("Back"), [this]() {
+            destroy();
+            soundManager->stopMusic();
+            if (game_client)
+                game_client->destroy();
+            if (gameGlobalInfo)
+                gameGlobalInfo->destroy();
+            if (my_player_info)
+                my_player_info->destroy();
+            returnToMainMenu(getRenderLayer());
+        }))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(300, 50);*/
     }else{
         // If this is a client, the "back" button disconnects from the server
         // and returns to the main menu.
@@ -417,6 +432,36 @@ ShipSelectionScreen::ShipSelectionScreen()
         crew_position_selection->spawnUI(getRenderLayer());
         destroy();
     });
+
+    // if we come from the proxy menu, our ship should already exist, so select it.
+    if (game_proxy && gameGlobalInfo)
+    {
+        int id = gameGlobalInfo->getPlayerShipIndexByName(PreferencesManager::get("shipname", ""));
+        if (id != -1)
+        {
+            P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(id);
+            if (ship->control_code.length() > 0)
+            {
+                if(ship->control_code.upper() == PreferencesManager::get("password", ""))
+                {
+                    my_player_info->commandSetShipId(ship->getMultiplayerId());
+                    my_player_info->player_ship_type = ship->player_ship_type;
+                    crew_position_selection_overlay->show();
+                }
+            }else{
+                my_player_info->commandSetShipId(ship->getMultiplayerId());
+                my_player_info->player_ship_type = ship->player_ship_type;
+                crew_position_selection_overlay->show();
+            }
+        } else {
+            // our ship does no longer exist. Return to spawn menu.
+            destroy();
+            string host_name = PreferencesManager::get("proxy_addr", "");
+            auto host = sp::io::network::Address(host_name);
+            int listenPort = PreferencesManager::get("proxy_listen_port", "0").toInt();
+            new ProxyJoinScreen(host, listenPort);
+        }
+    }
 }
 
 void ShipSelectionScreen::update(float delta)

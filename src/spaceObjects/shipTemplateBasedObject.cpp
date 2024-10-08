@@ -125,6 +125,7 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(ShipTemplateBasedObject, SpaceObject)
     /// Defines whether the STBO restocks scan probes for docked PlayerSpaceships.
     /// Example: stbo:setRestocksScanProbes(true)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setRestocksScanProbes);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setIsFighter);
     /// Returns whether this STBO restocks missiles for docked CpuShips.
     /// Example: stbo:getRestocksMissilesDocked()
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, getRestocksMissilesDocked);
@@ -199,6 +200,7 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
     long_range_radar_range = 30000.0f;
     short_range_radar_range = 5000.0f;
     restocks_missiles_docked = R_None;
+    is_fighter = false;
 
     registerMemberReplication(&template_name);
     registerMemberReplication(&type_name);
@@ -220,6 +222,7 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
 
     can_be_destroyed = true;
     registerMemberReplication(&can_be_destroyed);
+    registerMemberReplication(&is_fighter);
 }
 
 void ShipTemplateBasedObject::drawShieldsOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, float sprite_scale, bool show_levels)
@@ -485,6 +488,7 @@ void ShipTemplateBasedObject::setTemplate(string template_name)
 
     ship_template->setCollisionData(this);
     model_info.setData(ship_template->model_data);
+    is_fighter = ship_template->is_fighter;
 
     //Call the virtual applyTemplateValues function so subclasses can get extra values from the ship templates.
     applyTemplateValues();

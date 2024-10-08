@@ -313,6 +313,7 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoRepair);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setAutoMissileReload);
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setSpawnShips);
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setIsFighter);
 }
 
 std::unordered_map<string, P<ShipTemplate> > ShipTemplate::templateMap;
@@ -327,6 +328,7 @@ ShipTemplate::ShipTemplate()
     shares_energy_with_docked = true;
     repair_docked = false;
     restocks_scan_probes = false;
+    is_fighter = false;
     restocks_missiles_docked = R_None;
     energy_storage_amount = 1000;
     repair_crew_count = 3;
@@ -362,6 +364,7 @@ ShipTemplate::ShipTemplate()
     radar_trace = "radar/ship.png";
     impulse_sound_file = "sfx/engine.wav";
     default_ai_name = "default";
+
 }
 
 void ShipTemplate::setBeamTexture(int index, string texture)
@@ -667,6 +670,11 @@ void ShipTemplate::setRestocksScanProbes(bool enabled)
     restocks_scan_probes = enabled;
 }
 
+void ShipTemplate::setIsFighter(bool enabled)
+{
+    is_fighter = enabled;
+}
+
 void ShipTemplate::setRestocksMissilesDocked(ERestockMissileBehaviour behaviour)
 {
     restocks_missiles_docked = behaviour;
@@ -773,6 +781,7 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->shares_energy_with_docked = shares_energy_with_docked;
     result->repair_docked = repair_docked;
     result->restocks_scan_probes = restocks_scan_probes;
+    result->is_fighter = is_fighter;
     result->restocks_missiles_docked = restocks_missiles_docked;
     result->has_warp_drive = has_warp_drive;
     result->has_jump_drive = has_jump_drive;
@@ -786,6 +795,8 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
 
     return result;
 }
+
+
 
 void ShipTemplate::setEnergyStorage(float energy_amount)
 {

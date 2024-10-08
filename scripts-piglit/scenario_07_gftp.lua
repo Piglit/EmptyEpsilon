@@ -1,4 +1,8 @@
 -- Name: Mission: Ghost from the Past
+-- Short Description: A story-based mission
+-- Objective: Defend the mining complex and investigate the attack
+-- Duration: 1 hour
+-- Difficulty: hard
 -- Description: Far from any frontline or civilization, patrolling the Stakhanov Mining Complex can be a dull and lonely task of seizing contraband and stopping drunken brawls, and brightened only by R&R at Marco Polo station.
 ---
 --- However, when an inbound FTL-capable Ktlitan swarm is announced, you must scramble to save the sector!
@@ -14,6 +18,8 @@ require("utils.lua")
 --     Returns the distance between two objects.
 --   placeRandomAroundPoint(object_type, amount, dist_min, dist_max, x0, y0)
 --     create amount of object_type, at a distance between dist_min and dist_max around the point (x0, y0)
+
+require("plots/campaign.lua")
 
 function init()
     -- Spawn Marco Polo, its defenders, and a Ktlitan strike team
@@ -80,6 +86,7 @@ function init()
 
     -- Start the mission
     main_mission = 1
+	last_progress = 1
     mission_timer = 0
     stakhanov:sendCommsMessage(
         player,
@@ -93,6 +100,9 @@ Be careful of the dense asteroid agglomeration en route to the SMC.
 
 I repeat, this is not an exercise! Proceed at once to Stakhanov."]]), player:getCallSign())
     )
+
+	campaign:requestReputation()
+	campaign:initScore()
 end
 
 function swarmCommandComms()
@@ -509,7 +519,7 @@ We have a lot to process at the moment. We'll contact you as soon as we understa
         end
 
         -- If the ship is at Marco Polo, welcome them.
-        if (hacked == 1) and (distance(player, marco_polo) < 10000) and (bs114:sendCommsMessageNoLog(
+        if (hacked == 1) and (distance(player, marco_polo) < 10000) and (marco_polo:sendCommsMessageNoLog(
             player,
             _("incCall", [[On sight, Marco Polo makes contact with you:
 
@@ -774,6 +784,7 @@ Escort our recovery team to infiltrate and extract information from the Swarm Co
             -- If swarm command is destroyed, the humans win.
             if (not swarm_command:isValid()) then
                 globalMessage(_("msgMainscreen", "Even if the extraction party was sacrificed, the threat caused by the Swarm Command was still too great. Humanity is safe... but for how long?"))
+				campaign:victoryScore(93)
                 victory("Human Navy")
             end
 
@@ -789,6 +800,7 @@ Escort our recovery team to infiltrate and extract information from the Swarm Co
         -- If swarm command is destroyed, the humans win.
         if (hacked == 1) and (not swarm_command:isValid()) then
             globalMessage(_("msgMainscreen", "The Swarm Command is down! Humanity is safe... for now."))
+			campaign:victoryScore(93)
             victory("Human Navy")
         end
     end
@@ -796,10 +808,17 @@ Escort our recovery team to infiltrate and extract information from the Swarm Co
     -- If swarm command is destroyed and the recovery team was successful, the humans win.
     if (main_mission == 14) and (not swarm_command:isValid()) then
         globalMessage(_("msgMainscreen", "The Swarm Command is down! With the information extracted, the Navy is aware of the physical location of the rogue AI and can track it down. Congratulations!"))
+		if scout:isValid() then
+			sendMessageToCampaignServer("artifact", toJSON{name = "Swarm Command Data", description = "Strategic data exfiltrated from the data core of a Ktlitan Queen ship."})
+		end
+		campaign:victoryScore()
         victory("Human Navy")
+		return
     end
-	progress = main_mission / 14
-	sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress*100))
+	if last_progress ~= main_mission then
+		sendProgressToCampaignServer(main_mission, 14)
+		last_progress = main_mission
+	end
 end
 
 -- Spawn and return a hacker transport

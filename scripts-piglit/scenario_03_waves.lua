@@ -1,7 +1,12 @@
--- Name: Battle: Waves
+-- Name: Siege
+-- Short Description: A long battle scenario
+-- Objective: Destroy all incoming enemy ships
+-- Duration: 1 hour
+-- Difficulty: normal/selectable
 -- Description: Waves of increasingly difficult enemies attack friendly stations. There is no victory. How many waves can you destroy?
 ---
 --- Spawn the player ships you want. The strength of enemy ships is independent of the number and type of player ships.
+--- The reputation bonus you will gain here depends on the difficulty and the number of survived enemy waves.
 -- Type: Basic
 -- Setting[Enemies]: Configures the amount of enemies spawned in the scenario.
 -- Enemies[Easy]: Decreases the number of ships in each wave. Good for new players, but takes longer for the players to be overwhelmed.
@@ -22,6 +27,9 @@ require("utils.lua")
 --      Returns a relative vector (x, y coordinates)
 --   setCirclePos(obj, x, y, angle, distance)
 --      Returns the object with its position set to the resulting coordinates.
+
+require("plots/campaign.lua")
+require("script_hangar.lua")
 
 function randomStationTemplate()
     local rnd = random(0, 100)
@@ -46,17 +54,26 @@ function init()
 
     --PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
 
-    -- Give the mission to the (first) player ship
-    local text = _("goal-shipLog", [[At least one friendly base must survive.
+	campaign:initScore(getScenarioSetting("Enemies"))
+	onNewPlayerShip(function(ship)
+		-- Give the mission to the (first) player ship
+		local text = _("goal-shipLog", [[At least one friendly base must survive.
 
 Destroy all enemy ships. After a short delay, the next wave will appear. And so on ...
 
 How many waves can you destroy?]])
-    --getPlayerShip(-1):addToShipLog(text, "white")
+		ship:addToShipLog(text, "white")
+		campaign:requestReputation()
+		allowNewPlayerShips(false)
+	end)
 
     -- Random friendly stations
     for _ = 1, 2 do
         local station = SpaceStation():setTemplate(randomStationTemplate()):setFaction("Human Navy"):setPosition(random(-5000, 5000), random(-5000, 5000))
+		station:onDestruction(function(station, instigator)
+			local x,y = station:getPosition()
+			campaign:placeArtifact(x,y, "Escape Pod", "An escape pod from a destroyed Human Navy station. The station crew managed to evacuate the station just in time and so they could be rescued when a brave Human Navy ship finally arrived.")
+		end)
         table.insert(friendlyList, station)
     end
 
@@ -389,6 +406,7 @@ end
 
 
 function spawnWave()
+	sendProgressToCampaignServer(waveNumber, 100)	-- progress equals wave number
     waveNumber = waveNumber + 1
     ship = getPlayerShip(-1)
 	if ship ~= nil and ship:isValid() then

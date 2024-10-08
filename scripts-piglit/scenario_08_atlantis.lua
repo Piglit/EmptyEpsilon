@@ -1,4 +1,8 @@
 -- Name: Mission: Birth of the Atlantis
+-- Short Description: A story-based mission
+-- Objective: Prevent your ship from being destroyed
+-- Duration: 1 hour
+-- Difficulty: moderate
 -- Description: You are the first crew of a new and improved version of the Atlantis space explorer.
 ---
 --- You must check out ship systems and complete an initial mission.
@@ -15,6 +19,7 @@ nebula in kraylor defense line makes it unclear
 --]]
 
 require("utils.lua")
+require("plots/campaign.lua")
 
 --[[
 Rundown of the mission:
@@ -286,6 +291,8 @@ Doppler instability: %i]]),
 
     -- Set the initial mission state
     mission_state = phase1MessagePowerup
+	progress = 0
+	last_progress = 0
 
     defeat_timeout = 2.0 -- The defeat timeout means it takes 2 seconds before a defeat is actually done. This gives some missiles and explosions time to impact.
 
@@ -305,6 +312,9 @@ Doppler instability: %i]]),
     mission_state = phase3ReportBackToShipyard
     player:setPosition(24000, 125000)
     --]]
+
+	campaign:requestReputation()
+	campaign:initScore()
 end
 
 function phase1MessagePowerup(delta)
@@ -320,6 +330,7 @@ As you well know, you are aboard the newest version of the Atlantis space explor
 First, have your engineer power up all systems to 100%%, as you are currently in powered down mode.]]), player:getCallSign())
         )
         mission_state = phase1WaitForPowerup
+		progress = progress +1
     end
 end
 
@@ -340,6 +351,7 @@ Head to sector K6, where F-1 has dropped missile supplies. Pick them up to stock
     transport_f1:orderDock(supply_station_6)
     player:addReputationPoints(5)
     mission_state = phase1WaitForSupplyPickup
+	progress = progress +1
 end
 
 function phase1WaitForSupplyPickup(delta)
@@ -357,6 +369,7 @@ There are two dummy ships in your vicinity. Before we test your weapon systems, 
 Have your science officer scan the Dummy-1 and Dummy-2 ships to properly identify them.]]), player:getCallSign())
         )
         mission_state = phase1ScanDummyShips
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -376,6 +389,7 @@ Destroy Dummy-1 with your beam weapons, and use a homing missile to take out Dum
 The shields of Dummy-2 are configured so that your beam weapons will not penetrate them.]]), player:getCallSign())
         )
         mission_state = phase1DestroyDummyShips
+		progress = progress +1
         target_dummy_1:setShieldsMax(30)
         target_dummy_2:setShieldsMax(30)
         player:addReputationPoints(5)
@@ -396,6 +410,7 @@ function phase1DestroyDummyShips(delta)
 When you are ready to take on your first mission, contact us at Shipyard-Gamma. You can also dock with Supply-6 to resupply.]]), player:getCallSign())
         )
         mission_state = phase1WaitForContact
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -425,6 +440,7 @@ end
 function phase2SeekArtifact(delta)
     if b20_artifact:isScannedBy(player) then
         mission_state = phase2ReportArtifactReadings
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -474,6 +490,7 @@ We are reading a huge gravity surge from your direction. Get the hell out of the
     player:setSystemHealth("rearshield", player:getSystemHealth("rearshield") - random(0.0, 0.5))
 
     mission_state = phase2WaitTillWormholeWarpedPlayer
+	progress = progress +1
 end
 
 function phase2WaitTillWormholeWarpedPlayer(delta)
@@ -487,6 +504,7 @@ Come in. Come in. We suddenly read that your position is behind the Kraylor defe
 Do NOT engage the Kraylor. I repeat, DO NOT ENGAGE.]]), player:getCallSign()))
         )
         mission_state = phase3FindHoleInTheKraylorDefenseLine
+		progress = progress +1
     end
 end
 
@@ -515,6 +533,7 @@ Search for a hole in the Kraylor defenses, then try to get to sector zu5. We are
 
         jc88:orderFlyTowardsBlind(10000, -210000)
         mission_state = phase3EscapeTheKraylorDefenseLine
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -529,6 +548,7 @@ function phase3EscapeTheKraylorDefenseLine(delta)
 Dock with Supply-6 to recharge and restock, then report to Shipyard-Gamma for your mission report.]]), player:getCallSign())
         )
         mission_state = phase3ReportBackToShipyard
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -562,6 +582,7 @@ However, do NOT engage any of the Kraylor bases directly. You are not equipped t
         kraylor_transport:orderDock(kraylor_transport.current_station)
         kraylor_transport.drop = nil
         mission_state = phase4JumpBackToKraylorLine
+		progress = progress +1
     end
 end
 
@@ -576,6 +597,7 @@ function phase4JumpBackToKraylorLine(delta)
 Expect heavy retaliation as soon as you attack the transport.]])
         )
         mission_state = phase4DestroyTheTransport
+		progress = progress +1
     end
 end
 
@@ -600,6 +622,7 @@ function phase4DestroyTheTransport(delta)
             _("JumpCarrier-incCall", [[Return to the carrier IMMEDIATELY. The entire Kraylor fleet is after you. Whatever you picked up must be valuable.]])
         )
         mission_state = phase4JumpBackToShipyard
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -620,6 +643,7 @@ Dock with us and we'll take a shot at cracking them.]]), player:getCallSign())
             end
         end
         mission_state = phase5DockWithShipyard
+		progress = progress +1
         player:addReputationPoints(5)
     end
 end
@@ -635,6 +659,7 @@ It will take some time to crack this, but we should be successful.]])
         )
         cracking_delay = 30
         mission_state = phase5Cracking1
+		progress = progress +1
     end
 end
 
@@ -652,6 +677,7 @@ This seems to require particles with a negative mass. We're working on getting m
             )
             cracking_delay = 30
             mission_state = phase5Cracking2
+			progress = progress +1
         end
     end
 end
@@ -672,6 +698,7 @@ We'll keep you updated with more information.]])
             )
             cracking_delay = 30
             mission_state = phase5Cracking3
+			progress = progress +1
         end
     end
 end
@@ -690,6 +717,7 @@ It looks like they successfully created a working prototype jump drive, but the 
             )
             cracking_delay = 30
             mission_state = phase5Cracking4
+			progress = progress +1
         end
     end
 end
@@ -707,6 +735,8 @@ It seems that the Kraylor are constructing a long-range, moving battle station e
 While the technology behind the wormhole jump drive isn't stable, the Kraylor are reckless enough to do this in order to gain a huge tactical advantage.]])
             )
             mission_state = phase5CrackingDone
+			progress = progress +1
+			sendMessageToCampaignServer("artifact", toJSON{name = "Secret Kraylor Documents", description = "These documents reveal that the Kraylor built a prototype of a huge battle station with a wormhole-powered jump drive at it's center."})
         end
     end
 end
@@ -725,16 +755,19 @@ All hands on deck! Man all combat stations and evacuate all non-essential person
         odin.target = shipyard_gamma
         WormHole():setPosition(23984, 126258):setTargetPosition(0, 0)
         mission_state = phase5OdinAttack
+		progress = progress +1
     end
 end
 
 function phase5OdinAttack(delta)
     if not odin:isValid() then -- WTF man, you get bonus points for this.
         globalMessage(_("msgMainscreen", "Bonus points for destroying the battlestation!"))
+		campaign:victoryScore(110)
         victory("Human Navy")
         return
     end
     if distance(player, odin) > 30000 then
+		campaign:victoryScore()
         victory("Human Navy")
     end
 
@@ -778,6 +811,7 @@ Your ship is not equipped to travel this distance by itself, so we have tasked j
 
 Dock with JC-88 and it will handle the rest.]]))
                 mission_state = phase2WaitForJump
+				progress = progress +1
             end
         )
         addCommsReply(
@@ -799,6 +833,7 @@ We've downloaded all the data you collected thanks to the short-range quantum-en
 
 We're working through the data and will contact you when we have more details.]]), player:getCallSign()))
         mission_state = phase3AnalyzingData
+		progress = progress +1
         phase3AnalyzingData_timeout = 60.0
         return
     end
@@ -989,4 +1024,8 @@ function update(delta)
     if mission_state ~= nil then
         mission_state(delta)
     end
+	if progress ~= last_progress then
+		last_progress = progress
+        sendProgressToCampaignServer(progress, 25)
+	end
 end

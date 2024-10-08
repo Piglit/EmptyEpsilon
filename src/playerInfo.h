@@ -46,6 +46,7 @@ public:
     int32_t ship_id;
     string name;
     string last_ship_password;
+    bool fighter_pilot = 0;
 
     PlayerInfo();
 

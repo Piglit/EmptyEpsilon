@@ -93,12 +93,12 @@ def spawnablePrototypes(ship, otherCallsign, otherPW, spawnX, spawnY):
 def spawnShip(ship, template, password):
 	campaign = getCampaign()
 	code = campaign.getShipAdditionalCode(ship)
-    script = f"""
-        ship = PlayerSpaceship()
-        ship.setCallSign("{selection}")
-        ship.setTemplate("{template}")
-        ship.setControlCode("{password}")
-    """ + code
+	script = f"""
+		ship = PlayerSpaceship()
+		ship.setCallSign("{ship}")
+		ship.setTemplate("{template}")
+		ship.setControlCode("{password}")
+	""" + code
 	execLua(script)
 
 def spawnSpySat(spawnX, spawnY):
@@ -118,17 +118,14 @@ def startTimedEnemies():
 	storage = getScriptStorage()
 	scenario = storage.scenario
 	salvage_repair_mission = storage.salvage_repair_mission
-    scenario.exuariCarrierAttack()
-    if salvage_repair_mission.goneAggro then
-        scenario.makeFleetAggro("Kraylor")
-    end
+	scenario.exuariCarrierAttack()
+	scenario.makeFleetAggro("Kraylor")
 	scenario.ktlitanOrders()
 	""")
 	roundTimer.setOnRound("""
 	scenario = getScriptStorage().scenario
-	scenario.spawnDefensiveFleet(400, "Kraylor")
-	scenario.spawnDefensiveFleet(300, "Exuari")
-	scenario.spawnDefensiveFleet(200, "Ktlitans")
+	scenario.spawnDefensiveFleet(200, "Kraylor")
+	scenario.spawnDefensiveFleet(100, "Ktlitans")
 	""")
 
 def setDifficulty(difficulty):
@@ -147,7 +144,20 @@ def makeKraylorAggro():
 
 def wormholeIsSecured(val):
 	if val:
-	    val = "true"
+		val = "true"
 	else:
-	    val = "false"
+		val = "false"
 	execLua(f"getScriptStorage().scenario.securedWormhole = {val}")
+
+def restoreRepairCrews():
+	script = """
+		for pidx=1, 32 do
+			p = getPlayerShip(pidx)
+			if p ~= nil and p:isValid() then
+				if p:getRepairCrewCount() < 3 then
+					player:setRepairCrewCount(3)
+				end
+			end
+		end
+	"""
+	execLua(script)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Receives SpySat intel and prints it."""
+"""Receives messages for the Fernschreiber."""
 import pyrohelper
 import Pyro4
 
@@ -12,4 +12,4 @@ class Receiver:
         print(msg)  # TODO
 
 rcv = Receiver()
-pyrohelper.host_named_server(rcv, "spysatReceiver")
+pyrohelper.host_named_server(rcv, "Fernschreiber")

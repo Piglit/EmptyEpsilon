@@ -236,7 +236,7 @@ shipDetails = [
         [[sg.B("Delete selected ship", key="ship.delete")],[sg.B("Spawn ship", key="ship.spawn")]]
     )]
 
-layout=[timerNow, timerRound, [shipList], shipDetails]
+layout=[timerNow, timerRound]
 window=sg.Window("Flottenkommando", layout, size=(1200, 800), resizable=True, text_justification="r")
 selection = None
 selection_index = None
@@ -252,23 +252,7 @@ while True:
     elif event == "__TIMEOUT__":
         # update shipList
         # note: this triggers event shipList, so use another branch.
-        try:
-            values = []
-            selection_index = None
-            for ship, status in campaign.getStatusAll().items():
-                if "\t" in status:
-                    mission, progress = status.split("\t", maxsplit=1)
-                    values.append([ship, mission, progress])
-                else:
-                    values.append([ship, status])
-                if ship == selection:
-                    selection_index = len(values) -1
-            if selection_index is not None:
-                window["shipList"].update(values, select_rows=[selection_index])
-            else:
-                window["shipList"].update(values)
-        except:
-            window["shipList"].update([])
+        pass
     elif event == "shipList":
         selection = values["shipList"]
         if selection:

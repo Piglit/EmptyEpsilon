@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, Body, logger
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 from typing import Optional, List
+from enum import Enum
 from pprint import pprint
 import uvicorn
 import logging
@@ -25,11 +26,9 @@ import pyrohelper
 logging.getLogger("uvicorn.access").handlers = []
 logging.getLogger("uvicorn.access").propagate = False
 
+import coloredlogs
+coloredlogs.install(fmt="%(asctime)s\t%(levelname)s:\t%(message)s", datefmt="%H:%M:%S", level="INFO")
 log = logging.getLogger(__name__)
-h = logging.StreamHandler()
-h.setFormatter(logging.Formatter("%(asctime)s\t%(levelname)s:\t%(message)s", datefmt="%H:%M:%S"))
-log.setLevel("INFO")
-log.addHandler(h)
 
 app = FastAPI()
 testClient = TestClient(app)
@@ -41,7 +40,7 @@ def scenarioFileNameToMissionId(scenario_name):
 async def root():
 	return {"message": "Hello Space"}
 
-@app.post("/debug")
+#@app.post("/debug")
 async def postDebug(request : Request):
 	log.debug(request.method)
 	log.debug(request.url)
@@ -53,6 +52,10 @@ async def postDebug(request : Request):
 	j = await request.json()
 	log.debug(j)
 
+class EEServer(BaseModel):
+	instance_name: str
+	crew_name: str
+
 class EEServerScenarioInfo(BaseModel):
 	filename: str
 	name: str
@@ -62,9 +65,49 @@ class EEServerScenarioInfo(BaseModel):
 
 	def __str__(self):
 		readable = self.name
-		if logging.DEBUG >= log.level:
+		if logging.DEBUG >= coloredlogs.get_level():
 			readable += " ("+self.getId() + "; " + self.filename+")"
 		return readable
+
+class ScenarioEvents(str, Enum):
+	started = "started"
+	paused = "paused"
+	unpaused = "unpaused"
+	slowed = "slowed"
+	quit = "quit"
+	victory = "victory"
+	defeat = "defeat"
+	end = "end"
+
+	def fleet_info(self):
+		if self == "started":
+			return "is prepaired for"
+		if self == "unpaused":
+			return "is pursuing"
+		if self == "quit":
+			return "returned from"
+		if self == "victory":
+			return "was victorious in"
+		if self == "defeat":
+			return "was defeated in"
+		if self == "end":
+			return "reached the end of"
+		return self
+
+def activity(eesrv_name, crew_name, what):
+	log.info(crew_name + "\t" + what)
+	servers.setStatus(what, eesrv_name)
+	servers.storeData()
+
+
+@app.post("/scenario/{event}")
+async def scenario(event: ScenarioEvents, scenario: EEServerScenarioInfo, server: EEServer):
+	activity(server.instance_name, server.crew_name, event.fleet_info() + " " + str(scenario))
+	runScenarioInfoCallback(scenario.getId(), "@"+event, server.instance_name)
+
+@app.post("/screen")
+async def screen(server: EEServer, screen: str = Body(...)):
+	activity(server.instance_name, server.crew_name, "is at " + screen)
 
 class EEProxyShipInfo(BaseModel):
 	server_ip: str
@@ -80,8 +123,7 @@ class EEProxyDestroyInfo(BaseModel):
 	server_ip: str
 	callsign: str
 
-class ScenarioInfoVictory(EEServerScenarioInfo):
-	faction: str
+
 
 class ScenarioInfoScriptMessage(EEServerScenarioInfo):
 	script_message: str
@@ -100,12 +142,6 @@ def runScenarioInfoCallback(scenario_id, callback_name, server_name, **kwargs):
 		else:
 			info[callback_name](server_name, **kwargs)
 
-@app.post("/scenario_start")
-async def scenario_start(scenario_info: EEServerScenarioInfo, server_name: str = Body(...)):
-	log.info(server_name + "\tstarted scenario " + str(scenario_info))
-	runScenarioInfoCallback(scenario_info.getId(), "@start", server_name)
-	servers.setStatus(scenario_info.name + "\tstarted", server_name)
-	servers.storeData()
 
 @app.post("/proxySpawn")
 async def proxySpawn(ship: EEProxyShipInfo):
@@ -148,13 +184,6 @@ async def scenario_end(scenario_info: EEServerScenarioInfo, server_name: str = B
 	servers.setStatus(scenario_info.name + "\taborted", server_name)
 	runScenarioInfoCallback(scenario_info.getId(), "@end", server_name)
 
-@app.post("/scenario_victory")
-async def scenario_victory(scenario_info: ScenarioInfoVictory, server_name: str = Body(...)):
-	victory_faction = scenario_info.faction
-	log.info(server_name + "\tfinished scenario " + str(scenario_info) + "\twinner: " + victory_faction)
-	servers.setStatus(scenario_info.name + "\t"+victory_faction+" won", server_name)
-	call = "@victory["+victory_faction+"]"
-	runScenarioInfoCallback(scenario_info.getId(), call, server_name)
 
 @app.post("/script_message")
 async def script_message(scenario_info: ScenarioInfoScriptMessage, server_name: str = Body(...)):

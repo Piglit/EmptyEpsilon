@@ -231,3 +231,25 @@ function table.shuffle(list)
         list[i], list[j] = list[j], list[i]
     end
 end
+
+function tableRemoveRandom(array)
+--	Remove random element from array and return it.
+	-- Returns nil if the array is empty,
+	-- analogous to `table.remove`.
+    local array_item_count = #array
+    if array_item_count == 0 then
+        return nil
+    end
+    local selected_item = math.random(array_item_count)
+    array[selected_item], array[array_item_count] = array[array_item_count], array[selected_item]
+    return table.remove(array)
+end
+
+function tableSelectRandom(array)
+    local array_item_count = #array
+    if array_item_count == 0 then
+        return nil
+    end
+    return array[math.random(1,#array)]    
+end
+

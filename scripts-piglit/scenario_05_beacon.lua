@@ -1,4 +1,8 @@
 -- Name: Mission: Beacon of light
+-- Short Description: A story-based diplomatic mission
+-- Objective: Recover the diplomat and finish their task
+-- Duration: 1 hour
+-- Difficulty: hard on first try
 -- Description: Near the far outpost of Orion-5, Exuari attacks are increasing. A diplomat went missing, and your mission will start with recovering him.
 -- Type: Mission
 
@@ -13,6 +17,7 @@ require("utils.lua")
 --      Place random objects in a line, from point x1, y1 to x2, y2 with a random distance of random_amount
 
 require("script_hangar.lua")
+require("plots/campaign.lua")
 
 --- Init is run when the scenario is started. Create your initial world
 function init()
@@ -27,6 +32,7 @@ function init()
     main_station:setPosition(-25200, 32200):setCallSign("Orion-5")
     enemy_station = CpuShip():setTemplate("Ryder"):setFaction("Exuari"):orderStandGround()
     enemy_station:setPosition(-45600, -15800):setCallSign("Omega")
+
     neutral_station = SpaceStation():setTemplate("Small Station"):setFaction("Independent")
     neutral_station:setPosition(9100, -35400):setCallSign("Refugee-X")
 
@@ -36,6 +42,8 @@ function init()
     Nebula():setPosition(-32000, -10000)
     Nebula():setPosition(-24000, -14300)
     Nebula():setPosition(-28600, -21900)
+
+	campaign:placeArtifact(-32500, -11000, "Broken Exuari Bomber", "A derelict Exuari ship of the 'Ranger' class. One missile of it's arsenal of small nuclar warheads is still stuck in the torpedo tube together with an Exuari technician burned to death by the missiles exhaust plume.")
 
     -- Random nebulae in the system
     Nebula():setPosition(-8000, -38300)
@@ -77,7 +85,8 @@ Our last contact with RT-4 was before it entered the nebula at sector G5. The ne
     , player:getCallSign()))
     -- Set the initial mission state
     mission_state = missionStartState
-    sendMessageToCampaignServer("setProgress: 0%")
+	campaign:requestReputation()
+	campaign:initScore()
 end
 
 function missionStartState(delta)
@@ -179,7 +188,7 @@ To ensure Refugee-X is aware of your peaceful intentions, we have stripped you o
         player:setWeaponStorageMax("EMP", 0)
 
         mission_state = missionRetrieveCriminals
-        sendMessageToCampaignServer("setProgress: 30%")
+        sendProgressToCampaignServer(1, 4)
     end
 end
 function missionRT4Died(delta)
@@ -224,7 +233,7 @@ function missionWaitForAmbush(delta)
 
 Your translator has difficulty translating the message, but it seems to come down to the fact that they want you dead and that your death will bring them great fun.]])
         )
-        sendMessageToCampaignServer("setProgress: 50%")
+        sendProgressToCampaignServer(2, 4)
     end
 end
 
@@ -396,7 +405,7 @@ Lead the assault on the Exuari base in sector E2. Expect heavy resistance.]])
         CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
         CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(player)
         mission_state = nil
-        sendMessageToCampaignServer("setProgress:80%")
+        sendProgressToCampaignServer(3, 4)
     end
 end
 
@@ -410,6 +419,7 @@ function update(delta)
 
     -- If the enemy station is destroyed, the Human Navy wins.
     if not enemy_station:isValid() then
+		campaign:victoryScore()
         victory("Human Navy")
         return
     end

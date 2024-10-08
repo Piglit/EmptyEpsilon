@@ -1,5 +1,9 @@
--- Name: Basic Battle
--- Description: A few random stations are under attack by enemies, with random terrain around them. Destroy all enemies to win.
+-- Name: Skirmish
+-- Short Description: A quick and easy battle scenario
+-- Objective: Defend the space stations and destroy all enemy ships
+-- Duration: 30 minutes time limit
+-- Difficulty: normal/selectable
+-- Description: A few stations are under attack by enemies, with some terrain around them.
 ---
 -- Type: Basic
 -- Setting[Enemies]: Configures the amount of enemies spawned in the scenario.
@@ -27,6 +31,8 @@ require("utils.lua")
 --   angleRotation(a, b, c, d)
 --      Returns the bearing between first object/coordinate and second object/coordinate. 
 
+require("plots/campaign.lua")
+
 -- Global variables for this scenario
 local enemyList
 local friendlyList
@@ -34,11 +40,11 @@ local stationList
 local playerList
 local addWavesToGMPosition      -- If set to true, add wave will require GM to click on the map to position, where the wave should be spawned. 
 local startEnemyCount = nil
-local lastReportedProgress
-local lastReportedTime
 
 local gametimeleft = nil -- Maximum game time in seconds.
 local timewarning = nil -- Used for checking when to give a warning, and to update it so the warning happens once.
+
+local enemy_faction = "Criminals"
 
 local ship_names = {
     "SS Epsilon",
@@ -109,7 +115,7 @@ local ship_names = {
     "Jenny"
 }
 
---- Wrapper to adding an enemy wave
+--- Wrapper to adding an enemy wavE
 --
 -- This wrapper either calls addWaveInner directly (when on random wave positioning)
 -- or after onGMClick (when set to GM wave positioning).
@@ -142,45 +148,45 @@ end
 function addWaveInner(list, kind, a, d)
     if kind < 1.0 then
         -- striker
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Hunter"):setRotation(a + 180):orderRoaming(), 0, 0, a, d))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Hunter"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a, d))
     elseif kind < 2.0 then
         -- fighter
-        leader = setCirclePos(CpuShip():setTemplate("Rockbreaker"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-1, 1), d + random(-100, 100))
+        leader = setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-1, 1), d + random(-100, 100))
         table.insert(list, leader)
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setRotation(a + 180):orderFlyFormation(leader, -400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setRotation(a + 180):orderFlyFormation(leader, 400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setRotation(a + 180):orderFlyFormation(leader, -400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setRotation(a + 180):orderFlyFormation(leader, 400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 400, 0), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Drone"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 400, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
     elseif kind < 3.0 then
         -- gunship
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Red Adder MK5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     elseif kind < 4.0 then
         -- gunship
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Rockbreaker"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     elseif kind < 5.0 then
         -- dreadnought
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Atlantis X23"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Atlantis X23"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     elseif kind < 6.0 then
         -- missile
-        leader = setCirclePos(CpuShip():setTemplate("Piranha F12"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100))
+        leader = setCirclePos(CpuShip():setTemplate("Piranha F12"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100))
         table.insert(list, leader)
-        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setRotation(a + 180):orderFlyFormation(leader, -1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setRotation(a + 180):orderFlyFormation(leader, 1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, -1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MT52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderFlyFormation(leader, 1500, 400), 0, 0, a + random(-1, 1), d + random(-100, 100)))
     elseif kind < 7.0 then
         -- cruiser
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Phobos T3"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     elseif kind < 8.0 then
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Nirvana R5"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Nirvana R5"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     elseif kind < 9.0 then
-        table.insert(list, setCirclePos(CpuShip():setTemplate("MU52 Hornet"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("MU52 Hornet"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     else
         -- adv striker
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
-        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
+        table.insert(list, setCirclePos(CpuShip():setTemplate("Strike"):setFaction(enemy_faction):setRotation(a + 180):orderRoaming(), 0, 0, a + random(-5, 5), d + random(-100, 100)))
     end
 end
 
@@ -295,7 +301,6 @@ end
 
 --- Initialize scenario.
 function init()
-
     --[[
     -- Spawn a player Atlantis.
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate(getScenarioSetting("PlayerShip"))
@@ -309,8 +314,6 @@ function init()
     friendlyList = {}
     stationList = {}
     playerList = {}
-    lastReportedProgress = 0
-    lastReportedTime = 0
 
     onNewPlayerShip(function(ship)
         table.insert(playerList, ship)
@@ -318,7 +321,7 @@ function init()
         if station:isValid() then
             if gametimeleft ~= nil then
                 station:sendCommsMessage(
-                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming pirate attack.
 
     Please inform your Captain and crew that you have a total of %d minutes for this mission.
 
@@ -328,12 +331,14 @@ function init()
                 )
             else
                 station:sendCommsMessage(
-                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack.
+                    ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming pirate attack.
 
     Good luck.]]), ship:getCallSign())
                 )
             end
         end
+		campaign:requestReputation()
+		allowNewPlayerShips(false)
     end)
     
     addWavesToGMPosition = false
@@ -400,6 +405,7 @@ function init()
     }
     local enemy_group_count = counts[getScenarioSetting("Enemies")]
     assert(enemy_group_count, "unknown enemies setting: " .. getScenarioSetting("Enemies") .. " could not set enemy_group_count")
+	campaign:initScore(getScenarioSetting("Enemies"))
 
     local timesetting = {
         ["Unlimited"] = nil,
@@ -423,6 +429,8 @@ function init()
     end
 
     -- Spawn 2-5 random asteroid belts.
+	-- place an artifact in the belt
+	local art = nil
     for i_ = 1, irandom(2, 5) do
         local a = random(0, 360)
         local a2 = random(0, 360)
@@ -439,7 +447,11 @@ function init()
             if math.abs(posx) > 1000 and math.abs(posy) > 1000 then
                 for k_, station in ipairs(stationList) do
                     if distance(station, posx, posy) > 2000 then
-                        Asteroid():setPosition(posx, posy):setSize(random(100, 500))
+						if art == nil then
+							art = campaign:placeArtifact(x,y, "Pirate Beacon", "A beacon transmitted a signal, that attracted a group of pirate mercenaries. The beacon appears to be Exuari-made.")
+						else	
+							Asteroid():setPosition(posx, posy):setSize(random(100, 500))
+						end
                     end
                 end
             end
@@ -516,13 +528,10 @@ end
 -- @tparam number delta the time delta (in seconds)
 function update(delta)
     -- Count all surviving enemies and allies.
-    local enemy_count = countValid(enemyList)
+    --local enemy_count = countValid(enemyList)
+	local enemy_count = campaign:progressEnemyCount(enemyList)
     local friendly_count = countValid(friendlyList)
     local player_count = countValid(playerList)
-    if startEnemyCount == nil then
-        startEnemyCount = enemy_count
-    end
-    local progress = 100 - 100 * (enemy_count / startEnemyCount)
 
     -- If not playing the Empty variation, declare victory for the
     -- Humans (players) once all enemies are destroyed. Note that players can win
@@ -531,6 +540,7 @@ function update(delta)
     -- In the Empty variation, the GM must use the Win button to declare
     -- a Human victory.
     if (enemy_count == 0 and getScenarioSetting("Enemies") ~= "Empty") then
+		campaign:victoryScore()
         victory("Human Navy")
         if gametimeleft ~= nil then
             local text = string.format(_("msgMainscreen&Spectbanner", "Mission: SUCCESS (%d seconds left)"), math.floor(gametimeleft))
@@ -566,16 +576,6 @@ function update(delta)
                 end
                 timewarning = timewarning - 5 * 60
             end
-        end
-    end
-
-    if math.abs(lastReportedProgress - progress) > 10 or (gametimeleft ~= nil and math.abs(lastReportedTime - gametimeleft) > 60) then
-        lastReportedProgress = progress
-        if gametimeleft ~= nil then
-            lastReportedTime = gametimeleft
-            sendMessageToCampaignServer(string.format("setProgress:%.0f%%, %.0fmin left", progress, gametimeleft / 60))
-        else
-            sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
         end
     end
 

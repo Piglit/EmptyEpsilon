@@ -272,7 +272,7 @@ function enemyComms(comms_data)
 			end
 		end)
 	end
-	if comms_source.special_intimidate_ships then
+	if comms_source.special_intimidate_ships  or comms_source:getResourceAmount("Xenolinguistic Team") then
 		local cost = special_buy_cost(comms_target, comms_source)
 		addCommsReply(string.format(_("special-comms", "Surrender now! [Cost: %s Rep.]"), cost), function()
 			comms_data.friendlyness = comms_data.friendlyness + random(5,25)

@@ -1,11 +1,16 @@
--- Name: Battle: The Mining Outpost
--- Description: A mining outpost near the Kraylor border sent an emercency call. Defend the outpost against the Kraylor attack!
+-- Name: Outpost Defense
+-- Short Description: A quick battle scenario
+-- Objective: Defend the space station and destroy all enemy ships
+-- Duration: 15 minutes
+-- Difficulty: normal
+-- Description: A mining outpost near the Kraylor border sent an emergency call. Defend the outpost against the Kraylor attack!
 -- Type: Basic
 
 -- This mission uses hangar and fighter formation code.
 
 require("utils.lua")
 require("script_hangar.lua")
+require("plots/campaign.lua")
 
 function createMiningFrigate()
     local frigates = {
@@ -99,6 +104,22 @@ function init()
     for n = 1, 50 do
         setCirclePos(Asteroid(), 0, 0, random(0, 360), random(2000, 10000))
     end
+
+	local art = campaign:placeArtifact(0,10000, "Valuable Minerals", "A patch of valuable minerals from one of our mining posts, that some Kraylor pirates were after.")
+	setCirclePos(art, 0, 0, random(0, 360), 20000)
+
+	campaign:initScore()
+    onNewPlayerShip(function(ship)
+        if station:isValid() then
+			station:sendCommsMessage(
+				ship, string.format(_("goal-incCall", [[%s, your objective is to fend off the incoming Kraylor attack from this mining outpost.
+
+Good luck.]]), ship:getCallSign())
+			)
+        end
+		campaign:requestReputation()
+		allowNewPlayerShips(false)
+    end)
 end
 
 
@@ -111,11 +132,8 @@ function update(dt)
     friendly_count = 0
 
     -- Count all surviving enemies.
-    for _, enemy in ipairs(enemies) do
-        if enemy:isValid() then
-            enemy_count = enemy_count + 1
-        end
-    end
+
+	local enemy_count = campaign:progressEnemyCount(enemies)
 
     for _, friendly in ipairs(friends) do
         if friendly:isValid() then
@@ -124,6 +142,7 @@ function update(dt)
     end
 
     if enemy_count == 0 then
+		campaign:victoryScore()
         victory("Human Navy");
     end
 

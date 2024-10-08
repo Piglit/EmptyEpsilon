@@ -19,14 +19,14 @@ As soon as the Kraylor obtained reliable space flight, they immediately set out 
 
 Kraylor can live for weeks without air, food, or gravity, and consider humans to be weak creatures for dying within minutes of exposure to space. Because of their fortitude and cultural pressures against retreat, Kraylor ships do not contain escape pods.
 
-The Kraylor spacecrafts are bulky ships with moderate hull plating and strong front shields. Expect slow but stong beam weapons and homing missiles as standard equipment. Larger Kraylor ships come with even stronger shields, HVLIs and jump drives, but with reduced speed and maneuverability. Kraylor ships usualy travel alone or in small groups. Small fighters are only seen as hired mercenaries from other factions, since Kraylor consider single seated ships as inferiour.]]))
+The Kraylor spacecrafts are bulky ships with moderate hull plating and strong front shields. Expect slow but strong beam weapons and homing missiles as standard equipment. Larger Kraylor ships come with even stronger shields, HVLIs and jump drives, but with reduced speed and maneuverability. Kraylor ships usually travel alone or in small groups. Small fighters are only seen as hired mercenaries from other factions, since Kraylor consider single seated ships as inferior.]]))
 
 arlenians = FactionInfo():setName("Arlenians"):setLocaleName(_("Arlenians"))
 arlenians:setGMColor(0, 0, 255)
 arlenians:setEnemy(kraylor)
 arlenians:setDescription(_([[Arlenians are energy-based life forms who long ago transcended physical reality through superior technology. Arlenians' energy forms also give them access to strong telepathic powers. Many consider Arlenians to be the first and oldest explorers of the galaxy.
 
-Despite all these advantages, they are very peaceful, as they see little value in material posession.
+Despite all these advantages, they are very peaceful, as they see little value in material possession.
 
 For unknown reasons, Arlenians started granting their anti-grav technology to other races, and almost all starfaring races' technology is based off Arlenian designs. Dissenters and skeptics claim that Arlenians see other races as playthings to add to their galactic playground, but most are more than happy to accept their technology in hopes that it will give them an advantage over the others.
 
@@ -37,13 +37,13 @@ exuari:setGMColor(255, 0, 128)
 exuari:setEnemy(human)
 exuari:setEnemy(kraylor)
 exuari:setEnemy(arlenians)
-exuari:setDescription(_([[Exuari are race of predatory amphibians with long noses. They once had an empire that stretched halfway across the galaxy, but their territory is now limited to a handful of star systems. Nowadays small societies travel between the stars in their interstallar base carriers. For some reason, they find death to be outrageously funny, and several of their most famous comedians have died on stage.
+exuari:setDescription(_([[Exuari are race of predatory amphibians with long noses. They once had an empire that stretched halfway across the galaxy, but their territory is now limited to a handful of star systems. Nowadays small societies travel between the stars in their interstellar base carriers. For some reason, they find death to be outrageously funny, and several of their most famous comedians have died on stage.
 
 Upon making contact with other races, the chaotic Exuari found that killing aliens is more fun than killing their own people, and as such attack all non-Exuari on sight.
 
-In human terriory Exuari are feared for their secret agents and infiltrators: The most capable agents spread mistrust and grief between their enemies, ruining entire solar systems.
+In human territory Exuari are feared for their secret agents and infiltrators: The most capable agents spread mistrust and grief between their enemies, ruining entire solar systems.
 
-Exuari spacecrafts are highly specialised small frigates or starfighters, sometimes they are just guns attached to engines. The individual ships are quite fragile, but often come in greater numbers or appear unexpected. The Exuari equip most of their ships only with weak shields and often the hull itself can take more hits than the shields. You can recognise Exuari ships by their wings; most of the smaller ships are designed to perform in atmosphere as well as in space. Exuari usually travel in smaller to larger groups or operate from a base carrier ship. They often attack in waves of their specialised ships: quick fighters or bombers attack in great number; warp-driven striker ships run surprise attacks; Transporters re-fitted with nuclear weapons deliver their deadly cargo; For defense Exuari use mostly their frigates equipped with turrets and all types of missiles. But most of their ships are only armed with HVLIs in addition to fast-firing but low-damage beam weapons.]]))
+Exuari spacecrafts are highly specialised small frigates or star-fighters, sometimes they are just guns attached to engines. The individual ships are quite fragile, but often come in greater numbers or appear unexpected. The Exuari equip most of their ships only with weak shields and often the hull itself can take more hits than the shields. You can recognise Exuari ships by their wings; most of the smaller ships are designed to perform in atmosphere as well as in space. Exuari usually travel in smaller to larger groups or operate from a base carrier ship. They often attack in waves of their specialised ships: quick fighters or bombers attack in great number; warp-driven striker ships run surprise attacks; Transporters re-fitted with nuclear weapons deliver their deadly cargo; For defense Exuari use mostly their frigates equipped with turrets and all types of missiles. But most of their ships are only armed with HVLIs in addition to fast-firing but low-damage beam weapons.]]))
 
 GITM = FactionInfo():setName("Ghosts"):setLocaleName(_("Ghosts"))
 GITM:setGMColor(0, 255, 0)
@@ -75,20 +75,20 @@ yellows:setEnemy(exuari)
 yellows:setEnemy(kraylor)
 yellows:setEnemy(Hive)
 yellows:setEnemy(GITM)
-yellows:setDescription([[The Yellow Dragon Industrial Mining and Trading Corporation is a faction consisting mostly of  humans. As said by the name they run most of the mining and industrial stations in human governed systems. Also most human shipyards are in the hands of this corporation. Although they see themselves as independend, sometimes the help from the Human Navy is needed to fend off criminals or alien attacks. The corporation is in open conflict with the Blue Star Trading Cartell, and sometimes hired mercenaries attack the corporations ships and stations.
+yellows:setDescription([[The Yellow Dragon Industrial Mining and Trading Corporation is a faction consisting mostly of humans. As said by the name they run most of the mining and industrial stations in human governed systems. Also most human shipyards are in the hands of this corporation. Although they see themselves as independent, sometimes the help from the Human Navy is needed to fend off criminals or alien attacks. The corporation is in open conflict with the Blue Star Trading Cartel, and sometimes hired mercenaries attack the corporations ships and stations.
 
-Since most of the ships of the Human Navy are factored by the Yellow Dragon Industrial Mining and Trading Corporation, the navy is very much interrested in protecting the corporate ships and stations.]])
+Since most of the ships of the Human Navy are factored by the Yellow Dragon Industrial Mining and Trading Corporation, the navy is very much interested in protecting the corporate ships and stations.]])
 
-blues = FactionInfo():setName("Blue Star Cartell")
+blues = FactionInfo():setName("Blue Star Cartel")
 blues:setGMColor(128, 128, 255)
 blues:setFriendly(human)
 blues:setEnemy(exuari)
 blues:setEnemy(kraylor)
 blues:setEnemy(Hive)
 blues:setEnemy(GITM)
-blues:setDescription([[The Blue Star Trading Cartell is a self declared faction consisting of human merchants and traders and smaller companies. The declared goal of the cartell is to control and monetarise every trading route inside and in between the human territory. They cartell is known to secretly attack or sabotage ships of the conflicting Yellow Dragon Industrial Mining and Trading Corporation and also to hire criminals to attack or sabotage independend traders.
+blues:setDescription([[The Blue Star Trading Cartel is a self declared faction consisting of human merchants and traders and smaller companies. The declared goal of the cartel is to control and monetarise every trading route inside and in between the human territory. They cartel is known to secretly attack or sabotage ships of the conflicting Yellow Dragon Industrial Mining and Trading Corporation and also to hire criminals to attack or sabotage independent traders.
 
-Due to contracts between the Blue Star Trading Cartell and the Human Navy, the Navy must protect cartell ships against attacks from hostile aliens or pirates. In return ships of the Navy can refuel and restock non-contrabanned weapons on every station of the cartell.]])
+Due to contracts between the Blue Star Trading Cartel and the Human Navy, the Navy must protect cartel ships against attacks from hostile aliens or pirates. In return ships of the Navy can refuel and restock non-contraband weapons on every station of the cartel.]])
 
 reds = FactionInfo():setName("Criminals")
 reds:setGMColor(255, 128, 128)
@@ -102,7 +102,7 @@ reds:setDescription([[Despite appearing as a faction, criminals are distinguishe
 
 empty = FactionInfo():setName("Black Ops")
 empty:setGMColor(70, 70, 70)
-empty:setDescription([[Seems to be an independend freighter.]])
+empty:setDescription([[Seems to be an independent freighter.]])
 
 empty = FactionInfo():setName("Empty")
 empty:setGMColor(70, 70, 70)
@@ -122,7 +122,7 @@ transporter:setEnemy(exuari)
 
 iu = FactionInfo():setName("Interplanetary Union")
 iu:setGMColor(0, 255, 255)
-iu:setDescription(_([[The Interplanetary Union is mostly present in the uncivilised outer edges of the human expansion. Their goal is to colonise uninhabited systems and gain profit in the process. A comon strategy is to drop a station with shipyard and supplies in an unknown system and hire mercenaries and colonists to bring wealth to the system.]]))
+iu:setDescription(_([[The Interplanetary Union is mostly present in the uncivilised outer edges of the human expansion. Their goal is to colonise uninhabited systems and gain profit in the process. A common strategy is to drop a station with shipyard and supplies in an unknown system and hire mercenaries and colonists to bring wealth to the system.]]))
 iu:setEnemy(exuari)
 iu:setEnemy(GITM)
 

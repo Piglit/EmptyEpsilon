@@ -87,7 +87,9 @@ function update(delta)
 				end
 			else
 				if my_station:areEnemiesInRange(10000) then
-					my_ship:orderDefendTarget(my_station)
+					if my_ship:getOrder() ~= "Defend Target" then
+						my_ship:orderDefendTarget(my_station)
+					end
 				else
 					if not ship_healthy then
 						my_ship:orderDock(my_station)

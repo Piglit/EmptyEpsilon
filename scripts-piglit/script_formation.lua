@@ -31,8 +31,8 @@ function factionalOffsets(faction, pos)
 
 	local x,y -- x - to the front, y - to starport
 	if faction == "Kraylor" then
-		x = 300
-		y = 300
+		x = 400
+		y = 400
 	elseif faction == "Exuari" then
 		x = -300
 		y = 300

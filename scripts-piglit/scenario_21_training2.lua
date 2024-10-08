@@ -1,456 +1,264 @@
--- Name: Training: Close Combat
--- Type: Mission
--- Description: Close Combat Training Course
----
---- Objective: Defend your mothership against enemy fighters and destroy the enemy carrier.
----
---- Description:
---- In this training you will face different armed oppenents that you must destroy one by one. The difficulty will start low and will increase slowly with every destroyed enemy squadron.
----
---- Your ship is a warp-driven Hathcock Battle Cruiser - a cruiser with great beam power but few missiles.
----
---- This is a short mission for inexperienced players who prefer close combat.
--- Setting[Difficulty]: Select the difficulty of this mission.
--- Difficulty[Easy]: Each enemy wave consists of only one single ship. Intedned for inexperienced players.
--- Difficulty[Normal|Default]: Each enemy wave becomes more difficult than the previous one.
--- Difficulty[Hard]: More enemies, and they are present at the beginning of the scenario.
+-- Name: Frigates Testing Ground
+-- Type: Training
+-- Short Description: Frigate Training Ground
+-- Objective: Destroy all enemy ships in the area.
+-- Duration: 30 minutes
+-- Difficulty: easy-medium
+-- Description: Use the capabilities of different specialised ships agains different enemies.
+-- Setting[Ships]: Sets up what kind of ship types are available
+-- Ships[Frigates|Default]: All Frigates and a Scout are available
+-- Ships[Corvettes]: Heavier Corvettes are available
 
--- secondary design goal: Test and example for utils_formations
+-- secondary objective: show the basic usage of some script modules
 
-require "utils.lua"
-require "script_formation.lua"
-local spawn = script_formation.spawnFormation
+require("utils.lua")
+require("luax.lua")	-- table.filter
+
+require("script_formation.lua")	-- script_formation.spawnFormation
+require("script_hangar.lua")	-- script_hangar.create
+require("util_swap_ships.lua")
+require("plots/campaign.lua")
+require("plots/wh_util_rota.lua")
 
 --- Ship creation functions
 
-function createExuariStrikerSquad(amount, posx, posy)
-    local enemyList = spawn("Dash", amount, posx, posy, "Exuari", "Alpha-")
-    for _,ship in ipairs(enemyList) do
-        ship:setWarpDrive(false)
-    end
-    return enemyList
+function createHumanShip(template, posx, posy, arc)
+	return {CpuShip():setFaction("Human Navy"):setTemplate(template):setPosition(posx, posy):setRotation(arc):orderIdle():setScanned(true)}
 end
 
-function createExuariFighterSquad(amount, posx, posy)
-    local enemyList = spawn("Dagger", amount, posx, posy, "Exuari", "Beta-")
-    return enemyList
+function createHumanScoutShip(posx, posy, arc)
+	return createHumanShip(" Adder MK7", posx, posy, arc)
 end
 
-function createExuariBomberSquad(amount, posx, posy)
-    local enemyList = spawn("Gunner", amount, posx, posy, "Exuari", "Gamma-")
-    return enemyList
+function createHumanBeamShip(posx, posy, arc)
+	return createHumanShip(" Hathcock", posx, posy, arc)
 end
 
-function createExuariArtillerySquad(amount, posx, posy)
-    local enemyList = spawn("Ranger", amount, posx, posy, "Exuari", "Delta-")
-    return enemyList
+function createHumanMissileShip(posx, posy, arc)
+	return createHumanShip(" Piranha M5P", posx, posy, arc)
 end
 
-function createExuariDefense()
-    return CpuShip():setFaction("Exuari"):setTemplate("Warden")
+function createHumanMineShip(posx, posy, arc)
+	return createHumanShip(" Nautilus", posx, posy, arc)
 end
 
-function createExuariMothership()
-    return CpuShip():setFaction("Exuari"):setTemplate("Ryder")
+function createHumanBeamShipHeavy(posx, posy, arc)
+	return createHumanShip(" Maverick", posx, posy, arc)
 end
 
-function createHumanMothership()
-    local ship = CpuShip():setFaction("Human Navy"):setTemplate("Jump Carrier"):setScannedByFaction("Human Navy", true)
-    ship:setTypeName("Steamroller"):setJumpDrive(false):setJumpDrive(false)
-    ship:setHullMax(200):setHull(200):setShieldsMax(100,100):setShields(100,100)
-    ship:setWeaponTubeCount(2):setTubeLoadTime(0, 10.0):setTubeLoadTime(1, 10.0):setWeaponStorage("HVLI", 20)
-    ship:setBeamWeapon(0, 90, -10, 2000, 8, 11):setBeamWeapon(1, 90, 10, 2000, 8, 11)
-    return ship
+function createHumanMissileShipHeavy(posx, posy, arc)
+	return createHumanShip(" Crucible", posx, posy, arc)
 end
 
-function createPlayerShip()
-    local ship = PlayerSpaceship():setTemplate("Hathcock"):setFaction("Human Navy")
-    return ship
+function createExuariFighterSquad(posx, posy, arc)
+	local enemyList = script_formation.spawnFormation("Dagger", 2, posx, posy, "Exuari", "Beta-")
+	enemyList[1]:orderDefendLocation(posx, posy)
+	return enemyList
 end
 
+function createExuariBomberSquad(posx, posy, arc)
+	local enemyList = script_formation.spawnFormation("Gunner", 2, posx, posy, "Exuari", "Gamma-")
+	enemyList[1]:orderDefendLocation(posx, posy)
+	return enemyList
+end
+
+function createKraylorBeamship(posx, posy, arc)
+	return {CpuShip():setFaction("Kraylor"):setTemplate("Spinebreaker"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy)}
+end
+
+function createKraylorGunship(posx, posy, arc)
+	return {CpuShip():setFaction("Kraylor"):setTemplate("Rockbreaker"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy)}
+end
+
+function createKraylorDreadnought(posx, posy, arc)
+	local ship = CpuShip():setFaction("Kraylor"):setTemplate("Deathbringer"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy)
+	script_hangar.create(ship, "Drone", 2, insertDrone)
+	return {ship}
+end
+
+function createKraylorDreadnoughtCarrier(posx, posy, arc)
+	local ship = CpuShip():setFaction("Kraylor"):setTemplate("Painbringer"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy):setJumpDrive(false)
+	script_hangar.create(ship, "Drone", 4, insertDrone)
+	return {ship}
+end
+
+function createExuariSmallSniper(posx, posy, arc)
+	return {CpuShip():setTemplate("Ranger"):setFaction("Exuari"):setPosition(posx, posy):orderDefendLocation(posx, posy):setRotation(arc)}
+end
+
+function createExuariNormalSniper(posx, posy, arc)
+	return {CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(posx, posy):orderDefendLocation(posx, posy):setRotation(arc)}
+end
+
+function insertDrone(mother, newShip, idx)
+	table.insert(dronesList, newShip)
+end
+
+-- init
 function init()
-    gu = 5000   -- grid unit for enemy spawns
+	wh_rota:init()
+	local terrain_radius = 22000
+	local player_ship_radius = 4000
+	local enemies_inner_radius = 18000
+	local enemies_outer_radius = 32000
 
-    -- boss and guard
-    bossposx = 10*gu
-    bossposy = 0
-    boss = createExuariMothership():setCallSign("Omega"):setPosition(bossposx, bossposy):orderDefendLocation(bossposx, bossposy)
-    guard = createExuariDefense():setCallSign("Omicron"):setPosition(bossposx, bossposy+1000):orderDefendTarget(boss)
+	-- global vars
+	finishedTimer = 5
+	finishedFlag = false
+	dronesList = {}
+	enemyList = {}
+	humanList = {}
 
-    -- player and ally
-    allowNewPlayerShips(false)
-    player = createPlayerShip()
-    player:setPosition(gu/4, -gu/4):setHeading(90):setLongRangeRadarRange(5*gu):addReputationPoints(140.0)
-    dread = createHumanMothership():setCallSign("Liberator"):setPosition(-gu/4, gu/4):setHeading(90):orderAttack(boss):setCommsScript(""):setCommsFunction(mainMenu)
-    dreadSpeed = dread:getImpulseMaxSpeed()
+	-- place terrain
+	local r = terrain_radius
+	local x,y = radialPosition(0,0, r, 45)
+	placeRandomAroundPoint(Asteroid, 100, 0, r*0.5, x, y)
+	placeRandomAroundPoint(VisualAsteroid, 100, 0, r*0.5, x, y)
+	local x_0,y_0 = radialPosition(0,0, r*0.8, 45+90)
+	local x_1,y_1 = radialPosition(0,0, r*1.2, 45+90)
+	createObjectsOnLine(x_0, y_0, x_1, y_1, 1000, Mine, 2)
+	x,y = radialPosition(0,0, r, 45+180)
+	placeRandomAroundPoint(Nebula, 4, 0, r*0.5, x, y)
+	x,y = radialPosition(0,0, r, 45+270)
+	BlackHole():setPosition(x, y)
+	local art = campaign:placeArtifact(x,y, "Black Hole Orbiter", "A bunch of space debris, trapped near the event horizon of a black hole. It was in range of the gravitational pull of the black hole, but it's speed was sufficient to keep it in a stable orbit.")
+	art:setPosition(x+4000,y)
+	wh_rota:add_object(art, 2, x,y)
 
-    -- terrain
-    createRandomAlongArc(Asteroid,       100, 2*gu, -1*gu,     gu,  60, 220, 200)
-    createRandomAlongArc(VisualAsteroid, 100, 2*gu, -1*gu,     gu, 400, 270, 400)
-    createRandomAlongArc(Asteroid,        80, 7*gu,  2*gu, 1.5*gu, 180, 270, 400)
-    createRandomAlongArc(VisualAsteroid, 100, 7*gu,  2*gu, 1.5*gu, 180, 270, 1000)
-    placeRandomAroundPoint(Nebula,         4,   gu,  2*gu, 3.5*gu,  1.5*gu)
-    placeRandomAroundPoint(Nebula,         4,   gu,  3*gu, 6  *gu, -2.5*gu)
-    createObjectsOnLine(8*gu, -gu, 8*gu, gu, 1000, Mine, 2)
+	-- place ships
+	local spawn_funcs = {
+		{createHumanBeamShip, createExuariFighterSquad, createExuariBomberSquad},
+		{createHumanMissileShip, createKraylorBeamship, createKraylorGunship},
+		{createHumanMineShip, createKraylorDreadnought, createKraylorDreadnoughtCarrier},
+		{createHumanScoutShip, createExuariSmallSniper, createExuariNormalSniper},
+	}
 
-    -- scenario script details
-    enemyWaveIndex = 0
-    enemyList = {}
-    dreadNextPosx = 0
-    dreadProgress = 0
+	-- place enemies
+	for i,funcs in ipairs(spawn_funcs) do
+		local arc = i*360/#spawn_funcs
+		if funcs[1] ~= nil then
+			x,y = radialPosition(0,0, player_ship_radius, arc)
+			table.extend(humanList, funcs[1](x,y,arc))
+		end
+		x,y = radialPosition(0,0, enemies_inner_radius, arc)
+		table.extend(enemyList, funcs[2](x,y,arc-180))
+		x,y = radialPosition(0,0, enemies_outer_radius, arc)
+		table.extend(enemyList, funcs[3](x,y,arc-180))
+	end
 
-    instr1 = false
-    timer = 0
-    finishedTimer = 5
-    finishedFlag = false
+	if getScenarioSetting("Ships") == "Corvettes" then
+		local arc = 45
+		x,y = radialPosition(0,0, player_ship_radius, arc)
+		table.extend(humanList, createHumanBeamShipHeavy(x,y,arc))
+		arc = 180+45
+		x,y = radialPosition(0,0, player_ship_radius, arc)
+		table.extend(humanList, createHumanMissileShipHeavy(x,y,arc))
+	end
+	enemyCountStart = #enemyList
 
-    -- start action
-    spwanNextWave()
-    if getScenarioSetting("Difficulty") == "Hard" then
-        spwanNextWave()
-        spwanNextWave()
-        spwanNextWave()
-        spwanNextWave()
-    end
-    instructions()
-    dread:orderFlyTowardsBlind(dreadNextPosx, gu/4)
+	-- place space station
+	station = SpaceStation():setTemplate("Medium Station"):setCallSign("Dock"):setFaction("Human Navy"):setPosition(0,0)
+	player = PlayerSpaceship():setTemplate("Pod"):setPosition(-500,500):setRotation(60):commandTargetRotation(60)
+	station.comms_data = {docked_comms_functions = {commsSwapShip}}
+	campaign:requestReputation()
+	campaign:initScore()
+	station:sendCommsMessage(player, [[This is Commander Saberhagen.
 
+You are here to try out different ship types agains different types of enemy ships in this frigate testing compound.
+Dock the crew pod you are currently in with the central station 'Dock'. When you are docked, contact the station, so we can move you on board of any ship you like.]])
 end
 
-function spwanNextWave()
-    -- waves are:
-    -- 1. slow Striker
-    -- 2. Fighter Squad (attacking player)
-    -- 3. Bomber Squad
-    -- 4. Artillery
-    -- 5. Boss (already present)
-
-    enemyWaveIndex = enemyWaveIndex + 1
-
-    local amount
-    if getScenarioSetting("Difficulty") == "Hard" then
-        amount = enemyWaveIndex * 2
-    elseif getScenarioSetting("Difficulty") == "Easy" then
-        amount = 1
-    else
-        amount = enemyWaveIndex
-    end
-
-    -- spwan and determine squad leaders target
-    if enemyWaveIndex == 1 then
-        enemyList = createExuariStrikerSquad(amount, 2*gu, -1*gu)
-        enemyList[1]:orderRoaming()
-    elseif enemyWaveIndex == 2 then
-        enemyList = createExuariFighterSquad(amount, 3.5*gu, 1.5*gu)
-        enemyList[1]:orderAttack(player)
-    elseif enemyWaveIndex == 3 then
-        enemyList = createExuariBomberSquad(amount, 6*gu, -2.5*gu)
-        enemyList[1]:orderAttack(dread)
-    elseif enemyWaveIndex == 4 then
-        enemyList = createExuariArtillerySquad(amount, 7*gu, 2*gu)
-        enemyList[1]:orderAttack(dread)
-    elseif enemyWaveIndex == 5 then
-        -- only boss may be left
-        enemyList = {boss, guard}
-        if dread:isValid() then
-            -- restore full fire power, in case some was fired upon fighters
-            dread:setWeaponStorage("HVLI", 20) 
-        end
-    end
-
-    if enemyWaveIndex <= 6 then
-        local progress = (enemyWaveIndex-1)*20
-        sendMessageToCampaignServer(string.format("setProgress:%.0f%%", progress))
-    end
-    -- half of each squad attack the player
-    -- but only if the wave is big enough; depends on difficulty
-    -- in exuari sqads, fighter with index 4 follows index 3.
-    -- Index higher than 5 follow index 5.
-    if dread:isValid() then
-        if #enemyList > 2 then
-            enemyList[math.ceil(#enemyList/2)+1]:orderAttack(player)
-        end
-    end
-
-    dread:setImpulseMaxSpeed(dreadSpeed)
-    return true
+function commsSwapShip(comms_source, comms_target)
+	table.filter(humanList, function(obj)
+		return obj:isValid()
+	end)
+	local avail = {}
+	for _,ship in ipairs(humanList) do
+		if distance(ship, comms_target) <= 5000 then
+			table.insert(avail, ship)
+		end
+	end
+	if #humanList > 0 then
+		addCommsReply("Transfer us to another ship", function()
+			if #avail == 0 then
+				setCommsMessage("We can only transfer you to Human Navy ships that are in 5U range.\nContact the ship you want and make sure it gets closer to 5U of this station.")
+			else
+				setCommsMessage("We can transfer your crew to any Human Navy ship that is within 5U range.\nIf you need information on the ship types, ask your science officer to look them up in the database.\nWhat ship do you want to command?")
+				for _,ship in ipairs(avail) do
+					addCommsReply(string.format("%s %s", ship:getTypeName(), ship:getCallSign()), function()
+						setCommsMessage("Transfer in progress. Your crew should arrive on the target ship in a few seconds.")
+						if comms_source:getTypeName() == "Pod"  then
+							swapCountdown(boardCpuShip, comms_source, ship, function(nps,_)
+								player = nps
+								player:onDestruction(onPlayerDestroyed)
+								if player:getRepairCrewCount() < 1 then
+									player:setRepairCrewCount(1)
+								end
+							end)
+					   	else
+							local ncs
+							swapCountdown(swapPlayerAndCpuShip, comms_source, ship, function(nps, ncs)
+								player = nps
+								player:onDestruction(onPlayerDestroyed)
+								table.insert(humanList, ncs)
+								if instr_first_board ~= nil then
+									instr_first_board()
+								end
+								if player:getRepairCrewCount() < 1 then
+									player:setRepairCrewCount(1)
+								end
+							end)
+					   	end
+					end)
+				end
+			end
+		end)
+	end
 end
 
-function instructions()
-    if dread:isValid() and not instr1 then
-        if getScenarioSetting("Difficulty") == "Hard" then
-            instr1 = true
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen onboard the Liberator.
-
-Your goal is to keep yourself and the Liberator alive until the enemy carrier and it's guards are destroyed. You chose the hard mode, so prepare for some resistance.
-
-Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 1 then
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen onboard the Liberator.
-
-In this combat training you will practise your abilities with a Hathcock battlecruiser.
-The Hathcock is a ship for those who seek close combat. Rely on her beams and the high turn rate.
-
-The Liberator is pursuing an Exuari carrier ship in this sector.
-Your goal is to keep yourself and the Liberator alive until the carrier and it's guards are destroyed.
-
-We will face several small groups of enemies that will target you or the Liberator.
-Each group will be more difficult then the previous one.
-
-If you need any kind of help or strategic hints, feel free to contact us.
-
-Commander Saberhagen out.]])
-        elseif enemyWaveIndex == 2 and dread:isValid() then
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen.
-
-You can dock at the Liberator if you need to restore your energy or if you need repairs.
-
-If you run into more trouble than you can handle, feel free to contact us for help.
-
-Commander Saberhagen out.
-]])
-
-        elseif enemyWaveIndex == 3 then
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen.
-
-Remember to use all of your capabilities to your advantage: warp drive, hacking, shield and beam frequencies, the database, energy management etc.
-
-If you need more information on how to use those systems, contact us.
-
-Commander Saberhagen out.
-]])
-        elseif enemyWaveIndex == 4 then
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen.
-
-We need you to find a way for the Liberator to get across that mine-field ahead.
-
-Commander Saberhagen out.
-]])
-        elseif enemyWaveIndex == 5 then
-            instr1 = true
-            dread:sendCommsMessage(player, [[This is Commander Saberhagen.
-
-The final battle lies ahead of us. Try to distract the enemy guard frigate while the Liberator attacks the carrier.
-
-Commander Saberhagen out.
-]])
-
-        end
-    end
+function onPlayerDestroyed(playership, instigator)
+	player = PlayerSpaceship():setTemplate("Pod"):setPosition(-500,500):setRotation(60):commandTargetRotation(60)
+	return playership
 end
 
-function update_dread(delta)
-    if dread:isValid() then
-        local dreadPosx, dreadPosy = dread:getPosition()
-        if dreadPosx > dreadNextPosx - 200 then
-            -- target reached
-            dreadProgress = dreadProgress + 1
-            dreadNextPosx = dreadProgress * gu
-            if dreadProgress > 8 or enemyWaveIndex >= 5 then
-                -- fight boss
-                if boss:isValid() then
-                    dread:orderAttack(boss)
-                else
-                    dread:orderRoaming()
-                end
-                dread:setImpulseMaxSpeed(dreadSpeed)
-            else
-                -- still in waves
-                dread:orderFlyTowardsBlind(dreadNextPosx, dreadPosy)
-                if enemyWaveIndex*2 > dreadProgress then
-                    dread:setImpulseMaxSpeed(dreadSpeed)
-                elseif enemyWaveIndex*2 == dreadProgress then
-                    dread:setImpulseMaxSpeed(dreadSpeed/2)
-                else
-                    dread:setImpulseMaxSpeed(dreadSpeed/4)
-                end
-            end
-        end
-    end
+function instr_first_board()
+	if station ~=nil and station:isValid() and player ~= nil and player:isValid() then
+		station:sendCommsMessage(player, [[Welcome to your new ship.
+Feel free to navigate the sector and attack any enemy ship you like. The enemies closes to your current position should be the easiest to handle for your kind of ship.
+You may also call the other ships for help, if you are in trouble.
+If you want to try another ship, feel free to dock with the station and request to be transferred to another ship.
+If your current ship is destroyed, you will leave in an escape pod - in this case, also dock with the station and look for a new ship. to command.]])
+		instr_first_board = nil
+	end
 end
-
 
 function finished(delta)
-    finishedTimer = finishedTimer - delta
-    if finishedTimer < 0 then
-        victory("Human Navy")
-    end
-    if finishedFlag == false then
-        finishedFlag = true
-        local bonusString = "has survived."
-        if not dread:isValid() then
-            bonusString = "was destroyed."
-        end
-        globalMessage([[Mission Complete.
-Your Time: ]]..formatTime(timer)..[[
-
-Liberator ]]..bonusString..[[
-
-
-
-
-If you feel ready for combat and you liked the ship, play 'the mining outpost'.
-If you want to try another ship, play another training mission.]])
-    end
+	finishedTimer = finishedTimer - delta
+	if finishedTimer < 0 then
+		victory("Human Navy")
+	end
+	if finishedFlag == false then
+		finishedFlag = true
+		campaign:victoryScore()
+	end
 end
-
 
 function update(delta)
-    timer = timer + delta
-
-    -- Count all surviving enemies.
-    for i, enemy in ipairs(enemyList) do
-        if not enemy:isValid() then
-            table.remove(enemyList, i)
-            -- Note: table.remove() inside iteration causes the next element to be skipped.
-            -- This means in each update-cycle max half of the elements are removed.
-            -- It does not matter here, since update is called regulary.
-        end
-    end
-
-    if #enemyList == 0 then
-        spwanNextWave() 
-        instructions()
-    end
-
-    -- Adjust mothership speed, depending on player progress
-    update_dread(delta)
-
-    if enemyWaveIndex >= 5 then
-        if #enemyList == 0 then
-            finished(delta)
-            return
-        end
-    end
-    if not player:isValid() then
-        victory("Exuari")
-    end
-end
-
-function mainMenu()
-	if comms_target.comms_data == nil then
-		comms_target.comms_data = {friendlyness = random(0.0, 100.0)}
-	end
-	-- comms_data is used globally
-	comms_data = comms_target.comms_data
-	
-	if player:isFriendly(comms_target) then
-		return commsCommand(comms_data)
-	end
-	return false
-end
-
-function commsCommand(comms_data)
-	setCommsMessage("This is Commander Saberhagen onboard the Liberator, how can we assist?")
-	addCommsReply("Go to a waypoint", function()
-		if player:getWaypointCount() == 0 then
-			setCommsMessage("No waypoints set. Please set a waypoint first.")
-			addCommsReply("Back", mainMenu)
-		else
-			setCommsMessage("Which waypoint should we approach?")
-			for n=1,player:getWaypointCount() do
-				addCommsReply("Defend WP" .. n, function()
-					comms_target:orderDefendLocation(player:getWaypoint(n))
-					setCommsMessage("We are heading towards WP" .. n ..".")
-					addCommsReply("Back", mainMenu)
-				end)
-			end
+    local enemyCount = campaign:progressEnemyCount(enemyList, true, function()
+		-- on change
+		if player and player:isValid() and player:getTypeName() ~= "Pod" then
+			sendMessageToCampaignServer("unlockShip", player:getTypeName())
 		end
 	end)
-	addCommsReply("Defend us", function()
-		setCommsMessage("Heading toward you to assist.")
-		comms_target:orderDefendTarget(player)
-		addCommsReply("Back", mainMenu)
+	table.filter(dronesList, function(obj)
+		return obj:isValid()
 	end)
-	if boss:isValid() then
-		addCommsReply("Resume your previous mission", function()
-			setCommsMessage("Setting course to attack the enemy carrier.")
-			comms_target:orderAttack(boss)
-			addCommsReply("Back", mainMenu)
-		end)
+
+	if enemyCount == 0 and #dronesList == 0 then
+		finished(delta)
 	end
-	addCommsReply("Report status", function()
-		local msg = "Hull: " .. math.floor(comms_target:getHull() / comms_target:getHullMax() * 100) .. "%\n"
-		local shields = comms_target:getShieldCount()
-		if shields == 1 then
-			msg = msg .. "Shield: " .. math.floor(comms_target:getShieldLevel(0) / comms_target:getShieldMax(0) * 100) .. "%\n"
-		elseif shields == 2 then
-			msg = msg .. "Front Shield: " .. math.floor(comms_target:getShieldLevel(0) / comms_target:getShieldMax(0) * 100) .. "%\n"
-			msg = msg .. "Rear Shield: " .. math.floor(comms_target:getShieldLevel(1) / comms_target:getShieldMax(1) * 100) .. "%\n"
-		else
-			for n=0,shields-1 do
-				msg = msg .. "Shield " .. n .. ": " .. math.floor(comms_target:getShieldLevel(n) / comms_target:getShieldMax(n) * 100) .. "%\n"
-			end
-		end
 
-		setCommsMessage(msg)
-		addCommsReply("Back", mainMenu)
-	end)
-
-	addCommsReply("We need tactical advice", function()
-		setCommsMessage("How can I help?")
-		return commsHelp()
-	end)
-	return true
+	wh_rota:update(delta)
+	updateSwapCountdown(delta)
 end
 
-function commsHelp()
-
-	if enemyWaveIndex == 5 then
-		addCommsReply("How do we deal with that minefield", function()
-			setCommsMessage("There are several ways to get the Liberator around that minefield.\nYou can set a waypoint and order us to fly to that waypoint.\nYou can order us to defend you, so the Liberator will follow you instead of flying into the mines.\n\nMaybe there is a way to clear that mineflield. Your shields will be too weak to absorb the damage of more than one mine at once, so you have to think of something else. Be brave, be bold and be very fast!")
-		end)
-	end
-	if enemyWaveIndex >= 6 then
-		addCommsReply("How do we deal with those bigger enemies?", function()
-			setCommsMessage("Your science officer should be able to tell you something after looking up the enemy ship types in the database.\n\nThe enemy uses missiles, but their supply is limited. It may be a good idea to distract them while they waste their missiles and attack afterwards.\n\nThe Liberator has great firepower, let us use it against the enemies.\n\nWhen science has scanned the enemies twice, their beam ranges will be shown. You can attack from an angle, where they have no defense.\n\nIf you have missiles left, use them from afar before engaging with beam weapons.")
-		end)
-	end
-	addCommsReply("What is our goal?", function()
-		setCommsMessage("Your goal is to keep yourself and the Liberator alive until the enemy carrier and it's guards are destroyed.\nTo achieve that, you must destroy all attacking enemy fighters.")
-	end)
-	local rng = player:getShortRangeRadarRange()
-	if not player:areEnemiesInRange(rng) then
-		addCommsReply("Where do we find enemies?", function()
-			rng = player:getLongRangeRadarRange()
-			if player:areEnemiesInRange(rng) then
-				setCommsMessage("Your science officer can scan unknown (white) ships. That will reveal weather they are enemies or not. If they are hostile, they will turn red on your radar after scaning.\n\nScience should tell Helm where detected enemies are, so you can engage them.\nYou can always see previous comms messages in your comms log when you click on the line at the bottom of your relay screen.")
-			else
-				local course = ""
-				if comms_target:getOrderTarget() == boss then
-					course = "If you can not find any enemy, return to the Libarator."
-				else
-					course = "We are setting course towards the enemy carrier. Follow the Liberator if you can not find any enemies."
-					comms_target:orderAttack(boss)
-				end
-				if distance(player, comms_target) > rng then
-					course = course .. "\nIf Science lost track of the Liberator, you as relay officer should still see us on your map."
-				end
-				if player:areEnemiesInRange(2*rng) then
-					setCommsMessage("If there are no enemies in radar range, your science officer can look at the colored scanner lines surrounding the radar. The green line shows bio-signatures. That may reveal the position of enemies outside your radar range.\n\n"..course)
-				else
-					setCommsMessage(course)
-				end
-			end
-		end)
-	else
-		-- enemies are in short range
-		addCommsReply("The enemies keep evading, what can we do?", function()
-			setCommsMessage("The enemy fighters have great maneuverability and a fast impulse drive.\nEnemies that quick will most likely evade even homing missiles, so you should prefer beam weapons.\nYour engineer can boost your own impulse drive or maneuver; use it to keep the enemy inside your beam range.\nYour helm can also brevely use combat maneuver to get an evading enemy back into your range. You can also use a short burst with your warp drive, to get to the enemy.\n\nAnother approach is to disable the enemies drive. Relay can do this via hacking; also weapons can target the enemies drive system with the beams. Be aware that beams will only really damage an enemy when they target the hull.\n\nYour science officer can monitor the enemies hull, shields and system health to keep you updated about the damage done.\n\nYou might also be able to use the enemies evasion pattern against them.")
-		end)
-		addCommsReply("The enemies take a long time to be destroyed, what can we do?", function()
-			setCommsMessage("Your science officer should monitor the enemies current hull and shield levels. If science scanned the enemy twice, their shield frequencies are shown. Weapons can set the beam frequency to the enemies lowest shield frequency.\nYour weapons officer should make sure, that your beams target the enemies hull, not any other system; otherwise each hit will only cause one point of hull damage.\nAlso the enemy must be selected by the weapons officer, otherwise the beams will not fire.\nYour engineer can boost your beam weapons for a higher fire rate and better damage output.\n\nIf you are unclear how much damage your weapons deal, keep an eye on the main screen and watch your beams fire while ordering your science officer to report remaining shields and hull of the enemy after every hit.\n\nWhen you do it right, your beams should cut through the enemy like a knife through butter.")
-		end)
-	end
-	addCommsReply("We need some general advice how to deal with enemies.", function()
-		setCommsMessage("Your science officer can select a scanned enemy and look them up in the database. The description should reveal some tactical advice for that enemy.\nWhen Science scans an enemy twice, the enemies beam range, beam frequencies and shield frequencies are shown.\nWhen you are inside an enemies beam range, your weapon officer should have activated the shields. But switch them off when you are no longer in combat; Shields eat up a lot of energy.")
-	end)
-	if player:getEnergy() < 500 then
-		addCommsReply("We are low on energy, what can we do?", function()
-			setCommsMessage("You can dock with the Liberator to restore your energy.\nYour Engineer should always keep an eye on your energy consumption. The biggest energy drain are usualy the shields and the warp drive. Use your shields only when in combat and deactivate them when you are not in danger.\nYour engineer can also boost the reactor power to gain more energy. Lower the power of systems you do not use.\nIf you are comletely out of energy, your engineer can set all systems except the reactor to zero power to regain energy.")
-		end)
-	end
-	-- if you have something to contribute, that might be interesting for a beginner crew, feel free to add your own tactical advice here.
-	addCommsReply("Back", mainMenu)
-	return commsHelp()
-end

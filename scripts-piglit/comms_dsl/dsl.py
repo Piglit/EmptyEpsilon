@@ -9,6 +9,9 @@ How it is done:
 """
 
 import re
+import inspect
+import os.path
+import datetime
 
 class combined_condition:
 	def __init__(self, first_entry):
@@ -44,12 +47,51 @@ class combined_condition:
 				raise RuntimeError("Combined condition is broken")
 		return result
 
-class dialog_condition:
-	regex_outer = re.compile(r"\s*([A-za-z_.\-\d]+)\s*([<>=!~]+)\s*([A-za-z_.\-\d]+)\s*")
-	regex_inner_digit = re.compile(r"-?\d+")
-	regex_inner_variable = re.compile(r"\s*([A-za-z_]+.)?([A-za-z_]+)\s*")
+	def resources(self):
+		result = set()
+		for elem in self.condition_list:
+			if isinstance(elem, dialog_condition):
+				result |= elem.resources()
+		return result	
+
+class uses_resources:
+	regex_digit = re.compile(r"-?\d+")
+	regex_variable = re.compile(r"\s*([A-za-z_]+)\.([A-za-z_]+)\s*")
+
+	def parse_resource(resource):
+		result = uses_resources.regex_digit.fullmatch(resource)
+		if result:
+			return int(resource)	# regex makes sure, it is a number
+		else:
+			result = uses_resources.regex_variable.fullmatch(resource)
+			assert result is not None, f"condition syntax error in '{resource}'"
+			parent, child = result.group(1,2)
+			if parent in ["player", "source", "P"]:
+				parent = "source"
+			elif parent in ["object", "target", "station", "ship", "S"]:
+				parent = "target"
+			else:
+				assert parent in ["player", "source", "P", "object", "target", "station", "ship", "S"]
+			return (parent, child)
+
+	def resources(resource):
+		if isinstance(resource, tuple):
+			(a, b) = resource
+			if a == "source":
+				a = "player"
+			return set([a + "." + b])
+		return set()
+
+	def lua(resource):
+		if isinstance(resource, int):
+			return str(resource)
+		return f'''{resource[0]}:getResourceAmount("{resource[1]}")'''
+
+class dialog_condition():
+	regex_condition = re.compile(r"\s*([A-za-z_.\-\d]+)\s*([<>=!~]+)\s*([A-za-z_.\-\d]+)\s*")
+	# both sides can be a owner-resource combi or a number
 	def __init__(self, condition: str):
-		result = self.regex_outer.fullmatch(condition)
+		result = self.regex_condition.fullmatch(condition)
 		assert result is not None, f"condition syntax error in '{condition}'"
 		left, comparator, right = result.group(1, 2, 3)
 		#print(left, comparator, right)
@@ -61,52 +103,18 @@ class dialog_condition:
 			comparator = "~="
 		self.comparator = comparator
 
-		result = self.regex_inner_digit.fullmatch(left)
-		if result:
-			self.left = int(left)
-		else:
-			result = self.regex_inner_variable.fullmatch(left)
-			assert result is not None, f"condition syntax error in '{left}'"
-			left_parent, left_child = result.group(1,2)
-			left_parent = left_parent.removesuffix(".")
-			if left_parent in ["player", "source", "P"]:
-				left_parent = "source"
-			elif left_parent in ["object", "station", "ship", "S"]:
-				left_parent = "target"
-			else:
-				assert left_parent in ["player", "source", "P", "object", "station", "ship", "S"]
-			self.left = (left_parent, left_child)
-
-		result = self.regex_inner_digit.fullmatch(right)
-		if result:
-			self.right = int(right)
-		else:
-			result = self.regex_inner_variable.fullmatch(right)
-			assert result is not None, f"condition syntax error in '{right}'"
-			right_parent, right_child = result.group(1,2)
-			right_parent = right_parent.removesuffix(".")
-			if right_parent in ["player", "source", "P"]:
-				right_parent = "source"
-			elif right_parent in ["object", "station", "ship", "S"]:
-				right_parent = "target"
-			else:
-				assert right_parent in ["player", "source", "P", "object", "station", "ship", "S"]
-			self.right = (right_parent, right_child)
+		self.left = uses_resources.parse_resource(left)
+		self.right = uses_resources.parse_resource(right)
 
 	def lua(self):
 		result = ""
-		if isinstance(self.left, int):
-			result += f"{self.left}"
-		else:
-			assert isinstance(self.left, tuple)
-			result += f'''{self.left[0]}:getResourceAmount("{self.left[1]}")'''
+		result += uses_resources.lua(self.left)
 		result += f" {self.comparator} "
-		if isinstance(self.right, int):
-			result += f"{self.right}"
-		else:
-			assert isinstance(self.right, tuple)
-			result += f'''{self.right[0]}:getResourceAmount("{self.right[1]}")'''
+		result += uses_resources.lua(self.right)
 		return result
+
+	def resources(self):
+		return uses_resources.resources(self.left) | uses_resources.resources(self.right)
 
 	def __and__(self, other):
 		return combined_condition(self) & other
@@ -115,34 +123,38 @@ class dialog_condition:
 		return combined_condition(self) | other
 
 
-class dialog_effect:
+class dialog_effect():
 	"""An effect: resource manipulation."""
-	def __init__(self, who: str, what: str, how: str, amount: int):
-		if who in ["player", "source", "P"]:
-			who = "source"
-		elif who in ["object", "station", "ship", "S"]:
-			who = "target"
-		assert who in ["source", "target"]
-		assert how in ["+", "-", "="]
-		assert isinstance(what, str)
-		assert isinstance(amount, int)
-		self.who = who
-		self.what = what
-		self.how = how
-		self.amount = amount
-	
+	regex_effect = re.compile(r"\s*([A-za-z_.]+)\s*([+\-=])\s*([A-za-z_.\-\d]+)\s*")
+	# left side must be a owner-resource combi
+	# right side can be a owner-resource combi or a number
+	def __init__(self, effect):
+		result = self.regex_effect.fullmatch(effect)
+		assert result is not None, f"condition syntax error in '{effect}'"
+		left, operator, right = result.group(1, 2, 3)
+		assert operator in "+-="
+		self.operator = operator
+
+		self.left = uses_resources.parse_resource(left)
+		self.right = uses_resources.parse_resource(right)
+		assert isinstance(self.left, tuple)
+
 	def lua(self):
-		what = ""
-		if self.how == "+":
-			how = "increaseResourceAmount"
-		elif self.how == "-":
-			how = "decreaseResourceAmount" 
-		elif self.how == "=":
-			how = "setResourceAmount"
+		if self.operator == "+":
+			op = "increaseResourceAmount"
+		elif self.operator == "-":
+			op = "decreaseResourceAmount" 
+		elif self.operator == "=":
+			op = "setResourceAmount"
 		else:
-			raise KeyError(self.how)
-		result = f"""{self.who}:{how}("{self.what}", {self.amount})\n"""
+			raise KeyError(self.operator)
+
+		result = f"""{self.left[0]}:{op}("{self.left[1]}", """
+		result += uses_resources.lua(self.right) + ")\n"
 		return result
+
+	def resources(self):
+		return uses_resources.resources(self.left) | uses_resources.resources(self.right)
 
 class dialog_option:
 	"""A selectable option and everything below."""
@@ -169,6 +181,14 @@ class dialog_option:
 		result += """end)\n"""
 		return result
 
+	def resources(self):
+		result = set()
+		for e in self.effects:
+			result |= e.resources()
+		for do in self.dialog_options:
+			resources |= do.resources()
+		return result
+
 class conditional_dialog_option(dialog_option):
 	"""This selectable option is only shown if the condition is met."""
 	def __init__(self, condition, *args, **kwargs):
@@ -183,6 +203,9 @@ class conditional_dialog_option(dialog_option):
 				result += "\t" + line + "\n"
 		result += "end\n"
 		return result
+
+	def resources(self):
+		return dialog_option.resources(self) | self.condition.resources()
 
 class dialog_target(dialog_option):
 	"""You can jump to this target with dialog_link(name)."""
@@ -200,6 +223,12 @@ class dialog_target(dialog_option):
 		for do in self.dialog_options:
 			result += "\t" + do.lua()
 		result += """end\n"""
+		return result
+
+	def lua_all():
+		result = ""
+		for name, target in dialog_target.targets.items():
+			result += target.lua() + "\n"
 		return result
 
 class dialog_link:
@@ -239,4 +268,61 @@ class conditional_dialog_link(dialog_link):
 		result += "end\n"
 		return result
 
+class station:
+	stations = []
+
+	def __init__(self, *tags):
+		self.tags = tags
+		self.options = []
+		station.stations.append(self)
+
+	def add_dialog(self, dialog):
+		assert isinstance(dialog, dialog_option)# or isinstance(dialog, dialog_link)
+		self.options.append(dialog)
+
+	def lua(self):
+		ret = f"""table.insert(getStation("{",".join(self.tags)}").comms_data.comms_functions, function(source, target)\n"""
+		for o in self.options:
+			for line in o.lua().split("\n"):
+				if line:
+					ret += "\t" + line + "\n"
+		ret += "end)\n"
+		return ret
+
+	def lua_all():
+		result = ""
+		for target in station.stations:
+			result += target.lua() + "\n"
+		return result
+
+	def resources(self):
+		result = set()
+		for do in self.options:
+			result |= do.resources()
+		return result
+
+class script:
+	def __init__(self, filename, author, description):
+		self.filename = os.path.basename(filename)
+		self.heading = self.filename.removesuffix(".py")
+		self.date = datetime.datetime.now().date()
+		self.author = author
+		self.description = description
+
+	def lua(self):
+		result = f"""--[[{self.heading}
+generated by dsl.py from {self.filename} on {self.date}
+"""
+		if self.author:
+			result += f"""Author: {self.author}\n"""
+		if self.description:
+			result += f"""\n{self.description}\n"""
+		result += "--]]\n\n"
+		result += dialog_target.lua_all()
+		result += station.lua_all()
+		return result
+
+def generate(author = None, description = None):
+	filename = inspect.stack()[1].filename
+	return script(filename, author, description)
 

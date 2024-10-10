@@ -20,6 +20,12 @@ function tableSelectRandom(array)
     return array[math.random(1,#array)]    
 end
 
+-- for story comms: call this function after adding functions to station.comms_data.comms_functions
+function runCommsFunctionsSimple(comms_source, comms_target)
+    for _,f in ipairs(comms_target.comms_data.comms_functions) do
+        f(comms_source, comms_target)
+	end
+end
 function runCommsFunctions(functions, comms_source, comms_target)
     ret = nil
 	oMsg = ""

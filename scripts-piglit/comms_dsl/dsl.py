@@ -57,6 +57,7 @@ class combined_condition:
 class uses_resources:
 	regex_digit = re.compile(r"-?\d+")
 	regex_variable = re.compile(r"\s*([A-za-z_]+)\.([A-za-z_]+)\s*")
+	# TODO expresion
 
 	def parse_resource(resource):
 		result = uses_resources.regex_digit.fullmatch(resource)
@@ -181,12 +182,15 @@ class dialog_option:
 		result += """end)\n"""
 		return result
 
-	def resources(self):
+	def resources(self, recursive = True):
 		result = set()
 		for e in self.effects:
 			result |= e.resources()
 		for do in self.dialog_options:
-			resources |= do.resources()
+			if recursive:
+				result |= do.resources()
+			elif isinstance(do, conditional_dialog_option):
+				result |= do.condition.resources()
 		return result
 
 class conditional_dialog_option(dialog_option):

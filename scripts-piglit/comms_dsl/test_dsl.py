@@ -7,6 +7,7 @@ from dsl import dialog_effect as E
 from dsl import dialog_condition as C
 from dsl import dialog_target as T
 from dsl import dialog_link as L
+from dsl import conditional_dialog_option as CO
 
 def compare(s1, s2, ignore="\t"):
 	mapping = {}
@@ -312,3 +313,24 @@ def test_analyse_resources():
 	assert s.resources() == expected
 
 	station.stations.clear()	# clean up class var
+
+def test_update_resources():
+	d = O("test", "text", [
+		E("player.HVLI + 1"),
+		CO(C("player.REP >= 100") & C("target.HOMING = 1"), "test2", "text2", [
+			E("player.HOMING = 1"),
+			CO(C("player.REP >= 100"), "x", "y", []),
+		]),
+	])
+	expected = {"player.HVLI", "player.REP", "target.HOMING"}
+	assert d.resources(False) == expected
+
+
+def test_arithmetic():
+	d = CO(C("player.HVLI < player.HVLI_MAX"), "buy HVLIs", "Bought HVLIs", [
+		E("player.REP - ((player.HVLI_MAX - player.HVLI) * station.hvli_cost)"),
+		E("player.HVLI = player.HVLI_MAX"),
+	])
+
+	expected = {"player.HVLI", "player.HVLI_MAX", "player.REP", "target.hvli_cost"}
+	assert d.resources(False) == expected

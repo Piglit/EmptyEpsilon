@@ -326,6 +326,31 @@ def test_update_resources():
 	assert d.resources(False) == expected
 
 
+def test_tokenize():
+	e = "player.HVLI"
+	expected = [("resource_id", ("source", "HVLI"))]
+	assert uses_resources.tokenize(e) == expected
+
+	e = "-123"
+	expected = [("number", -123)]
+	assert uses_resources.tokenize(e) == expected
+
+	e = "123 - 456"
+	expected = [
+		("number", 123),
+		("operator", "-"),
+		("number", 456),
+	]
+	assert uses_resources.tokenize(e) == expected
+
+	e = "123-456"
+	expected = [
+		("number", 123),
+		("number", -456),
+	]
+	assert uses_resources.tokenize(e) == expected
+
+
 def test_arithmetic():
 	d = CO(C("player.HVLI < player.HVLI_MAX"), "buy HVLIs", "Bought HVLIs", [
 		E("player.REP - ((player.HVLI_MAX - player.HVLI) * station.hvli_cost)"),

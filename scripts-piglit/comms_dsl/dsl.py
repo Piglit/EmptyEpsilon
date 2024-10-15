@@ -57,55 +57,94 @@ class combined_condition:
 class uses_resources:
 	regex_digit = re.compile(r"-?\d+")
 	regex_variable = re.compile(r"\s*([A-za-z_]+)\.([A-za-z_]+)\s*")
-	# TODO expresion
+
+	def tokenize(expression):
+		"""see python docs: regex#writing-a-tokenizer"""
+		tokens = [
+			("resource_id", r"[A-za-z_]+\.[A-za-z_]+"),
+			("number", r"-?\d+"),
+			("operator", r"[+\-*/%)(]"),
+#			("comparator", r"(>=)|(<=)|(==)|(!=)|(~=)|(<)|(>)"),
+#			("assignment", r"="),
+			("skip", r"[ \t\n]+"),
+			("mismatch", r".")
+		]
+		regex = "|".join("(?P<%s>)%s" % pair for pair in tokens)
+		result = []
+		for mo in re.finditer(regex, expression):
+			kind = mo.lastgroup
+			value = mo.group()
+			column = mo.start()
+			if kind == "mismatch":
+				raise RuntimeError(f"{value!r} unexpected in '{expression}'. Position: {column}")
+			if kind == "number":
+				value = int(value)
+			if kind == "resource_id":
+				value = uses_resources.parse_resource(value) # tuple
+			if kind != "skip":
+				result.append((kind, value))
+		return result
+
+	def parse_resource_expression(expression):
+		return uses_resources.tokenize(expression)
 
 	def parse_resource(resource):
-		result = uses_resources.regex_digit.fullmatch(resource)
-		if result:
-			return int(resource)	# regex makes sure, it is a number
+		result = uses_resources.regex_variable.fullmatch(resource)
+		assert result is not None, f"condition syntax error in '{resource}'"
+		parent, child = result.group(1,2)
+		if parent in ["player", "source", "P"]:
+			parent = "source"
+		elif parent in ["object", "target", "station", "ship", "S"]:
+			parent = "target"
 		else:
-			result = uses_resources.regex_variable.fullmatch(resource)
-			assert result is not None, f"condition syntax error in '{resource}'"
-			parent, child = result.group(1,2)
-			if parent in ["player", "source", "P"]:
-				parent = "source"
-			elif parent in ["object", "target", "station", "ship", "S"]:
-				parent = "target"
-			else:
-				assert parent in ["player", "source", "P", "object", "target", "station", "ship", "S"]
-			return (parent, child)
+			assert parent in ["player", "source", "P", "object", "target", "station", "ship", "S"]
+		return (parent, child)
 
 	def resources(resource):
-		if isinstance(resource, tuple):
-			(a, b) = resource
-			if a == "source":
-				a = "player"
-			return set([a + "." + b])
-		return set()
+		result = set()
+		for part in resource:
+			(kind, value) = part
+			if kind == "resource_id":
+				(a, b) = value
+				if a == "source":
+					a = "player"
+				result.add(a + "." + b)
+		return result
 
 	def lua(resource):
-		if isinstance(resource, int):
-			return str(resource)
-		return f'''{resource[0]}:getResourceAmount("{resource[1]}")'''
+		result = ""
+		for part in resource:
+			(kind, value) = part
+			if kind == "resource_id":
+				result += f'''{value[0]}:getResourceAmount("{value[1]}")'''
+			elif kind == "number":
+				result += str(value)
+			elif kind == "operator":
+				result += " " + value + " "
+			else:
+				assert False
+		return result
 
 class dialog_condition():
-	regex_condition = re.compile(r"\s*([A-za-z_.\-\d]+)\s*([<>=!~]+)\s*([A-za-z_.\-\d]+)\s*")
+	regex_condition = re.compile(r"([A-za-z_\d\.+\-*/\s]+)([<>=!~]+)([A-za-z_\d\.+\-*/\s]+)")
 	# both sides can be a owner-resource combi or a number
 	def __init__(self, condition: str):
 		result = self.regex_condition.fullmatch(condition)
-		assert result is not None, f"condition syntax error in '{condition}'"
+		if result is None:
+			raise RuntimeError(f"Missing comperator in condition: '{condition}'")
 		left, comparator, right = result.group(1, 2, 3)
 		#print(left, comparator, right)
 
-		assert comparator in ["<", ">", "=", "==", "!=", "~=", "<=", ">="], f"comparator '{comparator}' not valid"
+		if comparator not in ["<", ">", "=", "==", "!=", "~=", "<=", ">="]:
+			raise RuntimeError(f"invalid comparator: '{comparator}'")
 		if comparator == "=":
 			comparator = "=="
 		if comparator == "!=":
 			comparator = "~="
 		self.comparator = comparator
 
-		self.left = uses_resources.parse_resource(left)
-		self.right = uses_resources.parse_resource(right)
+		self.left = uses_resources.parse_resource_expression(left)
+		self.right = uses_resources.parse_resource_expression(right)
 
 	def lua(self):
 		result = ""
@@ -126,19 +165,27 @@ class dialog_condition():
 
 class dialog_effect():
 	"""An effect: resource manipulation."""
-	regex_effect = re.compile(r"\s*([A-za-z_.]+)\s*([+\-=])\s*([A-za-z_.\-\d]+)\s*")
+	regex_effect = re.compile(r"\s*([A-za-z_.]+)\s*([+\-=])")
 	# left side must be a owner-resource combi
 	# right side can be a owner-resource combi or a number
 	def __init__(self, effect):
-		result = self.regex_effect.fullmatch(effect)
+		result = self.regex_effect.search(effect)
 		assert result is not None, f"condition syntax error in '{effect}'"
-		left, operator, right = result.group(1, 2, 3)
+		left, operator = result.group(1, 2)
+		right = effect[result.end():]
+		#print(left, operator, right)
 		assert operator in "+-="
 		self.operator = operator
 
-		self.left = uses_resources.parse_resource(left)
-		self.right = uses_resources.parse_resource(right)
+		left = uses_resources.parse_resource_expression(left)
+		self.right = uses_resources.parse_resource_expression(right)
+		assert isinstance(left, list)
+		assert len(left) == 1
+		assert isinstance(left[0], tuple)
+		assert left[0][0] == "resource_id"
+		self.left = left[0][1]
 		assert isinstance(self.left, tuple)
+		assert len(self.left) == 2
 
 	def lua(self):
 		if self.operator == "+":
@@ -155,7 +202,8 @@ class dialog_effect():
 		return result
 
 	def resources(self):
-		return uses_resources.resources(self.left) | uses_resources.resources(self.right)
+		
+		return uses_resources.resources([("resource_id", self.left)]) | uses_resources.resources(self.right)
 
 class dialog_option:
 	"""A selectable option and everything below."""
@@ -208,8 +256,8 @@ class conditional_dialog_option(dialog_option):
 		result += "end\n"
 		return result
 
-	def resources(self):
-		return dialog_option.resources(self) | self.condition.resources()
+	def resources(self, recursive = True):
+		return dialog_option.resources(self, recursive) | self.condition.resources()
 
 class dialog_target(dialog_option):
 	"""You can jump to this target with dialog_link(name)."""

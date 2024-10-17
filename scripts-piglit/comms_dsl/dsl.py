@@ -13,6 +13,219 @@ import inspect
 import os.path
 import datetime
 
+class Resource:
+	def __init__(self, owner, name):
+		assert owner in ["player", "source", "P", "object", "target", "station", "ship", "S"]
+		self.owner_input = owner
+		self.name = name
+		if owner in ["player", "source", "P"]:
+			self.owner_code = "source"
+			self.owner_readable = "player"
+		elif owner in ["object", "target", "station", "ship", "S"]:
+			self.owner_code = "target"
+			self.owner_readable = "target"
+		else:
+			assert False
+
+	def resources(self):
+		return {self.owner_readable + "." + self.name}
+
+	def lua(self):
+		return f'''{self.owner_code}:getResourceAmount("{self.name}")'''
+
+	def __str__(self):
+		return self.owner_input + "." + self.name
+	
+	def __eq__(self, other):
+		if isinstance(other, Resource):
+			return self.owner_code == other.owner_code and self.name == other.name
+		elif isinstance(other, str):
+			return [self.owner_input, self.name] == other.split(".")
+		else:
+			return False
+
+
+class Expression:
+	def __init__(self, tokens):
+		self.tokens = tokens
+
+	def resources(self):
+		result = set()
+		for token in self.tokens:
+			assert isinstance(token, tuple)
+			(kind, value) = token
+			if kind == "resource_id":
+				result |= value.resources()
+		return result
+
+	def lua(self):
+		result = ""
+		for token in self.tokens:
+			(kind, value) = token
+			if kind == "resource_id":
+				result += value.lua()
+			elif kind == "number":
+				result += str(value)
+			elif kind == "operator":
+				result += " " + value + " "
+			else:
+				assert False
+			# TODO parenthesis
+		return result
+
+
+class Parser:
+	regex_resource = re.compile(r"\s*([A-za-z_]+)\.([A-za-z_]+)\s*")
+
+	regex_tokens = "|".join("(?P<%s>)%s" % pair for pair in [
+		("resource_id", r"[A-za-z_]+\.[A-za-z_]+"),
+		("number", r"-?\d+"),
+		("operator", r"[+\-*/%]"),
+		("parenthesis", r"[)(]"),
+		("relation", r"[<>]"),
+		("negator", r"[~!]"),
+		("equals", r"="),
+		("skip", r"[ \t\n]+"),
+		("mismatch", r".")
+	])
+
+	def tokenize(text):
+		"""see python docs: regex#writing-a-tokenizer"""
+		result = []
+		for mo in re.finditer(Parser.regex_tokens, text):
+			kind = mo.lastgroup
+			value = mo.group()
+			column = mo.start()
+			if kind == "mismatch":
+				raise RuntimeError(f"{value!r} unexpected in '{text}'. Position: {column}")
+			if kind == "number":
+				value = int(value)
+			if kind == "resource_id":
+				res = Parser.regex_resource.fullmatch(value)
+				if res is None:
+					raise RuntimeError(f"'{res}' causes syntax error in '{text}'")
+				parent, child = res.group(1,2)
+				value = Resource(parent, child)
+
+			if kind != "skip":
+				result.append((kind, value))
+		return result
+
+	def expression(tokens, text):
+		"""Grammer:
+			expression  : expression operator expression
+						| resource_id
+						| number
+						| ( expression )
+		"""
+		if len(tokens) == 0:
+			raise RuntimeError(f"Missing expression after '{text}'")
+			
+		elif len(tokens) == 1:
+			if tokens[0][0] not in ["resource_id", "number"]:
+				raise RuntimeError(f"'{str(tokens[0][1])}' unexpected in expression '{text}.'")
+		elif len(tokens) == 2:
+			raise RuntimeError(f"'{str(tokens[-2][1])} {str(tokens[-1][1])}' unexpected in expression '{text}'.")
+		else: #len(tokens) >= 3:
+			l,m,r = tokens[0], tokens[1], tokens[2:]
+			if l[1] == "(":
+				pass	# TODO validate
+			elif m[0] != "operator":
+				raise RuntimeError(f"invalid expression '{text}'.")
+
+		return Expression(tokens)
+			
+	def assignment(text):
+		"""Grammer:
+		assignment	: resource_id ass_operator expression
+
+		ass_operator: operator
+					| equals
+		"""
+		tokens = Parser.tokenize(text)
+		if len(tokens) < 2:
+			raise RuntimeError(f"'{text}' is not a valid assignment.")
+
+		if tokens[0][0] != "resource_id":
+			raise RuntimeError(f"Effect must start with resource: '{text}'")
+		target = tokens[0][1]
+
+		if tokens[1][0] not in ["operator", "equals"]:
+			# fixes the following expression: 'P.foo -1' to 'P.foo - 1'
+			if tokens[1][0] == "number" and tokens[1][1] < 0:
+				tokens = [tokens[0], ("operator", "-"), ("number", -tokens[1][1])] + tokens[2:]
+			else:
+				raise RuntimeError(f"'{tokens[1][1]}' is not a valid assignment operator in '{text}'")
+		operator = tokens[1][1]
+
+		if len(tokens) < 3:
+			raise RuntimeError(f"Missing expression after '{text}'")
+			
+		exp = Parser.expression(tokens[2:], text)
+		return target, operator, exp
+	
+	def condition(text):
+		"""Grammer:
+		condition	: expression comparator expression
+
+		comparator	: relation
+					| relation equals
+					| negator equals
+					| equals
+		"""
+		tokens = Parser.tokenize(text)
+		left = []
+		comparator = ""
+		right = []
+		# sort into left, comparator, right
+		for token in tokens:
+			if not right and token[0] in ["relation", "equals", "negator"]:
+				comparator += token[1]
+			elif not comparator:
+				left.append(token)
+			else:
+				right.append(token)
+
+		if comparator not in ["<", ">", "=", "==", "!=", "~=", "<=", ">="]:
+			raise RuntimeError(f"invalid comparator: '{comparator}' in '{text}'")
+
+		if not left:
+			raise RuntimeError(f"'{text}' is missing the left side of the condition")
+
+		if not right:
+			raise RuntimeError(f"'{text}' is missing the right side of the condition")
+
+		return Parser.expression(left, text), comparator, Parser.expression(right, text)
+
+
+class dialog_condition():
+	# both sides can be a owner-resource combi or a number or arithmetic expression
+	def __init__(self, condition: str):
+		self.left, comparator, self.right = Parser.condition(condition)
+		if comparator == "=":
+			comparator = "=="
+		if comparator == "!=":
+			comparator = "~="
+		self.comparator = comparator
+		assert isinstance(self.left, Expression)
+		assert isinstance(self.right, Expression)
+
+	def lua(self):
+		result = ""
+		result += self.left.lua()
+		result += f" {self.comparator} "
+		result += self.right.lua()
+		return result
+
+	def resources(self):
+		return self.left.resources() | self.right.resources()
+
+	def __and__(self, other):
+		return combined_condition(self) & other
+
+	def __or__(self, other):
+		return combined_condition(self) | other
+
 class combined_condition:
 	def __init__(self, first_entry):
 		self.condition_list = [first_entry,]
@@ -54,156 +267,31 @@ class combined_condition:
 				result |= elem.resources()
 		return result	
 
-class uses_resources:
-	regex_digit = re.compile(r"-?\d+")
-	regex_variable = re.compile(r"\s*([A-za-z_]+)\.([A-za-z_]+)\s*")
-
-	def tokenize(expression):
-		"""see python docs: regex#writing-a-tokenizer"""
-		tokens = [
-			("resource_id", r"[A-za-z_]+\.[A-za-z_]+"),
-			("number", r"-?\d+"),
-			("operator", r"[+\-*/%)(]"),
-#			("comparator", r"(>=)|(<=)|(==)|(!=)|(~=)|(<)|(>)"),
-#			("assignment", r"="),
-			("skip", r"[ \t\n]+"),
-			("mismatch", r".")
-		]
-		regex = "|".join("(?P<%s>)%s" % pair for pair in tokens)
-		result = []
-		for mo in re.finditer(regex, expression):
-			kind = mo.lastgroup
-			value = mo.group()
-			column = mo.start()
-			if kind == "mismatch":
-				raise RuntimeError(f"{value!r} unexpected in '{expression}'. Position: {column}")
-			if kind == "number":
-				value = int(value)
-			if kind == "resource_id":
-				value = uses_resources.parse_resource(value) # tuple
-			if kind != "skip":
-				result.append((kind, value))
-		return result
-
-	def parse_resource_expression(expression):
-		return uses_resources.tokenize(expression)
-
-	def parse_resource(resource):
-		result = uses_resources.regex_variable.fullmatch(resource)
-		assert result is not None, f"condition syntax error in '{resource}'"
-		parent, child = result.group(1,2)
-		if parent in ["player", "source", "P"]:
-			parent = "source"
-		elif parent in ["object", "target", "station", "ship", "S"]:
-			parent = "target"
-		else:
-			assert parent in ["player", "source", "P", "object", "target", "station", "ship", "S"]
-		return (parent, child)
-
-	def resources(resource):
-		result = set()
-		for part in resource:
-			(kind, value) = part
-			if kind == "resource_id":
-				(a, b) = value
-				if a == "source":
-					a = "player"
-				result.add(a + "." + b)
-		return result
-
-	def lua(resource):
-		result = ""
-		for part in resource:
-			(kind, value) = part
-			if kind == "resource_id":
-				result += f'''{value[0]}:getResourceAmount("{value[1]}")'''
-			elif kind == "number":
-				result += str(value)
-			elif kind == "operator":
-				result += " " + value + " "
-			else:
-				assert False
-		return result
-
-class dialog_condition():
-	regex_condition = re.compile(r"([A-za-z_\d\.+\-*/\s]+)([<>=!~]+)([A-za-z_\d\.+\-*/\s]+)")
-	# both sides can be a owner-resource combi or a number
-	def __init__(self, condition: str):
-		result = self.regex_condition.fullmatch(condition)
-		if result is None:
-			raise RuntimeError(f"Missing comperator in condition: '{condition}'")
-		left, comparator, right = result.group(1, 2, 3)
-		#print(left, comparator, right)
-
-		if comparator not in ["<", ">", "=", "==", "!=", "~=", "<=", ">="]:
-			raise RuntimeError(f"invalid comparator: '{comparator}'")
-		if comparator == "=":
-			comparator = "=="
-		if comparator == "!=":
-			comparator = "~="
-		self.comparator = comparator
-
-		self.left = uses_resources.parse_resource_expression(left)
-		self.right = uses_resources.parse_resource_expression(right)
-
-	def lua(self):
-		result = ""
-		result += uses_resources.lua(self.left)
-		result += f" {self.comparator} "
-		result += uses_resources.lua(self.right)
-		return result
-
-	def resources(self):
-		return uses_resources.resources(self.left) | uses_resources.resources(self.right)
-
-	def __and__(self, other):
-		return combined_condition(self) & other
-
-	def __or__(self, other):
-		return combined_condition(self) | other
-
 
 class dialog_effect():
 	"""An effect: resource manipulation."""
-	regex_effect = re.compile(r"\s*([A-za-z_.]+)\s*([+\-=])")
 	# left side must be a owner-resource combi
-	# right side can be a owner-resource combi or a number
+	# right side can be a owner-resource combi or an arithmetic expression
 	def __init__(self, effect):
-		result = self.regex_effect.search(effect)
-		assert result is not None, f"condition syntax error in '{effect}'"
-		left, operator = result.group(1, 2)
-		right = effect[result.end():]
-		#print(left, operator, right)
-		assert operator in "+-="
-		self.operator = operator
-
-		left = uses_resources.parse_resource_expression(left)
-		self.right = uses_resources.parse_resource_expression(right)
-		assert isinstance(left, list)
-		assert len(left) == 1
-		assert isinstance(left[0], tuple)
-		assert left[0][0] == "resource_id"
-		self.left = left[0][1]
-		assert isinstance(self.left, tuple)
-		assert len(self.left) == 2
-
-	def lua(self):
+		self.target, self.operator, self.expression = Parser.assignment(effect)
+		assert isinstance(self.target, Resource)
+		assert isinstance(self.expression, Expression)
 		if self.operator == "+":
-			op = "increaseResourceAmount"
+			self.operator_code = "increaseResourceAmount"
 		elif self.operator == "-":
-			op = "decreaseResourceAmount" 
+			self.operator_code = "decreaseResourceAmount" 
 		elif self.operator == "=":
-			op = "setResourceAmount"
+			self.operator_code= "setResourceAmount"
 		else:
 			raise KeyError(self.operator)
 
-		result = f"""{self.left[0]}:{op}("{self.left[1]}", """
-		result += uses_resources.lua(self.right) + ")\n"
+	def lua(self):
+		result = f"""{self.target.owner_code}:{self.operator_code}("{self.target.name}", """
+		result += self.expression.lua() + ")\n"
 		return result
 
 	def resources(self):
-		
-		return uses_resources.resources([("resource_id", self.left)]) | uses_resources.resources(self.right)
+		return self.target.resources() | self.expression.resources()
 
 class dialog_option:
 	"""A selectable option and everything below."""

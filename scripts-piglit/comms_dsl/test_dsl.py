@@ -328,12 +328,12 @@ def test_update_resources():
 
 def test_tokenize():
 	e = "player.HVLI"
-	expected = [("resource_id", ("source", "HVLI"))]
-	assert uses_resources.tokenize(e) == expected
+	expected = [("resource_id", "player.HVLI")]
+	assert Parser.tokenize(e) == expected
 
 	e = "-123"
 	expected = [("number", -123)]
-	assert uses_resources.tokenize(e) == expected
+	assert Parser.tokenize(e) == expected
 
 	e = "123 - 456"
 	expected = [
@@ -341,15 +341,64 @@ def test_tokenize():
 		("operator", "-"),
 		("number", 456),
 	]
-	assert uses_resources.tokenize(e) == expected
+	assert Parser.tokenize(e) == expected
 
 	e = "123-456"
 	expected = [
 		("number", 123),
 		("number", -456),
 	]
-	assert uses_resources.tokenize(e) == expected
+	assert Parser.tokenize(e) == expected
 
+def test_assignment():
+	Parser.assignment("P.foo = S.bar")
+	Parser.assignment("P.foo - S.bar")
+	Parser.assignment("P.foo + S.bar")
+	Parser.assignment("P.foo * S.bar")
+	Parser.assignment("P.foo / S.bar")
+	Parser.assignment("P.foo % S.bar")
+	Parser.assignment("P.foo - 4")
+	Parser.assignment("P.foo + 4")
+	Parser.assignment("P.foo = -4")
+	Parser.assignment("P.foo -4")
+	Parser.assignment("P.foo +2/4")
+	Parser.assignment("P.foo +2/4*P.foo")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo + ")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo ")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment(" + ")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("+4")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("-4")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("4 = 4")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo 4 5")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo 4 P.foo")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo 4 +")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo + 4 P.foo")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo + 4 *")
+
+	with pytest.raises(RuntimeError):
+		Parser.assignment("P.foo + 4 > 5")
 
 def test_arithmetic():
 	d = CO(C("player.HVLI < player.HVLI_MAX"), "buy HVLIs", "Bought HVLIs", [
@@ -359,3 +408,29 @@ def test_arithmetic():
 
 	expected = {"player.HVLI", "player.HVLI_MAX", "player.REP", "target.hvli_cost"}
 	assert d.resources(False) == expected
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo + +")
+	assert e_info.value.args[0].startswith("'+' unexpected in expression")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo + (")
+	assert e_info.value.args[0].startswith("'(' unexpected in expression")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo + P.foo *")
+	assert e_info.value.args[0].startswith("'P.foo *' unexpected in expression")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo + * P.foo")
+	assert e_info.value.args[0].startswith("'* P.foo' unexpected in expression")
+
+	E("P.foo + P.foo * P.foo")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo P.foo + * P.foo")
+
+	E("P.foo = P.foo +  P.foo * P.foo")
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = P.foo P.foo + * P.foo")
+	assert e_info.value.args[0].startswith("invalid expression")

@@ -68,9 +68,10 @@ class Expression:
 				result += str(value)
 			elif kind == "operator":
 				result += " " + value + " "
+			elif kind == "parenthesis":
+				result += value
 			else:
 				assert False
-			# TODO parenthesis
 		return result
 
 
@@ -111,7 +112,7 @@ class Parser:
 				result.append((kind, value))
 		return result
 
-	def expression(tokens, text):
+	def expression(tokens, text, depth=0):
 		"""Grammer:
 			expression  : expression operator expression
 						| resource_id
@@ -120,18 +121,52 @@ class Parser:
 		"""
 		if len(tokens) == 0:
 			raise RuntimeError(f"Missing expression after '{text}'")
-			
+		elif tokens[0][0] == "parenthesis":
+			if tokens[0][1] == "(":
+				# consume (, expression must follow
+				Parser.expression(tokens[1:], text, depth+1)
+			elif tokens[0][1] == ")":
+				if depth <= 0:
+					raise RuntimeError(f"too many ')' in expression '{text}'")
+				if len(tokens) == 1:
+					# end of input reached after )
+					if depth > 1:
+						raise RuntimeError(f"missing ')' in expression '{text}'")
+				elif tokens[1][1] == ")":
+					# consume first ), continue
+					Parser.expression(tokens[1:], text, depth-1)
+				elif tokens[1][0] == "operator":
+					# consume ) and operator, expression must follow
+					Parser.expression(tokens[2:], text, depth-1)
+				else:
+					raise RuntimeError(f"missing operator after ')' in expression '{text}'.")
+		elif tokens[0][0] not in ["resource_id", "number"]:
+			raise RuntimeError(f"'{str(tokens[0][1])}' unexpected in expression '{text}.'")
 		elif len(tokens) == 1:
-			if tokens[0][0] not in ["resource_id", "number"]:
-				raise RuntimeError(f"'{str(tokens[0][1])}' unexpected in expression '{text}.'")
+			# last item was resource_id or number
+			pass
 		elif len(tokens) == 2:
-			raise RuntimeError(f"'{str(tokens[-2][1])} {str(tokens[-1][1])}' unexpected in expression '{text}'.")
-		else: #len(tokens) >= 3:
-			l,m,r = tokens[0], tokens[1], tokens[2:]
-			if l[1] == "(":
-				pass	# TODO validate
-			elif m[0] != "operator":
-				raise RuntimeError(f"invalid expression '{text}'.")
+			# consume first (resource_id or number), second must be )
+			if tokens[1][1] == ")":
+				Parser.expression(tokens[1:], text, depth)
+			else:
+				raise RuntimeError(f"'{str(tokens[-2][1])} {str(tokens[-1][1])}' unexpected in expression '{text}'.")
+		elif len(tokens) >= 3:
+			if tokens[1][0] == "operator":
+				# consume first token (resource_id or number) and second token (operator)
+				# next must be expression
+				if tokens[2][0] in ["resource_id", "number"] or tokens[2][1] == "(":
+					Parser.expression(tokens[2:], text, depth)
+				else:
+					raise RuntimeError(f"'{tokens[2][1]}' unexpected after '{tokens[0][1]} {tokens[1][1]}' in expression '{text}'.")
+					
+			elif tokens[1][1] == ")":
+				# consume first (resource_id or number), second must be )
+				Parser.expression(tokens[1:], text, depth)
+			else:
+				raise RuntimeError(f"'{tokens[1][1]}' unexpected after '{tokens[0][1]}' in expression '{text}'.")
+		else:
+			raise RuntimeError(f"invalid expression '{text}'.")
 
 		return Expression(tokens)
 			

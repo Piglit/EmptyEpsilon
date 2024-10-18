@@ -350,6 +350,25 @@ def test_tokenize():
 	]
 	assert Parser.tokenize(e) == expected
 
+	e = "P.foo = 2 * (P.foo + P.foo)"
+	expected = [
+		("resource_id", "P.foo"),
+		("equals", "="),
+		("number", 2),
+		("operator", "*"),
+		("parenthesis", "("),
+		("resource_id", "P.foo"),
+		("operator", "+"),
+		("resource_id", "P.foo"),
+		("parenthesis", ")"),
+	]
+	assert Parser.tokenize(e) == expected
+	
+	e = E(e)
+	expected = """source:setResourceAmount("foo", 2 * (source:getResourceAmount("foo") + source:getResourceAmount("foo")))\n"""
+	assert e.lua() == expected
+
+
 def test_assignment():
 	Parser.assignment("P.foo = S.bar")
 	Parser.assignment("P.foo - S.bar")
@@ -363,6 +382,8 @@ def test_assignment():
 	Parser.assignment("P.foo -4")
 	Parser.assignment("P.foo +2/4")
 	Parser.assignment("P.foo +2/4*P.foo")
+
+
 
 	with pytest.raises(RuntimeError):
 		Parser.assignment("P.foo + ")
@@ -400,7 +421,7 @@ def test_assignment():
 	with pytest.raises(RuntimeError):
 		Parser.assignment("P.foo + 4 > 5")
 
-def test_arithmetic():
+def test_expressions():
 	d = CO(C("player.HVLI < player.HVLI_MAX"), "buy HVLIs", "Bought HVLIs", [
 		E("player.REP - ((player.HVLI_MAX - player.HVLI) * station.hvli_cost)"),
 		E("player.HVLI = player.HVLI_MAX"),
@@ -415,7 +436,7 @@ def test_arithmetic():
 
 	with pytest.raises(RuntimeError) as e_info:
 		E("P.foo + (")
-	assert e_info.value.args[0].startswith("'(' unexpected in expression")
+	assert e_info.value.args[0].startswith("Missing expression after")
 
 	with pytest.raises(RuntimeError) as e_info:
 		E("P.foo + P.foo *")
@@ -423,7 +444,7 @@ def test_arithmetic():
 
 	with pytest.raises(RuntimeError) as e_info:
 		E("P.foo + * P.foo")
-	assert e_info.value.args[0].startswith("'* P.foo' unexpected in expression")
+	assert e_info.value.args[0].startswith("'*' unexpected in expression")
 
 	E("P.foo + P.foo * P.foo")
 
@@ -433,4 +454,30 @@ def test_arithmetic():
 	E("P.foo = P.foo +  P.foo * P.foo")
 	with pytest.raises(RuntimeError) as e_info:
 		E("P.foo = P.foo P.foo + * P.foo")
-	assert e_info.value.args[0].startswith("invalid expression")
+	assert e_info.value.args[0].startswith("'P.foo' unexpected after 'P.foo'")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = P.foo))")
+	assert e_info.value.args[0].startswith("too many ')'")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = P.foo * P.foo + P.foo *)")
+	assert e_info.value.args[0].startswith("')' unexpected after")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = (P.foo * P.foo + P.foo *)")
+	assert e_info.value.args[0].startswith("')' unexpected after")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = P.foo * P.foo + P.foo * -")
+	assert e_info.value.args[0].startswith("'-' unexpected after")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = (P.foo) )P.foo( + * (P.foo")
+	assert e_info.value.args[0].startswith("too many ')'")
+
+	with pytest.raises(RuntimeError) as e_info:
+		E("P.foo = ( P.foo ) +")
+	assert e_info.value.args[0].startswith("Missing expression after")
+
+

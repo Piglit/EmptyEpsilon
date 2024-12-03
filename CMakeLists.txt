@@ -595,7 +595,7 @@ set_target_properties(${PROJECT_NAME}
 include(InstallRequiredSystemLibraries)
 
 
-set(EE_RESOURCES resources scripts-piglit packs)
+set(EE_RESOURCES mod_spacelan resources scripts packs)
 if(WIN32 OR STEAMSDK)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
     install(DIRECTORY ${EE_RESOURCES} DESTINATION .)

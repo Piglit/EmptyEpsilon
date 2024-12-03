@@ -109,6 +109,7 @@ public:
     bool shares_energy_with_docked;
     bool repair_docked;
     bool restocks_scan_probes;
+    bool is_fighter;
     ERestockMissileBehaviour restocks_missiles_docked;
     bool can_scan = true;
     bool can_hack = true;
@@ -150,6 +151,8 @@ public:
     std::vector<ShipRoomTemplate> rooms;
     std::vector<ShipDoorTemplate> doors;
 
+
+
     ShipTemplate();
 
     void setName(string name);
@@ -165,6 +168,7 @@ public:
     void setSharesEnergyWithDocked(bool enabled);
     void setRepairDocked(bool enabled);
     void setRestocksScanProbes(bool enabled);
+    void setIsFighter(bool enabled);
     void setRestocksMissilesDocked(ERestockMissileBehaviour behaviour);
     void setCanScan(bool enabled) { can_scan = enabled; }
     void setCanHack(bool enabled) { can_hack = enabled; }
@@ -218,6 +222,7 @@ public:
     void setLongRangeRadarRange(float range);
     void setShortRangeRadarRange(float range);
     void setImpulseSoundFile(string sound);
+
 
     P<ShipTemplate> copy(string new_name);
 

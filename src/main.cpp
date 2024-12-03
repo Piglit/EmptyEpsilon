@@ -177,6 +177,7 @@ int main(int argc, char** argv)
     if (PreferencesManager::get("headless") != "")
         textureManager.setDisabled(true);
 
+    new DirectoryResourceProvider("mod/");	// scripts or other resources in the mod directory take precedence before resources in other directories, since this provider is addes first. Notice that other resources with the same name are not used anymore!
     if (PreferencesManager::get("mod") != "")
     {
         string mod = PreferencesManager::get("mod");

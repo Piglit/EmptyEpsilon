@@ -570,7 +570,8 @@ PlayerSpaceship::PlayerSpaceship()
     alert_level = AL_Normal;
     shields_active = false;
     control_code = "";
-	
+    color = "";
+    equipment = "";
 
     setFactionId(1);
 
@@ -616,6 +617,8 @@ PlayerSpaceship::PlayerSpaceship()
     registerMemberReplication(&alert_level);
     registerMemberReplication(&linked_science_probe_id);
     registerMemberReplication(&control_code);
+    registerMemberReplication(&color);
+    registerMemberReplication(&equipment);
     registerMemberReplication(&custom_functions);
 
     // Determine which stations must provide self-destruct confirmation codes.

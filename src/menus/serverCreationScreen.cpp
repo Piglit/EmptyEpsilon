@@ -7,7 +7,6 @@
 #include "epsilonServer.h"
 #include "multiplayer_proxy.h"
 #include "multiplayer_client.h"
-#include "gui/scriptError.h"
 #include "gui/gui2_overlay.h"
 #include "gui/gui2_label.h"
 #include "gui/gui2_togglebutton.h"
@@ -450,7 +449,15 @@ ServerCampaignScreen::ServerCampaignScreen()
             disconnectFromServer();
             new GameServerProxy(host, port, password, listenPort, proxyName);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            //new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, sp::io::network::Address("127.0.0.1"), listenPort);
+            /*
+            ServerScanner::ServerInfo info;
+            info.type = ServerScanner::ServerType::Manual;
+            info.name = host;
+            info.port = listenPort;
+            info.address = sp::io::network::Address("localhost");
+
+            new JoinServerScreen(info);
+            */
             destroy();
             new ProxyJoinScreen(host, listenPort);
         }
@@ -709,7 +716,13 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort)
         ship_create_button->disable();
         if (proxySpawn(ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue()))
         {
-            new JoinServerScreen(ServerBrowserMenu::SearchSource::Local, host, listenPort);
+            ServerScanner::ServerInfo info;
+            info.type = ServerScanner::ServerType::Manual;
+            if (!host.getHumanReadable().empty())
+                info.name = host.getHumanReadable()[1];
+            info.port = listenPort;
+            info.address = sp::io::network::Address(host);
+            new JoinServerScreen(info);
             destroy();
         }
         else

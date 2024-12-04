@@ -6,6 +6,8 @@
 
 const static int16_t CMD_RUN_SCRIPT = 0x0000;
 const static int16_t CMD_SEND_GLOBAL_MESSAGE = 0x0001;
+const static int16_t CMD_CREATE_FIGHTER = 0x0002;
+const static int16_t CMD_EQUIP_FIGHTER = 0x0003;
 
 P<GameMasterActions> gameMasterActions;
 

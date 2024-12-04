@@ -22,6 +22,7 @@ private:
 public:
     string template_name;
     string type_name;
+    string model_name;
     string radar_trace;
     string impulse_sound_file;
     P<ShipTemplate> ship_template;

@@ -100,6 +100,8 @@ public:
     bool shields_active;
     // Password to join a ship. Default is empty.
     string control_code;
+    string color;
+    string equipment;
 
 private:
     bool on_new_player_ship_called=false;
@@ -343,6 +345,12 @@ public:
 
     // Ship control code/password setter
     void setControlCode(string code) { control_code = code.upper(); }
+
+    void setColor(string col) { color = col; }
+    void setEquipment(string equip) { equipment = equip; }
+
+    string getColor() { return color; }
+    string getEquipment() { return equipment; }
 
     // Radar function
     virtual void drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;

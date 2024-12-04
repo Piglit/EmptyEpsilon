@@ -53,6 +53,7 @@ private:
     void unselectSingleOptions();
 
     int window_index;
+    GuiPanel* standard_crew_panel;
     GuiButton* ready_button;
     GuiToggleButton* main_screen_button;
     GuiToggleButton* crew_position_button[max_crew_positions];

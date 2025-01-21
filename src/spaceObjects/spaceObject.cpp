@@ -519,7 +519,7 @@ void SpaceObject::setCommsScript(string script_name)
 {
     this->comms_script_name = script_name;
     if (script_name != "")
-        i18n::load("locale/" + script_name.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+        i18n::load("locale/" + script_name.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
     this->comms_script_callback.clear();
 }
 

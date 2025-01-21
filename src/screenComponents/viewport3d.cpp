@@ -37,13 +37,14 @@ GuiViewport3D::GuiViewport3D(GuiContainer* owner, string id)
 
     // Load up the cube texture.
     // Face setup
-    std::array<std::tuple<const char*, uint32_t>, 6> faces{
-        std::make_tuple("skybox/right.png", GL_TEXTURE_CUBE_MAP_POSITIVE_X),
-        std::make_tuple("skybox/left.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_X),
-        std::make_tuple("skybox/top.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Y),
-        std::make_tuple("skybox/bottom.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Y),
-        std::make_tuple("skybox/front.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Z),
-        std::make_tuple("skybox/back.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Z),
+    string skybox_dir = "skybox/" + PreferencesManager::get("skybox", "");
+    std::array<std::tuple<string, uint32_t>, 6> faces{
+        std::make_tuple(skybox_dir+"/right.png", GL_TEXTURE_CUBE_MAP_POSITIVE_X),
+        std::make_tuple(skybox_dir+"/left.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_X),
+        std::make_tuple(skybox_dir+"/top.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Y),
+        std::make_tuple(skybox_dir+"/bottom.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Y),
+        std::make_tuple(skybox_dir+"/front.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Z),
+        std::make_tuple(skybox_dir+"/back.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Z),
     };
 
     // Upload

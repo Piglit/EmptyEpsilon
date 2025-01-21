@@ -33,7 +33,7 @@ Script::Script()
 bool Script::run(string filename)
 {
     // Load the locale file for this script.
-    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
 
     return ScriptObject::run(filename);
 }
@@ -52,7 +52,7 @@ static int require(lua_State* L)
     }
 
     // Load the locale file for this script.
-    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
 
     string filecontents;
     do

@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 #endif
     textureManager.setDefaultSmooth(true);
     textureManager.setDefaultRepeated(true);
-    i18n::load("locale/main." + PreferencesManager::get("language", "en") + ".po");
+    i18n::load("locale/main." + PreferencesManager::get("language", "de") + ".po");
 
     if (PreferencesManager::get("httpserver").toInt() != 0)
     {

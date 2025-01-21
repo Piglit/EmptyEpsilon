@@ -14,7 +14,7 @@ ScenarioInfo::ScenarioInfo(string filename)
 
     P<ResourceStream> stream = getResourceStream(filename);
     if (!stream) return;
-    locale = i18n::Catalogue::create("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+    locale = i18n::Catalogue::create("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
 
     string key;
     string value;

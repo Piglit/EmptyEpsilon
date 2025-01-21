@@ -51,12 +51,12 @@ TutorialGame::TutorialGame(bool repeated_tutorial, string filename)
     this->viewport = nullptr;
     this->repeated_tutorial = repeated_tutorial;
 
-    i18n::load("locale/main." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/comms_ship." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/comms_station." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/factionInfo." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/science_db." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+    i18n::load("locale/main." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/comms_ship." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/comms_station." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/factionInfo." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/science_db." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
 
     P<ScriptObject> factionInfoScript = new ScriptObject("factionInfo.lua");
     if (factionInfoScript->getError() != "") exit(1);

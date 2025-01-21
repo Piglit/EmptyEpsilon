@@ -118,7 +118,7 @@ OptionsMenu::OptionsMenu()
         std::sort(languages.begin(), languages.end());
 
         int default_index = 0;
-        auto default_elem = std::find(languages.begin(), languages.end(), PreferencesManager::get("language", "en"));
+        auto default_elem = std::find(languages.begin(), languages.end(), PreferencesManager::get("language", "de"));
         if(default_elem != languages.end())
         {
             default_index =  static_cast<int>(default_elem - languages.begin());

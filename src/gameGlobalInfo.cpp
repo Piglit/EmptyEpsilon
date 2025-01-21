@@ -231,12 +231,12 @@ void GameGlobalInfo::startScenario(string filename, std::unordered_map<string, s
     reset();
 
     i18n::reset();
-    i18n::load("locale/main." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/comms_ship." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/comms_station." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/factionInfo." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/science_db." + PreferencesManager::get("language", "en") + ".po");
-    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "en") + ".po"));
+    i18n::load("locale/main." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/comms_ship." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/comms_station." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/factionInfo." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/science_db." + PreferencesManager::get("language", "de") + ".po");
+    i18n::load("locale/" + filename.replace(".lua", "." + PreferencesManager::get("language", "de") + ".po"));
 
     P<ScriptObject> factionInfoScript = new ScriptObject("factionInfo.lua");
     if (factionInfoScript->getError() != "") exit(1);
@@ -537,7 +537,7 @@ REGISTER_SCRIPT_FUNCTION(getScenarioSetting);
 
 static int getGameLanguage(lua_State* L)
 {
-    lua_pushstring(L, PreferencesManager::get("language", "en").c_str());
+    lua_pushstring(L, PreferencesManager::get("language", "de").c_str());
     return 1;
 }
 /// string getGameLanguage()
@@ -659,7 +659,7 @@ static int playSoundFile(lua_State* L)
     int n = filename.rfind(".");
     if (n > -1)
     {
-        string filename_with_locale = filename.substr(0, n) + "." + PreferencesManager::get("language", "en") + filename.substr(n);
+        string filename_with_locale = filename.substr(0, n) + "." + PreferencesManager::get("language", "de") + filename.substr(n);
         if (getResourceStream(filename_with_locale)) {
             soundManager->playSound(filename_with_locale);
             return 0;

@@ -12,24 +12,31 @@ These are:
 
 Player ships are in general large frigates to small corvette class
 --]]
+
+require("shipSystems.lua")
+
+-- from vanilla:
 require("shiptemplates/stations.lua")
+require("shiptemplates/starFighters.lua")
+require("shiptemplates/frigates.lua")
+require("shiptemplates/corvette.lua")
+require("shiptemplates/dreadnaught.lua")
+require("shiptemplates/OLD.lua")
 
---require("shiptemplates/starFighters.lua")
---require("shiptemplates/frigates.lua")
---require("shiptemplates/corvette.lua")
---require("shiptemplates/dreadnaught.lua")
-
---require("shiptemplates/player.lua")
-require("shiptemplates/player_star_wars.lua")
-require("shiptemplates/humans.lua")
+-- modified:
 require("shiptemplates/exuari.lua")
-require("shiptemplates/kraylor.lua")
 require("shiptemplates/ktlitan.lua")
 require("shiptemplates/transport.lua")
 require("shiptemplates/satellites.lua")
-require("shiptemplates/special.lua")
+
+-- new, lan:
+--require("shiptemplates/player.lua")
+--require("shiptemplates/humans.lua")
+--require("shiptemplates/kraylor.lua")
+--require("shiptemplates/special.lua")
+
+-- new, sw:
 require("shiptemplates/tie.lua")
+require("shiptemplates/player_star_wars.lua")
 
 
---For now, we add our old ship templates as well. These should be removed at some point.
---require("shiptemplates/OLD.lua")

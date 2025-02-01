@@ -19,7 +19,7 @@ GuiJumpControls::GuiJumpControls(GuiContainer* owner, string id)
     charge_bar->setPosition(0, -50, sp::Alignment::BottomLeft)->setSize(50, GuiElement::GuiSizeMax);
     charge_bar->hide();
 
-    label = new GuiKeyValueDisplay(this, id + "_LABEL", 0.5, tr("jumpcontrol", "Distance"), "10.0");
+    label = new GuiKeyValueDisplay(this, id + "_LABEL", 0.60, tr("jumpcontrol", "Distance"), "10.0");
     label->setTextSize(30)->setPosition(50, -50, sp::Alignment::BottomLeft)->setSize(40, GuiElement::GuiSizeMax);
 
     button = new GuiButton(this, id + "_BUTTON", tr("jumpcontrol", "Jump"), [this]() {

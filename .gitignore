@@ -36,9 +36,15 @@ thumbs.db
 
 # gettext temp files
 *.po~
+# gettext irrelavant files
+*.cz.po
+*.it.po
+*.fr.po
+*.mo
 
 options.ini
 keybindings.json
+docs.html
 
 
 .vscode

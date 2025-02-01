@@ -191,6 +191,7 @@ int main(int argc, char** argv)
 
     new DirectoryResourceProvider("resources/");
     new DirectoryResourceProvider("scripts/");
+    new DirectoryResourceProvider("scripts/tutorial/");
     PackResourceProvider::addPackResourcesForDirectory("packs/");
     if (getenv("HOME"))
     {
@@ -405,7 +406,13 @@ int main(int argc, char** argv)
     new SteamRichPresence();
 #endif //STEAMSDK
 
-    if (PreferencesManager::get("server_scenario") == "")
+    string tutorial = PreferencesManager::get("tutorial");   // use "00_all.lua" for all tutorials
+    if (tutorial != "")
+    {
+        LOG(DEBUG) << "Starting tutorial: " << tutorial;
+        new TutorialGame(false, tutorial);
+    }
+    else if (PreferencesManager::get("server_scenario") == "")
         returnToMainMenu(defaultRenderLayer);
     else
     {
@@ -486,10 +493,6 @@ void returnToMainMenu(RenderLayer* render_layer)
         if (crew_position < 0) crew_position = 0;
         if (crew_position > max_crew_positions) crew_position = max_crew_positions;
         new AutoConnectScreen(ECrewPosition(crew_position), PreferencesManager::get("autocontrolmainscreen").toInt(), PreferencesManager::get("autoconnectship", "solo"));
-    }
-    else if (PreferencesManager::get("tutorial").toInt())
-    {
-        new TutorialGame(true);
     }else{
         new MainMenu();
     }

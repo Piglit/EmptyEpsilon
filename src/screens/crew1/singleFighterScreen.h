@@ -30,6 +30,7 @@ private:
     TargetsContainer targets;
     GuiRadarView* radar;
     GuiMissileTubeControls* tube_controls;
+    GuiElement* beam_info_box;
 public:
     SingleFighterScreen(GuiContainer* owner);
 

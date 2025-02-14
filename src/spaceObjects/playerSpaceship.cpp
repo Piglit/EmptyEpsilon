@@ -354,6 +354,14 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Control codes are case-insensitive.
     /// Example: player:setControlCode("abcde") -- matches "abcde", "ABCDE", "aBcDe"
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
+    /// repair crews to automatically move to damaged subsystems.
+    /// Use this on ships to require less player interaction, especially
+    /// when combined with setAutoCoolant/auto_coolant_enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoRepair);
+    /// Sets weapon_tube automatic weapon tube reload is enabled.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setAutoMissileReload);
+    /// Set a password to join the ship.
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, setControlCode);
     /// Defines a function to call when this PlayerSpaceship launches a probe.
     /// Passes the launching PlayerSpaceship and launched ScanProbe.
     /// Example:
@@ -537,11 +545,13 @@ PlayerSpaceship::PlayerSpaceship()
     shield_calibration_delay = 0.0;
     auto_repair_enabled = false;
     auto_coolant_enabled = false;
+    auto_reload_tube_enabled = false;
     max_coolant = max_coolant_per_system;
     scan_probe_stock = max_scan_probes;
     alert_level = AL_Normal;
     shields_active = false;
     control_code = "";
+	
 
     setFactionId(1);
 
@@ -572,6 +582,7 @@ PlayerSpaceship::PlayerSpaceship()
     registerMemberReplication(&auto_repair_enabled);
     registerMemberReplication(&max_coolant);
     registerMemberReplication(&auto_coolant_enabled);
+    registerMemberReplication(&auto_reload_tube_enabled);
     registerMemberReplication(&beam_system_target);
     registerMemberReplication(&comms_state);
     registerMemberReplication(&comms_open_delay, 1.0);
@@ -958,6 +969,9 @@ void PlayerSpaceship::applyTemplateValues()
     can_combat_maneuver = ship_template->can_combat_maneuver;
     can_self_destruct = ship_template->can_self_destruct;
     can_launch_probe = ship_template->can_launch_probe;
+    auto_repair_enabled = ship_template->auto_repair_enabled;
+    auto_coolant_enabled = ship_template->auto_coolant_enabled;
+    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
     if (!on_new_player_ship_called)
     {
         on_new_player_ship_called = true;
@@ -2268,7 +2282,9 @@ string PlayerSpaceship::getExportLine()
     if (auto_coolant_enabled)
         result += ":setAutoCoolant(true)";
     if (auto_repair_enabled)
-        result += ":commandSetAutoRepair(true)";
+        result += ":setAutoRepair(true)";
+    if (auto_reload_tube_enabled)
+        result += ":setAutoMissileReload(true)";
 
     // Update power factors, only for the systems where it changed.
     for (unsigned int sys_index = 0; sys_index < SYS_COUNT; ++sys_index)

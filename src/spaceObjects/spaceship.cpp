@@ -495,6 +495,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     energy_level = 1000;
     max_energy_level = 1000;
     turnSpeed = 0.0f;
+    auto_reload_tube_enabled = false;
 
     registerMemberReplication(&target_rotation, 1.5f);
     registerMemberReplication(&turnSpeed, 0.1f);
@@ -529,6 +530,9 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&combat_maneuver_boost_speed);
     registerMemberReplication(&combat_maneuver_strafe_speed);
     registerMemberReplication(&radar_trace);
+    registerMemberReplication(&docking_target_id);
+    registerMemberReplication(&missile_resupply_delay);
+
 
     for(unsigned int n=0; n<SYS_COUNT; n++)
     {
@@ -636,6 +640,7 @@ void SpaceShip::applyTemplateValues()
     for(int n=0; n<MW_Count; n++)
         weapon_storage[n] = weapon_storage_max[n] = ship_template->weapon_storage[n];
 
+    auto_reload_tube_enabled = ship_template->auto_reload_tube_enabled;
     ship_template->setCollisionData(this);
     model_info.setData(ship_template->model_data);
 }
@@ -1359,6 +1364,7 @@ void SpaceShip::requestDock(P<SpaceObject> target)
 
     docking_state = DS_Docking;
     docking_target = target;
+    docking_target_id = target->getMultiplayerId();
     warp_request = 0;
 }
 

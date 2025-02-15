@@ -765,6 +765,9 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     for(int n=0; n<MW_Count; n++)
         result->weapon_storage[n] = weapon_storage[n];
     result->radar_trace = radar_trace;
+    result->long_range_radar_range = long_range_radar_range;
+    result->short_range_radar_range = short_range_radar_range;
+    result->impulse_sound_file = impulse_sound_file;
 
     result->rooms = rooms;
     result->doors = doors;

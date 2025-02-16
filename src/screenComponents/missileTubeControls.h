@@ -3,6 +3,7 @@
 
 #include "gui/gui2_element.h"
 #include "missileWeaponData.h"
+#include "powerDamageIndicator.h"
 
 class GuiButton;
 class GuiProgressbar;
@@ -18,6 +19,7 @@ private:
         GuiButton* fire_button;
         GuiProgressbar* loading_bar;
         GuiLabel* loading_label;
+        GuiPowerDamageIndicator* damage_indicator;
     };
     std::vector<TubeRow> rows;
     class TypeRow {

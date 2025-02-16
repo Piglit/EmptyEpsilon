@@ -6,11 +6,13 @@
 -- @script scenario_10_empty
 
 function init()
-    --SpaceStation():setPosition(1000, 1000):setTemplate('Small Station'):setFaction("Human Navy"):setRotation(random(0, 360))
+    SpaceStation():setPosition(1000, 1000):setTemplate('Small Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(-1000, 1000):setTemplate('Medium Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(1000, -1000):setTemplate('Large Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(-1000, -1000):setTemplate('Huge Station'):setFaction("Human Navy"):setRotation(random(0, 360))
-    --player1 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setRotation(200)
+    player1 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("TIE-Fighter"):setRotation(200)
+	player1:addCustomInfo("single", "a", "Hurz")
+	player1:setAutoCoolant(true)
     --player2 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setRotation(0)
     --Nebula():setPosition(-5000, 0)
     --Artifact():setPosition(1000, 9000):setModel("small_frigate_1"):setDescription(_("scienceDescription-artifact", "An old space derelict."))

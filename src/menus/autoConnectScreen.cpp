@@ -153,7 +153,6 @@ void AutoConnectScreen::update(float delta)
                         {
                             destroy();
                             if (window_degree >= 0){
-                                uint8_t window_flags = PreferencesManager::get("ship_window_flags", "1").toInt();
                                 new WindowScreen(getRenderLayer(), window_degree, window_flags);
                             } else{
                                 my_player_info->spawnUI(0, getRenderLayer(), first_crew_position);

@@ -13,6 +13,8 @@ protected:
 
     bool launch_sound_played;
 
+    string radar_sprite;
+
 public:
     P<SpaceObject> owner; //Only valid on server.
     int32_t target_id;
@@ -46,8 +48,9 @@ public:
     void setMissileSize(EMissileSizes missile_size);
 
     virtual std::unordered_map<string, string> getGMInfo() override;
-private:
+protected:
     void updateMovement();
+    virtual void particleEffect();
 };
 
 #endif//MISSILE_WEAPON_H

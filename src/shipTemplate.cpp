@@ -141,9 +141,13 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// Defaults to 8.0.
     /// Example: template:setTubeLoadTime(0,12) -- sets the loading time for tube 0 to 12 seconds
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setTubeLoadTime);
+    /// Set the system (ESystem) that is used for the tube of the given index on this Template.
+    /// Example: template:setTubeSystem(0,"beamweapons") -- this tube uses beamweapons as system 
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setTubeSystem);
     /// Sets which weapon types the WeaponTube with the given index can load.
     /// Note the spelling of "missle".
     /// Example: template:weaponTubeAllowMissle(0,"Homing") -- allows Homing missiles to be loaded in tube 0
+
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, weaponTubeAllowMissle);
     /// Sets which weapon types the WeaponTube with the given index can't load.
     /// Note the spelling of "missle".
@@ -339,6 +343,7 @@ ShipTemplate::ShipTemplate()
         weapon_tube[n].type_allowed_mask = (1 << MW_Count) - 1;
         weapon_tube[n].direction = 0;
         weapon_tube[n].size = MS_Medium;
+        weapon_tube[n].system = SYS_MissileSystem;
     }
     hull = 70;
     shield_count = 0;
@@ -423,6 +428,11 @@ void ShipTemplate::setTubeSize(int index, EMissileSizes size)
     if (index < 0 || index >= max_weapon_tubes)
         return;
     weapon_tube[index].size = size;
+}
+
+void ShipTemplate::setTubeSystem(int index, ESystem system)
+{
+    weapon_tube[index].system = system;
 }
 
 void ShipTemplate::setType(TemplateType type)

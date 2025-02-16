@@ -18,6 +18,7 @@ class SingleFighterScreen : public GuiOverlay
 private:
     GuiViewport3D* viewport;
 
+    GuiKeyValueDisplay* callsign_display;
     GuiKeyValueDisplay* energy_display;
     GuiKeyValueDisplay* heading_display;
     GuiKeyValueDisplay* velocity_display;

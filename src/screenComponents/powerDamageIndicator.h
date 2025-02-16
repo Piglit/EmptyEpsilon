@@ -11,6 +11,7 @@ public:
 
     virtual void onDraw(sp::RenderTarget& target) override;
 
+    void setSystem(ESystem system);
 private:
     ESystem system;
     float text_size;

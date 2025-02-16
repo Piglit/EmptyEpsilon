@@ -9,6 +9,11 @@ GuiPowerDamageIndicator::GuiPowerDamageIndicator(GuiContainer* owner, string nam
 {
 }
 
+void GuiPowerDamageIndicator::setSystem(ESystem system)
+{
+    this->system = system;
+}
+
 void GuiPowerDamageIndicator::onDraw(sp::RenderTarget& renderer)
 {
     if (!my_spaceship)

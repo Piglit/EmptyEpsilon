@@ -111,6 +111,12 @@ void ShipAI::updateWeaponState(float delta)
             tube.startLoad(MW_Homing);
         else if (tube.isEmpty() && owner->weapon_storage[MW_HVLI] > 0 && tube.canLoad(MW_HVLI))
             tube.startLoad(MW_HVLI);
+        else if (tube.isEmpty() && owner->weapon_storage[MW_LaserGreen] > 0 && tube.canLoad(MW_LaserGreen))
+            tube.startLoad(MW_LaserGreen);
+        else if (tube.isEmpty() && owner->weapon_storage[MW_LaserRed] > 0 && tube.canLoad(MW_LaserRed))
+            tube.startLoad(MW_LaserRed);
+        else if (tube.isEmpty() && owner->weapon_storage[MW_IonMissile] > 0 && tube.canLoad(MW_IonMissile))
+            tube.startLoad(MW_IonMissile);
 
         //When the tube is loading or loaded, add the relative strenght of this tube to the direction of this tube.
         if (tube.isLoading() || tube.isLoaded())
@@ -510,6 +516,12 @@ void ShipAI::runAttack(P<SpaceObject> target)
     float attack_distance = 4000.0;
     if (has_missiles && best_missile_type == MW_HVLI)
         attack_distance = 2500.0;
+    if (has_missiles && best_missile_type == MW_LaserGreen)
+        attack_distance = 1500.0;
+    if (has_missiles && best_missile_type == MW_LaserRed)
+        attack_distance = 1500.0;
+    if (has_missiles && best_missile_type == MW_IonMissile)
+        attack_distance = 1000.0;
     if (has_beams)
         attack_distance = beam_weapon_range * 0.7f;
 
@@ -778,7 +790,7 @@ float ShipAI::calculateFiringSolution(P<SpaceObject> target, int tube_index)
         }
     }
 
-    if (type == MW_HVLI)    //Custom HVLI targeting for AI, as the calculate firing solution
+    if (type == MW_HVLI || type == MW_LaserRed || type == MW_LaserGreen || type == MW_IonMissile)    //Custom HVLI targeting for AI, as the calculate firing solution
     {
         const MissileWeaponData& data = MissileWeaponData::getDataFor(type);
 

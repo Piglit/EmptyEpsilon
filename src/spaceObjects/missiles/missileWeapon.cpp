@@ -56,13 +56,14 @@ MissileWeapon::MissileWeapon(string multiplayer_name, const MissileWeaponData& d
     registerMemberReplication(&category_modifier);
 
     launch_sound_played = false;
+    radar_sprite = "radar/missile.png";
 }
 
 void MissileWeapon::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
     if (long_range) return;
 
-    renderer.drawRotatedSprite("radar/missile.png", position, 32 * (0.25f + 0.25f * category_modifier), getRotation()-rotation, data.color);
+    renderer.drawRotatedSprite(radar_sprite, position, 32 * (0.25f + 0.25f * category_modifier), getRotation()-rotation, data.color);
 }
 
 void MissileWeapon::update(float delta)
@@ -74,7 +75,7 @@ void MissileWeapon::update(float delta)
 
     if (!launch_sound_played)
     {
-        soundManager->playSound(data.fire_sound, getPosition(), 400.0, 0.6, (1.0f + random(-0.2f, 0.2f)) * size_speed_modifier);
+        soundManager->playSound(data.fire_sound, getPosition(), 400.0, 0.6, (1.0f/* + random(-0.2f, 0.2f)*/) * size_speed_modifier);
         launch_sound_played = true;
     }
 
@@ -89,7 +90,7 @@ void MissileWeapon::update(float delta)
 
     if (delta > 0)
     {
-        ParticleEngine::spawn(glm::vec3(getPosition().x, getPosition().y, 0), glm::vec3(getPosition().x, getPosition().y, 0), glm::vec3(1, 0.8, 0.8), glm::vec3(0, 0, 0), 5, 20, 5.0);
+        particleEffect();
     }
 }
 
@@ -217,4 +218,9 @@ std::unordered_map<string, string> MissileWeapon::getGMInfo()
     ret[trMark("gm_info", "Size")] = getMissileSize();
 
     return ret;
+}
+
+void MissileWeapon::particleEffect()
+{
+    ParticleEngine::spawn(glm::vec3(getPosition().x, getPosition().y, 0), glm::vec3(getPosition().x, getPosition().y, 0), glm::vec3(1, 0.8, 0.8), glm::vec3(0, 0, 0), 5, 20, 5.0);
 }

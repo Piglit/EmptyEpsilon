@@ -80,6 +80,8 @@ public:
     sp::io::Keybinding weapons_select_mine;
     sp::io::Keybinding weapons_select_emp;
     sp::io::Keybinding weapons_select_hvli;
+    sp::io::Keybinding weapons_select_laser;
+    sp::io::Keybinding weapons_select_ion;
     std::array<sp::io::Keybinding, 16> weapons_load_tube;
     std::array<sp::io::Keybinding, 16> weapons_unload_tube;
     std::array<sp::io::Keybinding, 16> weapons_fire_tube;

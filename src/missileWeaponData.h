@@ -13,6 +13,9 @@ enum EMissileWeapons
     MW_Mine,
     MW_EMP,
     MW_HVLI,
+    MW_LaserRed,
+    MW_LaserGreen,
+    MW_IonMissile,
     MW_Count
 };
 

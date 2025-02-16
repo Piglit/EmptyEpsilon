@@ -4,6 +4,7 @@
 #include "spaceObjects/mine.h"
 #include "spaceObjects/missiles/nuke.h"
 #include "spaceObjects/missiles/hvli.h"
+#include "spaceObjects/missiles/laser.h"
 #include "spaceObjects/spaceship.h"
 #include "multiplayer_server.h"
 #include <SDL_assert.h>
@@ -15,6 +16,7 @@ WeaponTube::WeaponTube()
 
     load_time = 8.0;
     direction = 0;
+    system = SYS_MissileSystem;
     type_allowed_mask = (1 << MW_Count) - 1;
     type_loaded = MW_None;
     state = WTS_Empty;
@@ -32,6 +34,7 @@ void WeaponTube::setParent(SpaceShip* parent)
     parent->registerMemberReplication(&type_allowed_mask);
     parent->registerMemberReplication(&direction);
     parent->registerMemberReplication(&size);
+    parent->registerMemberReplication(&system);
 
     parent->registerMemberReplication(&type_loaded);
     parent->registerMemberReplication(&state);
@@ -63,6 +66,16 @@ float WeaponTube::getDirection()
     return direction;
 }
 
+ESystem WeaponTube::getSystem()
+{
+    return system;
+}
+
+void WeaponTube::setSystem(ESystem system)
+{
+    this->system = system;
+}
+
 void WeaponTube::startLoad(EMissileWeapons type)
 {
     if (!canLoad(type))
@@ -91,11 +104,21 @@ void WeaponTube::startUnload()
 
 void WeaponTube::fire(float target_angle)
 {
-    parent->didAnOffensiveAction();
-
     if (parent->docking_state != DS_NotDocking) return;
     if (parent->current_warp > 0.0f) return;
     if (state != WTS_Loaded) return;
+
+    if (system == SYS_BeamWeapons)
+    {
+        // add heat to the beam and zap the target.
+        auto energy_per_beam_fire = 3.0f;
+        auto heat_per_beam_fire = 0.02f;
+        if (parent->energy_level < energy_per_beam_fire) return;
+        parent->useEnergy(energy_per_beam_fire);
+        parent->addHeat(SYS_BeamWeapons, heat_per_beam_fire);
+    }
+
+    parent->didAnOffensiveAction();
 
     if (type_loaded == MW_HVLI)
     {
@@ -105,7 +128,11 @@ void WeaponTube::fire(float target_angle)
     }else{
         spawnProjectile(target_angle);
         state = WTS_Empty;
-        if (parent->auto_reload_tube_enabled)
+        if (type_loaded == MW_LaserGreen || type_loaded == MW_LaserRed || type_loaded == MW_IonMissile)
+        {
+            startLoad(type_loaded);
+            parent->weapon_storage[type_loaded] = parent->weapon_storage_max[type_loaded];
+        } else if (parent->auto_reload_tube_enabled)
             startLoad(type_loaded);
         else
             type_loaded = MW_None;
@@ -174,6 +201,41 @@ void WeaponTube::spawnProjectile(float target_angle)
             missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
         }
         break;
+    case MW_LaserRed:
+        {
+            P<LaserMissileRed> missile = new LaserMissileRed();
+            missile->owner = parent;
+            missile->setFactionId(parent->getFactionId());
+            missile->setPosition(fireLocation);
+            missile->setRotation(parent->getRotation() + direction);
+            missile->target_angle = parent->getRotation() + direction;
+            missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
+        }
+        break;
+    case MW_LaserGreen:
+        {
+            P<LaserMissileGreen> missile = new LaserMissileGreen();
+            missile->owner = parent;
+            missile->setFactionId(parent->getFactionId());
+            missile->setPosition(fireLocation);
+            missile->setRotation(parent->getRotation() + direction);
+            missile->target_angle = parent->getRotation() + direction;
+            missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
+        }
+        break;
+    case MW_IonMissile:
+        {
+            P<IonMissile> missile = new IonMissile();
+            missile->owner = parent;
+            missile->setFactionId(parent->getFactionId());
+            missile->setPosition(fireLocation);
+            missile->setRotation(parent->getRotation() + direction);
+            missile->target_angle = parent->getRotation() + direction;
+            missile->category_modifier = MissileWeaponData::convertSizeToCategoryModifier(size);
+        }
+        break;
+
+
     default:
         break;
     }
@@ -220,7 +282,7 @@ void WeaponTube::update(float delta)
 {
     if (delay > 0.0f)
     {
-        delay -= delta * parent->getSystemEffectiveness(SYS_MissileSystem);
+        delay -= delta * parent->getSystemEffectiveness(system);
     }else{
         switch(state)
         {

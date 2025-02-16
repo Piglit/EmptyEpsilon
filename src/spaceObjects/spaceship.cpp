@@ -411,6 +411,9 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(SpaceShip, ShipTemplateBasedObject)
     /// Sets the time, in seconds, required to load the weapon tube with the given index on this SpaceShip.
     /// Example: ship:setTubeLoadTime(0,12) -- sets the loading time for tube 0 to 12 seconds
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setTubeLoadTime);
+    /// Set the system (ESystem) that is used for the tube of the given index on this SpaceShip.
+    /// Example: ship:setTubeSystem(0,"beamweapons") -- this tube uses beamweapons as system 
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setTubeSystem);
     /// Sets the radar trace image for this SpaceShip.
     /// Valid values are filenames to PNG images relative to the resources/radar/ directory.
     /// Radar trace images should be white with a transparent background.
@@ -632,6 +635,7 @@ void SpaceShip::applyTemplateValues()
         weapon_tube[n].setLoadTimeConfig(ship_template->weapon_tube[n].load_time);
         weapon_tube[n].setDirection(ship_template->weapon_tube[n].direction);
         weapon_tube[n].setSize(ship_template->weapon_tube[n].size);
+        weapon_tube[n].setSystem(ship_template->weapon_tube[n].system);
         for(int m=0; m<MW_Count; m++)
         {
             if (ship_template->weapon_tube[n].type_allowed_mask & (1 << m))
@@ -1652,7 +1656,12 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_JumpDrive:
         return has_jump_drive;
     case SYS_MissileSystem:
-        return weapon_tube_count > 0 || restocks_missiles_docked != R_None;
+        for(int n=0; n<weapon_tube_count; n++)
+        {
+            if (weapon_tube[n].getSystem() == SYS_MissileSystem)
+                return true;
+        }
+        return restocks_missiles_docked != R_None;
     case SYS_FrontShield:
         return shield_count > 0;
     case SYS_RearShield:
@@ -1660,7 +1669,14 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_Reactor:
         return true;
     case SYS_BeamWeapons:
-        return beam_weapons[0].getArc() > 0.0f;
+        if (beam_weapons[0].getArc() > 0.0f)
+           return true;
+        for(int n=0; n<weapon_tube_count; n++)
+        {
+            if (weapon_tube[n].getSystem() == SYS_BeamWeapons)
+                return true;
+        }
+        return false;
     case SYS_Maneuver:
         return turn_speed > 0.0f;
     case SYS_Impulse:
@@ -1774,6 +1790,11 @@ void SpaceShip::setTubeLoadTime(int index, float time)
         return;
     }
     weapon_tube[index].setLoadTimeConfig(time);
+}
+
+void SpaceShip::setTubeSystem(int index, ESystem system)
+{
+    weapon_tube[index].setSystem(system);
 }
 
 void SpaceShip::addBroadcast(int threshold, string message)
@@ -1960,6 +1981,11 @@ string getMissileWeaponName(EMissileWeapons missile)
         return "EMP";
     case MW_HVLI:
         return "HVLI";
+    case MW_LaserRed:
+    case MW_LaserGreen:
+        return "Laser";
+    case MW_IonMissile:
+        return "Ion";
     default:
         return "UNK: " + string(int(missile));
     }
@@ -1981,6 +2007,11 @@ string getLocaleMissileWeaponName(EMissileWeapons missile)
         return tr("missile","EMP");
     case MW_HVLI:
         return tr("missile","HVLI");
+    case MW_LaserRed:
+    case MW_LaserGreen:
+        return tr("missile","Laser");
+    case MW_IonMissile:
+        return tr("missile","Ion");
     default:
         return "UNK: " + string(int(missile));
     }

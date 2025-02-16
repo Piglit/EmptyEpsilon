@@ -137,6 +137,7 @@ Keys::Keys() :
     weapons_select_mine("WEAPONS_SELECT_MINE", "3"),
     weapons_select_emp("WEAPONS_SELECT_EMP", "4"),
     weapons_select_hvli("WEAPONS_SELECT_HVLI", "5"),
+    weapons_select_laser("WEAPONS_SELECT_LASER"),
     weapons_load_tube{{
         {"WEAPONS_LOAD_TUBE1"},
         {"WEAPONS_LOAD_TUBE2"},
@@ -373,6 +374,7 @@ void Keys::init()
     weapons_select_mine.setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_Weapons", "Select mine"));
     weapons_select_emp.setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_Weapons", "Select EMP"));
     weapons_select_hvli.setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_Weapons", "Select HVLI"));
+    weapons_select_laser.setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_Weapons", "Select Laser"));
     for(auto n = 0u; n < weapons_load_tube.size(); n++)
     {
         weapons_load_tube[n].setLabel(tr("hotkey_menu", "Weapons"), tr("hotkey_Weapons", "Load tube {number}").format({{"number", string(n+1)}}));

@@ -506,6 +506,7 @@ public:
     EMissileSizes getTubeSize(int index);
     void setTubeLoadTime(int index, float time);
     float getTubeLoadTime(int index);
+    void setTubeSystem(int index, ESystem system);
 
     void setRadarTrace(string trace) { radar_trace = "radar/" + trace; }
 

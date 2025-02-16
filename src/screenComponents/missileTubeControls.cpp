@@ -1,7 +1,6 @@
 #include "playerInfo.h"
 #include "spaceObjects/playerSpaceship.h"
 #include "missileTubeControls.h"
-#include "powerDamageIndicator.h"
 
 #include "gui/gui2_button.h"
 #include "gui/gui2_progressbar.h"
@@ -53,7 +52,8 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
             }
         });
         row.fire_button->setSize(200, 50);
-        (new GuiPowerDamageIndicator(row.fire_button, id + "_" + string(n) + "_PDI", SYS_MissileSystem, sp::Alignment::CenterRight))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+        row.damage_indicator = new GuiPowerDamageIndicator(row.fire_button, id + "_" + string(n) + "_PDI", SYS_MissileSystem, sp::Alignment::CenterRight);
+        row.damage_indicator->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         row.loading_bar = new GuiProgressbar(row.layout, id + "_" + string(n) + "_PROGRESS", 0, 1.0, 0);
         row.loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(200, 50);
         row.loading_label = new GuiLabel(row.loading_bar, id + "_" + string(n) + "_PROGRESS_LABEL", "Loading", 35);
@@ -82,6 +82,8 @@ GuiMissileTubeControls::GuiMissileTubeControls(GuiContainer* owner, string id)
     load_type_rows[MW_EMP].button->setIcon("gui/icons/weapon-emp.png");
     load_type_rows[MW_Nuke].button->setIcon("gui/icons/weapon-nuke.png");
     load_type_rows[MW_HVLI].button->setIcon("gui/icons/weapon-hvli.png");
+    load_type_rows[MW_LaserGreen].button->setIcon("gui/icons/system_beam.png");
+    load_type_rows[MW_LaserRed].button->setIcon("gui/icons/system_beam.png");
 
     docked_loading_bar= new GuiProgressbar(this, id + "_DOCKED_LOADING_PROGRESS", 0, 1.0, 0);
     docked_loading_bar->setColor(glm::u8vec4(128, 128, 128, 255))->setSize(200, 50);
@@ -106,8 +108,16 @@ void GuiMissileTubeControls::onUpdate()
         rows[n].layout->show();
         if (tube.canOnlyLoad(MW_Mine))
             rows[n].fire_button->setIcon("gui/icons/weapon-mine", sp::Alignment::CenterLeft);
+        else if (tube.canOnlyLoad(MW_LaserGreen) || tube.canOnlyLoad(MW_LaserRed))
+        {
+            rows[n].fire_button->setIcon("gui/icons/system_beam", sp::Alignment::CenterLeft);
+            rows[n].damage_indicator->setSystem(SYS_BeamWeapons);
+        }
         else
+        {
+            rows[n].damage_indicator->setSystem(SYS_MissileSystem);
             rows[n].fire_button->setIcon("gui/icons/missile", sp::Alignment::CenterLeft, tube.getDirection());
+        }
         if(tube.isEmpty())
         {
             rows[n].load_button->setEnable(tube.canLoad(load_type));
@@ -176,6 +186,8 @@ void GuiMissileTubeControls::onUpdate()
         selectMissileWeapon(MW_EMP);
     if (keys.weapons_select_hvli.getDown())
         selectMissileWeapon(MW_HVLI);
+    if (keys.weapons_select_laser.getDown())
+        selectMissileWeapon(MW_LaserGreen);
 
     for(int n=0; n<my_spaceship->weapon_tube_count; n++)
     {
@@ -183,7 +195,7 @@ void GuiMissileTubeControls::onUpdate()
             my_spaceship->commandLoadTube(n, load_type);
         if (keys.weapons_unload_tube[n].getDown())
             my_spaceship->commandUnloadTube(n);
-        if (keys.weapons_fire_tube[n].getDown())
+        if (keys.weapons_fire_tube[n].get())    // not getDown but get, to enable rapid fire
         {
             float target_angle = missile_target_angle;
             if (!manual_aim)

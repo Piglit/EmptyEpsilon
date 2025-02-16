@@ -46,7 +46,9 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 
     // Ship stats at top left 
     auto stats = new GuiElement(this, "STATS");
-    stats->setPosition(20, 100, sp::Alignment::TopLeft)->setSize(240, 220)->setAttribute("layout", "vertical");
+    stats->setPosition(20, 100, sp::Alignment::TopLeft)->setSize(240, 260)->setAttribute("layout", "vertical");
+    callsign_display = new GuiKeyValueDisplay(stats, "CALLSIGN_DISPLAY", 0.45, tr("Callsign"), "");
+    callsign_display->setIcon("gui/icons/station-relay")->setTextSize(20)->setSize(240, 40)->setMargins(0,0,0,-8);
     energy_display = new GuiKeyValueDisplay(stats, "ENERGY_DISPLAY", 0.45, tr("Energy"), "");
     energy_display->setIcon("gui/icons/energy")->setTextSize(20)->setSize(240, 40)->setMargins(0,0,0,-8);
     heading_display = new GuiKeyValueDisplay(stats, "HEADING_DISPLAY", 0.45, tr("Heading"), "");
@@ -148,6 +150,7 @@ void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
             camera_position.z = 0.0;
         }
 
+        callsign_display->setValue(string(my_spaceship->callsign));
         energy_display->setValue(string(int(my_spaceship->energy_level)));
         heading_display->setValue(string(my_spaceship->getHeading(), 1));
         float velocity = glm::length(my_spaceship->getVelocity()) / 1000 * 60;
@@ -156,7 +159,7 @@ void SingleFighterScreen::onDraw(sp::RenderTarget& renderer)
         warp_controls->setVisible(my_spaceship->has_warp_drive);
         jump_controls->setVisible(my_spaceship->has_jump_drive);
 
-        beam_info_box->setVisible(my_spaceship->hasSystem(SYS_BeamWeapons) && gameGlobalInfo->use_system_damage);
+        beam_info_box->setVisible(my_spaceship->hasSystem(SYS_BeamWeapons) && gameGlobalInfo->use_system_damage && (my_spaceship->beam_weapons[0].getArc() > 0.0f));
 
         hull_display->setValue(string(int(nearbyint(100.0f * my_spaceship->hull_strength / my_spaceship->hull_max))) + "%");
         if (my_spaceship->hull_strength < my_spaceship->hull_max / 4.0f)

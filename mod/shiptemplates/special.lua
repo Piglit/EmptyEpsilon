@@ -177,7 +177,7 @@ template:addDoor( 6, 1, false)
 template:addDoor( 4, 2, true)
 template:addDoor( 4, 1, true)
 --]]
-
+--[[
 template = ShipTemplate():setName("Converted Carrier"):setModel("Ender Battlecruiser"):setClass(_("class", "Exuari"), _("subclass", "Carrier")):setType("playership")
 template:setRadarTrace("battleship.png")
 template:setDescription(_("A captured Exuari carrier spacecraft."))
@@ -208,7 +208,7 @@ template:setWarpSpeed(500)
 template:setJumpDriveRange(5000, 90000)
 addSystemsHeavy(template)
 -- GM: adjust Hull, Shields, Beam-Ranges
-
+--]]
 
 template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Navigation")):setType("playership")
 template:setModel("cubesat")
@@ -255,4 +255,53 @@ template:setAutoCoolant(true)
 template:setAutoRepair(true)
 template:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"), _("class", "Cruiser"))
 addSystemsHeavy(template)
+
+template = ShipTemplate():setName("TIE-Pilot"):setClass(_("class", "Escape Pod"), _("subclass", "Pilot"))
+template:setType("playership")
+template:setModel("tie_pilot")
+template:setDescription([[It's an imperial pilot.]])
+template:setRadarTrace("pilot.png")
+template:setImpulseSoundFile("sfx/engine_fighter.wav")
+template:setHull(1)	-- asteroid makes 35 dmg
+template:setShields()
+--				speed, turn, accel, rev-speed, rev-accel
+template:setSpeed(1, 2, 1)
+template:setCombatManeuver(2, 2)
+template:setEnergyStorage(60)
+template:setLongRangeRadarRange(1000)
+template:setShortRangeRadarRange(1000)
+template:setCanScan(false)
+template:setCanHack(false)
+template:setCanDock(true)
+template:setCanCombatManeuver(false)
+template:setCanLaunchProbe(false)
+template:setCanSelfDestruct(false)
+template:setAutoCoolant(true)
+template:setAutoMissileReload(false)
+template:setAutoRepair(true)
+
+
+template = ShipTemplate():setName("ANT 615"):setLocaleName(_("ship", "ANT 615")):setModel("combatsat"):setClass(_("class", "Droid"),_("subclass", "Sentinel Droid"))
+template:setDescription(_("Military droid from the old days, back when there was a huge battle station in the system. Its original purpose was probably to take out other droids."))
+template:setRadarTrace("probe_droid.png")
+--                 Arc,Dir,Range,CycleTime, Dmg
+template:setBeam(0, 15, 5, 990.0, 4.0, 2)
+template:setBeam(1, 15,-5, 1000.0, 4.0, 2)
+
+template:setHull(30)
+--template:setShields(30)
+template:setSpeed(120, 30, 25)
+
+var = template:copy("Viper Droid"):setLocaleName(_("ship", "Viper Droid")):setModel("droid_viper"):setClass(_("class", "Droid"),_("subclass", "Viper"))
+var:setHull(12)
+
+
+var = template:copy("Debris")
+var:setLocaleName(_("ship", "ANT 615")):setModel("debris-cubesat"):setClass(_("class", "Debris"),_("subclass", ""))
+var:setDescription(_("Space debris floating around"))
+var:setRadarTrace("probe.png")
+var:setHull(12)
+var:setSpeed(0, 0, 0)
+var:setBeam(0, 0, 0, 0, 0, 0)
+var:setBeam(1, 0, 0, 0, 0, 0)
 

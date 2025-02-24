@@ -394,3 +394,79 @@ function addSystemsAtlasAlt(template)
     template:addDoor(7, 5, true);
 end
 
+function addSystemsTF(template)
+    template:addRoom(-2,0,7,1)
+    template:addRoom(-2,5,7,1)
+    template:addRoomSystem(0,2,1,1,"Impulse")
+    template:addRoomSystem(0,3,1,1,"Maneuver")
+    template:addRoomSystem(1,2,1,2,"Reactor")
+    template:addRoomSystem(2,2,1,1,"BeamWeapons")
+    template:addRoomSystem(2,3,1,1,"BeamWeapons")
+    template:addRoom(1,1,1,1)
+    template:addRoom(1,4,1,1)
+
+    template:addDoor(1,2, true)
+    template:addDoor(0,3, true)
+    template:addDoor(1,4, true)
+    template:addDoor(1,1, true)
+    template:addDoor(1,5, true)
+
+    template:addDoor(1,2, false)
+    template:addDoor(2,2, false)
+    template:addDoor(1,3, false)
+    template:addDoor(2,3, false)
+end
+
+function addSystemsTI(template)
+    template:addRoomSystem(0,2,1,1,"Impulse")
+    template:addRoomSystem(0,3,1,1,"Maneuver")
+    template:addRoomSystem(1,2,1,2,"Reactor")
+    template:addRoom(2,2,1,2)
+
+    template:addRoom(1,1,1,1)
+    template:addRoom(1,4,1,1)
+    template:addRoomSystem(1,0,2,1,"BeamWeapons")
+    template:addRoomSystem(1,5,2,1,"BeamWeapons")
+
+    template:addDoor(1,2, true)
+    template:addDoor(0,3, true)
+    template:addDoor(1,4, true)
+    template:addDoor(1,1, true)
+    template:addDoor(1,5, true)
+
+    template:addDoor(1,2, false)
+    template:addDoor(2,2, false)
+    template:addDoor(1,3, false)
+end
+
+function addSystemsTB(template)
+    template:addRoom(-2,0,6,1)
+    template:addRoom(-2,8,6,1)
+
+    template:addRoomSystem(0,2,1,1,"Maneuver")
+    template:addRoomSystem(0,3,1,1,"Impulse")
+    template:addRoomSystem(1,2,1,2,"Reactor")
+    template:addRoomSystem(2,2,1,2,"BeamWeapons")
+
+    template:addRoom(2,1,1,1)
+    template:addRoom(1,4,2,1)
+    template:addRoom(2,7,1,1)
+
+    template:addRoomSystem(1,5,2,2,"MissileSystem")
+    template:addRoomSystem(0,5,1,1,"Impulse")
+    template:addRoomSystem(0,6,1,1,"Maneuver")
+
+    template:addDoor(1,2, false)
+    template:addDoor(1,3, false)
+    template:addDoor(1,5, false)
+    template:addDoor(1,6, false)
+    template:addDoor(2,3, false)
+
+    template:addDoor(2,1, true)
+    template:addDoor(2,2, true)
+    template:addDoor(2,4, true)
+    template:addDoor(2,5, true)
+    template:addDoor(2,7, true)
+    template:addDoor(2,8, true)
+end
+

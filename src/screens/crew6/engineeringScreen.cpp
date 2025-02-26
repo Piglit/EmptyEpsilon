@@ -304,12 +304,12 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
                 break;
             case SYS_Maneuver:
                 addSystemEffect(tr("Turning speed"), toNearbyIntString(effectiveness * 100) + "%");
-                if (my_spaceship->combat_maneuver_boost_speed > 0.0f || my_spaceship->combat_maneuver_strafe_speed)
+                if (my_spaceship->can_combat_maneuver && (my_spaceship->combat_maneuver_boost_speed > 0.0f || my_spaceship->combat_maneuver_strafe_speed))
                     addSystemEffect(tr("Combat recharge rate"), toNearbyIntString(((my_spaceship->getSystemEffectiveness(SYS_Maneuver) + my_spaceship->getSystemEffectiveness(SYS_Impulse)) / 2.0f) * 100) + "%");
                 break;
             case SYS_Impulse:
                 addSystemEffect(tr("Impulse speed"), toNearbyIntString(effectiveness * 100) + "%");
-                if (my_spaceship->combat_maneuver_boost_speed > 0.0f || my_spaceship->combat_maneuver_strafe_speed)
+                if (my_spaceship->can_combat_maneuver && (my_spaceship->combat_maneuver_boost_speed > 0.0f || my_spaceship->combat_maneuver_strafe_speed))
                     addSystemEffect(tr("Combat recharge rate"), toNearbyIntString(((my_spaceship->getSystemEffectiveness(SYS_Maneuver) + my_spaceship->getSystemEffectiveness(SYS_Impulse)) / 2.0f) * 100) + "%");
                 break;
             case SYS_Warp:

@@ -33,12 +33,15 @@ enum ECrewPosition
 class PlayerInfo;
 class PlayerSpaceship;
 class RenderLayer;
+class CrewStationScreen;
 extern P<PlayerInfo> my_player_info;
 extern P<PlayerSpaceship> my_spaceship;
 extern PVector<PlayerInfo> player_info_list;
 
 class PlayerInfo : public MultiplayerObject
 {
+private:
+    CrewStationScreen* screen;
 public:
     int32_t client_id;
 
@@ -49,6 +52,7 @@ public:
     string name;
     string last_ship_password;
     EPlayerShipType player_ship_type = PST_Ship;
+
 
     PlayerInfo();
 
@@ -64,6 +68,7 @@ public:
     virtual void onReceiveClientCommand(int32_t client_id, sp::io::DataBuffer& packet) override;
 
     void spawnUI(int monitor_index, RenderLayer* render_layer);
+    void spawnUI(int monitor_index, RenderLayer* render_layer, ECrewPosition selected_crew_position);
 };
 
 REGISTER_MULTIPLAYER_ENUM(ECrewPosition);

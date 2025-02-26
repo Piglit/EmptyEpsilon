@@ -172,6 +172,13 @@ void PlayerInfo::onReceiveClientCommand(int32_t client_id, sp::io::DataBuffer& p
     }
 }
 
+void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer, ECrewPosition selected_crew_position)
+{
+    spawnUI(monitor_index, render_layer);
+    if (screen)
+        screen->showTab(screen->findTab(getCrewPositionName(selected_crew_position)));
+}
+
 void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer)
 {
     if (my_player_info->isOnlyMainScreen(monitor_index))
@@ -180,7 +187,7 @@ void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer)
     }
     else
     {
-        CrewStationScreen* screen = new CrewStationScreen(render_layer, bool(main_screen & (1 << monitor_index)));
+        screen = new CrewStationScreen(render_layer, bool(main_screen & (1 << monitor_index)));
         auto container = screen->getTabContainer();
 
         //Crew 6/5

@@ -5,6 +5,6 @@ map_ambush = {
 }
 
 function map_ambush:init()
-	createRandomAlongArc(Nebula, 5, self.center_x, self.center_y, 5000, 0, 40, 2500)
-	createRandomAlongArc(Asteroid, 100, self.center_x, self.center_y, 5000, 60, 340, 1000)
+	createRandomAlongArc(Nebula, 5, self.center_x, self.center_y, 15000, 20, 140, 2500)
+	createRandomAlongArc(Asteroid, 100, self.center_x, self.center_y, 20000, 200, 340, 1000)
 end

@@ -2,7 +2,7 @@
 -- Description: A squadron of TIE-Pilots collect some defunct droids from an asteroid belt to train their flight abilities.
 -- Type: Skystrike
 
-TEST = true
+TEST = false
 require("utils.lua")
 require("plot_manager.lua")
 

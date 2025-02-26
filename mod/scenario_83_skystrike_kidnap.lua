@@ -32,14 +32,19 @@ end
 ss_kidnapped = {}
 
 function ss_kidnapped:resetCarriers()
-	self.carrier:setPosition(0,60000):setRotation(180):commandTargetRotation(180)
-	self.freighter:setPosition(10000,60000):setRotation(180):commandTargetRotation(180)
+	self.carrier:setPosition(50000,0):setRotation(180):commandTargetRotation(180)
+	self.station:setPosition(0,20000)
 end
 
 function ss_kidnapped:init()
-	self.carrier = fighter_utils:spawnCarrier():setFaction("Team Red")
-	self.freighter = fighter_utils:spawnFreighter()
+	self.station = fighter_utils:spawnCarrierStation()
+	self.carrier = fighter_utils:spawnCarrier()
+	fighter_utils.carriers["Team Red"] = self.carrier
+	fighter_utils.carriers["Team Blue"] = self.station
+	self.carrier:setFaction("Team Red")
+	CpuShip():setTemplate("GR-75"):setPosition(48000,-1000):setRotation(180):setFaction("Team Red"):orderFlyTowards(-48000, -1000):setScanStateByFaction("Team Red", "fullscan")
 	self:resetCarriers()
+	self.carrier:commandImpulse(0.5)
 end
 
 

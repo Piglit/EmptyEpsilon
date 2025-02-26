@@ -2,7 +2,7 @@
 -- Description: A TIE-squadron supports the boarding of a freighter.
 -- Type: Skystrike
 
-TEST = true
+TEST = false
 require("utils.lua")
 require("plot_manager.lua")
 
@@ -31,16 +31,17 @@ end
 ss_boarding = {}
 
 function ss_boarding:resetCarriers()
-	self.carrier:setPosition(0,60000):setRotation(180):commandTargetRotation(180)
-	self.freighter:setPosition(10000,60000):setRotation(180):commandTargetRotation(180)
+	self.carrier:setPosition(0,80000):setRotation(-90):commandTargetRotation(-90)
+	self.freighter:setPosition(-11000,60000):setRotation(180):commandTargetRotation(180)
 
 end
 
 function ss_boarding:init()
-	SpaceStation():setTemplate("Medium Station"):setCallSign("Skystrike Academy"):setFaction("Imperial"):setPosition(10000,60000)
+	SpaceStation():setTemplate("Medium Station"):setCallSign("Skystrike Academy"):setFaction("Imperial"):setPosition(-10000,60000)
 	self.carrier = fighter_utils:spawnCarrier()
 	self.freighter = fighter_utils:spawnFreighter()
 	self:resetCarriers()
+	self.probe_countdown = 0
 end
 
 function ss_boarding:initTest()
@@ -60,5 +61,18 @@ function changeLaserColorToRed(ship)
 	ship:setWeaponStorageMax("laser_red", 99)
 	ship:setWeaponStorage("laser_green", 0)
 	ship:setWeaponStorage("laser_red", 99)
+end
+
+function ss_boarding:update(delta)
+	-- restore probes over time
+	if self.carrier ~= nil and self.carrier:isValid() and self.carrier:getScanProbeCount() < self.carrier:getMaxScanProbeCount() then
+		self.probe_countdown = self.probe_countdown - delta
+		if self.probe_countdown < 0 then
+			self.carrier:setScanProbeCount(self.carrier:getScanProbeCount()+1)
+			self.probe_countdown = 60
+		end
+	else
+		self.probe_countdown = 60
+	end
 end
 

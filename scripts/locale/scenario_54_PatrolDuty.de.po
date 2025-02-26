@@ -169,46 +169,68 @@ msgid "Thirty minute time limit"
 msgstr "Zeitlimit: 30 Minuten"
 
 #: scripts/scenario_54_PatrolDuty.lua:155
+#: scripts/scenario_54_PatrolDuty.lua:6591
+#: scripts/scenario_54_PatrolDuty.lua:7285
+#: scripts/scenario_54_PatrolDuty.lua:8112
 msgctxt "buttonGM"
 msgid "Start plot 2 sick Kojak"
 msgstr "Zu Teil 2: Kojak krank"
 
 #: scripts/scenario_54_PatrolDuty.lua:156
+#: scripts/scenario_54_PatrolDuty.lua:6615
+#: scripts/scenario_54_PatrolDuty.lua:7372
+#: scripts/scenario_54_PatrolDuty.lua:7392
+#: scripts/scenario_54_PatrolDuty.lua:7416
+#: scripts/scenario_54_PatrolDuty.lua:8118
 msgctxt "buttonGM"
 msgid "Start p 3 McNabbit ride"
 msgstr "Teil 3: McNabbits Taxi"
 
 #: scripts/scenario_54_PatrolDuty.lua:157
+#: scripts/scenario_54_PatrolDuty.lua:6631
+#: scripts/scenario_54_PatrolDuty.lua:8124
 msgctxt "buttonGM"
 msgid "St p4 Lisbon's stowaway"
 msgstr "Zu Teil 4: Kind finden"
 
 #: scripts/scenario_54_PatrolDuty.lua:158
+#: scripts/scenario_54_PatrolDuty.lua:6638
+#: scripts/scenario_54_PatrolDuty.lua:8129
 msgctxt "buttonGM"
 msgid "Start plot 5"
 msgstr "Zu Teil 5"
 
 #: scripts/scenario_54_PatrolDuty.lua:159
+#: scripts/scenario_54_PatrolDuty.lua:6599
+#: scripts/scenario_54_PatrolDuty.lua:8134
 msgctxt "buttonGM"
 msgid "Strt plot 8 Sheila dies"
 msgstr "Zu Teil 8: Sheila stirbt"
 
 #: scripts/scenario_54_PatrolDuty.lua:160
+#: scripts/scenario_54_PatrolDuty.lua:6607
+#: scripts/scenario_54_PatrolDuty.lua:8139
 msgctxt "buttonGM"
 msgid "Start plot 9 ambush"
 msgstr "Zu Teil 9: Hinterhalt"
 
 #: scripts/scenario_54_PatrolDuty.lua:161
+#: scripts/scenario_54_PatrolDuty.lua:6623
+#: scripts/scenario_54_PatrolDuty.lua:8144
 msgctxt "buttonGM"
 msgid "Start plot 10 ambush"
 msgstr "Zu Teil 10: Hinterhalt"
 
 #: scripts/scenario_54_PatrolDuty.lua:162
+#: scripts/scenario_54_PatrolDuty.lua:6765
+#: scripts/scenario_54_PatrolDuty.lua:8154
 msgctxt "buttonGM"
 msgid "Skip to defend U.P."
 msgstr "Verteidigung von U.P."
 
 #: scripts/scenario_54_PatrolDuty.lua:163
+#: scripts/scenario_54_PatrolDuty.lua:6899
+#: scripts/scenario_54_PatrolDuty.lua:8164
 msgctxt "buttonGM"
 msgid "Skip to destroy S.C."
 msgstr "Zerstörung von S.C."

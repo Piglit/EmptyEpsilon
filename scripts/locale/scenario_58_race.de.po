@@ -477,8 +477,6 @@ msgstr "Zehnter Platz"
 
 #: scripts/scenario_58_race.lua:715
 #, lua-format
-#| msgctxt "trade-comms"
-#| msgid "     %s: %i\n"
 msgctxt "msgGM"
 msgid ""
 "%s\n"
@@ -1980,8 +1978,6 @@ msgstr "Rennen abgebrochen. Niemand ist an der Startlinie erschienen"
 
 #: scripts/scenario_58_race.lua:3516
 #, lua-format
-#| msgctxt "-tabHelms&Tactical&Singlepilot"
-#| msgid "%s in %s"
 msgctxt "race-tabHelms&Tactical&Singlepilot"
 msgid "%s in %s"
 msgstr "%s in %s"

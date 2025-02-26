@@ -515,7 +515,7 @@ void ScienceScreen::onUpdate()
                 // object, and it remains in radar range, continue to set it.
                 if (current_found &&
                     glm::length(obj->getPosition() - my_spaceship->getPosition()) < science_radar->getDistance() &&
-                    obj->canBeScannedBy(my_spaceship))
+                    obj->canBeSelectedBy(my_spaceship))
                 {
                     targets.set(obj);
                     return;
@@ -531,7 +531,7 @@ void ScienceScreen::onUpdate()
                     continue;
 
                 if (glm::length(obj->getPosition() - my_spaceship->getPosition()) < science_radar->getDistance() &&
-                    obj->canBeScannedBy(my_spaceship))
+                    obj->canBeSelectedBy(my_spaceship))
                 {
                     targets.set(obj);
                     return;

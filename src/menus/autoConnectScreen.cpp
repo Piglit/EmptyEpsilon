@@ -20,7 +20,7 @@ AutoConnectScreen::AutoConnectScreen(string crew_positions_string, bool control_
         scanner->scanLocalNetwork();
     }
 
-    status_label = new GuiLabel(this, "STATUS", "Searching for server...", 50);
+    status_label = new GuiLabel(this, "STATUS", "Searching for connection...", 50);
     status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
 
     string first_position_name = "Error";
@@ -102,12 +102,12 @@ void AutoConnectScreen::update(float delta)
             new GameClient(VERSION_NUMBER, autoconnect_address);
             scanner->destroy();
         } else if (serverList.size() > 0) {
-            status_label->setText("Found server " + serverList[0].name);
+            status_label->setText("Found connection" + serverList[0].name);
             connect_to_address = serverList[0].address;
             new GameClient(VERSION_NUMBER, serverList[0].address);
             scanner->destroy();
         } else {
-            status_label->setText("Searching for server...");
+            status_label->setText("Searching for connection...");
         }
     }else{
         switch(game_client->getStatus())
@@ -156,12 +156,12 @@ void AutoConnectScreen::update(float delta)
                                 uint8_t window_flags = PreferencesManager::get("ship_window_flags", "1").toInt();
                                 new WindowScreen(getRenderLayer(), window_degree, window_flags);
                             } else{
-                                my_player_info->spawnUI(0, getRenderLayer());
+                                my_player_info->spawnUI(0, getRenderLayer(), first_crew_position);
                             }
                         }
                     }
                 }else{
-                    status_label->setText("Connected, waiting for game data...");
+                    status_label->setText("Connected, waiting for data...");
                 }
             }
             break;

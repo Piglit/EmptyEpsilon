@@ -41,7 +41,7 @@ msgstr ""
 "30u erfassen, wobei das Schiff in der Radarmitte dargestellt wird. Dieses "
 "Radar erlaubt dir, schnell entfernte Objekte zu identifizieren."
 
-#: scripts/tutorial/00_all.lua:36
+#: scripts/tutorial/00_all.lua:36 scripts/tutorial/00_all.lua:482
 msgid ""
 "This is an asteroid. Flying into an asteroid will damage your ship, so avoid "
 "hitting them."
@@ -442,7 +442,7 @@ msgstr ""
 "ausschließlich Schilde, und sind daher perfekt um Schiffe mit starken "
 "Schilden zu schwächen."
 
-#: scripts/tutorial/00_all.lua:239
+#: scripts/tutorial/00_all.lua:239 scripts/tutorial/00_all.lua:583
 msgid ""
 "Welcome to engineering.\n"
 "Engineering is split into two parts. The top part shows your ship's "
@@ -567,7 +567,7 @@ msgstr ""
 "arbeitet schlechter wenn es Schaden nimmt. Deine Aufgabe ist es, die "
 "wichtigen System so gut wie möglich am laufen zu halten."
 
-#: scripts/tutorial/00_all.lua:273
+#: scripts/tutorial/00_all.lua:273 scripts/tutorial/00_all.lua:619
 msgid ""
 "Reactor:\n"
 "\n"
@@ -579,7 +579,7 @@ msgstr ""
 "Der Reaktor erzeugt Energie. Wenn du die Leistung des Reaktors erhöhst, wird "
 "die Energieproduktion gesteigert."
 
-#: scripts/tutorial/00_all.lua:276
+#: scripts/tutorial/00_all.lua:276 scripts/tutorial/00_all.lua:622
 msgid ""
 "Beam Weapons:\n"
 "\n"
@@ -591,7 +591,7 @@ msgstr ""
 "\n"
 "Mehr Energie für die Laser erhöht ihre Feuerrate und damit auch den "
 "verursachenden Schaden.\n"
-"Beachte: Jeder abgefeuerte Strahl erhöht zusätzlich die Wärme des Systems."
+"Beachte: Jeder abgefeuerte Schuss erhöht zusätzlich die Wärme des Systems."
 
 #: scripts/tutorial/00_all.lua:280
 msgid ""
@@ -610,9 +610,9 @@ msgid ""
 "Increasing power to the maneuvering system allows the ship to turn faster. "
 "It also increases the recharge rate for the combat maneuvering system."
 msgstr ""
-"Manövrierdüsen:\n"
+"Manövriertriebwerke:\n"
 "\n"
-"Eine höhere Leistung der Manövrierdüsen lässt das Schiff sich schneller "
+"Eine höhere Leistung der Manövriertriebwerke lässt das Schiff sich schneller "
 "drehen. Außerdem reduziert sich die Aufladezeit des Flugmanöversystems."
 
 #: scripts/tutorial/00_all.lua:286
@@ -660,7 +660,7 @@ msgstr ""
 "Mehr Leistung auf den Schilden reduziert ihre Aufladezeit, sowie die "
 "Schwächung der Schilde bei einem Treffer."
 
-#: scripts/tutorial/00_all.lua:298
+#: scripts/tutorial/00_all.lua:298 scripts/tutorial/00_all.lua:633
 msgid ""
 "This concludes the overview of the engineering station. Be sure to keep your "
 "ship running in top condition!"
@@ -690,7 +690,7 @@ msgid ""
 "Heading and distance are of particular importance, as without these, the "
 "helms officer will be jumping in the dark."
 msgstr ""
-"Auf diesem Radar kannst du Objekte anwähle und Informationen darüber "
+"Auf diesem Radar kannst du Objekte anwählen und Informationen darüber "
 "erhalten.\n"
 "Ich habe ein freundlich gesinntes Schiff und eine Station hinzugefügt, "
 "welche du untersuchen kannst\n"
@@ -713,6 +713,7 @@ msgstr ""
 "Scanne nun das Schiff."
 
 #: scripts/tutorial/00_all.lua:319 scripts/tutorial/00_all.lua:405
+#: scripts/tutorial/00_all.lua:657
 msgid ""
 "Good. Notice that you now know this ship is unfriendly. It might have been a "
 "friendly or neutral ship as well, but until you scanned it, you do not know."
@@ -746,6 +747,7 @@ msgstr ""
 "nötig ist, um nicht zu viel Zeit zu verlieren."
 
 #: scripts/tutorial/00_all.lua:327 scripts/tutorial/00_all.lua:413
+#: scripts/tutorial/00_all.lua:665
 msgid ""
 "Next to the long-range radar, the science station can also access the "
 "science database.\n"
@@ -923,3 +925,489 @@ msgstr ""
 "Hier endet das Tutorial. Dies Grundlagen sind hiermit abgedeckt, jedoch hält "
 "das Spiel auch noch erweiterte Funktionen bereit, welche du nach und nach "
 "entdecken wirst."
+
+#: scripts/tutorial/00_all.lua:453
+msgid ""
+"Welcome to the TIE-Fighter tutorial.\n"
+"Note that this tutorial is designed to give you a quick overview of the "
+"basic functions of your TIE, but does not cover every single aspect.\n"
+"\n"
+"Press next ("
+msgstr ""
+"Willkommen, Pilot:in im TIE-Jäger Tutorial.\n"
+"Diese Einführung ist dafür gedacht, Pilot:innen einen kurzen Überblick über "
+"die Basis-Funktionen eines TIEs zu geben, aber nicht jeden Aspekt "
+"abzudecken.\n"
+"\n"
+"Drücke weiter ("
+
+#: scripts/tutorial/00_all.lua:456
+msgid ""
+") to continue.\n"
+"To abort the tutorial at any time press "
+msgstr ""
+") um fortzufahren.\n"
+"Um das Tutorial abzubrechen drücke "
+
+#: scripts/tutorial/00_all.lua:467
+msgid ""
+"This concludes the tutorial. While we have covered the basics, there are "
+"more advanced features that you might discover.\n"
+"\n"
+"After you press next, your controls will be transferred to your actual ship. "
+"Contact flight control and let them know you are on standby."
+msgstr ""
+"Hier endet die Einführung. Die Grundlagen sind hiermit abgedeckt, weitere "
+"Funktionen und Taktiken können auf den kommenden Manövern erlernt werden.\n"
+"\n"
+"Drücke auf Weiter, um auf deinen Jäger für das kommende Manöver transferiert "
+"zu werden, Pilot:in. Kontaktiere die Manöverleitung und lasse sie wissen, "
+"dass du bereit bist."
+
+#: scripts/tutorial/00_all.lua:476
+msgid ""
+"This is your cockpit whith its controls and display panels.\n"
+"The short-range radar on the right side allows you to quickly identify "
+"nearby objects."
+msgstr ""
+"Dies ist das Cockpit mit seinen Steuerelementen und Anzeigen.\n"
+"Das Kurzstreckenradar auf der rechten Seite erlaubt es, nahe Objekte zu "
+"identifizieren."
+
+#: scripts/tutorial/00_all.lua:480
+msgid ""
+"Your ship is depicted at the radar's center. This radar can detect objects "
+"up to 5u from your ship."
+msgstr ""
+"Dein Schiff wird im Zentrum des Radars angezeigt. Das Radar kann Objekte "
+"innerhalb von 5u um das Schiff entdecken."
+
+#: scripts/tutorial/00_all.lua:485
+msgid ""
+"The white dot is a mine. When you move near a mine, it explodes with a "
+"powerful 1u-radius blast. Striking a mine will surely destroy your ship."
+msgstr ""
+"Der weiße Punkt ist eine Mine. Wenn sich etwas in die Nähe einer Mine "
+"bewegt, explodiert sie in einer starken Explosion mit einem Radius von 1u. "
+"Das Auslösen einer Mine kann leicht das Schiff zerstören."
+
+#: scripts/tutorial/00_all.lua:490
+msgid ""
+"These are stations. Stations can be several different sizes and belong to "
+"different factions. Their color on the radar indicates whether the station "
+"is friendly (green), neutral (light blue), or hostile (red)."
+msgstr ""
+"Dies sind Raumstationen. Raumstationen können in verschiedenen Größen "
+"vorkommen und unterschiedlichen Fraktionen angehören. Die Farbe des Symbols "
+"auf dem Radar weist darauf hin, ob die Station freundlich (grün), neutral "
+"(hellblau) oder feindlich (rot) gesinnt ist."
+
+#: scripts/tutorial/00_all.lua:495
+msgid ""
+"The rainbow-colored cloud is a nebula. Nebulae block long-range sensors, "
+"preventing larger ships from detecting what's inside of them at distances of "
+"more than 5u. Sensors also cannot detect objects behind nebulae."
+msgstr ""
+"Die ist eine bunte Gaswolke. Gaswolken blockieren Langstrecken-Sensoren, und "
+"hindern größere Schiffe daran zu erkennen, was sich im Inneren befindet, "
+"solange es mehr als 5u von ihnen entfernt ist. Außerdem können die Sensoren "
+"keine Objekte hinter Gaswolken entdecken."
+
+#: scripts/tutorial/00_all.lua:501
+msgid ""
+"Finally, these are ships. Their attitude toward you is reflected by the same "
+"colors on your radar as stations. In addition to green, blue, and red, ships "
+"of unknown attitude appear as gray objects on the radar.\n"
+"\n"
+"On your radar you can also see the range of their weapons (the red arcs) and "
+"the status of their shields (the blue circles)"
+msgstr ""
+"Zu guter Letzt: dies sind Schiffe. Ihre Gesinnung wird durch die selben "
+"Farben dargestellt wie bei Raumstationen. Zusätzlich zu grün, hellblau und "
+"rot erscheinen Schiffe unbekannter Gesinnung als graue Objekte.\n"
+"\n"
+"Auf dem Radar sind außerdem ihre Waffenreichweiten (die roten Bögen) und der "
+"Status ihrer Schilde (die blauen Kreise) abzulesen."
+
+#: scripts/tutorial/00_all.lua:519
+msgid "Let's look at the more active instruments in your cockpit."
+msgstr "Werfen wir einen Blick auf die aktiveren Instrumente im Cockpit."
+
+#: scripts/tutorial/00_all.lua:521
+msgid ""
+"As fighter pilot, you command your ship's movement in space.\n"
+"Your primary controls are your impulse engines and maneuvering thrusters.\n"
+"\n"
+"Raise your impulse level to 100% to fly forward right now. ("
+msgstr ""
+"Als Raumjägerpilot:in hast du die Kontrolle über die Bewegungen deines "
+"Schiffs im Weltraum.\n"
+"Die Primärsteuerung stellen der Impulsantrieb und die Manövrierdüsen dar.\n"
+"\n"
+"Setze den Impulsantrieb auf 100%, um das Schiff vorwärts zu bewegen. ("
+
+#: scripts/tutorial/00_all.lua:526
+msgid ""
+"Good. You now know how to move forward.\n"
+"\n"
+"I've disabled your impulse engine for now. Next, let's rotate your ship.\n"
+"Try rotating to heading 200 right now. ("
+msgstr ""
+"Gut.\n"
+"\n"
+"Ich habe fürs erste den Impulsantrieb deaktiviert. Als nächstes drehen wir "
+"das Schiff.\n"
+"Versuche, das Schiff in Richtung 200 Grad auszurichten. ("
+
+#: scripts/tutorial/00_all.lua:532
+msgid ""
+"Excellent!\n"
+"\n"
+"Next up: docking. To dock, maneuver within 1u of a station and press the "
+"\"Request Dock\" button ("
+msgstr ""
+"Ausgezeichnet!\n"
+"\n"
+"Als nächstes: Docken. Um Anzudocken, manövriere dein Schiff innerhalb von 1u "
+"von der Station und drücke auf \"Andocken\" ("
+
+#: scripts/tutorial/00_all.lua:534
+msgid ""
+"), from which point docking is fully automated.\n"
+"Maneuver to the nearby station and request permission to dock."
+msgstr ""
+"); danach ist der Andockvorgang voll automatisiert.\n"
+"Manövriere zur nahen Station und führe den Dockvorgang durch."
+
+#: scripts/tutorial/00_all.lua:536
+msgid ""
+"Now that you are docked, your movement is locked. There is nothing else you "
+"can do but undock, so do that now. ("
+msgstr ""
+"Da wir nun angedockt sind, ist die Bewegung des Schiffes nicht möglich. Als "
+"Steuerperson gibt es nichts was du im Moment tun kannst - außer abzudocken. "
+"Daher wähle nun \"abdocken\". ("
+
+#: scripts/tutorial/00_all.lua:538
+msgid ""
+"Ok, there are just a few more things that you need to know.\n"
+"As fighter pilot, you are responsible for firing with laser weapons on your "
+"target."
+msgstr ""
+"Als Jägerpilot:in ist es nicht nur deine Aufgabe zu fliegen, sondern auch "
+"mit den Laserwaffen auf ein Ziel zu feuern."
+
+#: scripts/tutorial/00_all.lua:556
+msgid "Now fire your lasers at the enemy ship! ("
+msgstr "Feuere jetzt mit den Lasern auf das feindliche Schiff! ("
+
+#: scripts/tutorial/00_all.lua:561
+msgid ""
+"Your most fundamental task is to get your enemy in the range of your ship's "
+"weapons. Attack that fighter you can see on your radar with your laser "
+"weapons.\n"
+"\n"
+"If you are having trouble to see the target on your screen, select it on "
+"your radar ("
+msgstr ""
+"Es ist wichtig, den Feind in Reichweite deiner Waffen zu bekommen.\n"
+"Greife nun den Jäger, den du auf dem Radar sehen kannst mit deinen Lasern "
+"an.\n"
+"Falls du Schwierigkeiten hast das Ziel auf dem Schirm zu erkennen, wähle es "
+"auf dem Radar aus ("
+
+#: scripts/tutorial/00_all.lua:563
+msgid ""
+").\n"
+"Notice that your laser weapons have a range of 2u."
+msgstr "). Beachte, dass deine Laserwaffen eine Reichweite von 2u haben."
+
+#: scripts/tutorial/00_all.lua:566
+msgid ""
+"You can hold the fire-button down for rapid fire.\n"
+"\n"
+"Take a look on your radar while firing, when the target is hit, the blue "
+"circle around it flickers red.\n"
+"\n"
+"Now destroy that target!"
+msgstr ""
+"Du kannst den Feuer-Knopf gedrückt halten, um ununterbrochen zu feuern.\n"
+"\n"
+"Beobachte, wie der blaue Kreis um den Gegner auf dem Radar blinkt, wenn das "
+"Ziel getroffen wird.\n"
+"\n"
+"Ok, zerstöre nun den Raumjäger!"
+
+#: scripts/tutorial/00_all.lua:571
+msgid ""
+"Aggression is not always the solution, but boy, it is fun!\n"
+"\n"
+"Now we will take a look at the engineering console. To switch to the "
+"engineering console press "
+msgstr ""
+"Aggression ist nicht immer die Lösung, aber im Namen des Imperiums meist "
+"gerechtfertigt.\n"
+"\n"
+"Als nächstes werden wir einen Blick auf die Maschinenraumkonsole werfen.\n"
+"Um zur Maschinenraumkonsole zu wechseln drücke "
+
+#: scripts/tutorial/00_all.lua:587
+msgid ""
+"First, we will explain your control over your ship's systems.\n"
+"Each row on the bottom area of the screen represents one of your ship's "
+"system, and each system has a damage level, heat level, power level, and "
+"coolant level."
+msgstr ""
+"Zuerst befassen wir uns mit der Kontrolle der Systeme.\n"
+"Jede Zeile der unteren Hälfte repräsentiert eines der Schiffssysteme; jedes "
+"System hat folgende Werte: Zustand, Wärmegrad, Leistung und Kühlmittelstand."
+
+#: scripts/tutorial/00_all.lua:590
+msgid "You can cycle through the systems with "
+msgstr "Du kannst durch die Schiffsysteme mit "
+
+#: scripts/tutorial/00_all.lua:590 scripts/tutorial/00_all.lua:659
+msgid " and "
+msgstr " und "
+
+#: scripts/tutorial/00_all.lua:590
+msgid ""
+". This will show you additional details of that systems performance.\n"
+"\n"
+"Select maneuvering now."
+msgstr ""
+" wechseln. Dabei werden zusätzliche Details für jedes System angezeigt.\n"
+"\n"
+"Wählen nun die Manövriertriebwerke aus."
+
+#: scripts/tutorial/00_all.lua:594
+msgid ""
+"You can manage each system's power level independently. Adding power to a "
+"system makes it perform more effectively, but also generates more heat, and "
+"thus requires coolant to prevent it from overheating and damaging the "
+"system.\n"
+"\n"
+"Maximize the power to the maneuvering system. ("
+msgstr ""
+"Nächster Schritt: Leistungswerte.\n"
+"Du kannst die Leistung für jedes System getrennt einstellen. Wenn du die "
+"Leistung eines System erhöhst, arbeitet es effektiver - aber es produziert "
+"auch mehr Wärme, und benötigt daher Kühlung, damit es nicht überhitzt und "
+"beschädigt wird.\n"
+"\n"
+"Erhöhe nun die Leistung der Manövriertriebwerke auf Maximum. ("
+
+#: scripts/tutorial/00_all.lua:597
+msgid ""
+"The added power increases the amount of heat in the system.\n"
+"To prevent damage, your ship is automatically putting coolant in your "
+"maneuvering system.\n"
+"Overpower the system until it overheats."
+msgstr ""
+"Die zusätzliche Leistung wird den Wärmegrad des Systems erhöhen.\n"
+"Um Schaden zu vermeiden wird dein Schiff automatisch Kühlmittel zu den "
+"Manövriertriebwerken leiten.\n"
+"Bei maximaler Leistung reicht das Kühlmittel nicht aus, um das System vom "
+"Überhitzen zu bewahren.\n"
+"Warte nun, bis das System überhitzt."
+
+#: scripts/tutorial/00_all.lua:602
+msgid ""
+"Note that as the system overheats, it takes damage. Because the system is "
+"damaged, it functions less effectively.\n"
+"\n"
+"Systems can also take damage when your ship is hit."
+msgstr ""
+"Nun da das System überhitzt, nimmt es Schaden. Dadurch arbeitet es weniger "
+"effizient.\n"
+"\n"
+"Systeme können ebenfalls beschädigt werden, wenn das Schiff getroffen wird."
+
+#: scripts/tutorial/00_all.lua:607
+msgid ""
+"The maneuvering system is damaged, as indicated by the color of this room's "
+"outline."
+msgstr ""
+"Die Manövriertriebwerke sind beschädigt, wie an der Hintergrundfarbe des "
+"entsprechenden Raumes zu erkennen ist."
+
+#: scripts/tutorial/00_all.lua:613
+msgid ""
+"I've also overheated the weapons and impulse systems. As before, the "
+"system's coolant level is increased to mitigate the effect. Note that the "
+"maneuvering system's coolant level is automatically reduced to allow for "
+"coolant in the impulse and beam weapons system.\n"
+"\n"
+"This is because you have a limited amount of coolant available to distribute "
+"this across your ship's systems."
+msgstr ""
+"Ich habe nun das Laser- und Impulsantriebssystem überhitzt. Wie zuvor passt "
+"das Schiff den Kühlmittelstand an um dem entgegenzuwirken.\n"
+"Der Kühlmittelstand der Manövriertriebwerke wurde automatisch reduziert, "
+"damit Kühlflüssigkeit zu den anderen Systemen gleitet werden kann.\n"
+"Dies liegt daran, dass nur eine begrenzte Menge an Kühlflüssigkeit zur "
+"Verfügung steht, die vom Schiff auf die einzelnen Systeme verteilt wird."
+
+#: scripts/tutorial/00_all.lua:617
+msgid ""
+"Good. Now you know your most important tasks. Next, we'll go over each "
+"system's function in detail.\n"
+"Remember, each system performs better with more power, but performs less "
+"well when damaged. It is your job to keep vital systems running as well as "
+"you can."
+msgstr ""
+"Ok. Du kennst nun die wichtigsten Funktionen der Maschinenraumkonsole. Als "
+"nächstes gehen wir etwas mehr ins Detail.\n"
+"Denke daran: Ein System mit mehr Leistung arbeitet auch besser, aber "
+"arbeitet schlechter wenn es Schaden nimmt.\n"
+"Deine Aufgabe hier ist es, die Systeme, die du benötigst mit genug Leistung "
+"zu versorgen, ohne dass sie überhitzen und Schaden nehmen."
+
+#: scripts/tutorial/00_all.lua:626
+msgid ""
+"Maneuvering:\n"
+"\n"
+"Increasing power to the maneuvering system allows the ship to turn faster."
+msgstr ""
+"Manövriertriebwerke:\n"
+"\n"
+"Eine höhere Leistung der Manövriertriebwerke lässt das Schiff sich schneller "
+"drehen."
+
+#: scripts/tutorial/00_all.lua:629
+msgid ""
+"Impulse Engines:\n"
+"\n"
+"Adding power to the impulse engines increases your flight speed."
+msgstr ""
+"Impulsantrieb:\n"
+"\n"
+"Mehr Leistung in diesem System erhöht die Fluggeschwindigkeit."
+
+#: scripts/tutorial/00_all.lua:643
+msgid ""
+"Welcome, operations officer.\n"
+"To switch from your cockpit to the operation console later press "
+msgstr ""
+"Willkommen auf der OPS-Konsole!\n"
+"Um später von Cockpit auf diese Konsole zu wechseln drücke "
+
+#: scripts/tutorial/00_all.lua:644
+msgid ""
+".\n"
+"\n"
+"You are the eyes of the squadron. Your job is to supply the other pilotes "
+"with information. From this station, you can detect and scan objects at a "
+"range of up to 15u."
+msgstr ""
+".\n"
+"\n"
+"Du bist die Augen und Ohren des Schiffes. Deine Aufgabe ist es, die anderen "
+"Piloten mit Informationen zu versorgen. Von deiner Station aus kannst du in "
+"einem Radius von 15u Objekte erfassen und scannen."
+
+#: scripts/tutorial/00_all.lua:649
+msgid ""
+"On this radar, you can select objects to get information about them.\n"
+"I've added a friendly ship and a station for you to examine. Select them ("
+msgstr ""
+"Auf diesem Radar kannst du Objekte anwählen und Informationen darüber "
+"erhalten.\n"
+"Ich habe ein freundlich gesinntes Schiff und eine Station hinzugefügt, "
+"welche du untersuchen kannst.\n"
+"Wähle sie aus ("
+
+#: scripts/tutorial/00_all.lua:650
+msgid ""
+") and notice how much information you can observe.\n"
+"Heading and distance are of particular importance, as without these, the "
+"pilotes will be flying in the dark."
+msgstr ""
+") und achte auf die Informationen, die du dadurch bekommst.\n"
+"Richtung und Entfernung sind besonders wichtig, denn ohne diese Infos "
+"müssten die anderen Piloten ins Ungewisse fliegen."
+
+#: scripts/tutorial/00_all.lua:654
+msgid ""
+"I've replaced the friendly station with an unknown ship. Once you select it ("
+msgstr ""
+"Ich habe die Station nun durch ein unbekanntes Schiff ersetzt. Sobald du es "
+"ausgewählt hast ("
+
+#: scripts/tutorial/00_all.lua:654
+msgid ""
+"), notice that you know nothing about this ship.\n"
+"To learn about it, you must scan it. Scanning requires you to match your "
+"scanner's frequency bands to your target's. ("
+msgstr ""
+"), wirst du feststellen, dass du nichts über dieses Schiff weißt. Um mehr "
+"darüber herauszufinden, kannst du es scannen. Bei einem Scan musst du die "
+"Frequenzen des Scanners an die Zielfrequenz angleichen. ("
+
+#: scripts/tutorial/00_all.lua:655
+msgid ""
+")\n"
+"Scan this ship now. ("
+msgstr ""
+")\n"
+"Scanne nun das Schiff. ("
+
+#: scripts/tutorial/00_all.lua:658
+msgid ""
+"Note that you have less information about this ship than the friendly ship. "
+"You must perform a deep scan of this ship to acquire more information.\n"
+"A deep scan takes more effort and requires you to align 2 different "
+"frequency bands simultaneously. ("
+msgstr ""
+"Wie du siehst, hast du weniger Informationen über dieses Schiff als über das "
+"Freundlich gesinnte. du musst einen Tiefenscan durchführen um mehr "
+"Informationen zu bekommen. ("
+
+#: scripts/tutorial/00_all.lua:659
+msgid ""
+")\n"
+"Deep scan the enemy now. ("
+msgstr ""
+")\n"
+"Führe nun einen Tiefenscan bei dem feindlichen Schiff durch, indem du ein "
+"zweites Mal scannst. ("
+
+#: scripts/tutorial/00_all.lua:661
+msgid ""
+"Excellent. Notice that this took more time and concentration than the simple "
+"scan, so be careful to perform deep scans only when necessary or you could "
+"run out of time. You can also abort a running scan if it takes too long ("
+msgstr ""
+"Hervorragend. Wie du siehst, erfordert dies mehr Zeit und Konzentration als "
+"ein einfacher Scan. Achte also darauf, Tiefenscans nur durchzuführen wenn es "
+"nötig ist, um nicht zu viel Zeit zu verlieren. Du kannst einen laufenden "
+"Scan auch abbrechen, wenn er zu lange dauern würde ("
+
+#: scripts/tutorial/00_all.lua:668
+msgid ""
+"Remember, your job is to supply information. Knowing the location and status "
+"of other ships is vital to your squadron.\n"
+"\n"
+"Without your information, the pilotes are mostly blind."
+msgstr ""
+"Wie erwähnt, ist es deine Aufgabe, Informationen zu Verfügung zu stellen. "
+"Das Wissen über den Standort und Zustand anderer Schiffe ist für dein "
+"Geschwader unverzichtbar.\n"
+"\n"
+"Ohne deine Informationen sind die Piloten größtenteils blind."
+
+#~ msgid "In this top area, you see your damage control droid in your ship."
+#~ msgstr "Im oberen Bereich siehst du den Reparaturdroiden auf dem Schiff."
+
+#~ msgid ") to continue..."
+#~ msgstr ") um fortzufahren..."
+
+#~ msgid ")"
+#~ msgstr ")"
+
+#~ msgid ""
+#~ "This concludes the overview of the power management station. Be sure to "
+#~ "keep your ship running in top condition!"
+#~ msgstr ""
+#~ "Damit wären wir am Ende der Übersicht zu dieser Konsole angelangt. Halte "
+#~ "das Schiff in einem guten Zustand!"

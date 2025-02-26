@@ -43,6 +43,7 @@ class PlayerInfo : public MultiplayerObject
 {
 private:
     CrewStationScreen* screen = nullptr;
+public:
     int32_t client_id;
 
     uint32_t crew_position[max_crew_positions];
@@ -52,6 +53,7 @@ private:
     string name;
     string last_ship_password;
     EPlayerShipType player_ship_type = PST_Ship;
+
 
     PlayerInfo();
 

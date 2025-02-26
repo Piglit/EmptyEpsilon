@@ -92,4 +92,5 @@ function resetPlayerShip()
     player:setWeaponStorageMax("mine", 0)
     player:setWeaponStorageMax("emp", 0)
     player:setWeaponStorageMax("hvli", 0)
+    player:setWeaponStorageMax("laser_green", 0)
 end

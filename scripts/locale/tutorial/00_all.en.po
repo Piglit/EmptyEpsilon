@@ -21,7 +21,7 @@ msgid ""
 "quickly identify distant objects."
 msgstr ""
 
-#: scripts/tutorial/00_all.lua:36
+#: scripts/tutorial/00_all.lua:36 scripts/tutorial/00_all.lua:482
 msgid ""
 "This is an asteroid. Flying into an asteroid will damage your ship, so avoid "
 "hitting them."
@@ -279,7 +279,7 @@ msgid ""
 "enemies."
 msgstr ""
 
-#: scripts/tutorial/00_all.lua:239
+#: scripts/tutorial/00_all.lua:239 scripts/tutorial/00_all.lua:582
 msgid ""
 "Welcome to engineering.\n"
 "Engineering is split into two parts. The top part shows your ship's "
@@ -359,7 +359,7 @@ msgid ""
 "can."
 msgstr ""
 
-#: scripts/tutorial/00_all.lua:273
+#: scripts/tutorial/00_all.lua:273 scripts/tutorial/00_all.lua:618
 msgid ""
 "Reactor:\n"
 "\n"
@@ -367,7 +367,7 @@ msgid ""
 "energy generation rate."
 msgstr ""
 
-#: scripts/tutorial/00_all.lua:276
+#: scripts/tutorial/00_all.lua:276 scripts/tutorial/00_all.lua:621
 msgid ""
 "Beam Weapons:\n"
 "\n"
@@ -421,7 +421,7 @@ msgid ""
 "decreases the amount of degradation your shields sustain when damaged."
 msgstr ""
 
-#: scripts/tutorial/00_all.lua:298
+#: scripts/tutorial/00_all.lua:298 scripts/tutorial/00_all.lua:632
 msgid ""
 "This concludes the overview of the engineering station. Be sure to keep your "
 "ship running in top condition!"
@@ -455,6 +455,7 @@ msgid ""
 msgstr ""
 
 #: scripts/tutorial/00_all.lua:319 scripts/tutorial/00_all.lua:405
+#: scripts/tutorial/00_all.lua:656
 msgid ""
 "Good. Notice that you now know this ship is unfriendly. It might have been a "
 "friendly or neutral ship as well, but until you scanned it, you do not know."
@@ -470,6 +471,7 @@ msgid ""
 msgstr ""
 
 #: scripts/tutorial/00_all.lua:323 scripts/tutorial/00_all.lua:409
+#: scripts/tutorial/00_all.lua:660
 msgid ""
 "Excellent. Notice that this took more time and concentration than the simple "
 "scan, so be careful to perform deep scans only when necessary or you could "
@@ -477,6 +479,7 @@ msgid ""
 msgstr ""
 
 #: scripts/tutorial/00_all.lua:327 scripts/tutorial/00_all.lua:413
+#: scripts/tutorial/00_all.lua:664
 msgid ""
 "Next to the long-range radar, the science station can also access the "
 "science database.\n"
@@ -592,4 +595,320 @@ msgstr ""
 msgid ""
 "This concludes the tutorial. While we have covered the basics, there are "
 "more advanced features in the game that you might discover."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:453
+msgid ""
+"Welcome to the TIE-Fighter tutorial.\n"
+"Note that this tutorial is designed to give you a quick overview of the "
+"basic functions of your TIE, but does not cover every single aspect.\n"
+"\n"
+"Press next ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:456
+msgid ""
+") to continue.\n"
+"To abort the tutorial at any time press "
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:467
+msgid ""
+"This concludes the tutorial. While we have covered the basics, there are "
+"more advanced features that you might discover.\n"
+"\n"
+"After you press next, your controls will be transferred to your actual ship. "
+"Contact flight control and let them know you are on standby."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:476
+msgid ""
+"This is your cockpit whith its controls and display panels.\n"
+"The short-range radar on the right side allows you to quickly identify "
+"nearby objects."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:480
+msgid ""
+"Your ship is depicted at the radar's center. This radar can detect objects "
+"up to 5u from your ship."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:485
+msgid ""
+"The white dot is a mine. When you move near a mine, it explodes with a "
+"powerful 1u-radius blast. Striking a mine will surely destroy your ship."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:490
+msgid ""
+"These are stations. Stations can be several different sizes and belong to "
+"different factions. Their color on the radar indicates whether the station "
+"is friendly (green), neutral (light blue), or hostile (red)."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:495
+msgid ""
+"The rainbow-colored cloud is a nebula. Nebulae block long-range sensors, "
+"preventing larger ships from detecting what's inside of them at distances of "
+"more than 5u. Sensors also cannot detect objects behind nebulae."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:501
+msgid ""
+"Finally, these are ships. Their attitude toward you is reflected by the same "
+"colors on your radar as stations. In addition to green, blue, and red, ships "
+"of unknown attitude appear as gray objects on the radar.\n"
+"\n"
+"On your radar you can also see the range of their weapons (the red arcs) and "
+"the status of their shields (the blue circles)"
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:519
+msgid "Let's look at the more active instruments in your cockpit."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:521
+msgid ""
+"As fighter pilot, you command your ship's movement in space.\n"
+"Your primary controls are your impulse engines and maneuvering thrusters.\n"
+"\n"
+"Raise your impulse level to 100% to fly forward right now. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:526
+msgid ""
+"Good. You now know how to move forward.\n"
+"\n"
+"I've disabled your impulse engine for now. Next, let's rotate your ship.\n"
+"Try rotating to heading 200 right now. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:532
+msgid ""
+"Excellent!\n"
+"\n"
+"Next up: docking. To dock, maneuver within 1u of a station and press the "
+"\"Request Dock\" button ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:534
+msgid ""
+"), from which point docking is fully automated.\n"
+"Maneuver to the nearby station and request permission to dock."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:536
+msgid ""
+"Now that you are docked, your movement is locked. There is nothing else you "
+"can do but undock, so do that now. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:538
+msgid ""
+"Ok, there are just a few more things that you need to know.\n"
+"As fighter pilot, you are responsible for firing with laser weapons on your "
+"target."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:556
+msgid "Now fire your lasers at the enemy ship! ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:561
+msgid ""
+"Your most fundamental task is to get your enemy in the range of your ship's "
+"weapons. Attack that fighter you can see on your radar with your laser "
+"weapons.\n"
+"\n"
+"If you are having trouble to see the target on your screen, select it on "
+"your radar ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:563
+msgid ""
+").\n"
+"Notice that your laser weapons have a range of 2u."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:566
+msgid ""
+"You can hold the fire-button down for rapid fire.\n"
+"\n"
+"Take a look on your radar while firing, when the target is hit, the blue "
+"circle around it flickers red.\n"
+"\n"
+"Now destroy that target!"
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:571
+msgid ""
+"Aggression is not always the solution, but boy, it is fun!\n"
+"\n"
+"Now we will take a look at the engineering console. To switch to the "
+"engineering console press "
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:586
+msgid ""
+"First, we will explain your control over your ship's systems.\n"
+"Each row on the bottom area of the screen represents one of your ship's "
+"system, and each system has a damage level, heat level, power level, and "
+"coolant level."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:589
+msgid "You can cycle through the systems with "
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:589 scripts/tutorial/00_all.lua:658
+msgid " and "
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:589
+msgid ""
+". This will show you additional details of that systems performance.\n"
+"\n"
+"Select maneuvering now."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:593
+msgid ""
+"You can manage each system's power level independently. Adding power to a "
+"system makes it perform more effectively, but also generates more heat, and "
+"thus requires coolant to prevent it from overheating and damaging the "
+"system.\n"
+"\n"
+"Maximize the power to the maneuvering system. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:596
+msgid ""
+"The added power increases the amount of heat in the system.\n"
+"To prevent damage, your ship is automatically putting coolant in your "
+"maneuvering system.\n"
+"Overpower the system until it overheats."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:601
+msgid ""
+"Note that as the system overheats, it takes damage. Because the system is "
+"damaged, it functions less effectively.\n"
+"\n"
+"Systems can also take damage when your ship is hit."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:605
+msgid "In this top area, you see your damage control droid in your ship."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:606
+msgid ""
+"The maneuvering system is damaged, as indicated by the color of this room's "
+"outline.\n"
+"\n"
+"Your droid will automatically repair damaged ship systems. Repairs will take "
+"a while."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:612
+msgid ""
+"I've also overheated the weapons and impulse systems. As before, the "
+"system's coolant level is increased to mitigate the effect. Note that the "
+"maneuvering system's coolant level is automatically reduced to allow for "
+"coolant in the impulse and beam weapons system.\n"
+"\n"
+"This is because you have a limited amount of coolant available to distribute "
+"this across your ship's systems."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:616
+msgid ""
+"Good. Now you know your most important tasks. Next, we'll go over each "
+"system's function in detail.\n"
+"Remember, each system performs better with more power, but performs less "
+"well when damaged. It is your job to keep vital systems running as well as "
+"you can."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:625
+msgid ""
+"Maneuvering:\n"
+"\n"
+"Increasing power to the maneuvering system allows the ship to turn faster."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:628
+msgid ""
+"Impulse Engines:\n"
+"\n"
+"Adding power to the impulse engines increases your flight speed."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:642
+msgid ""
+"Welcome, operations officer.\n"
+"To switch from your cockpit to the operation console later press "
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:643
+msgid ""
+".\n"
+"\n"
+"You are the eyes of the squadron. Your job is to supply the other pilotes "
+"with information. From this station, you can detect and scan objects at a "
+"range of up to 15u."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:648
+msgid ""
+"On this radar, you can select objects to get information about them.\n"
+"I've added a friendly ship and a station for you to examine. Select them ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:649
+msgid ""
+") and notice how much information you can observe.\n"
+"Heading and distance are of particular importance, as without these, the "
+"pilotes will be flying in the dark."
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:653
+msgid ""
+"I've replaced the friendly station with an unknown ship. Once you select it ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:653
+msgid ""
+"), notice that you know nothing about this ship.\n"
+"To learn about it, you must scan it. Scanning requires you to match your "
+"scanner's frequency bands to your target's. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:654
+msgid ""
+")\n"
+"Scan this ship now. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:657
+msgid ""
+"Note that you have less information about this ship than the friendly ship. "
+"You must perform a deep scan of this ship to acquire more information.\n"
+"A deep scan takes more effort and requires you to align 2 different "
+"frequency bands simultaneously. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:658
+msgid ""
+")\n"
+"Deep scan the enemy now. ("
+msgstr ""
+
+#: scripts/tutorial/00_all.lua:667
+msgid ""
+"Remember, your job is to supply information. Knowing the location and status "
+"of other ships is vital to your squadron.\n"
+"\n"
+"Without your information, the pilotes are mostly blind."
 msgstr ""

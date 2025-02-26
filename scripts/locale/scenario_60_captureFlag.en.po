@@ -287,9 +287,29 @@ msgid ""
 "rescanned after drop"
 msgstr ""
 
+#: scripts/scenario_60_captureFlag.lua:652
+#: scripts/scenario_60_captureFlag.lua:1304
+#: scripts/scenario_60_captureFlag.lua:1311
+#: scripts/scenario_60_captureFlag.lua:2141
+#: scripts/scenario_60_captureFlag.lua:6406
+msgctxt "setting-callsign"
+msgid "squad-num of size"
+msgstr ""
+
 #: scripts/scenario_60_captureFlag.lua:735
 msgctxt "scienceDescription-station"
 msgid "Referee"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:743
+#: scripts/scenario_60_captureFlag.lua:938
+#: scripts/scenario_60_captureFlag.lua:939
+#: scripts/scenario_60_captureFlag.lua:1113
+#: scripts/scenario_60_captureFlag.lua:1134
+#: scripts/scenario_60_captureFlag.lua:1188
+#: scripts/scenario_60_captureFlag.lua:7976
+msgctxt "setting-marker"
+msgid "buoys"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:750
@@ -344,16 +364,22 @@ msgid "hard"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:793
+#: scripts/scenario_60_captureFlag.lua:1006
+#: scripts/scenario_60_captureFlag.lua:1013
 msgctxt "buttonGM"
 msgid "medium"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:794
+#: scripts/scenario_60_captureFlag.lua:1010
+#: scripts/scenario_60_captureFlag.lua:1012
 msgctxt "buttonGM"
 msgid "small"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:795
+#: scripts/scenario_60_captureFlag.lua:1007
+#: scripts/scenario_60_captureFlag.lua:1009
 msgctxt "buttonGM"
 msgid "large"
 msgstr ""
@@ -471,6 +497,21 @@ msgstr ""
 #, lua-format
 msgctxt "buttonGM"
 msgid "Marker: %s ->Next"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:937
+#: scripts/scenario_60_captureFlag.lua:942
+#: scripts/scenario_60_captureFlag.lua:1068
+#: scripts/scenario_60_captureFlag.lua:1134
+#: scripts/scenario_60_captureFlag.lua:1182
+msgctxt "setting-marker"
+msgid "stars"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:940
+#: scripts/scenario_60_captureFlag.lua:941
+msgctxt "setting-marker"
+msgid "none"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:949
@@ -753,6 +794,28 @@ msgstr ""
 #, lua-format
 msgctxt "buttonGM"
 msgid "Name %s"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:1305
+#: scripts/scenario_60_captureFlag.lua:1306
+msgctxt "setting-callsign"
+msgid "default"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:1307
+#: scripts/scenario_60_captureFlag.lua:1308
+#: scripts/scenario_60_captureFlag.lua:2139
+#: scripts/scenario_60_captureFlag.lua:6404
+msgctxt "setting-callsign"
+msgid "squad-num/size"
+msgstr ""
+
+#: scripts/scenario_60_captureFlag.lua:1309
+#: scripts/scenario_60_captureFlag.lua:1310
+#: scripts/scenario_60_captureFlag.lua:2143
+#: scripts/scenario_60_captureFlag.lua:6408
+msgctxt "setting-callsign"
+msgid "short"
 msgstr ""
 
 #: scripts/scenario_60_captureFlag.lua:1315

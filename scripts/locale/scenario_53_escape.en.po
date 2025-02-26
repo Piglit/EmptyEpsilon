@@ -648,6 +648,11 @@ msgctxt "ammo-comms"
 msgid "I need ordnance restocked"
 msgstr ""
 
+#: scripts/scenario_53_escape.lua:1343
+msgctxt "ammo-comms"
+msgid "What type of ordnance do you need?"
+msgstr ""
+
 #: scripts/scenario_53_escape.lua:1346
 msgctxt "ammo-comms"
 msgid "Can you supply us with some nukes?"

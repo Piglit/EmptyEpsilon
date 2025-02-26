@@ -797,6 +797,12 @@ msgctxt "ammo-comms"
 msgid "I need ordnance restocked"
 msgstr "Wir benötigen Munition für unsere Waffensysteme."
 
+#: scripts/scenario_53_escape.lua:1343
+#, fuzzy
+msgctxt "ammo-comms"
+msgid "What type of ordnance do you need?"
+msgstr "Welche Art von Informationen benötigen Sie?"
+
 #: scripts/scenario_53_escape.lua:1346
 msgctxt "ammo-comms"
 msgid "Can you supply us with some nukes?"

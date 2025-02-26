@@ -271,6 +271,14 @@ msgctxt "Cloak"
 msgid "Device is cloaked (but it's not perfect)"
 msgstr ""
 
+#: scripts/scenario_27_liberation.lua:137
+#, lua-format
+msgctxt "msgGM"
+msgid ""
+"Player ship %s's template type (%s) could not be found in table "
+"player_ship_stats"
+msgstr ""
+
 #: scripts/scenario_27_liberation.lua:583
 msgctxt "trade-comms"
 msgid "food"
@@ -411,9 +419,88 @@ msgctxt "trade-comms"
 msgid "warp"
 msgstr ""
 
+#: scripts/scenario_27_liberation.lua:637
+msgctxt "station-comms"
+msgid "She studies the Exuari. She's *the* expert around here"
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:638
+msgctxt "station-comms"
+msgid ""
+"She studies the Exuari so hard that sometimes I wonder if she's got some "
+"kind of fixation."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:639
+msgctxt "station-comms"
+msgid ""
+"I heard that her family was killed by the Exuari. That's why she studies "
+"them so much."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:640
+msgctxt "station-comms"
+msgid ""
+"After studying the Exuari using our extensive resources, she took a job on a "
+"freighter to gather more data in the field."
+msgstr ""
+
 #: scripts/scenario_27_liberation.lua:814
 msgctxt "buttonGM"
 msgid "+Spawn Ship(s)"
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1514
+msgctxt "station-comms"
+msgid ""
+"Just the usual predatory actions: attack anything and laugh as it's "
+"destroyed or looted."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1515
+msgctxt "station-comms"
+msgid "They seemed interested in Liberation Day for some reason."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1516
+msgctxt "station-comms"
+msgid ""
+"I could not make sense of what they were saying. They seemed to be talking "
+"in riddles."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1517
+msgctxt "station-comms"
+msgid "You want to talk to Jasmine Purdue. She's been studying the Exuari."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1520
+#, lua-format
+msgctxt "station-comms"
+msgid ""
+"They've been setting up an isolated station for research somewhere near %s"
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1521
+msgctxt "station-comms"
+msgid "They seem to be interested in stellar mechanics."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1522
+msgctxt "station-comms"
+msgid ""
+"When you can get them to talk, the topic of the inner workings of stars "
+"seems to be top of mind."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1523
+msgctxt "station-comms"
+msgid "They were asking us about nova causality before trying to destroy us."
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1524
+msgctxt "station-comms"
+msgid "They're just attacking everything per usual."
 msgstr ""
 
 #: scripts/scenario_27_liberation.lua:1571
@@ -426,6 +513,11 @@ msgstr ""
 #: scripts/scenario_27_liberation.lua:3196
 msgctxt "scienceDescription-artifact"
 msgid "Nova Fireworks - product of the Exuari Exclamatory Enterprise"
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:1644
+msgctxt "msgGM"
+msgid "Empty Template pool: fix excludes or other criteria"
 msgstr ""
 
 #: scripts/scenario_27_liberation.lua:1774
@@ -694,6 +786,11 @@ msgstr ""
 #: scripts/scenario_27_liberation.lua:3002
 msgctxt "scienceDescription-artifact"
 msgid "Source of unusual emanations"
+msgstr ""
+
+#: scripts/scenario_27_liberation.lua:3115
+msgctxt "msgMainscreen"
+msgid "The Exuari really enjoyed the fireworks at your expense"
 msgstr ""
 
 #: scripts/scenario_27_liberation.lua:3480

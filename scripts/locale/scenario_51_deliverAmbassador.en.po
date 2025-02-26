@@ -103,6 +103,16 @@ msgctxt "scienceDescription-station"
 msgid "Major military installation"
 msgstr ""
 
+#: scripts/scenario_51_deliverAmbassador.lua:134
+msgctxt "buttonGM"
+msgid "+Spawn Ship(s)"
+msgstr ""
+
+#: scripts/scenario_51_deliverAmbassador.lua:135
+msgctxt "buttonGM"
+msgid "+Control Codes"
+msgstr ""
+
 #: scripts/scenario_51_deliverAmbassador.lua:329
 msgctxt "audio-incCall"
 msgid ""

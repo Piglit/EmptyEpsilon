@@ -9,17 +9,17 @@ msgid ""
 "current layout to the clipboard for use in scenario scripts."
 msgstr ""
 
-#: scripts/scenario_10_empty.lua:30
+#: scripts/scenario_10_empty.lua:51
 msgctxt "buttonGM"
 msgid "Random asteroid field"
 msgstr ""
 
-#: scripts/scenario_10_empty.lua:40
+#: scripts/scenario_10_empty.lua:61
 msgctxt "buttonGM"
 msgid "Random nebula field"
 msgstr ""
 
-#: scripts/scenario_10_empty.lua:49
+#: scripts/scenario_10_empty.lua:70
 msgctxt "buttonGM"
 msgid "Delete unselected"
 msgstr ""

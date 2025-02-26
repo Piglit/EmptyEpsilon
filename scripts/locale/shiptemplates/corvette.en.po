@@ -276,3 +276,10 @@ msgstr ""
 msgctxt "subclass"
 msgid "Carrier"
 msgstr ""
+
+#: scripts/shiptemplates/corvette.lua:361
+msgid ""
+"The Saipan mixes most of the strengths of the corvette class with carrier "
+"capability. The weapons compare favorably with other corvette class ships. "
+"Having fighters use the Saipan as a base can really ruin an enemy's day"
+msgstr ""

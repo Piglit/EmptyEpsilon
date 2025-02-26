@@ -240,10 +240,10 @@ int main(int argc, char** argv)
 
     //For now there is only one named theme : default.
     string theme_name = PreferencesManager::get("guitheme", "default");
-    if (!GuiTheme::loadTheme(theme_name, theme_name))
+    if (!GuiTheme::loadTheme(theme_name, "gui/" + theme_name +".theme.txt"))
     {
         LOG(ERROR, "Failed to load "+ theme_name + " theme, trying default. Resources missing or contains errors ? Check gui/" + theme_name + ".theme.txt");
-        if (!GuiTheme::loadTheme("default", "default"))
+        if (!GuiTheme::loadTheme("default", "gui/default.theme.txt"))
         {
             LOG(ERROR, "Failed to load default theme, exiting. Check gui/default.theme.txt"); //Yes, we may try to load twice default theme but this should be a rare error case which always finish in exit
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Failed to load gui theme, resources missing or contains errors ? Check gui/default.theme.txt", nullptr);

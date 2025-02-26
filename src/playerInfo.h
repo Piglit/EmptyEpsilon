@@ -43,7 +43,6 @@ class PlayerInfo : public MultiplayerObject
 {
 private:
     CrewStationScreen* screen = nullptr;
-public:
     int32_t client_id;
 
     uint32_t crew_position[max_crew_positions];

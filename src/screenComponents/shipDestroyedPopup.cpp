@@ -3,6 +3,7 @@
 #include "spaceObjects/playerSpaceship.h"
 #include "soundManager.h"
 #include "main.h"
+#include "preferenceManager.h"
 
 #include "gui/gui2_overlay.h"
 #include "gui/gui2_canvas.h"
@@ -18,13 +19,14 @@ GuiShipDestroyedPopup::GuiShipDestroyedPopup(GuiCanvas* owner)
     ship_destroyed_overlay = new GuiOverlay(this, "SHIP_DESTROYED", glm::u8vec4(0, 0, 0, 128));
     (new GuiPanel(ship_destroyed_overlay, "SHIP_DESTROYED_FRAME"))->setPosition(0, 0, sp::Alignment::Center)->setSize(500, 100);
     (new GuiLabel(ship_destroyed_overlay, "SHIP_DESTROYED_TEXT", tr("SHIP DESTROYED!"), 70))->setPosition(0, 0, sp::Alignment::Center)->setSize(500, 100);
-    (new GuiButton(ship_destroyed_overlay, "SHIP_DESTROYED_BUTTON", tr("shipdestroyed", "Return"), [this]() {
+/*    (new GuiButton(ship_destroyed_overlay, "SHIP_DESTROYED_BUTTON", tr("shipdestroyed", "Return"), [this]() {
         soundManager->stopMusic();
         returnToShipSelection(this->owner->getRenderLayer());
         this->owner->destroy();
     }))->setPosition(0, 75, sp::Alignment::Center)->setSize(500, 50);
-
+*/
     show_timeout.start(5.0);
+
 }
 
 void GuiShipDestroyedPopup::onDraw(sp::RenderTarget& target)
@@ -35,6 +37,18 @@ void GuiShipDestroyedPopup::onDraw(sp::RenderTarget& target)
         show_timeout.start(5.0);
     }else{
         if (show_timeout.isExpired())
+        {
             ship_destroyed_overlay->show();
+            back_timeout.start(5.0);
+        }
+        if (back_timeout.isExpired())
+        {
+            soundManager->stopMusic();
+            if (PreferencesManager::get("autoconnect") != "")
+                returnToMainMenu(this->owner->getRenderLayer());
+            else
+                returnToShipSelection(this->owner->getRenderLayer());
+            this->owner->destroy();
+        }
     }
 }

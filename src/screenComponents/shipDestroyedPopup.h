@@ -15,6 +15,7 @@ private:
     GuiOverlay* ship_destroyed_overlay;
     GuiCanvas* owner;
     sp::SystemTimer show_timeout;
+    sp::SystemTimer back_timeout;
 
 public:
     GuiShipDestroyedPopup(GuiCanvas* owner);

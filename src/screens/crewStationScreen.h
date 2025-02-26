@@ -30,6 +30,8 @@ public:
     void finishCreation();
 
     virtual void update(float delta) override;
+    void showTab(GuiElement* element);
+    GuiElement* findTab(string name);
 
 private:
     GuiElement* main_panel;
@@ -52,10 +54,7 @@ private:
     std::vector<CrewTabInfo> tabs;
     string keyboard_general = "";
     void showNextTab(int offset=1);
-    void showTab(GuiElement* element);
     string populateShortcutsList(ECrewPosition position);
-
-    GuiElement* findTab(string name);
 
     void tileViewport();
 };

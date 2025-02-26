@@ -16,7 +16,7 @@ class TutorialGame : public Updatable, public GuiCanvas
     GuiElement* viewport;
     GuiRadarView* tactical_radar;
     GuiRadarView* long_range_radar;
-    GuiElement* station_screen[8];
+    GuiElement* station_screen[11];
 
     P<ScriptObject> script;
     GuiPanel* frame;
@@ -40,6 +40,7 @@ public:
     void switchViewToScreen(int n);
     void setMessageToTopPosition();
     void setMessageToBottomPosition();
+    string showHotkey(string name);
 
     void onNext(ScriptSimpleCallback callback) { _onNext = callback; }
     void finish();
@@ -51,7 +52,7 @@ private:
 class LocalOnlyGame : public EpsilonServer
 {
 public:
-    LocalOnlyGame() : EpsilonServer(defaultServerPort) {}
+    LocalOnlyGame() : EpsilonServer(defaultServerPort+1) {}
     //Overide the update function from the game server, so no actuall socket communication is done.
     virtual void update(float delta) override;
 };

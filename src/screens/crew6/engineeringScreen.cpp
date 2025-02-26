@@ -361,6 +361,26 @@ void EngineeringScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
+        if (keys.engineering_select_system_next.getDown())
+        {
+            int n = selected_system;
+            do
+            {
+                n = (n + 1) % SYS_COUNT;
+            } while (! my_spaceship->hasSystem(static_cast<ESystem>(n)));
+            selectSystem(static_cast<ESystem>(n));
+        }
+        if (keys.engineering_select_system_prev.getDown())
+        {
+            int n = selected_system;
+            do
+            {
+                n = (n - 1);
+                if (n < 0) n = SYS_COUNT -1;
+            } while (! my_spaceship->hasSystem(static_cast<ESystem>(n)));
+            selectSystem(static_cast<ESystem>(n));
+        }
+
         for(unsigned int n=0; n<SYS_COUNT; n++) {
             if (keys.engineering_select_system[n].getDown()) selectSystem(static_cast<ESystem>(n));
 

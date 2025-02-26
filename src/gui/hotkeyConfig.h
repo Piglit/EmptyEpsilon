@@ -185,6 +185,7 @@ public:
 
     //Various
     sp::io::Keybinding spectator_show_callsigns;
+    sp::io::Keybinding tutorial_next;
 
     //Debug
     sp::io::Keybinding debug_show_fps;

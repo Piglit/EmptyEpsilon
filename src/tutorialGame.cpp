@@ -17,6 +17,9 @@
 #include "screens/crew4/tacticalScreen.h"
 #include "screens/crew4/engineeringAdvancedScreen.h"
 #include "screens/crew4/operationsScreen.h"
+#include "screens/crew1/singlePilotScreen.h"
+#include "screens/crew1/singleFighterScreen.h"
+#include "screens/extra/powerManagement.h"
 
 #include "screenComponents/indicatorOverlays.h"
 
@@ -37,6 +40,7 @@ REGISTER_SCRIPT_CLASS_NO_CREATE(TutorialGame)
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, showMessage);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, setMessageToTopPosition);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, setMessageToBottomPosition);
+    REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, showHotkey);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, onNext);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, finish);
 }
@@ -88,7 +92,10 @@ void TutorialGame::createScreens()
     station_screen[5] = new TacticalScreen(this);
     station_screen[6] = new EngineeringAdvancedScreen(this);
     station_screen[7] = new OperationScreen(this);
-    for(int n=0; n<8; n++)
+    station_screen[8] = new SinglePilotScreen(this);
+    station_screen[9] = new SingleFighterScreen(this);
+    station_screen[10] = new PowerManagementScreen(this);
+    for(int n=0; n<11; n++)
         station_screen[n]->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setPosition(0, 0, sp::Alignment::TopLeft);
 
     new GuiIndicatorOverlays(this);
@@ -101,7 +108,7 @@ void TutorialGame::createScreens()
     next_button = new GuiButton(frame, "", tr("Next"), [this]() {
         _onNext.call<void>();
     });
-    next_button->setTextSize(30)->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(300, 30);
+    next_button->setTextSize(20)->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(300, 30);
 
     if (repeated_tutorial)
     {
@@ -119,6 +126,8 @@ void TutorialGame::update(float delta)
 {
     if (keys.escape.getDown())
         finish();
+    if (keys.tutorial_next.getDown())
+        _onNext.call<void>();
     if (my_spaceship)
     {
         float target_camera_yaw = my_spaceship->getRotation();
@@ -200,7 +209,7 @@ void TutorialGame::switchViewToScreen(int n)
     if (viewport == nullptr)
         return;
 
-    if (n < 0 || n >= 8)
+    if (n < 0 || n >= 11)
         return;
     hideAllScreens();
     station_screen[n]->show();
@@ -235,6 +244,8 @@ void TutorialGame::finish()
         script->registerObject(this, "tutorial");
         script->run("tutorial.lua");
     }else{
+        foreach(SpaceObject, obj, space_object_list)
+            obj->destroy();
         script->destroy();
         destroy();
 
@@ -252,10 +263,16 @@ void TutorialGame::hideAllScreens()
     tactical_radar->hide();
     long_range_radar->hide();
 
-    for(int n=0; n<8; n++)
+    for(int n=0; n<11; n++)
     {
         station_screen[n]->hide();
     }
+}
+
+string TutorialGame::showHotkey(string name)
+{
+    auto binding = sp::io::Keybinding::getByName(name);
+    return binding->getHumanReadableKeyName(0);
 }
 
 void LocalOnlyGame::update(float delta)

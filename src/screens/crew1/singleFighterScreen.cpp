@@ -186,10 +186,12 @@ void SingleFighterScreen::onUpdate()
 {
     if (my_spaceship && isVisible())
     {
-        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue());
-        if (angle != 0.0f)
+        auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue())/* * 5.0f*/;
+        // make sure, the controller axis is only set for one of thje two keybindings
+//        if (angle != 0.0f)
         {
-            my_spaceship->commandTargetRotation(my_spaceship->getRotation() + angle);
+            //my_spaceship->commandTargetRotation(my_spaceship->getRotation() + angle);
+            my_spaceship->commandTurnSpeed(/*my_spaceship->turn_speed **/ angle);
         }
 
         if (keys.weapons_enemy_next_target.getDown())

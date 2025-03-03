@@ -276,6 +276,7 @@ template:setHull(200)
 template:setSpeed(50, 5, 7)
 template:setCanCombatManeuver(false)
 template:setInternalDockClasses(_("class", "Escape Pod"))
+template:setDockClasses(_("class", "Starfighter"))
 addSystemsTransport(template)
 
 var = template:copy("GR-75")

@@ -144,7 +144,7 @@ string CrewStationScreen::populateShortcutsList(ECrewPosition position)
             }
         }
     }
-    else if (position == singlePilot)
+    else if (position == singlePilot || position == singleFighter)
     {
         for (auto binding : sp::io::Keybinding::listAllByCategory(getCrewPositionName(helmsOfficer)))
         {

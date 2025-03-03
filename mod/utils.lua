@@ -424,3 +424,33 @@ function formatTime(seconds)
 	end
 	return str
 end
+
+function arrayContains(array, element)
+	for _,value in ipairs(array) do
+		if value == element then
+			return true
+		end
+	end
+	return false
+end
+
+-- removes all elements (in place!) that do not meet the condition
+function arrayFilter(array, condition)
+	local source_idx, target_idx = 0, #array + 1 
+	for i = 1, #array do
+		if not condition(array[i]) then
+			source_idx = i+1
+			target_idx = i
+			break
+		end
+	end
+	for i = source_idx, #array do
+		local value = array[i]
+		if condition(value) then
+			array[target_idx] = value
+			target_idx = target_idx + 1
+		end
+	end
+	array[target_idx] = nil
+end
+-- TODO test

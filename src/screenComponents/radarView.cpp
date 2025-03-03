@@ -448,7 +448,7 @@ void GuiRadarView::drawRangeIndicators(sp::RenderTarget& renderer)
     {
         float s = circle_size * scale;
         renderer.drawCircleOutline(radar_screen_center, s, 2.0, glm::u8vec4(255, 255, 255, 16));
-        renderer.drawText(sp::Rect(radar_screen_center.x, radar_screen_center.y - s - 20, 0, 0), string(int(circle_size / 1000.0f + 0.1f)) + DISTANCE_UNIT_1K, sp::Alignment::Center, 20, bold_font, glm::u8vec4(255, 255, 255, 32));
+        renderer.drawText(sp::Rect(radar_screen_center.x, radar_screen_center.y - s - 10, 0, 0), string(int(circle_size / 1000.0f + 0.1f)) + DISTANCE_UNIT_1K, sp::Alignment::Center, 20, bold_font, glm::u8vec4(255, 255, 255, 32));
     }
 }
 

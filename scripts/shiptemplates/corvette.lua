@@ -370,7 +370,7 @@ template:setInternalDockClasses(_("class", "Starfighter"))	--there's room inside
 template:setSharesEnergyWithDocked(false)
 template:setRepairDocked(true)
 template:setRestocksScanProbes(false)
-template:setRestocksMissilesDocked(true)	--applies to docking CPUShips only, not player ships
+template:setRestocksMissilesDocked("cpuships")	--applies to docking CPUShips only, not player ships
 --                  Arc, Dir,  Range, CycleTime, Dmg
 template:setBeam(0, 120, -40, 1000.0,		6.0, 6)
 template:setBeam(1, 120,  40, 1000.0,		6.0, 6)

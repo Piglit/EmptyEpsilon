@@ -35,19 +35,20 @@
 SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
 : GuiOverlay(owner, "SINGLEPILOT_SCREEN", colorConfig.background)
 {
+
     // Render the radar shadow and background decorations.
     (new GuiImage(this, "BACKGROUND_GRADIENT", "gui/background/gradientSingle.png"))->setPosition(glm::vec2(0, 0), sp::Alignment::Center)->setSize(1200, 900);
 
     background_crosses = new GuiOverlay(this, "BACKGROUND_CROSSES", glm::u8vec4{255,255,255,255});
     background_crosses->setTextureTiled("gui/background/crosses.png");
-
     // Render the alert level color overlay.
     (new AlertLevelOverlay(this));
 
     // 5U tactical radar with piloting features.
     radar = new GuiRadarView(this, "TACTICAL_RADAR", &targets);
-    radar->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 650);
-    radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators()->setStyle(GuiRadarView::Circular);
+
+    radar->setStyle(GuiRadarView::Circular)->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiElement::GuiSizeMatchHeight, 650);
+    radar->setRangeIndicatorStepSize(1000.0)->shortRange()->enableGhostDots()->enableWaypoints()->enableCallsigns()->enableHeadingIndicators();
     radar->setCallbacks(
         [this](sp::io::Pointer::Button button, glm::vec2 position) {
             auto last_target = targets.get();
@@ -131,6 +132,14 @@ void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
 {
     if (my_spaceship)
     {
+        camera_yaw = my_spaceship->getRotation();
+        camera_pitch = 0.0f;
+        auto position = my_spaceship->getPosition() + rotateVec2(glm::vec2(my_spaceship->getRadius(), 0), camera_yaw);
+
+        camera_position.x = position.x;
+        camera_position.y = position.y;
+        camera_position.z = 0.0;
+
         energy_display->setValue(string(int(my_spaceship->energy_level)));
         heading_display->setValue(string(my_spaceship->getHeading(), 1));
         float velocity = glm::length(my_spaceship->getVelocity()) / 1000 * 60;

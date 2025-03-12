@@ -483,7 +483,12 @@ void ShipAI::runOrders()
         }
         break;
     case AIOrder::Attack:          //Attack [order_target] very specificly.
-        pathPlanner.clear();
+        if (ai->order_target)
+        {
+            pathPlanner.clear();
+        }else{
+            ai->orders = AIOrder::Roaming;    //We pretty much lost our target, so just start roaming.
+        }
         break;
     case AIOrder::Retreat:
         if ((docking_port && docking_port->state == DockingPort::State::Docked && docking_port->target) && ai->order_target)

@@ -1,6 +1,6 @@
 -- Name: Boarding Action
 -- Description: A TIE-squadron supports the boarding of a freighter.
--- Type: Skystrike
+-- Type: Larp
 
 TEST = false
 require("utils.lua")

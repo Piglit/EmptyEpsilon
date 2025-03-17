@@ -1,6 +1,6 @@
 -- Name: Droid Collection
 -- Description: A squadron of TIE-Pilots collect some defunct droids from an asteroid belt to train their flight abilities.
--- Type: Skystrike
+-- Type: Larp
 
 TEST = false
 require("utils.lua")

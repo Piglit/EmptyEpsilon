@@ -3,7 +3,7 @@ name: CI/CD
 on:
   push:
     branches:
-      - lan24
+      - shattered_horizon25
   pull_request:
 jobs:
   linux:
@@ -19,7 +19,8 @@ jobs:
     - name: Build and test
       run: docker/build.sh
     - name: store artifact
-      uses: actions/upload-artifact@v3
+      if: false
+      uses: actions/upload-artifact@v4
       with:
         name: EmptyEpsilon_Linux
         path: /home/runner/work/EmptyEpsilon/EmptyEpsilon/build/EmptyEpsilon
@@ -36,7 +37,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: lan24
+          ref: skystrike
       - name: EmptyEpsilon Checkout
         uses: actions/checkout@v2
         with:
@@ -48,7 +49,7 @@ jobs:
           cmake ../EmptyEpsilon -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_TOOLCHAIN_FILE=../EmptyEpsilon/cmake/mingw.toolchain -DSERIOUS_PROTON_DIR=../SeriousProton -DWARNING_IS_ERROR=1
           ninja package
       - name: store artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: EmptyEpsilon_Windows
           path: /home/runner/work/EmptyEpsilon/EmptyEpsilon/_build_win32/EmptyEpsilon.zip
@@ -63,7 +64,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: lan24
+          ref: skystrike
       - name: EmptyEpsilon Checkout
         uses: actions/checkout@v2
         with:
@@ -76,11 +77,12 @@ jobs:
           ninja
           ninja install
       - name: store artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: EmptyEpsilon_MacOS
           path: /Users/runner/work/EmptyEpsilon/EmptyEpsilon/_build_macos/EmptyEpsilon.app
   windows:
+    if: false
     name: Windows
     runs-on: windows-latest
     strategy:
@@ -126,7 +128,7 @@ jobs:
         with:
           repository: piglit/SeriousProton
           path: SeriousProton
-          ref: lan24
+          ref: skystrike
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
       - name: Configure CMake
@@ -140,7 +142,7 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: cmake --build . --config ${{ matrix.build_type }} --target package 
       - name: store artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: EmptyEpsilon_Windows_${{ matrix.build_type }}
           path: D:/a/EmptyEpsilon/EmptyEpsilon/build/EmptyEpsilon.zip

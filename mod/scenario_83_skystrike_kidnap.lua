@@ -1,6 +1,6 @@
 -- Name: Kidnapped
 -- Description: The Gozanti carrier is held hostage, you need to liberate it.
--- Type: Skystrike
+-- Type: Larp
 
 TEST = true
 require("utils.lua")

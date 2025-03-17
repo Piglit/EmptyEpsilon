@@ -1,5 +1,5 @@
--- Name: Shattered Horizon 
--- Type: Mission
+-- Name: Shattered Horizon
+-- Type: Larp
 require("utils.lua")
 require("ee.lua")   -- SYSTEMS
 

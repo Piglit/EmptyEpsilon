@@ -417,6 +417,7 @@ public:
             return 0.0f;
         }
      }
+    float getCurrentWarpSpeed() { return current_warp; }
     float getJumpDriveCharge() { return jump_drive_charge; }
     void setJumpDriveCharge(float charge) { jump_drive_charge = charge; }
     float getJumpDelay() { return jump_delay; }

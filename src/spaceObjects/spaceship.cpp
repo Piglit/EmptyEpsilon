@@ -292,6 +292,10 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(SpaceShip, ShipTemplateBasedObject)
     /// Actual warp speed can be modified by "warp" system effectiveness.
     /// Example: ship:getWarpSpeed();
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, getWarpSpeed);
+    /// Returns this SpaceShip's current warp speed.
+    /// Actual warp speed can be modified by "warp" system effectiveness.
+    /// Example: ship:getCurrentWarpSpeed();
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, getCurrentWarpSpeed);
     /// Returns the arc, in degrees, for the BeamWeapon with the given index on this SpaceShip.
     /// Example: ship:getBeamWeaponArc(0); -- returns beam weapon 0's arc
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, getBeamWeaponArc);

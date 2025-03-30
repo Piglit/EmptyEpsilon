@@ -77,7 +77,21 @@ EEHttpServer::EEHttpServer(int port, string static_file_path)
                 return "{\"ERROR\": \"Cannot set values through get.lua\", \"COMMAND\": \"" + i->second + "\"}";
             }
             // Build LUA-code
-            luaCode += i->first + " = object:" + i->second + ", ";
+			int variables_count = i->first.count(",") + 1;
+			if (variables_count == 1)
+			{
+				luaCode += i->first + " = object:" + i->second + ", ";
+			}
+			else
+			{
+				int idx = 1;
+				for(auto& var: i->first.split(","))
+				{
+					luaCode += var + " = ({object:" + i->second + "})[" + std::to_string(idx) + "], ";
+					idx++;
+				}
+			}
+
         }   luaCode += "}";
 
         // Run script

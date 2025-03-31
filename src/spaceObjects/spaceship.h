@@ -392,6 +392,7 @@ public:
         impulse_acceleration = acceleration; 
         impulse_reverse_acceleration = reverse_acceleration.value_or(acceleration);
     }
+    float getCombatManeuverCharge() { return combat_maneuver_charge; }
     void setCombatManeuver(float boost, float strafe) { combat_maneuver_boost_speed = boost; combat_maneuver_strafe_speed = strafe; }
     bool hasJumpDrive() { return has_jump_drive; }
     void setJumpDrive(bool has_jump) { has_jump_drive = has_jump; }

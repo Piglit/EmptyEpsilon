@@ -318,12 +318,20 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Codes are 0-indexed. Index 0 corresponds to code A, 1 to B, etc.
     /// Example: player:commandConfirmDestructCode(0) -- commands bypassing self-destruct confirmation code A
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandBypassSelfDestruct);
+    /// Returns how much charge there is in the combat maneuvering system (0.0-1.0)
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, getCombatManeuverCharge);
     /// Commands this PlayerSpaceship to set its forward combat maneuver to the given value.
     /// Valid values are any from -1.0 (full reverse) to 1.0 (full forward).
     /// The maneuver continues until the ship's combat maneuver reserves are depleted.
     /// Crew screens allow only forward combat maneuvers, and the combat maneuver controls do not reflect a boost set via this command.
     /// Example: player:commandCombatManeuverBoost(0.5) -- commands boosting forward at half combat maneuver capacity
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandCombatManeuverBoost);
+    /// Commands this PlayerSpaceship to set its sideways combat maneuver to the given value.
+    /// Valid values are any from -1.0 (full left) to 1.0 (full right).
+    /// The maneuver continues until the ship's combat maneuver reserves are depleted.
+    /// The combat maneuver controls on the crew screens do not reflect a boost set via this command.
+    /// Example: player:commandCombatManeuverStrafe(0.5) -- commands boosting right at half combat maneuver capacity
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandCombatManeuverStrafe);
     /// Commands this PlayerSpaceship to launch a ScanProbe to the given coordinates.
     /// Example: player:commandLaunchProbe(1000,2000) -- commands launching a scan probe to 1000,2000
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, commandLaunchProbe);
@@ -2155,7 +2163,6 @@ void PlayerSpaceship::commandBypassSelfDestruct()
 
 void PlayerSpaceship::commandCombatManeuverBoost(float amount)
 {
-    combat_maneuver_boost_request = amount;
     sp::io::DataBuffer packet;
     packet << CMD_COMBAT_MANEUVER_BOOST << amount;
     sendClientCommand(packet);
@@ -2163,7 +2170,6 @@ void PlayerSpaceship::commandCombatManeuverBoost(float amount)
 
 void PlayerSpaceship::commandCombatManeuverStrafe(float amount)
 {
-    combat_maneuver_strafe_request = amount;
     sp::io::DataBuffer packet;
     packet << CMD_COMBAT_MANEUVER_STRAFE << amount;
     sendClientCommand(packet);

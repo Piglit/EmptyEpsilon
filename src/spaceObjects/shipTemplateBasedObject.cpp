@@ -175,8 +175,12 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(ShipTemplateBasedObject, SpaceObject)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, setRearShieldMax);
     /// Defines a function to call when this STBO takes damage.
     /// Passes the object taking damage and the instigator SpaceObject (or nil) to the function.
-    /// Example: stbo:onTakingDamage(function(this_stbo,instigator,damage_amount,damage_type) print(this_stbo:getCallSign() .. " was damaged by " .. instigator:getCallSign()) end)
+    /// Example: stbo:onTakingDamage(function(this_stbo, instigator) print(this_stbo:getCallSign() .. " was damaged by " .. instigator:getCallSign()) end)
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, onTakingDamage);
+    /// Defines a function to call when this STBO takes damage.
+    /// Passes the object taking damage, the damage amount and type and the instigator SpaceObject (or nil) to the function.
+    /// Example: stbo:onTakingDamageDetailed(function(this_stbo, damage_amount, damage_type, instigator) print(this_stbo:getCallSign() .. " was damaged by " .. instigator:getCallSign()) end)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplateBasedObject, onTakingDamageDetailed);
     /// Defines a function to call when this STBO is destroyed by taking damage.
     /// Passes the object taking damage and the instigator SpaceObject that delivered the destroying damage (or nil) to the function.
     /// Example: stbo:onTakingDamage(function(this_stbo,instigator) print(this_stbo:getCallSign() .. " was destroyed by " .. instigator:getCallSign()) end)
@@ -420,15 +424,25 @@ void ShipTemplateBasedObject::takeDamage(float damage_amount, DamageInfo info)
         takeHullDamage(damage_amount, info);
     }
 
-    if (hull_strength > 0 || !can_be_destroyed)
+    if (hull_strength > 0)
     {
         if (on_taking_damage.isSet())
         {
             if (info.instigator)
             {
-                on_taking_damage.call<void>(P<ShipTemplateBasedObject>(this), P<SpaceObject>(info.instigator), damage_amount, info.type);
+                on_taking_damage.call<void>(P<ShipTemplateBasedObject>(this), P<SpaceObject>(info.instigator));
             } else {
-                on_taking_damage.call<void>(P<ShipTemplateBasedObject>(this), nullptr, damage_amount, info.type);
+                on_taking_damage.call<void>(P<ShipTemplateBasedObject>(this));
+            }
+        }
+
+        if (on_taking_damage_detailed.isSet())
+        {
+            if (info.instigator)
+            {
+                on_taking_damage_detailed.call<void>(P<ShipTemplateBasedObject>(this), damage_amount, info.type, P<SpaceObject>(info.instigator));
+            } else {
+                on_taking_damage_detailed.call<void>(P<ShipTemplateBasedObject>(this), damage_amount, info.type);
             }
         }
     }
@@ -529,6 +543,11 @@ ESystem ShipTemplateBasedObject::getShieldSystemForShieldIndex(int index)
 void ShipTemplateBasedObject::onTakingDamage(ScriptSimpleCallback callback)
 {
     this->on_taking_damage = callback;
+}
+
+void ShipTemplateBasedObject::onTakingDamageDetailed(ScriptSimpleCallback callback)
+{
+    this->on_taking_damage_detailed = callback;
 }
 
 void ShipTemplateBasedObject::onDestruction(ScriptSimpleCallback callback)

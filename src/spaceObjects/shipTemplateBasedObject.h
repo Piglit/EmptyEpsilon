@@ -41,6 +41,7 @@ public:
 
     ScriptSimpleCallback on_destruction;
     ScriptSimpleCallback on_taking_damage;
+    ScriptSimpleCallback on_taking_damage_detailed;
 public:
     ShipTemplateBasedObject(float collision_range, string multiplayer_name, float multiplayer_significant_range=-1);
 
@@ -116,6 +117,7 @@ public:
     bool getPlayerShipType() { return player_ship_type; }
     void setPlayerShipType(EPlayerShipType type) { player_ship_type = type; }
     void onTakingDamage(ScriptSimpleCallback callback);
+    void onTakingDamageDetailed(ScriptSimpleCallback callback);
     void onDestruction(ScriptSimpleCallback callback);
 
     string getShieldDataString();

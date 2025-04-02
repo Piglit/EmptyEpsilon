@@ -22,7 +22,7 @@ LaserMissileRed::LaserMissileRed(): MissileWeapon("LaserMissileRed", MissileWeap
 
 void LaserMissileGreen::hitObject(P<SpaceObject> object)
 {
-    DamageInfo info(owner, DT_Kinetic, getPosition());
+    DamageInfo info(owner, DT_Energy, getPosition());
     object->takeDamage(category_modifier * 2, info);
     P<ExplosionEffect> e = new ExplosionEffect();
     e->setSize(category_modifier * 10);
@@ -30,7 +30,7 @@ void LaserMissileGreen::hitObject(P<SpaceObject> object)
 }
 void LaserMissileRed::hitObject(P<SpaceObject> object)
 {
-    DamageInfo info(owner, DT_Kinetic, getPosition());
+    DamageInfo info(owner, DT_Energy, getPosition());
     object->takeDamage(category_modifier * 2, info);
     P<ExplosionEffect> e = new ExplosionEffect();
     e->setSize(category_modifier * 10);

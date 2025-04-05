@@ -6,6 +6,31 @@
 -- @script scenario_10_empty
 
 function init()
+
+	print(toJSON({	-- works fine
+		a = {1,2,3},
+		b = {4,5,6},
+		c = {
+			{1,2,3},
+			{4,5,6},
+			{
+				{7,8,9},
+				{11,12}
+			}
+		}
+	}))
+	print(toJSON({
+		b = {
+			c = 3,
+		}
+	}))
+--	print(toJSON({	-- this one fails
+--		b = {
+--			c = 3,
+--			d = 4,
+--		}
+--	}))
+
     --SpaceStation():setPosition(1000, 1000):setTemplate('Small Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(-1000, 1000):setTemplate('Medium Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(1000, -1000):setTemplate('Large Station'):setFaction("Human Navy"):setRotation(random(0, 360))

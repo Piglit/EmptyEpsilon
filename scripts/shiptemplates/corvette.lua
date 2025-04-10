@@ -239,6 +239,7 @@ for cnt=1,5 do
     template:setSpeed(60 - 5 * cnt, 6, 10)
     template:setRadarTrace("transport.png")
     template:setDefaultAI("evasion")
+	template:setDockClasses(_("class", "Starfighter"), _("class", "Freighter"), _("class", "Cruiser"))
 
     if cnt > 2 then
         variation = template:copy("Personnel Jump Freighter " .. cnt):setLocaleName(string.format(_("ship", "Personnel Jump Freighter %d"), cnt))

@@ -9,6 +9,7 @@
 #include "random.h"
 #include "config.h"
 #include "io/json.h"
+#include "io/http/request.h"
 #include <SDL_assert.h>
 
 P<GameGlobalInfo> gameGlobalInfo;
@@ -845,6 +846,30 @@ static int getEEVersion(lua_State* L)
 /// Returns a string with the current EmptyEpsilon version number, such as "20221029".
 /// Example: getEEVersion() -- returns 20221029 on EE-2022.10.29
 REGISTER_SCRIPT_FUNCTION(getEEVersion);
+
+static int httpPost(lua_State* L)
+{
+    string ip_address = luaL_checkstring(L, 1);
+    int port = luaL_checkinteger(L, 2);
+    string uri = luaL_checkstring(L, 3);
+    string data = luaL_checkstring(L, 4);
+    sp::io::http::Request http(ip_address,port);
+    http.setHeader("content-type", "application/json");
+    auto response = http.post(uri, data);
+    if (response.status != 200)
+    {
+        lua_pushboolean(L, false);
+        LOG(WARNING) << "Failed http request (" << uri << "): " << response.status;
+        LOG(WARNING) << data;
+    }
+    else
+        lua_pushboolean(L, true);
+    return 1;
+}
+/// bool httpPost(ip, port, uri, data)
+/// Sends a http post request to ip on port with uri nad data (json)
+/// returs true if the call was successful, false otherwise
+REGISTER_SCRIPT_FUNCTION_NAMED(httpPost, "httpPost");
 
 static int luaLogPrint(lua_State* L, bool print)
 {

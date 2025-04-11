@@ -33,6 +33,21 @@ function plot_manager:init(plot_modules)
 
 end
 
+function plot_manager.gm_main_menu()
+	clearGMFunctions()
+	local plot_modules = plot_manager.plot_modules
+	for _,module in ipairs(plot_modules) do
+		if module.gm_menu ~= nil then
+			module:gm_menu()	-- create gm functions
+		end
+	end
+end
+
+-- global function for back to menu button
+function gm_menu_back()
+    addGMFunction(_("buttonGM", "Back to Main Menu"),plot_manager.gm_main_menu)
+end
+
 function plot_manager:update(delta)
 	-- only call getActivePlayerShips once per update
 	local active_player_ships = getActivePlayerShips()

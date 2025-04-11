@@ -1,7 +1,39 @@
 -- Name: Shattered Horizon
 -- Type: Larp
+
+TEST = true
 require("utils.lua")
 require("ee.lua")   -- SYSTEMS
+require("plot_manager.lua")
+
+require("map_shattered.lua")
+require("gravity_util.lua")
+require("player_ships_util.lua")
+require("perma_damage_util.lua")
+
+function init()
+	-- collection of scripts from different sources for the plot_manager
+	local plot_modules = {
+		map_shattered,
+		GRAVITY,
+		player_ships_util,
+		perma_damage_util,
+	}
+
+	plot_manager:init(plot_modules)
+
+	-- set scenario specific variables
+	GRAVITY.addGravitySource(map_shattered.planet, 80000)
+	GRAVITY.addException(map_shattered.flight_control)
+	GRAVITY.addException(map_shattered.ground)
+	player_ships_util.ground_station = map_shattered.ground
+
+	plot_manager.gm_main_menu()
+
+	if TEST then
+		player_ships_util:spawn_player_ship("Drexl", "Lambda T-4a", "Treuton Otro and Endira Vask's Lambda Shuttle", "Transport1")
+	end
+end
 
 
 --[[ Plots:
@@ -14,122 +46,20 @@ require("ee.lua")   -- SYSTEMS
     * GM-Triggered: ...
 --]]
 
-function init()
+function _init()
     Script():run("util_proximity_scan.lua")
 
     -- set params
     probe_amount=20
     player_offset = 0
-    moving_debris = {}
-    -- preflight
     current_preflight_player = nil
     --preflight_checklist_comms = nil
     preflight_queue = {}
     preflight_target_practice_number = 0
     -- other
     players_startup = {}
-    gravity_const = 100000000 
 
-    local orbit=35000
-    local radius=12300
- 
-    -- create system
-    planet1 = Planet():setPosition(0, 0):setPlanetRadius(radius):setDistanceFromMovementPlane(-3000):setPlanetSurfaceTexture("planets/planet-4-hd.png"):setPlanetCloudTexture("planets/clouds-2-hd.png"):setPlanetAtmosphereTexture("planets/atmosphere.png"):setPlanetAtmosphereColor(0.0,0.5,0.5):setDescriptions(_("Endor"),_("Forest Moon of Endor")):setCallSign(_("Endor")):setFaction("Environment")
-
-    Planet():setPosition(-5000, 2.5*orbit):setPlanetRadius(1000):setDistanceFromMovementPlane(-2000):setPlanetAtmosphereTexture("planets/star-1.png"):setPlanetAtmosphereColor(1.0,1.0,1.0)
-
-    atmo = Zone():setColor(0,0,128)
-    local zx = {}
-    local zy = {}
-    for i=0,15 do
-        local x,y = vectorFromAngle(i*360/16, 20000)
-        table.insert(zx, x)
-        table.insert(zy, y)
-    end
-    atmo:setPoints(
-        zx[1], zy[1],
-        zx[2], zy[2],
-        zx[3], zy[3],
-        zx[4], zy[4],
-        zx[5], zy[5],
-        zx[6], zy[6],
-        zx[7], zy[7],
-        zx[8], zy[8],
-        zx[9], zy[9],
-        zx[10], zy[10],
-        zx[11], zy[11],
-        zx[12], zy[12],
-        zx[13], zy[13],
-        zx[14], zy[14],
-        zx[15], zy[15],
-        zx[16], zy[16]
-    )
-
-    -- create stations and global accessible ships
-    flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(-3000, -30000)
-    flight_control:setDescription("A navigation satellite - the all-seeing eye of Tantal-3 flight control.")
-    flight_control:setLongRangeRadarRange(2*orbit):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ome")
-
-    buoy = CpuShip():setTemplate("NavSat"):setCallSign("Green Buoy"):setFaction("Endor"):setPosition(-400, -20000)
-    buoy:setDescription("A navigation buoy that marks the line between atmosphere and space.")
-    buoy:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
-    buoy2 = CpuShip():setTemplate("NavSat"):setCallSign("Red Buoy"):setFaction("Endor"):setPosition(zx[14], zy[14])
-    buoy2:setDescription("A navigation buoy that marks the line between atmosphere and space.")
-    buoy2:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
-    buoy3 = CpuShip():setTemplate("NavSat"):setCallSign("Magenta Bouy"):setFaction("Endor"):setPosition(zx[12], zy[12])
-    buoy3:setDescription("A navigation buoy that marks the line between atmosphere and space.")
-    buoy3:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
-
-    gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign("Ground Crew"):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
-
-    ground=PlayerSpaceship():setTemplate("Ground Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-800)
-    ground:setDescription(_("A ground station on Endor. It has a spaceport."))
-    ground:setLongRangeRadarRange(70000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
-    -- comms function comms_tantal_3 is no longer used when this is a playership
-    preflight_checklist_comms = ground    --set this to nil, if each ship should receive their own checklist. Otherwise ground gets all checklists
-    
-    geo_1=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("New Republic"):setCallSign("Pioneer-"..math.floor(random(1,20))):setPosition(33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    geo_2=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Independent"):setCallSign("Innocence-"..math.floor(random(1,20))):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    geo_3=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Syndicate"):setCallSign("Serpent-"..math.floor(random(1,20))):setPosition(33064, 2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-
-    -- place escort fighters for the freighters
-    local px,py = geo_1:getPosition()
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px+3000,py):orderDefendTarget(geo_1):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px-3000,py):orderDefendTarget(geo_1):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-A4 Y-Wing"):setPosition(px,py-3000):orderDefendTarget(geo_1):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-B Y-Wing"):setPosition(px,py+3000):orderDefendTarget(geo_1):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    px,py = geo_2:getPosition()
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(geo_2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(geo_2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(geo_2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(geo_2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    px,py = geo_3:getPosition()
-    CpuShip():setFaction("Syndicate"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(geo_3)
-    CpuShip():setFaction("Syndicate"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(geo_3)
-    CpuShip():setFaction("Syndicate"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(geo_3)
-
-    -- place asteroids and satellites
-    px,py = planet1:getPosition()
-    placeRandomAroundPoint(Asteroid,3000,orbit+radius,2*orbit+radius,px,py)
-    placeRandomAroundPoint(VisualAsteroid,1000,orbit+radius,2*orbit+radius+5000,px,py)
-    placeRandomAroundPoint(Asteroid,50,16000,orbit+radius,px,py)
-    placeArtifactsAroundPoint (16,orbit+radius,orbit+radius+500,px,py, true)    -- broken ones
-    placeArtifactsAroundPoint (16,orbit+radius,orbit+radius+500,px,py, false)   -- working ones
-    for dist=orbit+radius+8000,2*orbit,500 do
-        px,py = vectorFromAngle(random(0,360), dist)
-        placeRandomAroundPoint(Asteroid,50,1000,5000,px,py)
-    end
-    px,py = geo_1:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
-    px,py = geo_2:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
-    px,py = geo_3:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
-    createMovingDebris(20, 0, 2*orbit, 5000)
-
-    -- add GM functions
-    addGMFunction(_("buttonGM", "Lower Gravity"), lowerGravity)
-    addGMFunction(_("buttonGM", "Raise Gravity"), raiseGravity)
+	-- TODO
     GMPhase1 = _("buttonGM", "Satellite Clean Up")
     addGMFunction(GMPhase1,triggerPhase1)
     GMPhase2 = _("buttonGM", "Unusual Readings")
@@ -139,13 +69,6 @@ function init()
     GMDebris = _("buttonGM", "Spawn moving Debris")
     addGMFunction(GMDebris,triggerMovingDebris)
 
-    -- set database entry
-    mission_data = ScienceDatabase():setName(_('Mission data'))
-    item = mission_data:addEntry(_('Kessler Syndrome'))
-    item:setLongDescription(_([[The Kessler Syndrome is a no longer theoretical Scenario. It describes the situation where the density of objects a planet's orbit is high enough to cause a chain reaction of collisions. Each collision will create a huge debris field of multiple objects, and many of them will collide with other objects. Ultimately, the Orbit will be full of tiny objects destroying satellites and making space flight very hard, if not impossible. Also, much of our daily life depends on satellites, like communication and navigation. The Kessler Syndrome is a serious threat to all of this. This is why clearing space debris, and preventing that kind of scenario is extremely important.
-]]))
-    item:setImage("kessler_syndrome.png")
-
     -- handle new player ships
     onNewPlayerShip(init_player)
 
@@ -153,20 +76,6 @@ function init()
     mission_state = preflight
 end
 
-function init_player(player)
-    px,py = ground:getPosition()
-    player:setPosition(px+(100*player_offset),py-1200)
-    player:setHeading(0)
-    player:commandDock(ground)
-    player:addReputationPoints(50)
-    preparePreflight(player)
-    table.insert(players_startup, player)
-    if player_offset > 0 then
-        player_offset = -(player_offset+1)
-    else
-        player_offset = -(player_offset-1)
-    end
-end
 
 ------------------------ end of initialisation -----
 
@@ -863,431 +772,6 @@ function pfTargetPractice(delta, player, comms)
 end
 
 
--------- plotline zero: collect satellites ---------
-function collect_sats(delta)
-    if flight_control:isCommsInactive() then
-        -- FIXME: inits comms between players, does not send the message!
-        gm_dummy:sendCommsMessage(flight_control, _([[Greetings Flight Control!
-We see, you have a ship off the ground.
-They might help to reduce the problem of space debris in our orbit!
-You will need to forward this information to the ship:
-We found several suitable candidates for removal: they will appear with a four-digit call sign on your radar.
-A successful scan will reveal them the correct capturing frequency. Then, the shields of the ship will have to be calibrated with the correct frequency. Make sure they activate the shields after calibration. Then they can fly towards the pieces of space junk, and it should successfully be captured.
-
-As always, you can see this massage again, when you open your comms-log on the bottom of your screen - you may need to scroll down.
-]]))
-        mission_state = nil
-    end
-end
 
 
--- first plotline: abandoned droid, attacking if players get near
-function unusual_readings(delta)
-    gm_dummy:sendCommsMessage(flight_control, _([[We are getting strange readings from sector C7. It looks like the source is an abandoned droid. Please send a ship to investigate, but be careful.]]))
-    spyprobe = CpuShip():setFaction("Environment"):setTemplate("ANT 615"):setCallSign("NC3"):setHullMax(100):setHull(100):setPosition(48885, -45317):orderIdle()
-    spyprobe:setDescriptions(_("An abandoned droid"),_("An old military droid. Capturing frequency is blocked. Behaviour unknown."))
-    spyprobe:onDestruction(function(art, player)
-        mission_state=nil
-        gm_dummy:sendCommsMessage(flight_control, _([[The droid was destroyed. We can no longer find out what caused it's malfunction.]]))
-    end)
 
-    mission_state=spyprobe_spawned
-end
-
-function spyprobe_spawned(delta)
-    for i,p in ipairs(getActivePlayerShips()) do
-        if distance(p, spyprobe) < 7000 then
-            spyprobe:orderRoaming()
-            explosion_timer = 0
-            mission_state = start_havoc
-            state_step = 0
-            rx,ry = 0,0
-        end
-    end
-end
-
-function start_havoc(delta)
-    explosion_timer=explosion_timer+delta
-    if explosion_timer > 12 and state_step == 1 then
-        ExplosionEffect():setPosition(rx,ry):setSize(200)
-        placeRandomAroundPoint(Asteroid,8,1,500,rx,ry)
-        x, y = spyprobe:getPosition()
-        rx = x + random(0,1000)-500
-        state_step = state_step + 1
-    elseif explosion_timer > 5 and state_step == 0 then
-        gm_dummy:sendCommsMessage(flight_control, _([[The droid started to attack objects in its proximity! That way, more fragments will be created that may harm other ships. You must stop it! Try to NOT destroy it, target its impulse drive instead.]]))
-        local x, y = spyprobe:getPosition()
-        rx = x + random(0,1000)-500
-        ry = y + random(0,1000)-500
-        ExplosionEffect():setPosition(rx,ry):setSize(200)
-        rx=x
-        ry=y
-        state_step = state_step + 1
-    end
-    if spyprobe:getSystemHealth("impulse") <= 0.0 then
-        spy_x, spy_y = spyprobe:getPosition()
-        mission_state=spyprobe_disabled
-    end
-end
-
-function spyprobe_disabled(delta)
-    mission_state=nil
-    local x, y = spyprobe:getPosition()
-    local r = spyprobe:getRotation()
-    ElectricExplosionEffect():setPosition(x,y):setSize(200)
-    spyprobe:destroy()
-    local freq = math.floor(random(20, 40)) * 20
-    dormant_spyprobe=Artifact():setPosition(x, y):setCallSign("MiDro"):setScanningParameters(1, 2)
-    dormant_spyprobe:setDescriptions(_("A deactivated military droid. Scan to get the capturing frequency."),_("Capturing frequency:").." "..freq..". Set your shield frequency to match the capturing frequency and activate your shields to capture the droid.")
-    dormant_spyprobe:setModel("combatsat"):setRadarTraceIcon("probe_droid.png"):setRadarTraceScale(1)
-    dormant_spyprobe:setRotation(r)
-    dormant_spyprobe.freq=freq
-    dormant_spyprobe:onPickUp(function(art, player)
-        mission_state=nil
-        shieldfreq= 400+(player:getShieldsFrequency())*20
-        local ax, ay = art:getPosition()
-        local x, y = player:getPosition()
-        if shieldfreq == art.freq and player:getShieldsActive() == true then
-            ElectricExplosionEffect():setPosition(x,y):setSize(200)
-            player:takeDamage(1, "kinetic",ax, ay)
-            player:addReputationPoints(25)
-        else
-            ExplosionEffect():setPosition(x,y):setSize(200)
-            player:takeDamage(50, "kinetic",ax, ay)
-        end
-        gm_dummy:sendCommsMessage(flight_control, _([[It looks like the old droid was hit by a piece of space debris and thus reactivated. This also caused it to malfunction.]]))
-    end)
-end
-
-
--- second plot line    TODO
-
---    gm_dummy:sendCommsMessage(flight_control, _([[New orders: We have to shut down some rogue droids somehow. Therefore, you need to get a ship as close as possible to the control node that is commanding the droids. Luckily, the droids are in some kind of sleep mode right now, to recharge their batteries.
---Keep in mind that a ship should turn off all non-essential systems and devices as soon as they are getting closer to the dangerous droids.]]))
---This ship has a transmitter installed that is strong enough to overwhelm the jammer of the control node and to send a shutdown signal. But you have to be very close for it to work.
---We detected the control node at a heading of about 125 degrees from our position, but a newly formed dust cloud prevents us to get more details. We don't know if this cloud was created intentionally to serve as a hiding place. It might as well be a side effect of their destructive activities or just fuel leaking out of their old tanks. Good luck!
-
-
-function towards_commandnode(delta)
-    -- TODO player2 does not exist!
-    if distance(player2, geo_1) > 10000 and not cloud_hint and player2:hasPlayerAtPosition("Operations") then
-        ground:sendCommsMessage(player2 ,_([[The dust cloud is causing large electromagnetic interferences. Which means that as soon you are far enough away from the station, you can guess it's direction by looking at the red line at the edge of your radar screen.]]))
-        cloud_hint=true
-    end
-
-    if distance(player2, command_node) < 1001 then
-        for n=1,10 do
-            probe[n]:orderStandGround():setSystemHealth("Maneuvering",0.5)
-        end
-        player2:addCustomButton("Engineering","activate_transmitter_btn",_("Activate transmitter"),activate_transmitter)
-        player2:addCustomButton("Engineering+","activate_transmitter_btn_plus",_("Activate transmitter"),activate_transmitter)
-        player2:removeCustom("out_of_reach_info")
-        player2:removeCustom("out_of_reach_info_plus")
-        mission_state=nil
-   end
-end
-
-function activate_transmitter()
-    charge_timer=0
-    transmitter_charge=0
-    transmitter_txt=0
-    transmitter_step = 10
-    if player2:hasPlayerAtPosition("Relay") then
-        ground:sendCommsMessage(player2, _([[As soon as your transmitter is fully charged, the weapons officer has to sync the shields with the transmitter (a Button will appear on the console). Then, you yourself on Relay will have to send the signal. (There will be a button for this as well.) Good luck!]]))
-    else
-        ground:sendCommsMessage(player2, _([[As soon as your transmitter is fully charged, the weapons officer has to sync the shields with the transmitter (a Button will appear on the console). Then, you yourself on Operations will have to send the signal. (You will have to change your sidebar from 'Scanning' to 'Other' by pressing the 'Scanning' headline or the arrows next to it.) Good luck!]]))
-    end
-    mission_state=boot_transmitter
-    player2:removeCustom("activate_transmitter_btn")
-    player2:removeCustom("activate_transmitter_btn_plus")
-    globalMessage(_("Charging of Transmitter initiated"))
-    player2:addCustomInfo("Engineering","activate_transmitter_info",_("Transmitter is charging.."))
-    player2:addCustomInfo("Engineering+","activate_transmitter_info_plus",_("Transmitter is charging.."))
-    escalation=20
-    for n=1,probe_amount do
-        probe[n]:orderRoaming():setSystemHealth("Maneuvering",0.85)
-    end
-end
-
-function boot_transmitter(delta)
-    charge_timer=charge_timer+delta
-    transmitter_charge=charge_timer+10
-
-    if charge_timer>20 and transmitter_charge > (transmitter_txt + transmitter_step) then
-        transmitter_txt = math.floor(transmitter_txt + transmitter_step)
-        player2:addCustomInfo("Engineering","activate_transmitter_info",_("Transmitter charging")..": "..transmitter_txt.."%")
-        player2:addCustomInfo("Engineering+","activate_transmitter_info_plus",_("Transmitter charging")..": "..transmitter_txt.."%")
-    end
-    if charge_timer>20 and escalation==20 then
-        for n=1,10 do
-            probe[n]:setImpulseMaxSpeed(100):setSystemHealth("Impulse",0.1)
-
-        end
-        escalation=30
-    end
-    if charge_timer>30 and escalation==30 then
-        escalation=40
-    end
-    if charge_timer>40 and escalation==40 then
-        probe[probe_amount]:setWeaponStorage("HVLI",1):setWeaponStorageMax("HVLI",1):setWeaponTubeCount(1):setImpulseMaxSpeed(100)
-        escalation=60
-    end
-    if charge_timer>60 and escalation==60 then
-        escalation=80
-        transmitter_step=5
-    end
-    if charge_timer>80 and escalation==80 then
-                player2:addCustomMessage("Operations", "send_button_message", _("If not done yet, you should now change the headline of your sidebar from 'scan' to 'other', so you can send the signal as soon as it is available."))
-        transmitter_step=1.5
-        escalation=85
-    end
-    if charge_timer>90 then
-        globalMessage(_("Transmitter is ready to be synced with shields"))
-        player2:removeCustom("out_of_reach_info")
-        player2:removeCustom("activate_transmitter_btn")
-        player2:addCustomInfo("Engineering","activate_transmitter_info",_("Transmitter fully charged"))
-        player2:addCustomInfo("Engineering+","activate_transmitter_info_plus",_("Transmitter fully charged"))
-        player2:addCustomInfo("Weapons","connect_to_shields_info",_("Transmitter:"))
-        player2:addCustomInfo("Tactical","connect_to_shields_info_tactical",_("Transmitter:"))
-        player2:addCustomButton("Weapons","connect_to_shields_btn",_("Sync with shields"),connect_to_shields)
-        player2:addCustomButton("Tactical","connect_to_shields_btn_tactical",_("Sync with shields"),connect_to_shields)
-        mission_state=nil
-    end
-end
-
-function connect_to_shields()
-    globalMessage(_("Syncing shields with transmitter. Please stand by..."))
-    player2:removeCustom("connect_to_shields_btn")
-    player2:removeCustom("connect_to_shields_btn_tactical")
-    player2:addCustomInfo("Weapons","connect_to_shields_info",_("Syncing transmitter..."))
-    player2:addCustomInfo("Tactical","connect_to_shields_info_tactical",_("Syncing transmitter..."))
-    mission_state= connecting_shields
-    connect_timer=0
-end
-
-function connecting_shields(delta)
-    connect_timer=connect_timer+delta
-    if connect_timer > 5 then
-        player2:addCustomButton("Relay","send_signal_btn",_("send signal"),send_signal)
-        player2:removeCustom("transmitter_unlinked_info")
-        player2:addCustomButton("Operations","send_signal_btn_ops",_("send signal"),send_signal)
-        player2:addCustomInfo("Weapons","connect_to_shields_info",_("Transmitter is ready"))
-        player2:addCustomInfo("Tactical","connect_to_shields_info_tactical",_("Transmitter is ready"))
-        mission_state=nil
-    end
-end
-
-function send_signal()
-    local x, y = command_node:getPosition()
-    ElectricExplosionEffect():setPosition(x,y):setSize(500)
-    player2:removeCustom("send_signal_btn")
-    player2:removeCustom("send_signal_btn_ops")
-    sending_timer=0
-
-    BeamEffect():setSource(player2, 0, 0, 0):setTarget(command_node, 0, 0):setDuration(3):setRing(false):setTexture("texture/electric_sphere_texture.png")
-    mission_state=sending_signal
-    for n=1,probe_amount do
-        probe[n]:setFaction("Independent"):setScanned(true):orderIdle()
-    end
-end
-
-function sending_signal(delta)
-    sending_timer=sending_timer+delta
-    if sending_timer>3 then
-        globalMessage(_("Rogue satellites shut down"))
-        ground:sendCommsMessage(player2, _([[Congratulations! You saved the global satellite network from destruction. I call this a successful test run and we're gonna initiate the production of our fleet of tidying ships immediately. So eventually, we will get rid of this space junk problem once and for all. You and the rest of your crew did a great job!]]))
-        mission_state=nil
-    end
-end
-
--- -------------------------------- --
-
-function update(delta)
-    moveDebris(delta)
-    gravity(delta)
-    permaDamageSystems(delta)
-
-    if mission_state ~= nil then
-        mission_state(delta)
-    end
-end
-
---------  GM functions
-function triggerPhase1()
-    mission_state = collect_sats
-    removeGMFunction(GMPhase1)
-end
-
-function triggerPhase2()
-    mission_state = unusual_readings
-    removeGMFunction(GMPhase2)
-end
-
-function triggerPhase4()
-    initSatNetwork()
-    cloud_hint=false
-    mission_state = towards_commandnode
-    removeGMFunction(GMPhase2)
-    removeGMFunction(GMPhase4)
-end
-
-function triggerMovingDebris()
-    onGMClick(function(x,y) 
-        onGMClick(nil)
-        createMovingDebris(10, x, y, 1000)
-    end)
-end
-
-function raiseGravity()
-    gravity_const = gravity_const * 0.75
-end
-
-function lowerGravity()
-    gravity_const = gravity_const * 1.25
-end
-
--------- Misc. functions --------
-
-function initSatNetwork()
-    Nebula():setPosition(66578, -12988)
-    Nebula():setPosition(72935, -15086)
-    Nebula():setPosition(71476, -8925)
-
-    placeProbesAroundPoint(probe_amount,2000,5000,70000,-12000)
-    placeRandomAroundPoint(VisualAsteroid,50,1,5000,70000,-12000)
-    command_node= WarpJammer():setPosition(70000,-12000):setRange(2500):setCallSign("Control"):setDescription(_("This is the command node that controls the rogue satellites. We have to shut it down!"))
-    command_node:onDestruction(function()  -- fallback in case the command node somehow gets destroyed, so the scenario is still winnable
-        command_node=Artifact():setPosition(70000,-12000):setCallSign("Control"):setModel("shield_generator"):setDescription(_("This is the command node that controls the rogue satellites. We have to shut it down!"))
-    end)
-
-    gm_dummy:sendCommsMessage(flight_control, _([[Bad news: A whole group of military droids that should have been out of service just woke up. If we don't do anything against them, they will slowly but surely destroy all objects they can find. The debris will spread all over the orbit, destroying all our communications satellites.
-
-They emit heavy electromagnetic-signals. Your scanners will show the direction of those signals als wiggling blue line in direction 100.]]))
-
-end
-
-function placeProbesAroundPoint( amount, dist_min, dist_max, x0, y0)
-    probe ={}
-    for n=1,amount do
-        local r = random(0, 360)
-        local distance = random(dist_min, dist_max)
-        x = x0 + math.cos(r / 180 * math.pi) * distance
-        y = y0 + math.sin(r / 180 * math.pi) * distance
-        probe[n] = CpuShip():setFaction("Environment"):setAI("fighter"):setTemplate("ANT 615"):setPosition(x,y):orderIdle():setCallSign("IC"..n+5):setCommsFunction(no_reply)
-        probe[n]:setDescriptions(_("An old military droid"), _("An old military droid. Capturing frequency is blocked."))
-        probe[n]:setImpulseMaxSpeed(0)
-    end
-end
-
-function placeArtifactsAroundPoint( amount, dist_min, dist_max, x0, y0, broken)
-    local callsign_counter =1000
-    for n=1,amount do
-        local r = random(0, 360)
-        local distance = random(dist_min, dist_max)
-        x = x0 + math.cos(r / 180 * math.pi) * distance
-        y = y0 + math.sin(r / 180 * math.pi) * distance
-
-        if broken then
-            local freq = math.floor(random(20, 40)) * 20
-            callsign_counter = callsign_counter + math.floor(random(1,200))
-            local callsign = callsign_counter
-            debris = Artifact():setPosition(x, y):setDescriptions(_("A piece of space junk. Scan to find out the capturing frequency"), _("Capturing frequency:").." "..freq):setScanningParameters(1, 2)
-            debris.freq=freq
-            if freq < 595 then
-                debris:setModel("debris-cubesat")
-            else
-                debris:setModel("debris-blob")
-            end
-            debris:allowPickup(true)
-            debris:setCallSign(callsign):setFaction("Endor"):setRadarTraceColor(255,235,170)
-
-            debris:onPickUp(function(art, player)
-                shieldfreq= 400+(player:getShieldsFrequency())*20
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                if shieldfreq == art.freq and player:getShieldsActive() == true then
-                    ElectricExplosionEffect():setPosition(x,y):setSize(200)
-                    player:takeDamage(1, "kinetic",ax,ay )
-                    player:addReputationPoints(10)
-                else
-                    ExplosionEffect():setPosition(ax,ay):setSize(200)
-                    player:takeDamage(50, "kinetic",ax,ay )
-                end
-            end)
-
-        else
-            callsign="TTY"..string.format("%02d",n)
-            sat = Artifact():setPosition(x, y):setDescriptions(_("An operational satellite"),_("This satellite is fully operational. Do not capture!")):setScanningParameters(1, 2)
-            sat:setModel("cubesat"):setCallSign(callsign):setRadarTraceIcon("satellite.png"):setRadarTraceScale(1)
-            sat:allowPickup(true)
-
-            sat:onPickUp(function(art, player)
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                ExplosionEffect():setPosition(ax,ay):setSize(200)
-                player:takeDamage(50, "kinetic",ax,ay )
-                player:setReputationPoints((player:getReputationPoints()-10))
-            end)
-        end
-    end
-end
-
-function createMovingDebris(amount, px, py, rad)
-    local objs = placeRandomAroundPoint(Asteroid,amount,0,rad,-px,-py)
-    for i,o in ipairs(objs) do
-        o.speed = random(0.2, 1.0)
-        o.angle = angleRotation(o, planet1)
-        o.distance = distance(o, planet1)
-        o:setSize(50)
-        table.insert(moving_debris, o)
-    end
-end
-
-function moveDebris(delta)
-    local px, py = planet1:getPosition()
-    for i=1,#moving_debris do
-        local ta = moving_debris[i]
-        if ta ~= nil and ta:isValid() then
-            ta.angle = ta.angle + ta.speed * delta
-            if ta.angle >= 360 then 
-                ta.angle = 0
-            end
-            local pmx, pmy = vectorFromAngle(ta.angle, ta.distance)
-            ta:setPosition(px+pmx,py+pmy)
-        end
-    end
-end
-
-function gravity(delta)
-    for _,p in ipairs(players_startup) do
-        if p ~= nil and p:isValid() and p:getDockingState() == 0 then
-            local angle = angleRotation(p, planet1)
-            local dist_0 = distance(p, planet1)
-            if dist_0 < 80000 then
-                local dist_1 = (80000-dist_0)^2 / gravity_const * delta
-                local pmx, pmy = vectorFromAngle(angle, dist_0 - dist_1)
-                local px, py = p:getPosition()
-                p:setPosition(-pmx,-pmy)
-            end
-        end
-    end
-end
-
-function permaDamageSystems(delta)
-    for _,p in ipairs(players_startup) do   -- use the same table as gravity
-        if p ~= nil and p:isValid() then
-            for _, system in ipairs(SYSTEMS) do
-                if p:hasSystem(system) then
-                    if p[system] == nil then
-                        p[system] = p:getSystemHealth(system)
-                    end
-                    local diff = p[system] - p:getSystemHealth(system)
-                    p[system] = p:getSystemHealth(system)
-                    if diff > 0 then
-                        p:setSystemHealthMax(system, p:getSystemHealthMax(system) - diff / 20)
-                    end
-                end
-            end
-        end
-    end
-end

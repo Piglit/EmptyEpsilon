@@ -25,6 +25,7 @@ private:
 
     GuiKeyValueDisplay* info_reputation;
     GuiKeyValueDisplay* info_clock;
+    GuiKeyValueDisplay* callsign_display;
 
     GuiButton* place_waypoint_button;
     GuiButton* delete_waypoint_button;

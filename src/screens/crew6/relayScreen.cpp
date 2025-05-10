@@ -155,6 +155,9 @@ RelayScreen::RelayScreen(GuiContainer* owner, bool allow_comms)
     info_clock = new GuiKeyValueDisplay(option_buttons, "INFO_CLOCK", 0.4f, tr("Clock") + ":", "");
     info_clock->setSize(GuiElement::GuiSizeMax, 40);
 
+    callsign_display = new GuiKeyValueDisplay(option_buttons, "CALLSIGN_DISPLAY", 0.4f, tr("Callsign") + ":", "");
+    callsign_display->setSize(GuiElement::GuiSizeMax, 40);
+
     (new GuiAlertLevelSelect(this, ""))->setPosition(-20, -70, sp::Alignment::BottomRight)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "verticalbottom");
 
     (new GuiCustomShipFunctions(this, relayOfficer, ""))->setPosition(-20, 240, sp::Alignment::TopRight)->setSize(250, GuiElement::GuiSizeMax);
@@ -297,6 +300,7 @@ void RelayScreen::onDraw(sp::RenderTarget& renderer)
 
         // Update mission clock
         info_clock->setValue(gameGlobalInfo->getMissionTime());
+        callsign_display->setValue(string(my_spaceship->callsign));
 
         launch_probe_button->setText(tr("Launch Probe") + " (" + string(my_spaceship->scan_probe_stock) + ")");
     }

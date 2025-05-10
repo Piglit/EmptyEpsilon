@@ -91,6 +91,9 @@ OperationScreen::OperationScreen(GuiContainer* owner)
     info_clock = new GuiKeyValueDisplay(stats, "INFO_CLOCK", 0.45f, tr("Clock") + ":", "");
     info_clock->setTextSize(20)->setSize(240, 40);
 
+    callsign_display = new GuiKeyValueDisplay(stats, "CALLSIGN_DISPLAY", 0.45, tr("Callsign")+":", "");
+    callsign_display->setTextSize(20)->setSize(240, 40);
+
     mode = TargetSelection;
 
     new ShipsLog(this);
@@ -107,10 +110,12 @@ void OperationScreen::onDraw(sp::RenderTarget& target)
 
         // Update mission clock
         info_clock->setValue(gameGlobalInfo->getMissionTime())->show();
+        callsign_display->setValue(string(my_spaceship->callsign))->show();
     }
     else
     {
         info_reputation->hide();
         info_clock->hide();
+        callsign_display->hide();
     }
 }

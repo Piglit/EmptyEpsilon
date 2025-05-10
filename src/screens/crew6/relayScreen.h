@@ -33,6 +33,7 @@ private:
 
     GuiKeyValueDisplay* info_reputation;
     GuiKeyValueDisplay* info_clock;
+    GuiKeyValueDisplay* callsign_display;
     GuiElement* option_buttons;
     GuiButton* hack_target_button;
     GuiToggleButton* link_to_science_button;

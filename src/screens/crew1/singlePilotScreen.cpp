@@ -73,10 +73,10 @@ SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
 
     // Ship stats and combat maneuver at bottom right corner of left panel.
     combat_maneuver = new GuiCombatManeuver(this, "COMBAT_MANEUVER");
-    combat_maneuver->setPosition(-20, -180, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
+    combat_maneuver->setPosition(-20, -220, sp::Alignment::BottomRight)->setSize(200, 150)->setVisible(my_spaceship && my_spaceship->getCanCombatManeuver());
 
     auto stats = new GuiElement(this, "STATS");
-    stats->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(240, 160)->setAttribute("layout", "vertical");
+    stats->setPosition(-20, -20, sp::Alignment::BottomRight)->setSize(240, 200)->setAttribute("layout", "vertical");
     energy_display = new GuiKeyValueDisplay(stats, "ENERGY_DISPLAY", 0.45, tr("Energy"), "");
     energy_display->setIcon("gui/icons/energy")->setTextSize(20)->setSize(240, 40);
     heading_display = new GuiKeyValueDisplay(stats, "HEADING_DISPLAY", 0.45, tr("Heading"), "");
@@ -85,6 +85,8 @@ SinglePilotScreen::SinglePilotScreen(GuiContainer* owner)
     velocity_display->setIcon("gui/icons/speed")->setTextSize(20)->setSize(240, 40);
     shields_display = new GuiKeyValueDisplay(stats, "SHIELDS_DISPLAY", 0.45, tr("Shields"), "");
     shields_display->setIcon("gui/icons/shields")->setTextSize(20)->setSize(240, 40);
+    callsign_display = new GuiKeyValueDisplay(stats, "CALLSIGN_DISPLAY", 0.45, tr("Callsign"), "");
+    callsign_display->setIcon("gui/icons/station-relay")->setTextSize(20)->setSize(240, 40)->setMargins(0,0,0,-8);
 
     // Unlocked missile aim dial and lock controls.
     missile_aim = new AimLock(this, "MISSILE_AIM", radar, -90, 360 - 90, 0, [this](float value){
@@ -161,6 +163,7 @@ void SinglePilotScreen::onDraw(sp::RenderTarget& renderer)
             shields_display->hide();
         }
 
+        callsign_display->setValue(string(my_spaceship->callsign));
         missile_aim->setVisible(tube_controls->getManualAim());
 
         targets.set(my_spaceship->getTarget());

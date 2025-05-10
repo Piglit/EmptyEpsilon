@@ -22,6 +22,7 @@ private:
     GuiKeyValueDisplay* heading_display;
     GuiKeyValueDisplay* velocity_display;
     GuiKeyValueDisplay* shields_display;
+    GuiKeyValueDisplay* callsign_display;
     GuiElement* warp_controls;
     GuiElement* jump_controls;
     GuiCombatManeuver* combat_maneuver;

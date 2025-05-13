@@ -1,0 +1,53 @@
+{
+  "_comment: this file does not affect the layout": 0,
+  "_comment: keys starting with _ are not listed and are handled special": 0,
+  "_comment: values are in percent of the parent value": 0,
+  "_comment: the last entry gets the remainder (positive or negative)": 0,
+  "Gewinn": 10,
+  "Gebühren": [25, {
+      "bei Start": [15,20],
+      "bei Landung": [15,20],
+      "Start- und Landegebühr": [8,9],
+      "Personalunkosten": [2,3],
+      "Infrastrukturkosten ": [2,3],
+      "Betankung": [2,3],
+	  "Temporärer Energiekostenzuschlag": [1.5, 2],
+	  "Versorgungsgebühr": [1.5, 2],
+      "Positionsgebühr": [1,2],
+      "Lärmzuschlag": [0.9,1.0],
+      "Sonderdienste": [0.8,0.9],
+      "Raumhafendienste": [0.7,0.8],
+      "Emissionszuschlag": [0.5,0.6],
+      "Infrastrukturgebühr": [0.4,0.5],
+      "Abstellgebühr": [40,50]
+  }],
+  "Verhandelbar": [20, {
+    "Umsatzsteuer des Imperiums": 20,
+    "Sicherheitsgebühr": 16,
+    "Orbitalverkehrsabgabe": 13,
+    "Frachttransfergebühr": 10,
+    "Freiwillige Spende an Crimson-Dawn": 7,
+    "Reinigung": 5,
+    "Aufstocken der Lebenserhaltungssysteme": 4,
+    "Förderungspauschale pro Abflug": 3,
+    "Nachtzuschlag": 2,
+	"Registrierungsgebühr": 1.5,
+    "Trinkgelder": 1,
+    "Technikkosten": 19
+  }],
+  "Rabatte": [-10, {
+	"Wiederaufforstungskosten": -5,
+	"Vielfliegerzuschlag": -3,
+	"Sonderbehandlung": -4,
+	"Negative Auffälligkeiten beim Erscheinungsbild": -1,
+	"Missachtung der orbitalen Verkehrsordnung": -5,
+	"Verschmutzung": -10,
+	"Schiffstierhaltung": -2,
+	"Verursachen von Verzögerungen im Betriebsablauf": -8,
+    "Verwendung lärmmindernder Steuerflächen": 5,
+	"Inflationsausgleich": 10,
+    "Schul- und Einweisungsflüge": 15,
+    "Crimson Dawn Mitgliederrabatt": 30,
+    "Ambulanz und Rettungsflüge": 40
+  }]
+}

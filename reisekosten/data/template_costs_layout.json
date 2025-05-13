@@ -1,0 +1,67 @@
+{
+  "_comment: this file determines the layout": 0,
+  "_comment: since json objects are unordered, all keys start with a number": 0,
+  "column_left": {
+    "Raumhafengebühren": [
+      "Start- und Landegebühr",
+      "Positionsgebühr",
+      "Abstellgebühr",
+	  "Registrierungsgebühr",
+	  "Versorgungsgebühr",
+      "Infrasturkturgebühr",
+      "Lärmzuschlag",
+      "Nachtzuschlag",
+      "Emissionszuschlag",
+	  "Temporärer Energiekostenzuschlag",
+      "Raumhafendienste",
+      "Sonderdienste"
+    ],
+    "Bodenabfertigung": [
+      "bei Start",
+      "bei Landung"
+    ],
+    "Flugsicherung": [
+      "Personalunkosten",
+      "Infrastrukturkosten"
+    ],
+    "Dienstleistungen": [
+      "Aufstocken der Lebenserhaltungssysteme",
+      "Reinigung",
+      "Betankung"
+    ]
+  },
+  "column_right": {
+    "Reparaturen": [],
+    "Technikkosten": [],
+    "Treibstoffkosten": [],
+    "Trinkgelder": [],
+    "Förderprogramm für lokale Kleinunternehmen": [
+      "(ermöglich durch Crimson Dawn)",
+      "Förderungspauschale pro Abflug"
+    ],
+    "Steuern": [
+      "Orbitalverkehrsabgabe",
+      "Frachttransfergebühr",
+      "Sicherheitsgebühr",
+      "Freiwillige Spende an Crimson-Dawn",
+      "Umsatzsteuer des Imperiums"
+    ],
+    "Strafzahlungen": [
+	  "Missachtung der orbitalen Verkehrsordnung",
+	  "Negative Auffälligkeiten beim Erscheinungsbild",
+	  "Schiffstierhaltung",
+	  "Sonderbehandlung",
+	  "Verschmutzung",
+	  "Verursachen von Verzögerungen",
+	  "Vielfliegerzuschlag",
+	  "Wiederaufforstungskosten"
+    ],
+    "Rabatte": [
+      "Schul- und Einweisungsflüge",
+      "Ambulanz und Rettungsflüge",
+      "Verwendung Lärmmindernder Steuerflächen",
+      "Crimson Dawn Mitgliederrabatt",
+	  "Inflationsausgleich"
+	]
+  }
+}

@@ -1,7 +1,7 @@
 -- Name: Shattered Horizon
 -- Type: Larp
 
-TEST = false
+TEST = true
 require("utils.lua")
 require("ee.lua")   -- SYSTEMS
 require("plot_manager.lua")

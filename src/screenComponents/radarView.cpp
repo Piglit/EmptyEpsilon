@@ -718,7 +718,7 @@ void GuiRadarView::drawTargets(sp::RenderTarget& renderer)
         auto object_position_on_screen = worldToScreen(obj->getPosition());
         float r = obj->getRadius() * scale;
         sp::Rect object_rect(object_position_on_screen.x - r, object_position_on_screen.y - r, r * 2, r * 2);
-        if (obj != my_spaceship && rect.overlaps(object_rect))
+        if (rect.overlaps(object_rect))
         {
             renderer.drawSprite("redicule.png", object_position_on_screen, 48);
         }

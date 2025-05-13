@@ -53,7 +53,7 @@ void TargetsContainer::setToClosestTo(glm::vec2 position, float max_range, ESele
     foreach(Collisionable, obj, list)
     {
         P<SpaceObject> spaceObject = obj;
-        if (spaceObject && spaceObject != my_spaceship)
+        if (spaceObject)
         {
             switch(selection_type)
             {

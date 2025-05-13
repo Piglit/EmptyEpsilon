@@ -32,7 +32,7 @@ REGISTER_SCRIPT_SUBCLASS(Asteroid, SpaceObject)
 
 REGISTER_MULTIPLAYER_CLASS(Asteroid, "Asteroid");
 Asteroid::Asteroid()
-: SpaceObject(random(110, 130), "Asteroid")
+: SpaceObject(random(60, 200), "Asteroid")
 {
     setRotation(random(0, 360));
     rotation_speed = random(0.1f, 0.8f);
@@ -82,7 +82,7 @@ void Asteroid::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float
     if (size != getRadius())
         setRadius(size);
 
-    renderer.drawSprite("radar/blip.png", position, std::max(6.0f, (getRadius() * 2.0f) * scale), glm::u8vec4(255, 200, 100, 255));
+    renderer.drawRotatedSprite("radar/asteroid.png", position, std::max(6.0f, (getRadius() * 2.0f) * scale), getRotation()-rotation, glm::u8vec4(64, 64, 128, 255));
 }
 
 void Asteroid::collide(Collisionable* target, float force)

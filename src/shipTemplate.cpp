@@ -802,6 +802,12 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     result->long_range_radar_range = long_range_radar_range;
     result->short_range_radar_range = short_range_radar_range;
     result->impulse_sound_file = impulse_sound_file;
+    result->auto_repair_enabled = auto_repair_enabled;
+    result->auto_coolant_enabled = auto_coolant_enabled;
+    result->auto_reload_tube_enabled = auto_reload_tube_enabled;
+    result->spawnable_ships = spawnable_ships;  // is a vector
+    result->jump_drive_min_distance = jump_drive_min_distance;
+    result->jump_drive_max_distance = jump_drive_max_distance;
 
     result->rooms = rooms;
     result->doors = doors;

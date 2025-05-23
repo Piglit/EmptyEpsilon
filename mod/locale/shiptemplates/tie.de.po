@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#: mod/shiptemplates/tie.lua:5 mod/shiptemplates/tie.lua:49
+#: mod/shiptemplates/tie.lua:59
+msgctxt "class"
+msgid "Starfighter"
+msgstr "Raumjäger"
+
+#: mod/shiptemplates/tie.lua:5
+msgctxt "subclass"
+msgid "Fighter"
+msgstr "Jäger"
+
+#: mod/shiptemplates/tie.lua:39 mod/shiptemplates/tie.lua:97
+msgctxt "class"
+msgid "Escape Pod"
+msgstr "Rettungskapsel"
+
+#: mod/shiptemplates/tie.lua:49
+msgctxt "subclass"
+msgid "Interceptor"
+msgstr "Abfangjäger"
+
+#: mod/shiptemplates/tie.lua:59
+msgctxt "subclass"
+msgid "Bomber"
+msgstr "Bomber"

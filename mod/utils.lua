@@ -1,3 +1,4 @@
+require "serpent.lua"
 --- Utils.
 --
 -- Bunch of useful utility functions that can be used in any scenario script.
@@ -436,7 +437,7 @@ end
 
 -- removes all elements (in place!) that do not meet the condition
 function arrayFilter(array, condition)
-	local source_idx, target_idx = 0, #array + 1 
+	local source_idx, target_idx = #array +1, #array + 1 
 	for i = 1, #array do
 		if not condition(array[i]) then
 			source_idx = i+1
@@ -451,6 +452,7 @@ function arrayFilter(array, condition)
 			target_idx = target_idx + 1
 		end
 	end
-	array[target_idx] = nil
+	for i = target_idx, #array do
+		array[i] = nil
+	end
 end
--- TODO test

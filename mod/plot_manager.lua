@@ -14,6 +14,7 @@ function plot_manager:init(plot_modules)
 				module:onNewPlayerShip(ship)
 			end
 		end
+		ship:onProbeLaunch(plot_manager.onProbeLaunch)
 	end)
 
 	-- call init and initTest on all modules that have those functions
@@ -31,6 +32,14 @@ function plot_manager:init(plot_modules)
 	local storage = getScriptStorage()
 	storage["plot_manager"] = self
 
+end
+
+function plot_manager.onProbeLaunch(ship, probe)
+	for _,module in ipairs(plot_manager.plot_modules) do
+		if module.onProbeLaunch ~= nil then
+			module:onProbeLaunch(ship, probe)
+		end
+	end
 end
 
 function plot_manager.gm_main_menu()

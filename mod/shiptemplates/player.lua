@@ -268,7 +268,7 @@ template:setJumpDrive(true)
 template:setWarpSpeed(750)
 template:setWarpDrive(false)
 template:setDockClasses(_("class", "Satellite"))
-addSystemsMulitGun(template)
+addSystemsMultiGun(template)
 
 --[[ Player Laser Battlecruiser --]]
 template = ShipTemplate():setName("Hathcock"):setLocaleName(_("playerShip", "Hathcock")):setClass(_("class", "Frigate"), _("subclass", "Torpedoboat Destroyer")):setType("playership") 

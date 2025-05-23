@@ -210,7 +210,7 @@ addSystemsHeavy(template)
 -- GM: adjust Hull, Shields, Beam-Ranges
 --]]
 
-template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Navigation")):setType("playership")
+template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Navigation")):setType("ship")
 template:setModel("cubesat")
 template:setRadarTrace("satellite.png")
 template:setDescription([[The eyes of flight control]])
@@ -233,6 +233,8 @@ template:setAutoCoolant(true)
 template:setAutoRepair(true)
 
 addSystemsHeavy(template)
+varplayer = template:copy(" NavSat")
+varplayer:setType("playership")
 
 -- Station
 template = ShipTemplate():setName("Ground Station"):setLocaleName(_("Medium Station")):setModel("space_station_3"):setType("playership")
@@ -253,7 +255,7 @@ template:setCanSelfDestruct(false)
 
 template:setAutoCoolant(true)
 template:setAutoRepair(true)
-template:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"), _("class", "Cruiser"))
+template:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 addSystemsHeavy(template)
 
 template = ShipTemplate():setName("TIE-Pilot"):setClass(_("class", "Escape Pod"), _("subclass", "Pilot"))

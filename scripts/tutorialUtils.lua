@@ -1,7 +1,22 @@
 --[[ Assist function in creating tutorial sequences --]]
+function initPlayerShip()
+    player = PlayerSpaceship():setFaction("Human Navy")--:setTemplate("Phobos M3P")
+    tutorial:setPlayerShip(player)	-- if tutorial_ship is given, set it as template
+
+	player.tutorial_systems = {}
+	player.tutorial_systems.jumpDrive = player:hasJumpDrive()
+	player.tutorial_systems.warpDrive = player:hasWarpDrive()
+	if player:getTypeName() == "Phobos M3P" then
+		-- default - enable everything
+		player.tutorial_systems.jumpDrive = true
+		player.tutorial_systems.warpDrive = true
+	end
+    player.tutorial_systems.homing = player:getWeaponStorageMax("homing") > 0
+    player.tutorial_systems.hvli = player:getWeaponStorageMax("hvli") > 0
+    player.tutorial_systems.repair = player:getRepairCrewCount() > 0
+end
+
 function startTutorial()
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Phobos M3P")
-    tutorial:setPlayerShip(player)
 
     tutorial:showMessage(_([[Welcome to the EmptyEpsilon tutorial.
 Note that this tutorial is designed to give you a quick overview of the basic options for the game, but does not cover every single aspect.
@@ -93,4 +108,5 @@ function resetPlayerShip()
     player:setWeaponStorageMax("emp", 0)
     player:setWeaponStorageMax("hvli", 0)
     player:setWeaponStorageMax("laser_green", 0)
+	player:setLongRangeRadarRange(30000)
 end

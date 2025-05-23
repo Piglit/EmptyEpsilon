@@ -152,6 +152,8 @@ void TutorialGame::update(float delta)
 
 void TutorialGame::setPlayerShip(P<PlayerSpaceship> ship)
 {
+	ship->setTemplate(PreferencesManager::get("tutorial_ship", "Phobos M3P"));
+	ship->setCallSign(PreferencesManager::get("tutorial_callsign", "PFC"));
     my_player_info->commandSetShipId(ship->getMultiplayerId());
 
     if (viewport == nullptr)

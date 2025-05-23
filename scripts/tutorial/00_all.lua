@@ -4,6 +4,7 @@
 require("utils.lua")
 require("tutorialUtils.lua")
 
+initPlayerShip()	-- out of scope - let's see if this works
 
 function init()
     --Create the player ship
@@ -100,23 +101,32 @@ addToSequence(helmsTutorial, function() player:commandSetTarget(prev_object) end
 addToSequence(helmsTutorial, _([[Ok, there are just a few more things that you need to know.
 See the red arcs coming from your ship? Those are your beam weapons. As helms officer, it is your task to keep those beams on your target.
 I've set up an stationary enemy ship as a target. Destroy it with your beam weapons. Note that at every shot, the corresponding firing arc will change color.]]), function() return not prev_object:isValid() end)
-addToSequence(helmsTutorial, _([[Aggression is not always the solution, but boy, it is fun!
 
-On to the next task: moving long distances.
+addToSequence(helmsTutorial, _([[Aggression is not always the solution, but boy, it is fun!]]))
+
+if player.tutorial_systems.jumpDrive or player.tutorial_systems.warpDrive then
+	addToSequence(helmsTutorial, _([[On to the next task: moving long distances.
 There are two methods of moving long distances quickly. Depending on your ship, you either have a warp drive or a jump drive.
 The warp drive moves your ship at high speed, while the jump drive instantly teleports your ship a great distance.]]))
-addToSequence(helmsTutorial, function() player:setWarpDrive(true) end)
-addToSequence(helmsTutorial, _([[First, let us try the warp drive.
+end
+
+if player.tutorial_systems.warpDrive then
+	addToSequence(helmsTutorial, function() player:setWarpDrive(true) end)
+	addToSequence(helmsTutorial, _([[Let us try the warp drive.
 
 It functions like the impulse drive but only propels your ship forward, and consumes energy at a much faster rate.
 Use the warp drive to move more than 30u away from this starting point.]]), function() return distance(player, 0, 0) > 30000 end)
-addToSequence(helmsTutorial, function() player:setWarpDrive(false):setJumpDrive(true):setPosition(0, 0) end)
-addToSequence(helmsTutorial, _([[Next, let us demonstrate the jump drive.
+	addToSequence(helmsTutorial, function() player:setWarpDrive(false):setPosition(0, 0) end)
+end
+if player.tutorial_systems.jumpDrive then
+	addToSequence(helmsTutorial, function() player:setJumpDrive(true):setPosition(0, 0) end)
+	addToSequence(helmsTutorial, _([[Let us demonstrate the jump drive.
 
 To use the jump drive, point your ship in the direction where you want to jump, configure a distance to jump, and then initiate it. The jump occurs 10 seconds after you initiate. Use the jump drive to jump more than 30u from this starting point, in any direction.]]), function() return distance(player, 0, 0) > 30000 end)
-addToSequence(helmsTutorial, _([[Notice how your jump drive needs to recharge after use.
+	addToSequence(helmsTutorial, _([[Notice how your jump drive needs to recharge after use.]]))
+end
 
-This covers the basics of the helms officer.]]))
+addToSequence(helmsTutorial,_([[This covers the basics of the helms officer.]]))
 
 weaponsTutorial = createSequence()
 addToSequence(weaponsTutorial, function()
@@ -136,99 +146,103 @@ addToSequence(weaponsTutorial, _([[Your most fundamental task is to target your 
 Your beam weapons only fire at your selected target, and homing missiles travel toward your selected target.
 
 Target the ship in front of you by pressing it.]]), function() return player:getTarget() == prev_object end)
-addToSequence(weaponsTutorial, _([[Good! Notice that your beam weapons did not fire on this ship until you targeted it.
-
-Next up: shield controls.]]))
+addToSequence(weaponsTutorial, _([[Good! Notice that your beam weapons did not fire on this ship until you targeted it.]]))
 addToSequence(weaponsTutorial, function() prev_object:destroy() end)
-addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("MT52 Hornet"):setAI("default"):setPosition(-700, 0):setRotation(0):orderAttack(player):setScanned(true) end)
-addToSequence(weaponsTutorial, _([[As you might notice, you are being shot at. Do not worry, you cannot die right now.
+
+if player:getShieldCount() > 0 then
+	addToSequence(weaponsTutorial, _([[Next up: shield controls.]]))
+	addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("MT52 Hornet"):setAI("default"):setPosition(-700, 0):setRotation(0):orderAttack(player):setScanned(true) end)
+	addToSequence(weaponsTutorial, _([[As you might notice, you are being shot at. Do not worry, you cannot die right now.
 
 You are taking damage, however, so enable your shields to protect yourself.]]), function()
-    player:setHull(player:getHullMax())
-    player:setSystemHealth("reactor", 1.0)
-    player:setSystemHealth("beamweapons", 1.0)
-    player:setSystemHealth("missilesystem", 1.0)
-    player:setSystemHealth("maneuver", 1.0)
-    player:setSystemHealth("impulse", 1.0)
-    player:setSystemHealth("warp", 1.0)
-    player:setSystemHealth("jumpdrive", 1.0)
-    player:setSystemHealth("frontshield", 1.0)
-    player:setSystemHealth("rearshield", 1.0)
-    return player:getShieldLevel(1) < player:getShieldMax(1)
-end)
-addToSequence(weaponsTutorial, _([[Shields protect your ship from direct damage, but they cost extra energy to maintain, can take only a limited amount of damage, and are slow to recharge. Eventually, this enemy's attacks will get through your shields.
+		player:setHull(player:getHullMax())
+		player:setSystemHealth("reactor", 1.0)
+		player:setSystemHealth("beamweapons", 1.0)
+		player:setSystemHealth("missilesystem", 1.0)
+		player:setSystemHealth("maneuver", 1.0)
+		player:setSystemHealth("impulse", 1.0)
+		player:setSystemHealth("warp", 1.0)
+		player:setSystemHealth("jumpdrive", 1.0)
+		player:setSystemHealth("frontshield", 1.0)
+		player:setSystemHealth("rearshield", 1.0)
+		return (player:getShieldLevel(1) < player:getShieldMax(1) or player:getShieldLevel(0) < player:getShieldMax(0))
+	end)
+	addToSequence(weaponsTutorial, _([[Shields protect your ship from direct damage, but they cost extra energy to maintain, can take only a limited amount of damage, and are slow to recharge. Eventually, this enemy's attacks will get through your shields.
 
 Disable your shields to continue.]]), function() return not player:getShieldsActive() end)
-addToSequence(weaponsTutorial, function() prev_object:destroy() end)
-addToSequence(weaponsTutorial, _([[While only a single button, your shields are vital for survival. They protect against all kinds of damage, including beam weapons, missiles, asteroids, and mines, so make them one of your primary priorities.
+	addToSequence(weaponsTutorial, function() prev_object:destroy() end)
+	addToSequence(weaponsTutorial, _([[While only a single button, your shields are vital for survival. They protect against all kinds of damage, including beam weapons, missiles, asteroids, and mines, so make them one of your primary priorities.]]))
+end
 
-Next up, the real fun starts: missile weapons.]]))
+if player.tutorial_systems.homing then
+	addToSequence(weaponsTutorial, _([[Next up, the real fun starts: missile weapons.]]))
 
-addToSequence(weaponsTutorial, function()
-    player:setWeaponStorageMax("homing", 1)
-    player:setWeaponStorage("homing", 1)
-    player:setWeaponTubeCount(1)
-    prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(3000, 0):setRotation(0):orderIdle():setScanned(true)
-    prev_object:setHull(1):setShieldsMax(1) -- Make it die in 1 shot.
-end)
-addToSequence(weaponsTutorial, _([[You have 1 homing missile in your missile storage now, and 1 weapon tube.
+	addToSequence(weaponsTutorial, function()
+		player:setWeaponStorageMax("homing", 1)
+		player:setWeaponStorage("homing", 1)
+		player:setWeaponTubeCount(1)
+		prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(3000, 0):setRotation(0):orderIdle():setScanned(true)
+		prev_object:setHull(1):setShieldsMax(1) -- Make it die in 1 shot.
+	end)
+	addToSequence(weaponsTutorial, _([[You have 1 homing missile in your missile storage now, and 1 weapon tube.
 You can load this missile into your weapon tube. Depending on your ship type, you might have more types of missiles and more weapon tubes.
 
 Load this homing missile into the weapon tube by selecting the homing missile, and then pressing the load button for this tube. Note that it takes some time to load missiles into tubes.]]),
-    function() return player:getWeaponTubeLoadType(0) == "homing" end)
-addToSequence(weaponsTutorial, _([[Great! Now fire this missile by clicking on the tube.]]), function() return player:getWeaponTubeLoadType(0) == nil end)
-addToSequence(weaponsTutorial, _([[Missile away!]]), function() return not prev_object:isValid() end)
+		function() return player:getWeaponTubeLoadType(0) == "homing" end)
+	addToSequence(weaponsTutorial, _([[Great! Now fire this missile by clicking on the tube.]]), function() return player:getWeaponTubeLoadType(0) == nil end)
+	addToSequence(weaponsTutorial, _([[Missile away!]]), function() return not prev_object:isValid() end)
 
 
-addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(2000, -2000):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
-addToSequence(weaponsTutorial, function() tutorial:setMessageToBottomPosition() end)
-addToSequence(weaponsTutorial, _([[BOOM! That was just firing straight ahead, but missiles also have a homing feature, so let's try that!
+	addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(2000, -2000):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
+	addToSequence(weaponsTutorial, function() tutorial:setMessageToBottomPosition() end)
+	addToSequence(weaponsTutorial, _([[BOOM! That was just firing straight ahead, but missiles also have a homing feature, so let's try that!
 
 First, load a homing missile in the tube.
 Next, target the enemy ship by pressing it to guide your homing missiles toward your selected target.
 Then fire your missile!]]), function()
-    if player:getWeaponStorage("homing") < 1 then
-        player:setWeaponStorage("homing", 1)
-    end
-    return not prev_object:isValid()
-end)
-addToSequence(weaponsTutorial, _([[While not necessary against a stationary target, this homing ability can make all the difference against a moving target.]]))
+		if player:getWeaponStorage("homing") < 1 then
+			player:setWeaponStorage("homing", 1)
+		end
+		return not prev_object:isValid()
+	end)
+	addToSequence(weaponsTutorial, _([[While not necessary against a stationary target, this homing ability can make all the difference against a moving target.]]))
 
 
-addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(3000, -1500):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
-addToSequence(weaponsTutorial, _([[You can also manually aim missiles.
+--	addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(3000, -1500):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
+--	addToSequence(weaponsTutorial, _([[You can also manually aim missiles.
+--
+--First, unlock your aim by pressing the [Lock] button above the radar view.
+--Load a missile to view your missile's trajectory.
+--Next, aim your missiles with the aiming dial surrounding the radar.
+--Point the aiming dial at the next ship and fire.]]), function()
+--		if player:getWeaponStorage("homing") < 1 then
+--			player:setWeaponStorage("homing", 1)
+--		end
+--		return not prev_object:isValid()
+--	end)
+--
+--
+--	addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(-1550, -1900):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
+--	addToSequence(weaponsTutorial, _([[Perfect aim! The next ship is behind you. Notice how it's out of reach when you try to aim manually and, if you only use the homing ability, the trajectory won't reach the enemy. Manually aiming and the missile's homing ability aren't mutually exclusive to one another. You can hit the ship if you put the two abilities together.
+--
+--First, make sure your aim is unlocked and aim your missile as close to the enemy as you can.
+--Next, target the enemy ship by pressing it.
+--Then fire! The missile will first follow your manually-aimed trajectory, and then start homing in on the enemy.
+--]]), function()
+--		if player:getWeaponStorage("homing") < 1 then
+--			player:setWeaponStorage("homing", 1)
+--		end
+--		return not prev_object:isValid()
+--	end)
 
-First, unlock your aim by pressing the [Lock] button above the radar view.
-Load a missile to view your missile's trajectory.
-Next, aim your missiles with the aiming dial surrounding the radar.
-Point the aiming dial at the next ship and fire.]]), function()
-    if player:getWeaponStorage("homing") < 1 then
-        player:setWeaponStorage("homing", 1)
-    end
-    return not prev_object:isValid()
-end)
 
-
-addToSequence(weaponsTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Flavia"):setPosition(-1550, -1900):setRotation(0):orderIdle():setScanned(true):setHull(1):setShieldsMax(1) end)
-addToSequence(weaponsTutorial, _([[Perfect aim! The next ship is behind you. Notice how it's out of reach when you try to aim manually and, if you only use the homing ability, the trajectory won't reach the enemy. Manually aiming and the missile's homing ability aren't mutually exclusive to one another. You can hit the ship if you put the two abilities together.
-
-First, make sure your aim is unlocked and aim your missile as close to the enemy as you can.
-Next, target the enemy ship by pressing it.
-Then fire! The missile will first follow your manually-aimed trajectory, and then start homing in on the enemy.
-]]), function()
-    if player:getWeaponStorage("homing") < 1 then
-        player:setWeaponStorage("homing", 1)
-    end
-    return not prev_object:isValid()
-end)
-
-
-addToSequence(weaponsTutorial, function() player:setWeaponStorage("homing", 0):setWeaponStorageMax("homing", 0) end)
-addToSequence(weaponsTutorial, function() tutorial:setMessageToTopPosition() end)
-addToSequence(weaponsTutorial, _([[In addition to homing missiles, your ship might have HVLIs, nukes, EMPs, and mines.
+	addToSequence(weaponsTutorial, function() player:setWeaponStorage("homing", 0):setWeaponStorageMax("homing", 0) end)
+	addToSequence(weaponsTutorial, function() tutorial:setMessageToTopPosition() end)
+	addToSequence(weaponsTutorial, _([[In addition to homing missiles, your ship might have HVLIs, nukes, EMPs, and mines.
 HVLI stands for "High Velocity Lead Impactor". They fire in straight lines and do not have homing abilities.
 Nukes and EMPs also have homing abilities and have a 1u-radius blast and do more damage.
 EMPs damage only shields, and thus are great for weakening heavily shielded enemies.]]))
+end
 
 engineeringTutorial = createSequence()
 addToSequence(engineeringTutorial, function()
@@ -239,14 +253,16 @@ end)
 addToSequence(engineeringTutorial, _([[Welcome to engineering.
 Engineering is split into two parts. The top part shows your ship's interior, including damage control teams stationed throughout.
 The bottom part controls power and coolant levels of your ship's systems.]]))
-addToSequence(engineeringTutorial, function() player:setWarpDrive(true) end)
-addToSequence(engineeringTutorial, function() player:setSystemHeat("warp", 0.8) end)
+if player.tutorial_systems.warpDrive then
+	addToSequence(engineeringTutorial, function() player:setWarpDrive(true) end)
+end
+addToSequence(engineeringTutorial, function() player:setSystemHeat("maneuver", 0.8) end)
 addToSequence(engineeringTutorial, _([[First, we will explain your control over your ship's systems.
 Each row on the bottom area of the screen represents one of your ship's system, and each system has a damage level, heat level, power level, and coolant level.
 
-I've overheated your warp system. An overheating system can damage your ship. You can prevent this by putting coolant in your warp system. Select the warp system and increase the coolant slider.]]), function() return player:getSystemHeat("warp") < 0.05 end)
+I've overheated your maneuver system. An overheating system can damage your ship. You can prevent this by putting coolant in your maneuver system. Select the maneuver system and increase the coolant slider.]]), function() return player:getSystemHeat("maneuver") < 0.05 end)
 addToSequence(engineeringTutorial, function() player:setSystemHeat("impulse", 0.8) end)
-addToSequence(engineeringTutorial, _([[I've also overheated the impulse system. As before, increase the system's coolant level to mitigate the effect. Note that the warp system's coolant level is automatically reduced to allow for coolant in the impulse system.
+addToSequence(engineeringTutorial, _([[I've also overheated the impulse system. As before, increase the system's coolant level to mitigate the effect. Note that the maneuver system's coolant level is automatically reduced to allow for coolant in the impulse system.
 
 This is because you have a limited amount of coolant available to distribute this across your ship's systems.]]), function() return player:getSystemHeat("impulse") < 0.05 end)
 addToSequence(engineeringTutorial, _([[Good! Next up: power levels.
@@ -261,12 +277,15 @@ addToSequence(engineeringTutorial, function() player:commandSetSystemPowerReques
 addToSequence(engineeringTutorial, _([[Note that as the system overheats, it takes damage. Because the system is damaged, it functions less effectively.
 
 Systems can also take damage when your ship is hit while the shields are down.]]))
-addToSequence(engineeringTutorial, function() tutorial:setMessageToBottomPosition() end)
-addToSequence(engineeringTutorial, _([[In this top area, you see your damage control teams in your ship.]]))
-addToSequence(engineeringTutorial, _([[The front shield system is damaged, as indicated by the color of this room's outline.
+
+if player.tutorial_systems.repair then
+	addToSequence(engineeringTutorial, function() tutorial:setMessageToBottomPosition() end)
+	addToSequence(engineeringTutorial, _([[In this top area, you see your damage control teams in your ship.]]))
+	addToSequence(engineeringTutorial, _([[The front shield system is damaged, as indicated by the color of this room's outline.
 
 Select a damage control team from elsewhere on the ship by pressing it, then press on that room to initiate repairs.
 (Repairs will take a while.)]]), function() player:commandSetSystemPowerRequest("frontshield", 0.0) return player:getSystemHealth("frontshield") > 0.9 end)
+end
 addToSequence(engineeringTutorial, function() tutorial:setMessageToTopPosition() end)
 addToSequence(engineeringTutorial, _([[Good. Now you know your most important tasks. Next, we'll go over each system's function in detail.
 Remember, each system performs better with more power, but performs less well when damaged. Your job is to keep vital systems running as well as you can.]]))
@@ -277,21 +296,27 @@ addToSequence(engineeringTutorial, _([[Beam Weapons:
 
 Adding power to the beam weapons system increases their rate of fire, which causes them to do more damage.
 Note that every beam you fire adds additional heat to the system.]]))
-addToSequence(engineeringTutorial, _([[Missile System:
+if player.tutorial_systems.homing then
+	addToSequence(engineeringTutorial, _([[Missile System:
 
 Increased missile system power lowers the reload time of weapon tubes.]]))
+end
 addToSequence(engineeringTutorial, _([[Maneuvering:
 
 Increasing power to the maneuvering system allows the ship to turn faster. It also increases the recharge rate for the combat maneuvering system.]]))
 addToSequence(engineeringTutorial, _([[Impulse Engines:
 
 Adding power to the impulse engines increases your impulse flight speed.]]))
-addToSequence(engineeringTutorial, _([[Warp Drive:
+if player.tutorial_systems.warpDrive then
+	addToSequence(engineeringTutorial, _([[Warp Drive:
 
 Adding power to the warp drive increases your warp drive flight speed.]]))
-addToSequence(engineeringTutorial, _([[Jump Drive:
+end
+if player.tutorial_systems.jumpDrive then
+	addToSequence(engineeringTutorial, _([[Jump Drive:
 
 A higher-powered jump drive recharges faster and has a shorter delay before jumping.]]))
+end
 addToSequence(engineeringTutorial, _([[Shields:
 
 Additional power in the shield system increases their rate of recharge, and decreases the amount of degradation your shields sustain when damaged.]]))
@@ -311,16 +336,18 @@ addToSequence(scienceTutorial, function() prev_object2 = CpuShip():setFaction("H
 addToSequence(scienceTutorial, _([[On this radar, you can select objects to get information about them.
 I've added a friendly ship and a station for you to examine. Select them and notice how much information you can observe.
 Heading and distance are of particular importance, as without these, the helms officer will be jumping in the dark.]]))
-addToSequence(scienceTutorial, function() prev_object:destroy() end)
-addToSequence(scienceTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Phobos T3"):setPosition(3000, -15000):orderIdle() end)
-addToSequence(scienceTutorial, _([[I've replaced the friendly station with an unknown ship. Once you select it, notice that you know nothing about this ship.
+if player:getCanScan() then
+	addToSequence(scienceTutorial, function() prev_object:destroy() end)
+	addToSequence(scienceTutorial, function() prev_object = CpuShip():setFaction("Kraylor"):setTemplate("Phobos T3"):setPosition(3000, -15000):orderIdle() end)
+	addToSequence(scienceTutorial, _([[I've replaced the friendly station with an unknown ship. Once you select it, notice that you know nothing about this ship.
 To learn about it, you must scan it. Scanning requires you to match your scanner's frequency bands to your target's.
 Scan this ship now.]]), function() return prev_object:isScannedBy(player) end)
-addToSequence(scienceTutorial, _([[Good. Notice that you now know this ship is unfriendly. It might have been a friendly or neutral ship as well, but until you scanned it, you do not know.]]))
-addToSequence(scienceTutorial, _([[Note that you have less information about this ship than the friendly ship. You must perform a deep scan of this ship to acquire more information.
+	addToSequence(scienceTutorial, _([[Good. Notice that you now know this ship is unfriendly. It might have been a friendly or neutral ship as well, but until you scanned it, you do not know.]]))
+	addToSequence(scienceTutorial, _([[Note that you have less information about this ship than the friendly ship. You must perform a deep scan of this ship to acquire more information.
 A deep scan takes more effort and requires you to align 2 different frequency bands simultaneously.
 Deep scan the enemy now.]]), function() return prev_object:isFullyScannedBy(player) end)
-addToSequence(scienceTutorial, _([[Excellent. Notice that this took more time and concentration than the simple scan, so be careful to perform deep scans only when necessary or you could run out of time.]]))
+	addToSequence(scienceTutorial, _([[Excellent. Notice that this took more time and concentration than the simple scan, so be careful to perform deep scans only when necessary or you could run out of time.]]))
+end
 addToSequence(scienceTutorial, function() prev_object:destroy() end)
 addToSequence(scienceTutorial, function() prev_object2:destroy() end)
 addToSequence(scienceTutorial, function() tutorial:setMessageToTopPosition() end)
@@ -440,7 +467,7 @@ addToSequence(operationsTutorial, _([[Depending on the scenario, you might have 
 They might inform you about new objectives and your mission progress, ask for backup, or resupply your weapons. This is all part of your responsibilities as relay officer.]]))
 
 endOfTutorial = createSequence()
-addToSequence(endOfTutorial, function() tutorial:switchViewToMainScreen() end)
+--addToSequence(endOfTutorial, function() tutorial:switchViewToMainScreen() end)
 addToSequence(endOfTutorial, function() tutorial:setMessageToTopPosition() end)
 addToSequence(endOfTutorial, _([[This concludes the tutorial. While we have covered the basics, there are more advanced features in the game that you might discover.]]))
 

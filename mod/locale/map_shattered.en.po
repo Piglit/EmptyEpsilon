@@ -1,0 +1,99 @@
+#: mod/map_shattered.lua:15
+msgid "Endor"
+msgstr ""
+
+#: mod/map_shattered.lua:15
+msgid "Forest Moon of Endor"
+msgstr ""
+
+#: mod/map_shattered.lua:48
+msgid "A navigation satellite - the all-seeing eye of Tantal-3 flight control."
+msgstr ""
+
+#: mod/map_shattered.lua:51
+msgid "Green Buoy"
+msgstr ""
+
+#: mod/map_shattered.lua:52 mod/map_shattered.lua:55 mod/map_shattered.lua:58
+msgid "A navigation buoy that marks the line between atmosphere and space."
+msgstr ""
+
+#: mod/map_shattered.lua:54
+msgid "Red Buoy"
+msgstr ""
+
+#: mod/map_shattered.lua:57
+msgid "Magenta Bouy"
+msgstr ""
+
+#: mod/map_shattered.lua:61
+msgid "Tantal Observatory"
+msgstr ""
+
+#: mod/map_shattered.lua:64
+msgid "A ground station on Endor. It has a spaceport."
+msgstr ""
+
+#: mod/map_shattered.lua:67 mod/map_shattered.lua:68 mod/map_shattered.lua:69
+msgid "A long haul freighter"
+msgstr ""
+
+#: mod/map_shattered.lua:107
+msgid "Mission data"
+msgstr ""
+
+#: mod/map_shattered.lua:108
+msgid "Kessler Syndrome"
+msgstr ""
+
+#: mod/map_shattered.lua:109
+msgid ""
+"The Kessler Syndrome is a no longer theoretical Scenario. It describes the "
+"situation where the density of objects a planet's orbit is high enough to "
+"cause a chain reaction of collisions. Each collision will create a huge "
+"debris field of multiple objects, and many of them will collide with other "
+"objects. Ultimately, the Orbit will be full of tiny objects destroying "
+"satellites and making space flight very hard, if not impossible. Also, much "
+"of our daily life depends on satellites, like communication and navigation. "
+"The Kessler Syndrome is a serious threat to all of this. This is why "
+"clearing space debris, and preventing that kind of scenario is extremely "
+"important.\n"
+msgstr ""
+
+#: mod/map_shattered.lua:179
+msgctxt "buttonGM"
+msgid "Spawn moving debris"
+msgstr ""
+
+#: mod/map_shattered.lua:180
+msgctxt "buttonGM"
+msgid "Clear moving debris"
+msgstr ""
+
+#: mod/map_shattered.lua:296
+msgid "A piece of space junk. Scan to find out the capturing frequency"
+msgstr ""
+
+#: mod/map_shattered.lua:296
+msgid "Capturing frequency:"
+msgstr ""
+
+#: mod/map_shattered.lua:314
+msgid "Debris captured."
+msgstr ""
+
+#: mod/map_shattered.lua:318
+msgid "Debris was destroyed by impact"
+msgstr ""
+
+#: mod/map_shattered.lua:324
+msgid "An operational satellite"
+msgstr ""
+
+#: mod/map_shattered.lua:324
+msgid "This satellite is fully operational. Do not capture!"
+msgstr ""
+
+#: mod/map_shattered.lua:334
+msgid "Satellite was destroyed by impact"
+msgstr ""

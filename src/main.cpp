@@ -25,6 +25,7 @@
 #include "menus/shipSelectionScreen.h"
 #include "menus/optionsMenu.h"
 #include "menus/luaConsole.h"
+#include "menus/pfc.h"
 #include "factionInfo.h"
 #include "gameGlobalInfo.h"
 #include "spaceObjects/spaceObject.h"
@@ -407,7 +408,9 @@ int main(int argc, char** argv)
 #endif //STEAMSDK
  
     string tutorial = PreferencesManager::get("tutorial");   // use "00_all.lua" for all tutorials
-    if (tutorial != "")
+    if (tutorial == "pfc")
+		new PFCMenu;
+    else if (tutorial != "")
     {
         LOG(DEBUG) << "Starting tutorial: " << tutorial;
         new TutorialGame(false, tutorial);

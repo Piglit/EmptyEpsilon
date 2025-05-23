@@ -1,0 +1,128 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#: mod/map_shattered.lua:15
+msgid "Endor"
+msgstr "Endor"
+
+#: mod/map_shattered.lua:15
+msgid "Forest Moon of Endor"
+msgstr "Der Waldmond von Endor"
+
+#: mod/map_shattered.lua:48
+msgid "A navigation satellite - the all-seeing eye of Tantal-3 flight control."
+msgstr ""
+"Ein Navigationssatellit - das allsehende Auge der Tantal-3 Flugkontrolle."
+
+#: mod/map_shattered.lua:51
+msgid "Green Buoy"
+msgstr "Grüne Boje"
+
+#: mod/map_shattered.lua:52 mod/map_shattered.lua:55 mod/map_shattered.lua:58
+msgid "A navigation buoy that marks the line between atmosphere and space."
+msgstr ""
+"Eine Navigationsboje, die die Grenze zwischen Atmosphäre und Weltraum "
+"markiert."
+
+#: mod/map_shattered.lua:54
+msgid "Red Buoy"
+msgstr "Rote Boje"
+
+#: mod/map_shattered.lua:57
+msgid "Magenta Bouy"
+msgstr "Magenta Boje"
+
+#: mod/map_shattered.lua:61
+msgid "Tantal Observatory"
+msgstr "Tantal Observatorium"
+
+#: mod/map_shattered.lua:64
+msgid "A ground station on Endor. It has a spaceport."
+msgstr "Eine Bodenstation auf Endor. Sie verfügt über einen Raumhafen."
+
+#: mod/map_shattered.lua:67 mod/map_shattered.lua:68 mod/map_shattered.lua:69
+msgid "A long haul freighter"
+msgstr "Ein Langstreckenfrachter"
+
+#: mod/map_shattered.lua:107
+msgid "Mission data"
+msgstr "Missionsdaten"
+
+#: mod/map_shattered.lua:108
+msgid "Kessler Syndrome"
+msgstr "Kesser Syndrom"
+
+#: mod/map_shattered.lua:109
+msgid ""
+"The Kessler Syndrome is a no longer theoretical Scenario. It describes the "
+"situation where the density of objects a planet's orbit is high enough to "
+"cause a chain reaction of collisions. Each collision will create a huge "
+"debris field of multiple objects, and many of them will collide with other "
+"objects. Ultimately, the Orbit will be full of tiny objects destroying "
+"satellites and making space flight very hard, if not impossible. Also, much "
+"of our daily life depends on satellites, like communication and navigation. "
+"The Kessler Syndrome is a serious threat to all of this. This is why "
+"clearing space debris, and preventing that kind of scenario is extremely "
+"important.\n"
+msgstr ""
+"Das Kessler-Syndrom beschreibt die Situation, in der die Dichte von Objekten "
+"in der Umlaufbahn eines Planeten hoch genug ist, um eine Kettenreaktion von "
+"Kollisionen zu verursachen. Bei jeder Kollision entsteht ein riesiges "
+"Trümmerfeld aus mehreren Objekten, von denen viele wiederum mit anderen "
+"Objekten kollidieren werden. Letztendlich wird die Umlaufbahn voller kleiner "
+"Objekte sein, die Satelliten zerstören und die Raumfahrt sehr schwierig, "
+"wenn nicht gar unmöglich machen. Außerdem hängt ein großer Teil unseres "
+"täglichen Lebens von Satelliten ab, wie Kommunikation und Navigation. Das "
+"Kessler-Syndrom ist eine ernsthafte Bedrohung für all diese Dinge. Deshalb "
+"ist die Beseitigung von Weltraumschrott und die Verhinderung eines solchen "
+"Szenarios extrem wichtig.\n"
+
+#: mod/map_shattered.lua:179
+msgctxt "buttonGM"
+msgid "Spawn moving debris"
+msgstr ""
+
+#: mod/map_shattered.lua:180
+msgctxt "buttonGM"
+msgid "Clear moving debris"
+msgstr ""
+
+#: mod/map_shattered.lua:296
+msgid "A piece of space junk. Scan to find out the capturing frequency"
+msgstr ""
+"Ein Stück Weltraum-Schrott. Scanne, um die Frequenz zum Einfangen "
+"herauszufinden"
+
+#: mod/map_shattered.lua:296
+msgid "Capturing frequency:"
+msgstr "Frequenz zum Einfangen:"
+
+#: mod/map_shattered.lua:314
+msgid "Debris captured."
+msgstr "Trümmerteil geborgen."
+
+#: mod/map_shattered.lua:318
+msgid "Debris was destroyed by impact"
+msgstr "Trümmerteil wurde durch Einschlag zerstört"
+
+#: mod/map_shattered.lua:324
+msgid "An operational satellite"
+msgstr "Ein funktionsfähiger Satellit"
+
+#: mod/map_shattered.lua:324
+msgid "This satellite is fully operational. Do not capture!"
+msgstr "Dieser Satellit ist voll funktionsfähig. Nicht einfangen!"
+
+#: mod/map_shattered.lua:334
+msgid "Satellite was destroyed by impact"
+msgstr "Satellit wurde durch Einschlag zerstört"

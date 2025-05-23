@@ -430,7 +430,7 @@ end
 
 function plot_shattered_gozanti:init()
     local px, py = 0, -40000
-    self.gozanti = CpuShip():setTemplate(" Gozanti"):setCallSign("Queen of Watch"):setPosition(px, py):setFaction("Imperial"):orderRoaming():setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    self.gozanti = CpuShip():setTemplate(" Gozanti C-ROC"):setCallSign("QoW"):setDescription("Queen of Watch, ein ehemaliges imperiales Forschungsschiff"):setPosition(px, py):setFaction("Imperial"):orderRoaming():setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.gozanti):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.gozanti):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.gozanti):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)

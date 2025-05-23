@@ -101,11 +101,18 @@ var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("X-Wing")
-var:setClass(_("class", "Starfighter"), _("subclass", "Interceptor")) --TODO
+var:setClass(_("class", "Starfighter"), _("subclass", "Interceptor"))
 var:setDescription(_("X-wing starfighters were a type of starfighter marked by their distinctive S-foils that resembled the High Galactic script's character 'X' in attack formation. They were heavily armed with four laser cannons on the S-foils and proton torpedo launchers in the fuselage. X-wings were designed for dogfighting and long missions."))
 var:setRadarTrace("xwing.png")
 addRockets(var, true)
 var:setRepairCrewCount(1)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var = template:copy("Peregrine yacht")
+var:setClass(_("class", "Starfighter"), _("subclass", "Yacht"))
+var:setDescription(_("The Peregrine-class star yacht was a model of luxurious star yacht used during the Clone Wars."))
+var:setRadarTrace("pyacht.png")
+var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("ARC-170")
@@ -269,6 +276,28 @@ var:setBeam(1, 0, 0, 0, 6.0, 6)
 var:setBeamWeaponTurret(0, 300, -90, 5)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
+var = template:copy("Gozanti")
+var:setModel("MultiGunCorvette"..color_player)
+var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
+var:setRadarTrace("gozanti.png")
+addRockets(var, false)
+var:setRepairCrewCount(2)
+var:setDockClasses(_("class", "Starfighter"))
+var:setRepairDocked(true)
+var:setSharesEnergyWithDocked(false)
+var:setRestocksMissilesDocked("all")
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var2 = var:copy("Gozanti C-ROC")
+--                 Arc, Dir, Range, CycleTime, Dmg
+var2:setBeam(0, 10, 0, 800.0, 6.0, 6)
+var2:setBeam(1, 30, 0, 1200.0, 8.0, 12)
+--								Arc, Dir, Rotate speed
+var2:setBeamWeaponTurret(0, 360, 0, 5)
+var2:setBeamWeaponTurret(1, 0, 0, 5)
+var2:copy(" "..var2:getName()):setType("ship") -- CpuShip variant
+
+
 --[[Player Transport, 5 person crew, more specialiced, no default turret--]]
 
 template = createTemplate(5, 2, 0)
@@ -328,33 +357,6 @@ var:setSpeed(55, 7, 12)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 
---[[ Player Light Cruiser--]]
-template = ShipTemplate():setName("Gozanti"):setLocaleName(_("playerShip", "Gozanti")):setClass(_("class", "Cruiser"), _("subclass", "Freighter")):setType("playership")
-template:setModel("MultiGunCorvette"..color_player)
-template:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
-template:setRadarTrace("gozanti.png")
---                 Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 10, 0, 800.0, 6.0, 6)
-template:setBeam(1, 30, 0, 1200.0, 8.0, 12)
---								Arc, Dir, Rotate speed
-template:setBeamWeaponTurret(0, 360, 0, 5)
-addRockets(template, false)
-template:setShields(100, 100)
-template:setHull(200)
---	            speed, turn, accel, rev-speed, rev-accel
-template:setSpeed(80, 10, 20)
-template:setCombatManeuver(400, 250)
-template:setRepairCrewCount(2)
-template:setDockClasses(_("class", "Starfighter"))
-template:setRepairDocked(true)
-template:setSharesEnergyWithDocked(false)
-template:setRestocksMissilesDocked("all")
-template:setInternalDockClasses(_("class", "Escape Pod"))
-addSystemsMultiGun(template)
-varNcp = template:copy(" Gozanti")
-varNcp:setType("ship")
-
-
 --[[Heavy Freighter]]
 template = ShipTemplate()
 template:setClass(_("class", "Freighter"), _("subclass", "Medium Transport"))
@@ -364,7 +366,6 @@ template:setHull(200)
 --	            speed, turn, accel, rev-speed, rev-accel
 template:setSpeed(50, 5, 7)
 template:setCanCombatManeuver(false)
-template:setInternalDockClasses(_("class", "Escape Pod"))
 template:setDockClasses(_("class", "Starfighter"))
 template:setDockClasses(_("subclass", "Light transport"))
 addSystemsTransport(template)

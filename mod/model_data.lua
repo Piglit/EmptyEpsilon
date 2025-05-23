@@ -476,6 +476,7 @@ sizes = {
     Fighter={20,30},
     Scout={30,45},
     Corvette={50,80},
+    Frigate={75,120},
     Dreadnought={100,160},
     Behemoth={200,260},
 }

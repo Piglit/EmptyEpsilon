@@ -3,117 +3,279 @@
 #apt install python3-dialog python3-requests
 
 from dialog import Dialog
-import subprocess
+
+import pyrohelper
 import requests
-import time
-import random
-import os
 
-cwd = os.getcwd()
-os.chdir("/dev/shm")    # hack to enable tempdir
-
-
-playerships = {
-    "Artful Dodger":        ("Y2K",         "Leanti Meva's Y2K Transport"),
-    "Black Bantha":         ("YV-330",      "Ome Sennyd's YV-330 Transport"),
-    "Bluewing":             ("U-Wing",      "Ric Halcard's U-Wing Fighter"),
-    "Crate Dragon":         ("YT-2000",     "Rogan Corrs' YT-2000 Transport"),
-    "Cropdust Nomad":       ("Gozanti",     "Kell Murtry's Gozanti Cruiser"),
-    "Dancer":               ("YT-2400",     "Reto's YT-2400 Transport"),
-    "Drexl":                ("Lambda T-4a", "Treuton Otro and Endira Vask's Lambda Shuttle"),
-    "Greedy Wampa":         ("GR-75",       "~Caro~'s GR-75 Freighter"),  #TODO find out character name
-    "Lonestar":             ("Kuat D7",     "Kolt's Kuat D7 Patrol"),
-    "Lunaris":              ("YT-2400",     "Caex Vanta's YT-2400 Transport"),
-    "Nova Crow":            ("YT-2000",     "Veeza Tosh's YT-2000 Transport"),
-    "Ronin":                ("Action IV",   "Draic FeenX' Action IV Freighter"),  #TODO find out character name
-    "Schiffy McSchiffface": ("KvK-P0001",   "Kit Kol's KvK-Fighter"),
-    "Sicaria":              ("A-24",        "Viveca Torra's A-24 Sleuth Scout"),
-    "Steelin' Ivy":         ("YV-929",      "Vada Pav's YV-929 Transport"),
-    "Vengeance":            ("StarViper",   "Fenn Barlors' Star Viper Fighter"),
-    "Winner":               (" X-Wing",     "Generic X-Wing"),
-    "Xylon":                ("G9",          "Generic G9 for the syndicate"),
-    "Yaq":                  ("Lambda T-4a", "Generic Lambda for the empire"),
-    "Zoomer":               ("UT-60D",      "Generic U-Wing for the republic"),
-}
-
-scenarios = [
-    ("Training",            "Training scenario for new players"),
-    ("Shattered Horizon",   "The main scenario"),
-    ("Test",                "Scenario to test ships"),
-    ("None",                "Use the in-game scenario selection")
-]
-
-scenario_files = {
-    "Training":             "scenario_20_training1.lua", 
-    "Shattered Horizon":    "scenario_80_shattered_horizon.lua",
-    "Test":                 "scenario_10_empty.lua",
-    "None":                 ""
-}
-
-def menu():
-    d = Dialog(autowidgetsize=True)
-
-    def abort():
-        d.clear()
-        exit(0)
-
-    # Select participating ships
-    avail_ships = [(cs, t[1], 0) for cs,t in playerships.items()]
-    code, callsigns = d.checklist("Select all ships for this scenario.\nUse arrow keys and space to select.\nPress Enter to continue.", title="Shattered Horizon Launcher", choices=avail_ships)
-    if code != d.OK:
-        abort()
-
-    # Select primary ship
-    if len(callsigns) > 1:
-        choices = [(cs, playerships[cs][1]) for cs in callsigns]
-        code, primary = d.menu("Select the primary ship.\nAll other ships are considered escort ships.", title="Shattered Horizon Launcher", choices=choices)
-        if code != d.OK:
-            abort()
-        callsigns.remove(primary)
-        callsigns = [primary] + callsigns
-
-    script = "".join([spawn(cs, playerships[cs][0], i) for i, cs in enumerate(callsigns)])
-
-    code, scenario = d.menu("Select a scenario:", title="Shattered Horizon Launcher", choices=scenarios)
-    if code != d.OK:
-        abort()
-    scenario_file = scenario_files[scenario]
-
-    d.clear()
-    return script, scenario_file
+SERVER = "127.0.0.1"
 
 def _lua_exec(script):
-    return requests.post('http://127.0.0.1:8080/exec.lua', script).content == b''
+	return requests.post(f'http://{SERVER}:8080/exec.lua', script).content == b''
 
-def spawn(callsign, template, offset):
-    faction = "Transport" if offset == 0 else "Escort"
-    cs = template[0] + callsign[0] + "-" + str(10+len(callsign))
-    script = f"""
-        ship = PlayerSpaceship()
-        rotation = 0
-        pos = {-offset*200}
-        ship:setRotation(rotation)
-        ship:commandTargetRotation(rotation)
-        ship:setTemplate("{template}")
-        ship:setCallSign("{cs}")
-        ship:setDescription("{callsign}")
-        ship:setFaction("{faction}")
-        ship:setCanBeDestroyed(false)
-    """
-    return script
-#    return _lua_exec(script)
+playerships = {
+	"Artful Dodger":		("Y2K",			"Leichter corellianischer Y2K Peregrine Frachter von Leanti Meva."),
+	"Batnar Galaar":		("HWK-290",		"Modifizierter leichter Frachter HWK-290 von Mirsh Beskaryc"),
+	"Black Bantha":			("YV-330",		"YV-330 Frachter von Cooper"),
+	"Cropdust Nomad":		("Gozanti",		"Gozanti Cruiser von Kell Murtry"),
+	"Drexl":				("Lambda T-4a",	"Lambda Shuttle von Endira Vask und Treuton Otro"),
+	"Greedy Wampa":			("GR-75",		"Umgebauter GR-75 Frachter von Kei Prine"),
+	"Harlekin":				("Allanar N3",	"Leichter Allanar N3 Frachter von Viveka Torra"),
+	"Kyr'yc Laar":			("ARC-170",		"Aggressive-ReConnaisance Fighter von Kali Myk"),
+	"Lightning":			("Sheathipede",	"Sheathipede von Endor Sky Marshal Ran Korra"),
+	"Lonestar":				("Kuat D7",		"Kuat D7 Patrol von Colton Steele"),
+	"Nightbrother":			("Kom'rk",		"Kom'rk Klasse von Fenn Bralor"),
+	"Sicaria":				("A-24",		"A-24 Sleuth Scout von Viveca Torra"),
+	"TIE/rp 7901":			("TIE-Reaper",	"TIE Reaper von Flight Lieutenant Ron Jelran"),
+	"Thunderbolt":			("VCX-100",		"VCX-100 von Dash Meero"),
+	"Trummermove":			("CX-9",		"Eine CX-9 von Crimson Dawn"),
+	"Udesla":				("YT-1300",		"Corellianischer leichter Frachter YT-1300 von Mn'Taru und Tetsu-gunjin"),
+	"VV-Frightning":		("Lambda T-4a",	"Lambda Shuttle von Val'Kinor"),
+	"Winner":				("X-Wing",		"Generic X-Wing"),
+	"XW-65":				("X-Wing",		"T-65B X-Wing von Tiv Ohan"),
+	"Zegema Beach":			("Gozanti Mk Ic",	"Gozanti von Gabber'lok"),
+	"Xylon":				("G9",			"Eine G9 von Crimson Dawn"),
+	"Yaq":					("Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"),
+	"Zoomer":				("UT-60D",		"Ein U-Wing der Neuen Republik"),
+#	"Bluewing":				("U-Wing",		"U-Wing Fighter von Ric Halcard"),
+#	"Crate Dragon":			("YT-2000",		"YT-2000 Frachter von Rogan Corrs"),
+#	"Dancer":				("YT-2400",		"YT-2400 Frachter von Reto"),
+#	"Lunaris":				("YT-2400",	 "YT-2400 Frachter von Caex Vanta"),
+#	"Nova Crow":			("YT-2000",	 "YT-2000 Frachter von Veeza Tosh"),
+#	"Ronin":				("Action IV",   "Action IV Freighter von ..."),
+#	"Schiffy McSchiffface": ("KvK-P0001",   "KvK-Fighter von Kit Kol"),
+
+#	"Steelin' Ivy":			("YV-929",	  "YV-929 Frachter von Vada Pav"),
+#	"Vengeance":			("StarViper",   "Star Viper Fighter von Fenn Barlor"),
+}
+
+STATIONS = {
+	"0": "nothing",
+	"1": "helms",
+	"2": "weapons",
+	"3": "engineering",
+	"4": "science",
+	"5": "relay",
+	"6": "tactical",
+	"7": "engineeringAdvanced",
+	"8": "operations",
+	"9": "singlePilot",
+	"10": "damageControl",
+	"11": "powerManagement",
+	"12": "databaseView",
+	"13": "altRelay",
+	"14": "commsOnly",
+	"15": "shipLog",
+}
+SIMULATORS = [
+	("1", "Simulator 1, Wasserhaus"),
+	("2", "Simulator 2, Energiehaus"),
+	("3", "Simulator 3, Wasserhaus - Fighter"),
+	("4", "Simulator 2, Energiehaus - Shuttle"),
+]
+
+# TODO add ips of each simulator station here (must be ips, not hostnames)
+SIMULATOR_STATIONS = {
+	1:	["192.168.2.115"],
+	2:	[],
+	3:	[],
+	4:	[],
+}
+
+def get_client(ip):
+	# may raise exception, you should catch it
+	return pyrohelper.connect(f"PYRO:launcher@{ip}:7999")
+
+def command_to_simulator(simulator: int, commands):
+	for ip in SIMULATOR_STATIONS[simulator]:
+		get_client(ip).startEE(commands)
+
+def get_simulator_station(ip):
+	station = pyrohelper.connect(f"PYRO:launcher@{ip}:7999")
+	return station
+
+
+
+
+d = Dialog(autowidgetsize=True)
+def abort():
+	d.clear()
+	exit(0)
+
+def menu():
+	code, simulator = d.menu("Select a simulator", title="Shattered Horizon Launcher", choices=SIMULATORS)
+	if code != d.OK:
+		abort()
+	simulator = int(simulator)
+
+	# Select what to do
+	actions = [
+		("1", "Configure Ship"),
+		("2", "Configure Stations"),
+	]
+	code, action = d.menu("Select an action", title="Shattered Horizon Launcher", choices=actions)
+	if code != d.OK:
+		abort()
+
+	if action == "1":
+		configure_ship(simulator)
+	elif action == "2":
+		configure_stations(simulator)
+
+def configure_ship(simulator):
+	# Select participating ships
+	avail_ships = [(name, t[1]) for name,t in playerships.items()]
+	code, shipname = d.menu(f"Select a ship for simulator {simulator}.", title="Shattered Horizon Launcher", choices=avail_ships)
+	if code != d.OK:
+		return
+	template, description = playerships[shipname]
+
+	actions = [
+		("1", "Restart all stations with tutorial with this ship", False),
+		("2", "Spawn ship on server", False),
+		("3", "Restart all stations without tutorial", False),
+	]
+	while True:
+		code, actions_chosen = d.checklist(f"Select actions (multiple are possible).", title="Shattered Horizon Launcher", choices=actions)
+		if code != d.OK:
+			return
+
+		if not actions_chosen:
+			d.msgbox("No actions selected!")
+			continue
+
+		command = []	
+		if "1" in actions_chosen:
+			callsign = template[0] + shipname[0] + "-" + str(10+len(shipname))
+			command = [f'tutorial_ship={template}', f'tutorial_callsign={callsign}', "tutorial=pfc"]
+		if "2" in actions_chosen:
+			script = f"""getScriptStorage()["player_ships_util"]:spawn_player_ship("{shipname}", "{template}", "{description}", "Transport{simulator}")"""
+			d.code = d.yesno(f"Spawning {template} {shipname} in simulator {simulator}")
+			if code == d.OK:
+				d.clear()
+				if not _lua_exec(script):
+					exit(1)
+		if "3" in actions_chosen:
+			command =["tutorial="]
+		if "1" in actions_chosen or "3" in actions_chosen:
+			# restart clients
+			d.yesno(f"Restarting all clients in simulator {simulator}")
+			if code == d.OK:
+				command += [f"autoconnectship=faction=Transport{simulator}"]
+				command_to_simulator(simulator, command)
+		return
+	
+def configure_stations(simulator):
+	while True:
+		choices = []
+		for ip in SIMULATOR_STATIONS[simulator]:
+			client = get_client(ip)
+			choices.append((ip, "currently " + client.get_station()))
+		code, client = d.menu(f"Select a client in simulator {simulator}", title="Shattered Horizon Launcher", choices=choices)
+		if code != d.OK:
+			return
+		client = get_client(client)	# is not pyro proxy
+
+		while True:
+			actions = [
+				("1", "Restart with tutorial"),
+				("2", "Restart without tutorial"),
+				("3", "Change station"),
+			]
+			code, action = d.menu("Select an action", title="Shattered Horizon Launcher", choices=actions)
+			if code != d.OK:
+				break
+			if action == "1":
+				client.startEE(["tutorial=pfc"])
+				d.msgbox("Restarted client.")
+				break
+			if action == "2":
+				client.startEE(["tutorial="])
+				d.msgbox("Restarted client.")
+				break
+			if action == "3":
+				code, station= d.menu("Select a station", title="Shattered Horizon Launcher", choices=[(id, descr) for id,descr in STATIONS.items()])
+				if code != d.OK:
+					break
+				station = STATIONS[station]
+				client.set_station(station)
+				d.msgbox("Client configuration changed. You need to restart the client to apply the changes.")
 
 while True:
-    spawn_script, scenario_file = menu()
-    if scenario_file == "scenario_80_shattered_horizon.lua":
-        paused = 0
-    else:
-        paused = 1
-    cmd = ["./EmptyEpsilon", f"server_scenario={scenario_file}", "httpserver=8080", "autoconnect=0", "autoconnectship=", "autoconnect_address=", f"startpaused={paused}"]
-    os.chdir(cwd)
-    ee = subprocess.Popen(cmd)
-    time.sleep(1)
+	menu()
 
-    _lua_exec(spawn_script)
-    ee.communicate()
-    input("press enter to restart")
+#import subprocess
+#import time
+#import random
+#import os
+
+#cwd = os.getcwd()
+#os.chdir("/dev/shm")	# hack to enable tempdir
+
+#scenarios = [
+#	("Training",			"Training scenario for new players"),
+#	("Shattered Horizon",   "The main scenario"),
+#	("Test",				"Scenario to test ships"),
+#	("None",				"Use the in-game scenario selection")
+#]
+#
+#scenario_files = {
+#	"Training":			 "scenario_20_training1.lua", 
+#	"Shattered Horizon":	"scenario_80_shattered_horizon.lua",
+#	"Test":				 "scenario_10_empty.lua",
+#	"None":				 ""
+#}
+
+#	# Select primary ship
+#	if len(callsigns) > 1:
+#		choices = [(cs, playerships[cs][1]) for cs in callsigns]
+#		code, primary = d.menu("Select the primary ship.\nAll other ships are considered escort ships.", title="Shattered Horizon Launcher", choices=choices)
+#		if code != d.OK:
+#			abort()
+#		callsigns.remove(primary)
+#		callsigns = [primary] + callsigns
+#
+#	script = "".join([spawn(cs, playerships[cs][0], i) for i, cs in enumerate(callsigns)])
+#
+#	code, scenario = d.menu("Select a scenario:", title="Shattered Horizon Launcher", choices=scenarios)
+#	if code != d.OK:
+#		abort()
+#	scenario_file = scenario_files[scenario]
+#
+#	d.clear()
+#	return script, scenario_file
+
+
+
+#def spawn(callsign, template, offset):
+#	faction = "Transport" if offset == 0 else "Escort"
+#	cs = template[0] + callsign[0] + "-" + str(10+len(callsign))
+#	script = f"""
+#		ship = PlayerSpaceship()
+#		rotation = 0
+#		pos = {-offset*200}
+#		ship:setRotation(rotation)
+#		ship:commandTargetRotation(rotation)
+#		ship:setTemplate("{template}")
+#		ship:setCallSign("{cs}")
+#		ship:setDescription("{callsign}")
+#		ship:setFaction("{faction}")
+#		ship:setCanBeDestroyed(false)
+#	"""
+#	return script
+#	return _lua_exec(script)
+
+
+
+#	spawn_script, scenario_file = menu()
+#	if scenario_file == "scenario_80_shattered_horizon.lua":
+#		paused = 0
+#	else:
+#		paused = 1
+#	cmd = ["./EmptyEpsilon", f"server_scenario={scenario_file}", "httpserver=8080", "autoconnect=0", "autoconnectship=", "autoconnect_address=", f"startpaused={paused}"]
+#	os.chdir(cwd)
+#	ee = subprocess.Popen(cmd)
+#	time.sleep(1)
+#
+#	_lua_exec(spawn_script)
+#	ee.communicate()
+#	input("press enter to restart")

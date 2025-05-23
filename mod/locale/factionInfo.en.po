@@ -1,0 +1,87 @@
+#: mod/factionInfo.lua:1
+msgid "Independent"
+msgstr ""
+
+#: mod/factionInfo.lua:3
+msgid ""
+"Despite appearing as a faction, independents are distinguished primarily by "
+"having no strong affiliation with any faction at all. Most traders consider "
+"themselves independent, though certain voices have started to speak up about "
+"creating a merchant faction."
+msgstr ""
+
+#: mod/factionInfo.lua:101
+msgid "Imperial"
+msgstr ""
+
+#: mod/factionInfo.lua:103
+msgid "Remnants of the Imperial Forces"
+msgstr ""
+
+#: mod/factionInfo.lua:105
+msgid "New Republic"
+msgstr ""
+
+#: mod/factionInfo.lua:107
+msgid "The forces of the New Republic"
+msgstr ""
+
+#: mod/factionInfo.lua:110
+msgid "Crimson Dawn"
+msgstr ""
+
+#: mod/factionInfo.lua:112
+msgid "Ships of the Crimson Dawn syndicate"
+msgstr ""
+
+#: mod/factionInfo.lua:131
+msgid "Transport"
+msgstr ""
+
+#: mod/factionInfo.lua:131
+msgid "Transport craft from Endor"
+msgstr ""
+
+#: mod/factionInfo.lua:135
+msgid "Endor"
+msgstr ""
+
+#: mod/factionInfo.lua:137
+msgid "Endor flight control and navigation infrastructure."
+msgstr ""
+
+#: mod/factionInfo.lua:139
+msgid "Raider"
+msgstr ""
+
+#: mod/factionInfo.lua:141
+msgid ""
+"Raiders that may attack (more or less) innocent transportation vehicles."
+msgstr ""
+
+#: mod/factionInfo.lua:144
+msgid "Environment"
+msgstr ""
+
+#: mod/factionInfo.lua:146
+msgid "Debris flying around."
+msgstr ""
+
+#: mod/factionInfo.lua:149
+msgid "Sky Patrol"
+msgstr ""
+
+#: mod/factionInfo.lua:151
+msgid "Endor Sky Patrol - they enforce the law in orbit."
+msgstr ""
+
+#: mod/factionInfo.lua:155
+msgid "Criminals"
+msgstr ""
+
+#: mod/factionInfo.lua:157
+msgid ""
+"Despite appearing as a faction, criminals are distinguished primarily by "
+"having no strong affiliation with any faction at all. Pirates, outlaws and "
+"fugitives are considered criminals."
+msgstr ""

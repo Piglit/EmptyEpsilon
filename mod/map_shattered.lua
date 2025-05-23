@@ -64,9 +64,10 @@ function map_shattered:init()
     self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
     self.ground:setLongRangeRadarRange(20000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
 
-    self.freighter_imp=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_nr=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_cd=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(33064, 2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_cd=CpuShip():setTemplate(" MC80"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_lf=CpuShip():setTemplate(" Star Destroyer"):setFaction("Crimson Dawn"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
 
     -- place escort fighters for the freighters
     local px,py = self.freighter_nr:getPosition()

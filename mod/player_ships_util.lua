@@ -1,32 +1,40 @@
 -- Player Ship utility for Shattered Horizon
+noNetwork = true	-- igonre failed httpPost requests	
 player_ships_util = {
 	PLAYER_SHIPS = {
-    ["Artful Dodger"]=        {"Y2K",         "Leanti Meva's Y2K Transport"},
-    ["Black Bantha"]=         {"YV-330",      "Ome Sennyd's YV-330 Transport"},
---    ["Bluewing"]=             {"U-Wing",      "Ric Halcard's U-Wing Fighter"},
---    ["Crate Dragon"]=         {"YT-2000",     "Rogan Corrs' YT-2000 Transport"},
---    ["Cropdust Nomad"]=       {"Gozanti",     "Kell Murtry's Gozanti Cruiser"},
---    ["Dancer"]=               {"YT-2400",     "Reto's YT-2400 Transport"},
-    ["Drexl"]=                {"Lambda T-4a", "Treuton Otro and Endira Vask's Lambda Shuttle"},
-    ["Greedy Wampa"]=         {"GR-75",       "Kei Prines's GR-75 Freighter"},
-    ["Lonestar"]=             {"Kuat D7",     "Kolt's Kuat D7 Patrol"},
---    ["Lunaris"]=              {"YT-2400",     "Caex Vanta's YT-2400 Transport"},
---    ["Nova Crow"]=            {"YT-2000",     "Veeza Tosh's YT-2000 Transport"},
---    ["Ronin"]=                {"Action IV",   "Draic FeenX' Action IV Freighter"},  
---    ["Schiffy McSchiffface"]= {"KvK-P0001",   "Kit Kol's KvK-Fighter"},
---    ["Sicaria"]=              {"A-24",        "Viveca Torra's A-24 Sleuth Scout"},
---    ["Steelin' Ivy"]=         {"YV-929",      "Vada Pav's YV-929 Transport"},
---    ["Vengeance"]=            {"StarViper",   "Fenn Barlors' Star Viper Fighter"},
-    ["Winner"]=               {" X-Wing",     "Generic X-Wing"},
-    ["Xylon"]=                {"G9",          "Generic G9 for the syndicate"},
-    ["Yaq"]=                  {"Lambda T-4a", "Generic Lambda for the empire"},
-    ["Zoomer"]=               {"UT-60D",      "Generic U-Wing for the republic"},
+	["Artful Dodger"]=		{"Y2K",			"Leichter corellianischer Y2K Peregrine Frachter von Leanti Meva."},
+	["Batnar Galaar"]=		{"HWK-290",		"Modifizierter leichter Frachter HWK-290 von Mirsh Beskaryc"},
+	["Black Bantha"]=		{"YV-330",		"YV-330 Frachter von Cooper"},
+	["Cropdust Nomad"]=		{"Gozanti",		"Gozanti Cruiser von Kell Murtry"},
+	["Drexl"]=				{"Lambda T-4a",	"Lambda Shuttle von Endira Vask und Treuton Otro"},
+	["Greedy Wampa"]=		{"GR-75",		"Umgebauter GR-75 Frachter von Kei Prine"},
+	["Harlekin"]=			{"Allanar N3",	"Leichter Allanar N3 Frachter von Viveka Torra"},
+	["Kyr'yc Laar"]=		{"ARC-170",		"Aggressive-ReConnaisance Fighter von Kali Myk"},
+	["Lightning"]=			{"Sheathipede",	"Sheathipede von Endor Sky Marshal Ran Korra"},
+	["Lonestar"]=			{"Kuat D7",		"Kuat D7 Patrol von Colton Steele"},
+	["Nightbrother"]=		{"Kom'rk",		"Kom'rk Klasse von Fenn Bralor"},
+	["Sicaria"]=			{"A-24",		"A-24 Sleuth Scout von Viveca Torra"},
+	["TIE/rp 7901"]=		{"TIE-Reaper",	"TIE Reaper von Flight Lieutenant Ron Jelran"},
+	["Thunderbolt"]=		{"VCX-100",		"VCX-100 von Dash Meero"},
+	["Trummermove"]=		{"CX-9",		"Eine CX-9 von Crimson Dawn"},
+	["Udesla"]=				{"YT-1300",		"Corellianischer leichter Frachter YT-1300 von Mn'Taru und Tetsu-gunjin"},
+	["VV-Frightning"]=		{"Lambda T-4a",	"Lambda Shuttle von Val'Kinor"},
+	["Winner"]=				{"X-Wing",		"Generic X-Wing"},
+	["XW-65"]=				{"X-Wing",		"T-65B X-Wing von Tiv Ohan"},
+	["Zegema Beach"]=		{"Gozanti Mk Ic",	"Gozanti von Gabber'lok"},
+	["Xylon"]=				{"G9",			"Eine G9 von Crimson Dawn"},
+	["Yaq"]=				{"Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"},
+	["Zoomer"]=				{"UT-60D",		"Ein U-Wing der Neuen Republik"},
 	},
 	ground_station = nil,
 	active_ships = {},
 	http_post_send_queue = {},
 }
 
+function player_ships_util:init()
+	local storage = getScriptStorage()
+	storage["player_ships_util"] = self
+end
 
 function player_ships_util:spawn_player_ship(shipname, template, description, faction)
 	print("Create " .. template .. " " .. shipname)
@@ -40,6 +48,7 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	ship:setRotation(rotation)
 	ship:commandTargetRotation(rotation)
 	ship:setCanBeDestroyed(false)
+	ship:setCanSelfDestruct(false)
 	ship:addReputationPoints(50)
 	if self.ground_station ~= nil and self.ground_station:isValid() then
 		local px,py = self.ground_station:getPosition()
@@ -104,7 +113,7 @@ function player_ships_util:gm_menu()
 	end)
 	addGMFunction(_("buttonGM", "Despawn Player Ship"), function()
 		clearGMFunctions()
-		for shipname, ship in pairs(self.active_ships) do
+		for shipname, ship in pairs(player_ships_util.active_ships) do
 			addGMFunction(_("buttonGM", shipname), function()
 				player_ships_util:despawn_player_ship(shipname)
 				plot_manager.gm_main_menu()
@@ -196,6 +205,9 @@ function player_ships_util:http_post(endpoint, data)
 	-- send data to endpoint
 	-- if request failes, store it for the next update
 	if httpPost("127.0.0.1", 8002, endpoint, data) == false then
+		if noNetwork == true then
+			return false
+		end
 		table.insert(self.http_post_send_queue, {
 			endpoint = endpoint,
 			data = data,

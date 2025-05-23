@@ -76,6 +76,11 @@ async def fuelconsumption_from_sensor(d : Report):
 async def damagereport_from_sensor(d : Report):
 	rk.damagereport_from_sensor(d.callsign, d.data)
 
+@app.post("/reactor_control")
+async def reactor_control(request: Request):
+	j = await request.json()
+	log.debug(j)
+
 @app.post("/pingpost")
 async def ping():
 	pass

@@ -130,7 +130,7 @@ function addSystemsAdler(template)
     template:addDoor(11,5, true)
 end
 
-function addSystemsMulitGun(template)
+function addSystemsMultiGun(template)
     template:addRoomSystem(4, 2, 2, 1, "Maneuver");
     template:addRoomSystem(2, 1, 2, 1, "BeamWeapons");
     template:addRoom(2, 2, 2, 1);

@@ -46,8 +46,8 @@ function GRAVITY:updatePlayerShip(delta, p)
 			if dist_0 < limit then
 				local dist_1 = (limit-dist_0)^2 / self.gravity_const * delta
 				local pmx, pmy = vectorFromAngle(angle, dist_0 - dist_1)
-				local px, py = p:getPosition()
-				p:setPosition(-pmx,-pmy)
+				local sx, sy = source:getPosition()
+				p:setPosition(sx-pmx,sy-pmy)
 			end
 		end
 	end

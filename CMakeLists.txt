@@ -252,6 +252,7 @@ set(MAIN_SOURCES
     src/menus/autoConnectScreen.cpp
     src/menus/hotkeyMenu.cpp
     src/menus/luaConsole.cpp
+    src/menus/pfc.cpp
     src/screens/cinematicViewScreen.cpp
     src/screens/crewStationScreen.cpp
     src/screens/topDownScreen.cpp
@@ -411,6 +412,7 @@ set(MAIN_SOURCES
     src/menus/shipSelectionScreen.h
     src/menus/tutorialMenu.h
     src/menus/luaConsole.h
+    src/menus/pfc.h
     src/mesh.h
     src/missileWeaponData.h
     src/modelData.h

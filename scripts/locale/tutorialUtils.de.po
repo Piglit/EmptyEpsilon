@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: scripts/tutorialUtils.lua:18
+#: scripts/tutorialUtils.lua:21
 msgid ""
 "Welcome to the EmptyEpsilon tutorial.\n"
 "Note that this tutorial is designed to give you a quick overview of the "

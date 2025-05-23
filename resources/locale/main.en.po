@@ -210,12 +210,12 @@ msgctxt "station"
 msgid "Fighter Cockpit"
 msgstr ""
 
-#: src/playerInfo.cpp:266
+#: src/playerInfo.cpp:277
 msgctxt "station"
 msgid "Damage Control"
 msgstr ""
 
-#: src/playerInfo.cpp:267
+#: src/playerInfo.cpp:278
 msgctxt "station"
 msgid "Power Management"
 msgstr ""
@@ -867,6 +867,20 @@ msgctxt "hotkey_General"
 msgid "Open LUA console"
 msgstr ""
 
+#: src/menus/pfc.cpp:77
+msgid "title"
+msgstr ""
+
+#: src/menus/pfc.cpp:80
+msgctxt "button"
+msgid "Start Preflight-Check"
+msgstr ""
+
+#: src/menus/pfc.cpp:86
+msgctxt "button"
+msgid "Skip Preflight-Check"
+msgstr ""
+
 #: src/screens/cinematicViewScreen.cpp:41 src/screens/topDownScreen.cpp:33
 msgctxt "button"
 msgid "Lock camera on ship"
@@ -1205,10 +1219,6 @@ msgctxt "scienceButton"
 msgid "Database"
 msgstr ""
 
-#: src/screens/crew6/relayScreen.cpp:81
-msgid "Callsign"
-msgstr ""
-
 #: src/screens/crew6/relayScreen.cpp:84
 msgid "Faction"
 msgstr ""
@@ -1229,7 +1239,7 @@ msgstr ""
 msgid "Link to Science"
 msgstr ""
 
-#: src/screens/crew6/relayScreen.cpp:144 src/screens/crew6/relayScreen.cpp:301
+#: src/screens/crew6/relayScreen.cpp:144 src/screens/crew6/relayScreen.cpp:305
 msgid "Launch Probe"
 msgstr ""
 
@@ -2120,37 +2130,37 @@ msgctxt "scienceFrequencyGraph"
 msgid "No data"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:34
+#: src/screenComponents/powerDamageIndicator.cpp:39
 msgctxt "systems"
 msgid "DAMAGED"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:38
+#: src/screenComponents/powerDamageIndicator.cpp:43
 msgctxt "systems"
 msgid "JAMMED"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:42
+#: src/screenComponents/powerDamageIndicator.cpp:47
 msgctxt "systems"
 msgid "NO POWER"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:46
+#: src/screenComponents/powerDamageIndicator.cpp:51
 msgctxt "systems"
 msgid "LOW ENERGY"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:50
+#: src/screenComponents/powerDamageIndicator.cpp:55
 msgctxt "systems"
 msgid "LOW POWER"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:54
+#: src/screenComponents/powerDamageIndicator.cpp:59
 msgctxt "systems"
 msgid "OVERHEATING"
 msgstr ""
 
-#: src/screenComponents/powerDamageIndicator.cpp:58
+#: src/screenComponents/powerDamageIndicator.cpp:63
 msgctxt "systems"
 msgid "HACKED"
 msgstr ""
@@ -2189,13 +2199,8 @@ msgstr ""
 msgid "Combat maneuver"
 msgstr ""
 
-#: src/screenComponents/shipDestroyedPopup.cpp:20
-msgid "SHIP DESTROYED!"
-msgstr ""
-
 #: src/screenComponents/shipDestroyedPopup.cpp:21
-msgctxt "shipdestroyed"
-msgid "Return"
+msgid "SHIP DESTROYED!"
 msgstr ""
 
 #: src/screenComponents/warpControls.cpp:41
@@ -2374,29 +2379,29 @@ msgstr ""
 msgid "Hacking FAILURE!"
 msgstr ""
 
-#: src/spaceObjects/missiles/missileWeapon.cpp:205
-#: src/spaceObjects/mine.cpp:157
+#: src/spaceObjects/missiles/missileWeapon.cpp:206
+#: src/spaceObjects/mine.cpp:162
 msgctxt "gm_info"
 msgid "Owner"
 msgstr ""
 
-#: src/spaceObjects/missiles/missileWeapon.cpp:212
+#: src/spaceObjects/missiles/missileWeapon.cpp:213
 msgctxt "gm_info"
 msgid "Target"
 msgstr ""
 
-#: src/spaceObjects/missiles/missileWeapon.cpp:215
-#: src/spaceObjects/mine.cpp:160
+#: src/spaceObjects/missiles/missileWeapon.cpp:216
+#: src/spaceObjects/mine.cpp:165
 msgctxt "gm_info"
 msgid "Faction"
 msgstr ""
 
-#: src/spaceObjects/missiles/missileWeapon.cpp:216
+#: src/spaceObjects/missiles/missileWeapon.cpp:217
 msgctxt "gm_info"
 msgid "Lifetime"
 msgstr ""
 
-#: src/spaceObjects/missiles/missileWeapon.cpp:217
+#: src/spaceObjects/missiles/missileWeapon.cpp:218
 msgctxt "gm_info"
 msgid "Size"
 msgstr ""
@@ -3544,12 +3549,12 @@ msgctxt "hotkey_Engineering"
 msgid "Set rear shields coolant (joystick)"
 msgstr ""
 
-#: src/gui/hotkeyConfig.cpp:460
+#: src/gui/hotkeyConfig.cpp:471
 msgctxt "hotkey_Relay"
 msgid "Alert level: Normal"
 msgstr ""
 
-#: src/gui/hotkeyConfig.cpp:461
+#: src/gui/hotkeyConfig.cpp:472
 msgctxt "hotkey_Relay"
 msgid "Alert level: Yellow"
 msgstr ""

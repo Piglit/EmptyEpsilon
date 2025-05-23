@@ -2,6 +2,9 @@ map_shattered = {
 	moving_debris = {},
 	ground = nil,
 	flight_control = nil,
+	gm_dummy = nil,
+    sectors = {},	-- contains sectors containing asteroid positions
+	probes = {},	-- all probes, fired from player ships
 }
 
 function map_shattered:init()
@@ -43,7 +46,7 @@ function map_shattered:init()
     -- create stations and global accessible ships
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
-    self.flight_control:setLongRangeRadarRange(2*orbit):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+    self.flight_control:setLongRangeRadarRange(60000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
     self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Green Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
@@ -55,11 +58,11 @@ function map_shattered:init()
     self.buoy3:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy3:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
 
-    --gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign("Ground Crew"):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
+    self.gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign(_("Tantal Observatory")):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
 
     self.ground=PlayerSpaceship():setTemplate("Ground Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-1300)
     self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
-    self.ground:setLongRangeRadarRange(70000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
+    self.ground:setLongRangeRadarRange(20000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
 
     self.freighter_imp=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
     self.freighter_nr=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
@@ -83,21 +86,21 @@ function map_shattered:init()
 
     -- place asteroids and satellites
     px,py = self.planet:getPosition()
-    placeRandomAroundPoint(Asteroid,3000,orbit+radius,2*orbit+radius,px,py)
-    placeRandomAroundPoint(VisualAsteroid,1000,orbit+radius,2*orbit+radius+5000,px,py)
-    placeRandomAroundPoint(Asteroid,50,16000,orbit+radius,px,py)
+    self:addPositionsAroundPoint(Asteroid,3000,orbit+radius,2*orbit+radius,px,py)
+    self:addPositionsAroundPoint(VisualAsteroid,1000,orbit+radius,2*orbit+radius+5000,px,py)
+    self:addPositionsAroundPoint(Asteroid,50,16000,orbit+radius,px,py)
     self:placeArtifactsAroundPoint (16,orbit+radius,orbit+radius+500,px,py, true)    -- broken ones
     self:placeArtifactsAroundPoint (16,orbit+radius,orbit+radius+500,px,py, false)   -- working ones
     for dist=orbit+radius+8000,2*orbit,500 do
         px,py = vectorFromAngle(random(0,360), dist)
-        placeRandomAroundPoint(Asteroid,50,1000,5000,px,py)
+        self:addPositionsAroundPoint(Asteroid,50,1000,5000,px,py)
     end
     px,py = self.freighter_nr:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
+    self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     px,py = self.freighter_imp:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
+    self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     px,py = self.freighter_cd:getPosition()
-    placeRandomAroundPoint(Asteroid,50,4000,8000,px,py)
+    self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     self:createMovingDebris(20, 0, 2*orbit, 5000)
 
     -- set database entry
@@ -108,14 +111,132 @@ function map_shattered:init()
     item:setImage("kessler_syndrome.png")
 end
 
+function map_shattered:addPositionsAroundPoint(type, amount, dist_min, dist_max, x0, y0)
+    for n = 1, amount do
+        local r = random(0, 360)
+        local distance = random(dist_min, dist_max)
+        local x = x0 + math.cos(r / 180 * math.pi) * distance
+        local y = y0 + math.sin(r / 180 * math.pi) * distance
+		local sector = getSectorName(x,y)
+		if self.sectors[sector] == nil then
+			self.sectors[sector] = {
+				shown = false
+			}
+		end
+        table.insert(self.sectors[sector], {x, y, type})
+    end
+end
+
+function map_shattered:showAsteroidsInSector(sectorName, show)
+	local positions = self.sectors[sectorName]
+	if positions == nil then
+		return
+	end
+	if show and positions.shown == false then
+		positions.shown = true
+		for i, position in ipairs(positions) do
+			local x,y,type = table.unpack(position)
+			positions[i] = type():setPosition(x,y)
+		end
+	elseif show == false and positions.shown then
+		local new_positions = {
+			shown = false
+		}
+		for i=1, #positions do
+			asteroid = positions[i]
+			if asteroid:isValid() then
+				local x,y = asteroid:getPosition()
+				local type = asteroid.typeName
+				if type == "Asteroid" then
+					type = Asteroid
+				elseif type == "VisualAsteroid" then
+					type = VisualAsteroid
+				else
+					assert(false, "Type not implemented")
+				end
+				table.insert(new_positions, {x, y, type})
+				asteroid:destroy()
+			end
+		end
+		self.sectors[sectorName] = new_positions
+	end
+end
+--[[ -- Those only work when update does not overwrite em
+function map_shattered.showAsteroids()
+	self = map_shattered
+	for sector, positions in pairs(self.sectors) do
+		self:showAsteroidsInSector(sector, true)
+	end
+end
+function map_shattered.hideAsteroids()
+	self = map_shattered
+	for sector, positions in pairs(self.sectors) do
+		self:showAsteroidsInSector(sector, false)
+	end
+end
+--]]
 function map_shattered:gm_menu()
     addGMFunction(_("buttonGM", "Spawn moving debris"), map_shattered.triggerMovingDebris)
     addGMFunction(_("buttonGM", "Clear moving debris"), map_shattered.clearMovingDebris)
+--    addGMFunction(_("buttonGM", "Show Asteroids"), map_shattered.showAsteroids)
+--    addGMFunction(_("buttonGM", "Hide Asteroids"), map_shattered.hideAsteroids)
+end
+
+function map_shattered:onProbeLaunch(ship, probe)
+	arrayFilter(self.probes,
+		function(obj)
+			return obj:isValid()
+		end
+	)
+	table.insert(self.probes, probe)
+end
+
+function map_shattered:updateAsteroidVisibility()
+	for sectorName, sector in pairs(self.sectors) do
+		sector.showNext = false
+	end
+	for _, ship in ipairs(getActivePlayerShips()) do
+		local vision_dist = ship:getLongRangeRadarRange()
+		local x,y = ship:getPosition()
+		for s_x = x - vision_dist, x + vision_dist, 20000 do
+			for s_y = y - vision_dist, y + vision_dist, 20000 do
+				local d_x = (s_x - x) / 20000
+				local d_y = (s_y - y) / 20000
+				local d_v = math.ceil(vision_dist / 20000) +1
+				if d_x * d_x + d_y * d_y <= d_v * d_v then	-- optimization for large ranges
+					local sectorName = getSectorName(s_x, s_y)
+					if self.sectors[sectorName] ~= nil then
+						self.sectors[sectorName].showNext = true
+					end
+				end
+			end
+		end
+	end
+	for _, probe in ipairs(self.probes) do
+		if probe:isValid() then
+			local x,y = probe:getPosition()
+			local vision_dist = 5000
+			for _, s_x in ipairs({x - vision_dist, x + vision_dist}) do
+				for _, s_y in ipairs({y - vision_dist, y + vision_dist}) do
+					local sectorName = getSectorName(s_x, s_y)
+					if self.sectors[sectorName] ~= nil then
+						self.sectors[sectorName].showNext = true
+					end
+				end
+			end
+		end
+	end
+	for sectorName, sector in pairs(self.sectors) do
+		self:showAsteroidsInSector(sectorName, sector.showNext)
+	end
+
 end
 
 function map_shattered:update(delta)
 	self:moveDebris(delta)
+	self:updateAsteroidVisibility()
 end
+
 
 function map_shattered:createMovingDebris(amount, px, py, rad)
     local objs = placeRandomAroundPoint(Asteroid,amount,0,rad,-px,-py)
@@ -180,7 +301,7 @@ function map_shattered:placeArtifactsAroundPoint( amount, dist_min, dist_max, x0
                 debris:setModel("debris-blob")
             end
             debris:allowPickup(true)
-            debris:setCallSign(callsign):setFaction("Endor"):setRadarTraceColor(255,235,170)
+            debris:setCallSign(callsign):setFaction("Endor"):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(64,64,150)
 
             debris:onPickUp(function(art, player)
                 shieldfreq= 400+(player:getShieldsFrequency())*20
@@ -190,9 +311,11 @@ function map_shattered:placeArtifactsAroundPoint( amount, dist_min, dist_max, x0
                     ElectricExplosionEffect():setPosition(x,y):setSize(200)
                     player:takeDamage(1, "kinetic",ax,ay )
                     player:addReputationPoints(10)
+					player:addToShipLog(_("Debris captured."), "cyan")
                 else
                     ExplosionEffect():setPosition(ax,ay):setSize(200)
                     player:takeDamage(50, "kinetic",ax,ay )
+					player:addToShipLog(_("Debris was destroyed by impact"), "red")
                 end
             end)
 
@@ -208,6 +331,7 @@ function map_shattered:placeArtifactsAroundPoint( amount, dist_min, dist_max, x0
                 ExplosionEffect():setPosition(ax,ay):setSize(200)
                 player:takeDamage(50, "kinetic",ax,ay )
                 player:setReputationPoints((player:getReputationPoints()-10))
+				player:addToShipLog(_("Satellite was destroyed by impact"), "red")
             end)
         end
     end

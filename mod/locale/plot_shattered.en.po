@@ -1,0 +1,184 @@
+#: mod/plot_shattered.lua:13
+msgctxt "buttonGM"
+msgid "Unusual Readings"
+msgstr ""
+
+#: mod/plot_shattered.lua:40
+#, lua-format
+msgid ""
+"We are getting strange readings from sector %s. It looks like the source is "
+"an abandoned droid. Please send a ship to investigate, but be careful."
+msgstr ""
+
+#: mod/plot_shattered.lua:42
+msgid "An abandoned droid"
+msgstr ""
+
+#: mod/plot_shattered.lua:42
+msgid ""
+"An old military droid. Capturing frequency is blocked. Behaviour unknown."
+msgstr ""
+
+#: mod/plot_shattered.lua:47
+msgid ""
+"The droid was destroyed. We can no longer find out what caused it's "
+"malfunction."
+msgstr ""
+
+#: mod/plot_shattered.lua:49
+msgid "Droid destroyed."
+msgstr ""
+
+#: mod/plot_shattered.lua:62
+msgid "Activating... Searching targets..."
+msgstr ""
+
+#: mod/plot_shattered.lua:84
+msgid ""
+"The droid started to attack objects in its proximity! That way, more "
+"fragments will be created that may harm other ships. You must stop it! "
+"Instruct your ship crew that they should NOT destroy it, they should target "
+"its impulse drive instead."
+msgstr ""
+
+#: mod/plot_shattered.lua:116
+msgid "A deactivated military droid. Scan to get the capturing frequency."
+msgstr ""
+
+#: mod/plot_shattered.lua:116
+msgid "Capturing frequency:"
+msgstr ""
+
+#: mod/plot_shattered.lua:116
+msgid ""
+"Set your shield frequency to match the capturing frequency and activate your "
+"shields to capture the droid."
+msgstr ""
+
+#: mod/plot_shattered.lua:133
+msgid "Droid captured."
+msgstr ""
+
+#: mod/plot_shattered.lua:134
+#, lua-format
+msgid "The malfunctioning old droid was captured by %s."
+msgstr ""
+
+#: mod/plot_shattered.lua:152
+msgctxt "buttonGM"
+msgid "Droid Showdown"
+msgstr ""
+
+#: mod/plot_shattered.lua:181 mod/plot_shattered.lua:183
+msgid ""
+"This is the command node that controls the rogue droids. We have to shut it "
+"down!"
+msgstr ""
+
+#: mod/plot_shattered.lua:186
+msgid ""
+"Bad news: A whole group of military droids that should have been out of "
+"service just woke up. If we don't do anything against them, they will slowly "
+"but surely destroy all objects they can find. The debris will spread all "
+"over the orbit, destroying all our communications satellites.\n"
+"\n"
+"They emit heavy electromagnetic-signals. Your radar will show the direction "
+"of those signals als wiggling red line.\n"
+"    \n"
+"Please send a ship to invesitgate."
+msgstr ""
+
+#: mod/plot_shattered.lua:202
+msgid "An old military droid"
+msgstr ""
+
+#: mod/plot_shattered.lua:202
+msgid "An old military droid. Capturing frequency is blocked."
+msgstr ""
+
+#: mod/plot_shattered.lua:214
+msgid ""
+"We detected a control node within the group of rougue droids, but a newly "
+"formed dust cloud prevents us to get more details. We don't know if this "
+"cloud was created intentionally to serve as a hiding place. It might as well "
+"be a side effect of their destructive activities or just fuel leaking out of "
+"old tanks.\n"
+"We have to shut down the rogue droids somehow. Therefore, you need to get a "
+"ship as close as possible to the control node that is commanding the droids. "
+"Luckily, the droids are in some kind of sleep mode right now.\n"
+"Notify nearby ships, that they ship should turn off all non-essential "
+"systems and devices as soon as they are getting closer to the dangerous "
+"droids."
+msgstr ""
+
+#: mod/plot_shattered.lua:245 mod/plot_shattered.lua:246
+msgid "Out of reach"
+msgstr ""
+
+#: mod/plot_shattered.lua:253 mod/plot_shattered.lua:254
+msgid "Connect to control device"
+msgstr ""
+
+#: mod/plot_shattered.lua:256 mod/plot_shattered.lua:257
+msgid ""
+"A droid control device appeared is in range for data transmission. You can "
+"connect to it with the button on the right."
+msgstr ""
+
+#: mod/plot_shattered.lua:284
+msgid ""
+"Connection established. Keep near the control node, to not lose connection."
+msgstr ""
+
+#: mod/plot_shattered.lua:288 mod/plot_shattered.lua:289
+msgid "Connection established."
+msgstr ""
+
+#: mod/plot_shattered.lua:307 mod/plot_shattered.lua:308
+msgid "Transmitter charging"
+msgstr ""
+
+#: mod/plot_shattered.lua:332
+msgid ""
+"If not done yet, you should now change the headline of your sidebar from "
+"'scan' to 'other', so you can send the signal as soon as it is available."
+msgstr ""
+
+#: mod/plot_shattered.lua:333 mod/plot_shattered.lua:334
+msgid ""
+"As soon as your transmitter is fully charged, the weapons officer has to "
+"sync the shields with the transmitter (a Button will appear on the console). "
+"Then, Operations will have to send the signal. (There will be a button for "
+"this as well.)"
+msgstr ""
+
+#: mod/plot_shattered.lua:342 mod/plot_shattered.lua:343
+msgid "Transmitter fully charged"
+msgstr ""
+
+#: mod/plot_shattered.lua:344 mod/plot_shattered.lua:345
+msgid "Transmitter:"
+msgstr ""
+
+#: mod/plot_shattered.lua:346 mod/plot_shattered.lua:347
+msgid "Sync with shields"
+msgstr ""
+
+#: mod/plot_shattered.lua:356 mod/plot_shattered.lua:357
+msgid "Syncing transmitter..."
+msgstr ""
+
+#: mod/plot_shattered.lua:365 mod/plot_shattered.lua:367
+msgid "send signal"
+msgstr ""
+
+#: mod/plot_shattered.lua:368 mod/plot_shattered.lua:369
+msgid "Transmitter is ready"
+msgstr ""
+
+#: mod/plot_shattered.lua:400
+msgid ""
+"The rougue droids shut down. Congratulations - the ship you sent saved the "
+"global satellite network from destruction. Tell the crew, they did a great "
+"job!"
+msgstr ""

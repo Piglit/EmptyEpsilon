@@ -32,6 +32,8 @@ player_ships_util = {
 	ground_station = nil,
 	active_ships = {},
 	http_post_send_queue = {},
+	active_ships_by_faction = {},
+	pdu_settings_by_faction = {},
 }
 
 function player_ships_util:init()
@@ -53,6 +55,7 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	ship:setCanBeDestroyed(false)
 	ship:setCanSelfDestruct(false)
 	ship:addReputationPoints(50)
+	ship:setSystemPowerFactor("reactor", -20)
 	if self.ground_station ~= nil and self.ground_station:isValid() then
 		local px,py = self.ground_station:getPosition()
 		local offset = #getActivePlayerShips() -1
@@ -63,6 +66,7 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 		ship:commandDock(self.ground_station)
 	end
 	self.active_ships[shipname] = ship
+	self.active_ships_by_faction[faction] = ship
 	ship.previous_docking_state = 0
 	local data = {
 		callsign = ship:getCallSign(),
@@ -81,6 +85,11 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	ship.fuel_consumption_log = {}
 	ship.last_fuel_consumption_timestamp = 0
 	ship.activate_fuel_consumption_log = false
+
+	if self.pdu_settings_by_faction[faction] ~= nil then
+		self:set_ship_pdu(ship, self.pdu_settings_by_faction[faction])
+		self.pdu_settings_by_faction[faction] = nil
+	end
 	return ship
 end
 
@@ -92,6 +101,7 @@ function player_ships_util:despawn_player_ship(shipname)
 		state = "deleted",
 	}
 	player_ships_util:http_post("/ship_state", toJSON(data))
+	self.active_ships_by_faction[ship:getFaction()] = nil
 	ship:destroy()
 	self.active_ships[shipname] = nil
 end
@@ -240,6 +250,9 @@ function player_ships_util:updatePlayerShip(delta, ship)
 			player_ships_util:http_post("/ship_state", toJSON(data))
 			player_ships_util:logFuelConsumption(ship, timestamp, true)
 		end
+		if ship.tuner ~= nil then
+			self:tuner_update(delta, ship)
+		end
 	end
 end
 
@@ -272,4 +285,170 @@ function player_ships_util:update(delta)
 			self.http_post_send_queue = failed
 		end
 	end
+end
+
+function player_ships_util.set_pdu(args)
+	local faction = args.faction
+	local ship = player_ships_util.active_ships_by_faction[faction]
+	if ship ~= nil and ship:isValid() then
+		player_ships_util:set_ship_pdu(ship, args)
+		player_ships_util.pdu_settings_by_faction[faction] = nil
+	else
+		player_ships_util.pdu_settings_by_faction[faction] = args
+	end
+end
+
+function player_ships_util:tuner_update(delta, ship)
+	if ship.tuner_state == 0 then
+		if ship.tuner == 2 then
+			-- tuner 2 activates on 200% power and locks it
+			-- will probably happen during launch
+			for _,system in ipairs(SYSTEMS) do
+				if ship:getSystemPower(system) >= 2 then
+					ship:setSystemPowerRate(system, 0)
+					ship.tuner_state = 1
+				end
+			end
+		elseif ship.tuner == 3 then
+			-- tuner 3 activates on system damage
+			-- will happen during combat on when fighters overheat their drives
+			-- locks all power settings!
+			for _,system in ipairs(SYSTEMS) do
+				if ship:getSystemHealth(system) < 1 then
+					ship.tuner_state = 1
+				end
+			end
+			if ship.tuner_state == 1 then
+				for _,system in ipairs(SYSTEMS) do
+					ship:setSystemPowerRate(system, 0)
+				end
+			end
+		end
+	elseif ship.tuner_state == 1 then
+		-- happened last update
+		ship:removeCustom("pdu_caption")
+		ship:removeCustom("pdu_caption_plus")
+		ship:removeCustom("pdu_info")
+		ship:removeCustom("pdu_info_plus")
+		ship:removeCustom("pdu_note")
+		ship:removeCustom("pdu_note_plus")
+		ship:removeCustom("pdu_note2")
+		ship:removeCustom("pdu_note2_plus")
+		print("Sabotage active on "..ship:getCallSign())
+		ship.tuner_state = ship.tuner_state + delta
+	elseif ship.tuner_state < 10 then
+		ship.tuner_state = ship.tuner_state + delta
+		if ship.tuner_state > 2 then
+			ship:addCustomInfo("Engineering","pdu_caption","EVE-Fehler:", 20)
+			ship:addCustomInfo("Engineering+","pdu_caption_plus","EVE-Fehler:", 20)
+		end
+		if ship.tuner_state > 4 then
+			ship:addCustomInfo("Engineering","pdu_info","Sabotage festgestellt", 21)
+			ship:addCustomInfo("Engineering+","pdu_info_plus","Sabotage festgestellt", 21)
+		end
+		if ship.tuner_state > 6 then
+			ship:addCustomInfo("Engineering","pdu_note","Energieverteilung blockiert", 22)
+			ship:addCustomInfo("Engineering+","pdu_note_plus","Energieverteilung blockiert", 22)
+		end
+		if ship.tuner_state > 8 then
+			ship:addCustomInfo("Engineering","pdu_note2","Hauptleitung überprüfen!", 23)
+			ship:addCustomInfo("Engineering+","pdu_note2_plus","Hauptleitung überprüfen!", 23)
+			ship.tuner_state = 10
+		end
+	end			
+end
+
+
+function player_ships_util:set_ship_pdu(ship, args)
+	print("Received PDU settings of "..ship:getCallSign() .. ": " .. args.error .. args.warning)
+	if ship.tuner_state ~= nil and ship.tuner_state ~= 0 and ship.tuner_state ~= 99 then
+   		if args.active then
+			-- must plug it out an in again to reset sabotage
+			return
+		end
+		ship.tuner_state = 99
+		print("Sabotage inactive on "..ship:getCallSign())
+	end
+
+	ship:setSystemPowerRate(  "beamweapons",	args.weapons_rate)
+	ship:setSystemCoolantRate("beamweapons",	args.weapons_cool)
+	ship:setSystemPowerFactor("beamweapons",	args.weapons_consume)
+	ship:setSystemPowerRate(  "missilesystem",	args.weapons_rate)
+	ship:setSystemCoolantRate("missilesystem",	args.weapons_cool)
+	ship:setSystemPowerFactor("missilesystem",	args.weapons_consume/3)
+	ship:setSystemPowerRate(  "impulse",		args.drive_rate)
+	ship:setSystemCoolantRate("impulse",		args.drive_cool)
+	ship:setSystemPowerFactor("impulse",		args.drive_consume)
+	ship:setSystemPowerRate(  "maneuver",		args.drive_rate)
+	ship:setSystemCoolantRate("maneuver",		args.drive_cool)
+	ship:setSystemPowerFactor("maneuver",		args.drive_consume/2)
+	ship:setSystemPowerRate(  "frontshield",	args.shields_rate)
+	ship:setSystemCoolantRate("frontshield",	args.shields_cool)
+	ship:setSystemPowerFactor("frontshield",	args.shields_consume)
+	ship:setSystemPowerRate(  "rearshield",		args.shields_rate)
+	ship:setSystemCoolantRate("rearshield",		args.shields_cool)
+	ship:setSystemPowerFactor("rearshield",		args.shields_consume)
+
+	if args.tuner >= 2 then
+		if ship.tuner_state == nil then
+			print("Tuner "..tostring(args.tuner).." detected on "..ship:getCallSign())
+			ship.tuner = args.tuner
+			ship.tuner_state = 0
+		end
+	end
+	local pdu_msgs= {
+		["Main line not connected"] =	"Hauptleitung unterbrochen",
+		["Energy distribution not possible"] =	"Energieverteilung unmöglich",
+		["System overclocked"] = 		"Systeme übertaktet:",
+		["weapons rate"] = 				"Energieverteilung - Waffen",
+		["weapons coolant"] = 			"Kühlmittelpumpe - Waffen",
+		["drives rate"] = 				"Energieverteilung - Antriebe",
+		["drives coolant"] = 			"Kühlmittelpumpe - Antriebe",
+		["shields rate"] = 				"Energieverteilung - Schilde",
+		["shields coolant"] = 			"Kühlmittelpumpe - Schilde",
+		["Drive line not connected"] =	"Antriebsenergie unterbrochen",
+		["Shield line not connected"] =	"Schildenergie unterbrochen",
+		["Weapon line not connected"] =	"Waffenenergie unterbrochen",
+		["No power distribution"] = 	"Energieverteilung unmöglich",
+		["Non-standard energy consumption"] = "Energieverteilung umgesteckt",
+		[""] = "",
+	}
+	if args.error ~= "" then
+		assert(pdu_msgs[args.error] ~= nil)
+		ship:addCustomInfo("Engineering","pdu_caption","EVE-Fehler:", 20)
+		ship:addCustomInfo("Engineering+","pdu_caption_plus","EVE-Fehler:", 20)
+		ship:addCustomInfo("Engineering","pdu_info",pdu_msgs[args.error], 21)
+		ship:addCustomInfo("Engineering+","pdu_info_plus",pdu_msgs[args.error], 21)
+		ship:commandSetAlertLevel("yellow")
+	elseif args.warning ~= "" then
+		assert(pdu_msgs[args.warning] ~= nil)
+		ship:addCustomInfo("Engineering","pdu_caption","EVE-Warnung:", 20)
+		ship:addCustomInfo("Engineering+","pdu_caption_plus","EVE-Warnung:", 20)
+		ship:addCustomInfo("Engineering","pdu_info",pdu_msgs[args.warning], 21)
+		ship:addCustomInfo("Engineering+","pdu_info_plus",pdu_msgs[args.warning], 21)
+		ship:commandSetAlertLevel("normal")
+	else
+		ship:removeCustom("pdu_caption")
+		ship:removeCustom("pdu_caption_plus")
+		ship:removeCustom("pdu_info")
+		ship:removeCustom("pdu_info_plus")
+		ship:commandSetAlertLevel("normal")
+	end
+	if args.note ~= "" then
+		assert(pdu_msgs[args.note] ~= nil)
+		ship:addCustomInfo("Engineering","pdu_note",pdu_msgs[args.note], 22)
+		ship:addCustomInfo("Engineering+","pdu_note_plus",pdu_msgs[args.note], 22)
+	else
+		ship:removeCustom("pdu_note")
+		ship:removeCustom("pdu_note_plus")
+	end
+	if args.note2 ~= "" then
+		assert(pdu_msgs[args.note2] ~= nil)
+		ship:addCustomInfo("Engineering","pdu_note2",pdu_msgs[args.note2], 23)
+		ship:addCustomInfo("Engineering+","pdu_note2_plus",pdu_msgs[args.note2], 23)
+	else
+		ship:removeCustom("pdu_note2")
+		ship:removeCustom("pdu_note2_plus")
+	end
+
 end

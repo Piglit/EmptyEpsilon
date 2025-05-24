@@ -276,26 +276,33 @@ var:setBeam(1, 0, 0, 0, 6.0, 6)
 var:setBeamWeaponTurret(0, 300, -90, 5)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
+--[[Player Transport, 4-person without turret, two shields ]]
+
+template = createTemplate(4, 2, 0)
+template:setClass(_("class", "Freighter"), _("subclass", "Light transport"))
+template:setCombatManeuver(250, 150)
+template:setExternalDockClasses(_("class", "Starfighter"))
+
 var = template:copy("Gozanti")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
 var:setRadarTrace("gozanti.png")
-addRockets(var, false)
-var:setRepairCrewCount(2)
-var:setDockClasses(_("class", "Starfighter"))
+var:setRepairCrewCount(0)
 var:setRepairDocked(true)
 var:setSharesEnergyWithDocked(false)
 var:setRestocksMissilesDocked("all")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
-var2 = var:copy("Gozanti C-ROC")
+var = var:copy("Gozanti C-ROC")
 --                 Arc, Dir, Range, CycleTime, Dmg
-var2:setBeam(0, 10, 0, 800.0, 6.0, 6)
-var2:setBeam(1, 30, 0, 1200.0, 8.0, 12)
+var:setBeam(0, 10, 0, 800.0, 6.0, 6)
+var:setBeam(1, 30, 0, 1200.0, 8.0, 12)
 --								Arc, Dir, Rotate speed
-var2:setBeamWeaponTurret(0, 360, 0, 5)
-var2:setBeamWeaponTurret(1, 0, 0, 5)
-var2:copy(" "..var2:getName()):setType("ship") -- CpuShip variant
+var:setBeamWeaponTurret(0, 360, 0, 5)
+var:setBeamWeaponTurret(1, 0, 0, 5)
+addRockets(var, false)
+var:setRepairCrewCount(2)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 
 --[[Player Transport, 5 person crew, more specialiced, no default turret--]]
@@ -343,7 +350,6 @@ var:setCanCombatManeuver(false)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Gozanti Mk Ic")
-var:setClass(_("class", "Cruiser"), _("subclass", "Freighter"))
 var:setRadarTrace("gozanti.png")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))

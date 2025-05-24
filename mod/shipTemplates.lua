@@ -19,14 +19,14 @@ require("shipSystems.lua")
 require("shiptemplates/stations.lua")
 require("shiptemplates/starFighters.lua")
 require("shiptemplates/frigates.lua")
-require("shiptemplates/corvette.lua")
 require("shiptemplates/dreadnaught.lua")
 require("shiptemplates/OLD.lua")
 
 -- modified:
 require("shiptemplates/exuari.lua")
 require("shiptemplates/ktlitan.lua")
-require("shiptemplates/transport.lua")
+require("shiptemplates/corvette.lua")
+--require("shiptemplates/transport.lua")
 --require("shiptemplates/satellites.lua")	--moved to special
 
 -- new, lan:

@@ -121,7 +121,7 @@ msgstr "{turnspeed} Grad/Sek."
 #: src/scienceDatabase.cpp:528
 msgctxt "database"
 msgid "Warp speed"
-msgstr "Warpgeschwindigkeit"
+msgstr "Hypergeschwindigkeit"
 
 #: src/scienceDatabase.cpp:533
 msgctxt "database"
@@ -298,7 +298,7 @@ msgstr "Impulsantrieb"
 #: src/shipTemplate.cpp:603
 msgctxt "system"
 msgid "Warp Drive"
-msgstr "Warpantrieb"
+msgstr "Hyperantrieb"
 
 #: src/shipTemplate.cpp:604
 msgctxt "system"
@@ -1162,7 +1162,7 @@ msgstr "Impuls-Geschwindigkeit"
 
 #: src/screens/crew6/engineeringScreen.cpp:321
 msgid "Warp drive speed"
-msgstr "Warpantrieb Geschw."
+msgstr "Hyperantrieb Geschw."
 
 #: src/screens/crew6/engineeringScreen.cpp:324
 msgid "Jump drive recharge rate"
@@ -1696,11 +1696,11 @@ msgstr "Spezialantriebe:raketen"
 
 #: src/screens/gm/tweak.cpp:287
 msgid "Warp Drive"
-msgstr "Warpantrieb"
+msgstr "Hyperantrieb"
 
 #: src/screens/gm/tweak.cpp:292
 msgid "Warp speed:"
-msgstr "Warpgeschwindigkeit:"
+msgstr "Hypergeschwindigkeit:"
 
 #: src/screens/gm/tweak.cpp:298
 msgid "Jump Drive"
@@ -1981,7 +1981,7 @@ msgstr "Auto-Torpedo-Nachladen"
 #: src/screens/gm/tweak.cpp:1255
 msgctxt "player_tweak"
 msgid "Warp (E/s): {energy_per_second}"
-msgstr "Warp (E/s): {energy_per_second}"
+msgstr "Hyperantrieb (E/s): {energy_per_second}"
 
 #: src/screens/gm/tweak.cpp:1256
 msgctxt "player_tweak"
@@ -2245,7 +2245,7 @@ msgstr "Scannen"
 
 #: src/screenComponents/indicatorOverlays.cpp:24
 msgid "Game Paused"
-msgstr "Spiel pausiert"
+msgstr "System fährt hoch"
 
 #: src/screenComponents/indicatorOverlays.cpp:27
 msgid "Unpause"
@@ -2274,7 +2274,7 @@ msgstr "Schiff zerstört!"
 #: src/screenComponents/warpControls.cpp:41
 msgctxt "slider"
 msgid "Warp"
-msgstr "Warp"
+msgstr "Hyperantrieb"
 
 #: src/screenComponents/commsOverlay.cpp:20
 msgid "Opening communications..."
@@ -3148,37 +3148,37 @@ msgstr "Nach rechts"
 #: src/gui/hotkeyConfig.cpp:355
 msgctxt "hotkey_Helms"
 msgid "Warp off"
-msgstr "Warp aus"
+msgstr "Hyperantrieb aus"
 
 #: src/gui/hotkeyConfig.cpp:356
 msgctxt "hotkey_Helms"
 msgid "Warp 1"
-msgstr "Warp 1"
+msgstr "Hyperantrieb 1"
 
 #: src/gui/hotkeyConfig.cpp:357
 msgctxt "hotkey_Helms"
 msgid "Warp 2"
-msgstr "Warp 2"
+msgstr "Hyperantrieb 2"
 
 #: src/gui/hotkeyConfig.cpp:358
 msgctxt "hotkey_Helms"
 msgid "Warp 3"
-msgstr "Warp 3"
+msgstr "Hyperantrieb 3"
 
 #: src/gui/hotkeyConfig.cpp:359
 msgctxt "hotkey_Helms"
 msgid "Warp 4"
-msgstr "Warp 4"
+msgstr "Hyperantrieb 4"
 
 #: src/gui/hotkeyConfig.cpp:360
 msgctxt "hotkey_Helms"
 msgid "Increase Warp"
-msgstr "Warp erhöhen"
+msgstr "Hyperantrieb erhöhen"
 
 #: src/gui/hotkeyConfig.cpp:361
 msgctxt "hotkey_Helms"
 msgid "Decrease Warp"
-msgstr "Warp verringern"
+msgstr "Hyperantrieb verringern"
 
 #: src/gui/hotkeyConfig.cpp:362
 msgctxt "hotkey_Helms"
@@ -3418,7 +3418,7 @@ msgstr "Wähle System: Impuls"
 #: src/gui/hotkeyConfig.cpp:421
 msgctxt "hotkey_Engineering"
 msgid "Select warp system"
-msgstr "Wähle System: Warp"
+msgstr "Wähle System: Hyperantrieb"
 
 #: src/gui/hotkeyConfig.cpp:422
 msgctxt "hotkey_Engineering"
@@ -3583,7 +3583,7 @@ msgstr "Impulsleistung einstellen (Joystick)"
 #: src/gui/hotkeyConfig.cpp:455
 msgctxt "hotkey_Engineering"
 msgid "Set warp power (joystick)"
-msgstr "Warpleistung einstellen (Joystick)"
+msgstr "Hyperleistung einstellen (Joystick)"
 
 #: src/gui/hotkeyConfig.cpp:456
 msgctxt "hotkey_Engineering"
@@ -3628,7 +3628,7 @@ msgstr "Impulskühlung einstellen (Joystick)"
 #: src/gui/hotkeyConfig.cpp:465
 msgctxt "hotkey_Engineering"
 msgid "Set warp coolant (joystick)"
-msgstr "Warpkühlung einstellen (Joystick)"
+msgstr "Hyperantriebskühlung einstellen (Joystick)"
 
 #: src/gui/hotkeyConfig.cpp:466
 msgctxt "hotkey_Engineering"

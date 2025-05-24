@@ -7,6 +7,8 @@ from dialog import Dialog
 import pyrohelper
 import requests
 
+rk = None
+
 SERVER = "127.0.0.1"
 
 def _lua_exec(script):
@@ -36,7 +38,7 @@ playerships = {
 	"XW-65":				("X-Wing",		"T-65B X-Wing von Tiv Ohan"),
 	"Zegema Beach":			("Gozanti Mk Ic",	"Gozanti von Gabber'lok"),
 	"Xylon":				("G9",			"Eine G9 von Crimson Dawn"),
-	"Yaq":					("Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"),
+	"H.I.V.E.":				("Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"),
 	"Zoomer":				("UT-60D",		"Ein U-Wing der Neuen Republik"),
 #	"Bluewing":				("U-Wing",		"U-Wing Fighter von Ric Halcard"),
 #	"Crate Dragon":			("YT-2000",		"YT-2000 Frachter von Rogan Corrs"),
@@ -95,9 +97,6 @@ def get_simulator_station(ip):
 	station = pyrohelper.connect(f"PYRO:launcher@{ip}:7999")
 	return station
 
-
-
-
 d = Dialog(autowidgetsize=True)
 def abort():
 	d.clear()
@@ -113,6 +112,7 @@ def menu():
 	actions = [
 		("1", "Configure Ship"),
 		("2", "Configure Stations"),
+		("3", "Add income"),
 	]
 	code, action = d.menu("Select an action", title="Shattered Horizon Launcher", choices=actions)
 	if code != d.OK:
@@ -122,6 +122,14 @@ def menu():
 		configure_ship(simulator)
 	elif action == "2":
 		configure_stations(simulator)
+	elif action == "3":
+		global rk
+		if not rk:
+			rk = pyrohelper.connect_to_named("rk_server")
+		if rk.ping():
+			shipselection()
+		else:
+			d.msg("no connection to Reisekosten-server")
 
 def configure_ship(simulator):
 	# Select participating ships
@@ -201,6 +209,56 @@ def configure_stations(simulator):
 				station = STATIONS[station]
 				client.set_station(station)
 				d.msgbox("Client configuration changed. You need to restart the client to apply the changes.")
+
+def shipselection():
+	d.infobox("Loading...")
+	ships = rk.get_ships(with_income = True)
+	selectable_ships = [(cs, "{type} {name} ({income} credits)".format(**reg)) for cs,reg in ships.items()]
+	selectable_ships.append(("refresh", "Refresh this list"))
+
+	code, callsign = d.menu("Select a ship to modify it's income.\nIf ships work together, bot only one gets payed, split the income: Escort ships get one third, Fighters one fourth of the total income.\n\nUse arrow keys to navigate.\nPress Enter to continue.", title="GM-Interface", choices=selectable_ships)
+	if code != d.OK:
+		abort()
+	elif callsign == "refresh":
+		return
+	else:
+		incomemodify(callsign, ships[callsign])
+
+def incomemodify(callsign, reg):
+	d.infobox("Loading...")
+	inc = abs(rk.get_ship_income(callsign))
+	while True:
+		code, inc = d.inputbox("Ship: " + callsign + " - {type} {name}\nNote: {note}".format(**reg) + "\n\nEnter new income.\nBasic math operations are supported.\nPress Enter to continue.\nPress Escape to abort.", title="GM-Interface", init=str(inc))
+		if code != d.OK:
+			return
+		try:
+			# DANGER: eval user input! You must trust the user here!
+			inc_evaluated = eval(inc)
+			if isinstance(inc_evaluated, float):
+				inc_evaluated = int(inc_evaluated)
+			assert isinstance(inc_evaluated, int)
+			assert inc_evaluated >= 0
+			code = d.yesno("Set the income of " + callsign + " {type} {name}".format(**reg) + " to " + str(inc_evaluated) + " credits?")
+			while code == d.OK:
+				code, tag = d.radiolist("Wie erfolgt die Auszahlung?", choices=[
+					("+", "Haupt-Crew wurde bar bezahlt", False),
+					("-", "Crew(s) wird von Hafenmeisterei ausbezahlt", False),
+				])
+				if code != d.OK:
+					break
+				if tag == "-":
+					inc_evaluated = -inc_evaluated
+				if tag in ["+", "-"]:
+					d.infobox("Uploading...")
+					rk.set_ship_income(callsign, inc_evaluated)
+					return
+		except:
+			d.msgbox("Error: could not evaluate your input.")
+
+
+
+
+
 
 while True:
 	menu()

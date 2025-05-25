@@ -1,5 +1,5 @@
 -- Player Ship utility for Shattered Horizon
-noNetwork = true	-- igonre failed httpPost requests	
+noNetwork = false -- igonre failed httpPost requests	
 player_ships_util = {
 	PLAYER_SHIPS = {
 	["Artful Dodger"]=		{"Y2K",			"Leichter corellianischer Y2K Peregrine Frachter von Leanti Meva."},

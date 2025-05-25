@@ -1,4 +1,4 @@
---Exuari ships
+--Exuari ships, used as rebel and capital ships here
 
 --[[
 
@@ -74,48 +74,62 @@ Carriers:
 
 --[[ Fighters --]]
 -- Fighters are quick agile ships that do not do a lot of damage, but usually come in larger groups. They are easy to take out, but should not be underestimated.
-template = ShipTemplate():setName("T-Wing"):setClass("Starfighter", "Interceptor")
+template = ShipTemplate():setName(" T-Wing R-60"):setClass("Starfighter", "Interceptor")
 template:setModel("small_fighter_1")
 template:setRadarTrace("twing.png")
 template:setDescription(_("The R-60 T-wing interceptor was an interceptor originally designed to replace the A-wing. Unfortunately for the Rebellion, the end result turned out to be a poor replacement for the craft."))
 
 --                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
-template:setHull(30)
-template:setShields(30)
+--template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
+template:setTubes(1, 1.0)
+template:setTubeSystem(0, "beamweapons")
+template:setTubeSystem(1, "beamweapons")
+template:setWeaponTubeExclusiveFor(0, "laser_red")
+template:setWeaponTubeExclusiveFor(1, "laser_red")
+template:setWeaponStorage("laser_red", 99)
+
+template:setHull(15)
+template:setShields(15)
 --Reputation Score: 6
 template:setSpeed(120, 30, 25)
 template:setDefaultAI('fighter')
 
---variation = template:copy("X-Wing")
---variation:setClass("Exuari", "Starfighter - Interceptor")
---variation:setModel("dark_fighter_6")
---variation:setRadarTrace("xwing.png")
---variation:setDescription(("X-wing starfighters were a type of starfighter marked by their distinctive S-foils that resembled the High Galactic script's character 'X' in attack formation. They were heavily armed with four laser cannons on the S-foils and proton torpedo launchers in the fuselage. X-wings were designed for dogfighting and long missions."))
+variation = template:copy(" X-Wing")
+variation:setClass("Exuari", "Starfighter - Interceptor")
+variation:setModel("dark_fighter_6")
+variation:setRadarTrace("xwing.png")
+variation:setDescription(("X-wing starfighters were a type of starfighter marked by their distinctive S-foils that resembled the High Galactic script's character 'X' in attack formation. They were heavily armed with four laser cannons on the S-foils and proton torpedo launchers in the fuselage. X-wings were designed for dogfighting and long missions."))
 --variation:setBeam(0, 60, 0, 1000.0, 4.0, 4)
 --variation:setBeam(1, 60, 0, 1000.0, 4.0, 4)
---variation:setSpeed(130, 35, 30)
+variation:setTubes(2, 1.0)
+variation:setSpeed(130, 35, 30)
 
-template = ShipTemplate():setName("BTL-B Y-Wing"):setClass("Starfighter", "Bomber")
+template = ShipTemplate():setName(" Y-Wing BTL-B"):setClass("Starfighter", "Bomber")
 template:setModel("small_fighter_1")
 template:setRadarTrace("ywing.png")
 template:setDescription(_("The Y-wing starfighter/bomber, was a model of starfighter-bomber produced by Koensayr Manufacturing, the first of the BTL-series Y-wing line. A mainstay of the Republic Navy during the Clone Wars, BTL-Bs were adopted by clones and Jedi officers alike and were instrumental in the fight against the Confederacy of Independent Systems."))
-template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
+--template:setBeam(0, 60, 0, 1000.0, 4.0, 4)
+template:setTubes(2, 1.0)
+template:setTubeLoadTime(1,60)		 
+template:setTubeSystem(0, "beamweapons")
+template:setWeaponTubeExclusiveFor(0, "laser_red")
+template:setWeaponStorage("laser_red", 99)
 template:setHull(40)
 template:setShields(30)
 --Reputation Score: 7
 template:setSpeed(70, 20, 15)
 template:setDefaultAI('fighter')
-template:setTubes(1, 60.0)
-template:setTubeSize(0, "small")
+--template:setTubes(1, 60.0)
+template:setTubeSize(1, "small")
 template:setWeaponStorage("HVLI", 1)
+template:setWeaponTubeExclusiveFor(1, "HVLI")
 
-variation = template:copy("BTL-A4 Y-Wing")
-variation:setTubeSize(0, "medium")
+variation = template:copy(" Y-Wing BTL-A4")
+variation:setTubeSize(1, "medium")
 variation:setWeaponStorage("HVLI", 2)
 
-variation = template:copy("BTL-S3 Y-Wing")
-variation:setTubeSize(0, "large")
+variation = template:copy(" Y-Wing BTL-S3")
+variation:setTubeSize(1, "large")
 
 --[[ Strikers --]]
 -- The Strikeship is a warp-drive equipped figher build for quick strikes, it's fast, it's agile, but does not do an extreme amount of damage, and lacks in rear shields.
@@ -180,8 +194,8 @@ template:setTubeDirection(0, -1):weaponTubeDisallowMissle(0, "Mine")
 template:setTubeDirection(1,  1):weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(2,  180):setWeaponTubeExclusiveFor(2, "Mine")
 
-template = ShipTemplate():setName("Sentinel"):setClass("Exuari", "Frigate")
-template:setModel("transport_3_1"):setRadarTrace("exuari_frigate_2.png")
+template = ShipTemplate():setName("Nebulon-B"):setClass("Exuari", "Frigate")
+template:setModel("nebulon_b"):setRadarTrace("exuari_frigate_2.png")
 template:setDescription(_([[The Exuari Sentinel is an anti-fighter frigate. It has several rapid-firing, low-damage point-defense turret beams to quickly take out starfighters.]]))
 template:setBeamWeapon(0, 20, -9, 1200, 3, 2)
 template:setBeamWeapon(1, 20,  9, 1200, 3, 2)
@@ -245,7 +259,7 @@ variation:setWeaponStorage("Nuke", 1)
 
 --[[ Station/Transport--]]
 -- The battle station is a huge ship with many defensive features. It can be docked by smaller ships.
-template = ShipTemplate():setName("Ryder"):setModel("Ender Battlecruiser"):setClass("Exuari", "Carrier")
+template = ShipTemplate():setName("MC80"):setModel("calamari"):setClass("Exuari", "Carrier")
 template:setRadarTrace("battleship.png")
 template:setDescription(_("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier."))
 --                  Arc, Dir, Range, CycleTime, Dmg

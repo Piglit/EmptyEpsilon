@@ -3,11 +3,12 @@ require("shipSystems.lua") -- contains addSystems*
 color_player = "White" --change it if you want another style
 
 template = ShipTemplate():setName("TIE-Fighter"):setClass("Starfighter", "Fighter")
+template:setType("playership"):setPlayerShipType("fighter") 
 template:setModel("tie_fighter")
 template:setDescription([[It's a TIE Fighter]])
 template:setRadarTrace("tie_fighter.png")
 template:setImpulseSoundFile("sfx/engine_tie_mixed.wav")
-template:setHull(36)	-- asteroid makes 35 dmg
+template:setHull(25)	-- asteroid makes 35 dmg; capital has 4 dps, peak with 6 crew: 24 d/dual-shot 
 template:setShields()
 --				spped, turn, accel, rev-speed, rev-accel
 template:setSpeed(100, 28, 40, 25, 20)
@@ -15,7 +16,7 @@ template:setCombatManeuver(600, 0)
 --                 Arc, Dir, Range, CycleTime, Dmg
 --template:setBeam(0, 30,-5, 900.0, 4.0, 2.5)
 --template:setBeam(1, 30, 5, 900.0, 4.0, 2.5)
-template:setTubes(2, 1.0)
+template:setTubes(2, 2.0)
 template:setTubeSystem(0, "beamweapons")
 template:setTubeSystem(1, "beamweapons")
 template:setWeaponTubeExclusiveFor(0, "laser_green")
@@ -38,27 +39,27 @@ template:setAutoRepair(true)
 template:setDefaultAI('fighter')
 template:setInternalDockClasses("Escape Pod")
 
-var = template:copy("TIE Fighter")
-var:setType("playership")
-var:setPlayerShipType("fighter")
+var = template:copy(" TIE-Fighter")
+var:setType("ship") -- CpuShip
 addSystemsTF(var)
 
 var = template:copy("TIE-Interceptor")
+var:setTubes(2, 1.0) -- can fire faster, double dps!
 addSystemsTI(var)
 addSystemsTF(template)	-- set template systems after copy, otherwise they would be copied
 var:setModel("tie_interceptor")
 var:setClass("Starfighter", "Interceptor")
 var:setDescription([[It's a TIE Interceptor]])
 var:setRadarTrace("tie_interceptor.png")
-var:setHull(69)	-- two asteroids also kill TI
+var:setHull(36)	-- two asteroids also kill TI
 --var:setBeam(0, 30,-5, 900.0, 3.0, 3.0)
 --var:setBeam(1, 30, 5, 900.0, 3.0, 3.0)
 
-var2 = var:copy("TIE Interceptor")
-var2:setType("playership")
-var2:setPlayerShipType("fighter")
+var2 = var:copy(" TIE-Interceptor")
+var2:setType("ship") -- CpuShip
 
 template = ShipTemplate():setName("TIE-Bomber"):setClass("Starfighter", "Bomber")
+template:setType("playership"):setPlayerShipType("fighter") 
 template:setDescription([[It's a TIE Bomber]])
 template:setModel("tie_bomber")
 template:setRadarTrace("tie_bomber.png")
@@ -99,9 +100,8 @@ template:setDefaultAI('fighter')
 template:setInternalDockClasses("Escape Pod")
 addSystemsTB(template)
 
-var = template:copy("TIE Bomber")
-var:setType("playership")
-var:setPlayerShipType("fighter")
+var = template:copy(" TIE-Bomber")
+var:setType("ship") -- CpuShip
 --[[
 var2 = var:copy("TIE Bomber (assault)")
 var2:setTubes(1,7)

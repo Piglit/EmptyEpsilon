@@ -5,6 +5,7 @@ map_shattered = {
 	gm_dummy = nil,
     sectors = {},	-- contains sectors containing asteroid positions
 	probes = {},	-- all probes, fired from player ships
+	asteroids_visible = false,
 }
 
 function map_shattered:init()
@@ -60,30 +61,34 @@ function map_shattered:init()
 
     self.gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign(_("Tantal Observatory")):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
 
-    self.ground=PlayerSpaceship():setTemplate("Ground Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-1300)
+    self.ground=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-1300)
     self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
-    self.ground:setLongRangeRadarRange(20000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
+    self.ground:setRotation(-90)
 
-    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
-    self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
-    self.freighter_cd=CpuShip():setTemplate(" MC80"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
-    self.freighter_lf=CpuShip():setTemplate(" Star Destroyer"):setFaction("Crimson Dawn"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_imp=CpuShip():setTemplate(" Action IV"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.freighter_nr=CpuShip():setTemplate(" Action IV"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.freighter_cd=CpuShip():setTemplate(" Action IV"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.freighter_lf=CpuShip():setTemplate(" Action IV"):setFaction("Crimson Dawn"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
 
     -- place escort fighters for the freighters
     local px,py = self.freighter_nr:getPosition()
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px+3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px-3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-A4 Y-Wing"):setPosition(px,py-3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-B Y-Wing"):setPosition(px,py+3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(px+3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(px-3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(px,py-3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(px,py+3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     px,py = self.freighter_imp:getPosition()
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     px,py = self.freighter_cd:getPosition()
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(self.freighter_cd)
+    px,py = self.freighter_lf:getPosition()
+    CpuShip():setFaction("Crimson Dawn"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_lf)
+    CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_lf)
+    CpuShip():setFaction("Crimson Dawn"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(self.freighter_lf)
 
     -- place asteroids and satellites
     px,py = self.planet:getPosition()
@@ -101,6 +106,8 @@ function map_shattered:init()
     px,py = self.freighter_imp:getPosition()
     self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     px,py = self.freighter_cd:getPosition()
+    self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
+    px,py = self.freighter_lf:getPosition()
     self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     self:createMovingDebris(20, 0, 2*orbit, 5000)
 
@@ -162,25 +169,28 @@ function map_shattered:showAsteroidsInSector(sectorName, show)
 		self.sectors[sectorName] = new_positions
 	end
 end
---[[ -- Those only work when update does not overwrite em
+
 function map_shattered.showAsteroids()
 	self = map_shattered
 	for sector, positions in pairs(self.sectors) do
 		self:showAsteroidsInSector(sector, true)
 	end
+	self.asteroids_visible = true
+	plot_manager.gm_main_menu()
 end
 function map_shattered.hideAsteroids()
-	self = map_shattered
-	for sector, positions in pairs(self.sectors) do
-		self:showAsteroidsInSector(sector, false)
-	end
+	map_shattered.asteroids_visible = false
+	plot_manager.gm_main_menu()
 end
---]]
+
 function map_shattered:gm_menu()
-    addGMFunction(_("buttonGM", "Spawn moving debris"), map_shattered.triggerMovingDebris)
-    addGMFunction(_("buttonGM", "Clear moving debris"), map_shattered.clearMovingDebris)
---    addGMFunction(_("buttonGM", "Show Asteroids"), map_shattered.showAsteroids)
---    addGMFunction(_("buttonGM", "Hide Asteroids"), map_shattered.hideAsteroids)
+    addGMFunction("Spawn moving debris", map_shattered.triggerMovingDebris)
+    addGMFunction("Clear moving debris", map_shattered.clearMovingDebris)
+	if self.asteroids_visible then
+		addGMFunction("Hide Asteroids", map_shattered.hideAsteroids)
+	else
+		addGMFunction("Show Asteroids", map_shattered.showAsteroids)
+	end
 end
 
 function map_shattered:onProbeLaunch(ship, probe)
@@ -193,6 +203,7 @@ function map_shattered:onProbeLaunch(ship, probe)
 end
 
 function map_shattered:updateAsteroidVisibility()
+	if self.asteroids_visible then return end
 	for sectorName, sector in pairs(self.sectors) do
 		sector.showNext = false
 	end
@@ -230,7 +241,6 @@ function map_shattered:updateAsteroidVisibility()
 	for sectorName, sector in pairs(self.sectors) do
 		self:showAsteroidsInSector(sectorName, sector.showNext)
 	end
-
 end
 
 function map_shattered:update(delta)

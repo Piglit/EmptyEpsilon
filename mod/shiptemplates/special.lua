@@ -342,9 +342,4 @@ template:setTubeDirection(2, 0):weaponTubeDisallowMissle(2, "Nuke"):weaponTubeDi
 template:setTubeDirection(3, 180):setWeaponTubeExclusiveFor(3, "Mine")
 
 
-var = template:copy("MC80")								 
-var:setModel("calamari")
-
-var = template:copy("Nebulon-B")								 
-var:setModel("nebulon_b")
 

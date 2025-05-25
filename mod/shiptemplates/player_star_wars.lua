@@ -42,13 +42,13 @@ function createTemplate(crew_size, shield_segments, turret_level)
 		template:setShields(20*crew_size, 20*crew_size)
 	end
 
-	-- beams default to two beams in front; all cause 1 dps
+	-- beams default to two beams in front; all cause 2 dps, usually dual-fire: so 4 dps for the ship
 
 	assert(turret_level <= 3 and turret_level >= 0)
 	if turret_level > 0 then
 		--           		Arc,  Dir,	Range, 				CycleTime,	Dmg
-		template:setBeam(0, 10,   0,	800+100*crew_size, 	crew_size, 	crew_size)
-		template:setBeam(1, 10,   0,	800+100*crew_size, 	crew_size, 	crew_size)
+		template:setBeam(0, 10,   0,	800+100*crew_size, 	crew_size, 	2*crew_size)
+		template:setBeam(1, 10,   0,	800+100*crew_size, 	crew_size, 	2*crew_size)
 		--							    Arc, 			Dir, Rotate speed
 		template:setBeamWeaponTurret(0, 120*turret_level, 0, 6-turret_level)
 		template:setBeamWeaponTurret(1, 120*turret_level, 0, 6-turret_level)
@@ -61,8 +61,8 @@ function createTemplate(crew_size, shield_segments, turret_level)
 			beam_dir = 5
 		end
 		--           		Arc,  		Dir,		Range,			CycleTime,	Dmg
-		template:setBeam(0, beam_arc,   -beam_dir,	beam_range, 	crew_size, 	crew_size)
-		template:setBeam(1, beam_arc,    beam_dir,	beam_range, 	crew_size, 	crew_size)
+		template:setBeam(0, beam_arc,   -beam_dir,	beam_range, 	crew_size, 	2*crew_size)
+		template:setBeam(1, beam_arc,    beam_dir,	beam_range, 	crew_size, 	2*crew_size)
 	end
 
 	if crew_size <= 2 then

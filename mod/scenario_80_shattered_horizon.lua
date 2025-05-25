@@ -1,42 +1,43 @@
 -- Name: Shattered Horizon
 -- Type: Larp
 
-TEST = true
+TEST = false
 require("utils.lua")
 require("ee.lua")   -- SYSTEMS
 require("plot_manager.lua")
 
-require("map_shattered.lua")
-require("gravity_util.lua")
-require("player_ships_util.lua")
-require("perma_damage_util.lua")
+--require("map_shattered.lua")
+--require("gravity_util.lua")
+--require("player_ships_util.lua")
+--require("perma_damage_util.lua")
 require("plot_shattered.lua")
 
 function init()
 	-- collection of scripts from different sources for the plot_manager
 	local plot_modules = {
-		map_shattered,
-		GRAVITY,
-		player_ships_util,
-		perma_damage_util,
-		plot_shattered_droid,
-		plot_shattered_network,
-		plot_shattered_gozanti,
-		plot_shattered_crashlander,
+		"map_shattered",
+		"gravity_util",
+		"player_ships_util",
+		"perma_damage_util",
+		--plot_shattered_droid,
+		--plot_shattered_network,
+		{"plot_shattered_gozanti", plot_shattered_gozanti},
+		--plot_shattered_crashlander,
+		--plot_shattered_package,
 	}
 
 	plot_manager:init(plot_modules)
 
 	-- set scenario specific variables
-	GRAVITY.addGravitySource(map_shattered.planet, 80000)
-	GRAVITY.addException(map_shattered.flight_control)
-	GRAVITY.addException(map_shattered.ground)
+	gravity_util.addGravitySource(map_shattered.planet, 80000)
+	gravity_util.addException(map_shattered.flight_control)
+	gravity_util.addException(map_shattered.ground)
 	player_ships_util.ground_station = map_shattered.ground
-	plot_shattered_droid.gm_dummy = map_shattered.gm_dummy
-	plot_shattered_droid.flight_control = map_shattered.flight_control
-	plot_shattered_network.gm_dummy = map_shattered.gm_dummy
-	plot_shattered_network.flight_control = map_shattered.flight_control
-	plot_shattered_network.ground = map_shattered.ground
+	--plot_shattered_droid.gm_dummy = map_shattered.gm_dummy
+	--plot_shattered_droid.flight_control = map_shattered.flight_control
+	--plot_shattered_network.gm_dummy = map_shattered.gm_dummy
+	--plot_shattered_network.flight_control = map_shattered.flight_control
+	--plot_shattered_network.ground = map_shattered.ground
 
 	plot_manager.gm_main_menu()
 

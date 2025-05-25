@@ -2,6 +2,7 @@ plot_shattered_droid = {}
 plot_shattered_network = {}
 plot_shattered_gozanti = {}
 plot_shattered_crashlander = {}
+plot_shattered_package = {}
 
 -- TODO: Quests: clean up sats 1, 2, 4
 
@@ -482,3 +483,30 @@ function plot_shattered_crashlander:update(delta)
 		end
 	end
 end
+
+
+
+
+function plot_shattered_package:gm_menu()
+    addGMFunction(_("buttonGM", "Lost Package"),plot_shattered_package.spawn_package)
+end
+
+--------  GM functions
+
+function plot_shattered_package.spawn_package()
+    clearGMFunctions()
+    gm_menu_back()
+    onGMClick(function(x,y) 
+        onGMClick(nil)
+		if plot_shattered_package.ship ~= nil and plot_shattered_package.ship:isValid() then
+			plot_shattered_package.ship:destroy()
+		end
+		plot_shattered_package.ship = CpuShip():setCallSign("HW-25"):setFaction("Independent"):setTemplate("Goods Freighter 1"):setHullMax(100):setHull(20):setShieldsMax(0,0):setPosition(x, y):orderIdle():setDescriptions(_("Ein Schiffswrack"),_("Das Wrack der Wayfarer's Wisp - ein Hydrotii D-85 Frachter."))
+		for i=1,10 do
+			Artifact():setPosition(x+random(-5000, 5000), y+random(-5000, 5000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: leer")):setScanningParameters(3,1):setCallSign(string.format("%d-%s%s%s-%d", irandom(1111,9999), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), irandom(10,99))):allowPickup(true)
+		end
+			Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung für Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59"):allowPickup(true)
+        plot_manager.gm_main_menu()
+    end)
+end
+

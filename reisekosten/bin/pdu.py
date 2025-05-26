@@ -9,7 +9,7 @@ import uvicorn
 import requests 
 import json
 
-SERVER = "127.0.0.1"
+SERVER = "192.168.115.236"
 def _lua_exec(script):
 	return requests.post(f'http://{SERVER}:8080/exec.lua', script).content == b''
 
@@ -162,8 +162,8 @@ def test_set_reactor_input():
 	set_reactor_input(data)
 
 if __name__ == "__main__":
-	uvicorn.run("pdu:app", host="127.0.0.1", port=8003, reload=True)
+	uvicorn.run("pdu:app", host="127.0.0.1", port=9001, reload=True)
 	
 	# Test (from outside of this script)
-	# requests.post("http://127.0.0.1:8002/reactor_control", json={"mode": "test", "data": {"something_nested": "a", "something_else": "b"}}).json()
+	# requests.post("http://127.0.0.1:9001/reactor_control", json={"mode": "test", "data": {"something_nested": "a", "something_else": "b"}}).json()
 

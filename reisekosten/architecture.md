@@ -1,10 +1,12 @@
 Services (port, name, description):
 ---
+7999    ee_launcher
 8002    rk_http:    http interface where EmptyEpsilon connects to. Runs on the same machine as EE-Server.
 8003    rk_log:     log sink, where all logs get displayed. Should be visible to GM without efford.
 8001    rk_server:  data processing. the heart of all this.
 8004    rk_storage: data is saved in files here. Should be on a machine with persistent storage.
 8005    rk_display: plots, compiles shows the pdf to players. Connected to a display.
+9001  	reactor 
 
 Applications:
 gm_interface:   dialog interface for the gm. Income is set here, damagereport can be adjusted.

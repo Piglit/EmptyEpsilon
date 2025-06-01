@@ -161,8 +161,66 @@ def test_set_reactor_input():
 	}
 	set_reactor_input(data)
 
+def sabotage_1():
+	input("press Enter to disable PDU")
+	data = {
+		'PDU_ID': 'PDU_2',
+		'Tuner': 'NONE',
+		'PDU': 'OFF',
+		'Power Boost': 'NONE',
+		'Coolant Boost': 'NONE',
+		'Shields': 5,
+		'Drives': 4,
+		'Weapons': 3
+	}
+	values = set_reactor_input(data)
+	values = wrap_values_in_lua(values)
+	script = f"""getScriptStorage()["player_ships_util"].set_pdu{values}"""
+	_lua_exec(script)
+
+def sabotage_2():
+	input("press Enter to enable PDU")
+	data = {
+		'PDU_ID': 'PDU_2',
+		'Tuner': 'NONE',
+		'PDU': 'ACTIVE',
+		'Power Boost': 'NONE',
+		'Coolant Boost': 'NONE',
+		'Shields': 5,
+		'Drives': 4,
+		'Weapons': 3
+	}
+	values = set_reactor_input(data)
+	values = wrap_values_in_lua(values)
+	script = f"""getScriptStorage()["player_ships_util"].set_pdu{values}"""
+	_lua_exec(script)
+
+def sabotage_undo():
+	input("press Enter to reset sabotage")
+	data = {
+		'PDU_ID': 'PDU_2',
+		'Tuner': 'NONE',
+		'PDU': 'ACTIVE',
+		'Power Boost': 'NONE',
+		'Coolant Boost': 'NONE',
+		'Shields': 5,
+		'Drives': 4,
+		'Weapons': 3
+	}
+	values = set_reactor_input(data)
+	values = wrap_values_in_lua(values)
+	script = f"""getScriptStorage()["player_ships_util"].set_pdu{values}"""
+	_lua_exec(script)
+
 if __name__ == "__main__":
-	uvicorn.run("pdu:app", host="127.0.0.1", port=9001, reload=True)
+	_lua_exec("unpauseGame()")
+	while True:
+		sabotage_1()
+		sabotage_2()
+	sabotage_undo()
+
+#if __name__ == "__main__":
+#	uvicorn.run("pdu:app", host="127.0.0.1", port=9001, reload=True)
 	
 	# Test (from outside of this script)
 	# requests.post("http://127.0.0.1:9001/reactor_control", json={"mode": "test", "data": {"something_nested": "a", "something_else": "b"}}).json()

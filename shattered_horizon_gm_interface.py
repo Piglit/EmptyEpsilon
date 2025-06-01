@@ -9,7 +9,7 @@ import requests
 
 rk = None
 
-SERVER = "127.0.0.1"
+SERVER = "192.168.115.236"
 
 def _lua_exec(script):
 	return requests.post(f'http://{SERVER}:8080/exec.lua', script).content == b''
@@ -40,9 +40,10 @@ playerships = {
 	"Xylon":				("G9",			"Eine G9 von Crimson Dawn"),
 	"H.I.V.E.":				("Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"),
 	"Zoomer":				("UT-60D",		"Ein U-Wing der Neuen Republik"),
+	"Rho-1":				("TIE Interceptor", "Ein TIE-Abfangjäger der Rho-Staffel"),
 #	"Bluewing":				("U-Wing",		"U-Wing Fighter von Ric Halcard"),
 #	"Crate Dragon":			("YT-2000",		"YT-2000 Frachter von Rogan Corrs"),
-#	"Dancer":				("YT-2400",		"YT-2400 Frachter von Reto"),
+	"Romancer":				("YT-2400",		"YT-2400 Frachter"),
 #	"Lunaris":				("YT-2400",	 "YT-2400 Frachter von Caex Vanta"),
 #	"Nova Crow":			("YT-2000",	 "YT-2000 Frachter von Veeza Tosh"),
 #	"Ronin":				("Action IV",   "Action IV Freighter von ..."),
@@ -69,6 +70,8 @@ STATIONS = {
 	"13": "altRelay",
 	"14": "commsOnly",
 	"15": "shipLog",
+	"16": "mainscreen",
+    "17": "window:0",
 }
 SIMULATORS = [
 	("1", "Simulator 1, Wasserhaus"),
@@ -79,8 +82,8 @@ SIMULATORS = [
 
 # TODO add ips of each simulator station here (must be ips, not hostnames)
 SIMULATOR_STATIONS = {
-	1:	["192.168.2.115"],
-	2:	[],
+	1:	["192.168.115.241", "192.168.115.235", "192.168.115.229", "192.168.115.231", "192.168.115.242"],
+	2:	["192.168.115.222", "192.168.115.224", "192.168.115.227", "192.168.115.228"],
 	3:	[],
 	4:	[],
 }
@@ -92,10 +95,6 @@ def get_client(ip):
 def command_to_simulator(simulator: int, commands):
 	for ip in SIMULATOR_STATIONS[simulator]:
 		get_client(ip).startEE(commands)
-
-def get_simulator_station(ip):
-	station = pyrohelper.connect(f"PYRO:launcher@{ip}:7999")
-	return station
 
 d = Dialog(autowidgetsize=True)
 def abort():
@@ -178,8 +177,12 @@ def configure_stations(simulator):
 	while True:
 		choices = []
 		for ip in SIMULATOR_STATIONS[simulator]:
-			client = get_client(ip)
-			choices.append((ip, "currently " + client.get_station()))
+			print(f"connecting to PYRO:launcher@{ip}:7999")
+			try:
+				client = get_client(ip)
+				choices.append((ip, "currently " + client.get_station()))
+			except:
+				continue
 		code, client = d.menu(f"Select a client in simulator {simulator}", title="Shattered Horizon Launcher", choices=choices)
 		if code != d.OK:
 			return
@@ -208,7 +211,7 @@ def configure_stations(simulator):
 					break
 				station = STATIONS[station]
 				client.set_station(station)
-				d.msgbox("Client configuration changed. You need to restart the client to apply the changes.")
+				d.msgbox("Client configuration changed. Client is restarted.")
 
 def shipselection():
 	d.infobox("Loading...")

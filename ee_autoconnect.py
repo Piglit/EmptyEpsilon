@@ -6,34 +6,42 @@ It can be called over network to restart clients with certain options.
 
 import subprocess
 import os
+import sys
 import pyrohelper
 import Pyro4
-SERVER = "localhost" #"Schiffssysteme"# "192.168.115.236"    # TODO adjust
+import atexit
+SERVER = "192.168.115.236"
 
-TEST=True
+TEST=False
 
 @Pyro4.expose
 class EELauncher:
-	__CONFIG_PATH = "test/" #"~/.emptyepsilon/"
+	__CONFIG_PATH = "~/.emptyepsilon/"
 	def __init__(self):
 		self.ip = pyrohelper.get_ip()
-		self.child = None
 		self.simulator = 0
-		self.station = ""
+		self.station = "default"
+		self.child = None
+		if not os.path.exists("~/.emptyepsilon/NO_AUTO_START"):
+			self.child = subprocess.Popen("./EmptyEpsilon")
 
 	def get_simulator(self):
 		return self.simulator
 
 	def set_simulator(self, simulator:int):
 		self.simulator = simulator
+		self.stopEE()	# EE writes config at stop, so stop before change
 		self.setConfigItem("autoconnectship", "faction=Transport{simulator}")
+		self.startEE([])
 
 	def get_station(self):
 		return self.station
 
 	def set_station(self, station:str):
 		self.station = station
+		self.stopEE()	# EE writes config at stop, so stop before change
 		self.setConfigItem("autoconnect", station)
+		self.startEE([])
 
 	def startEE(self, args:list[str]):
 		command = ["./EmptyEpsilon"] + args
@@ -51,12 +59,13 @@ class EELauncher:
 		self.child.terminate()
 		self.child.wait()
 
+
 	def setConfigItem(self, key, value):
 		"""set a config option until the pc reboots. For permanent settings, write it to the config file on the server."""
 		self._replaceInIni(key, value)
 
 	def _getIniFilename(self):
-		return os.path.join(self.__CONFIG_PATH, "options.ini")
+		return "/home/user/.emptyepsilon/options.ini"
 		# try if this is writable on overlayfs - otherwise use this clients specific ini file
 
 	def _replaceInIni(self, key, value):
@@ -79,9 +88,14 @@ class EELauncher:
 		return True
 
 eel = EELauncher()
+
+def on_exit():
+	eel.stopEE()
+
 if __name__ == "__main__":
 	uri = pyrohelper.host(eel, 7999, "launcher")
 	print(uri)
+	atexit.register(on_exit)
 
 stations = [
 	("0", "nothing"),

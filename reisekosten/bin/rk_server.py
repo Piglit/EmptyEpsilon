@@ -101,7 +101,7 @@ class Reisekosten:
 
 	@Pyro4.oneway
 	def ship_state_change(self, callsign: str, timestamp: int, state: ShipState):
-		log.info(f"{callsign} {state.value} (T={int(timestamp)})")
+		log.info(f"{callsign} {state} (T={int(timestamp)})")
 		if state == ShipState.created:
 			# reset all data when ship is created
 			for item in self._storage_items:
@@ -422,14 +422,14 @@ class Reisekosten:
 		# remove ships, where the payment was finished
 		result = {}
 		self.create_test_ship()
-		for callsign in self.costs:
-			if not self.finished_payment.get(callsign):
-				result[callsign] = self.registration[callsign]
+		#for callsign in self.costs:
+		#	if not self.finished_payment.get(callsign):
+		#		result[callsign] = self.registration[callsign]
 		result["Test"] = {
-			"callsign": "Test",
-			"type": "Übungs/Testmodus",
+			"callsign": "Schiff",
+			"type": "Raumschiff",
 			"name": "",
-			"note": "Kein real existierendes Schiff. Die Einträge dienen zum Anlernen von neuem Personal in der Hafenmeisterei.",
+			"note": "Gebühren des aktuellen Schiffs anpassen",
 		}
 		return result
 

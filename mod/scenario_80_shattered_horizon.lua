@@ -1,41 +1,55 @@
 -- Name: Shattered Horizon
 -- Type: Larp
 
-TEST = false
+TEST = true
 require("utils.lua")
 require("ee.lua")   -- SYSTEMS
 require("plot_manager.lua")
 
-require("map_shattered.lua")
-require("gravity_util.lua")
-require("player_ships_util.lua")
-require("perma_damage_util.lua")
+--require("map_shattered.lua")
+--require("gravity_util.lua")
+--require("player_ships_util.lua")
+--require("perma_damage_util.lua")
 require("plot_shattered.lua")
 
 function init()
 	-- collection of scripts from different sources for the plot_manager
 	local plot_modules = {
-		map_shattered,
-		GRAVITY,
-		player_ships_util,
-		perma_damage_util,
-		plot_shattered_droid,
-		plot_shattered_network,
-		plot_shattered_gozanti,
+		"player_ships_util",
+		"perma_damage_util",
+		"map_shattered",
+		"gravity_util",
+		{"plot_shattered_cic", plot_shattered_cic},
+		--plot_shattered_droid,
+		--plot_shattered_network,
+		{"plot_shattered_gozanti", plot_shattered_gozanti},
+		--plot_shattered_crashlander,
+		{"plot_shattered_package", plot_shattered_package},
+		{"plot_shattered_pickup", plot_shattered_pickup},
+		{"plot_shattered_fleets", plot_shattered_fleets},
+		{"plot_shattered_crybaby", plot_shattered_crybaby},
+		"rescue_capsule_util",
+		"proximity_scan",
 	}
 
 	plot_manager:init(plot_modules)
 
 	-- set scenario specific variables
-	GRAVITY.addGravitySource(map_shattered.planet, 80000)
-	GRAVITY.addException(map_shattered.flight_control)
-	GRAVITY.addException(map_shattered.ground)
-	player_ships_util.ground_station = map_shattered.ground
-	plot_shattered_droid.gm_dummy = map_shattered.gm_dummy
-	plot_shattered_droid.flight_control = map_shattered.flight_control
-	plot_shattered_network.gm_dummy = map_shattered.gm_dummy
-	plot_shattered_network.flight_control = map_shattered.flight_control
-	plot_shattered_network.ground = map_shattered.ground
+	gravity_util.addGravitySource(map_shattered.planet, 80000)
+	gravity_util.addException(map_shattered.flight_control)
+	gravity_util.addException(map_shattered.ground)
+	player_ships_util.ground_station_1 = map_shattered.ground_blue
+	player_ships_util.ground_station_2 = map_shattered.ground_red
+	--plot_shattered_droid.gm_dummy = map_shattered.gm_dummy
+	--plot_shattered_droid.flight_control = map_shattered.flight_control
+	--plot_shattered_network.gm_dummy = map_shattered.gm_dummy
+	--plot_shattered_network.flight_control = map_shattered.flight_control
+	--plot_shattered_network.ground = map_shattered.ground
+
+	plot_shattered_fleets:spawn_star_destroyer(35800, -63000)
+
+	plot_shattered_cic.rebel_sat = plot_shattered_cic:spawn_sat(70400, -22000, "RS-04", _("A navigation satellite - it transmits sensor data to the surface of Endor."))
+	plot_shattered_cic:init_cic_infos(plot_shattered_cic.rebel_sat)
 
 	plot_manager.gm_main_menu()
 

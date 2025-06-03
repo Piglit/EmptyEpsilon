@@ -1,6 +1,58 @@
+local ENABLE_PICKUP_BY_GRABBERS = true
+local ENABLE_PICKUP_DEBRIS_BY_COLISSION = true
+local ENABLE_PICKUP_CARGO_BY_COLISSION = false
+
+plot_shattered_pickup= {}
 plot_shattered_droid = {}
+plot_shattered_droidspy = {}
 plot_shattered_network = {}
 plot_shattered_gozanti = {}
+plot_shattered_crashlander = {}
+plot_shattered_package = {}
+plot_shattered_cic = {}
+plot_shattered_fleets = {}
+plot_shattered_crybaby = {}
+
+function plot_shattered_pickup:gm_menu()
+    addGMFunction("Spawn Loot", function()
+		clearGMFunctions()
+		gm_menu_back()
+		onGMClick(function(x,y) 
+			plot_shattered_pickup:create_pickup(x,y)
+		end)
+	end)
+end
+
+function plot_shattered_pickup:create_pickup(x,y)
+	local freq = math.floor(random(20, 40)) * 20
+	local debris = Artifact():setPosition(x, y):setDescriptions(_("A piece of maybe valuable space junk. Scan to find out the capturing frequency"), _("Capturing frequency:").." "..freq..". " .._("Set your shield frequency to match the capturing frequency and activate your shields to capture it."))
+	debris.freq=freq
+	debris:setCallSign(""):setFaction("Endor"):setScanningParameters(1, 2):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(164/2,164/2,250/2):setModel("shield_generator")
+	debris.on_pickup = function(art, player)
+		local shieldfreq= 400+(player:getShieldsFrequency())*20
+		local ax, ay = art:getPosition()
+		local x, y = player:getPosition()
+		if shieldfreq == art.freq and player:getShieldsActive() == true then
+			ElectricExplosionEffect():setPosition(x,y):setSize(200)
+			player:takeDamage(1, "kinetic",ax,ay )
+			player:addReputationPoints(10)
+			player:addToShipLog(_("Debris captured."), "cyan")
+		else
+			ExplosionEffect():setPosition(ax,ay):setSize(200)
+			player:takeDamage(50, "kinetic",ax,ay )
+			player:addToShipLog(_("Debris was destroyed by impact"), "red")
+		end
+	end
+	if ENABLE_PICKUP_DEBRIS_BY_COLISSION then
+		debris:allowPickup(true)
+		debris:onPickUp(debris.on_pickup)
+	else
+		debris:allowPickup(false)
+	end
+	if ENABLE_PICKUP_BY_GRABBERS then
+		player_ships_util:add_grabbable_object(debris)
+	end
+end
 
 -- TODO: Quests: clean up sats 1, 2, 4
 
@@ -117,7 +169,7 @@ function plot_shattered_droid:spyprobe_disabled(delta)
     self.spyprobe:setModel("combatsat"):setRadarTraceIcon("probe_droid.png"):setRadarTraceScale(1)
     self.spyprobe:setRotation(r)
     self.spyprobe.freq=freq
-    self.spyprobe:onPickUp(function(art, player)
+	self.spyprobe.on_pickup = function(art, player)
 --        plot_shattered_droid.update = nil
         local shieldfreq= 400+(player:getShieldsFrequency())*20
         local ax, ay = art:getPosition()
@@ -133,7 +185,16 @@ function plot_shattered_droid:spyprobe_disabled(delta)
         player:addToShipLog(_("Droid captured."), "cyan")
         plot_shattered_droid.gm_dummy:sendCommsMessage(plot_shattered_droid.flight_control, string.format(_([[The malfunctioning old droid was captured by %s.]]), player:getCallSign()))
         --It looks like the old droid was hit by a piece of space debris and thus reactivated. This also caused it to malfunction.]]))
-    end)
+    end
+	if ENABLE_PICKUP_DEBRIS_BY_COLISSION then
+		self.spyprobe:allowPickup(true)
+		self.spyprobe:onPickUp(self.spyprobe.on_pickup)
+	else
+		self.spyprobe:allowPickup(false)
+	end
+	if ENABLE_PICKUP_BY_GRABBERS then
+		player_ships_util:add_grabbable_object(self.spyprobe)
+	end
 end
 
 
@@ -445,7 +506,7 @@ function plot_shattered_gozanti:init()
         {40000, -20000},
         {20000, -40000},
     }
-    self.next_waypoint = 1
+    self.next_waypoint = 5
 end
 
 function plot_shattered_gozanti:update(delta)
@@ -461,4 +522,316 @@ function plot_shattered_gozanti:update(delta)
             self.gozanti:orderFlyTowards(table.unpack(self.waypoints[self.next_waypoint]))
         end
     end
+end
+
+
+
+function plot_shattered_crashlander:update(delta)
+	if self.ship ~= nil and self.ship:isValid() then
+		local planet = map_shattered.planet
+		self.ship:setEnergy(500)
+		if self.ship:getSystemHealth("warp") <= 0.5 then
+			self.ship:setSystemHealth("warp", 0.5)
+		end
+		if not self.ship:getShieldsActive() and self.ship:getHull() < self.ship:getHullMax() then
+			self.ship:commandSetShields(true)
+			self.ship:setSystemHealthMax("maneuver", 0)
+		end
+		if distance(self.ship, planet) < 14000 then
+			player_ships_util:despawn_player_ship(self.shipname)
+		end
+	end
+end
+
+
+
+
+function plot_shattered_package:gm_menu()
+    addGMFunction(_("buttonGM", "Lost Package"),plot_shattered_package.spawn_package)
+end
+
+--------  GM functions
+
+function plot_shattered_package.spawn_package()
+    clearGMFunctions()
+    gm_menu_back()
+    onGMClick(function(x,y) 
+        onGMClick(nil)
+		if plot_shattered_package.ship ~= nil and plot_shattered_package.ship:isValid() then
+			plot_shattered_package.ship:destroy()
+		end
+		plot_shattered_package.ship = CpuShip():setCallSign("HW-25"):setFaction("Independent"):setTemplate("Goods Freighter 1"):setHullMax(100):setHull(20):setShieldsMax(0,0):setPosition(x, y):orderIdle():setDescriptions(_("Ein Schiffswrack"),_("Das Wrack der Wayfarer's Wisp - ein Hydrotii D-85 Frachter."))
+		for i=1,10 do
+			local a = Artifact():setPosition(x+random(-5000, 5000), y+random(-5000, 5000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: leer")):setScanningParameters(3,1):setCallSign(string.format("%d-%s%s%s-%d", irandom(1111,9999), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), irandom(10,99)))
+			if ENABLE_PICKUP_CARGO_BY_COLISSION then
+				a:allowPickup(true)
+			else
+				a:allowPickup(false)
+			end
+			if ENABLE_PICKUP_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(a)
+			end
+		end
+			local a = Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung f. Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59")
+			if ENABLE_PICKUP_CARGO_BY_COLISSION then
+				a:allowPickup(true)
+			else
+				a:allowPickup(false)
+			end
+			if ENABLE_PICKUP_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(a)
+			end
+        plot_manager.gm_main_menu()
+    end)
+end
+
+-- CIC
+function plot_shattered_cic:init()
+	self:init_cic_infos(map_shattered.flight_control)
+	local storage = getScriptStorage()
+	storage["plot_shattered_cic"] = self
+end
+
+function plot_shattered_cic:gm_menu()
+	addGMFunction("Satelliten", function()
+		clearGMFunctions()
+		if map_shattered.flight_control == nil or not map_shattered.flight_control:isValid() then
+			addGMFunction("CIC Sat", function()
+				map_shattered.flight_control = plot_shattered_cic:spawn_sat(3000, -30000, "FC-03", _("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
+				plot_shattered_cic:init_cic_infos(map_shattered.flight_control)
+				plot_manager.gm_main_menu()
+			end)
+		else
+			if map_shattered.flight_control.blocked then
+				addGMFunction("Unblock CIC radar",function()
+					plot_shattered_cic:unblock_cic(map_shattered.flight_control)
+					plot_manager.gm_main_menu()
+				end)
+			else
+				addGMFunction("Block CIC radar",function()
+					plot_shattered_cic:block_cic(map_shattered.flight_control)
+					plot_manager.gm_main_menu()
+				end)
+			end
+		end
+
+		if plot_shattered_cic.rebel_sat == nil or not plot_shattered_cic.rebel_sat:isValid() then
+			addGMFunction("Rebel Sat", function()
+				plot_shattered_cic.rebel_sat = plot_shattered_cic:spawn_sat(-40000, 15000, "RS-04", _("A navigation satellite - it transmits sensor data to the surface of Endor."))
+				plot_shattered_cic:init_cic_infos(plot_shattered_cic.rebel_sat)
+				plot_manager.gm_main_menu()
+			end)
+		else
+			if plot_shattered_cic.rebel_sat.blocked then
+				addGMFunction("Unblock Rebel radar",function()
+					plot_shattered_cic:unblock_cic(plot_shattered_cic.rebel_sat)
+					plot_manager.gm_main_menu()
+				end)
+			else
+				addGMFunction("Block Rebel radar",function()
+					plot_shattered_cic:block_cic(plot_shattered_cic.rebel_sat)
+					plot_manager.gm_main_menu()
+				end)
+			end
+		end
+		gm_menu_back()
+	end)
+end
+
+function plot_shattered_cic:init_cic_infos(sat)
+	if sat ~= nil and sat:isValid() then
+		self:set_infos(sat, 10, "SYSTEM-STATUS:")
+		self:set_infos(sat, 11, "Radar-Reichweite:                60u (100%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:              90u (100%)")
+		if sat == map_shattered.flight_control then
+			-- only for true CIC with comms
+			self:set_infos(sat, 13, "Funk-Sende-Reichweite:       50u (100%)")
+			self:set_infos(sat, 14, "Funk-Empfangs-Reichweite:  60u (100%)")
+		end
+		self:set_infos(sat, 30, " ")
+		self:set_infos(sat, 31, "RADAR-SENSOR-INFO:")
+		self:set_infos(sat, 32, "Rot:  Energie")
+		self:set_infos(sat, 33, "Grün: Biosign")
+		self:set_infos(sat, 34, "Blau:  Metall")
+	end
+end
+
+function plot_shattered_cic:unblock_cic(sat)
+	if sat.nebula ~= nil and sat.nebula:isValid() then
+		sat.nebula:destroy()
+	end
+	if sat ~= nil and sat:isValid() then
+		sat:commandSetAlertLevel("normal")
+		self:set_infos(sat, 11, "Radar-Reichweite:               60u (100%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:              90u (100%)")
+		self:set_infos(sat, 40, nil)
+		self:set_infos(sat, 41, nil)
+		self:set_infos(sat, 42, nil)
+		self:set_infos(sat, 43, nil)
+		self:set_infos(sat, 44, nil)
+	end
+	sat.blocked = false 
+end
+
+function plot_shattered_cic:block_cic(sat)
+	if sat ~= nil and sat:isValid() then
+		if sat.nebula ~= nil and sat.nebula:isValid() then
+			sat.nebula:destroy()
+		end
+		local x,y = sat:getPosition()
+		sat.nebula = Nebula():setPosition(x, y):setSize(3)
+		sat:commandSetAlertLevel("yellow")
+		self:set_infos(sat, 11, "Radar-Reichweite:               30u ( 50%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:                 ? ( 30%)")
+		self:set_infos(sat, 40, " ")
+		self:set_infos(sat, 41, "FEHLER / WARNUNGEN:")
+		self:set_infos(sat, 42, "Warnung: Energie-Sensor gestört      ")
+		self:set_infos(sat, 43, "Warnung: Biosign-Sensor ausgefallen")
+		self:set_infos(sat, 44, "Warnung: Langstreckenradar gestört")
+		sat.blocked = true
+	end
+end
+
+function plot_shattered_cic:set_infos(sat, idx, msg)
+	if sat == nil then
+		sat = map_shattered.flight_control
+	end
+	if sat ~= nil and sat:isValid() then
+		if msg == nil or msg == "" then
+			sat:removeCustom("CIC_"..tostring(idx))
+		else
+			sat:addCustomInfo("science", "CIC_"..tostring(idx), msg, idx)
+		end
+	end
+end
+
+function plot_shattered_cic:spawn_sat(x,y, callsign, description)
+    local sat = PlayerSpaceship():setTemplate("NavSat"):setCallSign(callsign):setFaction("Endor"):setPosition(x,y)
+    sat:setDescription(description)
+    sat:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+	gravity_util.addException(sat)
+	return sat
+end
+
+----- fleet arrivals
+
+function plot_shattered_fleets:gm_menu()
+    addGMFunction("Spawn Plot Fleets", function()
+		clearGMFunctions()
+		addGMFunction("Raider (one per click)", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				plot_shattered_fleets:spawn_raider(x,y)
+			end)
+		end)
+		addGMFunction("Viper Droid", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_viper_droid(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("Star Destroyer Victory", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_star_destroyer(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("Breaker VIP", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_breaker(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("NR Opfer Nebulon-B", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_nr_opfer(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("NR Fleet", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+			onGMClick(nil)
+				plot_shattered_fleets:spawn_nr_fleet(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		gm_menu_back()
+	end)
+end
+
+function plot_shattered_fleets:spawn_star_destroyer(x,y)
+    self.isd = CpuShip():setTemplate(" Star Destroyer"):setFaction("Imperial"):setCallSign("Victory"):setDescription("Star Destroyer Victory"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x+3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y-3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x+3000,y+3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(x,y-3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Interceptor"):setPosition(x,y+3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+end
+
+function plot_shattered_fleets:spawn_breaker(x,y)
+    self.breaker = CpuShip():setTemplate(" CR90"):setFaction("Independent"):setCallSign("CB-15"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+end
+
+function plot_shattered_fleets:spawn_nr_fleet(x,y)
+    self.mc = CpuShip():setTemplate(" MC80"):setFaction("New Republic"):setCallSign("Home One"):setDescription("Mon Calamari Cruiser Home One"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+	CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x+3000,y):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y-3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(x,y-3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x,y+3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x+3000,y+3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" CR90"):setPosition(x+5000,y):orderFlyFormation(self.mc, 0, 5000):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" CR90"):setPosition(x-5000,y):orderFlyFormation(self.mc, 0, -5000):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Nebulon-B"):setPosition(x,y+5000):orderFlyFormation(self.mc, 5000, 0):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+end
+
+function plot_shattered_fleets:spawn_nr_opfer(x,y)
+    self.opfer = CpuShip():setTemplate(" Nebulon-B"):setFaction("New Republic"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+	CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x+3000,y):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(x,y-3000):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x+3000,y+3000):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+end
+
+function plot_shattered_fleets:spawn_viper_droid(x,y)
+    self.viper = CpuShip():setTemplate("Viper Droid"):setFaction("Environment"):setPosition(x,y):orderStandGround()
+end																																				
+function plot_shattered_fleets:spawn_raider(x,y)
+	local templ = arraySelectRandom({
+		" U-Wing", " X-Wing", " ARC-170", " UT-60D", " A-24", " T-Wing R-60", " Y-Wing BTL-B", " Y-Wing BTL-A4", " Y-Wing BTL-S3", " TIE-Fighter", " TIE-Interceptor", " TIE-Bomber", " TIE-Reaper" 
+	}) 
+	CpuShip():setTemplate(templ):setFaction("Raider"):setPosition(x,y):orderRoaming()
+end
+
+-----
+
+function plot_shattered_crybaby:gm_menu()
+    addGMFunction("Spawn Crybaby", function()
+		clearGMFunctions()
+		gm_menu_back()
+		onGMClick(function(x,y) 
+            onGMClick(nil)
+			plot_shattered_crybaby:create_crybaby(x,y)
+			plot_manager.gm_main_menu()
+		end)
+	end)
+end
+function plot_shattered_crybaby:create_crybaby(x,y)
+	self.crybaby = CpuShip():setTemplate("NavSat"):setRadarTrace("star_destroyer.png"):setFaction("Environment"):setPosition(x,y):orderIdle():setCallSign("Notsignal: Gideons leichter Kreuzer"):setDescriptions("Moff Gideons leichter Kreuzer sendet ein Notsignal! Alle imperialen Schiffe müssen sofort zur Rettung kommen.", "Ein imperiales Notsignal kommt von diesem Objekt, dass sich als Moff Gideons leichter Kreuzer identifiziert.")
 end

@@ -22,10 +22,11 @@ player_ships_util = {
 	["Udesla"]=				{"YT-1300",		"Corellianischer leichter Frachter YT-1300 von Mn'Taru und Tetsu-gunjin"},
 	["VV-Frightning"]=		{"Lambda T-4a",	"Lambda Shuttle von Val'Kinor"},
 	["Winner"]=				{"X-Wing",		"Generic X-Wing"},
+	["BX-15"]=				{"X-Wing",		""},
 	["XW-65"]=				{"X-Wing",		"T-65B X-Wing von Tiv Ohan"},
 	["Zegema Beach"]=		{"Gozanti Mk Ic",	"Gozanti von Gabber'lok"},
 	["Xylon"]=				{"G9",			"Eine G9 von Crimson Dawn"},
-	["Yaq"]=				{"Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"},
+	["H.I.V.E."]=			{"Lambda T-4a", "Ein Lambda Shuttle des Galaktischen Imperiums"},
 	["Zoomer"]=				{"UT-60D",		"Ein U-Wing der Neuen Republik"},
 	},
 	ground_station = nil,
@@ -121,6 +122,45 @@ function player_ships_util:gm_menu()
 				plot_manager.gm_main_menu()
 			end)
 		end
+		gm_menu_back()
+	end)
+	addGMFunction(_("buttonGM", "Spawn Special Player Ship"), function()
+		clearGMFunctions()
+		addGMFunction(_("buttonGM", "Calamity @ Rim @ Sim 2"), function()
+			-- start at freighter
+			local shipname = "Calamity"
+			local data = player_ships_util.PLAYER_SHIPS[shipname]
+			local sim = "2"
+    		local px,py = map_shattered.freighter_imp:getPosition()
+			local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
+			ship:setPosition(px+750,py-500)
+			ship:commandAbortDock()
+			ship:commandDock(map_shattered.freighter_imp)
+			ship:setFaction("Imperial")
+			plot_manager.gm_main_menu()
+		end)
+		addGMFunction(_("buttonGM", "XB-4 @ Hyper @ Sim 3"), function()
+			-- crash land sequence
+			-- in radar view of Calamity @ 1:05
+			-- in radar view of FC @ 1:23
+			-- leave belt @ 2:40
+			-- enter atmo @ 3:35
+			-- crash @ 3:46
+			local shipname = "BX-15"
+			local data = player_ships_util.PLAYER_SHIPS[shipname]
+			local sim = "3"
+    		local px,py = 75000, -140000
+			local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
+			ship:commandAbortDock()
+			ship:setPosition(px,py):setRotation(210-90):commandTargetRotation(210-90)
+			ship:setWarpDrive(true):commandWarp(1)
+			ship:setMaxCoolant(0)
+			ship:setFaction("New Republic")
+			plot_shattered_crashlander.ship = ship
+			plot_shattered_crashlander.shipname = shipname
+			plot_manager.gm_main_menu()
+		end)
+
 		gm_menu_back()
 	end)
 end

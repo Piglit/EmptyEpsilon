@@ -74,6 +74,7 @@ template:setBeamWeapon(0, 10, -60, 1200, 9, 20)
 template:setBeamWeapon(1, 10,  60, 1200, 9, 20)
 template:setBeamWeaponTurret(0, 180, -15, 2)
 template:setBeamWeaponTurret(1, 180,  15, 2)
+template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 
 template = ShipTemplate():setName(" Nebulon-B"):setClass("Capital Ship", "Frigate")
 template:setModel("nebulon_b"):setRadarTrace("nebulon-b.png")
@@ -89,6 +90,7 @@ template:setBeamWeaponTurret(3, 180, -50, 3)
 template:setHull(1400)
 template:setShields(500, 400)
 template:setSpeed(40, 6, 2)
+template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 
 --template = ShipTemplate():setName("Warden"):setClass("Exuari", "Frigate")
 --template:setModel("transport_4_1"):setRadarTrace("exuari_frigate_3.png")
@@ -133,6 +135,7 @@ template:setSharesEnergyWithDocked(true)
 template:setRepairDocked(true)
 template:setRestocksMissilesDocked("all")
 template:setRestocksScanProbes(true)
+template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 
 template = ShipTemplate():setName(" Star Destroyer"):setClass("Capital Ship", "Carrier"):setModel("star_destroyer")
 template:setDescription(_([[A Star Destroyer is a dagger-shaped type of capital ship. Notable examples of Star Destroyers include the Imperial-class Star Destroyer and its predecessor, the Venator-class Star Destroyer.]]))
@@ -170,5 +173,6 @@ template:setTubeDirection(0, 0)
 template:setTubeDirection(1, 0):weaponTubeDisallowMissle(1, "Nuke"):weaponTubeDisallowMissle(1, "EMP")
 template:setTubeDirection(2, 0):weaponTubeDisallowMissle(2, "Nuke"):weaponTubeDisallowMissle(2, "EMP")
 template:setTubeDirection(3, 180):setWeaponTubeExclusiveFor(3, "Mine")
+template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 
 

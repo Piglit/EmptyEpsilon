@@ -1,10 +1,16 @@
+ENABLE_SAT_RECOVERY_BY_COLISSION = false
+ENABLE_SAT_RECOVERY_BY_GRABBERS = true
+
 map_shattered = {
 	moving_debris = {},
-	ground = nil,
+	ground_blue = nil,
+	ground_green= nil,
+	ground_red = nil,
 	flight_control = nil,
 	gm_dummy = nil,
     sectors = {},	-- contains sectors containing asteroid positions
 	probes = {},	-- all probes, fired from player ships
+	asteroids_visible = false,
 }
 
 function map_shattered:init()
@@ -46,12 +52,12 @@ function map_shattered:init()
     -- create stations and global accessible ships
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
-    self.flight_control:setLongRangeRadarRange(60000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+    self.flight_control:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
-    self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Green Buoy")):setFaction("Endor"):setPosition(-400, -20000)
+    self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Yellow Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
-    self.buoy2 = CpuShip():setTemplate("NavSat"):setCallSign(_("Red Buoy")):setFaction("Endor"):setPosition(zx[14], zy[14])
+    self.buoy2 = CpuShip():setTemplate("NavSat"):setCallSign(_("Cyan Buoy")):setFaction("Endor"):setPosition(zx[14], zy[14])
     self.buoy2:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy2:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
     self.buoy3 = CpuShip():setTemplate("NavSat"):setCallSign(_("Magenta Bouy")):setFaction("Endor"):setPosition(zx[12], zy[12])
@@ -60,29 +66,45 @@ function map_shattered:init()
 
     self.gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign(_("Tantal Observatory")):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
 
-    self.ground=PlayerSpaceship():setTemplate("Ground Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-1300)
-    self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
-    self.ground:setLongRangeRadarRange(20000):setRotation(-90):commandTargetRotation(-90):setCanScan(false):setControlCode("ground")
+    self.ground_blue=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("LZ-Blau")
+	setCirclePos(self.ground_blue, 0,0, -97, radius+1300)
+    self.ground_blue:setDescription(_("Raumhafen Tantal-3 Landezone Blau"))
+    self.ground_blue:setRotation(-90)
 
-    self.freighter_imp=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_nr=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_cd=CpuShip():setTemplate("Goods Jump Freighter 5"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(33064, 2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.ground_red=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("LZ-Rot")
+	setCirclePos(self.ground_red, 0,0, -83, radius+1300)
+    self.ground_red:setDescription(_("Raumhafen Tantal-3 Landezone Rot"))
+    self.ground_red:setRotation(-90)
+
+    self.ground_green=SpaceStation():setTemplate("Small Station"):setFaction("Endor"):setCallSign("LZ-Grün")
+	setCirclePos(self.ground_green, 0,0, -109, radius+900)
+    self.ground_green:setDescription(_("Landefeld nahe Tantal-3. Nicht für Starts geeignet."))
+    self.ground_green:setRotation(-90)
+
+    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_cd=CpuShip():setTemplate("Pheasant"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(70000, 27000):setDescription(_("A luxury casino ship")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(1000):setHull(1000):setShieldsMax(500, 250):setShields(500, 250)
+--    self.freighter_lf=CpuShip():setTemplate("Personnel Freighter 3"):setFaction("Independent"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(750):setHull(750):setShieldsMax(250, 250):setShields(250, 250)
 
     -- place escort fighters for the freighters
     local px,py = self.freighter_nr:getPosition()
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px+3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("X-Wing"):setPosition(px-3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-A4 Y-Wing"):setPosition(px,py-3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("New Republic"):setTemplate("BTL-B Y-Wing"):setPosition(px,py+3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(px+3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(px-3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(px,py-3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(px,py+3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     px,py = self.freighter_imp:getPosition()
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
-    CpuShip():setFaction("Imperial"):setTemplate("TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     px,py = self.freighter_cd:getPosition()
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(self.freighter_cd)
+--    px,py = self.freighter_lf:getPosition()
+--    CpuShip():setFaction("Independent"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_lf)
+--    CpuShip():setFaction("Independent"):setTemplate(" HWK-290"):setPosition(px-3000,py):orderDefendTarget(self.freighter_lf)
+--    CpuShip():setFaction("Independent"):setTemplate(" GX1"):setPosition(px,py-3000):orderDefendTarget(self.freighter_lf)
 
     -- place asteroids and satellites
     px,py = self.planet:getPosition()
@@ -101,6 +123,8 @@ function map_shattered:init()
     self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     px,py = self.freighter_cd:getPosition()
     self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
+--    px,py = self.freighter_lf:getPosition()
+--    self:addPositionsAroundPoint(Asteroid,50,4000,8000,px,py)
     self:createMovingDebris(20, 0, 2*orbit, 5000)
 
     -- set database entry
@@ -161,25 +185,32 @@ function map_shattered:showAsteroidsInSector(sectorName, show)
 		self.sectors[sectorName] = new_positions
 	end
 end
---[[ -- Those only work when update does not overwrite em
+
 function map_shattered.showAsteroids()
 	self = map_shattered
 	for sector, positions in pairs(self.sectors) do
 		self:showAsteroidsInSector(sector, true)
 	end
+	self.asteroids_visible = true
+	plot_manager.gm_main_menu()
 end
 function map_shattered.hideAsteroids()
-	self = map_shattered
-	for sector, positions in pairs(self.sectors) do
-		self:showAsteroidsInSector(sector, false)
-	end
+	map_shattered.asteroids_visible = false
+	plot_manager.gm_main_menu()
 end
---]]
+
 function map_shattered:gm_menu()
-    addGMFunction(_("buttonGM", "Spawn moving debris"), map_shattered.triggerMovingDebris)
-    addGMFunction(_("buttonGM", "Clear moving debris"), map_shattered.clearMovingDebris)
---    addGMFunction(_("buttonGM", "Show Asteroids"), map_shattered.showAsteroids)
---    addGMFunction(_("buttonGM", "Hide Asteroids"), map_shattered.hideAsteroids)
+    addGMFunction("Manage debris", function()
+		clearGMFunctions()
+		addGMFunction("Spawn moving debris", map_shattered.triggerMovingDebris)
+		addGMFunction("Clear moving debris", map_shattered.clearMovingDebris)
+		if self.asteroids_visible then
+			addGMFunction("Hide debris", map_shattered.hideAsteroids)
+		else
+			addGMFunction("Show debris", map_shattered.showAsteroids)
+		end
+		gm_menu_back()
+	end)
 end
 
 function map_shattered:onProbeLaunch(ship, probe)
@@ -192,6 +223,7 @@ function map_shattered:onProbeLaunch(ship, probe)
 end
 
 function map_shattered:updateAsteroidVisibility()
+	if self.asteroids_visible then return end
 	for sectorName, sector in pairs(self.sectors) do
 		sector.showNext = false
 	end
@@ -229,7 +261,6 @@ function map_shattered:updateAsteroidVisibility()
 	for sectorName, sector in pairs(self.sectors) do
 		self:showAsteroidsInSector(sectorName, sector.showNext)
 	end
-
 end
 
 function map_shattered:update(delta)
@@ -300,39 +331,53 @@ function map_shattered:placeArtifactsAroundPoint( amount, dist_min, dist_max, x0
             else
                 debris:setModel("debris-blob")
             end
-            debris:allowPickup(true)
             debris:setCallSign(callsign):setFaction("Endor"):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(64,64,150)
-
-            debris:onPickUp(function(art, player)
-                shieldfreq= 400+(player:getShieldsFrequency())*20
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                if shieldfreq == art.freq and player:getShieldsActive() == true then
-                    ElectricExplosionEffect():setPosition(x,y):setSize(200)
-                    player:takeDamage(1, "kinetic",ax,ay )
-                    player:addReputationPoints(10)
+			debris.on_pickup = function(art, player)
+				shieldfreq= 400+(player:getShieldsFrequency())*20
+				local ax, ay = art:getPosition()
+				local x, y = player:getPosition()
+				if shieldfreq == art.freq and player:getShieldsActive() == true then
+					ElectricExplosionEffect():setPosition(x,y):setSize(200)
+					player:takeDamage(1, "kinetic",ax,ay )
+					player:addReputationPoints(10)
 					player:addToShipLog(_("Debris captured."), "cyan")
-                else
-                    ExplosionEffect():setPosition(ax,ay):setSize(200)
-                    player:takeDamage(50, "kinetic",ax,ay )
+				else
+					ExplosionEffect():setPosition(ax,ay):setSize(200)
+					player:takeDamage(50, "kinetic",ax,ay )
 					player:addToShipLog(_("Debris was destroyed by impact"), "red")
-                end
-            end)
-
+				end
+			end
+			if ENABLE_SAT_RECOVERY_BY_COLISSION then
+				debris:allowPickup(true)
+				debris:onPickUp(debris.on_pickup)
+			else
+				debris:allowPickup(false)
+			end
+			if ENABLE_SAT_RECOVERY_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(debris)
+			end
         else
             callsign="TTY"..string.format("%02d",n)
             sat = Artifact():setPosition(x, y):setDescriptions(_("An operational satellite"),_("This satellite is fully operational. Do not capture!")):setScanningParameters(1, 2)
             sat:setModel("cubesat"):setCallSign(callsign):setRadarTraceIcon("satellite.png"):setRadarTraceScale(1)
-            sat:allowPickup(true)
-
-            sat:onPickUp(function(art, player)
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                ExplosionEffect():setPosition(ax,ay):setSize(200)
-                player:takeDamage(50, "kinetic",ax,ay )
-                player:setReputationPoints((player:getReputationPoints()-10))
+			sat.on_pickup = function(art, player)
+				local ax, ay = art:getPosition()
+				local x, y = player:getPosition()
+				ExplosionEffect():setPosition(ax,ay):setSize(200)
+				player:takeDamage(50, "kinetic",ax,ay )
+				player:setReputationPoints((player:getReputationPoints()-10))
 				player:addToShipLog(_("Satellite was destroyed by impact"), "red")
-            end)
+			end
+
+			if ENABLE_SAT_RECOVERY_BY_COLISSION then
+				sat:allowPickup(true)
+				sat:onPickUp(sat.on_pickup)
+			else
+				debris:allowPickup(false)
+			end
+			if ENABLE_SAT_RECOVERY_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(sat)
+			end
         end
     end
 end

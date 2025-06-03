@@ -118,32 +118,32 @@
 
 --[[ Station/Transport--]]
 -- The battle station is a huge ship with many defensive features. It can be docked by smaller ships.
-template = ShipTemplate():setName("Citadel"):setModel("Ender Battlecruiser"):setClass("Exuari","Carrier")
-template:setRadarTrace("radar_battleship.png")
-template:setDescription("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier.")
---                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
-template:setBeam(1,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
-template:setBeam(2,  20,  90, 2400.0, 6.1, 4):setBeamWeaponTurret(2, 160,  90, 5)
-template:setBeam(3,  20,  90, 2400.0, 6.0, 4):setBeamWeaponTurret(3, 160,  90, 5)
-template:setBeam(4,  20, -90, 2400.0, 5.9, 4):setBeamWeaponTurret(4, 160, -90, 5)
-template:setBeam(5,  20, -90, 2400.0, 6.2, 4):setBeamWeaponTurret(5, 160, -90, 5)
-template:setBeam(6,  20,  90, 2400.0, 5.9, 4):setBeamWeaponTurret(6, 160,  90, 5)
-template:setBeam(7,  20,  90, 2400.0, 6.2, 4):setBeamWeaponTurret(7, 160,  90, 5)
-template:setBeam(8,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(8, 160, -90, 5)
-template:setBeam(9,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 5)
-template:setBeam(10, 20,  90, 2400.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
-template:setBeam(11, 20,  90, 2400.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
-template:setShields(1000)
-template:setHull(100)
---Reputation Score: 35
-template:setSpeed(20, 1.5, 3)
-template:setDockClasses("Exuari")
-template:setSharesEnergyWithDocked(true)
-template:setRepairDocked(true)
-template:setRestocksMissilesDocked("all")
-template:setRestocksScanProbes(true)
---threat level: 12(dps)+0(tube)+12(shields)+5(hull)+0.2(speed)+0(maneuver) = 29.2 => 14.6 
+--template = ShipTemplate():setName("Citadel"):setModel("Ender Battlecruiser"):setClass("Exuari","Carrier")
+--template:setRadarTrace("radar_battleship.png")
+--template:setDescription("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier.")
+----                  Arc, Dir, Range, CycleTime, Dmg
+--template:setBeam(0,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(0, 160, -90, 5)
+--template:setBeam(1,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(1, 160, -90, 5)
+--template:setBeam(2,  20,  90, 2400.0, 6.1, 4):setBeamWeaponTurret(2, 160,  90, 5)
+--template:setBeam(3,  20,  90, 2400.0, 6.0, 4):setBeamWeaponTurret(3, 160,  90, 5)
+--template:setBeam(4,  20, -90, 2400.0, 5.9, 4):setBeamWeaponTurret(4, 160, -90, 5)
+--template:setBeam(5,  20, -90, 2400.0, 6.2, 4):setBeamWeaponTurret(5, 160, -90, 5)
+--template:setBeam(6,  20,  90, 2400.0, 5.9, 4):setBeamWeaponTurret(6, 160,  90, 5)
+--template:setBeam(7,  20,  90, 2400.0, 6.2, 4):setBeamWeaponTurret(7, 160,  90, 5)
+--template:setBeam(8,  20, -90, 2400.0, 6.1, 4):setBeamWeaponTurret(8, 160, -90, 5)
+--template:setBeam(9,  20, -90, 2400.0, 6.0, 4):setBeamWeaponTurret(9, 160, -90, 5)
+--template:setBeam(10, 20,  90, 2400.0, 6.1, 4):setBeamWeaponTurret(10, 160,  90, 5)
+--template:setBeam(11, 20,  90, 2400.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 5)
+--template:setShields(1000)
+--template:setHull(100)
+----Reputation Score: 35
+--template:setSpeed(20, 1.5, 3)
+--template:setDockClasses("Exuari")
+--template:setSharesEnergyWithDocked(true)
+--template:setRepairDocked(true)
+--template:setRestocksMissilesDocked("all")
+--template:setRestocksScanProbes(true)
+----threat level: 12(dps)+0(tube)+12(shields)+5(hull)+0.2(speed)+0(maneuver) = 29.2 => 14.6 
 
 --[[ Hack-Sat --]]
 --[[template = ShipTemplate():setName("XB-4"):setClass("Satellite", "Relay"):setType("playership")
@@ -232,6 +232,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoRepair(true)
 
+template:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 addSystemsHeavy(template)
 varplayer = template:copy(" NavSat")
 varplayer:setType("playership")
@@ -310,41 +311,4 @@ var:setSpeed(0, 0, 0)
 var:setBeam(0, 0, 0, 0, 0, 0)
 var:setBeam(1, 0, 0, 0, 0, 0)
 
--- ISD
-template = ShipTemplate():setName("Star Destroyer"):setClass("Dreadnought", "Imperial"):setModel("star_destroyer"):setType("playership")
-template:setDescription([[]])
-template:setRadarTrace("radar_melon.png")
-template:setJumpDrive(true)
-template:setShields(200, 200)
-template:setHull(250)
-template:setSpeed(90, 10, 20)
-template:setCombatManeuver(400, 250)
-template:setDockClasses("Starfighter")
---                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0,80, -80, 1500.0, 6.0, 8)
-template:setBeam(1,80,  80, 1500.0, 6.0, 8)
-template:setBeam(2,80, -100, 1500.0, 6.0, 8)
-template:setBeam(3,80,  100, 1500.0, 6.0, 8)
-template:setWeaponStorage("Homing", 12)
-template:setWeaponStorage("Nuke", 4)
-template:setWeaponStorage("Mine", 8)
-template:setWeaponStorage("EMP", 6)
-template:setWeaponStorage("HVLI", 20)
-template:setTubes(4, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
-template:weaponTubeDisallowMissle(0, "Mine")
-template:weaponTubeDisallowMissle(1, "Mine")
-template:weaponTubeDisallowMissle(2, "Mine")
-template:weaponTubeDisallowMissle(3, "Mine")
-
-template:setTubeDirection(0, 0)
-template:setTubeDirection(1, 0):weaponTubeDisallowMissle(1, "Nuke"):weaponTubeDisallowMissle(1, "EMP")
-template:setTubeDirection(2, 0):weaponTubeDisallowMissle(2, "Nuke"):weaponTubeDisallowMissle(2, "EMP")
-template:setTubeDirection(3, 180):setWeaponTubeExclusiveFor(3, "Mine")
-
-
-var = template:copy("MC80")								 
-var:setModel("calamari")
-
-var = template:copy("Nebulon-B")								 
-var:setModel("nebulon_b")
 

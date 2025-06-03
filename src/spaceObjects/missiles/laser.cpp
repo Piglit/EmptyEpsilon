@@ -29,7 +29,7 @@ IonMissile::IonMissile(): MissileWeapon("IonMissile", MissileWeaponData::getData
 void LaserMissileGreen::hitObject(P<SpaceObject> object)
 {
     DamageInfo info(owner, DT_Energy, getPosition());
-    object->takeDamage(category_modifier * 2, info);
+    object->takeDamage(category_modifier * 1, info);
     P<ExplosionEffect> e = new ExplosionEffect();
     e->setSize(category_modifier * 10);
     e->setPosition(getPosition());
@@ -37,7 +37,7 @@ void LaserMissileGreen::hitObject(P<SpaceObject> object)
 void LaserMissileRed::hitObject(P<SpaceObject> object)
 {
     DamageInfo info(owner, DT_Energy, getPosition());
-    object->takeDamage(category_modifier * 2, info);
+    object->takeDamage(category_modifier * 1, info);
     P<ExplosionEffect> e = new ExplosionEffect();
     e->setSize(category_modifier * 10);
     e->setPosition(getPosition());
@@ -45,7 +45,7 @@ void LaserMissileRed::hitObject(P<SpaceObject> object)
 void IonMissile::hitObject(P<SpaceObject> object)
 {
     DamageInfo info(owner, DT_EMP, getPosition());
-    object->takeDamage(category_modifier * 2, info);
+    object->takeDamage(category_modifier * 1, info);
     //P<ExplosionEffect> e = new ExplosionEffect();
     //e->setSize(category_modifier * 10);
     //e->setPosition(getPosition());

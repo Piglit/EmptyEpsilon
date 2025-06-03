@@ -22,6 +22,7 @@ function init()
 		plot_shattered_droid,
 		plot_shattered_network,
 		plot_shattered_gozanti,
+		plot_shattered_crashlander,
 	}
 
 	plot_manager:init(plot_modules)

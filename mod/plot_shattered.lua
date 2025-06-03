@@ -1,6 +1,7 @@
 plot_shattered_droid = {}
 plot_shattered_network = {}
 plot_shattered_gozanti = {}
+plot_shattered_crashlander = {}
 
 -- TODO: Quests: clean up sats 1, 2, 4
 
@@ -445,7 +446,7 @@ function plot_shattered_gozanti:init()
         {40000, -20000},
         {20000, -40000},
     }
-    self.next_waypoint = 1
+    self.next_waypoint = 5
 end
 
 function plot_shattered_gozanti:update(delta)
@@ -461,4 +462,23 @@ function plot_shattered_gozanti:update(delta)
             self.gozanti:orderFlyTowards(table.unpack(self.waypoints[self.next_waypoint]))
         end
     end
+end
+
+
+
+function plot_shattered_crashlander:update(delta)
+	if self.ship ~= nil and self.ship:isValid() then
+		local planet = map_shattered.planet
+		self.ship:setEnergy(500)
+		if self.ship:getSystemHealth("warp") <= 0.5 then
+			self.ship:setSystemHealth("warp", 0.5)
+		end
+		if not self.ship:getShieldsActive() and self.ship:getHull() < self.ship:getHullMax() then
+			self.ship:commandSetShields(true)
+			self.ship:setSystemHealthMax("maneuver", 0)
+		end
+		if distance(self.ship, planet) < 14000 then
+			player_ships_util:despawn_player_ship(self.shipname)
+		end
+	end
 end

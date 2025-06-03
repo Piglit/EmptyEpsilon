@@ -80,6 +80,7 @@ function createTemplate(crew_size, shield_segments, turret_level)
 
 	template:setCanSelfDestruct(false)
 	template:setInternalDockClasses(_("class", "Escape Pod"))
+	template:setDockClasses(_("class", "Shuttle"))
 	return template
 end
 
@@ -101,11 +102,18 @@ var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("X-Wing")
-var:setClass(_("class", "Starfighter"), _("subclass", "Interceptor")) --TODO
+var:setClass(_("class", "Starfighter"), _("subclass", "Interceptor"))
 var:setDescription(_("X-wing starfighters were a type of starfighter marked by their distinctive S-foils that resembled the High Galactic script's character 'X' in attack formation. They were heavily armed with four laser cannons on the S-foils and proton torpedo launchers in the fuselage. X-wings were designed for dogfighting and long missions."))
 var:setRadarTrace("xwing.png")
 addRockets(var, true)
 var:setRepairCrewCount(1)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var = template:copy("Peregrine yacht")
+var:setClass(_("class", "Starfighter"), _("subclass", "Yacht"))
+var:setDescription(_("The Peregrine-class star yacht was a model of luxurious star yacht used during the Clone Wars."))
+var:setRadarTrace("pyacht.png")
+var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("ARC-170")
@@ -213,12 +221,13 @@ var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 template = createTemplate(4, 1, 3)
 template:setClass(_("class", "Freighter"), _("subclass", "Light transport"))
 template:setCombatManeuver(250, 150)
-template:setExternalDockClasses(_("class", "Starfighter"))
+template:setDockClasses(_("class", "Starfighter"), _("class", "Shuttle"))
 
 var = template:copy("Y2K")
 var:setRadarTrace("y2k.png")
 var:setDescription(_([[Y2K Peregerine Class Light Freighter. Designed and put into production a few years after the end of the Clone Wars and the formation of the Galactic Empire, Corellian Engineering Corporation sought to create a smaller-scale version of their venerable YT-series of freighters, which were beginning to show their age. Applying lessons learned over the decades, the design team for the Y2K-series strove to design a courier-vessel, opting to skimp on the frills and focus on functionality.]]))
 var:setRepairCrewCount(0)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YT-1300")
@@ -228,6 +237,7 @@ var:setRepairCrewCount(0)
 var:setTubes(1, 10.0)
 var:setTubeDirection(0, 180)
 var:setWeaponStorage("HVLI", 1)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YT-2000")
@@ -235,6 +245,7 @@ var:setRadarTrace("yt2000.png")
 var:setDescription(_([[The YT-2000 transport was designed to be a direct improvement over the YT-1300, but it only saw a limited production run. Its basic design was similar to the YT-1930 with its centrally-placed cockpit and symmetrical design, while the rest of the ship returned to the saucer-like design of the YT-1300.]]))
 var:setRepairCrewCount(0)
 var:setBeam(2, 30, 0, 1200, 6.0, 6)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YT-2400")
@@ -242,6 +253,7 @@ var:setRadarTrace("yt2400b.png")
 var:setDescription(_([[The YT-2400 light freighter, also known as the YT-2400 transport, was a class of YT-series light freighter. During the Imperial Era, this model of freighter was used by both the Galactic Empire and the Alliance to Restore the Republic. The YT-2400 also saw use under cargo haulers and pirates.]]))
 var:setRepairCrewCount(1)
 addRockets(var, false)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YV-330")
@@ -251,13 +263,14 @@ var:setRepairCrewCount(0)
 var:setSpeed(55, 8, 12)
 var:setShields(100, 50)
 addRockets(var, false)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("VCX-100")
 var:setRadarTrace("vcx100.png")
 var:setDescription(_([[The VCX-100 light freighter was one of the Corellian Engineering Corporation's freighter designs.]]))
 var:setRepairCrewCount(0)
-var:setExternalDockClasses(_("class", "Shuttle"))
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("G9")
@@ -267,30 +280,65 @@ var:setRepairCrewCount(0)
 var:setBeam(0, 10, -90, 1200.0, 6.0, 6)
 var:setBeam(1, 0, 0, 0, 6.0, 6)
 var:setBeamWeaponTurret(0, 300, -90, 5)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+--[[Player Transport, 4-person without turret, two shields ]]
+
+template = createTemplate(4, 2, 0)
+template:setClass(_("class", "Freighter"), _("subclass", "Light transport"))
+template:setCombatManeuver(250, 150)
+template:setDockClasses(_("class", "Starfighter"), _("class", "Shuttle"))
+
+var = template:copy("Gozanti")
+var:setModel("MultiGunCorvette"..color_player)
+var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
+var:setRadarTrace("gozanti.png")
+var:setRepairCrewCount(0)
+var:setRepairDocked(true)
+var:setSharesEnergyWithDocked(false)
+var:setRestocksMissilesDocked("all")
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+
+var = var:copy("Gozanti C-ROC")
+--                 Arc, Dir, Range, CycleTime, Dmg
+var:setBeam(0, 10, 0, 800.0, 6.0, 6)
+var:setBeam(1, 30, 0, 1200.0, 8.0, 12)
+--								Arc, Dir, Rotate speed
+var:setBeamWeaponTurret(0, 360, 0, 5)
+var:setBeamWeaponTurret(1, 0, 0, 5)
+addRockets(var, false)
+var:setRepairCrewCount(2)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
 
 --[[Player Transport, 5 person crew, more specialiced, no default turret--]]
 
 template = createTemplate(5, 2, 0)
 template:setClass(_("class", "Freighter"), _("subclass", "Light transport"))
 template:setCombatManeuver(250, 150)
-template:setExternalDockClasses(_("class", "Starfighter"))
+template:setDockClasses(_("class", "Starfighter"), _("class", "Shuttle"))
 
 var = template:copy("Allanar N3")
 var:setRadarTrace("n3.png")
 var:setDescription(_([[The Allanar N3 light freighter was a model of light freighter that saw use during the era of the Galactic Empire. The ship, which typically required a crew of 4 to 7, boasted a hyperdrive system, three sublight engines, and multiple forward facing laser cannons.]]))
 var:setRepairCrewCount(0)
 addRockets(var, false)
-var:setExternalDockClasses(_("class", "Shuttle"))
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Lambda T-4a")
 var:setRadarTrace("lambda.png")
+template:setClass(_("class", "Shuttle"), _("subclass", "Light transport"))
 var:setDescription(_([[The Lambda-class T-4a shuttle, also known as the Imperial Shuttle, was a standard light utility craft in common with the Imperial military as a transport for troops and high-ranking individuals.]]))
 var:setRepairCrewCount(0)
 var:setBeam(0, 30, 0, 1200.0, 6.0, 6)
 var:setBeam(1, 10, 0, 1200.0, 6.0, 6)
 var:setBeamWeaponTurret(1, 120, 0, 5)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 -- GM: Instruction:
@@ -311,10 +359,10 @@ var:setAutoMissileReload(false)
 --	            speed, turn, accel, rev-speed, rev-accel
 var:setSpeed(55, 8, 12)
 var:setCanCombatManeuver(false)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Gozanti Mk Ic")
-var:setClass(_("class", "Cruiser"), _("subclass", "Freighter"))
 var:setRadarTrace("gozanti.png")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
@@ -325,34 +373,8 @@ var:setDescription(_("A modular cargo shuttle from the Loronar shipyards, origin
 var:setRadarTrace("cx8.png")
 var:setRepairCrewCount(0)
 var:setSpeed(55, 7, 12)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
-
-
---[[ Player Light Cruiser--]]
-template = ShipTemplate():setName("Gozanti"):setLocaleName(_("playerShip", "Gozanti")):setClass(_("class", "Cruiser"), _("subclass", "Freighter")):setType("playership")
-template:setModel("MultiGunCorvette"..color_player)
-template:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
-template:setRadarTrace("gozanti.png")
---                 Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 10, 0, 800.0, 6.0, 6)
-template:setBeam(1, 30, 0, 1200.0, 8.0, 12)
---								Arc, Dir, Rotate speed
-template:setBeamWeaponTurret(0, 360, 0, 5)
-addRockets(template, false)
-template:setShields(100, 100)
-template:setHull(200)
---	            speed, turn, accel, rev-speed, rev-accel
-template:setSpeed(80, 10, 20)
-template:setCombatManeuver(400, 250)
-template:setRepairCrewCount(2)
-template:setDockClasses(_("class", "Starfighter"))
-template:setRepairDocked(true)
-template:setSharesEnergyWithDocked(false)
-template:setRestocksMissilesDocked("all")
-template:setInternalDockClasses(_("class", "Escape Pod"))
-addSystemsMultiGun(template)
-varNcp = template:copy(" Gozanti")
-varNcp:setType("ship")
 
 
 --[[Heavy Freighter]]
@@ -364,7 +386,6 @@ template:setHull(200)
 --	            speed, turn, accel, rev-speed, rev-accel
 template:setSpeed(50, 5, 7)
 template:setCanCombatManeuver(false)
-template:setInternalDockClasses(_("class", "Escape Pod"))
 template:setDockClasses(_("class", "Starfighter"))
 template:setDockClasses(_("subclass", "Light transport"))
 addSystemsTransport(template)
@@ -384,6 +405,7 @@ var:setBeamWeaponTurret( 1, 120, 180, 6)
 var:setBeamWeaponTurret( 2, 120,   0, 6)
 var:setBeamWeaponTurret( 3, 120, 180, 6)
 var:setRepairCrewCount(5)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Action IV")
@@ -396,6 +418,7 @@ var:setBeam(1, 60, 180, 1500.0, 6.0, 6)
 var:setWeaponStorage("Homing", 12)
 var:setTubes(1, 10.0)
 var:setRepairCrewCount(2)
+var:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 --[[ Test default templates

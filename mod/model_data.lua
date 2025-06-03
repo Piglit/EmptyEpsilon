@@ -40,6 +40,41 @@ model:setRadius(79 * SCALE_FACTOR)
 model:setCollisionBox(150 * SCALE_FACTOR, 48 * SCALE_FACTOR)
 
 model = ModelData()
+model:setName("star_destroyer")
+model:setMesh("mesh/star_destroyer.obj")
+model:setTexture("mesh/star_destroyer_diffuse.png")
+model:setIllumination("mesh/star_destroyer_emit.png")
+model:setScale(133*2)
+model:setRadius(440)
+-- len: 1600m
+
+model = ModelData()
+model:setName("calamari")
+model:setMesh("mesh/calamari.obj")
+model:setTexture("mesh/calamari-diffuse.png")
+model:setIllumination("mesh/calamari-illumination.png")
+model:setScale(4)
+model:setRadius(1550)
+-- len: 3200m (mc80 home one estimate)
+
+model = ModelData()
+model:setName("nebulon_b")
+model:setMesh("mesh/nebulon-b.obj")
+model:setTexture("mesh/nebulon-b-diffuse.png")
+model:setScale(7)
+model:setRadius(150)
+-- len: 300m
+
+model = ModelData()
+model:setName("cr90")
+model:setMesh("mesh/cr90.obj")
+model:setTexture("mesh/cr90.png")
+model:setScale(7)
+model:setRadius(75)
+-- len: 150m
+
+
+model = ModelData()
 model:setName("tie_fighter")
 model:setMesh("mesh/tie.obj")
 model:setTexture("mesh/tie_color.png")

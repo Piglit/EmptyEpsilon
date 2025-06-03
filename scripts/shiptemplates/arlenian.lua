@@ -210,6 +210,7 @@ template:setBeam(0, 40, 0, 1400, 5.0, 7):setBeamTexture(0, "texture/beam_arlenia
 template:setBeam(1, 40, 0, 1400, 5.1, 7):setBeamTexture(1, "texture/beam_arlenian.png")
 template:setBeam(2, 40, 0, 1400, 5.2, 7):setBeamTexture(2, "texture/beam_arlenian.png")
 template:setBeam(3, 40, 0, 1400, 5.3, 7):setBeamTexture(3, "texture/beam_arlenian.png")
+template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 var = template:copy(template:getName().."P"):setType("playership")
 
 template = ShipTemplate():setName("Grebe")

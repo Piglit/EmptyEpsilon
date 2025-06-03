@@ -15,8 +15,13 @@ function gravity_util.lowerGravity()
 end
 
 function gravity_util:gm_menu()
-    addGMFunction(_("buttonGM", "Lower Gravity"), gravity_util.lowerGravity)
-    addGMFunction(_("buttonGM", "Raise Gravity"), gravity_util.raiseGravity)
+	addGMFunction(_("buttonGM", "Adjust Gravity"), function()
+		clearGMFunctions()
+		addGMFunction(_("buttonGM", "Lower Gravity"), gravity_util.lowerGravity)
+		addGMFunction(_("buttonGM", "Raise Gravity"), gravity_util.raiseGravity)
+		gm_menu_back()
+	end)
+
 end
 
 function gravity_util.addGravitySource(planet, outer_limit)

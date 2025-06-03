@@ -42,13 +42,13 @@ function createTemplate(crew_size, shield_segments, turret_level)
 		template:setShields(20*crew_size, 20*crew_size)
 	end
 
-	-- beams default to two beams in front; all cause 1 dps
+	-- beams default to two beams in front; all cause 2 dps, usually dual-fire: so 4 dps for the ship
 
 	assert(turret_level <= 3 and turret_level >= 0)
 	if turret_level > 0 then
 		--           		Arc,  Dir,	Range, 				CycleTime,	Dmg
-		template:setBeam(0, 10,   0,	800+100*crew_size, 	crew_size, 	crew_size)
-		template:setBeam(1, 10,   0,	800+100*crew_size, 	crew_size, 	crew_size)
+		template:setBeam(0, 10,   0,	800+100*crew_size, 	crew_size, 	2*crew_size)
+		template:setBeam(1, 10,   0,	800+100*crew_size, 	crew_size, 	2*crew_size)
 		--							    Arc, 			Dir, Rotate speed
 		template:setBeamWeaponTurret(0, 120*turret_level, 0, 6-turret_level)
 		template:setBeamWeaponTurret(1, 120*turret_level, 0, 6-turret_level)
@@ -61,8 +61,8 @@ function createTemplate(crew_size, shield_segments, turret_level)
 			beam_dir = 5
 		end
 		--           		Arc,  		Dir,		Range,			CycleTime,	Dmg
-		template:setBeam(0, beam_arc,   -beam_dir,	beam_range, 	crew_size, 	crew_size)
-		template:setBeam(1, beam_arc,    beam_dir,	beam_range, 	crew_size, 	crew_size)
+		template:setBeam(0, beam_arc,   -beam_dir,	beam_range, 	crew_size, 	2*crew_size)
+		template:setBeam(1, beam_arc,    beam_dir,	beam_range, 	crew_size, 	2*crew_size)
 	end
 
 	if crew_size <= 2 then
@@ -80,7 +80,7 @@ function createTemplate(crew_size, shield_segments, turret_level)
 
 	template:setCanSelfDestruct(false)
 	template:setInternalDockClasses("Escape Pod")
-	template:setDockClasses("Shuttle")
+	template:setDockClasses("Shuttle", "Starfighter", "Freighter", "Cruiser")	-- all player ship may dock on each other
 	return template
 end
 
@@ -98,7 +98,7 @@ var = template:copy("U-Wing")
 var:setClass("Starfighter", "Support")
 var:setDescription(_("The UT-60D U-wing starfighter/support craft, also known as the UT-60D, U-wing, or UT-60D U-wing Troop Transport, was a transport/gunship model manufactured by Incom Corporation and used by the Alliance to Restore the Republic during the Galactic Civil War. Used to drop troops into battle, and provide cover fire for them, U-wings were pivotal in transport and protection of the Rebel Alliance's ground forces during the Battle of Scarif."))
 var:setRadarTrace("uwing.png")
-var:setRepairCrewCount(0)
+var:setRepairCrewCount(1)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("X-Wing")
@@ -107,14 +107,8 @@ var:setDescription(_("X-wing starfighters were a type of starfighter marked by t
 var:setRadarTrace("xwing.png")
 addRockets(var, true)
 var:setRepairCrewCount(1)
-var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+--var:copy(" "..var:getName()):setType("ship") -- CpuShip variant, defined in exuari
 
-var = template:copy("Peregrine yacht")
-var:setClass("Starfighter", "Yacht")
-var:setDescription(_("The Peregrine-class star yacht was a model of luxurious star yacht used during the Clone Wars."))
-var:setRadarTrace("pyacht.png")
-var:setRepairCrewCount(0)
-var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("ARC-170")
 var:setClass("Starfighter", "Heavy Assault Fighter")
@@ -124,13 +118,17 @@ var:setRepairCrewCount(0)
 addRockets(var, true)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
+template = createTemplate(1, 2, 2)	-- turret variant
+
 var = template:copy("StarViper")
 var:setClass("Starfighter", "Heavy Attack Fighter")
 var:setDescription(_("The StarViper-class attack platform was a model of heavy attack starfighter manufactured by a subdivision of MandalMotors called Mandal Hypernautics. The fighter was lightly armored, but compensated for this with heavy weaponry and fast speed. Its high price meant that it was primarily found in use by larger crime syndicates like Black Sun and the Zann Consortium."))
 var:setRadarTrace("starviper.png")
 var:setShields(45)
 var:setRepairCrewCount(0)
-addRockets(var, true)
+var:setTubes(2, 20.0)
+var:setWeaponStorage("Homing", 6)
+var:setWeaponStorage("Nuke", 2)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 --[[Heavy Fighter (2/3 person crew)--]]
@@ -145,18 +143,21 @@ var:setRadarTrace("sheathipede.png")
 var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
-
 var = template:copy("TIE-Reaper")
 var:setClass("Starfighter", "Transport")
 var:setDescription(_("The TIE/rp Reaper attack lander, also known simply as the TIE Reaper, was a troop carrier variant of Sienar Fleet Systems's TIE fighter series used by the Galactic Empire. The TIE Reaper differed from the standard craft of the TIE line as it was primarily a troop dropship; it was designed for ferrying troops amidst the heat of battle"))
 var:setRadarTrace("tierp.png")
 var:setRepairCrewCount(0)
+var:setTubes(2, 20.0)
+var:setWeaponStorage("EMP", 6)
+--var:setAutoMissileReload(auto)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("UT-60D")
 var:setClass("Starfighter", "Support")
 var:setDescription(_("The UT-60D U-wing starfighter/support craft, also known as the UT-60D, U-wing, or UT-60D U-wing Troop Transport, was a transport/gunship model manufactured by Incom Corporation and used by the Alliance to Restore the Republic during the Galactic Civil War. Used to drop troops into battle, and provide cover fire for them, U-wings were pivotal in transport and protection of the Rebel Alliance's ground forces during the Battle of Scarif."))
 var:setRadarTrace("uwing.png")
+var:setRepairCrewCount(1)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Kuat D7")
@@ -180,7 +181,6 @@ addRockets(var, true)
 var:setRepairCrewCount(0)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
-
 var = template:copy("KvK-P0001")
 var:setClass("Starfighter", "Attack Fighter")
 var:setDescription(_("Custom designed U-Wing, rebuilt as strong fighter. Reduced weight, strong chasing, very fast impulse drive."))
@@ -203,6 +203,7 @@ var:setRadarTrace("a24.png")
 var:setRepairCrewCount(1)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
+template = createTemplate(3, 2, 0)
 var = template:copy("HWK-290")
 var:setClass("Freighter", "Light transport")
 var:setDescription(_("The HWK-290 was a light freighter manufactured by the Corellian Engineering Corporation in an effort to break into a new market for fast, small cargo ships. The production lasted from the decades leading up to the Battle of Naboo until being discontinued during the Clone Wars."))
@@ -216,29 +217,60 @@ var:setWeaponStorage("Mine", 4)
 var:setWeaponTubeExclusiveFor(0, "Mine"):setTubeDirection(0, 180)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
+var1 = var:copy("HWK-290 ") -- Spite variation
+var1:setRepairCrewCount(0)
+var1:setShields(80)
+var1:setBeam(0, 0, 0, 0, 2, 4)
+var1:setBeam(1, 0, 0, 0, 2, 4)
+
+var2 = var:copy("HWK-290  ") -- Bantar Galaar variation
+var2:setRepairCrewCount(0)
+var2:setShields(45)
+addRockets(var2, true)
+var2:setWeaponStorage("Homing", 0)
+var2:setWeaponStorage("Mine", 4)
+var2:setWeaponTubeExclusiveFor(0, "Mine"):setTubeDirection(0, 180)
+
+var = template:copy("HWK-1000")
+var:setClass("Freighter", "Light transport")
+var:setDescription(_([[
+The HWK-1000 light freighter is a transport manufactured by the Corellian Engineering Corporation during the Imperial Era. It boasted improved speed and performance over its predecessor, the HWK-290. Even though the Galactic Empire officially objected to the improved design, several hundred prototypes were manufactured at the Halyard 2 factory. These prototypes were sold through various underground channels in the Outer Rim with many being purchased by smugglers and collectors.]]))
+var:setRadarTrace("hwk290.png")
+var:setRepairCrewCount(0)
+var:setSpeed(100, 20, 40)
+var:setBeam(0, 30, 0, 1000, 2, 4)
+var:setBeam(1, 0, 0, 0, 2, 4)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+-- three player with turret
+template = createTemplate(3, 2, 3)
+
+var = template:copy("EML-850")
+var:setClass("Freighter", "Light transport")
+var:setDescription(_([[
+The EML-850 light freighter was designed and produced by the Barsha family of Corellian industrialists during the Republic Era. It was designed to be equally well-armored and cargo-capable, making it ideal for smugglers and other criminals, however its high cost resulted in mass production being abandoned in favor of other models.]]))
+var:setRadarTrace("eml850.png")
+var:setRepairCrewCount(0)
 
 --[[Player Transport, 4-person turreted, single shielded, mostly classes that start with 'Y'--]]
 
 template = createTemplate(4, 1, 3)
 template:setClass("Freighter", "Light transport")
 template:setCombatManeuver(250, 150)
-template:setDockClasses("Starfighter", "Shuttle")
 
 var = template:copy("Y2K")
 var:setRadarTrace("y2k.png")
 var:setDescription(_([[Y2K Peregerine Class Light Freighter. Designed and put into production a few years after the end of the Clone Wars and the formation of the Galactic Empire, Corellian Engineering Corporation sought to create a smaller-scale version of their venerable YT-series of freighters, which were beginning to show their age. Applying lessons learned over the decades, the design team for the Y2K-series strove to design a courier-vessel, opting to skimp on the frills and focus on functionality.]]))
 var:setRepairCrewCount(0)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
-var = template:copy("YT-1300")
+var = template:copy("YT-1300-B")
 var:setRadarTrace("yt1300.png")
 var:setDescription(_([[The YT-1300 light freighter, also known as the YT-1300 Corellian freighter, was a type of light freighter manufactured by the Corellian Engineering Corporation that saw operation in the galaxy during the final days of the Galactic Republic and the reign of the Galactic Empire. By the year 0 BBY, it was considered an outdated model.]]))
-var:setRepairCrewCount(0)
+var:setRepairCrewCount(2)
 var:setTubes(1, 10.0)
 var:setTubeDirection(0, 180)
-var:setWeaponStorage("HVLI", 1)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+var:setWeaponStorage("HVLI", 3)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YT-2000")
@@ -246,7 +278,6 @@ var:setRadarTrace("yt2000.png")
 var:setDescription(_([[The YT-2000 transport was designed to be a direct improvement over the YT-1300, but it only saw a limited production run. Its basic design was similar to the YT-1930 with its centrally-placed cockpit and symmetrical design, while the rest of the ship returned to the saucer-like design of the YT-1300.]]))
 var:setRepairCrewCount(0)
 var:setBeam(2, 30, 0, 1200, 6.0, 6)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("YT-2400")
@@ -254,34 +285,21 @@ var:setRadarTrace("yt2400b.png")
 var:setDescription(_([[The YT-2400 light freighter, also known as the YT-2400 transport, was a class of YT-series light freighter. During the Imperial Era, this model of freighter was used by both the Galactic Empire and the Alliance to Restore the Republic. The YT-2400 also saw use under cargo haulers and pirates.]]))
 var:setRepairCrewCount(1)
 addRockets(var, false)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
-var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
-
-var = template:copy("YV-330")
-var:setRadarTrace("yv330.png")
-var:setDescription(_([[The YV-330 light freighter was a YV series light freighter produced by the Corellian Engineering Corporation. It was 26 meters long, and its standard armament was a twin laser cannon turret mounted beneath the cockpit. YV-330 freighters were often used by smugglers, and modified with heavier weaponry.]]))
-var:setRepairCrewCount(0)
-var:setSpeed(55, 8, 12)
-var:setShields(100, 50)
-addRockets(var, false)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("VCX-100")
 var:setRadarTrace("vcx100.png")
 var:setDescription(_([[The VCX-100 light freighter was one of the Corellian Engineering Corporation's freighter designs.]]))
-var:setRepairCrewCount(0)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+var:setRepairCrewCount(1)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("G9")
 var:setRadarTrace("g9.png")
 var:setDescription(_([[The G9 Rigger-class light freighter was a model of freighter manufactured by the Corellian Engineering Corporation and used during the Clone Wars. Its only weapons were small blaster cannons attached to the wings and top of the freighter.]]))
 var:setRepairCrewCount(0)
-var:setBeam(0, 10, -90, 1200.0, 6.0, 6)
-var:setBeam(1, 0, 0, 0, 6.0, 6)
+var:setBeam(0, 10, -90, 1200.0, 6.0, 2*6)
+var:setBeam(1, 0, 0, 0, 6.0, 2*6)
 var:setBeamWeaponTurret(0, 300, -90, 5)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 --[[Player Transport, 4-person without turret, two shields ]]
@@ -289,31 +307,85 @@ var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 template = createTemplate(4, 2, 0)
 template:setClass("Freighter", "Light transport")
 template:setCombatManeuver(250, 150)
-template:setDockClasses("Starfighter", "Shuttle")
+
+var = template:copy("Peregrine yacht")
+var:setClass("Freighter", "Yacht")
+var:setDescription(_("The Peregrine-class star yacht was a model of luxurious star yacht used during the Clone Wars."))
+var:setRadarTrace("pyacht.png")
+var:setRepairCrewCount(0)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+-- GM-Note: es könnte noch ein Droide rumliegen...
+
+var = template:copy("DX-9")
+var:setClass("Freighter", "Shuttle")
+var:setDescription(_("The Delta-class DX-9 stormtrooper transport was an assault vehicle, built by Telgorn Corporation, which was designed to carry Imperial stormtroopers into battle."))
+var:setRadarTrace("dx9.png")
+var:setRepairCrewCount(0)
+var:setTubes(2, 20.0)
+var:setWeaponStorage("Homing", 4)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+-- TODO Ionenkanonen
+
+var = template:copy("GX1")
+var:setDescription(_([[The GX1 short hauler is a shuttle model manufactured by Lantillian ShipWrights. During the Clone Wars, the Galactic Republic used several top-of-the-line GX1 short haulers as diplomatic vessels. During the Age of the Empire, GX1 shuttles were used as starbuses to ferry commuters from one location to another. The diplomatic variant is usually equipped with double laser cannons.]]))
+var:setRadarTrace("gx1.png")
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var1 = var:copy("GX1 ")	-- Still Moving variation	
+var1:setRepairCrewCount(1) 
+var1:setShields()
+var1:setHull(40*2*4)
+
+var2 = var:copy("GX1  ")	-- Sapphire variation
+var2:setRepairCrewCount(0)
+var2:setTubes(1, 10.0)
+var2:setTubeDirection(0, 180)
+var2:setWeaponStorage("HVLI", 2)
+
+var = template:copy("CSS-1")
+var:setRadarTrace("css1.png")
+var:setDescription(_([[The CSS-1 Corellian Star Shuttle was a transport manufactured by Corellian Engineering Corporation for the Galactic Republic during at least a decade before the start of the Clone Wars.]]))
+var:setRepairCrewCount(1)
+var:setBeam(0, 0, 0, 0, 6.0, 2*6)
+var:setBeam(1, 0, 0, 0, 6.0, 2*6)
+var:setLongRangeRadarRange(30000)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var = template:copy("YV-330")
+var:setRadarTrace("yv330.png")
+var:setDescription(_([[The YV-330 light freighter was a YV series light freighter produced by the Corellian Engineering Corporation. It was 26 meters long, and its standard armament was a twin laser cannon turret mounted beneath the cockpit. YV-330 freighters were often used by smugglers, and modified with heavier weaponry.]]))
+var:setRepairCrewCount(1)	-- GM note: maybe not?
+var:setSpeed(55, 8, 12)
+var:setShields(100, 50)
+addRockets(var, false)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Gozanti")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
 var:setRadarTrace("gozanti.png")
 var:setRepairCrewCount(2)
-var:setRepairDocked(true)
-var:setSharesEnergyWithDocked(false)
-var:setRestocksMissilesDocked("all")
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+--var:setRepairDocked(true)
+--var:setSharesEnergyWithDocked(false)
+--var:setRestocksMissilesDocked("all")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 
-var = var:copy("Gozanti C-ROC")
+var1 = var:copy("Gozanti C-ROC")
+var1:setDescription(_([[The C-ROC Gozanti-class light cruiser is an official modified version of the Gozanti-class cruiser that was manufactured by the Corellian Engineering Corporation prominently during the Clone Wars and the Imperial Era.]]))
+var1:setRadarTrace("croc.png")
 --                 Arc, Dir, Range, CycleTime, Dmg
-var:setBeam(0, 10, 0, 800.0, 6.0, 6)
-var:setBeam(1, 30, 0, 1200.0, 8.0, 12)
---								Arc, Dir, Rotate speed
-var:setBeamWeaponTurret(0, 360, 0, 5)
-var:setBeamWeaponTurret(1, 0, 0, 5)
-addRockets(var, false)
-var:setRepairCrewCount(2)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
-var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+var1:setBeam(0, 10, 0, 800.0, 6.0, 2*6)
+var1:setBeam(1, 30, 0, 1200.0, 8.0, 20)
+--  							Arc, Dir, Rotate speed
+var1:setBeamWeaponTurret(0, 360, 0, 5)
+var1:setBeamWeaponTurret(1, 0, 0, 5)
+--addRockets(var, false)
+var1:setRepairCrewCount(1)
+var1:copy(" "..var1:getName()):setType("ship") -- CpuShip variant
+
+var2 = var1:copy("Gozanti ")	-- Cropdust Nomad variant
+addRockets(var2, false)
 
 
 --[[Player Transport, 5 person crew, more specialiced, no default turret--]]
@@ -321,14 +393,22 @@ var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 template = createTemplate(5, 2, 0)
 template:setClass("Freighter", "Light transport")
 template:setCombatManeuver(250, 150)
-template:setDockClasses("Starfighter", "Shuttle")
 
 var = template:copy("Allanar N3")
 var:setRadarTrace("n3.png")
 var:setDescription(_([[The Allanar N3 light freighter was a model of light freighter that saw use during the era of the Galactic Empire. The ship, which typically required a crew of 4 to 7, boasted a hyperdrive system, three sublight engines, and multiple forward facing laser cannons.]]))
 var:setRepairCrewCount(0)
 addRockets(var, false)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+
+var = template:copy("C70")
+var:setRadarTrace("c70.png")
+var:setDescription(_([[The Consular-class cruiser (Charger c70 retrofit), is a model of retrofitted Consular-class cruiser that turn the ships into small frigates. Corellian Engineering Corporation created this for Supreme Chancellor Palpatine during the early part of the Clone Wars.]]))
+var:setRepairCrewCount(2)
+var:setBeam(0, 120,  50, 1200.0, 6.0, 2*6)
+var:setBeam(1, 120, -50, 1200.0, 6.0, 2*6)
+var:setBeam(2, 0, 0, 800.0, 6.0, 6)
+var:setBeamWeaponTurret(2, 360, 0, 5)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Lambda T-4a")
@@ -337,22 +417,25 @@ template:setClass("Shuttle", "Light transport")
 var:setDescription(_([[The Lambda-class T-4a shuttle, also known as the Imperial Shuttle, was a standard light utility craft in common with the Imperial military as a transport for troops and high-ranking individuals.]]))
 var:setRepairCrewCount(0)
 var:setBeam(0, 30, 0, 1200.0, 6.0, 6)
-var:setBeam(1, 10, 0, 1200.0, 6.0, 6)
-var:setBeamWeaponTurret(1, 120, 0, 5)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+var:setBeam(1, 30, 0, 1200.0, 6.0, 6)
+var:setBeam(2, 10, 0, 1200.0, 6.0, 6)
+var:setBeam(3, 10, 0, 1200.0, 6.0, 6)
+var:setBeamWeaponTurret(2, 120, 0, 5)
+var:setBeamWeaponTurret(3, 120, 0, 5)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
--- GM: Instruction:
--- they can extract a rear-blaster:
--- Set range of beam 3 to 800
+var = var:copy("Lambda T-4a ")	-- Drexl variation
+var:setBeam(4, 10, 180, 800.0, 6.0, 6)
+var:setBeamWeaponTurret(4, 60, 0, 5)
+
 
 var = template:copy("YV-929")
 var:setRadarTrace("yv929.png")
 var:setDescription(_([[The YV-929 armed freighter was a 22-meter-long light freighter produced by Corellian Engineering Corporation. It used the same forward cockpit structure as the much larger YV-100 light freighter. 
 Unlike most CEC freighters, which came off the assembly lines with minimal weaponry, the YV-929 was designed from the start to be heavily armed for defense against pirate and Rebel raids, and also featured very strong shields.]]))
 var:setRepairCrewCount(0)
-var:setBeam(0, 50, 0, 1200.0, 6.0, 6)
-var:setBeam(1, 50, 0, 900.0, 4.0, 4)
+var:setBeam(0, 50, 0, 1200.0, 6.0, 2*6)
+var:setBeam(1, 50, 0, 900.0, 4.0, 2*4)
 var:setTubes(2, 15.0)
 var:setTubeDirection(1, 180)
 var:setWeaponStorage("Homing", 20)
@@ -360,7 +443,6 @@ var:setAutoMissileReload(false)
 --	            speed, turn, accel, rev-speed, rev-accel
 var:setSpeed(55, 8, 12)
 var:setCanCombatManeuver(false)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Gozanti Mk Ic")
@@ -368,10 +450,10 @@ var:setRadarTrace("gozanti.png")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
 var:setRepairCrewCount(2)
-var:setRepairDocked(true)
-var:setSharesEnergyWithDocked(false)
-var:setRestocksMissilesDocked("all")
-var:setExternalDockClasses("Starfighter", "Freighter", "Shuttle", "Cruiser")
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+--var:setRepairDocked(true)
+--var:setSharesEnergyWithDocked(false)
+--var:setRestocksMissilesDocked("all")
 
 
 var = template:copy("CX-9")
@@ -379,7 +461,6 @@ var:setDescription(_("A modular cargo shuttle from the Loronar shipyards, origin
 var:setRadarTrace("cx8.png")
 var:setRepairCrewCount(0)
 var:setSpeed(55, 7, 12)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 
@@ -392,8 +473,6 @@ template:setHull(200)
 --	            speed, turn, accel, rev-speed, rev-accel
 template:setSpeed(50, 5, 7)
 template:setCanCombatManeuver(false)
-template:setDockClasses("Starfighter")
-template:setDockClasses("Light transport")
 addSystemsTransport(template)
 
 var = template:copy("GR-75")
@@ -402,17 +481,16 @@ var:setRadarTrace("gr75.png")
 var:setModel("gr75")
 var:setShields(70, 70, 70, 70)
 --                  Arc, Dir, Range, CycleTime, Dmg
-var:setBeam(0, 10,   0, 1500.0, 6.0, 6)
-var:setBeam(1, 10, 180, 1500.0, 6.0, 6)
-var:setBeam(2, 10,   0, 1500.0, 6.0, 6)
-var:setBeam(3, 10, 180, 1500.0, 6.0, 6)
+var:setBeam(0, 10,   0, 1500.0, 6.0, 9)
+var:setBeam(1, 10, 180, 1500.0, 6.0, 9)
+var:setBeam(2, 10,   0, 1500.0, 6.0, 9)
+var:setBeam(3, 10, 180, 1500.0, 6.0, 9)
 --                               Arc, Dir, Rotate speed
 var:setBeamWeaponTurret( 0, 120,   0, 6)
 var:setBeamWeaponTurret( 1, 120, 180, 6)
 var:setBeamWeaponTurret( 2, 120,   0, 6)
 var:setBeamWeaponTurret( 3, 120, 180, 6)
 var:setRepairCrewCount(5)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 var = template:copy("Action IV")
@@ -421,12 +499,14 @@ var:setRadarTrace("action4.png")
 var:setModel("actioniv")
 var:setShields(70, 70)
 --           Arc, Dir, Range, CycleTime, Dmg
-var:setBeam(0, 60, 0,   1500.0, 6.0, 6)
-var:setBeam(1, 60, 180, 1500.0, 6.0, 6)
+var:setBeam(0, 60, 0,   1500.0, 6.0, 2*6)
+var:setBeam(1, 60, 180, 1200.0, 6.0, 6)
+var:setBeam(2, 60, 180, 1200.0, 6.0, 6)
+var:setBeamWeaponTurret( 1, 360, 0, 5)
+var:setBeamWeaponTurret( 2, 360, 0, 5)
 var:setWeaponStorage("Homing", 12)
 var:setTubes(1, 10.0)
-var:setRepairCrewCount(2)
-var:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
+var:setRepairCrewCount(1)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 --[[ Test default templates

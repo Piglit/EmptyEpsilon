@@ -16,15 +16,27 @@ require("utils.lua")
 --   placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
 --      Place random objects in a line, from point x1, y1 to x2, y2 with a random distance of random_amount
 
+--[[ TODO Tests:
+    transport mission failed condition:
+    * destroy transport, dock on main, spawn other ship
+    * destroy transport, spawn other ship, dock on main
+    defeat conditions:
+    * main player destroyed
+    * station destroyed while not in end game
+--]]
+
 require("script_hangar.lua")
 require("plots/campaign.lua")
 
 --- Init is run when the scenario is started. Create your initial world
 function init()
     -- Create the main ship for the players.
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
-    player:setPosition(22400, 18200)
-    allowNewPlayerShips(false)
+    player = nil
+    transport_mission_failed = false
+--	player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
+--    player:setPosition(22400, 18200)
+--    allowNewPlayerShips(false)
+    playerList = {}
 
     research_station = SpaceStation():setTemplate("Small Station"):setFaction("Human Navy")
     research_station:setPosition(23500, 16100):setCallSign("Research-1")
@@ -35,6 +47,59 @@ function init()
 
     neutral_station = SpaceStation():setTemplate("Small Station"):setFaction("Independent")
     neutral_station:setPosition(9100, -35400):setCallSign("Refugee-X")
+
+    campaign:initScore()
+    onNewPlayerShip(function(ship)
+        if player == nil then
+            player = ship
+        end
+        ship:setPosition(22400, 18200)
+        table.insert(playerList, ship)
+		campaign:requestReputation()
+        if mission_state == nil then
+            -- Start off the mission by sending a transmission to the first player
+            if research_station:isValid() then
+                research_station:sendCommsMessage(
+                    ship,
+                    string.format(_("goal-incCall", [[%s, please come in.
+
+            We lost contact with one of our transports, callsign RT-4, transporting the diplomat named J.J. Johnson. They were heading from our research station to Orion-5.
+
+            Our last contact with RT-4 was before it entered the nebula at sector G5. The nebula is blocking our long-range scans, so we're asking you to investigate and recover RT-4 if possible.]])
+                , ship:getCallSign()))
+            end
+            -- Set the initial mission state
+            mission_state = missionStartState
+        elseif mission_state == missionGreetReinforcements then
+            CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(ship)
+            CpuShip():setTemplate("Dagger"):setFaction("Exuari"):setPosition(3550, 31250):setRotation(0):orderAttack(ship)
+            CpuShip():setTemplate("Dagger"):setFaction("Exuari"):setPosition(3950, 31250):setRotation(180):orderAttack(ship)
+            CpuShip():setFaction("Exuari"):setTemplate("Jagger"):setPosition(22400 - 3736, 18200 + 2875):setRotation(-80):setWarpDrive(false):orderAttack(ship)
+            CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
+            if main_station:isValid() then
+                main_station:sendCommsMessage(
+                    ship,
+                    string.format(_("incCall", [[We now know the location of the Exuari base in the area.
+Assist %s in the assault on the Exuari base in sector E2. Expect heavy resistance.]]), player:getCallSign())
+                )
+            end
+        elseif mission_state == awaitReinforcements  or mission_state == missionGreetReinforcementsNewLeader then
+            CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(ship)
+            CpuShip():setTemplate("Dagger"):setFaction("Exuari"):setPosition(3550, 31250):setRotation(0):orderAttack(ship)
+            CpuShip():setTemplate("Dagger"):setFaction("Exuari"):setPosition(3950, 31250):setRotation(180):orderAttack(ship)
+            CpuShip():setFaction("Exuari"):setTemplate("Jagger"):setPosition(22400 - 3736, 18200 + 2875):setRotation(-80):setWarpDrive(false):orderAttack(ship)
+            CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
+            if main_station:isValid() then
+                main_station:sendCommsMessage(
+                    ship,
+                    string.format(_("incCall", [[We know there is an Exuari base in the area, but we don't know where it is. There is another ship, the %s in the area, but they seem to have lost track of the Exuari.
+Lead the search the area for Exuari ships - maybe you can find out where they come from and destroy their base.
+You may order %s to assist in your mission.]]), player:getCallSign(), player:getCallSign())
+                )
+            end
+            mission_state = missionGreetReinforcements
+        end
+    end)
 
     -- Nebula that hide the enemy station.
     Nebula():setPosition(-43300, 2200)
@@ -73,20 +138,6 @@ function init()
     exuari_RT4_guard2 = CpuShip():setTemplate("Dagger"):setFaction("Exuari"):setPosition(3950, 31250):setRotation(180)
     exuari_RT4_guard1:orderIdle()
     exuari_RT4_guard2:orderIdle()
-
-    -- Start off the mission by sending a transmission to the player
-    research_station:sendCommsMessage(
-        player,
-        string.format(_("goal-incCall", [[%s, please come in.
-
-We lost contact with one of our transports, callsign RT-4, transporting the diplomat named J.J. Johnson. They were heading from our research station to Orion-5.
-
-Our last contact with RT-4 was before it entered the nebula at sector G5. The nebula is blocking our long-range scans, so we're asking you to investigate and recover RT-4 if possible.]])
-    , player:getCallSign()))
-    -- Set the initial mission state
-    mission_state = missionStartState
-	campaign:requestReputation()
-	campaign:initScore()
 end
 
 function missionStartState(delta)
@@ -308,12 +359,12 @@ end
 
 function missionIdentifyTransport(delta)
     if not transport_target:isValid() then
-        -- TODO: What to do now?
         main_station:sendCommsMessage(
             player,
-            _("incCall", [[What the hell? I told you NOT to destroy the transport.]])
+            _("incCall", [[What the hell? I told you NOT to destroy the transport.
+Dock with us, so we can find a way to proceed from here.]])
         )
-        victory("Exuari")
+        mission_state = awaitReinforcements
     elseif transport_target:isFriendOrFoeIdentifiedBy(player) then
         main_station:sendCommsMessage(
             player,
@@ -325,12 +376,12 @@ end
 
 function missionStopTransport(delta)
     if not transport_target:isValid() then
-        -- TODO: What to do now?
         main_station:sendCommsMessage(
             player,
-            _("incCall", [[What the hell? I told you NOT to destroy the transport.]])
+            _("incCall", [[What the hell? I told you NOT to destroy the transport.
+Dock with us, so we can find a way to proceed from here.]])
         )
-        victory("Exuari")
+        mission_state = awaitReinforcements
     elseif transport_target:getSystemHealth("impulse") <= 0.0 then
         main_station:sendCommsMessage(
             player,
@@ -352,10 +403,10 @@ function missionTransportWaitForRecovery(delta)
     if not transport_target:isValid() then
         main_station:sendCommsMessage(
             player,
-            _("incCall", [[What the hell? I told you NOT to destroy the transport.]])
+            _("incCall", [[What the hell? I told you NOT to destroy the transport.
+Dock with us, so we can find a way to proceed from here.]])
         )
-        victory("Exuari")
-    -- TODO: What to do now?
+        mission_state = awaitReinforcements
     end
 
     mission_timer = mission_timer - delta
@@ -404,22 +455,66 @@ Lead the assault on the Exuari base in sector E2. Expect heavy resistance.]])
         CpuShip():setTemplate("Warden"):setFaction("Exuari"):setPosition(-47000, -14000):orderDefendTarget(enemy_station)
         CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
         CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(player)
-        mission_state = nil
+        mission_state = missionGreetReinforcements  -- not nil, since other player may join
         sendProgressToCampaignServer(3, 4)
+        campaign:allowReinforcements()
+    end
+end
+
+function missionGreetReinforcements(delta)
+end
+
+function awaitReinforcements(delta)
+    if transport_mission_failed == false then
+        sendProgressToCampaignServer(3, 5)
+        campaign:allowReinforcements()
+        transport_mission_failed = true
+    end
+    if player:isDocked(main_station) then
+        main_station:sendCommsMessage(
+            player,
+            _("incCall", [[We know there is an Exuari base in the area, but we don't know where it is. We have sent for another ship to lead the search, but until they arrive you are on your own.
+You may search the area for other Exuari ships - maybe you can find out from where they come.]])
+        )
+
+        CpuShip():setTemplate("Guard"):setFaction("Exuari"):setPosition(-44000, -14000):orderDefendTarget(enemy_station)
+        CpuShip():setTemplate("Warden"):setFaction("Exuari"):setPosition(-47000, -14000):orderDefendTarget(enemy_station)
+        CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-44500, -15000):orderDefendTarget(enemy_station)
+        CpuShip():setTemplate("Flash"):setFaction("Exuari"):setPosition(-43000, -9000):orderAttack(player)
+        mission_state = missionGreetReinforcementsNewLeader  -- not nil, since other player may join
+    end
+end
+
+function missionGreetReinforcementsNewLeader(delta)
+end
+
+function checkDefeatCondition(object)
+    if not object:isValid() then
+        victory("Exuari")
+        local text = string.format(_("Mission: FAILED (%s was destroyed)"), object:getCallSign())
+        globalMessage(text)
+        setBanner(text)
     end
 end
 
 function update(delta)
     script_hangar.update(delta)
     -- When the player ship or the research station is destroyed, call it a victory for the Exuari
-    if not player:isValid() or not research_station:isValid() or not main_station:isValid() then
-        victory("Exuari")
-        return
+    if player ~= nil then
+        checkDefeatCondition(player)
+    end
+    if mission_state ~= missionGreetReinforcements then
+        checkDefeatCondition(research_station)
+        checkDefeatCondition(main_station)
     end
 
     -- If the enemy station is destroyed, the Human Navy wins.
     if not enemy_station:isValid() then
-		campaign:victoryScore()
+        if transport_mission_failed then
+            campaign:victoryScore(80)
+        else
+            campaign:victoryScore()
+        end
         victory("Human Navy")
         return
     end

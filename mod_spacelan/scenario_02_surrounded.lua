@@ -15,22 +15,22 @@ function setCirclePos(obj, angle, distance)
     obj:setPosition(math.sin(angle / 180 * math.pi) * distance, -math.cos(angle / 180 * math.pi) * distance)
 end
 
-local enemyList
+local enemyList = {}
 local enemy_faction = "Criminals"
+local playerList = {}
 
 --- Initialize scenario.
 function init()
     enemyList = {}
     roamingEnemies = {}
 	playerSpawned = false
-	player = nil
 
     -- a station near the center
     -- (Currently, it is not necessary to defend it.)
     station = SpaceStation():setCallSign("Resupply Dock"):setTemplate("Small Station"):setPosition(0, -500):setRotation(random(0, 360)):setFaction("Independent")
 
     -- several single Phobos
-    for _ = 1, 5 do
+    for _ = 1, 2 do
         ship = CpuShip():setTemplate("Phobos T3"):orderIdle():setFaction(enemy_faction)
         table.insert(enemyList, ship)
         table.insert(roamingEnemies, ship)
@@ -48,7 +48,7 @@ function init()
     -- Atlantis with wingmen
     do
         local a = random(0, 360)
-        local d = 9000
+        local d = 25000
         ship = CpuShip():setTemplate("Atlantis X23"):setRotation(a + 180):orderIdle():setFaction(enemy_faction)
         table.insert(enemyList, ship)
         table.insert(roamingEnemies, ship)
@@ -89,8 +89,8 @@ function init()
 	setCirclePos(art, random(0, 360), 20000)
 
 	campaign:initScore()
-    onNewPlayerShip(function(pl)
-		player = pl
+    onNewPlayerShip(function(player)
+        table.insert(playerList, player)
 		campaign:requestReputation()
 		for i_,enemy in ipairs(roamingEnemies) do
 			enemy:orderRoaming()
@@ -101,19 +101,31 @@ function init()
 			)
         end
 		playerSpawned = true
-		allowNewPlayerShips(false)
     end)
+end
+
+function countValid(objectList)
+    local object_count = 0
+    for i_, object in ipairs(objectList) do
+        if object:isValid() then
+            object_count = object_count + 1
+        end
+    end
+    return object_count
 end
 
 --- Update scenario.
 function update(delta)
+
 	local enemy_count = campaign:progressEnemyCount(enemyList)
     if enemy_count == 0 then
 		campaign:victoryScore()
         victory("Human Navy")
     end
-	if playerSpawned and not player:isValid() then
-		allowNewPlayerShips(false)
+	if playerSpawned and countValid(playerList) == 0 then
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (all your ships destroyed)")
+        globalMessage(text)
+        setBanner(text)
         victory(enemy_faction)
 	end
 end

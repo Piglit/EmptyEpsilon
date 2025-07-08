@@ -115,7 +115,7 @@ local ship_names = {
     "Jenny"
 }
 
---- Wrapper to adding an enemy wavE
+--- Wrapper to adding an enemy wave
 --
 -- This wrapper either calls addWaveInner directly (when on random wave positioning)
 -- or after onGMClick (when set to GM wave positioning).
@@ -338,7 +338,6 @@ function init()
             end
         end
 		campaign:requestReputation()
-		allowNewPlayerShips(false)
     end)
     
     addWavesToGMPosition = false
@@ -530,7 +529,7 @@ function update(delta)
     -- Count all surviving enemies and allies.
     --local enemy_count = countValid(enemyList)
 	local enemy_count = campaign:progressEnemyCount(enemyList)
-    local friendly_count = countValid(friendlyList)
+    local friendly_count = countValid(stationList)
     local player_count = countValid(playerList)
 
     -- If not playing the Empty variation, declare victory for the
@@ -582,7 +581,7 @@ function update(delta)
     -- If all allies are destroyed, the Humans (players) lose.
     if friendly_count == 0 then
         victory("Kraylor")
-        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (no friendlies left)")
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (no stations left)")
         globalMessage(text)
         setBanner(text)
         return
@@ -596,16 +595,14 @@ function update(delta)
         end
     end
 
-    --[[
     -- If last player ship is destroyed, the Humans (players) lose.
-    if player_count == 0 then
+    if #playerList > 0 and player_count == 0 then
         victory("Kraylor")
         local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (all your ships destroyed)")
         globalMessage(text)
         setBanner(text)
         return
     end
-    --]]
     
     -- Set banner for cinematic and top down views.
     if gametimeleft ~= nil then

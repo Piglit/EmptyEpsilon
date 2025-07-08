@@ -99,3 +99,7 @@ function campaign:progressEnemyCount(enemyList, clean_up_list_in_place, on_chang
 
 	return object_count
 end
+
+function campaign:allowReinforcements()
+	sendMessageToCampaignServer("reinforcenemts", toJSON({allow = true}))
+end

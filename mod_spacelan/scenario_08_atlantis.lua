@@ -96,7 +96,6 @@ end
 function init()
     -- Create the main ship for the players.
     player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis")
-    allowNewPlayerShips(false)
     player:setPosition(25276, 133850):setRotation(-90):commandTargetRotation(-90)
 
     -- Set all systems to 0 power.
@@ -645,6 +644,7 @@ Dock with us and we'll take a shot at cracking them.]]), player:getCallSign())
         mission_state = phase5DockWithShipyard
 		progress = progress +1
         player:addReputationPoints(5)
+        campaign:allowReinforcements()
     end
 end
 
@@ -996,8 +996,20 @@ function putKraylorDefenseLineOnFullOffense()
 end
 
 function update(delta)
-    if not player:isValid() or (not jc88:isValid() and mission_state ~= phase5OdinAttack) then
+    if not player:isValid() then
         defeat_timeout = defeat_timeout - delta
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), player:getCallSign())
+        globalMessage(text)
+        setBanner(text)
+        if defeat_timeout < 0.0 then
+            victory("Kraylor")
+            return
+        end
+    elseif not jc88:isValid() and mission_state ~= phase5OdinAttack then
+        defeat_timeout = defeat_timeout - delta
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), jc88:getCallSign())
+        globalMessage(text)
+        setBanner(text)
         if defeat_timeout < 0.0 then
             victory("Kraylor")
             return

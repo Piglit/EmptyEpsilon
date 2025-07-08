@@ -64,7 +64,6 @@ Destroy all enemy ships. After a short delay, the next wave will appear. And so 
 How many waves can you destroy?]])
 		ship:addToShipLog(text, "white")
 		campaign:requestReputation()
-		allowNewPlayerShips(false)
 	end)
 
     -- Random friendly stations
@@ -479,6 +478,9 @@ function update(delta)
     end
     -- ... or lose
     if friendly_count == 0 then
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (no stations left)")
+        globalMessage(text)
+        setBanner(text)
         victory("Ghosts") -- Victory for the Ghosts (= defeat for the players)
     end
 end

@@ -80,28 +80,33 @@ function init()
     --Pop random nebulae
     placeRandomAroundPoint(Nebula, 5, 10000, 60000, -10000, 10000)
 
+    playerList = {}
     -- Spawn the player
-    player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setPosition(-22000, 44000)
-    allowNewPlayerShips(false)
+    onNewPlayerShip(function(ship)
+        --player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setPosition(-22000, 44000)
+        if player == nil then
+            player = ship
+            -- Start the mission
+            main_mission = 1
+            last_progress = 1
+            mission_timer = 0
+            stakhanov:sendCommsMessage(
+                ship,
+                string.format(_("goal-incCall", [[Your R&R aboard the Marco Polo is brought to quick end by an urgent broadcast from Central Command:
 
-    -- Start the mission
-    main_mission = 1
-	last_progress = 1
-    mission_timer = 0
-    stakhanov:sendCommsMessage(
-        player,
-        string.format(_("goal-incCall", [[Your R&R aboard the Marco Polo is brought to quick end by an urgent broadcast from Central Command:
+        "%s, please come in.
 
-"%s, please come in.
+        We have an emergency situation. Our sensors detect that a hostile Ktlitan swarm just jumped into your sector, with the main force heading for the Stakhanov Mining Complex. Proceed at once to Stakhanov and assist in the defence.
 
-We have an emergency situation. Our sensors detect that a hostile Ktlitan swarm just jumped into your sector, with the main force heading for the Stakhanov Mining Complex. Proceed at once to Stakhanov and assist in the defence.
+        Be careful of the dense asteroid agglomeration en route to the SMC.
 
-Be careful of the dense asteroid agglomeration en route to the SMC.
-
-I repeat, this is not an exercise! Proceed at once to Stakhanov."]]), player:getCallSign())
-    )
-
-	campaign:requestReputation()
+        I repeat, this is not an exercise! Proceed at once to Stakhanov."]]), ship:getCallSign())
+            )
+        end
+        ship:setPosition(-22000, 44000)
+        table.insert(playerList, ship)
+		campaign:requestReputation()
+    end)
 	campaign:initScore()
 end
 
@@ -259,21 +264,33 @@ function commsHackedShipCompare(freq_min, freq_max)
 end
 
 function update(delta)
+    if player == nil then
+        return  -- mission has not started yet
+    end
     -- mission_timer progress
     mission_timer = mission_timer + delta
 
     -- Black Site 114 must survive
     if not bs114:isValid() and (hacked == 0) then
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), bs114:getCallSign())
+        globalMessage(text)
+        setBanner(text)
         victory("Ghosts")
     end
 
     -- Stakhanov must survive
     if not stakhanov:isValid() then
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), stakhanov:getCallSign())
+        globalMessage(text)
+        setBanner(text)
         victory("Ghosts")
     end
 
     -- The player must survive
     if not player:isValid() then
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), player:getCallSign())
+        globalMessage(text)
+        setBanner(text)
         victory("Ghosts")
     end
 
@@ -537,6 +554,7 @@ Repair and reload while we notify Central Command of what happened there. We wil
     -- Give the player 2 minutes to catch their breath :)
     if (main_mission == 8) and (mission_timer > 120) then
         -- Use NSA to find the command platform.
+
         if (hacked == 0) and (bs114:sendCommsMessageNoLog(
             player,
             _("incCall", [[The dispatcher gets back to you:
@@ -554,6 +572,7 @@ We want to deliver the first blow. Use the Nosy Sensing Array in the sector F5 t
             nsa:setCommsFunction(commsNSA)
             lightbringer:setCommsFunction(commsLightbringer)
             main_mission = 9
+            campaign:allowReinforcements()
         end
 
         -- Go secure NSA to meet Shiva.
@@ -568,6 +587,7 @@ It is due to come out of its FTL jump near the Nosy Sensing Array. Secure the lo
         )
         then
             main_mission = 9
+            campaign:allowReinforcements()
 
             if euphrates:isValid() then
                 euphrates:orderFlyTowards(35000, 43000)

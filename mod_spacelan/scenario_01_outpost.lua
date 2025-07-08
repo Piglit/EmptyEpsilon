@@ -19,7 +19,7 @@ function createMiningFrigate()
         "Nirvana R5A",
     }
     local idx = math.random(#frigates)
-    return CpuShip():setTemplate(frigates[idx]):setFaction("Mining Corporation")
+    return CpuShip():setTemplate(frigates[idx]):setFaction("Human Navy")
 end
 
 function createMiningFreighter()
@@ -32,7 +32,7 @@ function createMiningFreighter()
         table.insert(freighters, "Fuel Freighter "..cnt)
     end
     local idx = math.random(#freighters)
-    return CpuShip():setTemplate(freighters[idx]):setFaction("Mining Corporation")
+    return CpuShip():setTemplate(freighters[idx]):setFaction("Human Navy")
 end
 
 function createKraylorGunship()
@@ -66,7 +66,7 @@ end
 function init()
 
     --player = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Hathcock")
-    station = SpaceStation():setTemplate("Small Station"):setPosition(0, -500):setRotation(random(0, 360)):setFaction("Mining Corporation"):setCallSign("Mining Outpost")
+    station = SpaceStation():setTemplate("Medium Station"):setPosition(0, -500):setRotation(random(0, 360)):setFaction("Human Navy"):setCallSign("Mining Outpost")
     enemies = {}
     friends = {}
     for n = 1, 2 do
@@ -80,15 +80,15 @@ function init()
         table.insert(friends, ship)
     end
 
-    for n = 1, 5 do
+    for n = 1, 3 do
         ship = createKraylorGunship():orderRoaming()
-        setCirclePos(ship, 0, 0, random(0, 360), random(20000, 30000))
+        setCirclePos(ship, 0, 0, random(0, 360), random(30000, 40000))
         table.insert(enemies, ship)
         script_hangar.create(ship, "Drone", 1)
     end
 
     a = random(0, 360)
-    d = 9500
+    d = 25000
     ship_with_hangar = createKraylorDestroyer():setRotation(a + 180):orderRoaming()
     setCirclePos(ship_with_hangar, 0, 0, a, d)
     table.insert(enemies, ship_with_hangar)
@@ -118,7 +118,6 @@ Good luck.]]), ship:getCallSign())
 			)
         end
 		campaign:requestReputation()
-		allowNewPlayerShips(false)
     end)
 end
 
@@ -148,6 +147,9 @@ function update(dt)
 
     -- If all allies are destroyed, the Humans (players) lose.
     if not station:isValid() then
+        local text = _("msgMainscreen&Spectbanner", "Mission: FAILED (station destroyed)")
+        globalMessage(text)
+        setBanner(text)
         victory("Kraylor");
     else
         -- As the battle continues, award reputation based on

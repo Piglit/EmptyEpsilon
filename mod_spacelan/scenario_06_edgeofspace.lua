@@ -77,8 +77,6 @@ function init()
     Player:setWeaponStorageMax("Mine", 0)
     Player:setJumpDrive(true)
 
-    allowNewPlayerShips(false)
-
     -- Create a "Technical Officer" entity hidden in sector Z81 to talk to Relay and prompt the Captain to give the order to return to Central Command. The position of this ship in relation to the station Nirvana was intended to serve as a sort of timer for the inspection job.
     Technical_Officer = CpuShip():setFaction("Human Navy"):setTemplate("Flavia"):setCallSign(_("callsign-ship", "Technical Officer")):setPosition(1530000, 411000):orderIdle()
     Technical_Officer:setCommsScript("") -- Disable the comms script for the Technical Officer station (though really, they should never find it all the way out in sector Z81).
@@ -324,24 +322,37 @@ function goto_war_early()
     Human_m3:orderRoaming()
 
     mission_state = 12
+    campaign:allowReinforcements()
 end
 
 function update(delta)
     -- if you dead, you lose
     if not Player:isValid() then
+        local text = string.format(_("Mission: FAILED (%s destroyed)"), Player:getCallSign())
+        globalMessage(text)
+        setBanner(text)
         victory("Kraylor")
     end
 
 	if mission_state < 11 then
 		if not Central_Command:isValid() then
+            local text = string.format(_("Mission: FAILED (%s destroyed)"), Central_Command:getCallSign())
+            globalMessage(text)
+            setBanner(text)
 			victory("Kraylor")
 		end
 
 		if not EOS_Station:isValid() and not mission_state == 12 then
+            local text = string.format(_("Mission: FAILED (%s destroyed)"), EOS_Station:getCallSign())
+            globalMessage(text)
+            setBanner(text)
 			victory("Kraylor")
 		end
 
 		if not Science_Galileo:isValid() and not mission_state == 12 then
+            local text = string.format(_("Mission: FAILED (%s destroyed)"), Science_Galileo:getCallSign())
+            globalMessage(text)
+            setBanner(text)
 			victory("Kraylor")
 		end
 	end
@@ -792,6 +803,7 @@ When your ship is finished being outfitted for war, move up to the nebula, but b
             )
 
             mission_state = 10
+            campaign:allowReinforcements()
         end
     end
 

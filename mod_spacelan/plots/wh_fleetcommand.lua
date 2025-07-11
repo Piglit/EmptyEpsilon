@@ -25,9 +25,9 @@ function wh_fleetcommand.spawnFleetCommand()
 		sendMessageToCampaignServer("fleetcommand-deleted")
 	end
 	removeGMFunction("Create Fleetcommand")
-	local posx, posy = 0, 0
+	local posx, posy = 17500, 3500
 	local fc = PlayerSpaceship():setTemplate("Targaryen"):setCallSign("Der Ball"):setPosition(posx, posy)
-	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0)
+	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0):setLongRangeRadarRange(5000)
 	fc:setCanLaunchProbe(false):setCanHack(false):setCanScan(false):setCanSelfDestruct(false)
 	for n=0,4 do
 		fc:setBeamWeapon(n, 90,  n * 90, 0, 6, 5)
@@ -104,6 +104,11 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Station Upgrades")
 	fc:setResourceDescription(name, "Allows the station to activate self destruction.")
+	name = "Mid Range Radar"
+	fc:setResourceAmount(name, -1)
+	fc:setResourceCategory(name, "Station Upgrades")
+	fc:setResourceDescription(name, "Enlarges the stations radar range.")
+
 
 	-- Ship Upgrades
 	name = "Station Command Team"
@@ -180,6 +185,14 @@ function wh_fleetcommand.upgrade(resource)
 		fc:setCanHack(true)
 	elseif resource == "Self Destruction" then
 		fc:setCanSelfDestruct(true)
+	elseif resource == "Mid Range Radar" then
+		fc:setLongRangeRadarRange(30000)
+		local name = "Long Range Radar"
+		fc:setResourceAmount(name, -2)
+		fc:setResourceCategory(name, "Station Upgrades")
+		fc:setResourceDescription(name, "Further enlarges the stations radar range.")
+	elseif resource == "Long Range Radar" then
+		fc:setLongRangeRadarRange(60000)
 	end
 	if ship ~= nil then	-- ship specific
 		ship:setResourceAmount(resource, 1)

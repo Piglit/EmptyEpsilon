@@ -23,8 +23,19 @@ function init()
 		"wh_fleetcommand",
 		"wh_players",
 		"wh_artifacts",
-		"wh_stations",	--TODO adjust
+		"wh_rota",
+		"gravity_util",
+		"avp_terrain_modules",
+--		"avp_stations",
 	})
+	gravity_util.gravity_const = 2000000	-- 50 times as high!
+	local amount = 47
+	local terrain = avp_terrain_modules:createMetaSpiral{x=100000, y=120000, radius=200000, amount=amount}
+--	terrain:registerOnChildrenCreationCallback(function (terrain_module)
+--		local station = avp_stations:createInTerrain(terrain_module.terrain_type)
+--		terrain_module:insertStation(station)
+--	end)
+--	local terrain_2 = avp_terrain_modules:createMetaSpiral{x=500000, y=120000, radius=200000, rotation=180+3*360/amount, amount=amount}	-- should be gm activated. for late game
 end
 
 function update(delta)

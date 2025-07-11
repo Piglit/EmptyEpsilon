@@ -4,8 +4,8 @@
 
 
 plot_manager = {
-	plot_modules_by_name = {}	-- unordered, used for script access
-	plot_modules_by_index= {}	-- this one is ordered
+	plot_modules_by_name = {},	-- unordered, used for script access
+	plot_modules_by_index= {},	-- this one is ordered
 }
 
 function plot_manager:init(plot_module_names)

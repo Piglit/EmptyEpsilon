@@ -2,7 +2,9 @@
 -- test depends on wormhole
 --]]
 
-wh_players = {}
+wh_players = {
+	playerShipStats = {}
+}
 require "xansta_mods.lua"
 require "utils.lua"
 
@@ -58,17 +60,30 @@ function wh_players:onProxySpawn(instance, callsign, template, drive, password)
 		ship:setWarpDrive(false):setJumpDrive(true)
 	end
 
+	--[[
 	if self.shipsByInstance[instance] == nil then
 		self:spawnedShipEnterSector(ship, callsign)
 	else
 		self:respawnedPlayerShip(ship)
 	end
+	--]]
+	self:spawnedShipOnCommandStation(ship)
 	sendMessageToCampaignServer("request_reputation", callsign)
 	sendMessageToCampaignServer("request_artifacts", callsign)
 	self.shipsByInstance[instance] = ship
 	return callsign
 end
 
+function wh_players:spawnedShipOnCommandStation(ship)
+	local station = getScriptStorage().wh_fleetcommand.station
+	if station ~= nil and station:isValid() then
+		local x,y = station:getPosition()
+		setCirclePos(ship, x,y, random(0,360), 500)
+		ship:commandDock(station)
+	end
+end
+
+--[[
 function wh_players:spawnedShipEnterSector(ship, callsign)
 	local angle = wh_wormhole.wormhole_a.angle
 	local ax, ay = vectorFromAngle(angle, -25000)	-- opposite side
@@ -86,6 +101,7 @@ function wh_players:respawnedPlayerShip(ship)
 		self:spawnedShipEnterSector(ship)
 	end
 end
+--]]
 
 function wh_players:onNewPlayerShip(p)
 	self:updatePlayerSoftTemplate(p)

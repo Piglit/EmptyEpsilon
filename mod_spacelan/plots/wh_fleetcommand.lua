@@ -25,7 +25,7 @@ function wh_fleetcommand.spawnFleetCommand()
 		sendMessageToCampaignServer("fleetcommand-deleted")
 	end
 	removeGMFunction("Create Fleetcommand")
-	local posx, posy = -280000, 0
+	local posx, posy = 0, 0
 	local fc = PlayerSpaceship():setTemplate("Targaryen"):setCallSign("Der Ball"):setPosition(posx, posy)
 	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0)
 	fc:setCanLaunchProbe(false):setCanHack(false):setCanScan(false):setCanSelfDestruct(false)

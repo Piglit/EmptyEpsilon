@@ -7,7 +7,7 @@ require "place_station_scenario_utility.lua"
 require "luax.lua"
 
 function wh_stations:init()
-	local center_x, center_y = 100000,0
+	local center_x, center_y = 0,0
 	local placement_attempt_count = 0
 	self.stations = {}
 	local characters = {

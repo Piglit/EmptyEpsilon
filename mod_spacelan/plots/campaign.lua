@@ -100,6 +100,28 @@ function campaign:progressEnemyCount(enemyList, clean_up_list_in_place, on_chang
 	return object_count
 end
 
-function campaign:allowReinforcements()
+function campaign.onProxySpawn(instance, callsign, template, drive, password)
+	-- values may contain invalid characters!
+	self = campaign
+	if self.shipsByInstance[instance] ~= nil and self.shipsByInstance[instance]:isValid() then
+		return callsign -- a ship for your proxy already exists
+	end
+	local ship = PlayerSpaceship():setTemplate(template):setCallSign(callsign):setControlCode(password)
+	if drive == "warp" then
+		ship:setWarpDrive(true):setJumpDrive(false)
+	elseif ship.drive == "jump" then
+		ship:setWarpDrive(false):setJumpDrive(true)
+	end
+	self.shipsByInstance[instance] = ship
+	if self.onProxySpawnCallback ~= nil then
+		self.onProxySpawnCallback(ship, instance, callsign)
+	end
+	return callsign
+end
+
+function campaign:allowReinforcements(callback)
 	sendMessageToCampaignServer("reinforcenemts", toJSON({allow = true}))
+	self.shipsByInstance = {}
+	self.onProxySpawnCallback = callback
+	getScriptStorage().onProxySpawn = campaign.onProxySpawn
 end

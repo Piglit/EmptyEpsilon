@@ -9,7 +9,7 @@ if(APPLE)
   message(STATUS "Mac deployment target is: $ENV{MACOSX_DEPLOYMENT_TARGET}")
 endif()
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -28,9 +28,9 @@ else()
     # - PROJECT_VERSION_MAJOR
     # - PROJECT_VERSION_MINOR
     # - PROJECT_VERSION_PATCH
-    string(TIMESTAMP MAJOR "2024")
+    string(TIMESTAMP MAJOR "2025")
     string(TIMESTAMP MINOR "09")
-    string(TIMESTAMP PATCH "21")
+    string(TIMESTAMP PATCH "20")
 endif()
 
 project(EmptyEpsilon LANGUAGES CXX C  VERSION ${MAJOR}.${MINOR}.${PATCH})

@@ -73,6 +73,7 @@ function init_constants_xansta()
 			["Deathbringer"]= 47,
 			["Painbringer"]= 50,
 			["Doombringer"]= 65,
+			["Battlestation"]= 55,
 		},
 		["Exuari"]= {
 			["Dagger"]= 5,
@@ -91,16 +92,31 @@ function init_constants_xansta()
 			["Ranger"]= 17,
 			["Buster"]= 17,
 			["Ryder"]= 65,
+			["Zeppelin"]= 120,
+			["Craver"]= 170,
+			["Ridge"]= 250,
 		},
 		["Ktlitans"]= {
+			["Lite Drone"]= 4,	
 			["Ktlitan Drone"]= 5,	
+			["Heavy Drone"]= 6,	
+			["Gnat"]= 5,	
 			["Ktlitan Worker"]= 15,	
+			["Cleaner"]= 15,	
+			["Undertaker"]= 15,	
+			["Nurse"]= 15,	
+			["Builder"]= 15,	
 			["Ktlitan Fighter"]= 22,	
+			["K2 Fighter"]= 23,	
+			["K3 Fighter"]= 24,	
 			["Ktlitan Scout"]= 30,	
 			["Ktlitan Breaker"]= 45,	
+			["K2 Breaker"]= 65,	
 			["Ktlitan Feeder"]= 60,	
 			["Ktlitan Destroyer"]= 75,
 			["Ktlitan Queen"]= 100,	
+			["Diva"]= 120,	
+			["Tsarina"]= 150,	
 		},
 		["other"]= {
 			["MT52 Hornet"]= 5,
@@ -118,6 +134,7 @@ function init_constants_xansta()
 	stnl = {}
 	stsl = {}
 	ship_template = {}
+	ship_template_strength = {}
 	for faction, list in pairs(stl) do
 			stln[faction] = {}
 			for key, value in pairs(list) do
@@ -125,6 +142,7 @@ function init_constants_xansta()
 				table.insert(stnl, key)
 				table.insert(stsl, value)
 				ship_template[key] = {strength = value}
+				ship_template_strength[key] = value
 			end
 	end
 

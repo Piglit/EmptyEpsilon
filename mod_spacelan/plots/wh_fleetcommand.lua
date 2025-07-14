@@ -25,16 +25,17 @@ function wh_fleetcommand.spawnFleetCommand()
 		sendMessageToCampaignServer("fleetcommand-deleted")
 	end
 	removeGMFunction("Create Fleetcommand")
-	local posx, posy = -280000, 0
+	local posx, posy = 17500, 3500
 	local fc = PlayerSpaceship():setTemplate("Targaryen"):setCallSign("Der Ball"):setPosition(posx, posy)
-	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0)
+	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0):setLongRangeRadarRange(5000)
 	fc:setCanLaunchProbe(false):setCanHack(false):setCanScan(false):setCanSelfDestruct(false)
+	fc:setControlCode("rundilein")
 	for n=0,4 do
 		fc:setBeamWeapon(n, 90,  n * 90, 0, 6, 5)
 	end
 
 	fc:setSharesEnergyWithDocked(false):setRestocksScanProbes(false):setRepairDocked(false):setRestocksMissilesDocked("none")
-	fc:setResourceAmount("Artifacts", wh_fleetcommand.upgrades_done)
+	fc:setResourceAmount("Artifacts", 4)--TODO restore wh_fleetcommand.upgrades_done)
 	fc:setResourceDescription("Artifacts", "You can spend Artifacts for upgrades")
 
 	-- Docking services
@@ -104,6 +105,11 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Station Upgrades")
 	fc:setResourceDescription(name, "Allows the station to activate self destruction.")
+	name = "Mid Range Radar"
+	fc:setResourceAmount(name, -1)
+	fc:setResourceCategory(name, "Station Upgrades")
+	fc:setResourceDescription(name, "Enlarges the stations radar range.")
+
 
 	-- Ship Upgrades
 	name = "Station Command Team"
@@ -114,14 +120,18 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc:setResourceAmount(name, -2)
 	fc:setResourceCategory(name, "Ship Upgrades")
 	fc:setResourceDescription(name, "Allows the ship to make enemy stations neutral.")
-	name = "Diplomatic Crew"
+	name = "Transfer Artifact"
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Ship Upgrades")
-	fc:setResourceDescription(name, "Allows the ship to make neutral ships friendly.")
-	name = "Xenolinguistic Team"
-	fc:setResourceAmount(name, -1)
-	fc:setResourceCategory(name, "Ship Upgrades")
-	fc:setResourceDescription(name, "Allows the ship to make Kraylor ships neutral.")
+	fc:setResourceDescription(name, "Transfer an Artifact to be used somewhere else.")
+--	name = "Diplomatic Crew"
+--	fc:setResourceAmount(name, -1)
+--	fc:setResourceCategory(name, "Ship Upgrades")
+--	fc:setResourceDescription(name, "Allows the ship to make neutral ships friendly.")
+--	name = "Xenolinguistic Team"
+--	fc:setResourceAmount(name, -1)
+--	fc:setResourceCategory(name, "Ship Upgrades")
+--	fc:setResourceDescription(name, "Allows the ship to make Kraylor ships neutral.")
 
 	wh_fleetcommand.station = fc
 	wh_fleetcommand.upgrades_done = 0	-- if station gets destroyed, the respawned one will get a number of artifacts, matching the amount of upgrades of the old station.
@@ -180,8 +190,18 @@ function wh_fleetcommand.upgrade(resource)
 		fc:setCanHack(true)
 	elseif resource == "Self Destruction" then
 		fc:setCanSelfDestruct(true)
+	elseif resource == "Mid Range Radar" then
+		fc:setLongRangeRadarRange(30000)
+		local name = "Long Range Radar"
+		fc:setResourceAmount(name, -2)
+		fc:setResourceCategory(name, "Station Upgrades")
+		fc:setResourceDescription(name, "Further enlarges the stations radar range.")
+	elseif resource == "Long Range Radar" then
+		fc:setLongRangeRadarRange(60000)
 	end
-	if ship ~= nil then	-- ship specific
+	if resource == "Transfer Artifact" and ship ~= nil then
+		ship:increaseResourceAmount("Artifacts", 1)
+	elseif ship ~= nil then	-- ship specific
 		ship:setResourceAmount(resource, 1)
 		if ship.fc_upgrades_done == nil then
 			ship.fc_upgrades_done = 0
@@ -286,15 +306,29 @@ function wh_fleetcommand:update(delta)
 				end
 
 				-- Artifact handling
-				wh_artifacts:transferArtifacts(ps, fc)
+				if ps:getResourceAmount("Artifacts") > 0 then
+					ps:addCustomButton("Relay", "e_artifact_send", "Transfer Artifacts", function() 
+						wh_artifacts:transferArtifacts(ps, fc)
+					end)
+					ps:addCustomButton("Operations", "e_artifact_send+", "Transfer Artifacts", function() 
+						wh_artifacts:transferArtifacts(ps, fc)
+					end)
+				else
+					ps:removeCustom("e_artifact_send")
+					ps:removeCustom("e_artifact_send+")
+				end
 			else -- not docked
 				ps.docked_time = 0
 				ps:removeCustom("e_drive_refit")
+				ps:removeCustom("e_drive_refit+")
+				ps:removeCustom("e_artifact_send")
+				ps:removeCustom("e_artifact_send+")
 			end	
 		end
 	end
 
 	-- jump handling
+	--[[
 	if fc:hasJumpDrive() then
 		if distance(fc.last_pos_x, fc.last_pos_y, fc) > 10000 then
 			-- jump happended
@@ -307,7 +341,7 @@ function wh_fleetcommand:update(delta)
 			delta = delta * 1000 / 60
 			fc:setJumpDriveCharge(delta) -- max: 30000 (jump distance)
 		end
-	end
+	end--]]
 
 	-- update handling
 	fc:addCustomInfo("Engineering+", "e_Artifacts_name", "Artifacts: "..tostring(fc:getResourceAmount("Artifacts")),0)
@@ -420,7 +454,7 @@ function wh_fleetcommand:update(delta)
 			local amount = ship:getResourceAmount(resource)
 			if amount <= 0 then
 				fc:addCustomButton("Engineering+", resource, resource .. " (" .. tostring(-value) .. ")", function()
-					fc.last_upgrade_menu = ship:getCallSign()
+					fc.last_upgrade_menu = fc.upgrade_menu_status
 					fc.upgrade_menu_status = resource
 					for _,resource in ipairs(fc:getResources("Ship Upgrades")) do
 						fc:removeCustom(resource)

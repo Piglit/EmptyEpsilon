@@ -3,13 +3,11 @@
 -- No Dependencies
 -- Can be called from other modules that rely on orbit-rotation
 --]]
-wh_rota = {}
+wh_rota = {
+	objects = {}
+}
 
 require "utils.lua"
-
-function wh_rota:init()
-	self.objects = {}
-end
 
 function wh_rota:add_object(object, speed, center, center_y)
     if type(center) == "number" and type(center_y) == "number" then
@@ -36,10 +34,7 @@ function wh_rota:update(delta)
         local obj = self.objects[i]
         if obj ~= nil and obj:isValid() then
             obj.angle = obj.angle + obj.speed * delta
-            if obj.angle >= 360 then 
-                obj.angle = 0
-            end
-            local pmx, pmy = vectorFromAngle(obj.angle, obj.distance)
+			local pmx, pmy = vectorFromAngle(obj.angle, obj.distance)
 			local cx, cy = obj.center:getPosition()
             obj:setPosition(cx+pmx, cy+pmy)
         end

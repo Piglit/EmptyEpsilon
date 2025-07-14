@@ -15,7 +15,8 @@ If you want to extend this list of ships, consider using variations of the "batt
 Strategic use in scenarios
 --------------------------
 Considering the faction description and existing scenarios the following strategies have been developed for the Kraylor fleet.
-  * Marauders: Few ships invade the territory from different directions. They go from one place to another and attack ships and stations. More advanced ships may use jump drives and drones. When used in small but combat heavy scenarios, the players goal can be to defend their assets and hunt down the marauders. In more story-driven scenarios they often they may occur as nuisance that distracts the players from their primary goal.
+  * Marauders: Few separate ships invade the territory from different directions. They go from one place to another and attack ships and stations. More advanced ships may use jump drives and drones. When used in small but combat heavy scenarios, the players goal can be to defend their assets and hunt down the marauders. In more story-driven scenarios they often they may occur as nuisance that distracts the players from their primary goal.
+  * Flotilla: A small group of ships lead by one more powerful enemy. The leader may or may not use a jump-drive as long as the other ships are around.
   * Bases: Kraylor stations are scattered over an area of the map. Small Kraylor fleets will defend most of the stations. The stations may regularly launch marauders to attack stations of the players faction. The players goal usually is to destroy Kraylor stations while defending their own assets.
 
 Ship Properties
@@ -231,7 +232,7 @@ template:weaponTubeDisallowMissle(1, "EMP")
 -- The weapons-platform is a stationary platform with beam-weapons. It's extremely slow to turn, but it's beam weapons do a huge amount of damage.
 template = ShipTemplate():setName("Battlestation"):setClass("Kraylor", "Station"):setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful Kraylor rapid devastor beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
-template:setRadarTrace("radartrace_smallstation.png")
+template:setRadarTrace("smallstation.png")
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 --Reputation Score: 87

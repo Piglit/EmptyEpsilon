@@ -56,7 +56,7 @@ GITM:setEnemy(human)
 GITM:setEnemy(exuari)
 
 Hive = FactionInfo():setName("Ktlitans"):setLocaleName(_("Ktlitans"))
-Hive:setGMColor(128, 255, 0)
+Hive:setGMColor(128, 64, 64)
 Hive:setDescription(_([[The Ktlitans are intelligent eight-legged creatures that resemble Earth's arachnids. However, unlike most terrestrial arachnids, the Ktlitans do not fight among themselves. Their common, and only, goal is their species' survival.
 
 While they live in a hierarchical structure that resembles a hive, the lower castes continue their work and start new tasks on their own even when no orders come from their superiors. However, when higher castes are present, the lower Ktlitans follow their orders without question or hesitation.

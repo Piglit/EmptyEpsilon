@@ -166,9 +166,9 @@ function wh_artifacts:transferArtifacts(ps, fc)
 			msg = msg.."s"
 		end
 		local msg_ps = "Transferred " .. msg .. " to the station. The fleet command may use them for upgrades."
-		ps:addReputationPoints(20 * arts)
+		--ps:addReputationPoints(20 * arts)
 		ps:transferResource("Artifacts", arts, fc)
-		msg_ps = msg_ps .. "\n(Reputation +"..(20*arts)..")"
+		--msg_ps = msg_ps .. "\n(Reputation +"..(20*arts)..")"
 		ps:addToShipLog(msg_ps, "magenta")
 		local msg_fc = "Received " .. msg .. " from ".. ps:getCallSign() .. "."
 		fc:addToShipLog(msg_fc, "magenta")

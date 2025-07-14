@@ -494,15 +494,15 @@ function stationStatusReport(calling_function)
             ["rearshield"] =    _("situationReport-comms","rear shield"),
         }
         local major_repairs = _("situationReport-comms","Repair these major systems:")
-        for i,system in ipairs(system_list) do
-            if comms_target.comms_data.system_repair[system].avail then
-                if major_repairs == _("situationReport-comms","Repair these major systems:") then
-                    major_repairs = string.format("%s %s",major_repairs,system_list_desc[system])
-                else
-                    major_repairs = string.format("%s, %s",major_repairs,system_list_desc[system])
-                end
-            end
-        end
+--        for i,system in ipairs(system_list) do
+--            if comms_target.comms_data.system_repair[system].avail then
+--                if major_repairs == _("situationReport-comms","Repair these major systems:") then
+--                    major_repairs = string.format("%s %s",major_repairs,system_list_desc[system])
+--                else
+--                    major_repairs = string.format("%s, %s",major_repairs,system_list_desc[system])
+--                end
+--            end
+--        end
         if major_repairs ~= _("situationReport-comms","Repair these major systems:") then
             msg = string.format("%s\n%s.",msg,major_repairs)
         end
@@ -791,6 +791,10 @@ function catalogImprovements(msg)
     if msg == nil then
         msg = ""
     end
+	if comms_target:getFaction() ~= comms_source:getFaction() then
+        table.insert(improvements,"join")
+		return msg,improvements   --skip other improvements 
+	end
     if comms_target:getRestocksScanProbes() then
         msg = string.format(_("situationReport-comms","%s\nReplenish scan probes: nominal."),msg)
     else
@@ -929,6 +933,9 @@ function improveStationService(improvements)
                 "Restock mines on docked ship",
                 "Resupply mines to docked ship",
             },
+            ["join"] = {
+                "Support for the Human Navy",
+            },
         }
         for i,improvement in ipairs(improvements) do
             if improvement_prompt[improvement] == nil then
@@ -936,13 +943,11 @@ function improveStationService(improvements)
             else
                 addCommsReply(tableSelectRandom(improvement_prompt[improvement]),function()    
                     local needed_good = comms_target.mission_goods[improvement]
-                    setCommsMessage(string.format(_("situationReport-comms","%s could be improved with %s. You may be able to get %s from stations or transports."),tableSelectRandom(improvement_prompt[improvement]),needed_good,needed_good))
-                    if comms_source.goods ~= nil then
-                        if comms_source.goods[needed_good] ~= nil and comms_source.goods[needed_good] > 0 and comms_source:isDocked(comms_target) then
-                            addCommsReply(string.format(_("situationReport-comms","Provide %s to station %s"),needed_good,comms_target:getCallSign()),function()
+                    setCommsMessage(string.format(_("situationReport-comms","%s could be improved with an artifact."),tableSelectRandom(improvement_prompt[improvement])))
+                    if comms_source:getResourceAmount("Artifacts") > 0 then
+                            addCommsReply(string.format(_("situationReport-comms","Provide Artifact to station %s"),comms_target:getCallSign()),function()
                                 if comms_source:isDocked(comms_target) then
-                                    comms_source.goods[needed_good] = comms_source.goods[needed_good] - 1
-                                    comms_source.cargo = comms_source.cargo + 1
+									comms_source:decreaseResourceAmount("Artifacts", 1)
                                     local improvement_msg = _("situationReport-comms","There was a problem with the improvement process")
                                     local friendliness_bonus_lo = 3
                                     local friendliness_bonus_hi = 9
@@ -1018,6 +1023,10 @@ function improveStationService(improvements)
                                         comms_target.comms_data.max_weapon_refill_amount.neutral = 1
                                         improvement_msg = _("situationReport-comms","We can replenish HVLIs again! Come back any time to have your supply of high velocity lead impactors replenished.")
                                         comms_target.comms_data.friendlyness = math.min(comms_target.comms_data.friendlyness + random(friendliness_bonus_lo,friendliness_bonus_hi),100)
+									elseif improvement == "join" then
+										comms_target:setFaction("Human Navy")
+                                        improvement_msg = _("situationReport-comms","This station joined the Human Navy. We will generate reputation for you and we will always be visible on your releay screens. But we may require your help in case we are under attack.")
+                                        comms_target.comms_data.friendlyness = math.min(comms_target.comms_data.friendlyness + random(friendliness_bonus_lo,friendliness_bonus_hi),100)
                                     end
                                     setCommsMessage(improvement_msg)
                                 else
@@ -1026,7 +1035,6 @@ function improveStationService(improvements)
                                 addCommsReply(_("Back"), commsStation)
                             end)
                         end
-                    end
                     addCommsReply(_("Back"), commsStation)
                 end)
             end
@@ -3676,40 +3684,6 @@ function interactiveDockedStationCommsMeat()
     if isAllowedTo(comms_target.comms_data.services.activatedefensefleet) then
         stationDefenseFleet()
     end
---[[RM    if comms_target == stationMonocle then
-        if random(1,100) < 4 then
-            if stationMonocle:getCallSign() == "Monocle" then
-                stationMonocle:setCallSign("Arecibo III")
-            else
-                stationMonocle:setCallSign("Monocle III")
-            end
-               stationMonocle.comms_data.history = string.format("Established in Nov2020, %s was intended to help Pastern observe asteroids in exchange for information about T'k'nol'g, suspected of biological research using human tissue illicitly obtained. The results of the research so far have yielded an addictive drug that in large enough doses not only kills the consumer but turns their body into a hyper-acidic blob that tends to eat through the hulls of ships and stations. Certain personnel on %s are tasked with watching for T'k'nol'g and reporting any additional sightings or gleaned information",stationMonocle:getCallSign(),stationMonocle:getCallSign())
-        end
-    end
-    if planet_magnasol_star ~= nil and distance(planet_magnasol_star,comms_target) < 120000 then
-        magnasolHeatDiscussion({identifier=interactiveDockedStationCommsMeat,name="interactive relay officer"})
-    end
-    if comms_target == stationHossenfelder then
-        riptideHossenfelderDiscussion({identifier=interactiveDockedStationCommsMeat,name="interactive relay officer"})
-    end
-    if comms_target == stationLafrina then
-        lafrinaDiscussion({identifier=interactiveDockedStationCommsMeat,name="interactive relay officer"})
-    end
-	if not comms_source:isEnemy(comms_target) then
-		if comms_source:isFriendly(comms_target) then
-			if comms_source.pods ~= comms_source.max_pods then
-				unloadEscapePods()
-			end
-		else
-			if comms_source.pods ~= comms_source.max_pods then
-				if comms_target.comms_data.escape_pod_cost == nil then
-					comms_target.comms_data.escape_pod_cost = math.random(8,12)
-				end
-				unloadEscapePods(comms_target.comms_data.escape_pod_cost)
-			end
-		end
-	end
-    --]]
 	local goods_commerce_prompts = {
 		"Buy, sell, trade goods, etc.",
 		"Buy, sell, trade, etc.",
@@ -3857,7 +3831,7 @@ function createTransportMission()
 	local mission_target = nil
 	local reward = 0
 	if mission_character ~= nil then
-		local destination_pool = getScriptStorage().wh_stations.stations
+		local destination_pool = getScriptStorage().avp_stations.stations
 		table.filter(destination_pool, function(o)
 			return o ~= nil and o:isValid()
 		end)
@@ -3879,7 +3853,7 @@ function createCargoMission()
 		local mission_character = tableRemoveRandom(comms_target.residents)
 		local mission_origin = nil
 		if mission_character ~= nil then
-			local origin_pool = getScriptStorage().wh_stations.stations
+			local origin_pool = getScriptStorage().avp_stations.stations
 			table.filter(origin_pool, function(o)
 				return o ~= nil and o:isValid()
 			end)
@@ -4946,80 +4920,80 @@ function repairShip()
     --    primary system repair
     local system_repair_list = {}
     offer_repair = false
-    if comms_target.comms_data.system_repair ~= nil then
-        for i, system in ipairs(system_list) do
-            if comms_source:hasSystem(system) then
-                if comms_source:getSystemHealthMax(system) < 1 then
-                    if comms_target.comms_data.system_repair[system].avail then
-                        if comms_target.comms_data.system_repair[system].cost > 0 then
-                            if comms_target.player_system_repair_service == nil then
-                                offer_repair = true
-                                table.insert(system_repair_list,system)
-                            else
-                                if comms_target.player_system_repair_service[comms_source] == nil then
-                                    offer_repair = true
-                                    table.insert(system_repair_list,system)
-                                else
-                                    if comms_target.player_system_repair_service[comms_source][system] == nil then
-                                        offer_repair = true
-                                        table.insert(system_repair_list,system)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if offer_repair then
-        options_presented_count = options_presented_count + 1
-        local primary_repair_prompt = {
-            "Repair primary ship system",
-            "Make repairs to primary ship system",
-            string.format("Fix primary system on %s",comms_source:getCallSign()),
-            "Fix primary ship system",
-        }
-        addCommsReply(tableSelectRandom(primary_repair_prompt),function()
-            local what_primary_system = {
-                "What system would you like repaired?",
-                "What system is in need of repair?",
-                string.format("What severe wounds on %s can %s help heal?",comms_source:getCallSign(),comms_target:getCallSign()),
-                string.format("What primary ship system can %s work on to bring %s back into good working order?",comms_target:getCallSign(),comms_source:getCallSign()),
-            }
-            setCommsMessage(what_primary_system[math.random(1,#what_primary_system)])
-            for index, system in ipairs(system_repair_list) do
-                addCommsReply(string.format(_("stationServices-comms","Repair %s max health up to %.1f%% (%i rep)"),pretty_system[system],comms_target.comms_data.system_repair[system].max*100,comms_target.comms_data.system_repair[system].cost), function()
-                    if comms_source:takeReputationPoints(comms_target.comms_data.system_repair[system].cost) then
-                        if comms_target.player_system_repair_service == nil then
-                            comms_target.player_system_repair_service = {}
-                        end
-                        if comms_target.player_system_repair_service[comms_source] == nil then
-                            comms_target.player_system_repair_service[comms_source] = {}
-                        end
-                        comms_target.player_system_repair_service[comms_source][system] = true
-                        local working_on_system = {
-                            string.format("We'll start working on your %s maximum health right away.",pretty_system[system]),
-                            string.format("We will put %s repair technicians to work on your %s maximum health immediately.",comms_target:getCallSign(),pretty_system[system]),
-                            string.format("%s has put repair technicians to work on %s's %s maximum health.",comms_target:getCallSign(),comms_source:getCallSign(),pretty_system[system]),
-                            string.format("We put our most qualified repair technicians to work on your %s maximum health.",pretty_system[system]),
-                        }
-                        setCommsMessage(working_on_system[math.random(1,#working_on_system)])
-                    else
-                        local insufficient_rep_responses = {
-                            "Insufficient reputation",
-                            "Not enough reputation",
-                            "You need more reputation",
-                            string.format("You need more than %i reputation",math.floor(comms_source:getReputationPoints())),
-                            "You don't have enough reputation",
-                        }
-                        setCommsMessage(insufficient_rep_responses[math.random(1,#insufficient_rep_responses)])
-                    end
-                    addCommsReply(_("Back"), commsStation)
-                end)
-            end
-        end)
-    end
+--    if comms_target.comms_data.system_repair ~= nil then
+--        for i, system in ipairs(system_list) do
+--            if comms_source:hasSystem(system) then
+--                if comms_source:getSystemHealthMax(system) < 1 then
+--                    if comms_target.comms_data.system_repair[system].avail then
+--                        if comms_target.comms_data.system_repair[system].cost > 0 then
+--                            if comms_target.player_system_repair_service == nil then
+--                                offer_repair = true
+--                                table.insert(system_repair_list,system)
+--                            else
+--                                if comms_target.player_system_repair_service[comms_source] == nil then
+--                                    offer_repair = true
+--                                    table.insert(system_repair_list,system)
+--                                else
+--                                    if comms_target.player_system_repair_service[comms_source][system] == nil then
+--                                        offer_repair = true
+--                                        table.insert(system_repair_list,system)
+--                                    end
+--                                end
+--                            end
+--                        end
+--                    end
+--                end
+--            end
+--        end
+--    end
+--    if offer_repair then
+--        options_presented_count = options_presented_count + 1
+--        local primary_repair_prompt = {
+--            "Repair primary ship system",
+--            "Make repairs to primary ship system",
+--            string.format("Fix primary system on %s",comms_source:getCallSign()),
+--            "Fix primary ship system",
+--        }
+--        addCommsReply(tableSelectRandom(primary_repair_prompt),function()
+--            local what_primary_system = {
+--                "What system would you like repaired?",
+--                "What system is in need of repair?",
+--                string.format("What severe wounds on %s can %s help heal?",comms_source:getCallSign(),comms_target:getCallSign()),
+--                string.format("What primary ship system can %s work on to bring %s back into good working order?",comms_target:getCallSign(),comms_source:getCallSign()),
+--            }
+--            setCommsMessage(what_primary_system[math.random(1,#what_primary_system)])
+--            for index, system in ipairs(system_repair_list) do
+--                addCommsReply(string.format(_("stationServices-comms","Repair %s max health up to %.1f%% (%i rep)"),pretty_system[system],comms_target.comms_data.system_repair[system].max*100,comms_target.comms_data.system_repair[system].cost), function()
+--                    if comms_source:takeReputationPoints(comms_target.comms_data.system_repair[system].cost) then
+--                        if comms_target.player_system_repair_service == nil then
+--                            comms_target.player_system_repair_service = {}
+--                        end
+--                        if comms_target.player_system_repair_service[comms_source] == nil then
+--                            comms_target.player_system_repair_service[comms_source] = {}
+--                        end
+--                        comms_target.player_system_repair_service[comms_source][system] = true
+--                        local working_on_system = {
+--                            string.format("We'll start working on your %s maximum health right away.",pretty_system[system]),
+--                            string.format("We will put %s repair technicians to work on your %s maximum health immediately.",comms_target:getCallSign(),pretty_system[system]),
+--                            string.format("%s has put repair technicians to work on %s's %s maximum health.",comms_target:getCallSign(),comms_source:getCallSign(),pretty_system[system]),
+--                            string.format("We put our most qualified repair technicians to work on your %s maximum health.",pretty_system[system]),
+--                        }
+--                        setCommsMessage(working_on_system[math.random(1,#working_on_system)])
+--                    else
+--                        local insufficient_rep_responses = {
+--                            "Insufficient reputation",
+--                            "Not enough reputation",
+--                            "You need more reputation",
+--                            string.format("You need more than %i reputation",math.floor(comms_source:getReputationPoints())),
+--                            "You don't have enough reputation",
+--                        }
+--                        setCommsMessage(insufficient_rep_responses[math.random(1,#insufficient_rep_responses)])
+--                    end
+--                    addCommsReply(_("Back"), commsStation)
+--                end)
+--            end
+--        end)
+--    end
     if options_presented_count == 0 then
         local no_applicable_repair_service = {
             "No applicable repair service available",

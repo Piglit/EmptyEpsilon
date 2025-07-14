@@ -2,7 +2,9 @@
 -- test depends on wormhole
 --]]
 
-wh_players = {}
+wh_players = {
+	playerShipStats = {}
+}
 require "xansta_mods.lua"
 require "utils.lua"
 
@@ -37,38 +39,45 @@ function wh_players:init()
 		["Pod"]					= { strength = 1,	cargo = 0,	distance = 100,	probes = 0,},
 		["Poseidon"]			= { strength = 30,	cargo = 6,	distance = 400,	probes = 10,},
 		["Targaryen"]			= { strength = 1,	cargo = 0,	distance = 1200,probes = 12,},
+		["SpySat"]				= { strength = 1,	cargo = 0,	distance = 100, probes = 0,},
+		["Pod"]					= { strength = 1,	cargo = 0,	distance = 100, probes = 0,},
 	}
 
-	self.shipsByInstance = {}
+campaign:allowReinforcements(function (ship, instance, callsign)
+		--[[
+		if self.shipsByInstance[instance] == nil then
+			self:spawnedShipEnterSector(ship, callsign)
+		else
+			self:respawnedPlayerShip(ship)
+		end
+		--]]
+		wh_players:spawnedShipOnCommandStation(ship)
+		sendMessageToCampaignServer("request_reputation", callsign)
+		sendMessageToCampaignServer("request_artifacts", callsign)
+	end)
+
 	getScriptStorage().wh_players = self
 end
 
-function wh_players:initTest()
-	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
+--function wh_players:initTest()
+--	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
+--end
+
+function wh_players:spawnedShipOnCommandStation(ship)
+	local station = getScriptStorage().wh_fleetcommand.station
+	if station ~= nil and station:isValid() then
+		local x,y = station:getPosition()
+		setCirclePos(ship, x,y, random(0,360), 500)
+		ship:commandDock(station)
+		--[[
+		for _,missile in ipairs(MISSILE_TYPES) do
+			ship:setWeaponStorage(missile, 0)
+		end
+		--]]
+	end
 end
 
-function wh_players:onProxySpawn(instance, callsign, template, drive, password)
-	if self.shipsByInstance[instance] ~= nil and self.shipsByInstance[instance]:isValid() then
-		return callsign -- a ship for your proxy already exists
-	end
-	local ship = PlayerSpaceship():setTemplate(template):setCallSign(callsign):setControlCode(password)
-	if drive == "warp" then
-		ship:setWarpDrive(true):setJumpDrive(false)
-	elseif ship.drive == "jump" then
-		ship:setWarpDrive(false):setJumpDrive(true)
-	end
-
-	if self.shipsByInstance[instance] == nil then
-		self:spawnedShipEnterSector(ship, callsign)
-	else
-		self:respawnedPlayerShip(ship)
-	end
-	sendMessageToCampaignServer("request_reputation", callsign)
-	sendMessageToCampaignServer("request_artifacts", callsign)
-	self.shipsByInstance[instance] = ship
-	return callsign
-end
-
+--[[
 function wh_players:spawnedShipEnterSector(ship, callsign)
 	local angle = wh_wormhole.wormhole_a.angle
 	local ax, ay = vectorFromAngle(angle, -25000)	-- opposite side
@@ -86,6 +95,7 @@ function wh_players:respawnedPlayerShip(ship)
 		self:spawnedShipEnterSector(ship)
 	end
 end
+--]]
 
 function wh_players:onNewPlayerShip(p)
 	self:updatePlayerSoftTemplate(p)

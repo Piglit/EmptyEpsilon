@@ -79,7 +79,7 @@ function wh_turns:startInterlude()
 	setHackingDifficulty(2)
 	globalMessage('', 0)
 	-- wait until player uses wormhole to start next turn
-	sendMessageToCampaignServer("interlude")
+	sendMessageToCampaignServer("interlude", "")
 end
 
 function wh_turns.onWormhole(wormhole, teleportee)

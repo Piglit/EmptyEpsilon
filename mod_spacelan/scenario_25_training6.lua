@@ -1,5 +1,5 @@
 -- Name: Training: Corvette
--- Type: Basic
+-- Type: Training
 -- Description: Corvette Training Ground
 ---
 

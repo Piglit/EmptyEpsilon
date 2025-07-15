@@ -1,5 +1,5 @@
 -- Name: Training: Missile Cruiser
--- Type: Mission
+-- Type: Training
 -- Description: Advanced Training Course
 ---
 --- Objective: Capture a enemy maintainance dock and destroy all incomming enemy ships in the area.

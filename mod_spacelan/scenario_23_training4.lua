@@ -1,5 +1,5 @@
 -- Name: Training: Mine Layer 
--- Type: Mission
+-- Type: Training
 -- Description: Mine Layer Training Course
 ---
 --- Objective: Destroy all enemy ships in the area.

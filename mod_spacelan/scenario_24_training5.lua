@@ -1,5 +1,5 @@
 -- Name: Training: Fighter
--- Type: Basic
+-- Type: Training
 -- Description: Fighter Training Cource
 ---
 

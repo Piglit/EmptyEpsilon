@@ -2,7 +2,7 @@
 -- Description: Escape imprisonment and return home. 
 ---
 --- Mission consists of one ship with a full crew. Engineer, Relay and Science will be busy; Weapons less busy.
--- Type: Mission, somewhat replayable
+-- Type: Replayable Mission
 -- Variation[Easy]: Easy goals and/or enemies
 -- Variation[Hard]: Hard goals and/or enemies
 

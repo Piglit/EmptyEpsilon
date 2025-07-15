@@ -7,7 +7,7 @@
 ---
 --- Version 0.8
 -- Author: Xansta & Kilted-Klingon
--- Type: Player ship vs. player ship, teams up to 6 ships per side
+-- Type: PvP
 -- Variation[Easy]: Easy enemies, told which opposing team ship picked up flag
 -- Variation[Hard]: Hard enemies, told nothing when opposing team picks up flag
 -- Variation[Small]: Smaller region: 50U, told when opposing team picks up flag

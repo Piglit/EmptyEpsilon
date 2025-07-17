@@ -325,7 +325,7 @@ function init_constants_xansta()
 	feature_crewFate = true
 	--Damage to ship can kill repair crew members, deplete coolant and --disable ship functions--
 	--ship functions may no be repairable, make sure, stations can heal it.
-	feature_coolantNebulae = true
+	feature_coolantNebulae = false
 	healthCheckTimer = 5
 	healthCheckTimerInterval = 5
 end

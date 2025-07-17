@@ -249,6 +249,7 @@ end
 
 -- Place random objects in a line, from point x1,y1 to x2,y2 with a random distance of random_amount
 function placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
+    local created = {}
     for n=1,amount do
         local f = random(0, 1)
         local x = x1 + (x2 - x1) * f
@@ -258,8 +259,9 @@ function placeRandomInLine(object_type, amount, x1, y1, x2, y2, random_amount)
         x = x + math.cos(r / 180 * math.pi) * distance
         y = y + math.sin(r / 180 * math.pi) * distance
 
-        object_type():setPosition(x, y)
+        table.insert(created, object_type():setPosition(x, y))
     end
+    return created
 end
 
 -- Place semi-random object_types around point (x,y) in a (x_grids by y_grids) area
@@ -429,6 +431,11 @@ function formatTime(seconds)
 	return str
 end
 
+function spiral_position(rotation, scale, phi)
+	-- returns angle and distance. Can be used in setCirclePos(obj, x, y, angle, distance)
+	return phi+rotation, scale*phi 
+end
+
 -- Checks if one circle intersects another circle.
 function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, circle2y, radius2 )
 --[[
@@ -476,4 +483,44 @@ function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, cir
 
 	if checkEqualFuzzy( length, radius1 + radius2 ) or checkEqualFuzzy( length, math.abs( radius1 - radius2 ) ) then return {{p3x, p3y}} end -- tangent
 	return {{p3x, p3y}, {p4x, p4y}} --intersection
+end
+
+function arrayContains(array, element)
+	for _,value in ipairs(array) do
+		if value == element then
+			return true
+		end
+	end
+	return false
+end
+
+-- removes all elements (in place!) that do not meet the condition
+function arrayFilter(array, condition)
+	local source_idx, target_idx = #array +1, #array + 1
+	for i = 1, #array do
+		if not condition(array[i]) then
+			source_idx = i+1
+			target_idx = i
+			break
+		end
+	end
+	for i = source_idx, #array do
+		local value = array[i]
+		if condition(value) then
+			array[target_idx] = value
+			target_idx = target_idx + 1
+		end
+	end
+	for i = target_idx, #array do
+		array[i] = nil
+	end
+end
+
+-- shuffle an array in place
+function arrayShuffle(array)
+	for i = #array, 2, -1 do
+		local j = math.random(i)
+		array[i], array[j] = array[j], array[i]
+	end
+	return array
 end

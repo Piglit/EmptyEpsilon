@@ -28,6 +28,12 @@ REGISTER_SCRIPT_CLASS_NO_CREATE(SpaceObject)
     /// Returns this SpaceObject's absolute rotation, in degrees.
     /// Example: local rotation = obj:getRotation()
     REGISTER_SCRIPT_CLASS_FUNCTION(Collisionable, getRotation);
+    /// Sets this SpaceObject's radius.
+    /// Example: obj:setRadius(1000)
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceObject, setRadius);
+    /// Returns this SpaceObject's radius
+    /// Example: local radius = obj:getRadius()
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceObject, getRadius);
     /// Sets this SpaceObject's heading, in degrees ranging from 0 to 360.
     /// Unlike SpaceObject:setRotation(), a value of 0 points to the top of the map ("north").
     /// Values that are negative or greater than 360 are converted to values within that range.

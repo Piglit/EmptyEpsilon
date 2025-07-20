@@ -53,21 +53,24 @@ Zone::Zone()
 
 void Zone::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
-    if (!long_range || color.a == 0 || !outline.size())
+    if (!long_range || !outline.size())
         return;
-    std::vector<glm::vec2> outline_points;
-    for(auto p : outline)
-        outline_points.push_back(position + rotateVec2(p * scale, -rotation));
-    renderer.drawTriangles(outline_points, triangles, glm::u8vec4(color.r, color.g, color.b, 64));
-    
-    outline_points.push_back(position + rotateVec2(outline[0] * scale, -rotation));
-    renderer.drawLine(outline_points, glm::u8vec4(color.r, color.g, color.b, 128));
 
     if (label.length() > 0)
     {
         float font_size = getRadius() * scale / label.length();
         renderer.drawText(sp::Rect(position.x, position.y, 0, 0), label, sp::Alignment::Center, font_size, main_font, glm::u8vec4(color.r, color.g, color.b, 128));
     }
+
+    if (color.a == 0)
+        return;
+
+    std::vector<glm::vec2> outline_points;
+    for(auto p : outline)
+        outline_points.push_back(position + rotateVec2(p * scale, -rotation));
+    renderer.drawTriangles(outline_points, triangles, glm::u8vec4(color.r, color.g, color.b, 64));
+    outline_points.push_back(position + rotateVec2(outline[0] * scale, -rotation));
+    renderer.drawLine(outline_points, glm::u8vec4(color.r, color.g, color.b, 128));
 }
 
 void Zone::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)

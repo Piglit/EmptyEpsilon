@@ -10,6 +10,8 @@ class Planet : public SpaceObject, public Updatable
 public:
     Planet();
 
+    float update_delta;
+
     virtual void draw3D() override;
     virtual void draw3DTransparent() override;
     virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;

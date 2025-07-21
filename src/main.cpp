@@ -49,9 +49,6 @@
 #include "steam/steam_api.h"
 #include "steamrichpresence.h"
 #endif
-#if MUMBLE
-#include "mumble.h"
-#endif
 
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -411,10 +408,7 @@ int main(int argc, char** argv)
 #if STEAMSDK
     new SteamRichPresence();
 #endif //STEAMSDK
-#if MUMBLE 
-    new MumblePositionalAudio();
-#endif //MUMBLE
-
+ 
     string tutorial = PreferencesManager::get("tutorial");   // use "00_all.lua" for all tutorials
     if (tutorial != "")
     {

@@ -5,7 +5,6 @@
 #include "gameGlobalInfo.h"
 #include "scenarioInfo.h"
 #include "preferenceManager.h"
-#include "scenarioInfo.h"
 #include "scienceDatabase.h"
 #include "multiplayer_client.h"
 #include "soundManager.h"
@@ -14,6 +13,7 @@
 #include "io/json.h"
 #include "io/http/request.h"
 #include <SDL_assert.h>
+#include "libmumblelink.h"
 
 P<GameGlobalInfo> gameGlobalInfo;
 
@@ -60,6 +60,8 @@ GameGlobalInfo::GameGlobalInfo()
     registerMemberReplication(&allow_main_screen_long_range_radar);
     registerMemberReplication(&gm_control_code);
     registerMemberReplication(&elapsed_time, 0.1);
+    registerMemberReplication(&scenario);
+    registerMemberReplication(&server_name);
 
     for(unsigned int n=0; n<factionInfo.size(); n++)
         reputation_points.push_back(0);
@@ -132,10 +134,40 @@ void GameGlobalInfo::update(float delta)
         if ((my_spaceship && my_spaceship->getMultiplayerId() != my_player_info->ship_id) || (my_spaceship && my_player_info->ship_id == -1) || (!my_spaceship && my_player_info->ship_id != -1))
         {
             if (game_server)
+            {
                 my_spaceship = game_server->getObjectById(my_player_info->ship_id);
+                server_name = game_server->getServerName();
+            }
             else
                 my_spaceship = game_client->getObjectById(my_player_info->ship_id);
+
+			// retry and update mumble link, whenever the ship changes
+            if (mumble::link() == 0)
+            {
+                if (my_spaceship)
+				{
+                    int id = my_spaceship->getMultiplayerId();
+					mumble::update_infos(string(id), server_name);
+				}
+                else
+					mumble::reset();
+			}
         }
+        if (my_spaceship)
+        {
+            auto pos = my_spaceship->getPosition();
+            float dir = my_spaceship->getRotation();
+            float dx = glm::cos(dir);
+            float dy = glm::sin(dir);
+            // mumble settings suggest coordinate differences between 0 to 100
+            // so we define 1u in EE as 1m in Mumble
+            mumble::update_coordinates(pos[0]/1000.0f,pos[1]/1000.0f,dx,dy);
+        }
+    }
+    else
+    {
+		if (mumble::islinked())
+			mumble::reset();
     }
     elapsed_time += delta;
 }
@@ -206,6 +238,9 @@ void GameGlobalInfo::reset()
     {
         p->ship_id = -1;//reset();
     }
+
+	if (mumble::islinked())
+		mumble::reset();
 }
 
 void GameGlobalInfo::setScenarioSettings(const string filename, std::unordered_map<string, string> new_settings)

@@ -188,6 +188,7 @@ Planet::Planet()
     collision_size = -2.0f;
 
     setRadarSignatureInfo(0.5f, 0.f, 0.3f);
+    update_delta = 0.0;
 
     registerMemberReplication(&planet_size);
     registerMemberReplication(&cloud_size);
@@ -266,6 +267,7 @@ void Planet::setOrbit(P<SpaceObject> target, float orbit_time)
 
 void Planet::update(float delta)
 {
+    update_delta = delta;
     if (collision_size == -2.0f)
     {
         updateCollisionSize();
@@ -418,6 +420,15 @@ void Planet::collide(Collisionable* target, float collision_force)
     if (collision_size > 0)
     {
         //Something hit this planet...
+        if (update_delta == 0.0f)
+            return;
+
+        P<SpaceObject> obj = P<Collisionable>(target);
+        if (!obj) return;
+        if (!obj->hasWeight()) { return; } // the object is not affected by gravitation
+        DamageInfo info(NULL, DT_Kinetic, getPosition());
+        if (isServer())
+            obj->takeDamage(8.0f * update_delta, info);
     }
 }
 

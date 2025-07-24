@@ -7,13 +7,14 @@ Manages stations
 * manages stations quests
 
 --]]
-avp_stations = {}
+avp_stations = {
+	stations = {},
+}
 
 require "place_station_scenario_utility.lua"
 require "luax.lua"
 
 function avp_stations:init()
-	self.stations = {}
 	local characters = {
 		{name = "Frank Brown", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
 		{name = "Joyce Miller", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
@@ -71,7 +72,7 @@ function avp_stations:init()
 					station.characters = {character}
 				end
 				table.insert(self.stations, station)
-				station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
+				station.surrender_hull_threshold = math.random(40,80)	-- for avp_kraylor
 			else
 				break
 			end
@@ -87,7 +88,7 @@ function avp_stations:init()
 
 
 	self:setRepairMissions()
-	getScriptStorage().wh_stations = self 
+	getScriptStorage().avp_stations = self 
 --]]
 end
 
@@ -223,7 +224,7 @@ end
 
 
 --[[
-function wh_stations:initTest()
+function avp_stations:initTest()
 	local x,y = self.stations[1]:getPosition()
 	local ship = PlayerSpaceship():setTemplate("Adder MK7"):setCallSign("Station Visitor"):setPosition(x,y):setRotation(90):commandTargetRotation(90)
 	ship:setResourceAmount("Station Command Team", 1)
@@ -233,7 +234,7 @@ function wh_stations:initTest()
 end
 --]]
 --[[
-function wh_stations:setRepairMissions()
+function avp_stations:setRepairMissions()
     local mission_reasons = {
         ["energy"] = {
             [_("situationReport-comms", "A recent reactor failure has put us on auxiliary power, so we cannot recharge ships.")] = {
@@ -447,9 +448,9 @@ function wh_stations:setRepairMissions()
         print("Mission:",mission,"Good:",details.good,"Station:",out_station)
     end
 	--]]
-end
+--end
 --]]
-function wh_stations:update(delta)
+function avp_stations:update(delta)
 	for _, station in ipairs(self.stations) do
 		if station:isValid() then
 			-- stations produce their buy value in one hour

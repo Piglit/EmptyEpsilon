@@ -104,6 +104,10 @@ function TerrainModule:labelZone()
 --		self.zone:setLabel(label)
 --		self.zone_label = label
 --	end
+	if self.radius < 5000 then
+		-- too small to read
+		return self
+	end
 	if #self.zone_names == 0 then
 		self.zone_names = TerrainModule.zone_names
 	end
@@ -249,6 +253,11 @@ TerrainModule.zone_names = arrayShuffle({
 	"Das Eckige",
 	"Ybb T'strl",
 	"Traum von Jules Verne",
+	"Friedhof der Offiziere",
+	"Endhaltestelle",
+	"Ihrer Majestät Missfallen",
+	"Padmes Verwüstung",
+	"Sicherer Raum",
 })
 
 TerrainModuleBlackHoles.zone_names = arrayShuffle({
@@ -293,7 +302,7 @@ function TerrainModuleNebulae:create()
 		local x,y = radialPosition(self.x, self.y, dist, arc)
 		Nebula():setPosition(x,y)
 	end
-	if self.radius < 15000 then
+	if self.radius > 15000 then
 		self:labelZone()
 	end
 	return self
@@ -453,9 +462,16 @@ function TerrainModuleMetaSpiral:create()
 			MetaTerrain():setPosition(module.x,module.y):setRadius(module.radius)
 		end
 		module:check()
+
 		if TEST then
 			module:create()
+			for _,callback in ipairs(self.onChildrenCreationCallbacks) do
+				callback(module)
+			end
 		else
+			for _,callback in ipairs(self.onChildrenCreationCallbacks) do
+				module:registerOnCreationCallback(callback)
+			end
 			module:createWhenVisible()
 		end
 	end
@@ -463,9 +479,16 @@ function TerrainModuleMetaSpiral:create()
 end
 
 function TerrainModuleMeta:registerOnChildrenCreationCallback(callback)
-	for _,module in pairs(self.children) do
-		module:registerOnCreationCallback(callback)
+	if self.children ~= nil then
+		for _,module in pairs(self.children) do
+			module:registerOnCreationCallback(callback)
+		end
 	end
+
+	if self.onChildrenCreationCallbacks == nil then
+		self.onChildrenCreationCallbacks = {}
+	end
+	table.insert(self.onChildrenCreationCallbacks, callback)
 end
 
 

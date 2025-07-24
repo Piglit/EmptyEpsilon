@@ -40,7 +40,6 @@ avp_terrain_modules = {
 }
 
 local TerrainModule = {}
-local MAX_ASTEROID_SIZE = 130	-- source asteroid size :110-130
 
 function TerrainModule:new(obj)
 	obj = obj or {} -- create empty if none given 
@@ -148,6 +147,10 @@ function TerrainModule:registerOnCreationCallback(callback)
 	table.insert(self.onCreationCallbacks, callback)
 end
 
+function TerrainModule:canInsertStation()
+	return true
+end
+
 function TerrainModule:insertStation(station)
 	-- default implementation
 	-- places a station inside the module
@@ -155,7 +158,11 @@ function TerrainModule:insertStation(station)
 		self.stations = {}
 	end
 	table.insert(self.stations, station)
-	self:insertObject(station, 0.75)
+	if self.station_distance_rad ~= nil then
+		self:insertObject(station, self.station_distance_rad)
+	else
+		self:insertObject(station, 0.75)
+	end
 end
 
 function TerrainModule:insertObject(obj, dist, orientation)
@@ -271,8 +278,7 @@ TerrainModuleNebulae.zone_names = arrayShuffle({
 function TerrainModuleAsteroids:create()
 	-- places asteroids in a nice manner
 	self:check()
-	local outermost_position = self.radius - MAX_ASTEROID_SIZE
-	local rings_amount = math.max(1,math.floor(outermost_position / 5000))
+	local rings_amount = math.max(1,math.floor(self.radius / 5000))
 	local rings_distance = self.radius / (rings_amount + 1)
 	local rotation = self.rotation
 	for stripe = 1, rings_amount do
@@ -284,8 +290,13 @@ function TerrainModuleAsteroids:create()
 			createRandomAlongArc(Asteroid, 20*stripe/layer, self.x, self.y, stripe_dist, rotation-90/layer, rotation+90/layer, width*layer/2)
 		end
 	end
+	self.station_distance_rad = (irandom(1,rings_amount) +0.5) * rings_distance / self.radius
 	self:labelZone()
 	return self
+end
+
+function TerrainModuleMines:canInsertStation()
+	return self.radius >= 10000	-- at least two rings
 end
 
 function TerrainModuleNebulae:create()
@@ -302,6 +313,7 @@ function TerrainModuleNebulae:create()
 		local x,y = radialPosition(self.x, self.y, dist, arc)
 		Nebula():setPosition(x,y)
 	end
+	self.station_distance_rad = random(0.25, 0.75)
 	if self.radius > 15000 then
 		self:labelZone()
 	end
@@ -312,9 +324,9 @@ function TerrainModuleMines:create()
 	-- places Mines in a nice manner
 	self:check()
 	local rotation = self.rotation
-	local dict_between_rings = self.radius / 4
+	local dist_between_rings = self.radius / 4
 	local dist_between_mines_squared = 1500*1500
-	for dist_from_origin = dict_between_rings, self.radius-dict_between_rings, dict_between_rings do
+	for dist_from_origin = dist_between_rings, self.radius-dist_between_rings, dist_between_rings do
 		rotation = rotation + random(120,240)
 		local arc_dist = math.deg(math.acos(1-dist_between_mines_squared/(2*dist_from_origin*dist_from_origin)))
 		for arc = rotation, rotation+random(60,270), arc_dist do
@@ -322,7 +334,12 @@ function TerrainModuleMines:create()
 			Mine():setPosition(x,y)
 		end
 	end
+	self.station_distance_rad = 0
 	return self
+end
+
+function TerrainModuleMines:canInsertStation()
+	return self.radius >= 5000
 end
 
 function TerrainModulePlanets:createPlanet(isMoon)
@@ -368,6 +385,7 @@ function TerrainModulePlanets:create()
 			moon:setOrbit(self.planet, random(i*360, 2*i*360))
 		end
 	end
+	self.station_distance_rad = 0.25 + (irandom(0,moons) + 0.5) / (moons+1)	-- TODO test
 	self:labelZone()
 	return self
 end
@@ -394,6 +412,10 @@ function TerrainModuleBlackHoles:create()
 	return self
 end
 
+function TerrainModuleBlackHoles:canInsertStation()
+	return self.radius >= 5000
+end
+
 function TerrainModuleWormHoles:create()
 	-- places WormHole in a nice manner
 	self:check()
@@ -413,7 +435,12 @@ function TerrainModuleWormHoles:create()
 		local target_x, target_y = radialPosition(mirror_x, mirror_y, dist, direction)
 		WormHole():setPosition(x, y):setTargetPosition(target_x, target_y)
 	end
+	self.station_distance_rad = 0
 	return self
+end
+
+function TerrainModuleWormHoles:canInsertStation()
+	return self.radius >= 10000
 end
 
 function TerrainModuleMetaSpiral:create()

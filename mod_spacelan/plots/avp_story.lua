@@ -11,4 +11,7 @@ function avp_story.onStationCreation(terrain_module)
 		self.stations_discovered = self.stations_discovered + 1
 		local station = avp_stations:createInTerrain(terrain_module)
 	end
+	if terrain_module:canInsertArtifact() then
+		terrain_module:insertArtifact()
+	end
 end

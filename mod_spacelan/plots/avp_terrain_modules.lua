@@ -87,22 +87,6 @@ end
 function TerrainModule:labelZone()
 	-- not every zone gets a label
 	-- the label is set on discovery in create()
---	if avp_terrain_modules.zone_names == nil then
---		avp_terrain_modules.zone_names = arrayShuffle({
---			"Strahlen des Ponies",
---			"Fliege des Hundes",
---			"Kupferner Hängeleuchter",
---			"Schnurrhaare des Dachses",
---			"Helm der Königs",
---			"Führung des Tentakels",
---			"Leere der Unerfahrenheit",
---		})
---	end
---	if #avp_terrain_modules.zone_names > 0 then
---		local label = table.remove(avp_terrain_modules.zone_names)
---		self.zone:setLabel(label)
---		self.zone_label = label
---	end
 	if self.radius < 5000 then
 		-- too small to read
 		return self
@@ -145,6 +129,10 @@ function TerrainModule:registerOnCreationCallback(callback)
 		self.onCreationCallbacks = {}
 	end
 	table.insert(self.onCreationCallbacks, callback)
+end
+
+function TerrainModule:canInsertArtifact()
+	return false
 end
 
 function TerrainModule:canInsertStation()
@@ -345,6 +333,14 @@ function TerrainModuleMines:canInsertStation()
 	return self.radius >= 5000
 end
 
+function TerrainModuleMines:canInsertArtifact()
+	return self.radius < 5000
+end
+
+function TerrainModuleMines:insertArtifact()
+	wh_artifacts:placeGenericArtifact(self.x,self.y)
+end
+
 function TerrainModulePlanets:createPlanet(isMoon)
 	local planet = Planet()
 	if isMoon then
@@ -433,6 +429,7 @@ end
 function TerrainModuleBlackHoles:create()
 	-- places BlackHoles in a nice manner
 	self:check()
+	self.holes = {}
 	local holes = 1
 	if self.radius >= 10000 then
 		holes = irandom(1, math.floor(self.radius/10000))
@@ -442,11 +439,13 @@ function TerrainModuleBlackHoles:create()
 		for i = 1, holes do
 			local x,y = radialPosition(self.x, self.y, self.radius/3, self.rotation+(i*360/holes))
 			local bh = BlackHole():setRadius(self.radius/4):setPosition(x, y)
+			table.insert(self.holes, bh)
 			wh_rota:add_object(bh, -0.5, self.x, self.y)
 			gravity_util.addGravitySource(bh, self.radius*2/3)					
 		end
 	else
 		local bh = BlackHole():setRadius(self.radius/2):setPosition(self.x, self.y)
+		table.insert(self.holes, bh)
 		gravity_util.addGravitySource(bh, self.radius)
 	end
 	return self
@@ -454,6 +453,34 @@ end
 
 function TerrainModuleBlackHoles:canInsertStation()
 	return self.radius >= 5000
+end
+
+function TerrainModuleBlackHoles:canInsertArtifact()
+	return true
+end
+
+function TerrainModuleBlackHoles:insertArtifact()
+	local x,y,speed
+	if #self.holes == 1 then
+		x,y = radialPosition(self.x,self.y, 2*self.radius/5, 0)
+		speed = 2
+		local art = wh_artifacts:placeGenericArtifact(x,y)
+		wh_rota:add_object(art, speed, self.x, self.y)
+	else
+		speed = -0.5
+		x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation)
+		local art = wh_artifacts:placeGenericArtifact(x,y)
+		wh_rota:add_object(art, speed, self.x, self.y)
+		x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation + 360/#self.holes)
+		art = wh_artifacts:placeGenericArtifact(x,y)
+		wh_rota:add_object(art, speed, self.x, self.y)
+		if #self.holes > 2 then
+			x,y = self.holes[2]:getPosition()
+			x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
+			art = wh_artifacts:placeGenericArtifact(x,y)
+			wh_rota:add_object(art, speed, self.x, self.y)
+		end
+	end
 end
 
 function TerrainModuleWormHoles:create()

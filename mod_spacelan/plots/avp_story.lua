@@ -7,6 +7,8 @@ end
 
 function avp_story.onStationCreation(terrain_module)
 	self = avp_story
-	self.stations_discovered = self.stations_discovered + 1
-	local station = avp_stations:createInTerrain(terrain_module)
+	if terrain_module:canInsertStation() then
+		self.stations_discovered = self.stations_discovered + 1
+		local station = avp_stations:createInTerrain(terrain_module)
+	end
 end

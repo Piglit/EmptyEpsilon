@@ -148,7 +148,7 @@ function TerrainModule:registerOnCreationCallback(callback)
 end
 
 function TerrainModule:canInsertStation()
-	return true
+	return self.radius > 5000
 end
 
 function TerrainModule:insertStation(station)
@@ -189,6 +189,9 @@ function TerrainModule:insertObject(obj, dist, orientation)
 		else
 			arc = self.rotation + 180
 		end
+	elseif type(orientation) == "number" then
+		arc = orientation
+		orientation = nil
 	end
 	if orientation ~= "nil" then
 		arc = arc + random(-45, 45)
@@ -290,7 +293,7 @@ function TerrainModuleAsteroids:create()
 			createRandomAlongArc(Asteroid, 20*stripe/layer, self.x, self.y, stripe_dist, rotation-90/layer, rotation+90/layer, width*layer/2)
 		end
 	end
-	self.station_distance_rad = (irandom(1,rings_amount) +0.5) * rings_distance / self.radius
+	self.station_distance_rad = (irandom(1,math.max(rings_amount-1, 1)) +0.5) * rings_distance / self.radius
 	self:labelZone()
 	return self
 end
@@ -367,8 +370,9 @@ end
 function TerrainModulePlanets:create()
 	-- places Planets in a nice manner
 	self:check()
+	self.moons = {}
 	local moons = irandom(0, math.floor(self.radius/8000))
-	local z = self.radius/(6*(moons+1))-- * random(-1, 1)
+	local z = self.radius/(6*(moons+1)) * random(-1, 1)
 	self.planet = self:createPlanet(false):setPosition(self.x, self.y):setPlanetRadius(self.radius/4):setDistanceFromMovementPlane(z)
 	gravity_util.addGravitySource(self.planet, self.radius)
 	for i = 1, moons do
@@ -376,18 +380,54 @@ function TerrainModulePlanets:create()
 		local moon_dist_min = self.radius/4
 		local moon_dist_max = self.radius*3/4 - moon_radius
 		local moon_dist = i * moon_dist_max / moons
-		local x,y = radialPosition(self.x, self.y, moon_dist_min+moon_dist, self.rotation+(i*360/moons))
+		local moon_arc = self.rotation+(i*360/moons)
+		local x,y = radialPosition(self.x, self.y, moon_dist_min+moon_dist, moon_arc)
 		moon_radius = random(moon_radius/2, moon_radius)
 		local moon = self:createPlanet(true):setPosition(x,y):setPlanetRadius(moon_radius):setDistanceFromMovementPlane(z)
+		local orbit_time = 360
 		if moons == 2 then
-			moon:setOrbit(self.planet, 360)	-- 1 deg per s for both moons
+			moon:setOrbit(self.planet, orbit_time)	-- 1 deg per s for both moons
 		else
-			moon:setOrbit(self.planet, random(i*360, 2*i*360))
+			orbit_time = random(i*360, 2*i*360)
+			moon:setOrbit(self.planet, orbit_time)
 		end
+		moon.orbit_time = orbit_time
+		moon.arc = moon_arc
+		table.insert(self.moons, moon)
 	end
-	self.station_distance_rad = 0.25 + (irandom(0,moons) + 0.5) / (moons+1)	-- TODO test
 	self:labelZone()
 	return self
+end
+function TerrainModulePlanets:canInsertStation()
+	return self.radius >= 4000
+end
+function TerrainModulePlanets:insertStation(station)
+	TerrainModule.insertStation(self, station)
+	if #self.moons > 0 then
+		local linked_moon = self.moons[#self.moons]
+		local dist
+		-- r(planet) = r(zone)/4
+		-- r(moon) = r(zone)/(3*(#moons+1))
+		-- r := r(zone)
+		if #self.moons <= 2 then
+			-- r(planet) + centerOf( r(zone) - r(planet) - 2r(moon))
+			dist = self.radius/4 + 0.5 * (3/4 * self.radius - 2*self.radius/(3 * (#self.moons+1)))
+		elseif #self.moons % 2 == 1 then
+			-- r(planet) + centerOf( r(zone) - r(planet) - r(moon))
+			dist = self.radius/4 + 0.5 * (3/4 * self.radius - self.radius/(3 * (#self.moons+1)))
+		else
+			-- innermost_orbit + centerOf( innermost_orbit, outermost_orbit)
+			-- orbit(i) = r(planet) + i/moons * ( r(zone) - r(planet) - r(moon))
+			local orbit_dist = (3/4 * self.radius - self.radius/ (3 * (#self.moons+1)))
+			-- self.radius/4 + orbit_dist/#self.moons + (orbit_dist - orbit_dist / #self.moons) /2
+			dist = self.radius/4 + orbit_dist * (1/#self.moons + (1 - 1 / #self.moons) /2)
+		end							   
+		local x,y = radialPosition(self.x, self.y, dist, linked_moon.arc+180)
+		station:setPosition(x,y)
+		wh_rota:add_object(station, 360/linked_moon.orbit_time, self.x, self.y)
+	else
+		wh_rota:add_object(station, 0.5, self.x, self.y)
+	end
 end
 
 function TerrainModuleBlackHoles:create()

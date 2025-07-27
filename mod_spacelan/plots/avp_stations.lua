@@ -98,6 +98,9 @@ function avp_stations:createInTerrain(terrain_module)
 	local group, station = pickStation("RandomHumanNeutral")	-- could also be a group or a name
 	station:setFaction("Independent")
 	local sizeTemplate = szt()
+--	if TEST then
+--		sizeTemplate = "Huge Station"
+--	end
 	station:setTemplate(sizeTemplate)
 
 	-- place station

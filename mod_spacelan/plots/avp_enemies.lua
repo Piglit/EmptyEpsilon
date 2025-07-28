@@ -1,5 +1,12 @@
 avp_enemies = {
+<<<<<<< HEAD
 	modules = {},
+	factions = {
+		"Kraylor",
+		"Exuari",
+		"Ktlitans",
+		"Ghosts",
+	},
 }
 
 --[[ assume the existence of the following lists:
@@ -10,7 +17,20 @@ avp_enemies = {
 * ship_template_strength[template] = value
 --]]
 
+function avp_enemies:init()
+	self.faction_index = #self.factions +1
+end
+
 function avp_enemies:spawn(positions, faction, strength)
+	if faction == nil then
+		if self.faction_index > #self.factions then
+			arrayShuffle(self.factions)
+			self.faction_index = 1
+		end
+		faction = self.factions[self.faction_index]
+		self.faction_index = self.faction_index +1
+	end
+
 	if avp_enemies.modules[faction] ~= nil then
 		avp_enemies[faction]:spawnEnemiesAtPositions(positions, strength)
 	else

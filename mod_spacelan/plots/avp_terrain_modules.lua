@@ -303,6 +303,20 @@ function TerrainModuleAsteroids:canInsertStation()
 	return self.rings_amount >= 2
 end
 
+function TerrainModuleAsteroids:canInsertArtifact()
+	return random(0,1) > 0.25
+end
+
+function TerrainModuleAsteroids:insertArtifact()
+	local dist = self.radius / (self.rings_amount + 1)
+	local x,y = radialPosition(self.x, self.y, dist, self.rotation+90)
+	art = wh_artifacts:placeGenericArtifact(x,y)
+	if TEST == false then
+		art:setRadarTraceColor(255, 200, 100)	-- camoflage
+	end
+	art:setCallSign("")
+end
+
 function TerrainModuleAsteroids:canInsertEnemies()
 	return self.rings_amount ~= 2
 end
@@ -390,6 +404,7 @@ function TerrainModuleMines:canInsertEnemies()
 end
 
 function TerrainModuleMines:insertArtifact()
+	-- if no station is placed
 	wh_artifacts:placeGenericArtifact(self.x,self.y)
 end
 

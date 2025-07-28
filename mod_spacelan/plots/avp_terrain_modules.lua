@@ -139,6 +139,10 @@ function TerrainModule:canInsertStation()
 	return self.radius > 5000
 end
 
+function TerrainModule:canInsertEnemies()
+	return self.radius > 5000
+end
+
 function TerrainModule:insertStation(station)
 	-- default implementation
 	-- places a station inside the module
@@ -186,6 +190,13 @@ function TerrainModule:insertObject(obj, dist, orientation)
 	end
 	local x,y = radialPosition(self.x, self.y, self.radius*dist, arc)
 	obj:setPosition(x,y)
+end
+
+function TerrainModule:getEnemySpawnPositions()
+	-- returns an array of tuples with spawn positions for this module
+	-- If more enemies are used, the positioning starts again at the first coordinate
+	-- default implementation, to be overridden by subclasses
+	return {{0,0}}
 end
 
 function avp_terrain_modules:updatePlayerShip(delta, ship)
@@ -281,34 +292,71 @@ function TerrainModuleAsteroids:create()
 			createRandomAlongArc(Asteroid, 20*stripe/layer, self.x, self.y, stripe_dist, rotation-90/layer, rotation+90/layer, width*layer/2)
 		end
 	end
-	self.station_distance_rad = (irandom(1,math.max(rings_amount-1, 1)) +0.5) * rings_distance / self.radius
+	self.rings_amount = rings_amount
+	self.station_distance_rad = (irandom(1,math.max(rings_amount-2, 1)) +0.5) * rings_distance / self.radius
 	self:labelZone()
 	return self
 end
 
-function TerrainModuleMines:canInsertStation()
-	return self.radius >= 10000	-- at least two rings
+function TerrainModuleAsteroids:canInsertStation()
+	-- between rings, preferably not between the outer two
+	return self.rings_amount >= 2
+end
+
+function TerrainModuleAsteroids:canInsertEnemies()
+	return self.rings_amount ~= 2
+end
+
+function TerrainModuleAsteroids:getEnemySpawnPositions()
+	-- if no station: enemies at the center
+	if not self:canInsertStation() then
+		return {{self.x,self.y}}
+	end
+	-- just inside outermost ring
+	local current = self.rotation
+	local positions = {}
+	local dist = (self.rings_amount-0.5) * self.radius / (self.rings_amount + 1)
+	for i = 1, 50 do
+		current = current + 360/i
+		local x,y = radialPosition(self.x, self.y, dist, current)
+		table.insert(positions, {x,y})
+	end
+	return positions
 end
 
 function TerrainModuleNebulae:create()
 	-- places nebulae in an interesting way
-	self:check()
 	-- since nebulae do not collide, we can place them also in the outermost area.
+	self:check()
+	self.nebulae = {}
 	if self.radius < 5000 then
-		Nebula():setPosition(self.x,self.y)
+		table.insert(self.nebulae, Nebula():setPosition(self.x,self.y))
 		return self
 	end
 	local arc = self.rotation
 	for dist = 5000, self.radius, 3000 do
 		arc = arc + random(120,180)
 		local x,y = radialPosition(self.x, self.y, dist, arc)
-		Nebula():setPosition(x,y)
+		table.insert(self.nebulae, Nebula():setPosition(x,y))
 	end
 	self.station_distance_rad = random(0.25, 0.75)
 	if self.radius > 15000 then
 		self:labelZone()
 	end
 	return self
+end
+
+function TerrainModuleNebulae:canInsertEnemies()
+	return true
+end
+
+function TerrainModuleNebulae:getEnemySpawnPositions()
+	local positions = {}
+	for _, nebula in ipairs(self.nebulae) do
+		local x,y = nebula:getPosition()
+		table.insert(positions, {x,y})
+	end
+	return positions
 end
 
 function TerrainModuleMines:create()
@@ -337,8 +385,24 @@ function TerrainModuleMines:canInsertArtifact()
 	return self.radius < 5000
 end
 
+function TerrainModuleMines:canInsertEnemies()
+	return self.radius/4 >= 3000
+end
+
 function TerrainModuleMines:insertArtifact()
 	wh_artifacts:placeGenericArtifact(self.x,self.y)
+end
+
+function TerrainModuleMines:getEnemySpawnPositions()
+	-- between outer and middle ring
+	local current = self.rotation
+	local positions = {}
+	for i = 1, 50 do
+		current = current + 360/i
+		local x,y = radialPosition(self.x, self.y, self.radius*5/8, current)
+		table.insert(positions, {x,y})
+	end
+	return positions
 end
 
 function TerrainModulePlanets:createPlanet(isMoon)
@@ -425,6 +489,22 @@ function TerrainModulePlanets:insertStation(station)
 		wh_rota:add_object(station, 0.5, self.x, self.y)
 	end
 end
+function TerrainModulePlanets:getEnemySpawnPositions()
+	-- just inside outermost moon
+	local current = self.rotation
+	local positions = {}
+	local dist = self.radius
+	if #self.moons > 0 then
+		local moon_radius = self.radius/(3*(#self.moons+1))
+		dist = self.radius - 2*moon_radius - 1000
+	end
+	for i = 1, 50 do
+		current = current + 360/i
+		local x,y = radialPosition(self.x, self.y, dist, current)
+		table.insert(positions, {x,y})
+	end
+	return positions
+end
 
 function TerrainModuleBlackHoles:create()
 	-- places BlackHoles in a nice manner
@@ -483,6 +563,18 @@ function TerrainModuleBlackHoles:insertArtifact()
 	end
 end
 
+function TerrainModuleBlackHoles:getEnemySpawnPositions()
+	-- on the outside of the radius, since station is at 0.75
+	local current = self.rotation
+	local positions = {}
+	for i = 1, 50 do
+		current = current + 360/i
+		local x,y = radialPosition(self.x, self.y, self.radius, current)
+		table.insert(positions, {x,y})
+	end
+	return positions
+end
+
 function TerrainModuleWormHoles:create()
 	-- places WormHole in a nice manner
 	self:check()
@@ -510,6 +602,23 @@ function TerrainModuleWormHoles:canInsertStation()
 	return self.radius >= 10000
 end
 
+function TerrainModuleWormHoles:getEnemySpawnPositions()
+	-- from outside to near the holes
+	local current = self.rotation
+	local positions = {}
+	local limit = 2*self.radius/3 - 3000
+	for i = 1, 50 do
+		current = current + 360/i
+		local x,y = radialPosition(self.x, self.y, self.radius-i*limit/50, current)
+		table.insert(positions, {x,y})
+	end
+	return positions
+end
+
+function TerrainModuleWormHoles:canInsertEnemies()
+	return 2*self.radius/3 > 3000
+end
+
 function TerrainModuleMetaSpiral:create()
 	-- places terrain in a nice spiral 
 	self:check()
@@ -524,14 +633,14 @@ function TerrainModuleMetaSpiral:create()
 		TerrainModuleAsteroids,
 		TerrainModuleAsteroids,
 		TerrainModuleNebulae,
-		TerrainModuleNebulae,
 		TerrainModuleMines,
 		TerrainModulePlanets,
-		TerrainModuleBlackHoles,
 		TerrainModuleWormHoles,
+		TerrainModuleBlackHoles,
+		TerrainModuleNebulae,
 	}
 	-- start with the last one in the center (hole), shuffle after
-	local module_idx = #modules
+	local module_idx = #modules -2
 	-- set up a spiral
 	for phi = start_angle,end_angle-1,(end_angle-start_angle)/amount do
 		local direction, dist = spiral_position(self.rotation, scale, phi)

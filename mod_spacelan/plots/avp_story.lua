@@ -14,4 +14,9 @@ function avp_story.onStationCreation(terrain_module)
 	if terrain_module:canInsertArtifact() then
 		terrain_module:insertArtifact()
 	end
+
+	if terrain_module:canInsertEnemies() then
+		local positions = terrain_module:getEnemySpawnPositions()
+		avp_enemies:spawn(positions)
+	end
 end

@@ -16,7 +16,7 @@ Strategic use in scenarios
 --------------------------
 Considering the faction description and existing scenarios the following strategies have been developed for the Kraylor fleet.
   * Marauders: Few separate ships invade the territory from different directions. They go from one place to another and attack ships and stations. More advanced ships may use jump drives and drones. When used in small but combat heavy scenarios, the players goal can be to defend their assets and hunt down the marauders. In more story-driven scenarios they often they may occur as nuisance that distracts the players from their primary goal.
-  * Flottilla: A small group of ships lead by one more powerful enemy. The leader may or may not use a jump-drive as long as the other ships are around.
+  * Flotilla: A small group of ships lead by one more powerful enemy. The leader may or may not use a jump-drive as long as the other ships are around.
   * Bases: Kraylor stations are scattered over an area of the map. Small Kraylor fleets will defend most of the stations. The stations may regularly launch marauders to attack stations of the players faction. The players goal usually is to destroy Kraylor stations while defending their own assets.
 
 Ship Properties

@@ -203,7 +203,7 @@ void CpuShip::orderStandGround()
     target_rotation = getRotation();
     orders = AI_StandGround;
     order_target = NULL;
-    order_target_location = glm::vec2(0, 0);
+    order_target_location = getPosition();
     this->addBroadcast(FVF_Friendly, tr("cpulog", "Standing ground for now."));
 }
 

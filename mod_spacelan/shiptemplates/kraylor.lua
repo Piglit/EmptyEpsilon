@@ -232,7 +232,7 @@ template:weaponTubeDisallowMissle(1, "EMP")
 -- The weapons-platform is a stationary platform with beam-weapons. It's extremely slow to turn, but it's beam weapons do a huge amount of damage.
 template = ShipTemplate():setName("Battlestation"):setClass("Kraylor", "Station"):setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful Kraylor rapid devastor beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
-template:setRadarTrace("radartrace_smallstation.png")
+template:setRadarTrace("smallstation.png")
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 --Reputation Score: 87

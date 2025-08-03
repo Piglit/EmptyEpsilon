@@ -645,7 +645,7 @@ function TerrainModuleMetaSpiral:create()
 	-- module classes get shuffled and then distributed to the positions
 	-- some modules appear more than once here, to appear more often
 	local modules = {
-		TerrainModuleAsteroids,
+--FIXME		TerrainModuleAsteroids,
 		TerrainModuleAsteroids,
 		TerrainModuleNebulae,
 		TerrainModuleMines,

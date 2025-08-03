@@ -36,7 +36,7 @@ function avp_story.onStationCreation(terrain_module)
 	if terrain_module:canInsertEnemies() then
 		local positions = terrain_module:getEnemySpawnPositions()
 		local enemies
-	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction)
+	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, 100)
 	end
 
 	if station ~= nil and enemy_faction == "Kraylor" then

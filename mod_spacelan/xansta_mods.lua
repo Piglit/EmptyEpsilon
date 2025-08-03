@@ -73,6 +73,7 @@ function init_constants_xansta()
 			["Deathbringer"]= 47,
 			["Painbringer"]= 50,
 			["Doombringer"]= 65,
+			["Battlestation"]= 55,
 		},
 		["Exuari"]= {
 			["Dagger"]= 5,

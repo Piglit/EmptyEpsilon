@@ -3,10 +3,17 @@ avp_story = {}
 
 function avp_story:init()
 	self.stations_discovered = 0
+	self.terrain_discovered = 0
+	self.time_first_discoverey = 0
 end
 
 function avp_story.onStationCreation(terrain_module)
 	self = avp_story
+	self.terrain_discovered = self.terrain_discovered + 1
+	if self.time_first_discoverey == nil then
+		self.time_first_discoverey = getScenarioTime()
+	end
+
 	local station, enemy_faction
 
 	if terrain_module:canInsertStation() then
@@ -17,9 +24,9 @@ function avp_story.onStationCreation(terrain_module)
 	if station == nil then
 		-- Ktlitans dwell in the center, where it is too inhospitable for stations
 		enemy_faction = "Ktlitans"
-	elseif self.stations_discovered <= 4 then
-		-- the exploration story starts with ghosts
-		enemy_faction = "Ghosts"
+--	elseif self.stations_discovered <= 4 then
+--		-- the exploration story starts with ghosts
+--		enemy_faction = "Ghosts"
 	elseif terrain_module.terrain_type == "nebulae" then
 		-- Exuari populate the nebulae, for surprise attacks
 		enemy_faction = "Exuari"
@@ -33,10 +40,35 @@ function avp_story.onStationCreation(terrain_module)
 		end	
 	end
 
+	local hours_of_game = (getScenarioTime() - self.time_first_discoverey) / 3600
+	local radius_factor = math.sqrt(terrain_module.radius / 5000)
+	local gm_adjustment = 0	--TODO
+	local player_strength = 0
+	for _,ship in ipairs(getActivePlayerShips()) do
+		local hull = ship:getHullMax()
+		if hull >= 500 then
+			-- stations have about 1000 hull, they should count as one ship
+			player_strength = player_strength + hull / 1000
+		elseif hull >= 100 then
+			-- capital ships have between 100 and 250 hull
+			player_strength = player_strength + hull / 100
+		else
+			-- fighters have < 100 hull, they count only half
+			player_strength = player_strength + hull / 200
+		end
+	end
+	-- player_strength: ~2-12
+	-- hours: ~1-5
+	-- discovery_score: ~1-35
+	-- radius_factor: ~1-6
+	-- difficulty: ~ 5-30
+	local difficulty = 10 * (player_strength + hours_of_game + self.terrain_discovered + radius_factor + gm_adjustment)
+	--print(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
+
 	if terrain_module:canInsertEnemies() then
 		local positions = terrain_module:getEnemySpawnPositions()
 		local enemies
-	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, 100)
+	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, difficulty)
 	end
 
 	if station ~= nil and enemy_faction == "Kraylor" then

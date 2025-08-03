@@ -254,6 +254,145 @@ function EnemyModuleKraylor:spawnBase(pos, strength)
 end
 
 
+
+--[[ Ktlitans --]]
+
+EnemyModuleKtlitans = EnemyModule:new{
+	faction="Ktlitans",
+	classes={
+		drones = {
+			"Ktlitan Drone",
+			"Lite Drone",
+			"Heavy Drone",
+			"Gnat",
+		},
+		workers = {
+			"Ktlitan Worker",
+			"Cleaner",
+			"Undertaker",
+			"Nurse",
+			"Builder",
+		},
+		fighters = {
+			"Ktlitan Fighter",
+			"K2 Fighter",
+			"K3 Fighter",
+			"Ktlitan Scout",
+			"Ktlitan Breaker",
+			"K2 Breaker",
+			"Ktlitan Feeder",
+			"Ktlitan Destroyer",
+		},
+		queens = {
+			"Ktlitan Queen",
+			"Diva",	--mobile
+			"Tsarina",
+		}
+	}
+}
+
+function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
+	local hive_strength, expedition_strength = strength/2, strength/3
+	strength = strength - hive_strength - expedition_strength
+	local last_strength, ship
+	local position_index = 1
+	if hive_strength >= 200 then
+		last_strength, ship = self:spawnHive(positions[position_index], hive_strength)
+		hive_strength = hive_strength - last_strength
+--		table.insert(bases, ship)
+		position_index = position_index % #positions + 1
+	end
+	expedition_strength = expedition_strength + hive_strength
+	while expedition_strength >= 20 do
+		local templates = arrayShuffle({table.unpack(self.classes.fighters)})	-- quick and dirty clone of table with unpack and repack
+		table.insert(templates, 1, "Ktlitan Scout")
+		local last_strength, ship = self:spawnFormation(positions[position_index], expedition_strength, templates)
+		expedition_strength = expedition_strength - last_strength
+--		table.insert(flottilla_leaders, ship)
+		position_index = position_index % #positions + 1
+	end
+	strength = strength + expedition_strength
+	while strength > 0 do
+		local template = self:getClassTemplate("drones")
+		ship, last_strength = self:spawnShipAtPosition(template, positions[position_index])
+		ship:orderStandGround()
+		strength = strength - last_strength
+--		table.insert(marauders, ship)
+		position_index = position_index % #positions + 1
+	end
+--	return {
+--		marauders = marauders,
+--		flottilla_leaders = flottilla_leaders,
+--		bases = bases,
+--	}
+end
+
+function EnemyModuleKtlitans:spawnHive(pos, strength)
+	--[[ Creates a queen surrounded by workers.
+		 The queen can spawn as many drones as there are workers in case of an attack
+		 The quenn does also spawn drones over time
+	--]]
+	local queen, total_used_strength = self:spawnShipAtPosition(self:getClassTemplate("queens"), pos)
+	queen:orderDefendLocation(pos[1],pos[2])
+
+	while total_used_strength < strength do
+		local templates = arrayShuffle(self.classes.workers)
+		local used_strength, leader = self:spawnFormation(pos, strength-total_used_strength, templates)
+		leader:orderDefendTarget(queen)
+
+		local template = self:getClassTemplate("drones")
+		script_hangar.append(queen, template, 1)	-- add one random drone to emergency hangar
+		total_used_strength = total_used_strength + used_strength + ship_template_strength[template]
+	end
+
+	template = self:getClassTemplate("drones")
+	script_hangar.create(queen, template, 100)	-- produce over time in separate hangar
+	script_hangar.config(queen, "cooldownMax", 600)	-- 10 Minutes
+	script_hangar.config(queen, "triggerRange", 1000000) -- everywhere
+	return total_used_strength, queen
+end
+
+--[[ Exuari --]]
+
+EnemyModuleExuari = EnemyModule:new{
+	faction="Exuari",
+	classes={
+		fighters = arrayShuffle({
+			"Dagger",
+			"Blade",
+			"Gunner",
+			"Shooter",
+			"Jagger",
+		}),
+		strikers = arrayShuffle({
+			"Racer",
+			"Hunter",
+			"Strike",
+			"Dash",
+		}),
+		frigates = arrayShuffle({
+			"Guard",
+			"Sentinel",
+			"Warden",
+		}),
+		artillery = arrayShuffle({
+			"Flash",
+			"Ranger",
+			"Buster",
+		}),
+		carriers = arrayShuffle({
+			"Ryder",
+			"Zeppelin",
+			"Craver",
+			"Ridge",
+		}),
+	}
+}
+
+function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
+	-- TODO
+end
+
 --[[ Ghosts --]]
 
 EnemyModuleGhosts = EnemyModule:new{
@@ -276,7 +415,7 @@ EnemyModuleGhosts = EnemyModule:new{
 
 function EnemyModuleGhosts:spawnEnemiesAtPositions(positions, strength)
 	--[[TODO better strategy?
-		send a captial ship and two fighters
+		always send a captial ship and two fighters
 	--]]
 	local position_index = 0
 	while strength >= 0 do
@@ -286,6 +425,60 @@ function EnemyModuleGhosts:spawnEnemiesAtPositions(positions, strength)
 			self:getClassTemplate("fighters"),
 			self:getClassTemplate("fighters"),
 		}
+		local used_strength, leader = self:spawnFormation(positions[position_index], strength, templates)
+		strength = strength - used_strength
+	end
+end
+
+
+--[[ Criminals --]]
+
+EnemyModuleCriminals = EnemyModule:new{
+	faction="Criminals",
+	classes={
+		fighters = arrayShuffle({
+			"Red Hornet",
+			"Red Lindworm",
+			"Red Adder MK5",
+			"Red Adder MK4",
+		}),
+		capitals = arrayShuffle({
+			"Phobos Firehawk",
+			"Piranha F12.M",
+			"Nirvana Thunder Child",
+			"Lightning Storm",
+		}),
+	}
+}
+
+function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
+	--[[TODO better strategy?
+		send a captial ship and two fighters
+	--]]
+	local position_index = 0
+	while strength >= 0 do
+		local templates
+		local composition = irandom(1,3)
+		position_index = position_index % #positions + 1
+		if composition == 1 then
+			templates = {
+				self:getClassTemplate("capitals"),
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+			}
+		elseif composition == 2 then
+			templates = {
+				self:getClassTemplate("capitals"),
+				self:getClassTemplate("capitals"),
+			}
+		else
+			templates = {
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+			}
+		end
 		local used_strength, leader = self:spawnFormation(positions[position_index], strength, templates)
 		strength = strength - used_strength
 	end

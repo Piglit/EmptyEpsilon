@@ -13,7 +13,7 @@ function table.dump(...)
 	print(serpent.block(...))
 end
 
-TEST = false
+TEST = true
 
 function init()
 	difficulty = 1	-- global var from xanstas stuff

@@ -265,7 +265,7 @@ TerrainModule.zone_names = arrayShuffle({
 	"Friedhof der Offiziere",
 	"Endhaltestelle",
 	"Ihrer Majestät Missfallen",
-	"Padmes Verwüstung",
+	"Padmes Lebensfreude",
 	"Sicherer Raum",
 })
 

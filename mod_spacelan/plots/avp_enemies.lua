@@ -22,6 +22,10 @@ function avp_enemies:init()
 	self.faction_index = #self.factions +1
 end
 
+function avp_enemies:update(dt)
+	EnemyModuleKtlitans:updateDrones(dt)
+end
+
 function avp_enemies:spawn(positions, faction, strength)
 	if faction == nil then
 		if self.faction_index > #self.factions then
@@ -103,8 +107,12 @@ function EnemyModule:spawnFormation(pos, strength, templates)
 	local x,y = pos[1], pos[2]
 	local formationLeader, formationSecond
 	local total_used_strength = 0
+	local first_leader
 	for index, template in ipairs(templates) do
 		local ship, used_strength = self:spawnShipAtPosition(template, {x,y})
+		if first_leader == nil then
+			first_leader = ship
+		end
 		ship:setRotation(rotation)
 		formationLeader, formationSecond = script_formation.buildFormationIncremental(ship, index, formationLeader, formationSecond)
 		total_used_strength = total_used_strength + used_strength
@@ -116,7 +124,7 @@ function EnemyModule:spawnFormation(pos, strength, templates)
 		rotation = rotation - 360/#templates
 		x,y = radialPosition(pos[1], pos[2], 400, rotation)
 	end
-	return total_used_strength, formationLeader
+	return total_used_strength, first_leader 
 end
 
 --[[ Kraylor --]]
@@ -288,7 +296,8 @@ EnemyModuleKtlitans = EnemyModule:new{
 			"Diva",	--mobile
 			"Tsarina",
 		}
-	}
+	},
+	swarm_ships = {},
 }
 
 function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
@@ -317,7 +326,7 @@ function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
 		ship, last_strength = self:spawnShipAtPosition(template, positions[position_index])
 		ship:orderStandGround()
 		strength = strength - last_strength
---		table.insert(marauders, ship)
+		table.insert(self.swarm_ships, ship)
 		position_index = position_index % #positions + 1
 	end
 --	return {
@@ -350,6 +359,27 @@ function EnemyModuleKtlitans:spawnHive(pos, strength)
 	script_hangar.config(queen, "cooldownMax", 600)	-- 10 Minutes
 	script_hangar.config(queen, "triggerRange", 1000000) -- everywhere
 	return total_used_strength, queen
+end
+
+function EnemyModuleKtlitans:updateDrones(dt)
+	if self.swarm_ships ~= nil then
+		for i,ship in ipairs(self.swarm_ships) do
+			if ship ~= nil and ship:isValid() then
+				if ship:areEnemiesInRange(3000) then
+					if ship.fight == false then
+						ship:orderRoaming()	-- calling this every tick results in strange behaviour.
+						-- after taking damage they fall back to fighterAI
+					end
+				else
+					ship.fight = false
+				end
+			else
+				self.swarm_ships[i] = self.swarm_ships[#self.swarm_ships]
+				self.swarm_ships[#self.swarm_ships] = nil
+				break
+			end
+		end
+	end
 end
 
 --[[ Exuari --]]
@@ -460,6 +490,7 @@ function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
 --	}
 end
 
+
 --[[ Ghosts --]]
 
 EnemyModuleGhosts = EnemyModule:new{
@@ -548,4 +579,5 @@ function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
 		strength = strength - used_strength
 	end
 end
+
 

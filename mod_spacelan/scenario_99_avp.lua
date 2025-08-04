@@ -13,7 +13,7 @@ function table.dump(...)
 	print(serpent.block(...))
 end
 
-TEST = true
+TEST = false
 
 function init()
 	difficulty = 1	-- global var from xanstas stuff
@@ -25,6 +25,7 @@ function init()
 		"wh_artifacts",
 		"wh_rota",
 		"gravity_util",
+		"avp_mining",
 		"avp_terrain_modules",
 		"avp_stations",
 		"avp_enemies",

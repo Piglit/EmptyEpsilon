@@ -105,7 +105,9 @@ function avp_stations:createInTerrain(terrain_module)
 
 	-- place station
 	terrain_module:insertStation(station)
-
+	if terrain_module.terrain_type == "asteroids" then
+		avp_mining:activateMining(station, 2*terrain_module.radius)
+	end
 	-- do not use most of the comms data from the utility,
 	-- keep description, general, history as they are descriptive
 

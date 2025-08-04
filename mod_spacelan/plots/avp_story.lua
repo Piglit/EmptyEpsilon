@@ -21,15 +21,15 @@ function avp_story.onStationCreation(terrain_module)
 
 		station = avp_stations:createInTerrain(terrain_module)
 	end
-	if station == nil then
-		-- Ktlitans dwell in the center, where it is too inhospitable for stations
-		enemy_faction = "Ktlitans"
---	elseif self.stations_discovered <= 4 then
---		-- the exploration story starts with ghosts
---		enemy_faction = "Ghosts"
-	elseif terrain_module.terrain_type == "nebulae" then
-		-- Exuari populate the nebulae, for surprise attacks
-		enemy_faction = "Exuari"
+	if station == nil or terrain_module.terrain_type == "nebulae" then
+		-- Ktlitans and Exuari:
+		-- they dwell in the center, where it is too inhospitable for stations
+		-- and populate the nebulae, for surprise attacks
+		if irandom(1,2) == 1 then
+			enemy_faction = "Ktlitans"
+		else
+			enemy_faction = "Exuari"
+		end
 	end
 
 	if terrain_module:canInsertArtifact() then
@@ -40,6 +40,26 @@ function avp_story.onStationCreation(terrain_module)
 		end	
 	end
 
+	if terrain_module:canInsertEnemies() then
+		local positions = terrain_module:getEnemySpawnPositions()
+		local enemies
+	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, self:enemyStrength(terrain_module))
+	end
+
+	if station ~= nil and enemy_faction == "Kraylor" then
+		-- Kraylor already own their stations
+		station:setFaction("Kraylor")
+	end
+	if station ~= nil and enemy_faction == "Exuari" and terrain_module.terrain_type ~= "nebulae" then
+		-- Exuari are attacking the station, so make it Arlenian, so Exuari can attack it
+		-- But Exuati try to hide in nebulae, so do not switch station faction then.
+		station:setFaction("Arlenians")
+	end
+
+
+end
+
+function avp_story:enemyStrength(terrain_module)
 	local hours_of_game = (getScenarioTime() - self.time_first_discoverey) / 3600
 	local radius_factor = math.sqrt(terrain_module.radius / 5000)
 	local gm_adjustment = 0	--TODO
@@ -64,22 +84,5 @@ function avp_story.onStationCreation(terrain_module)
 	-- difficulty: ~ 5-30
 	local difficulty = 10 * (player_strength + hours_of_game + self.terrain_discovered + radius_factor + gm_adjustment)
 	--print(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
-
-	if terrain_module:canInsertEnemies() then
-		local positions = terrain_module:getEnemySpawnPositions()
-		local enemies
-	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, difficulty)
-	end
-
-	if station ~= nil and enemy_faction == "Kraylor" then
-		-- Kraylor already own their stations
-		station:setFaction("Kraylor")
-	end
-	if station ~= nil and enemy_faction == "Exuari" and terrain_module.terrain_type ~= "nebulae" then
-		-- Exuari are attacking the station, so make it Arlenian, so Exuari can attack it
-		-- But Exuati try to hide in nebulae, so do not switch station faction then.
-		station:setFaction("Arlenians")
-	end
-
-
+	return difficulty
 end

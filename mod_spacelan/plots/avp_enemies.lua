@@ -390,7 +390,74 @@ EnemyModuleExuari = EnemyModule:new{
 }
 
 function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
-	-- TODO
+	--[[
+		* single carrier, that launches fighters and strikers, surrounded by frigates
+		* death teams: artillery, with fighter sqads
+	--]]
+	local carrier_strength, death_team_strength, striker_strength = strength/2, strength/4, strength/4
+	local last_strength, template, carrier, ship
+	local position_index = 1
+	if carrier_strength >= 500 then
+		template = "Ridge"
+	elseif carrier_strength >= 300 then
+		template = "Craver"
+	elseif carrier_strength >= 200 then
+		template = "Zeppelin"
+	elseif carrier_strength >= 100 then
+		template = "Ryder"
+	elseif carrier_strength >= 50 then
+		template = self:getClassTemplate("frigates")
+	else
+		template = nil
+	end
+	if template then
+		local rotation = random(1,360)
+		carrier, last_strength = self:spawnShipAtPosition(template, positions[position_index])
+		carrier_strength = carrier_strength - last_strength
+		carrier:orderStandGround()
+		while carrier_strength > 20 do
+			rotation = rotation + 47
+			local x,y = radialPosition(positions[position_index][1], positions[position_index][2], 3000, rotation)
+			template = self:getClassTemplate("frigates")
+			ship, last_strength = self:spawnShipAtPosition(template, {x,y})
+			carrier_strength = carrier_strength - last_strength
+			ship:setRotation(rotation)
+			ship:orderDefendTarget(carrier)
+			if carrier_strength > 0 then
+				template = self:getClassTemplate("fighters")
+				script_hangar.append(carrier, template, 1)
+				carrier_strength = carrier_strength - ship_template_strength[template]
+			end
+		end
+		template = self:getClassTemplate("strikers")
+		carrier_strength = carrier_strength - ship_template_strength[template]
+		script_hangar.create(carrier, template, 1)	-- strikers in separate hangar
+		script_hangar.config(carrier, "cooldownMax", 60)	-- 1 Minute
+		script_hangar.config(carrier, "triggerRange", 50000) -- huge radius
+	end
+	while carrier ~= nil and striker_strength > 0 do
+		template = self:getClassTemplate("strikers")
+		script_hangar.append(carrier, template, 1)
+		striker_strength = striker_strength - ship_template_strength[template]
+	end
+	death_team_strength = death_team_strength + carrier_strength + striker_strength
+	while death_team_strength >= 0 do
+		position_index = position_index % #positions + 1
+		local templates = {
+			self:getClassTemplate("artillery"),
+			self:getClassTemplate("fighters"),
+			self:getClassTemplate("fighters"),
+			self:getClassTemplate("fighters"),
+		}
+		last_strength, ship = self:spawnFormation(positions[position_index], death_team_strength, templates)
+		death_team_strength = death_team_strength - last_strength
+--		table.insert(flottilla_leaders, ship)
+	end
+--	return {
+--		marauders = marauders,
+--		flottilla_leaders = flottilla_leaders,
+--		bases = bases,
+--	}
 end
 
 --[[ Ghosts --]]
@@ -452,9 +519,7 @@ EnemyModuleCriminals = EnemyModule:new{
 }
 
 function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
-	--[[TODO better strategy?
-		send a captial ship and two fighters
-	--]]
+	--[[ Small groups of ships, combinations of captial ships and fighters	--]]
 	local position_index = 0
 	while strength >= 0 do
 		local templates

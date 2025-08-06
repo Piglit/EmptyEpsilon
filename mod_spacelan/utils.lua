@@ -523,3 +523,12 @@ function arrayShuffle(array)
 	end
 	return array
 end
+
+function arraySelectRandom(array)
+    local array_item_count = #array
+    if array_item_count == 0 then
+        return nil
+    end
+    return array[irandom(1,#array)]    
+end
+

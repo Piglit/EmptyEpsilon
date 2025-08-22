@@ -104,11 +104,12 @@ def scenario_event(scenario: models.scenario.Scenario, crew: models.crew.Crew, e
 		artifact = json.loads(details)
 		if not crew.hasArtifact(details):
 			# append to current briefing. This gets overwritten by other setBriefing calls.
+
+#				(json.dumps(fleetcommand_name) if fleetcommand_name else "\b") + """ abgegeben werden, um das Flottenkommando mit strategischen Informationen und Upgrades zu versorgen.
 			crew.setBriefing(crew.getBriefingRaw() + f"""
 Ihr habt in dieser Mission das Artefakt '{artifact['name']}' eingesammelt. 
-Gesammelte Artefakte können in einer späteren Mission auf der Raumstation des Flottenkommandos """ +
-				(json.dumps(fleetcommand_name) if fleetcommand_name else "\b") + """ abgegeben werden, um das Flottenkommando mit strategischen Informationen und Upgrades zu versorgen.
-Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal beim Flottenkommando abgegeben werden.
+Gesammelte Artefakte können in einer späteren Mission an Raumstationen eingesetzt werden, um diese Stationen mit Upgrades zu versorgen.
+Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
 """)
 		crew.addArtifact(artifact["name"], artifact["description"])
 

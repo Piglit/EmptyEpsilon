@@ -43,8 +43,6 @@ def start():
 # Hier: Crews Missionen zuweisen
 # Continue
 
-# TODO spellcheck
-
 def helpTasks():
 	d.msgbox("""Übersicht über die Abläufe und Aufgaben des Flottenkommandos:
 
@@ -64,10 +62,10 @@ def helpTasks():
 		* Eine Mission finden, welche die Crew noch nicht kennt.
 		* Briefing an die Vertreter der Crew austeilen.
 		* Die Mission über dieses Interface für die Crew freischalten.
-5. Crews sind bereit für die Wurmloch-Expedition:
+5. Crews sind bereit für die große Mission:
 	* Repräsentanten der Crew zur nächsten Besprechung des Flottenkommandos einladen.
-	* Schiffe der Crew über dieses Interface auf die Wurmloch-Expedition schicken.
-	* Regelmäßige Besprechung mit allen Repräsentanten aller Crews, die auf der Wurmloch-Expedition sind.
+	* Schiffe der Crew über dieses Interface auf die Mission schicken.
+	* Regelmäßige Besprechung mit allen Repräsentanten aller Crews, die auf der Mission sind.
 """)
 
 def helpMissions():

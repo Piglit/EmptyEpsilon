@@ -27,6 +27,8 @@ class Crew:
 		self.crew_name = crew_name if crew_name else "" 
 		self.status = "unknown"
 		self.scenarios = []
+		self.proxies = {}
+		self.proxy_open = False
 		self.setScenarios(template["scenarios"].copy())
 		self.scenario_settings = {}
 		self.ships = template["ships"].copy()
@@ -34,6 +36,7 @@ class Crew:
 		self.scores = {}
 		self.artifacts = {}
 		self.code = ""
+		self.profile = "default"
 
 	def setCrewName(self, name):
 		self.crew_name = name
@@ -48,6 +51,18 @@ class Crew:
 
 	def getScenarios(self) -> list[str]:
 		return self.scenarios
+
+	def getProxies(self) -> dict[str,str]:
+		for instance_name, crew in crews.items():
+			if not crew.proxy_open and instance_name in self.proxies:
+				del self.proxies[instance_name]
+		return self.proxies
+
+	def isScenarioUnlocked(self, s):
+		if isinstance(s, str):
+			s = models.scenario.getScenario(s)
+		assert isinstance(s, Scenario)
+		return s.filename in self.scenarios
 
 	def setScenarios(self, scenarios):
 		assert isinstance(scenarios, list)
@@ -102,6 +117,24 @@ class Crew:
 	def getScenarioSettings(self, scenario_name):
 		return self.scenario_settings.get(scenario_name)
 
+	def addProxy(self, proxy_instance_name, proxy_display_name):
+		self.proxies[proxy_instance_name] = proxy_display_name
+		self.storeCrew()
+
+	def removeProxy(self, proxy_instance_name):
+		if proxy_instance_name in self.proxies:
+			del self.proxies[proxy_instance_name]
+		self.storeCrew()
+
+	def setProxies(self, proxies):
+		assert isinstance(proxies, dict)
+		self.proxies = proxies
+		self.storeCrew()
+
+	def setProxyOpen(self, value:bool):
+		self.proxy_open = value
+		self.storeCrew()
+
 	def getShips(self):
 		return self.ships
 
@@ -149,18 +182,25 @@ class Crew:
 		assert isinstance(s, Scenario)
 		return self.getScoreRaw(s.filename)
 
-	def getRecentScore(self):
-		current = self.scores.get("current")
+	def getRecentScore(self, scenario_name="current"):
+		current = self.scores.get(scenario_name)
 		if not current:
 			return dict()
 		ret = {
 			"current_scenario_name": "",
 			"artifacts": json.dumps(self.artifacts),
 		}
-		scenario = current["scenario"]
+		if scenario_name == "current":
+			scenario = current["scenario"]
+			ret["current_scenario_name"] = current["scenario_name"]
+		else:
+			s = models.scenario.getScenario(scenario_name)
+			scenario = s.filename
+			ret["current_scenario_name"] = s.name
+
 		ss = self.scores[scenario]
 		hi = Crew.getFleetHighscore(scenario)
-		ret["current_scenario_name"] = current["scenario_name"]
+
 		if "time" in current:
 			ret["current_time"] = str(timedelta(seconds=-current["time"]))
 			ret["best_time"] = str(timedelta(seconds=-ss["time"]))
@@ -268,7 +308,7 @@ class Crew:
 			_OBJECT_:setResourceCategory("{name}", "Campaign Artifacts")"""
 		script = f"""
 			local id=getPlayerShipIndex("{self.crew_name}")-- this is a security issue
-	        _OBJECT_=getPlayerShip(id)
+			_OBJECT_=getPlayerShip(id)
 			_OBJECT_:addToShipLog("You carry {amount} artifact{"s" if amount > 1 else ""} from previous missions to deliver to the fleet command station.", "green")"""
 		script += script_artifacts
 		luaExecutor.exec(script, _server+":8080", 0, Crew._artifactCallback, [self])
@@ -289,7 +329,7 @@ class Crew:
 			return
 		script = f"""
 			local id=getPlayerShipIndex("{self.crew_name}")-- this is a security issue
-	        _OBJECT_=getPlayerShip(id)
+			_OBJECT_=getPlayerShip(id)
 			_OBJECT_:addReputationPoints({amount})
 			_OBJECT_:addToShipLog("Reputation: +{amount} from previous missions", "green")
 		"""
@@ -303,6 +343,12 @@ class Crew:
 			self.scores["delivered"]["reputation"] -= amount
 			log.info(f"{self.crew_name} {amount} reputation has been delivered.")
 
+
+	def setProfile(self, profile: str):
+		self.profile = profile
+
+	def getProfile(self) -> str:
+		return self.profile
 
 	def storeCrew(self):
 		storage.storeInfo(self, self.instance_name, subdir="crews")
@@ -344,6 +390,7 @@ def getOrCreateCrew(instance_name, crew_name):
 def removeCrew(instance_name):
 	if instance_name in crews:
 		del crews[instance_name]
+	storage.delete(instance_name, subdir="crews")
 
 def loadCrew(instance_name):
 	loaded = storage.loadInfo(instance_name, subdir="crews")
@@ -352,5 +399,12 @@ def loadCrew(instance_name):
 		return True
 	else:
 		return False
+
+def getCrewsWithOpenProxies():
+	proxies = {}
+	for instance_name, crew in crews.items():
+		if crew.proxy_open:
+			proxies[instance_name] = crew.crew_name
+	return proxies
 
 core.subscribe("activity", setCrewStatus)

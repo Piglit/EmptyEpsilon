@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from pathlib import Path
 
-PATH = Path(__file__).parent.parent.parent / "scripts-piglit"
+PATH = Path(__file__).parent.parent.parent / "mod_spacelan"
 
 class ScenarioSetting:
 	def __init__(self, key: str, description: str):
@@ -24,6 +24,7 @@ class Scenario:
 		self.categories = []
 		self.settings = []
 		self.load_file()
+		self.reputation_factor = 1.0
 		assert self.name
 	
 	def getInfo(self):
@@ -89,6 +90,12 @@ class Scenario:
 				return True
 		return False
 
+	def getReputationFactor(self):
+		return self.reputation_factor
+
+	def setReputationFactor(self, factor):
+		self.reputation_factor = factor
+
 	def __str__(self):
 		return self.name
 
@@ -114,4 +121,5 @@ def getScenario(name):
 	return scenarios[name]
 
 def clearScenarios():
+	global scenarios
 	scenarios = {}

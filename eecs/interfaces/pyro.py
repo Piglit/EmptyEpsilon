@@ -13,6 +13,9 @@ class Crews:
 	def getCrewByName(self, callsign):
 		return crew.getCrewByCallsign(callsign).__dict__
 
+	def getCrewsWithOpenProxies(self):
+		return crew.getCrewsWithOpenProxies()
+
 	def list(self):
 		ret = {}
 		for instance, obj in crew.crews.items():
@@ -42,6 +45,12 @@ class Crews:
 		crew.crews[instance].addArtifact(text, "")
 	def rmArtifact(self, instance, text):
 		crew.crews[instance].rmArtifact(text)
+	def setProfile(self, instance, profile):
+		crew.crews[instance].setProfile(profile)
+	def setProxies(self, instance, proxies):
+		crew.crews[instance].setProxies(proxies)
+	def setProxyOpen(self, instance, value):
+		crew.crews[instance].setProxyOpen(bool(value))
 
 @Pyro4.expose
 class Scenarios:

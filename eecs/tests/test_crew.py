@@ -64,26 +64,29 @@ def test_score():
 		"artifacts":True,
 		"progress":100,
 		"time":9.478441022336483
-	}	
+	}
 	scenario = "scenario_20_training1.lua"
 	expected = {
-		"current_scenario_name":	"Training: Cruiser",
+		"current_scenario_name":	"Basic Training Course",
 		"current_time":				"0:00:09",
 		"best_time":				"0:00:09",
 		"fleet_time":				"0:00:09",	
-		"fleet_time_name":			crewName,
+		"fleet_time_name":			f" ({crewName})",
 		"current_progress":			"100%",
 		"best_progress":			"100%",
 		"fleet_progress":			"100%",
-		"fleet_progress_name":		crewName,
+		"fleet_progress_name":		f" ({crewName})",
 		"current_artifacts":		"1",
 		"best_artifacts":			"1",
 		"fleet_artifacts":			"1",
-		"fleet_artifacts_name":		crewName,
+		"fleet_artifacts_name":		f" ({crewName})",
+		"artifacts":				"{}",
 	}
 	crew = getOrCreateCrew(serverName, crewName)
 	crew.updateScore(scenario, score)
 	result = crew.getRecentScore()
+	assert result == expected
+	result = crew.getRecentScore("scenario_20_training1.lua")
 	assert result == expected
 	
 
@@ -161,4 +164,11 @@ def _test_setStatus():
 	assert "Hurz!" not in entries
 	print(entries)
 
+def test_proxy():
+	assert not getCrewsWithOpenProxies()
+	s = getOrCreateCrew(serverName, crewName)
+	s.setProxyOpen(True)
+	assert getCrewsWithOpenProxies()[serverName] == crewName
+	s.setProxies({serverName: crewName})
+	assert s.getProxies()[serverName] == crewName
 

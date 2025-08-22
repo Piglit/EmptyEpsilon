@@ -42,6 +42,10 @@ class EEServer(BaseModel):
 	instance_name: str
 	crew_name: str
 
+class EEProxy(BaseModel):
+	host_name: str
+	crew_name: str
+
 class EEScenario(BaseModel):
 	filename: str
 	name: str
@@ -56,6 +60,11 @@ class EEScenario(BaseModel):
 async def scenario_event(event: ScenarioEvents, scenario: EEScenario, server: EEServer):
 	c = models.crew.getOrCreateCrew(server.instance_name, server.crew_name)
 	activity(c, event.fleet_info() + " " + str(scenario), event=event, scenario=scenario.getScenario())
+
+@app.post("/joinedproxy")
+async def proxy_event(proxy: EEProxy, server: EEServer):
+	c = models.crew.getOrCreateCrew(server.instance_name, server.crew_name)
+	activity(c, f"joined {proxy.crew_name}")
 
 @app.post("/screen")
 async def screen(server: EEServer, screen: str = Body(...)):
@@ -90,6 +99,7 @@ async def scriptMessage(scenario: EEScenario, server: EEServer, data: ScriptMess
 class CampaignResponse(BaseModel):
 	briefing: str
 	scenarios: list[str]
+	proxies: dict[str, str]
 	score: dict[str, str]
 #	ships: list[str]
 
@@ -100,11 +110,10 @@ async def getCampaign(server_name, crew_name):
 	if not c:
 		raise HTTPException(status_code=404, detail=f"Crew {server_name} not found.")
 
-	scenarios = c.getScenarios()
-
 	return {
 		"briefing": c.getBriefing(),
-		"scenarios": scenarios,
+		"scenarios": c.getScenarios(),
+		"proxies": c.getProxies(),
 #		"ships": c.getShips(),	# don't know if needed...
 		"score": c.getRecentScore(),
 	}
@@ -164,4 +173,11 @@ async def getSpawnPosition(server_name, scenario_name):
 	else:
 		spawn_info = {"posx": randint(-100, 100), "posy": randint(-100, 100), "dir": randint(0,359)}
 	return spawn_info 
+
+@app.get("/score/{server_name}/{scenario_name}")
+async def getScore(server_name, scenario_name):
+	c = models.crew.getCrew(server_name)
+	if not c:
+		raise HTTPException(status_code=404, detail=f"Crew {server_name} not found.")
+	return c.getRecentScore(scenario_name)
 

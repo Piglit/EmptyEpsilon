@@ -282,6 +282,8 @@ set(MAIN_SOURCES
     src/screens/gm/globalMessageEntryView.cpp
     src/screens/gm/chatDialog.cpp
     src/screens/gm/tweak.cpp
+    src/screens/missionControlScreen.cpp
+    src/screens/missionScoreScreen.cpp
     src/screenComponents/aimLock.cpp
     src/screenComponents/alertLevelButton.cpp
     src/screenComponents/alertOverlay.cpp
@@ -501,6 +503,8 @@ set(MAIN_SOURCES
     src/screens/spectatorScreen.h
     src/screens/topDownScreen.h
     src/screens/windowScreen.h
+    src/screens/missionControlScreen.h
+    src/screens/missionScoreScreen.h
     src/script.h
     src/shaderRegistry.h
     src/shipTemplate.h

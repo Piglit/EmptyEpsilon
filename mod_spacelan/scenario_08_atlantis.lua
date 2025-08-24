@@ -7,6 +7,9 @@
 ---
 --- You must check out ship systems and complete an initial mission.
 -- Type: Mission
+-- Setting[Chapter]: Configures on which chapter of the story you start.
+-- Chapter[Beginning|Default]: Start at the beginning of the story.
+-- Chapter[Wormhole]: Start the moment you entered the wormhole. If the game crashed upon entering the wormhole, you can resume the game here.
 
 --- Scenario
 -- @script scenario_08_atlantis
@@ -302,11 +305,15 @@ Doppler instability: %i]]),
         player:setSystemPower(system, 1.0)
         player:commandSetSystemPowerRequest(system, 1.0)
     end
+	--]]
 
-    -- TEMP
-    mission_state = phase2WaitTillWormholeWarpedPlayer
-    player:setPosition(30036, -270545)
+	if getScenarioSetting("Chapter") == "Wormhole" then
+		mission_state = phase2WaitTillWormholeWarpedPlayer
+		progress = 8
+		player:setPosition(30036, -270545)
+	end
 
+	--[[
     -- TEMP
     mission_state = phase3ReportBackToShipyard
     player:setPosition(24000, 125000)
@@ -474,7 +481,7 @@ We are reading a huge gravity surge from your direction. Get the hell out of the
     x, y = b20_artifact:getPosition()
     b20_artifact:explode()
     b20_artifact.nebula:destroy() -- Remove the nebula, else it will get sucked into the wormhole. Now it just looks like the wormhole replaces the nebula.
-    WormHole():setPosition(x, y):setTargetPosition(30036, -270545) -- Wormhole to sector ZR6
+    WormHole():setPosition(x+1, y-1):setTargetPosition(30036, -270545) -- Wormhole to sector ZR6
 
     -- The explosion damages all systems, but makes sure the impulse, warp, and jump drives are non-functional. This prevents the player from escaping the grasp of the wormhole.
     -- Make sure we are around 2U of the wormhole before this function is called.

@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from pathlib import Path
 
-PATH = Path(__file__).parent.parent.parent / "scripts-piglit"
+PATH = Path(__file__).parent.parent.parent / "mod_spacelan"
 
 class ScenarioSetting:
 	def __init__(self, key: str, description: str):

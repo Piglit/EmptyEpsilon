@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level="DEBUG", fmt="%(asctime)s\t%(levelname)s:\t%(message)s", datefmt="%H:%M:%S")
 logging.getLogger("asyncio").setLevel(logging.WARNING)
 
-#log.setLevel("INFO")
+log.setLevel("INFO")
 #log.addHandler(h)
 #import uvicorn
 #logging.getLogger("uvicorn.access").handlers = []

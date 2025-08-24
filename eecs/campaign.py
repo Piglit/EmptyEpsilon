@@ -25,7 +25,7 @@ models.scenario.loadScenarios([
 	"scenario_07_gftp.lua",			# if not artifact: unlock ghost wave
 	"scenario_08_atlantis.lua",
 
-	"scenario_99_wormhole_expedition.lua",
+#	"scenario_99_wormhole_expedition.lua",
 ])
 
 # best progress [0,100] of a played scenario times this factor results in the multiplayer rep bonus.

@@ -78,6 +78,7 @@ private:
     void displayDetails(string caption, std::vector<std::pair<string, string> > details);
     GuiElement* right;
     GuiElement* layout;
+    GuiElement* score_layout;
     GuiListbox* first_list;
     GuiListbox* scenario_list;
     GuiButton* start_button;

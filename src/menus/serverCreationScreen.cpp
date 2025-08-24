@@ -319,43 +319,6 @@ ServerCampaignScreen::ServerCampaignScreen()
             (new GuiLabel(layout, "GENERAL_LABEL", tr("Instructions"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
             (new GuiScrollText(layout, "SCENARIO_DESCRIPTION", briefing_text))->setTextSize(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
         }
-        else if (value == "Score")
-        {
-            (new GuiLabel(layout, "SCORE_HEADING", tr("Score of ") + score["current_scenario_name"], 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
-			if (score.find("current_progress") != score.end())
-			{
-				auto line = new GuiElement(layout, "");
-				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-	            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.6, tr("Progress:"), score["current_progress"]))->setSize(150, 50);
-	            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS_BEST", 0.5, tr("Best:"), score["best_progress"]))->setSize(125, 50);
-            	(new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.3, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]))->setSize(325, 50);
-
-			}
-			if (score.find("current_time") != score.end())
-			{
-				auto line = new GuiElement(layout, "");
-				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            	(new GuiKeyValueDisplay(line, "SCORE_TIME", 0.6, tr("Time:"), score["current_time"]))->setSize(150, 50);
-            	(new GuiKeyValueDisplay(line, "SCORE_TIME_BEST", 0.5, tr("Best:"), score["best_time"]))->setSize(125, 50);
-            	(new GuiKeyValueDisplay(line, "SCORE_TIME_FLEET", 0.3, tr("Fleet best:"), score["fleet_time"] + score["fleet_time_name"]))->setSize(325, 50);
-			}
-			if (score.find("current_artifacts") != score.end())
-			{
-				auto line = new GuiElement(layout, "");
-				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS", 0.6, tr("Artifacts:"), score["current_artifacts"]))->setSize(150, 50);
-	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_BEST", 0.5, tr("Best:"), score["best_artifacts"]))->setSize(125, 50);
-	            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_FLEET", 0.3, tr("Fleet best:"), score["fleet_artifacts"] + score["fleet_artifacts_name"]))->setSize(325, 50);
-			}
-			if (score.find("reputation") != score.end())
-			{
-				auto line = new GuiElement(layout, "");
-				line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-	            (new GuiKeyValueDisplay(line, "SCORE_REPUTATION", 0.7, tr("Reputation Bonus:"), score["reputation"]))->setSize(200, 50);
-//	            (new GuiLabel(line, "SCORE_REP_HINT", tr("You will start future missions with this bonus. The reputation bonus depends on your highest progress."), 30))->setSize(300, 50); //TODO difficulty
-			}
-
-        }
         else if (value == "Network")
         {
             auto name = game_server->getServerName();
@@ -394,7 +357,7 @@ ServerCampaignScreen::ServerCampaignScreen()
             //({{"Nope", "Not implemented yet"}});
         }
     });
-    first_list->setSize(GuiElement::GuiSizeMax, 200);
+    first_list->setSize(GuiElement::GuiSizeMax, 160);
 
     // scenarios
     (new GuiLabel(middle, "GENERAL_LABEL", tr("Scenario"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
@@ -402,7 +365,7 @@ ServerCampaignScreen::ServerCampaignScreen()
     {
 
         ScenarioInfo info(value);
-
+        score = campaign_client->getScenarioScore(value);
         displayDetails(info.name, info.detailed_description);
         start_button->enable()->show();
         first_list->setSelectionIndex(-1);
@@ -492,10 +455,6 @@ ServerCampaignScreen::ServerCampaignScreen()
 
     }
 
-    if (!score.empty()) {
-        first_list->addEntry("Score", "Score");
-    }
-
     // add other stuff to info panel
     first_list->addEntry("Network Info", "Network");
     //first_list->addEntry("Contact Fleet Command", "Chat");
@@ -565,6 +524,57 @@ void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<
 
         (new GuiLabel(layout, last.first, tr(last.first), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
         (new GuiScrollText(layout, "DETAILS_SCROLL", tr(last.second)))->setTextSize(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+
+        // Score
+        if (score_layout)
+            score_layout->destroy();
+        score_layout = new GuiElement(layout, "");
+        score_layout->setAttribute("layout", "vertical");
+        score_layout->setPosition(0, -130, sp::Alignment::BottomCenter);
+        int v_size = 0;
+        (new GuiLabel(score_layout, "SCORE_HEADING", tr("Score"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+        if (score.find("current_progress") != score.end())
+        {
+            auto line = new GuiElement(score_layout, "");
+            line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS_BEST", 0.35, tr("Progress:"), score["best_progress"]))->setSize(275, 50);
+            (new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.3, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]))->setSize(325, 50);
+            v_size++;
+        }
+        if (score.find("current_time") != score.end())
+        {
+            auto line = new GuiElement(score_layout, "");
+            line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+            (new GuiKeyValueDisplay(line, "SCORE_TIME_BEST", 0.37, tr("Best Time:"), score["best_time"]))->setSize(275, 50);
+            (new GuiKeyValueDisplay(line, "SCORE_TIME_FLEET", 0.3, tr("Fleet best:"), score["fleet_time"] + score["fleet_time_name"]))->setSize(325, 50);
+            v_size++;
+        }
+        if (score.find("current_artifacts") != score.end())
+        {
+            auto line = new GuiElement(score_layout, "");
+            line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_BEST", 0.35, tr("Artifacts:"), score["best_artifacts"]))->setSize(275, 50);
+            (new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_FLEET", 0.3, tr("Fleet best:"), score["fleet_artifacts"] + score["fleet_artifacts_name"]))->setSize(325, 50);
+            v_size++;
+        }
+        if (score.find("reputation") != score.end())
+        {
+            auto line = new GuiElement(score_layout, "");
+            line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
+            (new GuiKeyValueDisplay(line, "SCORE_REPUTATION", 0.55, tr("Reputation Bonus:"), score["reputation"]))->setSize(275, 50);
+//	            (new GuiLabel(line, "SCORE_REP_HINT", tr("You will start future missions with this bonus. The reputation bonus depends on your highest progress."), 30))->setSize(300, 50); //TODO difficulty
+            v_size++;
+        }
+        if (v_size > 0)
+        {
+            v_size++;
+            score_layout->setSize(GuiElement::GuiSizeMax, v_size*40);
+        }
+        else
+        {
+            score_layout->setSize(GuiElement::GuiSizeMax, 50);
+            score_layout->hide();
+        }
 }
 
 ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)

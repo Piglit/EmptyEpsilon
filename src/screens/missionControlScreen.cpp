@@ -1,5 +1,6 @@
 #include "missionControlScreen.h"
-#include "menus/serverCreationScreen.h"
+//#include "menus/serverCreationScreen.h"
+#include "missionScoreScreen.h"
 #include "shipTemplate.h"
 #include "playerInfo.h"
 #include "spaceObjects/playerSpaceship.h"
@@ -63,7 +64,10 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
         } else {
             (new GuiButton(mission_info_container, "QUIT", tr("Quit Mission"), [this]() {
                 destroy();
-                new ServerCampaignScreen();
+                //new ServerCampaignScreen();
+                gameGlobalInfo->reset();
+                gameGlobalInfo->scenario_settings.clear();
+                new MissionScoreScreen(getRenderLayer());
             }))->setSize(GuiElement::GuiSizeMax, 50);
         }
 

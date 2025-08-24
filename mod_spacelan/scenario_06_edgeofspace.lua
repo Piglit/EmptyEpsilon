@@ -247,6 +247,7 @@ Reopen communications if you have any questions.]])
     , Player:getCallSign()))
 
     mission_state = 1
+	last_progress = 0
     kraylor_threat = 0
     kraylor_warning = 0
     command_warning = 0
@@ -257,7 +258,7 @@ Reopen communications if you have any questions.]])
     tech_stranded = 0
 
 	campaign:initScore()
-	campaign:requestReputation
+	campaign:requestReputation()
 end
 
 function goto_war_early()
@@ -854,8 +855,9 @@ Reports are coming in from core human space that a massive Kraylor strike force 
         end
     end
 
-	if mission_state <= 10 then
+	if mission_state <= 10 and last_progress ~= mission_state then
 		sendProgressToCampaignServer(mission_state, 20)
+		last_progress = mission_state
 	else
 		-- 11: small war initiated by kraylor
 		-- 12: Player started war
@@ -879,8 +881,10 @@ Reports are coming in from core human space that a massive Kraylor strike force 
 				now = now + enemyCountStart/4
 			end
 			now = now + #enemyList	-- 25%
-			sendProgressToCampaignServer(now, total)
-
+			if last_progress ~= now then
+				sendProgressToCampaignServer(now, total)
+				last_progress = now
+			end
 			if #enemyList == 0 then
 				campaign:victoryScore(now)
 				victory("Human Navy")

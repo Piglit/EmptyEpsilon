@@ -296,7 +296,7 @@ void GameGlobalInfo::startScenario(string filename, std::unordered_map<string, s
     script->run(filename);
     engine->registerObject("scenario", script);
 
-    if (PreferencesManager::get("game_logs", "1").toInt())
+    if (PreferencesManager::get("game_logs", "0").toInt())
     {
         state_logger = new GameStateLogger();
         state_logger->start();

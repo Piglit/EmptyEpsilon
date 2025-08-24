@@ -11,6 +11,9 @@
 -- Type: Mission
 -- Author: Visjammer
 -- Modded by Pithlit
+-- Setting[Chapter]: Configures on which chapter of the story you start.
+-- Chapter[Beginning|Default]: Start at the beginning of the story.
+-- Chapter[Conflict]: Start with the declaration of war.
 
 --- Scenario
 -- @script scenario_06_edgeofspace
@@ -247,6 +250,7 @@ Reopen communications if you have any questions.]])
     , Player:getCallSign()))
 
     mission_state = 1
+	last_progress = 0
     kraylor_threat = 0
     kraylor_warning = 0
     command_warning = 0
@@ -257,7 +261,21 @@ Reopen communications if you have any questions.]])
     tech_stranded = 0
 
 	campaign:initScore()
-	campaign:requestReputation
+	campaign:requestReputation()
+
+	if getScenarioSetting("Chapter") == "Conflict" then
+		mission_state = 7
+		kraylor_e1:destroy()
+		kraylor_e2:destroy()
+		kraylor_e3:destroy()
+		kraylor_e4:destroy()
+		kraylor_m1:destroy()
+		kraylor_m2:destroy()
+		kraylor_m3:destroy()
+		kraylor_m4:destroy()
+		Kraylor_Eline:destroy()
+		Kraylor_Mline:destroy()
+	end
 end
 
 function goto_war_early()
@@ -328,7 +346,7 @@ end
 function update(delta)
     -- if you dead, you lose
     if not Player:isValid() then
-        local text = string.format(_("Mission: FAILED (%s destroyed)"), Player:getCallSign())
+        local text = _("Mission: FAILED (Ship destroyed)")
         globalMessage(text)
         setBanner(text)
         victory("Kraylor")
@@ -336,21 +354,21 @@ function update(delta)
 
 	if mission_state < 11 then
 		if not Central_Command:isValid() then
-            local text = string.format(_("Mission: FAILED (%s destroyed)"), Central_Command:getCallSign())
+            local text = _("Mission: FAILED (Central Command destroyed)")
             globalMessage(text)
             setBanner(text)
 			victory("Kraylor")
 		end
 
 		if not EOS_Station:isValid() and not mission_state == 12 then
-            local text = string.format(_("Mission: FAILED (%s destroyed)"), EOS_Station:getCallSign())
+            local text = _("Mission: FAILED (E.O.S. destroyed)")
             globalMessage(text)
             setBanner(text)
 			victory("Kraylor")
 		end
 
 		if not Science_Galileo:isValid() and not mission_state == 12 then
-            local text = string.format(_("Mission: FAILED (%s destroyed)"), Science_Galileo:getCallSign())
+            local text = _("Mission: FAILED (Galileo destroyed)")
             globalMessage(text)
             setBanner(text)
 			victory("Kraylor")
@@ -854,8 +872,9 @@ Reports are coming in from core human space that a massive Kraylor strike force 
         end
     end
 
-	if mission_state <= 10 then
-		sendProgressToCampaignServer(mission_state, 20)
+	if mission_state <= 10 and last_progress ~= mission_state then
+		sendProgressToCampaignServer(mission_state-1, 20)
+		last_progress = mission_state
 	else
 		-- 11: small war initiated by kraylor
 		-- 12: Player started war
@@ -863,7 +882,6 @@ Reports are coming in from core human space that a massive Kraylor strike force 
 		table.filter(enemyList, function(obj)
 		    return obj:isValid()
 		end)
-
 
 		if before ~= #enemyList then
 			local total = enemyCountStart * 4
@@ -878,9 +896,11 @@ Reports are coming in from core human space that a massive Kraylor strike force 
 			if Science_Galileo:isValid() then
 				now = now + enemyCountStart/4
 			end
-			now = now + #enemyList	-- 25%
-			sendProgressToCampaignServer(now, total)
-
+			now = now + (enemyCountStart - #enemyList)	-- 25%
+			if last_progress ~= now then
+				sendProgressToCampaignServer(now, total)
+				last_progress = now
+			end
 			if #enemyList == 0 then
 				campaign:victoryScore(now)
 				victory("Human Navy")

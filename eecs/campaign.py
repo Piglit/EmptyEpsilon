@@ -178,13 +178,13 @@ Der Reputations-Bonus ergibt sich aus dem gewählten Schwierigkeitsgrad und dem 
 			crew.unlockScenario("03_waves", settings={"Enemy Faction": ["Kraylor"], "Enemies": ["Easy", "Normal"]})
 			if progress == 100:
 				crew.lockScenario("03_waves")
-				crew.setBriefing(brief = """Großartige Leistung {crew_name}!
+				crew.setBriefing("""Großartige Leistung {crew_name}!
 Nach diesem Gefecht sollten die Kraylor erheblichen Respekt vor uns zeigen.
 
 Ihr solltet nun mit dem Flottenkommando in Kontakt treten, um gemeinsam euer weiteres Vorgehen zu planen.""")
 			else:
 				brief = ""
-				if progess > 75:
+				if progress > 75:
 					brief = """Willkommen zurück, {crew_name}.
 Nach diesem Grenzkonflikt machten sich die übrigen Kraylor-Streitkräfte auf den Weg, um ihren Angriff auf unsere Systeme fortzuführen."""
 				else:

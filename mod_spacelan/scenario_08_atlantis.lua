@@ -758,7 +758,7 @@ IT'S THE BATTLE STATION!
 
 All hands on deck! Man all combat stations and evacuate all non-essential personnel! Save what you can!]])
         )
-        odin = CpuShip():setFaction("Kraylor"):setTemplate("Odin"):setCallSign("Odin"):setScanned(true):setPosition(26900, 132872):orderAttack(shipyard_gamma)
+        odin = CpuShip():setFaction("Kraylor"):setTemplate("Goddess of Destruction"):setCallSign("Goddess of Destruction"):setScanned(true):setPosition(26900, 132872):orderAttack(shipyard_gamma)
         odin.target = shipyard_gamma
         WormHole():setPosition(23984, 126258):setTargetPosition(0, 0)
         mission_state = phase5OdinAttack

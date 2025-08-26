@@ -314,7 +314,7 @@ class Crew:
 	def setProfile(self, profile: str):
 		self.profile = profile
 
-	def getProfile(self): -> str
+	def getProfile(self) -> str:
 		return self.profile
 
 	def storeCrew(self):

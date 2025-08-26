@@ -34,6 +34,7 @@ class Crew:
 		self.scores = {}
 		self.artifacts = {}
 		self.code = ""
+		self.profile = "default"
 
 	def setCrewName(self, name):
 		self.crew_name = name
@@ -48,6 +49,12 @@ class Crew:
 
 	def getScenarios(self) -> list[str]:
 		return self.scenarios
+
+	def isScenarioUnlocked(self, s):
+		if isinstance(s, str):
+			s = models.scenario.getScenario(s)
+		assert isinstance(s, Scenario)
+		return s.filename in self.scenarios
 
 	def setScenarios(self, scenarios):
 		assert isinstance(scenarios, list)
@@ -303,6 +310,12 @@ class Crew:
 			self.scores["delivered"]["reputation"] -= amount
 			log.info(f"{self.crew_name} {amount} reputation has been delivered.")
 
+
+	def setProfile(self, profile: str):
+		self.profile = profile
+
+	def getProfile(self): -> str
+		return self.profile
 
 	def storeCrew(self):
 		storage.storeInfo(self, self.instance_name, subdir="crews")

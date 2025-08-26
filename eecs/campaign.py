@@ -28,6 +28,25 @@ models.scenario.loadScenarios([
 #	"scenario_99_wormhole_expedition.lua",
 ])
 
+# profiles:
+# beginner:
+	# Goal: learn the game
+	# Ships: Phobos light criuser
+	# Missions: 20_training1, 00_basic[Easy], 06_edgeofspace
+	# Timeline:				1:00,			1:30,			2:30
+# default/experienced:
+	# Goal: explore the game
+	# Ships: Supporters / Atlantis
+	# Missions: 20_training1, 00_basic[Normal], 21_training2 && 08_atlantis
+	# Timeline:				0:30,			1:00,			2:00
+# veteran:
+	# Goal: master the game
+	# Ships: their choice
+	# Missions: 20_training1, 00_basic[Hard], 07_gftp
+	# Timeline:				0:30,			1:00,			2:00
+
+
+
 # best progress [0,100] of a played scenario times this factor results in the multiplayer rep bonus.
 # uses scriptId
 SCENARIO_REPUTATION_FACTOR = {
@@ -42,7 +61,7 @@ briefing = """Willkommen, Crew der {crew_name}.
 
 Dies ist euer Missionsauswahlbildschirm. Hier werden alle für euch verfügbaren Missionen angezeigt werden. Momentan steht euch nur eine einzelne Trainingsmission zur Verfügung, die dazu da ist, damit ihr euch ein wenig auf einander einspielen können.
 
-Wenn ihr eine Mission abschließt (oder auch nur größtenteils abschließt), werden weitere Missionen für euch bereitgestellt.
+Wenn ihr eine Mission abschließt (oder auch nur größtenteils abschließt), werden weitere Missionen für euch verfügbar.
 """
 models.crew.setCrewTemplate(["20_training1"], ["Phobos M3P"], briefing)
 
@@ -109,7 +128,7 @@ def scenario_event(scenario: models.scenario.Scenario, crew: models.crew.Crew, e
 			crew.setBriefing(crew.getBriefingRaw() + f"""
 Ihr habt in dieser Mission das Artefakt '{artifact['name']}' eingesammelt. 
 Gesammelte Artefakte können in einer späteren Mission an Raumstationen eingesetzt werden, um diese Stationen mit Upgrades zu versorgen.
-Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
+Jede Mission enthält ein Missions-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
 """)
 		crew.addArtifact(artifact["name"], artifact["description"])
 
@@ -125,27 +144,19 @@ Jedes Szenario enthält ein Szenario-spezifisches Artefakt. Das gleiche Artefakt
 
 	# scenario specific
 	if s == "20_training1":
-		if progress is not None and progress >= 75:
-			crew.unlockScenario("00_basic", settings={"Time": ["30min"], "Enemies": ["Normal"]})
-			crew.unlockScenario("21_training2", settings={"Ships": ["Frigates"]})
+		if progress is not None and progress >= 75 and not crew.isScenarioUnlocked("00_basic"):
+			if crew.profile == "beginner":
+				difficulties_available = ["Easy"]
+			elif crew.profile == "veteran":
+				difficulties_available = ["Hard"]
+			else:
+				difficulties_available = ["Normal"]
+			crew.unlockScenario("00_basic", settings={"Time": ["30min"], "Enemies": difficulties_available})
 			crew.setBriefing("""Glückwunsch, {crew_name}.
-Euch stehen weitere Missionen zur Auswahl:
-In 'Skirmish' könnt ihr euer Können gegen angreifende Gegner testen.
-In 'Frigates Testing Ground' könnt ihr andere (spezialisierte) Schiffe ausprobieren.
 
-Ihr könnt euch nun euren Punktestand bei der gerade abgeschlossenen Missionen ansehen.
-""")
-	if s == "21_training2":
-		if event_topic == "started":
-			crew.setBriefing("""Willkommen zurück, {crew_name}.\n""")
-		if event_topic == "unlockShip":
-			ship = details
-			if not crew.hasShip(ship):
-				crew.unlockShip(ship)
-				if "{ships}" not in crew.getBriefingRaw():
-					crew.setBriefing(crew.getBriefingRaw() + """
-Die in dieser Mission erfolgreich von euch verwendeten Schiffstypen stehen euch nun auch im 'Skirmish'-Szenario zur Verfügung. Dort habt ihr nun die Auswahl zwischen den folgenden Schiffstypen:
-{ships}.
+Euch steht eine neue Mission zur Auswahl:
+In 'Skirmish' könnt ihr euer Können gegen angreifende Gegner testen.
+Falls ihr euch anders auf die Stationen eures Schiffs verteilen wollt, könnt ihr auch die gerade absolvierte Trainingsmission wiederholen.
 """)
 
 	if s == "00_basic":
@@ -158,6 +169,43 @@ Die aktuelle Mission 'Skirmish' kann auf verschiedenen Schwierigkeitsgraden wied
 Ein höherer Schwierigkeitsgrad sorgt für einen höheren Reputations-Bonus: Ihr werdet alle künftigen Missionen mit diesem Bonus auf eure Reputation beginnen. 
 
 Der Reputations-Bonus ergibt sich aus dem gewählten Schwierigkeitsgrad und dem dabei erreichten Missionsfortschritt. Wird ein Szenario häufiger gespielt, gilt der höchste erreichte Reputations-Bonus. Diesen könnt ihr in der Punkteübersicht einsehen.
+""")
+			if progress >= 75:
+				if crew_name.profile == "beginner":
+					if not crew.isScenarioUnlocked("06_edgeofspace"):
+						crew.unlockScenario("06_edgeofspace", settings={"Chapter": ["Beginning"]})
+						crew.setBriefing(crew.getBriefingRaw() + """
+Euch steht nun eine weitere Mission zur Verfügung.""")
+				elif crew_name.profile == "veteran":
+					if not crew.isScenarioUnlocked("07_gftp"):
+						crew.unlockScenario("21_training2")
+						crew.unlockScenario("07_gftp")#, settings={"Chapter": ["Beginning"]})
+						crew.setBriefing(crew.getBriefingRaw() + """
+Euch stehen nun weitere Missionen zur Verfügung:
+In 'Frigates Testing Ground' könnt ihr andere (spezialisierte) Schiffe ausprobieren.
+In 'Ghosts from the past' lies some challenge.
+""")
+				else:
+					if not crew.isScenarioUnlocked("21_training2"):
+						crew.unlockScenario("21_training2", settings={"Ships": ["Frigates"]})
+						crew.unlockScenario("08_atlantis", settings={"Chapter": ["Beginning"]})
+						crew.setBriefing(crew.getBriefingRaw() + """
+Euch stehen nun weitere Missionen zur Verfügung:
+In 'Frigates Testing Ground' könnt ihr andere (leichte und spezialisierte) Schiffe ausprobieren.
+In 'Birth of Atlantis' erhaltet ihr den Prototyp eines schweren Kreuzers.
+""")
+
+	if s == "21_training2":
+		if event_topic == "started":
+			crew.setBriefing("""Willkommen zurück, {crew_name}.\n""")
+		if event_topic == "unlockShip":
+			ship = details
+			if not crew.hasShip(ship):
+				crew.unlockShip(ship)
+				if "{ships}" not in crew.getBriefingRaw():
+					crew.setBriefing(crew.getBriefingRaw() + """
+Die in dieser Mission erfolgreich von euch verwendeten Schiffstypen stehen euch nun auch im 'Skirmish'-Szenario zur Verfügung. Dort habt ihr nun die Auswahl zwischen den folgenden Schiffstypen:
+{ships}.
 """)
 
 	if s == "03_waves":

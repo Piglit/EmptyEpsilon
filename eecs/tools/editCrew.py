@@ -41,6 +41,7 @@ def showCrew(instance):
 			"addArtifact": ("add an artifact", "addArtifact"),
 			"rmArtifact": ("remove an artifact", "rmArtifact"),
 			"setBriefing": ("change the briefing text", "setBriefing", "briefing"),
+			"setProfile": ("change the profile", "setProfile", "profile"),
 		}
 		code, tag = d.menu(msg, choices=[(k, v[0]) for k,v in choice_details.items()])
 		if code == d.OK:

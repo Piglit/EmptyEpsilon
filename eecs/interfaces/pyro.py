@@ -42,6 +42,8 @@ class Crews:
 		crew.crews[instance].addArtifact(text, "")
 	def rmArtifact(self, instance, text):
 		crew.crews[instance].rmArtifact(text)
+	def setProfile(self, instance, profile):
+		crew.crews[instance].setProfile(profile)
 
 @Pyro4.expose
 class Scenarios:

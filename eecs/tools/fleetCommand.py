@@ -19,6 +19,7 @@ def start():
 			("Mechaniken", "Übersicht über die Spielmechaniken der Kampagne"),
 			("Crew: auf Mission schicken", "Lege fest, welche Missionen für welche Crew verfügbar sind."),
 			("Crew: Schiff freischalten", "Lege fest, welche Schiffstypen für welche Crew verfügbar sind."),
+			("Crew: Profil festlegen", "Lege fest, nach welchem Schema automatisch Missionen für welche Crews freigeschaltet werden."),
 	#		("", ""),
 		])
 		if code == d.OK:
@@ -32,6 +33,8 @@ def start():
 				selectMissions()
 			elif tag == "Crew: Schiff freischalten":
 				selectShips()
+			elif tag == "Crew: Profil festlegen":
+				selectProfiles()
 		else:
 			return
 

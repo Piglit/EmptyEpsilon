@@ -1,6 +1,7 @@
 """Use this interface to store and restore data."""
 import pickle
 import os
+import shutil
 
 def _create_dir_path(subdir):
 	path = "data/"
@@ -26,5 +27,10 @@ def loadInfo(filename, subdir=None):
 			return pickle.load(file)
 	except:
 		return None
+
+def delete(filename, subdir):
+	path = _create_dir_path(subdir)
+	shutil.rmtree(path, ignore_errors=True)
+
 
 

@@ -67,19 +67,20 @@ def test_score():
 	}	
 	scenario = "scenario_20_training1.lua"
 	expected = {
-		"current_scenario_name":	"Training: Cruiser",
+		"current_scenario_name":	"Basic Training Course",
 		"current_time":				"0:00:09",
 		"best_time":				"0:00:09",
 		"fleet_time":				"0:00:09",	
-		"fleet_time_name":			crewName,
+		"fleet_time_name":			f" ({crewName})",
 		"current_progress":			"100%",
 		"best_progress":			"100%",
 		"fleet_progress":			"100%",
-		"fleet_progress_name":		crewName,
+		"fleet_progress_name":		f" ({crewName})",
 		"current_artifacts":		"1",
 		"best_artifacts":			"1",
 		"fleet_artifacts":			"1",
-		"fleet_artifacts_name":		crewName,
+		"fleet_artifacts_name":		f" ({crewName})",
+		"artifacts":				"{}",
 	}
 	crew = getOrCreateCrew(serverName, crewName)
 	crew.updateScore(scenario, score)

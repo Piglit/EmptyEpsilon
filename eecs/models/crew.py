@@ -357,6 +357,7 @@ def getOrCreateCrew(instance_name, crew_name):
 def removeCrew(instance_name):
 	if instance_name in crews:
 		del crews[instance_name]
+	storage.delete(instance_name, subdir="crews")
 
 def loadCrew(instance_name):
 	loaded = storage.loadInfo(instance_name, subdir="crews")

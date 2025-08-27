@@ -2,6 +2,7 @@
 import core
 import models.crew
 import models.scenario
+import models.campaign
 import outbound.stationsComms
 import outbound.pyroMessage
 from interfaces import storage
@@ -10,9 +11,11 @@ import string
 from datetime import datetime, timedelta
 from threading import Timer
 
+
+
 # load scenarios, that should be available in the campaign.
 # use the complete filename without the folder.
-models.scenario.loadScenarios([
+scenarios = [
 	"scenario_20_training1.lua",
 	"scenario_00_basic.lua",
 	"scenario_21_training2.lua",
@@ -26,7 +29,9 @@ models.scenario.loadScenarios([
 	"scenario_08_atlantis.lua",
 
 #	"scenario_99_wormhole_expedition.lua",
-])
+]
+
+campaign = models.campaign.Campaign(scenarios) 
 
 # profiles:
 # beginner:
@@ -49,11 +54,10 @@ models.scenario.loadScenarios([
 
 # best progress [0,100] of a played scenario times this factor results in the multiplayer rep bonus.
 # uses scriptId
-SCENARIO_REPUTATION_FACTOR = {
-	"20_training1":	0.25,
-	"00_basic":		0.5,
-	"03_waves":		10,	# 10 per wave per difficulty
-}
+campaign.setReputationFactor("20_training1", 0.25)
+campaign.setReputationFactor("00_basic", 0.5)
+campaign.setReputationFactor("03_waves", 10) # 10 per wave per difficulty
+
 
 fleetcommand_name = storage.loadInfo("fleetcommand_name") # or None if not found
 
@@ -63,7 +67,7 @@ Dies ist euer Missionsauswahlbildschirm. Hier werden alle für euch verfügbaren
 
 Wenn ihr eine Mission abschließt (oder auch nur größtenteils abschließt), werden weitere Missionen für euch verfügbar.
 """
-models.crew.setCrewTemplate(["20_training1"], ["Phobos M3P"], briefing)
+campaign.setDefaultCrewTemplate(["20_training1"], ["Phobos M3P"], briefing)
 
 def cypher(text, key):
 	result = ""
@@ -97,50 +101,22 @@ def unlockAtlantis(crew):
 
 def scenario_event(scenario: models.scenario.Scenario, crew: models.crew.Crew, event_topic: str, details=str):
 	global fleetcommand_name
-	s = scenario.scriptId 
-	
-	# update score and get progress
-	progress = None
-	rep_factor = SCENARIO_REPUTATION_FACTOR.get(s, 1.0)
-	difficulty = crew.getScoreRaw("current").get("difficulty",1)	# current can be empty
-	if event_topic == "score":
-		details = json.loads(details)
-		if "progress" in details:
-			progress = details["progress"]
-			difficulty = details.get("difficulty",difficulty)
-			details["reputation"] = progress * rep_factor * difficulty
-		crew.updateScore(s, details)
-	elif event_topic == "progress":
-		assert isinstance(details, dict)
-		progress = details["progress"]
-		crew.updateScore(s, {"progress": progress, "reputation": progress * rep_factor * difficulty})
 
 	# for all scenarios
-	elif event_topic == "started":
-		crew.setBriefing("")
-		crew.clearCurrentScore()
-	elif event_topic == "artifact":
+	if event_topic == "artifact":
 		artifact = json.loads(details)
 		if not crew.hasArtifact(details):
 			# append to current briefing. This gets overwritten by other setBriefing calls.
-
-#				(json.dumps(fleetcommand_name) if fleetcommand_name else "\b") + """ abgegeben werden, um das Flottenkommando mit strategischen Informationen und Upgrades zu versorgen.
 			crew.setBriefing(crew.getBriefingRaw() + f"""
 Ihr habt in dieser Mission das Artefakt '{artifact['name']}' eingesammelt. 
 Gesammelte Artefakte können in einer späteren Mission an Raumstationen eingesetzt werden, um diese Stationen mit Upgrades zu versorgen.
 Jede Mission enthält ein Missions-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
 """)
-		crew.addArtifact(artifact["name"], artifact["description"])
 
-	# requests
-	elif event_topic == "request_reputation":
-		if details:
-			models.crew.getCrewByCallsign(details).sendReputation(server="localhost", reduce=True)	# XXX server is hacky
-		else:
-			crew.sendReputation()
-	elif event_topic == "request_artifacts":
-		assert isinstance(details, str)
-		models.crew.getCrewByCallsign(details).sendArtifacts(server="localhost") # XXX server is hacky
+	progress = campaign.scenario_event(scenario, crew, event_topic, details)
+	# progress can be None, if the event was not progress-related
+
+	s = scenario.scriptId
 
 	# scenario specific
 	if s == "20_training1":

@@ -18,11 +18,11 @@ def test_debug():
 	assert r.status_code == 200
 
 def test_scenario():
+	models.scenario.clearScenarios()
 	models.scenario.loadScenarios(["scenario_00_basic.lua"])
 	for event in ScenarioEvents:
 		r = tc.post(f"/scenario/{event.value}", json={"scenario": {"filename": "scenario_00_basic.lua", "name": "test"}, "server": {"instance_name": "testpc", "crew_name": "Testi"}})
 		assert r.status_code == 200
-	models.scenario.clearScenarios()
 
 def test_screen():
 	r = tc.post(f"/screen", json={"screen": "testscreen", "server": {"instance_name": "testpc", "crew_name": "Testi"}})
@@ -37,6 +37,7 @@ def test_getBriefing():
 	assert r.status_code == 404
 
 def test_getScenarios():
+	models.scenario.clearScenarios()
 	models.scenario.loadScenarios(["scenario_01_outpost.lua"])
 	models.crew.getCrew("testpc").setScenarios([])
 	r = tc.get(f"/scenarios/testpc")
@@ -46,18 +47,22 @@ def test_getScenarios():
 	r = tc.get(f"/scenarios/testpc")
 	assert r.status_code == 200
 	assert r.json() == {"scenarios": ["scenario_01_outpost.lua"]}
-	models.scenario.clearScenarios()
 
 def test_scriptProgress():
+	models.scenario.clearScenarios()
+	models.scenario.loadScenarios(["scenario_00_basic.lua"])
 	r = tc.post(f"/script/progress", json={"scenario": {"filename": "scenario_00_basic.lua", "name": "test"}, "server": {"instance_name": "testpc", "crew_name": "Testi"}, "data": {"progress": 1/3}})
 	assert r.status_code == 200
 
 def test_scriptMessage():
+	models.scenario.clearScenarios()
+	models.scenario.loadScenarios(["scenario_00_basic.lua"])
 	r = tc.post(f"/script/message", json={"scenario": {"filename": "scenario_00_basic.lua", "name": "test"}, "server": {"instance_name": "testpc", "crew_name": "Testi"}, "data": {"topic": "test", "details": "blubb"}})
 	assert r.status_code == 200
 
 def test_getCampaign():
-	#models.scenario.loadScenarios(["scenario_01_outpost.lua"])
+	models.scenario.clearScenarios()
+	models.scenario.loadScenarios(["scenario_01_outpost.lua"])
 	models.crew.setCrewTemplate(["outpost"], ["Phobos M3P"], "Hi!")
 	r = tc.get(f"/campaign/camptest/testi")
 	assert r.status_code == 200
@@ -65,5 +70,23 @@ def test_getCampaign():
 #						"ships": ["Phobos M3P"],
 						"briefing": "Hi!",
 						"score": {}}
+
+def test_getScore():
 	models.scenario.clearScenarios()
+	models.scenario.loadScenarios(["scenario_01_outpost.lua"])
+	score = {
+		"artifacts":True,
+		"progress":100,
+		"time":9.478441022336483
+	}
+	models.crew.removeCrew("testserver")
+	crew = models.crew.getOrCreateCrew("testserver", "Testship")
+	crew.updateScore("outpost", score)
+
+	r = tc.get(f"/score/testserver/scenario_01_outpost.lua")
+	assert r.status_code == 200
+	assert r.json()
+
+	r = tc.get(f"/briefing/nopc")
+	assert r.status_code == 404
 

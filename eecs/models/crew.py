@@ -156,18 +156,25 @@ class Crew:
 		assert isinstance(s, Scenario)
 		return self.getScoreRaw(s.filename)
 
-	def getRecentScore(self):
-		current = self.scores.get("current")
+	def getRecentScore(self, scenario_name="current"):
+		current = self.scores.get(scenario_name)
 		if not current:
 			return dict()
 		ret = {
 			"current_scenario_name": "",
 			"artifacts": json.dumps(self.artifacts),
 		}
-		scenario = current["scenario"]
+		if scenario_name == "current":
+			scenario = current["scenario"]
+			ret["current_scenario_name"] = current["scenario_name"]
+		else:
+			s = models.scenario.getScenario(scenario_name)
+			scenario = s.filename
+			ret["current_scenario_name"] = s.name
+
 		ss = self.scores[scenario]
 		hi = Crew.getFleetHighscore(scenario)
-		ret["current_scenario_name"] = current["scenario_name"]
+
 		if "time" in current:
 			ret["current_time"] = str(timedelta(seconds=-current["time"]))
 			ret["best_time"] = str(timedelta(seconds=-ss["time"]))

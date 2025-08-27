@@ -165,3 +165,10 @@ async def getSpawnPosition(server_name, scenario_name):
 		spawn_info = {"posx": randint(-100, 100), "posy": randint(-100, 100), "dir": randint(0,359)}
 	return spawn_info 
 
+@app.get("/score/{server_name}/{scenario_name}")
+async def getScore(server_name, scenario_name):
+	c = models.crew.getCrew(server_name)
+	if not c:
+		raise HTTPException(status_code=404, detail=f"Crew {server_name} not found.")
+	return c.getRecentScore(scenario_name)
+

@@ -64,7 +64,7 @@ def test_score():
 		"artifacts":True,
 		"progress":100,
 		"time":9.478441022336483
-	}	
+	}
 	scenario = "scenario_20_training1.lua"
 	expected = {
 		"current_scenario_name":	"Basic Training Course",
@@ -85,6 +85,8 @@ def test_score():
 	crew = getOrCreateCrew(serverName, crewName)
 	crew.updateScore(scenario, score)
 	result = crew.getRecentScore()
+	assert result == expected
+	result = crew.getRecentScore("scenario_20_training1.lua")
 	assert result == expected
 	
 

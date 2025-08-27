@@ -29,4 +29,7 @@ def test_scenario_event():
 	camp._started(s, c)
 	assert(c.getBriefing() == "" )
 	camp._artifact(s, c, {"name": "Testifact", "description": ""})
-
+	def sse(scenario, crew, event_topic, details, progress):
+		print(progress)
+#	camp.addScenarioSpecificEvent("00_basic", sse)
+#	camp.scenario_event(s, c, "progress", details)

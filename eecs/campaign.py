@@ -147,12 +147,12 @@ Ein höherer Schwierigkeitsgrad sorgt für einen höheren Reputations-Bonus: Ihr
 Der Reputations-Bonus ergibt sich aus dem gewählten Schwierigkeitsgrad und dem dabei erreichten Missionsfortschritt. Wird ein Szenario häufiger gespielt, gilt der höchste erreichte Reputations-Bonus. Diesen könnt ihr in der Punkteübersicht einsehen.
 """)
 			if progress >= 75:
-				if crew_name.profile == "beginner":
+				if crew.profile == "beginner":
 					if not crew.isScenarioUnlocked("06_edgeofspace"):
 						crew.unlockScenario("06_edgeofspace", settings={"Chapter": ["Beginning"]})
 						crew.setBriefing(crew.getBriefingRaw() + """
 Euch steht nun eine weitere Mission zur Verfügung.""")
-				elif crew_name.profile == "veteran":
+				elif crew.profile == "veteran":
 					if not crew.isScenarioUnlocked("07_gftp"):
 						crew.unlockScenario("21_training2")
 						crew.unlockScenario("07_gftp")#, settings={"Chapter": ["Beginning"]})
@@ -314,4 +314,8 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		outbound.stationsComms.turntime(f"Flottenbesprechung bis {until_human}")
 
 
+
 core.subscribe("scenario_event", scenario_event)
+
+
+#campaign.test_run()

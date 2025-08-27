@@ -272,7 +272,7 @@ function update(delta)
 
     -- Black Site 114 must survive
     if not bs114:isValid() and (hacked == 0) then
-        local text = string.format(_("Mission: FAILED (%s destroyed)"), bs114:getCallSign())
+        local text = _("Mission: FAILED (Black Site 114 destroyed)")
         globalMessage(text)
         setBanner(text)
         victory("Ghosts")
@@ -280,7 +280,7 @@ function update(delta)
 
     -- Stakhanov must survive
     if not stakhanov:isValid() then
-        local text = string.format(_("Mission: FAILED (%s destroyed)"), stakhanov:getCallSign())
+        local text = _("Mission: FAILED (Stakhanov destroyed)")
         globalMessage(text)
         setBanner(text)
         victory("Ghosts")
@@ -288,7 +288,7 @@ function update(delta)
 
     -- The player must survive
     if not player:isValid() then
-        local text = string.format(_("Mission: FAILED (%s destroyed)"), player:getCallSign())
+        local text = _("Mission: FAILED (Ship destroyed)")
         globalMessage(text)
         setBanner(text)
         victory("Ghosts")

@@ -488,10 +488,10 @@ end
 function missionGreetReinforcementsNewLeader(delta)
 end
 
-function checkDefeatCondition(object)
+function checkDefeatCondition(object, object_callsign)
     if not object:isValid() then
         victory("Exuari")
-        local text = string.format(_("Mission: FAILED (%s was destroyed)"), object:getCallSign())
+        local text = string.format(_("Mission: FAILED (%s was destroyed)"), object_callsign)
         globalMessage(text)
         setBanner(text)
     end
@@ -501,11 +501,11 @@ function update(delta)
     script_hangar.update(delta)
     -- When the player ship or the research station is destroyed, call it a victory for the Exuari
     if player ~= nil then
-        checkDefeatCondition(player)
+        checkDefeatCondition(player, "ship")
     end
     if mission_state ~= missionGreetReinforcements then
-        checkDefeatCondition(research_station)
-        checkDefeatCondition(main_station)
+        checkDefeatCondition(research_station, "Research-1")
+        checkDefeatCondition(main_station, "Orion-5")
     end
 
     -- If the enemy station is destroyed, the Human Navy wins.

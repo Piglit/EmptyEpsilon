@@ -41,7 +41,7 @@ extern PVector<PlayerInfo> player_info_list;
 class PlayerInfo : public MultiplayerObject
 {
 private:
-    CrewStationScreen* screen;
+    CrewStationScreen* screen = nullptr;
 public:
     int32_t client_id;
 

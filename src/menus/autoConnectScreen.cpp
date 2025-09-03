@@ -152,7 +152,7 @@ void AutoConnectScreen::update(float delta)
                         if (my_spaceship->getMultiplayerId() == my_player_info->ship_id && (first_crew_position == max_crew_positions || my_player_info->crew_position[first_crew_position]))
                         {
                             destroy();
-                            if (window_degree > 0){
+                            if (window_degree >= 0){
                                 uint8_t window_flags = PreferencesManager::get("ship_window_flags", "1").toInt();
                                 new WindowScreen(getRenderLayer(), window_degree, window_flags);
                             } else{

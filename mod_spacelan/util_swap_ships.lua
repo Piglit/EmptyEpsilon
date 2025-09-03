@@ -57,6 +57,7 @@ function swapPlayerAndCpuShip(player_ship, cpu_ship)
 	player_ship:destroy()				--goodbye player fighter
 
 	new_player_ship:addToShipLog("Crew transfer complete", "green")
+	new_player_ship:setRepairCrewCount(new_player_ship:getRepairCrewCount())	-- explicit set, otherwise they may not be shown
 	return new_player_ship, new_cpu_ship
 end
 
@@ -91,6 +92,7 @@ function boardCpuShip(player_ship, cpu_ship)
 	player_ship:destroy()				--goodbye player fighter
 
 	new_player_ship:addToShipLog("Crew transfer complete", "green")
+	new_player_ship:setRepairCrewCount(new_player_ship:getRepairCrewCount())	-- explicit set, otherwise they may not be shown
 	return new_player_ship
 end
 

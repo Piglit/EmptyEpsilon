@@ -18,7 +18,7 @@ require("script_formation.lua")	-- script_formation.spawnFormation
 require("script_hangar.lua")	-- script_hangar.create
 require("util_swap_ships.lua")
 require("plots/campaign.lua")
-require("plots/wh_util_rota.lua")
+require("plots/wh_rota.lua")
 
 --- Ship creation functions
 
@@ -96,7 +96,6 @@ end
 
 -- init
 function init()
-	wh_rota:init()
 	local terrain_radius = 22000
 	local player_ship_radius = 4000
 	local enemies_inner_radius = 18000
@@ -164,7 +163,7 @@ function init()
 	campaign:initScore()
 	station:sendCommsMessage(player, [[This is Commander Saberhagen.
 
-You are here to try out different ship types agains different types of enemy ships in this frigate testing compound.
+You are here to try out different ship types against different types of enemy ships in this frigate testing compound.
 Dock the crew pod you are currently in with the central station 'Dock'. When you are docked, contact the station, so we can move you on board of any ship you like.]])
 end
 
@@ -227,7 +226,7 @@ function instr_first_board()
 Feel free to navigate the sector and attack any enemy ship you like. The enemies closes to your current position should be the easiest to handle for your kind of ship.
 You may also call the other ships for help, if you are in trouble.
 If you want to try another ship, feel free to dock with the station and request to be transferred to another ship.
-If your current ship is destroyed, you will leave in an escape pod - in this case, also dock with the station and look for a new ship. to command.]])
+If your current ship is destroyed, you will leave in an escape pod - in this case, also dock with the station and look for a new ship to command.]])
 		instr_first_board = nil
 	end
 end

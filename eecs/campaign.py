@@ -312,6 +312,12 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		until = datetime.now() + timedelta(seconds=duration)
 		until_human = until.strftime("%H:%M:%S")
 		outbound.stationsComms.turntime(f"Flottenbesprechung bis {until_human}")
+	elif event_topic == "reinforcenemts":
+		details = json.loads(details)
+		crew.setProxyOpen(details["allow"])
+	elif event_topic == "started":
+		crew.setProxyOpen(False)
+
 
 
 

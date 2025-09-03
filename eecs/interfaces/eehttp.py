@@ -90,6 +90,7 @@ async def scriptMessage(scenario: EEScenario, server: EEServer, data: ScriptMess
 class CampaignResponse(BaseModel):
 	briefing: str
 	scenarios: list[str]
+	proxies: dict[str, str]
 	score: dict[str, str]
 #	ships: list[str]
 
@@ -100,11 +101,10 @@ async def getCampaign(server_name, crew_name):
 	if not c:
 		raise HTTPException(status_code=404, detail=f"Crew {server_name} not found.")
 
-	scenarios = c.getScenarios()
-
 	return {
 		"briefing": c.getBriefing(),
-		"scenarios": scenarios,
+		"scenarios": c.getScenarios(),
+		"proxies": c.getProxies(),
 #		"ships": c.getShips(),	# don't know if needed...
 		"score": c.getRecentScore(),
 	}

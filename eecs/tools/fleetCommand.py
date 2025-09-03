@@ -20,6 +20,7 @@ def start():
 			("Crew: Profil festlegen", "Lege fest, nach welchem Schema automatisch Missionen für welche Crews freigeschaltet werden."),
 	#		("", ""),
 			("Crew: auf Mission schicken", "Lege fest, welche Missionen für welche Crew verfügbar sind."),
+			("Crew: als Verstärkung schicken", "Lege fest, welchen anderen Crews eine Crew helfen kann."),
 			("Crew: Schiff freischalten", "Lege fest, welche Schiffstypen für welche Crew verfügbar sind."),
 
 		])
@@ -32,6 +33,8 @@ def start():
 				helpMechanics()
 			elif tag == "Crew: auf Mission schicken":
 				selectMissions()
+			elif tag == "Crew: als Verstärkung schicken":
+				selectProxies()
 			elif tag == "Crew: Schiff freischalten":
 				selectShips()
 			elif tag == "Crew: Profil festlegen":
@@ -202,6 +205,49 @@ ENTER:	 OK
 				msg = "Änderung vorgenommen." 
 				if diff_add:
 					msg += "\n\nSollte die neue Mission am Missionsauswahlbildschirm der Crew noch nicht anzegeigt werden, muss das Missionsauswahlmenü verlassen und wieder geöffnet werden."
+				d.msgbox(msg)
+		else:
+			d.msgbox("Keine Änderungen vorgenommen.")
+
+def selectProxies():
+	crew = selectCrew()
+	if not crew:
+		return None
+	msg = """{crew_name} {status}""".format(**crew)
+	d.infobox("Lädt aktive Missionen...")
+	avail_proxies_dict = crews.getCrewsWithOpenProxies()
+
+	msg += """
+
+Links:   nicht verfügbare Unterstützungs-Missionen
+Rechts:  verfügbare Unterstützungs-Missionen
+SPACE:   Unterstützungs-Mission erlauben/verbieten
+TAB:     Fokus zwischen links und rechts wechseln.
+ENTER:	 OK
+"""
+	code, tags = d.buildlist(msg, visit_items=True, items = [(tag, crew_name, tag in crew["proxies"]) for tag , crew_name in avail_proxies_dict.items()])
+	if code == d.OK:
+		diff_add = set()
+		diff_rm = set()
+		for tag in tags:
+			if tag not in crew["proxies"]:
+				diff_add.add(avail_proxies_dict[tag])
+		for tag in crew["proxies"]:
+			if tag not in tags:
+				diff_rm.add(avail_proxies_dict[tag])
+		msg = ""
+		if diff_add:
+			msg += "Folgende Unterstützungs-Missionen für {crew_name} freigeschalten:\n\n".format(**crew)
+			msg += ", ".join(list(diff_add))
+		if diff_rm:
+			msg += "\n\nFolgende Unterstützungs-Missionen für {crew_name} deaktivieren:\n\n".format(**crew)
+			msg += ", ".join(list(diff_rm))
+		if diff_add or diff_rm:
+			if d.yesno(msg) == "ok":
+				crews.setProxies(crew["instance_name"], {tag: avail_proxies_dict[tag] for tag in tags})
+				msg = "Änderung vorgenommen." 
+				if diff_add:
+					msg += "\n\nSollte die neue Unterstützungs-Mission am Missionsauswahlbildschirm der Crew noch nicht anzegeigt werden, muss das Missionsauswahlmenü verlassen und wieder geöffnet werden."
 				d.msgbox(msg)
 		else:
 			d.msgbox("Keine Änderungen vorgenommen.")

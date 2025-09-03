@@ -27,6 +27,8 @@ class Crew:
 		self.crew_name = crew_name if crew_name else "" 
 		self.status = "unknown"
 		self.scenarios = []
+		self.proxies = {}
+		self.proxy_open = False
 		self.setScenarios(template["scenarios"].copy())
 		self.scenario_settings = {}
 		self.ships = template["ships"].copy()
@@ -49,6 +51,12 @@ class Crew:
 
 	def getScenarios(self) -> list[str]:
 		return self.scenarios
+
+	def getProxies(self) -> dict[str,str]:
+		for instance_name, crew in crews.items():
+			if not crew.proxy_open:
+				del self.proxies[instance_name]
+		return self.proxies
 
 	def isScenarioUnlocked(self, s):
 		if isinstance(s, str):
@@ -108,6 +116,24 @@ class Crew:
 
 	def getScenarioSettings(self, scenario_name):
 		return self.scenario_settings.get(scenario_name)
+
+	def addProxy(self, proxy_instance_name, proxy_display_name):
+		self.proxies[proxy_instance_name] = proxy_display_name
+		self.storeCrew()
+
+	def removeProxy(self, proxy_instance_name):
+		if proxy_instance_name in self.proxies:
+			del self.proxies[proxy_instance_name]
+		self.storeCrew()
+
+	def setProxies(self, proxies):
+		assert isinstance(proxies, dict)
+		self.proxies = proxies
+		self.storeCrew()
+
+	def setProxyOpen(self, value:bool):
+		self.proxy_open = value
+		self.storeCrew()
 
 	def getShips(self):
 		return self.ships
@@ -373,5 +399,12 @@ def loadCrew(instance_name):
 		return True
 	else:
 		return False
+
+def getCrewsWithOpenProxies():
+	proxies = {}
+	for instance_name, crew in crews.items():
+		if crew.proxy_open:
+			proxies[instance_name] = crew.crew_name
+	return proxies
 
 core.subscribe("activity", setCrewStatus)

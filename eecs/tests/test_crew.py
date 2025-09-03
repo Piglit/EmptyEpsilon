@@ -164,4 +164,11 @@ def _test_setStatus():
 	assert "Hurz!" not in entries
 	print(entries)
 
+def test_proxy():
+	assert not getCrewsWithOpenProxies()
+	s = getOrCreateCrew(serverName, crewName)
+	s.setProxyOpen(True)
+	assert getCrewsWithOpenProxies()[serverName] == crewName
+	s.setProxies({serverName: crewName})
+	assert s.getProxies()[serverName] == crewName
 

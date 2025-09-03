@@ -18,7 +18,8 @@ def log_activity(crew, what, **kwargs):
 
 def log_script_message(crew, scenario, topic, details):
 	log.info(f"{crew}\tin {scenario} caused {topic}")
-	log.debug(f"\t{details}")
+	if details:
+		log.debug(f"\t{details}")
 
 core.subscribe("activity", log_activity)
 core.subscribe("progress", log_activity)

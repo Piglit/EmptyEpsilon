@@ -352,6 +352,9 @@ void CrewStationScreen::showTab(GuiElement* element)
 
 GuiElement* CrewStationScreen::findTab(string name)
 {
+    if (tabs.size() == 0)
+        return nullptr;
+
     for(CrewTabInfo& info : tabs)
     {
         if (info.button->getText() == name)

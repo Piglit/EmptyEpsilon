@@ -100,7 +100,9 @@ end
 -- @tparam SpaceStation comms_target
 function commsShipEnemy(comms_source, comms_target)
     local comms_data = comms_target.comms_data
-	return enemyComms(comms_data) -- from xansta_mods
+	if true then
+		return enemyComms(comms_data) -- from xansta_mods
+	end
     if comms_data.friendlyness > 50 then
         local faction = comms_target:getFaction()
         local message

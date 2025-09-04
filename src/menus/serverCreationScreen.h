@@ -76,18 +76,20 @@ public:
 private:
     void loadCampaign();
     void displayDetails(string caption, std::vector<std::pair<string, string> > details);
-    GuiElement* right;
-    GuiElement* layout;
-    GuiElement* score_layout;
-    GuiListbox* first_list;
-    GuiListbox* scenario_list;
-    GuiButton* start_button;
-    GuiHelpOverlay* splash_briefing;
+    GuiElement* right = nullptr;
+    GuiElement* layout = nullptr;
+    GuiElement* score_layout = nullptr;
+    GuiListbox* first_list = nullptr;
+    GuiListbox* scenario_list = nullptr;
+    GuiListbox* proxy_list = nullptr;
+    GuiButton* start_button = nullptr;
+    GuiHelpOverlay* splash_briefing = nullptr;
 	GuiLabel* crew_text_label = nullptr;
 	GuiLabel* crew_amount_label = nullptr;
     string crew_text;
     string briefing_text;
 	std::map<string, string> score;
+	std::map<string, string> proxies;
 };
 
 class ProxyJoinScreen: public GuiCanvas//, Updatable
@@ -96,9 +98,24 @@ private:
     GuiSelector* ship_template_selector;
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
+    sp::io::network::Address host;
+    int listenPort;
 public:
     ProxyJoinScreen(sp::io::network::Address host, int listenPort);
-    //virtual void update(float delta) override;
+//    virtual void update(float delta) override;
     bool proxySpawn(string templ, string drive);
 };
+
+class ProxyConnectedScreen: public GuiCanvas, Updatable
+{
+private:
+    sp::io::network::Address host;
+    int listenPort;
+    GuiLabel* status_label;
+    string callsign;
+public:
+    ProxyConnectedScreen(sp::io::network::Address host, int listenPort, string callsign);
+    virtual void update(float delta) override;
+};
+
 #endif//SERVER_CREATION_SCREEN_H

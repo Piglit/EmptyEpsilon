@@ -41,37 +41,24 @@ function wh_players:init()
 		["Targaryen"]			= { strength = 1,	cargo = 0,	distance = 1200,probes = 12,},
 	}
 
-	self.shipsByInstance = {}
+	campaign.allowReinforcements(function (ship, instance, callsign)
+		--[[
+		if self.shipsByInstance[instance] == nil then
+			self:spawnedShipEnterSector(ship, callsign)
+		else
+			self:respawnedPlayerShip(ship)
+		end
+		--]]
+		wh_players:spawnedShipOnCommandStation(ship)
+		sendMessageToCampaignServer("request_reputation", callsign)
+		sendMessageToCampaignServer("request_artifacts", callsign)
+	end)
+
 	getScriptStorage().wh_players = self
 end
 
 function wh_players:initTest()
 	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
-end
-
-function wh_players:onProxySpawn(instance, callsign, template, drive, password)
-	if self.shipsByInstance[instance] ~= nil and self.shipsByInstance[instance]:isValid() then
-		return callsign -- a ship for your proxy already exists
-	end
-	local ship = PlayerSpaceship():setTemplate(template):setCallSign(callsign):setControlCode(password)
-	if drive == "warp" then
-		ship:setWarpDrive(true):setJumpDrive(false)
-	elseif ship.drive == "jump" then
-		ship:setWarpDrive(false):setJumpDrive(true)
-	end
-
-	--[[
-	if self.shipsByInstance[instance] == nil then
-		self:spawnedShipEnterSector(ship, callsign)
-	else
-		self:respawnedPlayerShip(ship)
-	end
-	--]]
-	self:spawnedShipOnCommandStation(ship)
-	sendMessageToCampaignServer("request_reputation", callsign)
-	sendMessageToCampaignServer("request_artifacts", callsign)
-	self.shipsByInstance[instance] = ship
-	return callsign
 end
 
 function wh_players:spawnedShipOnCommandStation(ship)

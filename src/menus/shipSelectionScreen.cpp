@@ -21,6 +21,7 @@
 #include "screens/spectatorScreen.h"
 #include "screens/gm/gameMasterScreen.h"
 #include "menus/serverCreationScreen.h"
+#include "GMActions.h"
 
 #include "gui/gui2_panel.h"
 #include "gui/gui2_label.h"
@@ -456,6 +457,17 @@ ShipSelectionScreen::ShipSelectionScreen()
         } else {
             // our ship does no longer exist. Return to spawn menu.
             destroy();
+            soundManager->stopMusic();
+			if (game_client)
+				game_client->destroy();
+			if (gameGlobalInfo)
+				gameGlobalInfo->destroy();
+			if (gameMasterActions)
+				gameMasterActions->destroy();
+			foreach(PlayerInfo, i, player_info_list)
+				i->destroy();
+			if (my_player_info)
+				my_player_info->destroy();
             string host_name = PreferencesManager::get("proxy_addr", "");
             auto host = sp::io::network::Address(host_name);
             int listenPort = PreferencesManager::get("proxy_listen_port", "0").toInt();

@@ -314,6 +314,7 @@ ServerCampaignScreen::ServerCampaignScreen()
 
         start_button->disable()->hide();
         scenario_list->setSelectionIndex(-1);
+        proxy_list->setSelectionIndex(-1);
         if (value == "Instructions")
         {
             (new GuiLabel(layout, "GENERAL_LABEL", tr("Instructions"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
@@ -369,13 +370,26 @@ ServerCampaignScreen::ServerCampaignScreen()
         displayDetails(info.name, info.detailed_description);
         start_button->enable()->show();
         first_list->setSelectionIndex(-1);
-        if (info.proxy != "") {
-            start_button->setText(tr("Join scenario"));
-        } else {
+        proxy_list->setSelectionIndex(-1);
+//        if (info.proxy != "") {
+//            start_button->setText(tr("Join scenario"));
+//        } else {
             start_button->setText(tr("Start scenario"));
-        }
+//        }
     });
-    scenario_list->setSize(GuiElement::GuiSizeMax, 550);
+    scenario_list->setSize(GuiElement::GuiSizeMax, 250);
+
+    // proxies
+    (new GuiLabel(middle, "GENERAL_LABEL", tr("Support"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+    proxy_list = new GuiListbox(middle, "PROXY_LIST", [this](int index, string value)
+    {
+        displayDetails(proxies[value], {{"Description", "Support another ship on its current mission.\nSince you don't have any information on the mission and what to expect, make sure to contact the ship you support as soon as possible."}});
+        start_button->enable()->show();
+        start_button->setText(tr("Join scenario"));
+        first_list->setSelectionIndex(-1);
+        scenario_list->setSelectionIndex(-1);
+    });
+    proxy_list->setSize(GuiElement::GuiSizeMax, 200);
 
     //======== Bottom buttons
     // Close server button.
@@ -388,14 +402,31 @@ ServerCampaignScreen::ServerCampaignScreen()
 
     // Start server button.
     start_button = new GuiButton(this, "START_SCENARIO", tr("Start scenario"), [this]() {
-        if (scenario_list->getSelectionIndex() == -1)
-            return;
-        auto filename = scenario_list->getEntryValue(scenario_list->getSelectionIndex());
-        ScenarioInfo info(filename);
-
-        if (info.proxy != "")
+        if (scenario_list->getSelectionIndex() != -1)
         {
-            string host_name = info.proxy;
+            auto filename = scenario_list->getEntryValue(scenario_list->getSelectionIndex());
+            ScenarioInfo info(filename);
+            if (info.settings.empty())
+            {
+                // Start the selected scenario.
+                gameGlobalInfo->scenario = info.name;
+                gameGlobalInfo->startScenario(filename);
+
+                // Destroy this screen and move on to control screen 
+                destroy();
+                new MissionControlScreen(getRenderLayer());
+            }
+            else
+            {
+                new ServerScenarioOptionsScreen(filename);
+                destroy();
+            }
+        }
+        else if (proxy_list->getSelectionIndex() != -1)
+        {
+            string host_name = proxy_list->getEntryValue(proxy_list->getSelectionIndex());
+            // FIXME proxy must be able to resolve the servers hostname!
+            // otherwise host is empty, resulting in a segfault
             auto host = sp::io::network::Address(host_name);
             PreferencesManager::set("proxy_addr", host.getHumanReadable()[0]);
             int port = defaultServerPort;
@@ -404,40 +435,19 @@ ServerCampaignScreen::ServerCampaignScreen()
             PreferencesManager::set("proxy_listen_port", std::to_string(listenPort));
             string proxyName = PreferencesManager::get("shipname", "");
 
-            // before disconnectFromServer, since it destroys gameGlobalInfo:
-            gameGlobalInfo->scenario = info.name;
-            gameGlobalInfo->scenario_filename = filename;
-            gameGlobalInfo->notifyCampaignServerScenario("joined");
-
+            nlohmann::json info = {
+                {"proxy", {
+                        {"host_name", host_name.c_str()},
+                        {"crew_name", proxies[host_name].c_str()}
+                    }
+                }
+            };
+            campaign_client->notifyCampaignServer("joinedproxy", info);
             disconnectFromServer();
             new GameServerProxy(host, port, password, listenPort, proxyName);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            /*
-            ServerScanner::ServerInfo info;
-            info.type = ServerScanner::ServerType::Manual;
-            info.name = host;
-            info.port = listenPort;
-            info.address = sp::io::network::Address("localhost");
-
-            new JoinServerScreen(info);
-            */
             destroy();
             new ProxyJoinScreen(host, listenPort);
-        }
-        else if (info.settings.empty())
-        {
-            // Start the selected scenario.
-            gameGlobalInfo->scenario = info.name;
-            gameGlobalInfo->startScenario(filename);
-
-            // Destroy this screen and move on to control screen 
-            destroy();
-            new MissionControlScreen(getRenderLayer());
-        }
-        else
-        {
-            new ServerScenarioOptionsScreen(filename);
-            destroy();
         }
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50)->disable()->hide();
@@ -487,19 +497,25 @@ void ServerCampaignScreen::loadCampaign()
 
     scenario_list->setSelectionIndex(-1);
     scenario_list->setOptions({});
-    auto scenarios = campaign["scenarios"];
-    for (auto scenario : scenarios)
+    for (auto scenario : campaign["scenarios"])
     {
         string filename = scenario.get<std::string>();
         ScenarioInfo info(filename);
         scenario_list->addEntry(info.name, info.filename);
+    }
+
+    proxy_list->setSelectionIndex(-1);
+    proxy_list->setOptions({});
+    for (auto const& [key, value]: campaign["proxies"].items())
+    {
+        proxies[key] = value;
+        proxy_list->addEntry(value, key);
     }
     auto score_json = campaign["score"];
     for (auto const& [key, value]: score_json.items())
     {
         score[key] = value;
     }
-
 }
 
 void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
@@ -528,6 +544,9 @@ void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<
         // Score
         if (score_layout)
             score_layout->destroy();
+
+        if (proxy_list->getSelectionIndex() != -1)
+            return;
         score_layout = new GuiElement(layout, "");
         score_layout->setAttribute("layout", "vertical");
         score_layout->setPosition(0, -130, sp::Alignment::BottomCenter);
@@ -678,15 +697,15 @@ void ServerCampaignScreen::update(float delta)
 	}
 }
 
-ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort)
+ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort): host(host), listenPort(listenPort)
 {
     new GuiOverlay(this, "", colorConfig.background);
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
     auto container = new GuiElement(this, "");
-    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 370+50+50)->setAttribute("layout", "horizontal");
+    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 420+50+50)->setAttribute("layout", "horizontal");
     auto panel = new GuiPanel(container, "");
-    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 370);
+    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 420);
      
     // ship creation panel
     auto ship_content = new GuiElement(panel, "");
@@ -724,21 +743,23 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort)
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();
-        if (proxySpawn(ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue()))
+        if (!proxySpawn(ship_template_selector->getSelectionValue(), ship_drive_selector->getSelectionValue()))
+            ship_create_button->enable();
+        else
         {
-            ServerScanner::ServerInfo info;
-            info.type = ServerScanner::ServerType::Manual;
-            if (!host.getHumanReadable().empty())
-                info.name = host.getHumanReadable()[1];
-            info.port = listenPort;
-            info.address = sp::io::network::Address(host);
-            new JoinServerScreen(info);
+            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
             destroy();
         }
-        else
-            ship_create_button->enable();
     });
     ship_create_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+
+	// Close server button.
+	(new GuiButton(ship_content, "CLOSE_SERVER", tr("Close"), [this]() {
+		campaign_client->notifyCampaignServerScreen("login");
+		destroy();
+		disconnectFromServer();
+		new CampaignMenu();
+	}))->setPosition(20, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
 }
 
 bool ProxyJoinScreen::proxySpawn(string templ, string drive)
@@ -746,7 +767,7 @@ bool ProxyJoinScreen::proxySpawn(string templ, string drive)
     string callsign = PreferencesManager::get("shipname", "");
     string instance = PreferencesManager::get("instance_name", "");
     string password = PreferencesManager::get("password", "");
-    string script = "getScriptStorage().wh_players:onProxySpawn(\""
+    string script = "getScriptStorage().onProxySpawn(\""
         + instance + "\", \""
         + callsign + "\", \""
         + templ + "\", \""
@@ -770,5 +791,61 @@ bool ProxyJoinScreen::proxySpawn(string templ, string drive)
         return false;
     }
     return true;
+}
+
+ProxyConnectedScreen::ProxyConnectedScreen(sp::io::network::Address host, int listenPort, string callsign): host(host), listenPort(listenPort), callsign(callsign)
+{
+    if (!game_client)
+    {
+        new GameClient(VERSION_NUMBER, host, listenPort);
+        LOG(DEBUG) << "created new client";
+    }
+    new GuiOverlay(this, "", colorConfig.background);
+    (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
+    status_label = new GuiLabel(this, "STATUS", tr("Searching for connection..."), 50);
+    status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
+	// Close server button.
+	(new GuiButton(this, "CLOSE_SERVER", tr("Disconnect"), [this]() {
+		campaign_client->notifyCampaignServerScreen("login");
+		destroy();
+		disconnectFromServer();
+		new CampaignMenu();
+	}))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(200, 50);
+}
+
+void ProxyConnectedScreen::update(float delta)
+{
+    if (!game_client)
+        status_label->setText(tr("Connecting."));
+    else if (game_client->getStatus() != GameClient::Connected)
+        status_label->setText(tr("Connecting.."));
+    else if (game_client->getClientId() <= 0)
+        status_label->setText(tr("Connecting..."));
+    else
+    {
+
+        foreach(PlayerInfo, i, player_info_list)
+            if (i->client_id == game_client->getClientId())
+                my_player_info = i;
+        if (!my_player_info)
+            status_label->setText(tr("Waiting for ship."));
+        else if (!gameGlobalInfo)
+            status_label->setText(tr("Waiting for ship.."));
+        else if (!my_spaceship)
+        {
+            status_label->setText(tr("Waiting for ship..."));
+            for(int n=0; n<GameGlobalInfo::max_player_ships; n++)
+            {
+                P<PlayerSpaceship> ship = gameGlobalInfo->getPlayerShip(n);
+                if (ship->getCallSign().lower() == callsign.lower())
+                {
+                    my_player_info->commandSetShipId(ship->getMultiplayerId());
+                    break;
+                }
+            }
+        }
+        else
+            status_label->setText(tr("Connected"));
+    }
 }
 

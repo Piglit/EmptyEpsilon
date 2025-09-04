@@ -61,9 +61,10 @@ def backlog_send():
 		if station_server == instance_name:
 			continue
 		color = "cyan"
+		order = ord(instance_name[0]) * 100 + len(instance_name)
 		script += f"""
 			_OBJECT_:addToShipLog("{msg}", "{color}")
-			_OBJECT_:addCustomInfo("ShipLog", "{instance_name}", "{msg}")"""
+			_OBJECT_:addCustomInfo("ShipLog", "{instance_name}", "{msg}", {order})"""
 	luaExecutor.exec(script, station_server+":8080", 0, _callback)
 
 def _callback(success):
@@ -76,10 +77,11 @@ def status_update(crew, what, **kwargs):
 	(station_server, station_name) = existing_subscription
 	station_name = lua.sanitize_lua_string(station_name)
 	msg, instance_name = sanitize_message(crew, what)
+	order = ord(instance_name[0]) * 100 + len(instance_name)
 	script = f"""
 		local id=getPlayerShipIndex("{station_name}")
 		_OBJECT_=getPlayerShip(id)
-		_OBJECT_:addCustomInfo("ShipLog", "{instance_name}", "{msg}")"""
+		_OBJECT_:addCustomInfo("ShipLog", "{instance_name}", "{msg}", {order})"""
 	try:
 		lua.exec(script, station_server+":8080")
 	except requests.exceptions.ConnectionError:

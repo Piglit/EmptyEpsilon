@@ -53,7 +53,7 @@ void disconnectFromServer()
     if (game_server)
         game_server->destroy();
     if (game_proxy)
-        game_proxy->destroy();  // FIXME This one does not get properly destroyed. Pointer is still valid afterwards
+        game_proxy->destroy();
     if (gameGlobalInfo)
         gameGlobalInfo->destroy();
     if (gameMasterActions)

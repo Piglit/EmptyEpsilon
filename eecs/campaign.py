@@ -315,7 +315,8 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 	elif event_topic == "reinforcenemts":
 		details = json.loads(details)
 		crew.setProxyOpen(details["allow"])
-	elif event_topic == "started":
+	
+	if event_topic in ["started", "quit", "victory", "defeat", "end", "joined"]:
 		crew.setProxyOpen(False)
 
 

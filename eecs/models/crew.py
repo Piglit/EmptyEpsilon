@@ -54,7 +54,7 @@ class Crew:
 
 	def getProxies(self) -> dict[str,str]:
 		for instance_name, crew in crews.items():
-			if not crew.proxy_open:
+			if not crew.proxy_open and instance_name in self.proxies:
 				del self.proxies[instance_name]
 		return self.proxies
 

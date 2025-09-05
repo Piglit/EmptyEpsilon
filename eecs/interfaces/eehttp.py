@@ -42,6 +42,10 @@ class EEServer(BaseModel):
 	instance_name: str
 	crew_name: str
 
+class EEProxy(BaseModel):
+	host_name: str
+	crew_name: str
+
 class EEScenario(BaseModel):
 	filename: str
 	name: str
@@ -56,6 +60,11 @@ class EEScenario(BaseModel):
 async def scenario_event(event: ScenarioEvents, scenario: EEScenario, server: EEServer):
 	c = models.crew.getOrCreateCrew(server.instance_name, server.crew_name)
 	activity(c, event.fleet_info() + " " + str(scenario), event=event, scenario=scenario.getScenario())
+
+@app.post("/joinedproxy")
+async def proxy_event(proxy: EEProxy, server: EEServer):
+	c = models.crew.getOrCreateCrew(server.instance_name, server.crew_name)
+	activity(c, f"joined {proxy.crew_name}")
 
 @app.post("/screen")
 async def screen(server: EEServer, screen: str = Body(...)):

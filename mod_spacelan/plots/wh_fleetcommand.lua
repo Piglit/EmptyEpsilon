@@ -29,6 +29,7 @@ function wh_fleetcommand.spawnFleetCommand()
 	local fc = PlayerSpaceship():setTemplate("Targaryen"):setCallSign("Der Ball"):setPosition(posx, posy)
 	fc:setJumpDrive(false):setWeaponTubeCount(0):setWeaponStorageMax("Homing", 0):setWeaponStorage("Homing", 0):setShieldsMax():setMaxScanProbeCount(0):setLongRangeRadarRange(5000)
 	fc:setCanLaunchProbe(false):setCanHack(false):setCanScan(false):setCanSelfDestruct(false)
+	fc:setControlCode("rundilein")
 	for n=0,4 do
 		fc:setBeamWeapon(n, 90,  n * 90, 0, 6, 5)
 	end

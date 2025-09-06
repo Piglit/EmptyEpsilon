@@ -67,6 +67,11 @@ function wh_players:spawnedShipOnCommandStation(ship)
 		local x,y = station:getPosition()
 		setCirclePos(ship, x,y, random(0,360), 500)
 		ship:commandDock(station)
+		--[[
+		for _,missile in ipairs(MISSILE_TYPES) do
+			ship:setWeaponStorage(missile, 0)
+		end
+		--]]
 	end
 end
 

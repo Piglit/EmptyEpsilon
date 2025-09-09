@@ -15,7 +15,7 @@ require "place_station_scenario_utility.lua"
 require "luax.lua"
 
 function avp_stations:init()
-	local characters = {
+	self.characters = {
 		{name = "Frank Brown", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
 		{name = "Joyce Miller", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
 		{name = "Harry Jones", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
@@ -102,6 +102,14 @@ function avp_stations:createInTerrain(terrain_module)
 --		sizeTemplate = "Huge Station"
 --	end
 	station:setTemplate(sizeTemplate)
+	station:setCommsScript("comms_station_sandbox.lua")
+	local character = table.remove(self.characters)	-- pop one into this station
+	if character ~= nil then
+		station.characters = {character}
+	end
+	--station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
+
+	--self:setRepairMissions() --TODO
 
 	-- place station
 	terrain_module:insertStation(station)

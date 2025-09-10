@@ -74,7 +74,7 @@ CampaignMenu::CampaignMenu()
         if (game_server)
         {
             game_server->setServerName(PreferencesManager::get("shipname"));
-            game_server->setPassword(PreferencesManager::get("password").upper());
+//            game_server->setPassword(PreferencesManager::get("password").upper());
             if (campaign_client && campaign_client->isOnline()) {
                 gameGlobalInfo->campaign_running = true;
                 new ServerCampaignScreen();

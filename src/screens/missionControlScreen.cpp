@@ -159,6 +159,7 @@ MissionControlScreen::MissionControlScreen(RenderLayer* render_layer, glm::vec2 
                     ship->setJumpDrive(false);
                     ship->setWarpDrive(true);
                 }
+                ship->setControlCode(PreferencesManager::get("password", ""));
                 my_player_info->commandSetShipId(ship->getMultiplayerId());
                 ship_create_button->disable();
             }

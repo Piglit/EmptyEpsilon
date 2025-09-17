@@ -434,7 +434,7 @@ function wh_fleetcommand:update(delta)
 			local amount = ship:getResourceAmount(resource)
 			if amount <= 0 then
 				fc:addCustomButton("Engineering+", resource, resource .. " (" .. tostring(-value) .. ")", function()
-					fc.last_upgrade_menu = ship:getCallSign()
+					fc.last_upgrade_menu = fc.upgrade_menu_status
 					fc.upgrade_menu_status = resource
 					for _,resource in ipairs(fc:getResources("Ship Upgrades")) do
 						fc:removeCustom(resource)

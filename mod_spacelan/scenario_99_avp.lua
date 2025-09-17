@@ -13,15 +13,16 @@ function table.dump(...)
 	print(serpent.block(...))
 end
 
-TEST = true
+TEST = false
 
 function init()
 	difficulty = 1	-- global var from xanstas stuff
 	init_constants_xansta()
 
 	plot_manager:init({
-		"wh_fleetcommand",
+		"campaign",
 		"wh_players",
+		"wh_fleetcommand",
 		"wh_artifacts",
 		"wh_rota",
 		"gravity_util",

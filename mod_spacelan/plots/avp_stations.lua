@@ -57,39 +57,19 @@ function avp_stations:init()
 		{name = "Miguel Lopez", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
 		{name = "Renata Rodriguez", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
 	}
---[[
-	repeat		
-		local ox, oy = vectorFromAngle(random(0,360),random(40000,100000))
-		ox = ox + center_x
-		oy = oy + center_y
-		local obj_list = getObjectsInRadius(ox, oy, 20000)
-		if #obj_list == 0 then
-			local station = placeStation(ox, oy, "RandomHumanNeutral", "Arlenians")	-- random size
-			if station ~= nil then
-				station:setCommsScript("comms_station_sandbox.lua")
-				local character = table.remove(characters)	-- pop one into this station
-				if character ~= nil then
-					station.characters = {character}
-				end
-				table.insert(self.stations, station)
-				station.surrender_hull_threshold = math.random(40,80)	-- for avp_kraylor
-			else
-				break
-			end
-		end
-		placement_attempt_count = placement_attempt_count + 1
-	until(placement_attempt_count > 500)
 
-	-- distribute remaining characters, if any
-	while #characters > 0 do
-		local station = tableSelectRandom(self.stations)
-		table.insert(station.characters, table.remove(characters))
-	end
+    self.mission_goods = {}
+    self.ordnance_missions = {
+        "Homing","Nuke","EMP","Mine","HVLI",
+    }
+    for i,mission in ipairs(self.ordnance_missions) do
+        self.mission_goods[mission] = {"nickel","platinum","gold","dilithium","tritanium","cobalt","circuit","filament"}
+    end
+    table.insert(self.mission_goods.Homing,"sensor")
+    table.insert(self.mission_goods.Nuke,"sensor")
+    table.insert(self.mission_goods.EMP,"sensor")
+	assert (vapor_goods ~= nil)	-- from xansta_mods
 
-
-	self:setRepairMissions()
-	getScriptStorage().avp_stations = self 
---]]
 end
 
 
@@ -103,18 +83,21 @@ function avp_stations:createInTerrain(terrain_module)
 --	end
 	station:setTemplate(sizeTemplate)
 	station:setCommsScript("comms_station_sandbox.lua")
+
 	local character = table.remove(self.characters)	-- pop one into this station
 	if character ~= nil then
 		station.characters = {character}
 	end
-	--station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
+	station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
 
-	--self:setRepairMissions() --TODO
+	self:setRepairMissions(station)
 
 	-- place station
-	terrain_module:insertStation(station)
-	if terrain_module.terrain_type == "asteroids" then
-		avp_mining:activateMining(station, 2*terrain_module.radius)
+	if terrain_module ~= nil then
+		terrain_module:insertStation(station)
+		if terrain_module.terrain_type == "asteroids" then
+			avp_mining:activateMining(station, 2*terrain_module.radius)
+		end
 	end
 	-- do not use most of the comms data from the utility,
 	-- keep description, general, history as they are descriptive
@@ -182,7 +165,14 @@ function avp_stations:createInTerrain(terrain_module)
 		"restock_probes",
 		"sell_weapons",
 	}
-	if terrain_module.terrain_type == "asteroids" then
+	if terrain_module == nil then
+		station.comms_data.weapon_available.EMP = true
+		station.comms_data.weapon_available.HVLI = true
+--		station.comms_data.weapon_available.Homing = true
+		station.comms_data.weapon_available.Mine = true
+		station.comms_data.weapon_available.Nuke = true
+		services = all_services
+	elseif terrain_module.terrain_type == "asteroids" then
 		station.comms_data.weapon_available.HVLI = true
 		services = {"repair_docked", "sell_weapons"}
 	elseif terrain_module.terrain_type == "nebulae" then
@@ -203,7 +193,7 @@ function avp_stations:createInTerrain(terrain_module)
 
 	-- all the specific services are available for friends only
 	for _, service in ipairs(services) do
-		station.comms_data.services[service] = "friend"
+		station.comms_data.services[service] = false--"friend"
 	end
 
 	-- choose few of the services for neutrals
@@ -226,11 +216,11 @@ function avp_stations:createInTerrain(terrain_module)
 		end
 		station.comms_data.services[service] = "neutral"
 	end
-	
 	station:setSharesEnergyWithDocked(station.comms_data.services.share_energy ~= false)
 	station:setRepairDocked(station.comms_data.services.repair_docked ~= false)
 	station:setRestocksScanProbes(station.comms_data.services.restock_probes ~= false)
 
+	table.insert(self.stations, station)
 	return station
 end
 
@@ -246,8 +236,7 @@ function avp_stations:initTest()
 	ship:setResourceAmount("Xenolinguistic Team", 1)
 end
 --]]
---[[
-function avp_stations:setRepairMissions()
+function avp_stations:setRepairMissions(station)
     local mission_reasons = {
         ["energy"] = {
             [_("situationReport-comms", "A recent reactor failure has put us on auxiliary power, so we cannot recharge ships.")] = {
@@ -283,69 +272,56 @@ function avp_stations:setRepairMissions()
             },
         }
     }
-    local mission_goods = {}
-    local ordnance_missions = {
-        "Homing","Nuke","EMP","Mine","HVLI",
-    }
-    for i,mission in ipairs(ordnance_missions) do
-        mission_goods[mission] = {"nickel","platinum","gold","dilithium","tritanium","cobalt","circuit","filament"}
-    end
-    table.insert(mission_goods.Homing,"sensor")
-    table.insert(mission_goods.Nuke,"sensor")
-    table.insert(mission_goods.EMP,"sensor")
-	assert (vapor_goods ~= nil)	-- from xansta_mods
 
-    local mission_stations = self.stations
-    for i,station in ipairs(mission_stations) do
-		station.mission_goods = {}
-		for j,m_type in ipairs(ordnance_missions) do
-			station.mission_goods[m_type] = tableSelectRandom(mission_goods[m_type])
-		end
-		if not station:getRestocksScanProbes() then
-				local reason_list = {
-					_("situationReport-comms", "Cannot replenish scan probes due to fabrication unit failure."),
-					_("situationReport-comms", "Parts shortage prevents scan probe replenishment."),
-					_("situationReport-comms", "Station management has curtailed scan probe replenishment for cost cutting reasons."),
-				}
-				station.probe_fail_reason = reason_list[math.random(1,#reason_list)]
-				station.mission_goods["restock_probes"] = tableSelectRandom(mission_reasons["restock_probes"][station.probe_fail_reason])
-		end
-		if not station:getRepairDocked() then
-				reason_list = {
-					_("situationReport-comms", "We're out of the necessary materials and supplies for hull repair."),
-					_("situationReport-comms", "Hull repair automation unavailable while it is undergoing maintenance."),
-					_("situationReport-comms", "All hull repair technicians quarantined to quarters due to illness."),
-				}
-				station.repair_fail_reason = reason_list[math.random(1,#reason_list)]
-				station.mission_goods["hull"] = tableSelectRandom(mission_reasons["hull"][station.repair_fail_reason])
-		end
-		if not station:getSharesEnergyWithDocked() then
-				reason_list = {
-					_("situationReport-comms", "A recent reactor failure has put us on auxiliary power, so we cannot recharge ships."),
-					_("situationReport-comms", "A damaged power coupling makes it too dangerous to recharge ships."),
-					_("situationReport-comms", "An asteroid strike damaged our solar cells and we are short on power, so we can't recharge ships right now."),
-				}
-				station.energy_fail_reason = reason_list[math.random(1,#reason_list)]
-				station.mission_goods["energy"] = tableSelectRandom(mission_reasons["energy"][station.energy_fail_reason])
-		end
+	station.mission_goods = {}
+	for j,m_type in ipairs(self.ordnance_missions) do
+		station.mission_goods[m_type] = tableSelectRandom(self.mission_goods[m_type])
+	end
+	if not station:getRestocksScanProbes() then
+		local reason_list = {
+			_("situationReport-comms", "Cannot replenish scan probes due to fabrication unit failure."),
+			_("situationReport-comms", "Parts shortage prevents scan probe replenishment."),
+			_("situationReport-comms", "Station management has curtailed scan probe replenishment for cost cutting reasons."),
+		}
+		station.probe_fail_reason = reason_list[math.random(1,#reason_list)]
+		station.mission_goods["restock_probes"] = tableSelectRandom(mission_reasons["restock_probes"][station.probe_fail_reason])
+	end
+	if not station:getRepairDocked() then
+		reason_list = {
+			_("situationReport-comms", "We're out of the necessary materials and supplies for hull repair."),
+			_("situationReport-comms", "Hull repair automation unavailable while it is undergoing maintenance."),
+			_("situationReport-comms", "All hull repair technicians quarantined to quarters due to illness."),
+		}
+		station.repair_fail_reason = reason_list[math.random(1,#reason_list)]
+		station.mission_goods["hull"] = tableSelectRandom(mission_reasons["hull"][station.repair_fail_reason])
+	end
+	if not station:getSharesEnergyWithDocked() then
+		reason_list = {
+			_("situationReport-comms", "A recent reactor failure has put us on auxiliary power, so we cannot recharge ships."),
+			_("situationReport-comms", "A damaged power coupling makes it too dangerous to recharge ships."),
+			_("situationReport-comms", "An asteroid strike damaged our solar cells and we are short on power, so we can't recharge ships right now."),
+		}
+		station.energy_fail_reason = reason_list[math.random(1,#reason_list)]
+		station.mission_goods["energy"] = tableSelectRandom(mission_reasons["energy"][station.energy_fail_reason])
+	end
 
-		--remove what is sold here
-		if station.comms_data ~= nil and station.comms_data.goods ~= nil then
-			for station_good,details in pairs(station.comms_data.goods) do
-				for mission,mission_good in pairs(station.mission_goods) do
-					if mission_good == station_good then
-						station.mission_goods[mission] = tableSelectRandom(vapor_goods)
-					end
+	--remove what is sold here
+	if station.comms_data ~= nil and station.comms_data.goods ~= nil then
+		for station_good,details in pairs(station.comms_data.goods) do
+			for mission,mission_good in pairs(station.mission_goods) do
+				if mission_good == station_good then
+					station.mission_goods[mission] = tableSelectRandom(vapor_goods)
 				end
 			end
 		end
-    end
+	end
 	--[[ don't know what this is for...
+    local mission_stations = self.stations
     local missions_stations_goods = {}
     for i,station in ipairs(mission_stations) do
 		if station.comms_data ~= nil and station.comms_data.goods ~= nil then
 			for station_good,details in pairs(station.comms_data.goods) do
-				for mission,mission_goods in pairs(mission_goods) do
+				for mission,mission_goods in pairs(self.mission_goods) do
 					for k,mission_good in ipairs(mission_goods) do
 						if mission_good == station_good then
 							if missions_stations_goods[mission] == nil then
@@ -396,20 +372,20 @@ function avp_stations:setRepairMissions()
                 end
                 if not good_selected then
                     mission_good[mission] = {good = good, station = selected_station}
-                    mission_goods[mission] = {good}
+                    self.mission_goods[mission] = {good}
                     table.insert(already_selected_good,good)
                     selected_station.selected_mission_good = good
                 end
             else
                 mission_good[mission] = {good = good, station = selected_station}
-                mission_goods[mission] = {good}
+                self.mission_goods[mission] = {good}
                 table.insert(already_selected_good,good)
                 selected_station.selected_mission_good = good
             end
         end
     end
     --    complete goods selection for missions
-    for mission,goods in pairs(mission_goods) do
+    for mission,goods in pairs(self.mission_goods) do
         local selected_good = nil
         if #goods > 1 then
             local good_pool = {}
@@ -461,8 +437,7 @@ function avp_stations:setRepairMissions()
         print("Mission:",mission,"Good:",details.good,"Station:",out_station)
     end
 	--]]
---end
---]]
+end
 function avp_stations:update(delta)
 	for _, station in ipairs(self.stations) do
 		if station:isValid() then

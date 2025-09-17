@@ -39,9 +39,11 @@ function wh_players:init()
 		["Pod"]					= { strength = 1,	cargo = 0,	distance = 100,	probes = 0,},
 		["Poseidon"]			= { strength = 30,	cargo = 6,	distance = 400,	probes = 10,},
 		["Targaryen"]			= { strength = 1,	cargo = 0,	distance = 1200,probes = 12,},
+		["SpySat"]				= { strength = 1,	cargo = 0,	distance = 100, probes = 0,},
+		["Pod"]					= { strength = 1,	cargo = 0,	distance = 100, probes = 0,},
 	}
 
-	campaign.allowReinforcements(function (ship, instance, callsign)
+campaign:allowReinforcements(function (ship, instance, callsign)
 		--[[
 		if self.shipsByInstance[instance] == nil then
 			self:spawnedShipEnterSector(ship, callsign)
@@ -57,9 +59,9 @@ function wh_players:init()
 	getScriptStorage().wh_players = self
 end
 
-function wh_players:initTest()
-	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
-end
+--function wh_players:initTest()
+--	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
+--end
 
 function wh_players:spawnedShipOnCommandStation(ship)
 	local station = getScriptStorage().wh_fleetcommand.station

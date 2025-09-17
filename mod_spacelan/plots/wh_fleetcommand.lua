@@ -309,6 +309,7 @@ function wh_fleetcommand:update(delta)
 	end
 
 	-- jump handling
+	--[[
 	if fc:hasJumpDrive() then
 		if distance(fc.last_pos_x, fc.last_pos_y, fc) > 10000 then
 			-- jump happended
@@ -321,7 +322,7 @@ function wh_fleetcommand:update(delta)
 			delta = delta * 1000 / 60
 			fc:setJumpDriveCharge(delta) -- max: 30000 (jump distance)
 		end
-	end
+	end--]]
 
 	-- update handling
 	fc:addCustomInfo("Engineering+", "e_Artifacts_name", "Artifacts: "..tostring(fc:getResourceAmount("Artifacts")),0)

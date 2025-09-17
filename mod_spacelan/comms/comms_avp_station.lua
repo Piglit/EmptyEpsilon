@@ -34,8 +34,8 @@ if TEST then
 		return msg
 	end
 end
-require("comms/comms_abomination")
-require("comms/comms_functions")
+require("comms/comms_abomination.lua")
+require("comms/comms_functions.lua")
 local cf = comms_functions
 
 -- string.format()
@@ -237,4 +237,4 @@ end
 
 
 
-require("comms/test_comms_abomination")	-- last line!
+require("comms/test_comms_abomination.lua")	-- last line!

@@ -4,8 +4,8 @@ To call them, give comms_source/player and comms_target/station as arguments.
 Inside these functions, those are just called source and target.
 --]]
 
-require ("utils")
-require ("luax")
+require ("utils.lua")
+require ("luax.lua")
 --require ("generate_call_sign_scenario_utility")
 
 comms_functions = {}

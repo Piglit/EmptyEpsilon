@@ -28,7 +28,7 @@ scenarios = [
 	"scenario_07_gftp.lua",			# if not artifact: unlock ghost wave
 	"scenario_08_atlantis.lua",
 
-#	"scenario_99_wormhole_expedition.lua",
+	"scenario_99_avp.lua",
 ]
 
 campaign = models.campaign.Campaign(scenarios) 

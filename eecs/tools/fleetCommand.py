@@ -132,9 +132,9 @@ def selectCrew():
 		return None
 	#maybe json.dumps(input)?
 	menu_items = [(crew["crew_name"], crew['status']) for crew in instances.values()]
-	for mi in menu_items:
-		assert mi[0].isascii()
-		assert mi[1].isascii()
+#	for mi in menu_items:
+#		assert mi[0].isascii(), mi[0]
+#		assert mi[1].isascii(), mi[1]
 	code, tag = d.menu("Select crew", choices=menu_items)
 	if code == d.OK:
 		d.infobox("Lädt Crew...")

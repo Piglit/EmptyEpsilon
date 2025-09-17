@@ -292,6 +292,8 @@ Bevor ihr jedoch eine weitere Mission beginnt, solltet ihr mit dem Flottenkomman
 		outbound.stationsComms.subscribe_comms_log(crew.instance_name, details)
 	elif event_topic == "fleetcommand-deleted":
 		outbound.stationsComms.unsubscribe_comms_log()
+	elif event_topic == "fernschreiber":
+		outbound.pyroMessage.send("Fernschreiber", details)
 	elif event_topic == "exuari-comms":
 		msg = details
 		chiffre = cypher(msg, "exuari")

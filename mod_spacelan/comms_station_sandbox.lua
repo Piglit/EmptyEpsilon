@@ -791,6 +791,10 @@ function catalogImprovements(msg)
     if msg == nil then
         msg = ""
     end
+	if comms_target:getFaction() ~= comms_source:getFaction() then
+        table.insert(improvements,"join")
+		return msg,improvements   --skip other improvements 
+	end
     if comms_target:getRestocksScanProbes() then
         msg = string.format(_("situationReport-comms","%s\nReplenish scan probes: nominal."),msg)
     else
@@ -862,9 +866,6 @@ function catalogImprovements(msg)
     else
         msg = string.format("%s\n%s.",msg,missile_provision_msg)
     end
-	if comms_target:getFaction() ~= "Human Navy" then
-        table.insert(improvements,"join")
-	end
     return msg,improvements    
 end
 function improveStationService(improvements)
@@ -942,7 +943,7 @@ function improveStationService(improvements)
             else
                 addCommsReply(tableSelectRandom(improvement_prompt[improvement]),function()    
                     local needed_good = comms_target.mission_goods[improvement]
-                    setCommsMessage(string.format(_("situationReport-comms","%s could be improved with an artifact"),tableSelectRandom(improvement_prompt[improvement])))
+                    setCommsMessage(string.format(_("situationReport-comms","%s could be improved with an artifact."),tableSelectRandom(improvement_prompt[improvement])))
                     if comms_source:getResourceAmount("Artifacts") > 0 then
                             addCommsReply(string.format(_("situationReport-comms","Provide Artifact to station %s"),comms_target:getCallSign()),function()
                                 if comms_source:isDocked(comms_target) then

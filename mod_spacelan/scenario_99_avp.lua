@@ -60,6 +60,7 @@ function create_exuari_boss()
 	onGMClick(function(x,y)
 		EnemyModuleExuari:spawnEnemiesAtPositions({{x, y}}, 1000)
 		onGMClick(nil)
+		sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir fangen eine starke Warpsignatur aus Sektor ".. getSectorName(x,y) .."auf.\nDort ist gerade etwas großes angekommen!")
 	end)
 end
 
@@ -67,6 +68,7 @@ function create_ktlitan_boss()
 	onGMClick(function(x,y)
 		EnemyModuleKtlitans:spawnEnemiesAtPositions({{x, y}}, 500)
 		onGMClick(nil)
+		sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir empfangen eine große Menge Biosignaturen aus Sektor ".. getSectorName(x,y) ..".\nWir vermuten dort eine große Anzahl an Schiffen!")
 	end)
 end
 
@@ -96,7 +98,7 @@ function createKraylorGunship()
 end
 
 function create_kraylor_fortress()
-	local x_0,y_0 = 60000,60000
+	local x_0,y_0 = 20000,100000
     local kraylor_defense_line = {
         WarpJammer():setFaction("Kraylor"):setRange(18000):setPosition(x_0 +264940, y_0 + 7657),
         WarpJammer():setFaction("Kraylor"):setRange(18000):setPosition(x_0 +289620, y_0 + 9915),
@@ -153,5 +155,6 @@ function create_kraylor_fortress()
         end
     end
 
+	sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir empfangen starke Warp-Störsignale aus Sektor ".. getSectorName(x_0 +297462, y_0 -4252) ..".\nWir vermuten dort eine Kraylor-Befestigungsanlage!")
 	removeGMFunction("Create Kraylor Fortress")
 end

@@ -442,8 +442,8 @@ function avp_stations:update(delta)
 	for _, station in ipairs(self.stations) do
 		if station:isValid() then
 			-- stations produce their buy value in one hour
-			--local gain = station:getHullMax() * 4 / 3600
-			--station:addReputationPoints(gain*delta)
+			local gain = station:getHullMax() * 4 / 3600
+			station:addReputationPoints(gain*delta)
 		end
 	end
 end

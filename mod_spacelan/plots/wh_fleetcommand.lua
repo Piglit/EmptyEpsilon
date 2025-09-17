@@ -35,7 +35,7 @@ function wh_fleetcommand.spawnFleetCommand()
 	end
 
 	fc:setSharesEnergyWithDocked(false):setRestocksScanProbes(false):setRepairDocked(false):setRestocksMissilesDocked("none")
-	fc:setResourceAmount("Artifacts", wh_fleetcommand.upgrades_done)
+	fc:setResourceAmount("Artifacts", 4)--TODO restore wh_fleetcommand.upgrades_done)
 	fc:setResourceDescription("Artifacts", "You can spend Artifacts for upgrades")
 
 	-- Docking services
@@ -120,14 +120,18 @@ function wh_fleetcommand.spawnFleetCommand()
 	fc:setResourceAmount(name, -2)
 	fc:setResourceCategory(name, "Ship Upgrades")
 	fc:setResourceDescription(name, "Allows the ship to make enemy stations neutral.")
-	name = "Diplomatic Crew"
+	name = "Transfer Artifact"
 	fc:setResourceAmount(name, -1)
 	fc:setResourceCategory(name, "Ship Upgrades")
-	fc:setResourceDescription(name, "Allows the ship to make neutral ships friendly.")
-	name = "Xenolinguistic Team"
-	fc:setResourceAmount(name, -1)
-	fc:setResourceCategory(name, "Ship Upgrades")
-	fc:setResourceDescription(name, "Allows the ship to make Kraylor ships neutral.")
+	fc:setResourceDescription(name, "Transfer an Artifact to be used somewhere else.")
+--	name = "Diplomatic Crew"
+--	fc:setResourceAmount(name, -1)
+--	fc:setResourceCategory(name, "Ship Upgrades")
+--	fc:setResourceDescription(name, "Allows the ship to make neutral ships friendly.")
+--	name = "Xenolinguistic Team"
+--	fc:setResourceAmount(name, -1)
+--	fc:setResourceCategory(name, "Ship Upgrades")
+--	fc:setResourceDescription(name, "Allows the ship to make Kraylor ships neutral.")
 
 	wh_fleetcommand.station = fc
 	wh_fleetcommand.upgrades_done = 0	-- if station gets destroyed, the respawned one will get a number of artifacts, matching the amount of upgrades of the old station.
@@ -195,7 +199,9 @@ function wh_fleetcommand.upgrade(resource)
 	elseif resource == "Long Range Radar" then
 		fc:setLongRangeRadarRange(60000)
 	end
-	if ship ~= nil then	-- ship specific
+	if resource == "Transfer Artifact" and ship ~= nil then
+		ship:increaseResourceAmount("Artifacts", 1)
+	elseif ship ~= nil then	-- ship specific
 		ship:setResourceAmount(resource, 1)
 		if ship.fc_upgrades_done == nil then
 			ship.fc_upgrades_done = 0
@@ -300,10 +306,23 @@ function wh_fleetcommand:update(delta)
 				end
 
 				-- Artifact handling
-				wh_artifacts:transferArtifacts(ps, fc)
+				if ps:getResourceAmount("Artifacts") > 0 then
+					ps:addCustomButton("Relay", "e_artifact_send", "Transfer Artifacts", function() 
+						wh_artifacts:transferArtifacts(ps, fc)
+					end)
+					ps:addCustomButton("Operations", "e_artifact_send+", "Transfer Artifacts", function() 
+						wh_artifacts:transferArtifacts(ps, fc)
+					end)
+				else
+					ps:removeCustom("e_artifact_send")
+					ps:removeCustom("e_artifact_send+")
+				end
 			else -- not docked
 				ps.docked_time = 0
 				ps:removeCustom("e_drive_refit")
+				ps:removeCustom("e_drive_refit+")
+				ps:removeCustom("e_artifact_send")
+				ps:removeCustom("e_artifact_send+")
 			end	
 		end
 	end

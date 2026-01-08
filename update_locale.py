@@ -7,7 +7,7 @@ import os
 
 def update_other_languages(base):
     assert base.endswith(".en.po")
-    for other in glob.glob(base[:-5] + "*.po"):
+    for other in glob.glob(base[:-5] + "de.po"):
         if other == base:
             continue
         print("Merge %s -> %s" % (base, other))

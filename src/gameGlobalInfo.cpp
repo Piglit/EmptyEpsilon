@@ -11,6 +11,7 @@
 #include "io/http/request.h"
 #include <SDL_assert.h>
 #include "libmumblelink.h"
+#include "scenarioInfo.h"
 
 P<GameGlobalInfo> gameGlobalInfo;
 

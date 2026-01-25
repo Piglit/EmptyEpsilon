@@ -15,18 +15,18 @@ def convertObj(filename):
 		if len(line) < 1:
 			continue
 		if line[0] == 'v':
-			vertices.append(map(lambda n: float(n), line[1:]))
+			vertices.append([map(lambda n: float(n), line[1:])])
 		elif line[0] == 'vn':
-			normals.append(map(lambda n: float(n), line[1:]))
+			normals.append([map(lambda n: float(n), line[1:])])
 		elif line[0] == 'vt':
-			uvs.append(map(lambda n: float(n), line[1:]))
+			uvs.append([map(lambda n: float(n), line[1:])])
 		elif line[0] == 'f':
-			faces.append(map(lambda n: map(lambda m: int(m), n.split('/')), line[1:]))
+			faces.append([map(lambda n: map(lambda m: int(m), n.split('/')), line[1:])])
 	f.close()
-	data = ''
+	data = bytes()
 	cnt = 0
 	for face in faces:
-		for i in xrange(2, len(face)):
+		for i in range(2, len(face)):
 			for n in [0, i-1, i]:
 				v = vertices[face[n][0] - 1]
 				vt = uvs[face[n][1] - 1]
@@ -41,8 +41,8 @@ def buildPack(name):
 	filenames = glob.glob('*') + glob.glob('*/*') + glob.glob('*/*/*')
 	files = {}
 	for filename in filenames:
-		filename = filename.encode('ascii')
 		filename = filename.replace('\\', '/')
+		filename = filename.encode('ascii')
 		if os.path.isfile(filename):
 			ext = os.path.splitext(filename)[1]
 			if ext == '.obj':
@@ -56,7 +56,7 @@ def buildPack(name):
 			files[filename] = data
 	os.chdir('..')
 	f = open(name + '.pack', 'wb')
-	flog = open(name + '.packlist', 'wb')
+	flog = open(name + '.packlist', 'w')
 	f.write(struct.pack('>i', FORMAT_VERSION))
 	f.write(struct.pack('>i', len(files)))
 	offset = 8
@@ -65,9 +65,9 @@ def buildPack(name):
 	for filename, data in files.items():
 		f.write(struct.pack('>B', len(filename)))
 		f.write(filename)
-		flog.write(filename + '\n')
+		flog.write(filename.decode() + '\n')
 		f.write(struct.pack('>ii', offset, len(data)))
-		print offset, filename
+		print(offset, filename)
 		offset += len(data)
 	for filename, data in files.items():
 		f.write(data)

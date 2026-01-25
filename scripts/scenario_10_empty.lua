@@ -5,12 +5,35 @@
 --- Scenario
 -- @script scenario_10_empty
 
+require("utils.lua")
+
 function init()
+--	PlayerSpaceship():setTemplate("Arlenian 1"):setCallSign("A1"):setPosition(0, 0):setFaction("Human Navy"):setRotation(0)
+--	PlayerSpaceship():setTemplate("Arlenian 7tcP"):setCallSign("Arl-3"):setPosition(0, 500):setFaction("Human Navy"):setRotation(0)
+--	PlayerSpaceship():setTemplate("Arlenian 7scP"):setCallSign("Arl-4"):setPosition(0, 700):setFaction("Human Navy"):setRotation(0)
+	local arlenian_ships = {
+		"Widow", "Matron", "Goldfinch", "Gentoo", "Hoatzin", "Macaw", "Spix", "Pidgeon", "Woodpecker", "Swallow", "Linnet", "Pheasant", "Grebe", "Pochard", "Crane", "Towhee", "Pelican", "Grosbeak", "Kite", "Heron",
+	}
+	for i=1, 20 do	--1, 20
+		local ship = PlayerSpaceship():setTemplate(arlenian_ships[i].."P"):setCallSign("Arl-"..i):setPosition(0, 200*i):setFaction("Human Navy"):setScanned("Human Navy"):setRotation(i*360/20):setCanBeDestroyed(false)
+		setCirclePos(ship, 0,0, i*360/20, 1500)
+		if i%2 == 0 then
+			ship:setFaction("Kraylor")
+		end
+	end
+
+	for i=0, 7 do	--1, 7
+		local ship = PlayerSpaceship():setTemplate("Arlenian Station "..i):setCallSign("Arl-S-"..i):setPosition(1000, 1000*i):setFaction("Human Navy"):setRotation(i*360/8)
+		setCirclePos(ship, 0,0, i*360/8, 400)
+		if i%2 == 0 then
+			ship:setFaction("Kraylor")
+		end
+	end
     --SpaceStation():setPosition(1000, 1000):setTemplate('Small Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(-1000, 1000):setTemplate('Medium Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(1000, -1000):setTemplate('Large Station'):setFaction("Human Navy"):setRotation(random(0, 360))
     --SpaceStation():setPosition(-1000, -1000):setTemplate('Huge Station'):setFaction("Human Navy"):setRotation(random(0, 360))
-    --player1 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setRotation(200)
+    --player1 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Arlenian BP")
     --player2 = PlayerSpaceship():setFaction("Human Navy"):setTemplate("Atlantis"):setRotation(0)
     --Nebula():setPosition(-5000, 0)
     --Artifact():setPosition(1000, 9000):setModel("small_frigate_1"):setDescription(_("scienceDescription-artifact", "An old space derelict."))
@@ -20,11 +43,11 @@ function init()
     --addGMFunction(_("buttonGM", "move 2 to 1"), function() player2:transferPlayersToShip(player1) end)
     --CpuShip():setTemplate("Adder MK5"):setPosition(0, 0):setRotation(0):setFaction("Human Navy")
     --CpuShip():setTemplate("Piranha F12"):setPosition(2000, 0):setRotation(-90):setFaction("Kraylor")
-    local planet1 = Planet():setPosition(5000, 5000):setPlanetRadius(3000):setDistanceFromMovementPlane(-2000):setPlanetSurfaceTexture("planets/planet-1.png"):setPlanetCloudTexture("planets/clouds-1.png"):setPlanetAtmosphereTexture("planets/atmosphere.png"):setPlanetAtmosphereColor(0.2, 0.2, 1.0)
-    local moon1 = Planet():setPosition(5000, 0):setPlanetRadius(1000):setDistanceFromMovementPlane(-2000):setPlanetSurfaceTexture("planets/moon-1.png"):setAxialRotationTime(20.0)
-    local sun1 = Planet():setPosition(5000, 15000):setPlanetRadius(1000):setDistanceFromMovementPlane(-2000):setPlanetAtmosphereTexture("planets/star-1.png"):setPlanetAtmosphereColor(1.0, 1.0, 1.0)
-    planet1:setOrbit(sun1, 40)
-    moon1:setOrbit(planet1, 20.0)
+    --local planet1 = Planet():setPosition(5000, 5000):setPlanetRadius(3000):setDistanceFromMovementPlane(-2000):setPlanetSurfaceTexture("planets/planet-1.png"):setPlanetCloudTexture("planets/clouds-1.png"):setPlanetAtmosphereTexture("planets/atmosphere.png"):setPlanetAtmosphereColor(0.2, 0.2, 1.0)
+    --local moon1 = Planet():setPosition(5000, 0):setPlanetRadius(1000):setDistanceFromMovementPlane(-2000):setPlanetSurfaceTexture("planets/moon-1.png"):setAxialRotationTime(20.0)
+    --local sun1 = Planet():setPosition(5000, 15000):setPlanetRadius(1000):setDistanceFromMovementPlane(-2000):setPlanetAtmosphereTexture("planets/star-1.png"):setPlanetAtmosphereColor(1.0, 1.0, 1.0)
+    --planet1:setOrbit(sun1, 40)
+    --moon1:setOrbit(planet1, 20.0)
 
     addGMFunction(
         _("buttonGM", "Random asteroid field"),

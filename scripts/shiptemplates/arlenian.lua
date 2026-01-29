@@ -46,7 +46,6 @@ Arlenians are huge compared to humans, usually an Arlenian ship houses one Arlen
 
 
 
-
 -- Fighters / small transport craft
 
 template = ShipTemplate():setName(_("Widow"))
@@ -495,3 +494,4 @@ Arlenian Drives are sorted mostly by class.
 As a rule of thumb, the number of drive rings in relation to the ships size is relevant.
 
 --]]
+

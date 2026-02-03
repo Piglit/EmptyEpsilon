@@ -41,6 +41,7 @@ public:
     void setMessageToTopPosition();
     void setMessageToBottomPosition();
     string showHotkey(string name);
+    string tryShowHotkeyInBrackets(string name);
 
     void onNext(ScriptSimpleCallback callback) { _onNext = callback; }
     void finish();

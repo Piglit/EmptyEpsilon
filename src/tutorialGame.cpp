@@ -41,6 +41,7 @@ REGISTER_SCRIPT_CLASS_NO_CREATE(TutorialGame)
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, setMessageToTopPosition);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, setMessageToBottomPosition);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, showHotkey);
+    REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, tryShowHotkeyInBrackets);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, onNext);
     REGISTER_SCRIPT_CLASS_FUNCTION(TutorialGame, finish);
 }
@@ -275,6 +276,15 @@ string TutorialGame::showHotkey(string name)
 {
     auto binding = sp::io::Keybinding::getByName(name);
     return binding->getHumanReadableKeyName(0);
+}
+
+string TutorialGame::tryShowHotkeyInBrackets(string name)
+{
+    auto binding = sp::io::Keybinding::getByName(name);
+    string readable = binding->getHumanReadableKeyName(0);
+    if (readable.empty())
+        return "";
+    return " ("+readable+") ";
 }
 
 void LocalOnlyGame::update(float delta)

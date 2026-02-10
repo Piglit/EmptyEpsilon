@@ -73,7 +73,7 @@ model:setScale(7)
 model:setRadius(75)
 -- len: 150m
 
-
+-- TIEs
 model = ModelData()
 model:setName("tie_fighter")
 model:setMesh("mesh/tie.obj")
@@ -909,6 +909,7 @@ model:setSpecular("bomber_spec_kraylor.png")
 model:setScale(12)
 model:setRadius(15)
 model:addEngineEmitter(-0.84, 0, 0.005,  1.0, 0.2, 0.1, 1.0)
+model:addBeamPosition(0.52, 0, 0.44)
 
 model = ModelData()
 model:setName("esga_fighter")

@@ -27,7 +27,8 @@ require("shiptemplates/exuari.lua")
 require("shiptemplates/arlenian.lua")
 require("shiptemplates/ktlitan.lua")
 require("shiptemplates/corvette.lua")
---require("shiptemplates/transport.lua")
+require("shiptemplates/transport.lua")
+require("shiptemplates/arlenian.lua")
 --require("shiptemplates/satellites.lua")	--moved to special
 
 -- new, lan:

@@ -66,7 +66,7 @@ Component details used for designing the ships above:
 
 -- Fighters / small transport craft
 
-template = ShipTemplate():setName(_("Widow"))
+template = ShipTemplate():setName("Widow")
 -- widow: from cape widow, also called yellow bishop - a black bird with some gold
 template:setClass("Arlenian", "Fighter")
 template:setDescription(_("The Widow is a small and fragile craft, that is usually unarmed and used as one-person shuttle or to transport small items between ships. Unmanned Widows may be deployed by capital ships to distract enemy fighters for a short time."))
@@ -92,14 +92,19 @@ var = var:copy(var:getName().."P"):setType("playership")
 template = ShipTemplate():setName("Goldfinch")
 -- goldfinch: from colors: red black white gold
 template:setClass("Arlenian", "Fighter")
-template:setDescription(_("The Goldfinch is the standard Arlenian starfighter. Small, somewhat fragile without shields, but still charming in small groups."))	-- translation note: a flock of goldfinches is called a charm.
+template:setDescription(_("The Goldfinch is a starfighter. Small, somewhat fragile without shields, but still charming in small groups."))	-- translation note: a flock of goldfinches is called a charm.
 template:setModel("esga_fighter"):setRadarTrace("esga_fighter.png")
 template:setHull(20)
 -- no shields
 template:setSpeed(90, 15, 30)
 template:setDefaultAI('fighter')
 --                  Arc, Dir, Range, CycleTime, Dmg
-template:setBeam(0, 20, 0, 600.0, 4.0, 3):setBeamTexture(0, "texture/beam_arlenian.png")
+--template:setBeam(0, 20, 0, 600.0, 4.0, 3):setBeamTexture(0, "texture/beam_arlenian.png")
+template:setTubes(1, 1.2)
+template:setTubeSystem(0, "beamweapons")
+template:setWeaponTubeExclusiveFor(0, "laser_red")
+template:setWeaponStorage("laser_red", 99)
+
 var = template:copy(template:getName().."P"):setType("playership")
 
 template = ShipTemplate():setName("Gentoo")
@@ -203,13 +208,24 @@ var = template:copy(template:getName().."P"):setType("playership")
 template = ShipTemplate():setName("Pheasant")
 -- pheasant
 template:setModel("esga_cruiser_A"):setRadarTrace("esga_cruiser_A.png")
+template:setClass("Arlenian", "Frigate")
+template:setDescription(_([[Diese Art von Vergnügungsraumschiffen des Crimson-Dawn Syndikats sind weniger ein Transportmittel als eine fliegende Machtdemonstration.
+
+Die Linienführung ist elegant und geschwungen, fast schon luxuriös, doch die Frontpartie erzählt eine andere Geschichte: Dort sitzen überdimensionierte Frontlaser in massiven Lafetten eingelassen. Sie sind nicht versteckt, sondern bewusst sichtbar – lang, kantig und bedrohlich: ein lautloses Versprechen, dass dieses Schiff nicht nur zum Feiern gebaut wurde.
+
+Im Inneren solcher Schiffe herrscht üblicherweise Dekadenz. Der zentrale Vergnügungsbereich erstreckt sich über mehrere Decks: schwebende Plattformen, holografische Projektionen, schwere Vorhänge aus dunklem Stoff und eine Bar aus schwarzem Glas, hinter der seltene Spirituosen aus allen Systemen ausgeschenkt werden. Gedämpftes Licht, vibrierende Bässe und das Murmeln geheimer Absprachen vermischen sich zu einer Atmosphäre, in der Deals ebenso selbstverständlich sind wie exzessive Feste.
+
+Auf der Backbord-Seite öffnet sich ein seitlicher Hangar – geschickt in die Linien des Schiffes integriert. Von außen wirkt er wie eine schlichte Wartungsöffnung, doch im Inneren bietet er Platz für mehrere schnelle Beiboote und Abfangjäger. Schmugglerware, VIP-Gäste oder bewaffnete Eskorte – alles kann diskret ein- und ausgeladen werden, geschützt durch Energiefelder und automatische Geschütztürme.
+
+Dieses Schiff ist ein Symbol des Syndikats: Es lädt ein, verführt und blendet – aber wer die Frontlaser ignoriert, lernt schnell, dass hinter dem Glanz kompromisslose Gewalt steht.]]))	-- TODO translate and better descr.
 template:setHull(150)
 template:setShields(7*75)
 template:setSpeed(27, 5, 2.7)
-template:setBeam(0, 40, 0, 1400, 5.0, 7):setBeamTexture(0, "texture/beam_arlenian.png")
-template:setBeam(1, 40, 0, 1400, 5.1, 7):setBeamTexture(1, "texture/beam_arlenian.png")
-template:setBeam(2, 40, 0, 1400, 5.2, 7):setBeamTexture(2, "texture/beam_arlenian.png")
-template:setBeam(3, 40, 0, 1400, 5.3, 7):setBeamTexture(3, "texture/beam_arlenian.png")
+template:setBeam(0, 40, 0, 1400, 5.0, 3):setBeamTexture(0, "texture/beam_arlenian.png")
+template:setBeam(1, 40, 0, 1400, 5.1, 3):setBeamTexture(1, "texture/beam_arlenian.png")
+template:setBeam(2, 40, 0, 1400, 5.2, 3):setBeamTexture(2, "texture/beam_arlenian.png")
+template:setBeam(3, 40, 0, 1400, 5.3, 3):setBeamTexture(3, "texture/beam_arlenian.png")
+template:setDockClasses("Starfighter")
 var = template:copy(template:getName().."P"):setType("playership")
 
 template = ShipTemplate():setName("Grebe")
@@ -316,6 +332,7 @@ template:setTubeSize(0, "large")
 var = template:copy(template:getName().."P"):setType("playership")
 
 -- stations		 
+--[[
 template = ShipTemplate():setName("Arlenian Station 0"):setType("station")
 template:setModel("esga_station_citadel"):setRadarTrace("esga_station_citadel.png")
 template:setHull(500)
@@ -358,4 +375,4 @@ template:setModel("esga_station_science"):setRadarTrace("esga_station_science.pn
 template:setHull(150)
 template:setShields(300)
 -- has beams
-
+--]]

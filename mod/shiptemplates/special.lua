@@ -178,7 +178,7 @@ template:addDoor( 4, 2, true)
 template:addDoor( 4, 1, true)
 --]]
 --[[
-template = ShipTemplate():setName("Converted Carrier"):setModel("Ender Battlecruiser"):setClass(_("class", "Exuari"), _("subclass", "Carrier")):setType("playership")
+template = ShipTemplate():setName("Converted Carrier"):setModel("Ender Battlecruiser"):setClass("Exuari", "Carrier"):setType("playership")
 template:setRadarTrace("battleship.png")
 template:setDescription(_("A captured Exuari carrier spacecraft."))
 --                  Arc, Dir, Range, CycleTime, Dmg
@@ -197,8 +197,8 @@ template:setBeam(11, 20,  90, 1200.0, 6.0, 4):setBeamWeaponTurret(11, 160,  90, 
 template:setHull(100)
 template:setShields(250)
 template:setSpeed(20, 1.5, 3)
-template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"))
-template:setInternalDockClasses(_("class", "Starfighter"))
+template:setExternalDockClasses("Frigate", "Corvette")
+template:setInternalDockClasses("Starfighter")
 template:setSharesEnergyWithDocked(true)
 template:setRepairDocked(true)
 template:setRestocksMissilesDocked("all")
@@ -210,7 +210,7 @@ addSystemsHeavy(template)
 -- GM: adjust Hull, Shields, Beam-Ranges
 --]]
 
-template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Navigation")):setType("ship")
+template = ShipTemplate():setName("NavSat"):setClass("Satellite", "Navigation"):setType("ship")
 template:setModel("cubesat")
 template:setRadarTrace("satellite.png")
 template:setDescription([[The eyes of flight control]])
@@ -255,10 +255,10 @@ template:setCanSelfDestruct(false)
 
 template:setAutoCoolant(true)
 template:setAutoRepair(true)
-template:setExternalDockClasses(_("class", "Starfighter"),_("class", "Freighter"),_("class", "Shuttle"), _("class", "Cruiser"))
+template:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 addSystemsHeavy(template)
 
-template = ShipTemplate():setName("TIE-Pilot"):setClass(_("class", "Escape Pod"), _("subclass", "Pilot"))
+template = ShipTemplate():setName("TIE-Pilot"):setClass("Escape Pod", "Pilot")
 template:setType("playership")
 template:setModel("tie_pilot")
 template:setDescription([[It's an imperial pilot.]])
@@ -283,7 +283,7 @@ template:setAutoMissileReload(false)
 template:setAutoRepair(true)
 
 
-template = ShipTemplate():setName("ANT 615"):setLocaleName(_("ship", "ANT 615")):setModel("combatsat"):setClass(_("class", "Droid"),_("subclass", "Sentinel Droid"))
+template = ShipTemplate():setName("ANT 615"):setLocaleName(_("ship", "ANT 615")):setModel("combatsat"):setClass("Droid",_("subclass", "Sentinel Droid"))
 template:setDescription(_("Military droid from the old days, back when there was a huge battle station in the system. Its original purpose was probably to take out other droids."))
 template:setRadarTrace("probe_droid.png")
 --                 Arc,Dir,Range,CycleTime, Dmg
@@ -294,12 +294,12 @@ template:setHull(30)
 --template:setShields(30)
 template:setSpeed(120, 30, 25)
 
-var = template:copy("Viper Droid"):setLocaleName(_("ship", "Viper Droid")):setModel("droid_viper"):setClass(_("class", "Droid"),_("subclass", "Viper"))
+var = template:copy("Viper Droid"):setLocaleName(_("ship", "Viper Droid")):setModel("droid_viper"):setClass("Droid","Viper")
 var:setHull(12)
 
 
 var = template:copy("Debris")
-var:setLocaleName(_("ship", "ANT 615")):setModel("debris-cubesat"):setClass(_("class", "Debris"),_("subclass", ""))
+var:setLocaleName(_("ship", "ANT 615")):setModel("debris-cubesat"):setClass("Debris","")
 var:setDescription(_("Space debris floating around"))
 var:setRadarTrace("probe.png")
 var:setHull(12)

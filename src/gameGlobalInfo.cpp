@@ -89,6 +89,15 @@ void GameGlobalInfo::setPlayerShip(int index, P<PlayerSpaceship> ship)
         playerShipId[index] = -1;
 }
 
+int GameGlobalInfo::getPlayerShipIndexByName(string callsign)
+{
+    for(int n=0; n<max_player_ships; n++)
+        if (getPlayerShip(n))
+            if (getPlayerShip(n)->getCallSign() == callsign)
+                return n;
+    return -1;
+}
+
 int GameGlobalInfo::findPlayerShip(P<PlayerSpaceship> ship)
 {
     for(int n=0; n<max_player_ships; n++)
@@ -486,6 +495,16 @@ static int getPlayerShip(lua_State* L)
 /// Pass -2 to return the current player ship.
 /// Example: getPlayerShip(2) -- returns the second-indexed ship, if it exists
 REGISTER_SCRIPT_FUNCTION(getPlayerShip);
+
+static int getPlayerShipIndex(lua_State* L)
+{
+    string callsign = luaL_checkstring(L, 1);
+    lua_pushnumber(L, gameGlobalInfo->getPlayerShipIndexByName(callsign)+1);
+    return 1;
+}
+/// int getPlayerShipIndex(string callsign)
+/// Return the player's ship index
+REGISTER_SCRIPT_FUNCTION(getPlayerShipIndex);
 
 static int getActivePlayerShips(lua_State* L)
 {

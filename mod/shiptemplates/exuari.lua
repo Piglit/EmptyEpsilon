@@ -74,7 +74,7 @@ Carriers:
 
 --[[ Fighters --]]
 -- Fighters are quick agile ships that do not do a lot of damage, but usually come in larger groups. They are easy to take out, but should not be underestimated.
-template = ShipTemplate():setName("T-Wing"):setClass(_("class", "Starfighter"), _("subclass", "Interceptor"))
+template = ShipTemplate():setName("T-Wing"):setClass("Starfighter", "Interceptor")
 template:setModel("small_fighter_1")
 template:setRadarTrace("twing.png")
 template:setDescription(_("The R-60 T-wing interceptor was an interceptor originally designed to replace the A-wing. Unfortunately for the Rebellion, the end result turned out to be a poor replacement for the craft."))
@@ -88,7 +88,7 @@ template:setSpeed(120, 30, 25)
 template:setDefaultAI('fighter')
 
 --variation = template:copy("X-Wing")
---variation:setClass(_("ss", "Exuari"), _("subclass", "Starfighter - Interceptor"))
+--variation:setClass("Exuari", "Starfighter - Interceptor")
 --variation:setModel("dark_fighter_6")
 --variation:setRadarTrace("xwing.png")
 --variation:setDescription(("X-wing starfighters were a type of starfighter marked by their distinctive S-foils that resembled the High Galactic script's character 'X' in attack formation. They were heavily armed with four laser cannons on the S-foils and proton torpedo launchers in the fuselage. X-wings were designed for dogfighting and long missions."))
@@ -96,7 +96,7 @@ template:setDefaultAI('fighter')
 --variation:setBeam(1, 60, 0, 1000.0, 4.0, 4)
 --variation:setSpeed(130, 35, 30)
 
-template = ShipTemplate():setName("BTL-B Y-Wing"):setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
+template = ShipTemplate():setName("BTL-B Y-Wing"):setClass("Starfighter", "Bomber")
 template:setModel("small_fighter_1")
 template:setRadarTrace("ywing.png")
 template:setDescription(_("The Y-wing starfighter/bomber, was a model of starfighter-bomber produced by Koensayr Manufacturing, the first of the BTL-series Y-wing line. A mainstay of the Republic Navy during the Clone Wars, BTL-Bs were adopted by clones and Jedi officers alike and were instrumental in the fight against the Confederacy of Independent Systems."))
@@ -119,7 +119,7 @@ variation:setTubeSize(0, "large")
 
 --[[ Strikers --]]
 -- The Strikeship is a warp-drive equipped figher build for quick strikes, it's fast, it's agile, but does not do an extreme amount of damage, and lacks in rear shields.
-template = ShipTemplate():setName("Racer"):setClass(_("class", "Exuari"), _("subclass", "Striker"))
+template = ShipTemplate():setName("Racer"):setClass("Exuari", "Striker")
 template:setModel("small_frigate_1"):setRadarTrace("exuari_1.png")
 template:setDescription(_("The Exuari alpha striker 'Racer' is a warp-drive equipped Figter build for quick strikes. This spacecraft runs on a small crew and is often used as scout, interceptor or to perform preemptive attacks. It's fast, it's agile, but the striker beams do not cause an extreme amount of damage. Like all strikers, it lacks in rear shields."))
 --                  Arc, Dir, Range, CycleTime, Dmg
@@ -161,7 +161,7 @@ variation:setWarpSpeed(200)
 --[[ Frigates--]]
 --Frigates are non-warp capable ships, mostly used to defend bases or to build the rear line in an assault.
 --TODO: replace models (transorts should not be used here)
-template = ShipTemplate():setName("Guard"):setClass(_("class", "Exuari"), _("subclass", "Frigate"))
+template = ShipTemplate():setName("Guard"):setClass("Exuari", "Frigate")
 template:setModel("transport_1_1"):setRadarTrace("exuari_frigate_1.png")
 template:setDescription(_([[The Exuari Guard is not impressive, trying to be a alround escort or defense vessel. It has powering problems, causing the reload cycle of beams and missiles to take longer than expected. The Guard is equipped with turret beams and a large stock of different missiles, including homing missiles and mines.]]))
 template:setHull(70)
@@ -180,7 +180,7 @@ template:setTubeDirection(0, -1):weaponTubeDisallowMissle(0, "Mine")
 template:setTubeDirection(1,  1):weaponTubeDisallowMissle(1, "Mine")
 template:setTubeDirection(2,  180):setWeaponTubeExclusiveFor(2, "Mine")
 
-template = ShipTemplate():setName("Sentinel"):setClass(_("class", "Exuari"), _("subclass", "Frigate"))
+template = ShipTemplate():setName("Sentinel"):setClass("Exuari", "Frigate")
 template:setModel("transport_3_1"):setRadarTrace("exuari_frigate_2.png")
 template:setDescription(_([[The Exuari Sentinel is an anti-fighter frigate. It has several rapid-firing, low-damage point-defense turret beams to quickly take out starfighters.]]))
 template:setBeamWeapon(0, 20, -9, 1200, 3, 2)
@@ -196,7 +196,7 @@ template:setShields(50, 40)
 --Reputation Score: 16
 template:setSpeed(70, 15, 10)
 
-template = ShipTemplate():setName("Warden"):setClass(_("class", "Exuari"), _("subclass", "Frigate"))
+template = ShipTemplate():setName("Warden"):setClass("Exuari", "Frigate")
 template:setModel("transport_4_1"):setRadarTrace("exuari_frigate_3.png")
 template:setDescription(_([[The Exuari Warden is a heavy artillery frigate, it fires bunches of missiles from forward facing tubes. Only a single point defense turret is present.]]))
 template:setBeamWeapon(0, 20, 0, 1200, 3, 2)
@@ -216,7 +216,7 @@ template:setTubeDirection(4,  2)
 
 --[[ Artillery--]]
 --Artillery are non-warp capable ships, mostly used to delivers Nukes to their enemies. They may be disguised as Transport ships (or are refurbished freighters). 
-template = ShipTemplate():setName("Flash"):setClass(_("class", "Exuari"), _("subclass", "Artillery"))
+template = ShipTemplate():setName("Flash"):setClass("Exuari", "Artillery")
 template:setModel("small_frigate_2"):setRadarTrace("exuari_2.png")
 template:setDescription(_([[The Exuari Flash is a special artillery sniper, built to deal a large amounts of damage quickly and from a distance before escaping. It's a basic freighter that carries nuclear weapons. Some say, this is what happens to freighters, when they fall into the hands of the Exuari.]]))
 template:setHull(30)
@@ -245,7 +245,7 @@ variation:setWeaponStorage("Nuke", 1)
 
 --[[ Station/Transport--]]
 -- The battle station is a huge ship with many defensive features. It can be docked by smaller ships.
-template = ShipTemplate():setName("Ryder"):setModel("Ender Battlecruiser"):setClass(_("class", "Exuari"), _("subclass", "Carrier"))
+template = ShipTemplate():setName("Ryder"):setModel("Ender Battlecruiser"):setClass("Exuari", "Carrier")
 template:setRadarTrace("battleship.png")
 template:setDescription(_("The Exuari 'Ryder' is a large carrier spacecraft with many defensive features. It can be docked by smaller ships to refuel or carry them. Unlike a station it is equipped with a slow impulse drive and capable of interstellar travel. It is used as a habitation for Exuari crews and has a hangar bay. A commom Exuari assault strategy is to keep a Ryder off the sensor range of the desired target, while fighters and artillery start from the carrier."))
 --                  Arc, Dir, Range, CycleTime, Dmg
@@ -265,7 +265,7 @@ template:setHull(100)
 template:setShields(250)
 --Reputation Score: 35
 template:setSpeed(20, 1.5, 3)
-template:setDockClasses(_("class", "Exuari"))
+template:setDockClasses("Exuari")
 template:setSharesEnergyWithDocked(true)
 template:setRepairDocked(true)
 template:setRestocksMissilesDocked("all")

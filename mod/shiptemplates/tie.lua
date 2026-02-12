@@ -2,7 +2,7 @@ require("shipSystems.lua") -- contains addSystems*
 
 color_player = "White" --change it if you want another style
 
-template = ShipTemplate():setName("TIE-Fighter"):setClass(_("class", "Starfighter"), _("subclass", "Fighter"))
+template = ShipTemplate():setName("TIE-Fighter"):setClass("Starfighter", "Fighter")
 template:setModel("tie_fighter")
 template:setDescription([[It's a TIE Fighter]])
 template:setRadarTrace("tie_fighter.png")
@@ -36,7 +36,7 @@ template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
 template:setDefaultAI('fighter')
-template:setInternalDockClasses(_("class", "Escape Pod"))
+template:setInternalDockClasses("Escape Pod")
 
 var = template:copy("TIE Fighter")
 var:setType("playership")
@@ -46,7 +46,7 @@ var = template:copy("TIE-Interceptor")
 addSystemsTI(var)
 addSystemsTF(template)	-- set template systems after copy, otherwise they would be copied
 var:setModel("tie_interceptor")
-var:setClass(_("class", "Starfighter"), _("subclass", "Interceptor"))
+var:setClass("Starfighter", "Interceptor")
 var:setDescription([[It's a TIE Interceptor]])
 var:setRadarTrace("tie_interceptor.png")
 var:setHull(69)	-- two asteroids also kill TI
@@ -56,7 +56,7 @@ var:setHull(69)	-- two asteroids also kill TI
 var2 = var:copy("TIE Interceptor")
 var2:setType("playership")
 
-template = ShipTemplate():setName("TIE-Bomber"):setClass(_("class", "Starfighter"), _("subclass", "Bomber"))
+template = ShipTemplate():setName("TIE-Bomber"):setClass("Starfighter", "Bomber")
 template:setDescription([[It's a TIE Bomber]])
 template:setModel("tie_bomber")
 template:setRadarTrace("tie_bomber.png")
@@ -94,7 +94,7 @@ template:setAutoCoolant(true)
 template:setAutoMissileReload(true)
 template:setAutoRepair(true)
 template:setDefaultAI('fighter')
-template:setInternalDockClasses(_("class", "Escape Pod"))
+template:setInternalDockClasses("Escape Pod")
 addSystemsTB(template)
 
 var = template:copy("TIE Bomber")

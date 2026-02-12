@@ -35,7 +35,7 @@ for cnt=1,5 do
     if cnt > 2 then
         variation = template:copy("Goods Jump Freighter " .. cnt)
         variation:setJumpDrive(true)
-		variation:setExternalDockClasses(_("class", "Starfighter"), _("class", "Freighter"), _("class", "Cruiser"))
+		variation:setExternalDockClasses("Starfighter", "Freighter", "Cruiser")
     end
     
     template = ShipTemplate():setName("Garbage Freighter " .. cnt):setClass("Corvette", "Freighter"):setModel("transport_3_" .. cnt)
@@ -60,7 +60,7 @@ for cnt=1,5 do
     if cnt > 2 then
         variation = template:copy("Equipment Jump Freighter " .. cnt)
         variation:setJumpDrive(true)
-		variation:setExternalDockClasses(_("class", "Starfighter"), _("class", "Freighter"), _("class", "Cruiser"))
+		variation:setExternalDockClasses("Starfighter", "Freighter", "Cruiser")
     end
 
     template = ShipTemplate():setName("Fuel Freighter " .. cnt):setClass("Corvette", "Freighter"):setModel("transport_5_" .. cnt)

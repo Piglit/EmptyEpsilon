@@ -89,6 +89,7 @@ public:
     P<PlayerSpaceship> getPlayerShip(int index);
     void setPlayerShip(int index, P<PlayerSpaceship> ship);
 
+    int getPlayerShipIndexByName(string callsign);
     int findPlayerShip(P<PlayerSpaceship> ship);
     int insertPlayerShip(P<PlayerSpaceship> ship);
     /*!
@@ -107,12 +108,12 @@ public:
     void reset();
     void setScenarioSettings(const string filename, std::unordered_map<string, string> new_settings);
     void startScenario(string filename, std::unordered_map<string, string> new_settings = {});
-
     virtual void update(float delta) override;
     virtual void destroy() override;
     string getMissionTime();
 
     string getNextShipCallsign();
+
 };
 
 string getSectorName(glm::vec2 position);

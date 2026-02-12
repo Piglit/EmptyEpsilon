@@ -8,13 +8,15 @@
 #include "gui/gui2_keyvaluedisplay.h"
 #include "gui/gui2_selector.h"
 #include "gui/gui2_progressbar.h"
+#include "gui/gui2_label.h"
 
 GuiShieldFrequencySelect::GuiShieldFrequencySelect(GuiContainer* owner, string id)
 : GuiElement(owner, id)
 {
-    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+    (new GuiLabel(this, "SHIELD_INFO_LABEL", tr("Shield info"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
+    (new GuiShieldsEnableButton(this, "SHIELDS_ENABLE"))->setPosition(0, 50, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
     GuiElement* calibration_row = new GuiElement(this, "");
-    calibration_row->setPosition(0, 50, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50)->setAttribute("layout", "horizontalright");
+    calibration_row->setPosition(0, 100, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50)->setAttribute("layout", "horizontalright");
 
     new_frequency = new GuiSelector(calibration_row, "", nullptr);
     new_frequency->setSize(120, 50);

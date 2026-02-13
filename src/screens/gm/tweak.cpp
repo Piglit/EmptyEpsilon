@@ -759,30 +759,30 @@ GuiShipTweakSystems::GuiShipTweakSystems(GuiContainer* owner)
     for(int n=0; n<SYS_COUNT; n++)
     {
         ESystem system = ESystem(n);
-        (new GuiLabel(left_col, "", tr("{system} health").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 30);
+        (new GuiLabel(left_col, "", tr("{system} health").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 20);
         system_damage[n] = new GuiSlider(left_col, "", -1.0, 1.0, 0.0, [this, n](float value) {
             target->systems[n].health = std::min(value,target->systems[n].health_max);
         });
-        system_damage[n]->setSize(GuiElement::GuiSizeMax, 30);
+        system_damage[n]->setSize(GuiElement::GuiSizeMax, 20);
         system_damage[n]->addSnapValue(-1.0, 0.01);
         system_damage[n]->addSnapValue( 0.0, 0.01);
         system_damage[n]->addSnapValue( 1.0, 0.01);
 
-        (new GuiLabel(center_col, "", tr("{system} health max").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 30);
+        (new GuiLabel(center_col, "", tr("{system} health max").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 20);
         system_health_max[n] = new GuiSlider(center_col, "", -1.0, 1.0, 1.0, [this, n](float value) {
             target->systems[n].health_max = value;
             target->systems[n].health = std::min(value,target->systems[n].health);
         });
-        system_health_max[n]->setSize(GuiElement::GuiSizeMax, 30);
+        system_health_max[n]->setSize(GuiElement::GuiSizeMax, 20);
         system_health_max[n]->addSnapValue(-1.0, 0.01);
         system_health_max[n]->addSnapValue( 0.0, 0.01);
         system_health_max[n]->addSnapValue( 1.0, 0.01);
 
-        (new GuiLabel(right_col, "", tr("{system} heat").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 30);
+        (new GuiLabel(right_col, "", tr("{system} heat").format({{"system", getLocaleSystemName(system)}}), 20))->setSize(GuiElement::GuiSizeMax, 20);
         system_heat[n] = new GuiSlider(right_col, "", 0.0, 1.0, 0.0, [this, n](float value) {
             target->systems[n].heat_level = value;
         });
-        system_heat[n]->setSize(GuiElement::GuiSizeMax, 30);
+        system_heat[n]->setSize(GuiElement::GuiSizeMax, 20);
         system_heat[n]->addSnapValue( 0.0, 0.01);
         system_heat[n]->addSnapValue( 1.0, 0.01);
     }

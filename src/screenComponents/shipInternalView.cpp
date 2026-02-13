@@ -205,6 +205,12 @@ void GuiShipRoom::onDraw(sp::RenderTarget& renderer)
         case SYS_RearShield:
             icon = "gui/icons/shields-aft";
             break;
+        case SYS_Sensors:
+            icon = "gui/icons/station-science";
+            break;
+        case SYS_Communication:
+            icon = "gui/icons/station-relay";
+            break;
         default:
             icon = "particle.png";
             break;

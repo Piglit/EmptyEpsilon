@@ -27,6 +27,11 @@ enum ESystem
     SYS_JumpDrive,
     SYS_FrontShield,
     SYS_RearShield,
+    SYS_Sensors,
+    SYS_Communication,
+    SYS_Hangar,
+    SYS_Bridge,
+    SYS_Airlock,
     SYS_COUNT
 };
 

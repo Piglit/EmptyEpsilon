@@ -1668,6 +1668,12 @@ bool SpaceShip::hasSystem(ESystem system)
         return shield_count > 1;
     case SYS_Reactor:
         return true;
+    case SYS_Communication:
+    case SYS_Sensors:
+    case SYS_Hangar:
+    case SYS_Bridge:
+    case SYS_Airlock:
+        return (ship_template && ship_template->hull == 150);   // XXX hacky
     case SYS_BeamWeapons:
         if (beam_weapons[0].getArc() > 0.0f)
            return true;

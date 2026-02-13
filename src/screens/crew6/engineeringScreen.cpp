@@ -134,6 +134,11 @@ EngineeringScreen::EngineeringScreen(GuiContainer* owner, ECrewPosition crew_pos
     system_rows[SYS_JumpDrive].button->setIcon("gui/icons/system_jumpdrive");
     system_rows[SYS_FrontShield].button->setIcon("gui/icons/shields-fore");
     system_rows[SYS_RearShield].button->setIcon("gui/icons/shields-aft");
+    system_rows[SYS_Sensors].button->setIcon("gui/icons/station-science");
+    system_rows[SYS_Communication].button->setIcon("gui/icons/station-relay");
+    system_rows[SYS_Hangar].button->setIcon("gui/icons/station-science");	//TODO icon
+    system_rows[SYS_Bridge].button->setIcon("gui/icons/station-science");
+    system_rows[SYS_Airlock].button->setIcon("gui/icons/station-science");
 
     system_effects_container = new GuiElement(system_config_container, "");
     system_effects_container->setPosition(0, -400, sp::Alignment::BottomRight)->setSize(270, 400)->setAttribute("layout", "verticalbottom");

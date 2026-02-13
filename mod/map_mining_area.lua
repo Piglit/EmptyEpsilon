@@ -1,11 +1,11 @@
-fa_area_mining = {
+map_mining_area = {
 	center_x = 0,
 	center_y = 0,
 	scale = 1,
 	droids_inactive = {},
 }
 
-function fa_area_mining:init()
+function map_mining_area:init()
 	-- those variables can and should be modified before init is called.
 	local center_x = self.center_x
 	local center_y = self.center_y
@@ -46,7 +46,7 @@ function fa_area_mining:init()
 	return self
 end
 
-function fa_area_mining:createDebris()
+function map_mining_area:createDebris()
 	local center_x = self.center_x
 	local center_y = self.center_y
 	local scale = self.scale
@@ -64,7 +64,7 @@ function spiral_position(rotation, scale, phi)
 	return phi+rotation, scale*phi 
 end
 
-function fa_area_mining:create_asteroid_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
+function map_mining_area:create_asteroid_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
 	local r, angle
 	local objs = {}
 	for phi = start_angle,end_angle,(end_angle-start_angle)/amount do
@@ -76,14 +76,14 @@ function fa_area_mining:create_asteroid_spiral(x, y, scale, amount, start_angle,
 	return objs, r, angle
 end
 
-function fa_area_mining:create_debris_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
+function map_mining_area:create_debris_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
 	for phi = start_angle,end_angle+1,(end_angle-start_angle)/amount do
 		local angle, r = spiral_position(rotation, scale, phi)
 		local obj = CpuShip():setTemplate("Debris"):orderIdle():setFaction("Environment")
 		setCirclePos(obj, x, y, angle, r*random(1.0,1.1))
 	end
 end
-function fa_area_mining:create_droid_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
+function map_mining_area:create_droid_spiral(x, y, scale, amount, start_angle, end_angle, rotation)
 	local objs = {}
 	for phi = start_angle,end_angle+1,(end_angle-start_angle)/amount do
 		local angle, r = spiral_position(rotation, scale, phi)
@@ -94,7 +94,7 @@ function fa_area_mining:create_droid_spiral(x, y, scale, amount, start_angle, en
 	return objs
 end
 
-function fa_area_mining:activateDroids(player)
+function map_mining_area:activateDroids(player)
 	for idx, droid in ipairs(self.droids_inactive) do
 		if droid:isValid() and distance(droid, player) < 1500 then
 			droid:orderStandGround()
@@ -104,6 +104,6 @@ function fa_area_mining:activateDroids(player)
 	end
 end
 
-function fa_area_mining:updatePlayerShip(delta, player)
+function map_mining_area:updatePlayerShip(delta, player)
 	self:activateDroids(player)
 end

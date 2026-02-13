@@ -1,3 +1,7 @@
+-- TODO: if carrier captures pod, it is immediately "delivered"
+require("utils_customElements.lua")
+
+
 rescue_capsule_util = {
 	CAPTURE_DISTANCE = 100,
 	pods = {},
@@ -12,7 +16,7 @@ rescue_capsule_util = {
 function rescue_capsule_util:onNewPlayerShip(ship)
 	if arrayContains(self.ships_templates_that_spawn_pods, ship:getTypeName()) then
 		-- warning onDestroyed can only be defined once per ship!
-		ship:onDestruction(function(obj,_) rescue_capsule_util.spawnRescueCapsule(obj) end)
+		ship:onDestroyed(function(obj,_) rescue_capsule_util.spawnRescueCapsule(obj) end)
 	end
 end
 
@@ -20,6 +24,21 @@ function rescue_capsule_util:updatePlayerShip(delta, ship)
 	if ship:isValid() then
 		self:addOrUpdateCollectCapsuleButton(ship)
 	end
+end
+
+function rescue_capsule_util:gm_menu()
+	addGMFunction("Spawn rescuable pilot", function()
+		onGMClick(function(x,y)
+			rescue_capsule_util.spawnNewPilotPod(x,y)
+			onGMClick(nil)
+		end)	
+	end)
+end
+
+function rescue_capsule_util.spawnNewPilotPod(x,y)
+	local pod = PlayerSpaceship():setTemplate("TIE-Pilot"):setFaction("Independent"):setPosition(x,y):setCanBeDestroyed(false)
+	table.insert(rescue_capsule_util.pods, pod)
+	return pod
 end
 
 -- Usage:
@@ -33,12 +52,12 @@ function rescue_capsule_util.spawnRescueCapsule(obj)
 		error("spawnRescueCapsule is only implemented for PlayerSpaceship")
 	else
 		local callsign = obj:getCallSign()
+		print(callsign .. " destroyed")
 		local x,y = obj:getPosition()
-		pod = PlayerSpaceship():setTemplate("TIE-Pilot"):setFaction("Pilot")
-		pod:setCallSign(callsign):setPosition(x,y)
-		pod:setCanBeDestroyed(false)
+		local pod = rescue_capsule_util.spawnNewPilotPod(x,y)
+		pod:setFaction("Pilot")
+		pod:setCallSign(callsign)
 		-- configure autoconnect for a callsign, to reconnect the clients of the destroyed ship to the pod after the "ship destroyed" screen was shown.
-		table.insert(rescue_capsule_util.pods, pod)
 	end
 end
 
@@ -61,38 +80,51 @@ function rescue_capsule_util:addOrUpdateCollectCapsuleButton(obj)
 			local docked = pod:getDockedWith()
 			local self_docked = obj:getDockedWith()
 			if docked == obj then
+				customElements:removeCustom(obj, "POD_DIST_"..callsign)
 				if self_docked ~= nil then
-					obj:addCustomButton("Single", "POD_"..callsign, "Deliver "..callsign, function()
+					customElements:addCustomButton(obj, "Helms", "POD_"..callsign, string.format(_("%s abliefern"), callsign), function()
 						pod:destroy()
-						obj:removeCustom("POD_"..callsign)
+						customElements:removeCustom(obj, "POD_"..callsign)
+						customElements:removeCustom(obj, "POD_DIST_"..callsign)
 					end, 50+i)
 				else
-					obj:addCustomButton("Single", "POD_"..callsign, "Release "..callsign, function()
+					customElements:addCustomButton(obj, "Helms", "POD_"..callsign, string.format(_("%s rauswerfen"), callsign), function()
 						pod:commandUndock()
 						pod:setRotationMaxSpeed(1)
-						obj:removeCustom("POD_"..callsign)
+						customElements:removeCustom(obj, "POD_"..callsign)
+						customElements:removeCustom(obj, "POD_DIST_"..callsign)
 						pod.docking_assist_target = nil
 					end, 50+i)
 				end
 			elseif docked == nil and distance(obj, pod) <= self.CAPTURE_DISTANCE then
 				if pod.docking_assist_target == nil then
-					obj:addCustomButton("Single", "POD_"..callsign, "Rescue "..callsign, function()
+					customElements:addCustomButton(obj, "Helms", "POD_"..callsign, string.format(_("%s bergen"), callsign), function()
 						pod:setRotationMaxSpeed(1)
 						pod:setSystemHealth("maneuver", 1.0)
 						pod:setSystemHealth("impulse", 1.0)
 						pod:commandDock(obj)	-- this should also be possible when canDock is false
 						pod.docking_assist_target = obj 
-						obj:removeCustom("POD_"..callsign)
+						customElements:removeCustom(obj, "POD_"..callsign)
+						customElements:removeCustom(obj, "POD_DIST_"..callsign)
 					end, 50+i)
 				else
-					obj:addCustomButton("Single", "POD_"..callsign, "Stop rescuing "..callsign, function()
+					customElements:addCustomButton(obj, "Helms", "POD_"..callsign, string.format(_("Bergung %s abbrechen"), callsign), function()
 						pod.docking_assist_target = nil
 						pod:commandAbortDock()
 						pod:setRotationMaxSpeed(1)
 					end, 50+i)
+					local dist = math.floor(distance(pod, obj)) - 20 -- - radius of TIEs
+					if dist > 4 then
+						customElements:addCustomInfo(obj, "Helms", "POD_DIST_"..callsign, string.format(_("Abstand zu %s: %im"), callsign, dist), 50-i)
+					else
+						local darc = math.abs(1-((angleHeading(pod, obj) - pod:getHeading() - 180)%360)/180)
+						customElements:addCustomInfo(obj, "Helms", "POD_DIST_"..callsign, string.format(_("Bergung %s: %i%%"), callsign, math.floor(darc*100-dist)), 50-i)
+
+					end
 				end
 			else
-				obj:removeCustom("POD_"..callsign)
+				customElements:removeCustom(obj, "POD_"..callsign)
+				customElements:removeCustom(obj, "POD_DIST_"..callsign)
 			end
 		end
 	end
@@ -134,4 +166,15 @@ function rescue_capsule_util:update(delta)
 			end
 		end
 	end
+end
+
+function rescue_capsule_util:initTest()
+	local ship1 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Pod Collector"):setPosition(0,0)--:setFaction("Imperial")
+	local ship2 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Pod1"):setPosition(100,0)
+	local ship3 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Pod2"):setPosition(100,100)
+	local ship4 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Pod3"):setPosition(1100,1100)
+	local ship5 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Rival Collector"):setPosition(500,500):setFaction("Imperial")
+	ship2:destroy()
+	ship3:destroy()
+	ship4:destroy()
 end

@@ -1,44 +1,44 @@
-GRAVITY = {
+gravity_util = {
     gravity_const = 100000000,
 	sources = {},
 	exceptions = {}
 }
 
-function GRAVITY.raiseGravity()
-    GRAVITY.gravity_const = GRAVITY.gravity_const * 0.75
-	print("AntiGravity is now "..(GRAVITY.gravity_const/1000000) .. "%")
+function gravity_util.raiseGravity()
+    gravity_util.gravity_const = gravity_util.gravity_const * 0.75
+	print("AntiGravity is now "..(gravity_util.gravity_const/1000000) .. "%")
 end
 
-function GRAVITY.lowerGravity()
-    GRAVITY.gravity_const = GRAVITY.gravity_const * 1.25
-	print("AntiGravity is now "..(GRAVITY.gravity_const/1000000) .. "%")
+function gravity_util.lowerGravity()
+    gravity_util.gravity_const = gravity_util.gravity_const * 1.25
+	print("AntiGravity is now "..(gravity_util.gravity_const/1000000) .. "%")
 end
 
-function GRAVITY:gm_menu()
-    addGMFunction(_("buttonGM", "Lower Gravity"), GRAVITY.lowerGravity)
-    addGMFunction(_("buttonGM", "Raise Gravity"), GRAVITY.raiseGravity)
+function gravity_util:gm_menu()
+    addGMFunction(_("buttonGM", "Lower Gravity"), gravity_util.lowerGravity)
+    addGMFunction(_("buttonGM", "Raise Gravity"), gravity_util.raiseGravity)
 end
 
-function GRAVITY.addGravitySource(planet, outer_limit)
+function gravity_util.addGravitySource(planet, outer_limit)
 	if planet ~= nil and planet:isValid() then
-		table.insert(GRAVITY.sources, {planet, outer_limit})
+		table.insert(gravity_util.sources, {planet, outer_limit})
 	end
 end
 
-function GRAVITY.addException(playership)
-	table.insert(GRAVITY.exceptions, playership)
+function gravity_util.addException(playership)
+	table.insert(gravity_util.exceptions, playership)
 end
 
-function GRAVITY:updatePlayerShip(delta, p)
+function gravity_util:updatePlayerShip(delta, p)
 	if p ~= nil and p:isValid() and p:getDockingState() == 0 then
 		if arrayContains(self.exceptions, p) then
 			return
 		end
-		for idx,s in ipairs(GRAVITY.sources) do
+		for idx,s in ipairs(gravity_util.sources) do
 			local source = s[1]
 			local limit = s[2]
 			if source == nil or not source:isValid() then
-				table.remove(GRAVITY.source, idx)
+				table.remove(gravity_util.source, idx)
 				return
 			end
 			local angle = angleRotation(p, source)

@@ -287,15 +287,18 @@ template = ShipTemplate():setName("ANT 615"):setLocaleName(_("ship", "ANT 615"))
 template:setDescription(_("Military droid from the old days, back when there was a huge battle station in the system. Its original purpose was probably to take out other droids."))
 template:setRadarTrace("probe_droid.png")
 --                 Arc,Dir,Range,CycleTime, Dmg
-template:setBeam(0, 15, 5, 990.0, 4.0, 2)
-template:setBeam(1, 15,-5, 1000.0, 4.0, 2)
-
+--template:setBeam(0, 15, 5, 990.0, 4.0, 2)
+--template:setBeam(1, 15,-5, 1000.0, 4.0, 2)
+template:setTubes(1, 2.0)
+template:setTubeSystem(0, "beamweapons")
+template:setWeaponTubeExclusiveFor(0, "laser_red")
+template:setWeaponStorage("laser_red", 99)
 template:setHull(30)
 --template:setShields(30)
-template:setSpeed(120, 30, 25)
+template:setSpeed(20, 10, 2)
 
 var = template:copy("Viper Droid"):setLocaleName(_("ship", "Viper Droid")):setModel("droid_viper"):setClass("Droid","Viper")
-var:setHull(12)
+var:setHull(8)
 
 
 var = template:copy("Debris")

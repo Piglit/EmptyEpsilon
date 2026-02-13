@@ -1,4 +1,3 @@
-require "serpent.lua"
 --- Utils.
 --
 -- Bunch of useful utility functions that can be used in any scenario script.
@@ -291,6 +290,7 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
     local perlin_section_i = random(0, 1000)
     local perlin_section_j = random(0, 1000)
 
+    local created = {}
     -- Create a XY intensity map
     for i = 1, x_grids do
         for j = 1, y_grids do
@@ -306,10 +306,14 @@ function placeRandomObjects(object_type, density, perlin_z, x, y, x_grids, y_gri
                 local x_start = ((i - x_grids / 2) * grid_size) + x
                 local y_start = ((j - x_grids / 2) * grid_size) + y
 
-                placeRandomAroundPoint(object_type, nr_of_objects, 0, grid_size / 1.5, x_start, y_start)
+                local cr = placeRandomAroundPoint(object_type, nr_of_objects, 0, grid_size / 1.5, x_start, y_start)
+                for _,v in ipairs(cr) do
+                    table.insert(created, v)
+                end
             end
         end
     end
+    return created
 end
 
 -- Extract coordinates between two objects, two points, object and point or point and object
@@ -375,7 +379,6 @@ function createRandomAlongArc(object_type, amount, x, y, distance, startArc, end
 		for ndex=1,amount do
 			radialPoint = random(startArc,endArcClockwise)
 			pointDist = distance + random(-randomize,randomize)
-			object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist)
 			table.insert(object_list,object_type():setPosition(x + math.cos(radialPoint / 180 * math.pi) * pointDist, y + math.sin(radialPoint / 180 * math.pi) * pointDist))
 		end
 	end
@@ -389,6 +392,7 @@ end
 --   radialPosition(100, 500, 3000, 65)
 --   radialPosition(obj, 3000, 65)
 function radialPosition(a, b, c, d)
+	local x,y,dist,arc
     if type(a) == "number" and type(b) == "number" and type(c) == "number" and type(d) == "number" then
         -- Assume radialPosition(x, y, dist, arc)
 		x = a
@@ -426,6 +430,60 @@ function formatTime(seconds)
 	return str
 end
 
+function spiral_position(rotation, scale, phi)
+	-- returns angle and distance. Can be used in setCirclePos(obj, x, y, angle, distance)
+	return phi+rotation, scale*phi 
+end
+
+-- Checks if one circle intersects another circle.
+function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, circle2y, radius2 )
+--[[
+	Copyright (c) 2015 Davis Claiborne
+	This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+	Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+	The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgement in the product documentation would be appreciated but is not required.
+	Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+	This notice may not be removed or altered from any source distribution.
+
+	Altered by Pithlit: took only needed functions, changed return values
+--]]
+
+	-- Deals with floats / verify false false values. This can happen because of significant figures.
+	local function checkEqualFuzzy( number1, number2 )
+		return ( number1 - .00001 <= number2 ) and ( number2 <= number1 + .00001 )
+	end
+
+	-- Check if input is actually a number
+	local function validateNumber( n )
+		if type( n ) ~= 'number' then return false
+		elseif n ~= n then return false -- nan
+		elseif math.abs( n ) == math.huge then return false
+		else return true end
+	end
+
+	local length = distance( circle1x, circle1y, circle2x, circle2y )
+	if length > radius1 + radius2 then return {} end -- If the distance is greater than the two radii, they can't intersect.
+	if checkEqualFuzzy( length, 0 ) and checkEqualFuzzy( radius1, radius2 ) then return {} end	-- equal
+	if checkEqualFuzzy( circle1x, circle2x ) and checkEqualFuzzy( circle1y, circle2y ) then return {} end --collinear
+
+	local a = ( radius1 * radius1 - radius2 * radius2 + length * length ) / ( 2 * length )
+	local h = math.sqrt( radius1 * radius1 - a * a )
+
+	local p2x = circle1x + a * ( circle2x - circle1x ) / length
+	local p2y = circle1y + a * ( circle2y - circle1y ) / length
+	local p3x = p2x + h * ( circle2y - circle1y ) / length
+	local p3y = p2y - h * ( circle2x - circle1x ) / length
+	local p4x = p2x - h * ( circle2y - circle1y ) / length
+	local p4y = p2y + h * ( circle2x - circle1x ) / length
+
+	if not validateNumber( p3x ) or not validateNumber( p3y ) or not validateNumber( p4x ) or not validateNumber( p4y ) then
+		return {} -- inside
+	end
+
+	if checkEqualFuzzy( length, radius1 + radius2 ) or checkEqualFuzzy( length, math.abs( radius1 - radius2 ) ) then return {{p3x, p3y}} end -- tangent
+	return {{p3x, p3y}, {p4x, p4y}} --intersection
+end
+
 function arrayContains(array, element)
 	for _,value in ipairs(array) do
 		if value == element then
@@ -437,7 +495,7 @@ end
 
 -- removes all elements (in place!) that do not meet the condition
 function arrayFilter(array, condition)
-	local source_idx, target_idx = #array +1, #array + 1 
+	local source_idx, target_idx = #array +1, #array + 1
 	for i = 1, #array do
 		if not condition(array[i]) then
 			source_idx = i+1
@@ -456,3 +514,21 @@ function arrayFilter(array, condition)
 		array[i] = nil
 	end
 end
+
+-- shuffle an array in place
+function arrayShuffle(array)
+	for i = #array, 2, -1 do
+		local j = math.random(i)
+		array[i], array[j] = array[j], array[i]
+	end
+	return array
+end
+
+function arraySelectRandom(array)
+    local array_item_count = #array
+    if array_item_count == 0 then
+        return nil
+    end
+    return array[irandom(1,#array)]    
+end
+

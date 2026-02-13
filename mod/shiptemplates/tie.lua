@@ -6,7 +6,7 @@ template = ShipTemplate():setName("TIE-Fighter"):setClass("Starfighter", "Fighte
 template:setModel("tie_fighter")
 template:setDescription([[It's a TIE Fighter]])
 template:setRadarTrace("tie_fighter.png")
-template:setImpulseSoundFile("sfx/engine_fighter.wav")
+template:setImpulseSoundFile("sfx/engine_tie_mixed.wav")
 template:setHull(36)	-- asteroid makes 35 dmg
 template:setShields()
 --				spped, turn, accel, rev-speed, rev-accel
@@ -40,6 +40,7 @@ template:setInternalDockClasses("Escape Pod")
 
 var = template:copy("TIE Fighter")
 var:setType("playership")
+var:setPlayerShipType("fighter")
 addSystemsTF(var)
 
 var = template:copy("TIE-Interceptor")
@@ -55,12 +56,13 @@ var:setHull(69)	-- two asteroids also kill TI
 
 var2 = var:copy("TIE Interceptor")
 var2:setType("playership")
+var2:setPlayerShipType("fighter")
 
 template = ShipTemplate():setName("TIE-Bomber"):setClass("Starfighter", "Bomber")
 template:setDescription([[It's a TIE Bomber]])
 template:setModel("tie_bomber")
 template:setRadarTrace("tie_bomber.png")
-template:setImpulseSoundFile("sfx/engine_fighter.wav")
+template:setImpulseSoundFile("sfx/engine_tie_mixed.wav")
 template:setHull(100)
 template:setShields()
 template:setSpeed(70, 15, 25, 40, 15)
@@ -99,6 +101,7 @@ addSystemsTB(template)
 
 var = template:copy("TIE Bomber")
 var:setType("playership")
+var:setPlayerShipType("fighter")
 --[[
 var2 = var:copy("TIE Bomber (assault)")
 var2:setTubes(1,7)

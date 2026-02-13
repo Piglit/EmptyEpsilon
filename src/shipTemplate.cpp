@@ -586,6 +586,11 @@ string getSystemName(ESystem system)
     case SYS_JumpDrive: return "jumpdrive";
     case SYS_FrontShield: return "frontshield";
     case SYS_RearShield: return "rearshield";
+    case SYS_Sensors: return "sensors";
+    case SYS_Communication: return "communication";
+    case SYS_Hangar: return "hangar";
+    case SYS_Bridge: return "bridge";
+    case SYS_Airlock: return "airlock";
     default:
         return "UNKNOWN";
     }
@@ -604,6 +609,11 @@ string getLocaleSystemName(ESystem system)
     case SYS_JumpDrive: return tr("system", "Jump Drive");
     case SYS_FrontShield: return tr("system", "Front Shield Generator");
     case SYS_RearShield: return tr("system", "Rear Shield Generator");
+    case SYS_Sensors: return tr("system", "Sensor System");
+    case SYS_Communication: return tr("system", "Communication System");
+    case SYS_Hangar: return tr("system", "Hangar");
+    case SYS_Bridge: return tr("system", "Bridge");
+    case SYS_Airlock: return tr("system", "Airlock");
     default:
         return "UNKNOWN";
     }

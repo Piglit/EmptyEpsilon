@@ -23,6 +23,16 @@ template<> void convert<ESystem>::param(lua_State* L, int& idx, ESystem& es)
         es = SYS_FrontShield;
     else if (str == "rearshield")
         es = SYS_RearShield;
+    else if (str == "sensors")
+        es = SYS_Sensors;
+    else if (str == "communication")
+        es = SYS_Communication;
+    else if (str == "hangar")
+        es = SYS_Hangar;
+    else if (str == "bridge")
+        es = SYS_Bridge;
+    else if (str == "airlock")
+        es = SYS_Airlock;
     else
         es = SYS_None;
 }

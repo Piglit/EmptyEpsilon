@@ -162,7 +162,7 @@ ScienceScreen::ScienceScreen(GuiContainer* owner, ECrewPosition crew_position)
     for(int n = 0; n < SYS_COUNT; n++)
     {
         info_system[n] = new GuiKeyValueDisplay(info_sidebar, "SCIENCE_SYSTEM_" + string(n), 0.75, getLocaleSystemName(ESystem(n)), "-");
-        info_system[n]->setSize(GuiElement::GuiSizeMax, 30);
+        info_system[n]->setSize(GuiElement::GuiSizeMax, 30)->setMargins(0,0,0,-6);
         info_system[n]->hide();
     }
 
@@ -426,7 +426,7 @@ void ScienceScreen::onDraw(sp::RenderTarget& renderer)
                         float system_health = ship->systems[n].health;
                         info_system[n]->setValue(string(int(system_health * 100.0f)) + "%")->setColor(glm::u8vec4(255, 127.5f * (system_health + 1), 127.5f * (system_health + 1), 255));
                     } else {
-                        info_system[n]->setValue("-");
+                        info_system[n]->setValue("-")->hide();
                     }
                 }
             }

@@ -6,6 +6,17 @@ Manages stations
 * manages stations trade
 * manages stations quests
 
+
+Design goal:
+* Exploration & Expansion: find suitable stations and take them.
+
+Derived from that:
+* Neutral stations can be captured. Low Artifact/Rep cost. There must be a clearly communicated reward.
+* Enemy stations should be capturable by combat and have a higher value than neutral ones.
+* Arlenian stations want to be united (or can not be captured directly?) to share their serviced
+* Independent/HN stations want to establish trade routes that need to be defended to share their services.
+
+
 --]]
 avp_stations = {
 	stations = {},
@@ -72,26 +83,73 @@ function avp_stations:init()
 
 end
 
+function avp_stations:createArlenianStation(template, terrain_module)
+	local groups = {"Generic", "RandomHumanNeutral", "Random"}
+	for _,grpname in ipairs(groups) do
+		local group, station = pickStation(grpname)
+		if station ~= nil then
+			station:setFaction("Arlenians"):setTemplate(template)
+			avp_stations:apply_comms_script(station, terrain_module)
+			table.insert(self.stations, station)
+			return station
+		end
+	end
+end
 
-function avp_stations:createInTerrain(terrain_module)
+function avp_stations:createEnemyStation(templates, name_groups, terrain_module)
+	local template = tableSelectRandom(templates)
+	for _,grpname in ipairs(name_groups) do
+		local group, station = pickStation(grpname)
+		if station ~= nil then
+			station:setTemplate(template)
+			avp_stations:apply_comms_script(station, terrain_module)
+			table.insert(self.stations, station)
+			return station
+		end
+	end
+end
+
+function avp_stations:createExuariCarrier()
+	local groups = {"Sinister", "RandomGenericSinister", "Random"}
+	for _,grpname in ipairs(groups) do
+		local group, station = pickStation(grpname)
+		if station ~= nil then
+			carrier = CpuShip():setCallSign(station:getCallSign()):setDescription(station:getDescription())
+			carrier.comms_data = station.comms_data
+			station:destroy()
+			local stationSizeRandom = random(1,100)
+			local sizeTemplate
+			if stationSizeRandom <= 66 then
+				sizeTemplate = "Craver"
+			else
+				sizeTemplate = "Ridge"
+			end
+			carrier:setFaction("Exuari"):setTemplate(sizeTemplate):orderStandGround()
+			for idx,grp in ipairs({"frigates", "artillery", "strikers", "fighters"}) do
+				for i = idx, idx*2+1 do
+					local template = EnemyModuleExuari:getClassTemplate(grp)
+					if i == idx then
+						script_hangar:create(carrier, template, i)	-- one bay per class
+					else
+						script_hangar:append(carrier, template, i)
+					end
+				end
+				script_hangar:config(carrier, "cooldownMax", 60/idx)
+				script_hangar:config(carrier, "triggerRange", 50000 - 10000*idx)
+			end	
+			table.insert(self.stations, carrier)
+			return carrier 
+		end
+	end
+end
+
+function avp_stations:createIndependentStation(terrain_module)
 	-- call sub-functions from the utility
 	local group, station = pickStation("RandomHumanNeutral")	-- could also be a group or a name
 	station:setFaction("Independent")
 	local sizeTemplate = szt()
---	if TEST then
---		sizeTemplate = "Huge Station"
---	end
 	station:setTemplate(sizeTemplate)
-	station:setCommsScript("comms_station_sandbox.lua")
-
-	local character = table.remove(self.characters)	-- pop one into this station
-	if character ~= nil then
-		station.characters = {character}
-	end
-	station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
-
-	self:setRepairMissions(station)
-
+	
 	-- place station
 	if terrain_module ~= nil then
 		terrain_module:insertStation(station)
@@ -99,17 +157,109 @@ function avp_stations:createInTerrain(terrain_module)
 			avp_mining:activateMining(station, 2*terrain_module.radius)
 		end
 	end
-	-- do not use most of the comms data from the utility,
-	-- keep description, general, history as they are descriptive
 
-	-- disable weapons:
-	station.comms_data.weapon_available = {
-		Homing =			false,
-		HVLI =				false,
-		Mine =				false,
-		Nuke =				false,
-		EMP =				false,
-	}
+	avp_stations:apply_comms_script(station, terrain_module)
+	table.insert(self.stations, station)
+	return station
+end
+
+-- modify comms_data to fit to our missions
+function avp_stations:apply_comms_script(station, terrain_module)
+	comms_vf_station.entry:set_as_comms_function(station)
+	local hull_modifier = station:getHullMax() / 100
+	-- small: 1.5
+	-- medium: 4
+	-- large: 5
+	-- huge: 8
+
+	station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
+
+	-- do not use most of the comms data from the utility,
+	-- keep description, general, history as they are descriptive.
+	
+	-- these are are the same for all stations. just remove them and add them later
+	station.comms_data.services = nil
+	station.comms_data.service_available = {}
+	station.comms_data.service_cost = {}
+
+	-- disable xanstas trade system, since I dont really like it
+	station.comms_data.goods = {}
+	station.comms_data.trade = nil
+
+	-- patch in case it is missing
+	if station.comms_data.reputation_cost_multipliers == nil then
+		station.comms_data.reputation_cost_multipliers = {
+			friend = 			1.0, 
+			neutral = 			irandom(2,3),	-- is given by utility per station
+		}
+	end
+	-- we never call placeStation, so some data is missing:
+	-- removed faction_matters, but keep size_matters
+	local size_matters = hull_modifier * 5
+	station:setSharesEnergyWithDocked(random(1,100) <= (50 + size_matters))
+	station:setRepairDocked(random(1,100) <= (55 + size_matters))
+	station:setRestocksScanProbes(random(1,100) <= (45 + size_matters))
+	station.comms_data.system_repair = {}
+--	station.comms_data.coolant_pump_repair = {}
+	local system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
+	for i, system in ipairs(system_list) do
+		local chance = 60 + size_matters
+		local eval = random(1,100)
+		station.comms_data.system_repair[system] = eval <= chance
+		--eval = random(1,100)
+		--station.comms_data.coolant_pump_repair[system] = eval <= chance
+	end
+	-- we currently don't use function_repair, so leave it missing
+	
+	-- don't know if needed:
+	--station:setSharesEnergyWithDocked(station.comms_data.services.share_energy ~= false)
+	--station:setRepairDocked(station.comms_data.services.repair_docked ~= false)
+	--station:setRestocksScanProbes(station.comms_data.services.restock_probes ~= false)
+
+	self:setRepairMissions(station)
+
+	-- weapons:
+	-- some weapons are enabled or disabled due to the faction description by the place utility. Most of them get randomly enabled by the difficulty setting at the beginning of the game (when the first call of pickStation occures).
+	-- Let's use them as a suggestion of weapons, they still have in store, but to a limited and very scarce amount.
+
+	assert(station.comms_data.weapon_available)
+	for weapon, avail in pairs(station.comms_data.weapon_available) do
+		if avail then
+			station.comms_data.weapon_available[weapon] = math.ceil(hull_modifier)
+		end
+	end
+
+	-- stations procude weapons, depending on the terrain. They always sell those.
+	-- warning: Independent stations are not placed in mines and planets!
+	assert(terrain_module)
+	if terrain_module.terrain_type == "asteroids" then
+		station.comms_data.weapon_available.HVLI = true
+		services = {"repair_docked", "sell_weapons"}
+	elseif terrain_module.terrain_type == "nebulae" then
+		station.comms_data.weapon_available.Homing = true
+		services = {"coolant_pump_repair", "restock_probes", "sell_weapons"}
+	elseif terrain_module.terrain_type == "mines" then
+		station.comms_data.weapon_available.Mine = true
+		services = {"sell_weapons", "jump_overcharge"}
+	elseif terrain_module.terrain_type == "blackholes" then
+		station.comms_data.weapon_available.EMP = true
+		services = {"subsystem_repair", "sell_weapons", "share_energy"}
+	elseif terrain_module.terrain_type == "planets" then
+		station.comms_data.weapon_available.Nuke = true
+		services = {"reinforcements", "system_repair", "repair_docked", "sell_weapons"}
+	elseif terrain_module.terrain_type == "wormholes" then
+		services = {"restock_probes", "supplydrop", "jumpsupplydrop"}
+	end
+
+
+
+	local character = table.remove(self.characters)	-- pop one into this station
+	if character ~= nil then
+		station.characters = {character}
+	end
+
+
+	
 
 	-- this table is for isAllowedTo, it understands "friend" and "neutral" - everything else is denied.
 	-- disable all as default, enable selected later
@@ -139,16 +289,6 @@ function avp_stations:createInTerrain(terrain_module)
 		restock_probes =	math.random(10,20),
 	}
 
-	--[[ unmodified
-	station.comms_data.reputation_cost_multipliers = {
-		friend = 			1.0, 
-		neutral = 			irandom(2,3),	-- is given by utility per station
-	}
-	--]]
-
-	-- disable xanstas trade system, since I dont really like it
-	station.comms_data.goods = {}
-	station.comms_data.trade = nil
 
 	-- services depend on terrain type:
 	local services = {}
@@ -165,31 +305,6 @@ function avp_stations:createInTerrain(terrain_module)
 		"restock_probes",
 		"sell_weapons",
 	}
-	if terrain_module == nil then
-		station.comms_data.weapon_available.EMP = true
-		station.comms_data.weapon_available.HVLI = true
---		station.comms_data.weapon_available.Homing = true
-		station.comms_data.weapon_available.Mine = true
-		station.comms_data.weapon_available.Nuke = true
-		services = all_services
-	elseif terrain_module.terrain_type == "asteroids" then
-		station.comms_data.weapon_available.HVLI = true
-		services = {"repair_docked", "sell_weapons"}
-	elseif terrain_module.terrain_type == "nebulae" then
-		station.comms_data.weapon_available.Homing = true
-		services = {"coolant_pump_repair", "restock_probes", "sell_weapons"}
-	elseif terrain_module.terrain_type == "mines" then
-		station.comms_data.weapon_available.Mine = true
-		services = {"sell_weapons", "jump_overcharge"}
-	elseif terrain_module.terrain_type == "blackholes" then
-		station.comms_data.weapon_available.EMP = true
-		services = {"subsystem_repair", "sell_weapons", "share_energy"}
-	elseif terrain_module.terrain_type == "planets" then
-		station.comms_data.weapon_available.Nuke = true
-		services = {"reinforcements", "system_repair", "repair_docked", "sell_weapons"}
-	elseif terrain_module.terrain_type == "wormholes" then
-		services = {"restock_probes", "supplydrop", "jumpsupplydrop"}
-	end
 
 	-- all the specific services are available for friends only
 	for _, service in ipairs(services) do
@@ -216,11 +331,7 @@ function avp_stations:createInTerrain(terrain_module)
 		end
 		station.comms_data.services[service] = "neutral"
 	end
-	station:setSharesEnergyWithDocked(station.comms_data.services.share_energy ~= false)
-	station:setRepairDocked(station.comms_data.services.repair_docked ~= false)
-	station:setRestocksScanProbes(station.comms_data.services.restock_probes ~= false)
 
-	table.insert(self.stations, station)
 	return station
 end
 

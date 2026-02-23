@@ -19,6 +19,7 @@ require("shiptemplates/humans.lua")
 require("shiptemplates/exuari.lua")
 require("shiptemplates/kraylor.lua")
 require("shiptemplates/ktlitan.lua")
+require("shiptemplates/arlenian.lua")
 require("shiptemplates/satellites.lua")
 require("shiptemplates/special.lua")
 

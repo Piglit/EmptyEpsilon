@@ -253,7 +253,7 @@ template:setRestocksScanProbes(true)
 --Key features: stationary. Maybe add a Homing tube as variant.
 
 template = ShipTemplate():setName("Goddess of Destruction"):setClass("Kraylor", "Station"):setModel("space_station_2")
-template:setRadarTrace("radartrace_largestation.png")
+template:setRadarTrace("largestation.png")
 template:setDescription([[The Goddess of Destruction is a "ship" so large and unique that it's almost a class of its own.
 
 The ship is often nicknamed the "all-mother", a name that aptly describes the many roles this ship can fulfill. It's both a supply station and an extremely heavily armored and shielded weapon station capable of annihilating small fleets on its own.

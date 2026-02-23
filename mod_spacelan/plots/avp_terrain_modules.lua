@@ -31,7 +31,6 @@ requires: utils.lua (vectorFromAngle)
 --]]
 
 require "utils.lua"
---require "plots/wh_rota.lua"
 
 avp_terrain_modules = {
 	modules = {},
@@ -46,6 +45,9 @@ function TerrainModule:new(obj)
 	setmetatable(obj, self)
 	self.__index = self
 	table.insert(avp_terrain_modules.modules, obj)
+	--if obj.terrain_type ~= nil then
+	--	log("new "..obj.terrain_type)
+	--end
 	return obj
 end
 
@@ -81,22 +83,26 @@ function TerrainModule:placeZone()
         table.insert(points, y)
     end
     self.zone = Zone():setPoints(table.unpack(points))
+	--set label
+	self.zone_name = ""
+	if self.radius > 5000 then
+		-- not too small to read
+		if #self.zone_names == 0 then
+			self.zone_names = TerrainModule.zone_names
+		end
+		if #self.zone_names > 0 then
+			-- pop one element
+			self.zone_name = table.remove(self.zone_names)
+		end
+	end
 	return self					   
 end
 
 function TerrainModule:labelZone()
 	-- not every zone gets a label
 	-- the label is set on discovery in create()
-	if self.radius < 5000 then
-		-- too small to read
-		return self
-	end
-	if #self.zone_names == 0 then
-		self.zone_names = TerrainModule.zone_names
-	end
-	if #self.zone_names > 0 then
-		-- pop one element
-		self.zone:setLabel(table.remove(self.zone_names))
+	if self.zone_name ~= "" then
+		self.zone:setLabel(self.zone_name)
 	end
 	return self
 end
@@ -113,6 +119,11 @@ function TerrainModule:check()
 	self.rotation = self.rotation or 0
 	assert(type(self.rotation) == "number")
 	self:placeZone()
+	assert(self.terrain_type ~= nil)	
+	assert(self.canInsertShip ~= nil)	
+	assert(self.canInsertStation ~= nil)	
+	assert(self.canInsertArtifact ~= nil)	
+	assert(self.canInsertEnemies~= nil)	
 	return self
 end
 
@@ -140,7 +151,11 @@ function TerrainModule:canInsertStation()
 end
 
 function TerrainModule:canInsertEnemies()
-	return self.radius > 5000
+	return self.radius > 5000 and not self.skip_enemies
+end
+
+function TerrainModule:canInsertShip()
+	return true
 end
 
 function TerrainModule:insertStation(station)
@@ -154,6 +169,37 @@ function TerrainModule:insertStation(station)
 		self:insertObject(station, self.station_distance_rad)
 	else
 		self:insertObject(station, 0.75)
+	end
+end
+
+function TerrainModule:getStation()
+	-- returns the first valid station
+	if self.stations ~= nil then
+		for _,station in ipairs(self.stations) do
+			if station ~= nil and station:isValid() then
+				return station
+			end
+		end
+	end
+	return nil
+end
+
+function TerrainModule:insertShip(ship, visitor)
+	-- default implementation
+	-- places a ship inside the module
+	if self.ships == nil then
+		self.ships = {}
+	end
+	table.insert(self.ships, ship)
+	local orientation = "near"
+	if visitor ~= nil and visitor:isValid() then
+		-- in direction of the player that finds this TerrainModule 
+		orientation = angleRotation(visitor, self.x, self.y)
+	end
+	if self.ship_distance_rad ~= nil then
+		self:insertObject(ship, self.ship_distance_rad, orientation)
+	else
+		self:insertObject(ship, 0.99, orientation)
 	end
 end
 
@@ -199,16 +245,30 @@ function TerrainModule:getEnemySpawnPositions()
 	return {{0,0}}
 end
 
+function TerrainModule:calculateSpawnPositionsOnRing(distance)
+	local rot = self.rotation
+	local positions = {}
+	for i = 1, 50 do
+		rot = rot + 360/i
+		local x,y = radialPosition(self.x, self.y, distance, rot)
+		table.insert(positions, {x,y})
+	end
+	return positions
+
+end
+
 function avp_terrain_modules:updatePlayerShip(delta, ship)
 	-- if a hidden module comes into view, create it and call onCreation callbacks
 	for idx, module in ipairs(self.hidden_modules) do
 		if distance(ship, module.x, module.y) <= ship:getLongRangeRadarRange() + module.radius + 5000 then
 			module:create()
-
+			--if module.terrain_type ~= nil then
+			--	log("created "..module.terrain_type)
+			--end
 			table.remove(self.hidden_modules, idx)
 			if module.onCreationCallbacks ~= nil then
 				for _,cb in ipairs(module.onCreationCallbacks) do
-					cb(module)
+					cb(module, ship)
 				end
 			end
 			return
@@ -234,7 +294,7 @@ TerrainModuleNebulae = TerrainModule:new{terrain_type="nebulae"}
 TerrainModuleMines = TerrainModule:new{terrain_type="mines"}
 TerrainModulePlanets = TerrainModule:new{terrain_type="planets"}
 TerrainModuleBlackHoles = TerrainModule:new{terrain_type="blackholes"}
-TerrainModuleWormHoles = TerrainModule:new{terrain_type="wormholes"}
+TerrainModuleWormHoles = TerrainModule:new{terrain_type="wormholes", all_wormholes={}}
 TerrainModuleMeta = TerrainModule:new{terrain_type="meta"}
 TerrainModuleMetaSpiral = TerrainModuleMeta:new{}
 
@@ -267,14 +327,42 @@ TerrainModule.zone_names = arrayShuffle({
 	"Ihrer Majestät Missfallen",
 	"Padmes Lebensfreude",
 	"Sicherer Raum",
+	"Ende der Vernunft",
 })
 
-TerrainModuleBlackHoles.zone_names = arrayShuffle({
-	"Offenbarung der Zwillinge",
+TerrainModuleAsteroids.zone_names = arrayShuffle({
+	"Der Haufen",
+	"Beltalowda",
+	"Glas voll Dreck",
 })
 
 TerrainModuleNebulae.zone_names = arrayShuffle({
 	"Phileas Fogg",
+	"Der siebte Schleier",
+	"Blauer Rauch",
+})
+
+TerrainModuleMines.zone_names = arrayShuffle({
+	"Begierde der Möve",
+	"Testgelände 7",
+})
+
+TerrainModulePlanets.zone_names = arrayShuffle({
+	"Kosmische Jonglage",
+	"Bunte Kugel",
+	"Heimatwelt 48",
+})
+
+TerrainModuleBlackHoles.zone_names = {	-- not shuffeled
+	"Offenbarung der Zwillinge",
+	"Loch Ness",
+	"Immerwährende Dunkelheit",
+	"Vermächtnis der Nacht",
+}
+
+TerrainModuleWormHoles.zone_names = arrayShuffle({
+	"Einstein-Rosen-Brücke 3",
+	"Reisebüro Delta",
 })
 
 function TerrainModuleAsteroids:create()
@@ -300,17 +388,20 @@ end
 
 function TerrainModuleAsteroids:canInsertStation()
 	-- between rings, preferably not between the outer two
+	if self.rings_amount == nil then
+		self.rings_amount = math.max(1,math.floor(self.radius / 5000))
+	end
 	return self.rings_amount >= 2
 end
 
 function TerrainModuleAsteroids:canInsertArtifact()
-	return random(0,1) > 0.25
+	return true
 end
 
 function TerrainModuleAsteroids:insertArtifact()
 	local dist = self.radius / (self.rings_amount + 1)
 	local x,y = radialPosition(self.x, self.y, dist, self.rotation+90)
-	art = wh_artifacts:placeGenericArtifact(x,y)
+	art = wh_artifacts:placeGenericArtifact(x,y)	-- TODO: more specific description, high level asteroid?
 	if TEST == false then
 		art:setRadarTraceColor(255, 200, 100)	-- camoflage
 	end
@@ -318,7 +409,10 @@ function TerrainModuleAsteroids:insertArtifact()
 end
 
 function TerrainModuleAsteroids:canInsertEnemies()
-	return self.rings_amount ~= 2
+	if self.rings_amount == nil then
+		self.rings_amount = math.max(1,math.floor(self.radius / 5000))
+	end
+	return self.rings_amount ~= 2 and not self.skip_enemies
 end
 
 function TerrainModuleAsteroids:getEnemySpawnPositions()
@@ -327,15 +421,8 @@ function TerrainModuleAsteroids:getEnemySpawnPositions()
 		return {{self.x,self.y}}
 	end
 	-- just inside outermost ring
-	local current = self.rotation
-	local positions = {}
 	local dist = (self.rings_amount-0.5) * self.radius / (self.rings_amount + 1)
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, dist, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(dist)
 end
 
 function TerrainModuleNebulae:create()
@@ -354,14 +441,12 @@ function TerrainModuleNebulae:create()
 		table.insert(self.nebulae, Nebula():setPosition(x,y))
 	end
 	self.station_distance_rad = random(0.25, 0.75)
-	if self.radius > 15000 then
-		self:labelZone()
-	end
+	self:labelZone()
 	return self
 end
 
 function TerrainModuleNebulae:canInsertEnemies()
-	return true
+	return not self.skip_enemies
 end
 
 function TerrainModuleNebulae:getEnemySpawnPositions()
@@ -376,6 +461,7 @@ end
 function TerrainModuleMines:create()
 	-- places Mines in a nice manner
 	self:check()
+	self.mines = {}
 	local rotation = self.rotation
 	local dist_between_rings = self.radius / 4
 	local dist_between_mines_squared = 1500*1500
@@ -384,10 +470,11 @@ function TerrainModuleMines:create()
 		local arc_dist = math.deg(math.acos(1-dist_between_mines_squared/(2*dist_from_origin*dist_from_origin)))
 		for arc = rotation, rotation+random(60,270), arc_dist do
 			local x,y = radialPosition(self.x, self.y, dist_from_origin, arc)
-			Mine():setPosition(x,y)
+			table.insert(self.mines, Mine():setPosition(x,y))
 		end
 	end
 	self.station_distance_rad = 0
+	self:labelZone()
 	return self
 end
 
@@ -400,7 +487,7 @@ function TerrainModuleMines:canInsertArtifact()
 end
 
 function TerrainModuleMines:canInsertEnemies()
-	return self.radius/4 >= 3000
+	return self.radius/4 >= 3000 and not self.skip_enemies
 end
 
 function TerrainModuleMines:insertArtifact()
@@ -409,15 +496,7 @@ function TerrainModuleMines:insertArtifact()
 end
 
 function TerrainModuleMines:getEnemySpawnPositions()
-	-- between outer and middle ring
-	local current = self.rotation
-	local positions = {}
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, self.radius*5/8, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(self.radius*5/8)
 end
 
 function TerrainModulePlanets:createPlanet(isMoon)
@@ -476,8 +555,18 @@ end
 function TerrainModulePlanets:canInsertStation()
 	return self.radius >= 4000
 end
+function TerrainModulePlanets:canInsertArtifact()
+	return true
+end
 function TerrainModulePlanets:insertStation(station)
 	TerrainModule.insertStation(self, station)
+	self:insertOrbitingObject(station)
+end
+function TerrainModulePlanets:insertArtifact()
+	local art = wh_artifacts:placeGenericArtifact(0,0)	-- TODO: more specific description
+	self:insertOrbitingObject(art)
+end
+function TerrainModulePlanets:insertOrbitingObject(obj)
 	if #self.moons > 0 then
 		local linked_moon = self.moons[#self.moons]
 		local dist
@@ -498,39 +587,33 @@ function TerrainModulePlanets:insertStation(station)
 			dist = self.radius/4 + orbit_dist * (1/#self.moons + (1 - 1 / #self.moons) /2)
 		end							   
 		local x,y = radialPosition(self.x, self.y, dist, linked_moon.arc+180)
-		station:setPosition(x,y)
-		wh_rota:add_object(station, 360/linked_moon.orbit_time, self.x, self.y)
+		obj:setPosition(x,y)
+		wh_rota:add_object(obj, 360/linked_moon.orbit_time, self.x, self.y)
 	else
-		wh_rota:add_object(station, 0.5, self.x, self.y)
+		wh_rota:add_object(obj, 0.5, self.x, self.y)
 	end
 end
+
 function TerrainModulePlanets:getEnemySpawnPositions()
 	-- just inside outermost moon
-	local current = self.rotation
-	local positions = {}
 	local dist = self.radius
 	if #self.moons > 0 then
 		local moon_radius = self.radius/(3*(#self.moons+1))
 		dist = self.radius - 2*moon_radius - 1000
 	end
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, dist, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(dist)
 end
 
 function TerrainModuleBlackHoles:create()
 	-- places BlackHoles in a nice manner
 	self:check()
 	self.holes = {}
+	self.artifacts = {}
 	local holes = 1
 	if self.radius >= 10000 then
 		holes = irandom(1, math.floor(self.radius/10000))
 	end
 	if holes > 1 then
-		self:labelZone()
 		for i = 1, holes do
 			local x,y = radialPosition(self.x, self.y, self.radius/3, self.rotation+(i*360/holes))
 			local bh = BlackHole():setRadius(self.radius/4):setPosition(x, y)
@@ -543,6 +626,7 @@ function TerrainModuleBlackHoles:create()
 		table.insert(self.holes, bh)
 		gravity_util.addGravitySource(bh, self.radius)
 	end
+	self:labelZone()
 	return self
 end
 
@@ -554,40 +638,41 @@ function TerrainModuleBlackHoles:canInsertArtifact()
 	return true
 end
 
-function TerrainModuleBlackHoles:insertArtifact()
+function TerrainModuleBlackHoles:insertArtifact(callback)
+	-- callback can be nil for no effect
 	local x,y,speed
+	local artifact_name = _("Black hole stabilizer")
+	local artifact_info = _("This Arlenian device was used to prevent the wormhole from collapsing.")
 	if #self.holes == 1 then
-		x,y = radialPosition(self.x,self.y, 2*self.radius/5, 0)
+		x,y = radialPosition(self.x,self.y, 2*self.radius/5, self.rotation)
 		speed = 2
-		local art = wh_artifacts:placeGenericArtifact(x,y)
+		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
+		art.terrain_module = self
+		art.hole = self.holes[1]
+		table.insert(self.artifacts, art)
 	else
-		speed = -0.5
-		x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation)
-		local art = wh_artifacts:placeGenericArtifact(x,y)
-		wh_rota:add_object(art, speed, self.x, self.y)
-		x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation + 360/#self.holes)
-		art = wh_artifacts:placeGenericArtifact(x,y)
-		wh_rota:add_object(art, speed, self.x, self.y)
-		if #self.holes > 2 then
-			x,y = self.holes[2]:getPosition()
-			x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
-			art = wh_artifacts:placeGenericArtifact(x,y)
-			wh_rota:add_object(art, speed, self.x, self.y)
+		for idx,bh in ipairs(self.holes) do
+			speed = bh.speed -- the artifact circles the bh once each bh year
+			x,y = bh:getPosition()
+			local rotation = self.rotation -- for 1 or 2 holes, so they are opposite
+			-- for 3 holes:
+			if #self.holes%2 == 1 then
+				rotation = rotation + idx*180/#self.holes
+			end
+			x,y = radialPosition(x,y, self.radius/5, rotation)--+idx*360/#self.holes)
+			local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+			wh_rota:add_object(art, speed, bh)
+			art.hole = bh 
+			art.terrain_module = self
+			table.insert(self.artifacts, art)
 		end
 	end
 end
 
 function TerrainModuleBlackHoles:getEnemySpawnPositions()
 	-- on the outside of the radius, since station is at 0.75
-	local current = self.rotation
-	local positions = {}
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, self.radius, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(self.radius)
 end
 
 function TerrainModuleWormHoles:create()
@@ -601,15 +686,19 @@ function TerrainModuleWormHoles:create()
 	if self.radius >= 10000 then
 		amount = irandom(1, math.floor(self.radius/10000))
 	end
+	self.wormholes = {}
 	for i = 1, amount do
 		local x,y = radialPosition(self.x, self.y, self.radius/3, self.rotation+(i*360/amount))
 		-- calculate wormhole target position
 		local direction = angleRotation(mirror_x, mirror_y, x, y) + i * (360/(amount+1))
 		local dist = distance(mirror_x, mirror_y, x, y)
 		local target_x, target_y = radialPosition(mirror_x, mirror_y, dist, direction)
-		WormHole():setPosition(x, y):setTargetPosition(target_x, target_y)
+		local wh = WormHole():setPosition(x, y):setTargetPosition(target_x, target_y)
+		table.insert(self.wormholes, wh) 
+		table.insert(self.all_wormholes, wh) -- TODO test if this works
 	end
 	self.station_distance_rad = 0
+	self:labelZone()
 	return self
 end
 
@@ -631,7 +720,7 @@ function TerrainModuleWormHoles:getEnemySpawnPositions()
 end
 
 function TerrainModuleWormHoles:canInsertEnemies()
-	return 2*self.radius/3 > 3000
+	return 2*self.radius/3 > 3000 and not self.skip_enemies
 end
 
 function TerrainModuleMetaSpiral:create()
@@ -645,7 +734,7 @@ function TerrainModuleMetaSpiral:create()
 	-- module classes get shuffled and then distributed to the positions
 	-- some modules appear more than once here, to appear more often
 	local modules = {
---FIXME		TerrainModuleAsteroids,
+		TerrainModuleAsteroids,
 		TerrainModuleAsteroids,
 		TerrainModuleNebulae,
 		TerrainModuleMines,
@@ -675,12 +764,33 @@ function TerrainModuleMetaSpiral:create()
 		this.radius = distance(this.x, this.y, prev.x, prev.y) / 2
 	end
 	self.children[1].radius = self.children[2].radius	-- the center is a bit off
+
+	if self.onChildrenCheckCallbacks == nil then
+		self.onChildrenCheckCallbacks = {}
+	end
+	if self.onChildrenCreationCallbacks == nil then
+		self.onChildrenCreationCallbacks = {}
+	end
+	local counter = {}
+	local encounter_counter = {}
 	for _,module in ipairs(self.children) do
 		if MetaTerrain ~= nil then
 			MetaTerrain():setPosition(module.x,module.y):setRadius(module.radius)
 		end
 		module:check()
-
+		for _,callback in ipairs(self.onChildrenCheckCallbacks) do
+			callback(module)
+		end
+		if counter[module.terrain_type] == nil then
+			counter[module.terrain_type] = 1
+		else
+			counter[module.terrain_type] = counter[module.terrain_type] +1
+		end
+		if encounter_counter[module.encounter] == nil then
+			encounter_counter[module.encounter] = 1
+		else
+			encounter_counter[module.encounter] = encounter_counter[module.encounter] +1
+		end
 		if TEST then
 			module:create()
 			for _,callback in ipairs(self.onChildrenCreationCallbacks) do
@@ -693,6 +803,23 @@ function TerrainModuleMetaSpiral:create()
 			module:createWhenVisible()
 		end
 	end
+	for i=2, #self.children-1 do
+		local last = self.children[i-1]
+		local recent = self.children[i]
+		local next = self.children[i+1]
+		assert(last.gossip)
+		assert(next.gossip)
+		recent.collected_gossip = {last.gossip, next.gossip}
+	end
+	for terrain_type, counter in pairs(counter) do
+		log(string.format("created %i %s", counter, terrain_type))
+	end
+	local ecc = 1
+	for encounter, counter in pairs(encounter_counter) do
+		log(string.format("created %i %s", counter, encounter))
+		ecc = ecc+1
+	end
+	log(string.format("created %i different encounters (should be 17)", ecc))
 	return self
 end
 
@@ -707,6 +834,20 @@ function TerrainModuleMeta:registerOnChildrenCreationCallback(callback)
 		self.onChildrenCreationCallbacks = {}
 	end
 	table.insert(self.onChildrenCreationCallbacks, callback)
+end
+
+function TerrainModuleMeta:registerOnChildrenCheckCallback(callback)
+	if self.children ~= nil then
+		for _,module in pairs(self.children) do
+			log("  XXX")
+			module:registerOnCheckCallback(callback)
+		end
+	end
+
+	if self.onChildrenCheckCallbacks == nil then
+		self.onChildrenCheckCallbacks = {}
+	end
+	table.insert(self.onChildrenCheckCallbacks, callback)
 end
 
 

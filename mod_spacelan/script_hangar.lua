@@ -17,7 +17,7 @@ function script_hangar:update(dt)
 				if ship:areEnemiesInRange(hangar.triggerRange) then
 					if hangar.cooldownRemain > 0 then
 						local factor = 1
-						if ship:hasSystem("hangar") then
+						if ship.hasSystem ~= nil and ship:hasSystem("hangar") then
 							factor = math.max(0, math.max(0, ship:getSystemPower("hangar") - 0.75 * ship:getSystemHackedLevel("hangar")) * ship:getSystemHealth("hangar"))
 						end
 						hangar.cooldownRemain = hangar.cooldownRemain - dt * factor
@@ -50,7 +50,7 @@ function script_hangar:update(dt)
 							-- leader out of range
 							leader = nil
 						end
-						leader, second = script_formation.buildFormationIncremental(ship2, nidx, leader, second)
+						leader, second = script_formation.buildFormationIncremental(ship2, nidx, leader, second, hangar.formation_offset_x, hangar.formation_offset_y)
 						hangar.nextIndex = nidx +1
 						hangar.nextLeader = leader
 						hangar.nextSecond = second
@@ -82,6 +82,8 @@ function script_hangar:create(mothership, launchedShipTemplate, amount, callback
 		cooldownRemain = 10.0,
 		triggerRange = 7000,
 		launchDistance = 300,
+		formation_offset_x = nil,
+		formation_offset_y = nil,
 		arc = 180,	-- where do ships leave
 		nextIndex = 1,
 		nextLeader = nil,

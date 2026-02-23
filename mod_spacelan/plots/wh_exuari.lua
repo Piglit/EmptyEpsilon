@@ -55,7 +55,6 @@ end
 function wh_exuari:initTest()
 	PlayerSpaceship():setTemplate("Adder MK7"):setCallSign("Wormhole jumper"):setPosition(-10000,15000):setRotation(-90):commandTargetRotation(-90):setResourceAmount("Artifacts", 4)
 	wh_wormhole.wormhole_b:setPosition(-10000, 10000)
-	wh_rota.objects = {}
 
 	wh_artifacts:placeDetailedArtifact(-280000,-10000, "CaptureTest", "Has been captured")
 	local ship = CpuShip():setTemplate("Strike"):setFaction("Exuari"):setPosition(-280000,-20000):setCallSign(generateCallSign(nil, "Exuari"))

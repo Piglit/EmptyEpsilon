@@ -5,6 +5,7 @@ avp_enemies = {
 		"Exuari",
 		"Ktlitans",
 		"Ghosts",
+		"Criminals",
 	},
 }
 
@@ -61,7 +62,7 @@ end
 -- cycle through positions until the total strength of enemies is greater than the given strength
 -- entry point for custom modules
 function EnemyModule:spawnEnemiesAtPositions(positions, strength)
-	print("Called spawn, bit is disabled")
+	print("Called spawn, but is disabled")
 	return nil
 --	local idx = 0
 --	local ships = {}
@@ -127,6 +128,30 @@ function EnemyModule:spawnFormation(pos, strength, templates)
 	return total_used_strength, first_leader 
 end
 
+function EnemyModule:addBossHangar(carrier, hangar_classes)
+	-- add 3, 5, 7, 9, ... ships of each class to the hangar.
+	for idx,grp in ipairs(hangar_classes) do
+		for i = idx, idx*2+1 do
+			local template = self:getClassTemplate(grp)
+			if i == idx then
+				if idx == 1 and carrier.typeName == "CpuShip" then
+					script_hangar:create(carrier, template, 1, nil, true)	-- mothership leads the first class
+					script_hangar:config(carrier, "formation_offset_x", 500)
+					script_hangar:config(carrier, "formation_offset_y", -1000)
+				else
+					script_hangar:create(carrier, template, 1)	-- one bay per class
+				end
+			else
+				script_hangar:append(carrier, template, 1)
+			end
+		end
+		script_hangar:config(carrier, "cooldownMax", 60/idx)
+		script_hangar:config(carrier, "triggerRange", 50000 - 10000*idx)
+		script_hangar:config(carrier, "arc", 90+90*idx)
+	end	
+	return carrier
+end
+
 --[[ Kraylor --]]
 
 EnemyModuleKraylor = EnemyModule:new{
@@ -157,12 +182,12 @@ function EnemyModuleKraylor:spawnEnemiesAtPositions(positions, strength)
 	local position_index = 1
 	local last_strength = 0
 	local base_strength, flotilla_strength, marauder_strength = strength/3, strength/3, strength/3
-	local marauders, flottilla_leaders, bases = {},{},{}
 	local ship
+	local fleet = {}
 	while base_strength >= 100 do
 		last_strength, ship = self:spawnBase(positions[position_index], base_strength)
 		base_strength = base_strength - last_strength
-		table.insert(bases, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
 	flotilla_strength = flotilla_strength + base_strength
@@ -174,21 +199,17 @@ function EnemyModuleKraylor:spawnEnemiesAtPositions(positions, strength)
 			last_strength, ship = self:spawnBringerFlotilla(positions[position_index], flotilla_strength)
 		end
 		flotilla_strength = flotilla_strength - last_strength
-		table.insert(flottilla_leaders, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
 	marauder_strength = marauder_strength + flotilla_strength
 	while marauder_strength > 0 do
 		last_strength, ship = self:spawnMarauder(positions[position_index], marauder_strength)
 		marauder_strength = marauder_strength - last_strength
-		table.insert(marauders, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
-	return {
-		marauders = marauders,
-		flottilla_leaders = flottilla_leaders,
-		bases = bases,
-	}
+	return fleet
 end
 
 function EnemyModuleKraylor:addDrones(ship, min, max, strength)
@@ -261,7 +282,21 @@ function EnemyModuleKraylor:spawnBase(pos, strength)
 	return total_used_strength, station
 end
 
+function EnemyModuleKraylor:spawnBossBases()
+	local bases = {}
+	for i=1, 4 do
+		local base = CpuShip():setTemplate("Battlestation"):orderStandGround():setFaction("Kraylor")
+		self:addBossHangar(base, {"bringers", "breakers"})
+		table.insert(bases, base)
+	end
+	return bases
+end
 
+function EnemyModuleKraylor:spawnBossMothership()
+	local carrier = CpuShip():setTemplate("Goddess of Destruction"):orderStandGround():setFaction("Kraylor")
+	self:addBossHangar(carrier, {"bringers", "breakers"})
+	return carrier
+end
 
 --[[ Ktlitans --]]
 
@@ -305,10 +340,11 @@ function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
 	strength = strength - hive_strength - expedition_strength
 	local last_strength, ship
 	local position_index = 1
+	local fleet = {}
 	if hive_strength >= 200 then
 		last_strength, ship = self:spawnHive(positions[position_index], hive_strength)
 		hive_strength = hive_strength - last_strength
---		table.insert(bases, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
 	expedition_strength = expedition_strength + hive_strength
@@ -317,7 +353,7 @@ function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
 		table.insert(templates, 1, "Ktlitan Scout")
 		local last_strength, ship = self:spawnFormation(positions[position_index], expedition_strength, templates)
 		expedition_strength = expedition_strength - last_strength
---		table.insert(flottilla_leaders, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
 	strength = strength + expedition_strength
@@ -327,13 +363,10 @@ function EnemyModuleKtlitans:spawnEnemiesAtPositions(positions, strength)
 		ship:orderStandGround()
 		strength = strength - last_strength
 		table.insert(self.swarm_ships, ship)
+		table.insert(fleet, ship)
 		position_index = position_index % #positions + 1
 	end
---	return {
---		marauders = marauders,
---		flottilla_leaders = flottilla_leaders,
---		bases = bases,
---	}
+	return fleet
 end
 
 function EnemyModuleKtlitans:spawnHive(pos, strength)
@@ -382,6 +415,23 @@ function EnemyModuleKtlitans:updateDrones(dt)
 	end
 end
 
+function EnemyModuleKtlitans:spawnBoss()
+	local stationSizeRandom = random(1,100)
+	local sizeTemplate
+	if stationSizeRandom <= 66 then
+		sizeTemplate = "Diva"
+	else
+		sizeTemplate = "Tsarina"
+	end
+	local carrier = CpuShip():setTemplate(sizeTemplate):orderStandGround():setFaction("Ktlitans")
+	self:addBossHangar(carrier, {"fighters", "workers", "drones"})
+	script_hangar:config(carrier, "onLaunch", function(c, s, i)	-- for the drones:
+		table.insert(EnemyModuleKtlitans.swarm_ships, s)
+	end)
+
+	return carrier
+end
+
 --[[ Exuari --]]
 
 EnemyModuleExuari = EnemyModule:new{
@@ -426,6 +476,7 @@ function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
 	--]]
 	local carrier_strength, death_team_strength, striker_strength = strength/2, strength/4, strength/4
 	local last_strength, template, carrier, ship
+	local fleet_leaders = {}
 	local position_index = 1
 	if carrier_strength >= 500 then
 		template = "Ridge"
@@ -445,6 +496,7 @@ function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
 		carrier, last_strength = self:spawnShipAtPosition(template, positions[position_index])
 		carrier_strength = carrier_strength - last_strength
 		carrier:orderStandGround()
+		table.insert(fleet_leaders, carrier)
 		while carrier_strength > 20 do
 			rotation = rotation + 47
 			local x,y = radialPosition(positions[position_index][1], positions[position_index][2], 3000, rotation)
@@ -481,15 +533,23 @@ function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
 		}
 		last_strength, ship = self:spawnFormation(positions[position_index], death_team_strength, templates)
 		death_team_strength = death_team_strength - last_strength
---		table.insert(flottilla_leaders, ship)
+		table.insert(fleet_leaders, ship)
 	end
---	return {
---		marauders = marauders,
---		flottilla_leaders = flottilla_leaders,
---		bases = bases,
---	}
+	return fleet_leaders
 end
 
+function EnemyModuleExuari:spawnBoss(pos)
+	local stationSizeRandom = random(1,100)
+	local sizeTemplate
+	if stationSizeRandom <= 66 then
+		sizeTemplate = "Craver"
+	else
+		sizeTemplate = "Ridge"
+	end
+	local carrier = CpuShip():setTemplate(sizeTemplate):orderStandGround():setFaction("Exuari")
+	self:addBossHangar(carrier, {"frigates", "artillery", "strikers", "fighters"})
+	return carrier
+end
 
 --[[ Ghosts --]]
 
@@ -516,6 +576,7 @@ function EnemyModuleGhosts:spawnEnemiesAtPositions(positions, strength)
 		always send a captial ship and two fighters
 	--]]
 	local position_index = 0
+	local fleet_leaders = {}
 	while strength >= 0 do
 		position_index = position_index % #positions + 1
 		local templates = {
@@ -525,7 +586,9 @@ function EnemyModuleGhosts:spawnEnemiesAtPositions(positions, strength)
 		}
 		local used_strength, leader = self:spawnFormation(positions[position_index], strength, templates)
 		strength = strength - used_strength
+		table.insert(fleet_leaders, leader)
 	end
+	return fleet_leaders
 end
 
 
@@ -552,6 +615,7 @@ EnemyModuleCriminals = EnemyModule:new{
 function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
 	--[[ Small groups of ships, combinations of captial ships and fighters	--]]
 	local position_index = 0
+	local fleet_leaders = {}
 	while strength >= 0 do
 		local templates
 		local composition = irandom(1,3)
@@ -577,7 +641,9 @@ function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
 		end
 		local used_strength, leader = self:spawnFormation(positions[position_index], strength, templates)
 		strength = strength - used_strength
+		table.insert(fleet_leaders, leader)
 	end
+	return fleet_leaders
 end
 
 

@@ -198,7 +198,7 @@ function EnemyModuleKraylor:addDrones(ship, min, max, strength)
 		drones_amount = irandom(min,max)
 	end
 	if drones_amount > 0 then
-		script_hangar.create(ship, "Drone", drones_amount)
+		script_hangar:create(ship, "Drone", drones_amount)
 		return 5 * drones_amount
 	end
 	return 0
@@ -350,14 +350,14 @@ function EnemyModuleKtlitans:spawnHive(pos, strength)
 		leader:orderDefendTarget(queen)
 
 		local template = self:getClassTemplate("drones")
-		script_hangar.append(queen, template, 1)	-- add one random drone to emergency hangar
+		script_hangar:append(queen, template, 1)	-- add one random drone to emergency hangar
 		total_used_strength = total_used_strength + used_strength + ship_template_strength[template]
 	end
 
 	template = self:getClassTemplate("drones")
-	script_hangar.create(queen, template, 100)	-- produce over time in separate hangar
-	script_hangar.config(queen, "cooldownMax", 600)	-- 10 Minutes
-	script_hangar.config(queen, "triggerRange", 1000000) -- everywhere
+	script_hangar:create(queen, template, 100)	-- produce over time in separate hangar
+	script_hangar:config(queen, "cooldownMax", 600)	-- 10 Minutes
+	script_hangar:config(queen, "triggerRange", 1000000) -- everywhere
 	return total_used_strength, queen
 end
 
@@ -455,19 +455,19 @@ function EnemyModuleExuari:spawnEnemiesAtPositions(positions, strength)
 			ship:orderDefendTarget(carrier)
 			if carrier_strength > 0 then
 				template = self:getClassTemplate("fighters")
-				script_hangar.append(carrier, template, 1)
+				script_hangar:append(carrier, template, 1)
 				carrier_strength = carrier_strength - ship_template_strength[template]
 			end
 		end
 		template = self:getClassTemplate("strikers")
 		carrier_strength = carrier_strength - ship_template_strength[template]
-		script_hangar.create(carrier, template, 1)	-- strikers in separate hangar
-		script_hangar.config(carrier, "cooldownMax", 60)	-- 1 Minute
-		script_hangar.config(carrier, "triggerRange", 50000) -- huge radius
+		script_hangar:create(carrier, template, 1)	-- strikers in separate hangar
+		script_hangar:config(carrier, "cooldownMax", 60)	-- 1 Minute
+		script_hangar:config(carrier, "triggerRange", 50000) -- huge radius
 	end
 	while carrier ~= nil and striker_strength > 0 do
 		template = self:getClassTemplate("strikers")
-		script_hangar.append(carrier, template, 1)
+		script_hangar:append(carrier, template, 1)
 		striker_strength = striker_strength - ship_template_strength[template]
 	end
 	death_team_strength = death_team_strength + carrier_strength + striker_strength

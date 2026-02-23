@@ -84,7 +84,7 @@ function init()
         ship = createKraylorGunship():orderRoaming()
         setCirclePos(ship, 0, 0, random(0, 360), random(30000, 40000))
         table.insert(enemies, ship)
-        script_hangar.create(ship, "Drone", 1)
+        script_hangar:create(ship, "Drone", 1)
     end
 
     a = random(0, 360)
@@ -92,7 +92,7 @@ function init()
     ship_with_hangar = createKraylorDestroyer():setRotation(a + 180):orderRoaming()
     setCirclePos(ship_with_hangar, 0, 0, a, d)
     table.insert(enemies, ship_with_hangar)
-    script_hangar.create(ship_with_hangar, "Drone", 3)
+    script_hangar:create(ship_with_hangar, "Drone", 3)
 
     for n = 1, 10 do
         setCirclePos(Mine(), 0, 0, random(0, 360), random(10000, 25000))
@@ -124,7 +124,7 @@ end
 
 function update(dt)
     --launch fighters from mothership
-    script_hangar.update(dt)
+    script_hangar:update(dt)
 
     --victory condition
     enemy_count = 0

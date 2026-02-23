@@ -2,34 +2,60 @@
 -- This is done to make scripting more modular. You can now have multiple script files, with their own init, update and callback functions, and they are called from here.
 --]]
 
+PLOT_DIRECTORY = "" -- use "plots/" for spacelan or "" for sw
 
 plot_manager = {
 	plot_modules_by_name = {},	-- unordered, used for script access
 	plot_modules_by_index= {},	-- this one is ordered
+	init_run = false,
 }
 
-function plot_manager:init(plot_module_names)
-	-- require file and store global object in modules
-	for _, name in ipairs(plot_module_names) do
-		require("plots/"..name..".lua")
-		local module_table = _G[name]
-		assert(module_table ~= nil, name .. " is not a global table in plots/"..name..".lua")
-		self.plot_modules_by_name[name] = module_table
-		table.insert(self.plot_modules_by_index, module_table)
+
+-- distributes global script calls (like onNewPlayerShip()) to all modules.
+-- this function can be called multiple times.
+-- Param plot_modules: list of modules as string or table:
+-- string: requires lua file, that must have a global table with the same name as the file.
+-- table (string, table): name and global table.
+function plot_manager:init(plot_modules)
+	if not self.init_run then
+		-- distribute callbacks to modules that have an onNewPlayerShip function
+		onNewPlayerShip(function(ship)
+			for _,module in ipairs(self.plot_modules_by_index) do
+				if module.onNewPlayerShip ~= nil then
+					module:onNewPlayerShip(ship)
+				end
+			end
+			ship:onProbeLaunch(plot_manager.onProbeLaunch)
+		end)
+
+		-- expose everything to storage for outside script access.
+		local storage = getScriptStorage()
+		storage["plot_manager"] = self
+
+		self.init_run = true
 	end
 
-	-- distribute callbacks to modules that have an onNewPlayerShip function
-	onNewPlayerShip(function(ship)
-		for _,module in ipairs(self.plot_modules_by_index) do
-			if module.onNewPlayerShip ~= nil then
-				module:onNewPlayerShip(ship)
-			end
+	for i, module_name in ipairs(plot_modules) do
+		assert(self.plot_modules_by_name[module_name] == nil, "module " ..i.. " is already initialised.")
+		local name, module
+		if type(module_name) == "table" then
+			-- modules global table is given as parameter
+			name = module_name[1]
+			module = module_name[2]
+			assert(type(name) == "string", "plot_module name is not a string")
+		elseif type(module_name) == "string" then
+			-- require file and store global object in modules
+			name = module_name
+			require(PLOT_DIRECTORY..name..".lua")
+			module = _G[name]	-- get the global table of the module with the same name
+			assert(module ~= nil, name .. " is not a global table in "..PLOT_DIRECTORY..name..".lua")
 		end
-		ship:onProbeLaunch(plot_manager.onProbeLaunch)
-	end)
+		assert(type(module) == "table", "plot_module table is not a table but "..type(module))
 
-	-- call init and initTest on all modules that have those functions
-	for _,module in ipairs(self.plot_modules_by_index) do
+		self.plot_modules_by_name[name] = module
+		table.insert(self.plot_modules_by_index, module)
+
+		-- call init and initTest on all modules that have those functions
 		if module.init ~= nil then
 			module:init()
 		end
@@ -37,6 +63,7 @@ function plot_manager:init(plot_module_names)
 			module:initTest()
 		end
 	end
+	self.gm_main_menu()
 
 	-- expose everything to storage for outside script access.
 	local storage = getScriptStorage()
@@ -53,6 +80,7 @@ end
 
 function plot_manager.gm_main_menu()
 	clearGMFunctions()
+	onGMClick(nil)
 	for _,module in ipairs(plot_manager.plot_modules_by_index) do
 		if module.gm_menu ~= nil then
 			module:gm_menu()	-- create gm functions
@@ -87,6 +115,6 @@ end
 
 -- This is the global update function!
 -- make sure to not have another one defined elsewhere!
---function update(delta)
---	plot_manager:update(delta)
---end
+function update(delta)
+	plot_manager:update(delta)
+end

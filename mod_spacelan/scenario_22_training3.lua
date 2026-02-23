@@ -86,9 +86,9 @@ function init()
 
     if getScenarioSetting("Difficulty") == "Hard" then
         for _, enemy in ipairs(enemyList) do
-            script_hangar.create(enemy, "Drone", 3)
+            script_hangar:create(enemy, "Drone", 3)
         end
-        script_hangar.create(station, "Drone", 1)
+        script_hangar:create(station, "Drone", 1)
     end
 end
 
@@ -98,7 +98,7 @@ function promoteToBoss()
             boss = enemy
         end
     end
-    script_hangar.create(boss, "Drone", 6)
+    script_hangar:create(boss, "Drone", 6)
     boss:orderAttack(player)
     boss:setHullMax(boss:getHullMax() + 100)
     boss:setHull(boss:getHull() + 100)
@@ -246,7 +246,7 @@ function update(delta)
 
 
     --util scripts
-    script_hangar.update(delta)
+    script_hangar:update(delta)
     commsInstr()
 end
 

@@ -45,7 +45,7 @@ end
 
 function update(delta)
 	plot_manager:update(delta)
-	script_hangar.update(delta)
+	script_hangar:update(delta)
 end
 
 function create_terrain_2()
@@ -127,7 +127,7 @@ function create_kraylor_fortress()
     for idx, warp_jammer in ipairs(kraylor_defense_line) do
         local x, y = warp_jammer:getPosition()
         local ship = createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
-		script_hangar.create(ship, "Drone", 4)
+		script_hangar:create(ship, "Drone", 4)
         for n = 1, 3 do
             local ship2 = createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)
         end
@@ -148,7 +148,7 @@ function create_kraylor_fortress()
     for idx, station in ipairs(kraylor_forward_line) do
         local x, y = station:getPosition()
         local ship = createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
-		script_hangar.create(ship, "Drone", 2)
+		script_hangar:create(ship, "Drone", 2)
 
         for n = 1, 3 do
             local ship2 = createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)

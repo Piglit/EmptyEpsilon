@@ -1,22 +1,26 @@
-script_hangar = {}
-
 require("script_formation.lua")
 require("utils.lua")
 
-local shipsWithHangars = {}
+script_hangar = {
+	shipsWithHangars = {}
+}
 
-function script_hangar.update(dt)
-	for sidx,ship in ipairs(shipsWithHangars) do
+function script_hangar:update(dt)
+	for sidx,ship in ipairs(self.shipsWithHangars) do
 		if ship == nil or ship.hangar_queue == nil then
-			table.remove(shipsWithHangars, sidx)
+			table.remove(self.shipsWithHangars, sidx)
 		elseif not ship:isValid() then
 			ship.hangar_queue = nil
-			table.remove(shipsWithHangars, sidx)
+			table.remove(self.shipsWithHangars, sidx)
 		else
 			for hidx, hangar in ipairs(ship.hangar_queue) do
 				if ship:areEnemiesInRange(hangar.triggerRange) then
 					if hangar.cooldownRemain > 0 then
-						hangar.cooldownRemain = hangar.cooldownRemain - dt
+						local factor = 1
+						if ship:hasSystem("hangar") then
+							factor = math.max(0, math.max(0, ship:getSystemPower("hangar") - 0.75 * ship:getSystemHackedLevel("hangar")) * ship:getSystemHealth("hangar"))
+						end
+						hangar.cooldownRemain = hangar.cooldownRemain - dt * factor
 					elseif hangar.amount <= 0 then
 						if #hangar.queue > 0 then
 							local nextShip = table.remove(hangar.queue, 1)
@@ -30,7 +34,7 @@ function script_hangar.update(dt)
 						ship2:setFaction(ship:getFaction())
 						local x,y = ship:getPosition()
 						local rot = ship:getRotation()
-						setCirclePos(ship2, x,y, rot+180, hangar.launchDistance)
+						setCirclePos(ship2, x,y, rot+hangar.arc, hangar.launchDistance)
 						ship2:setRotation(rot)
 						local nidx = hangar.nextIndex
 						if hangar.callSignPrefix ~= nil then
@@ -62,13 +66,13 @@ end
 
 -- create a new hangar on the mothership that launches ships
 -- when called multiple times: each call creates a parallel hangar
-function script_hangar.create(mothership, launchedShipTemplate, amount, callbackOnLaunch, mothershipLeads)
+function script_hangar:create(mothership, launchedShipTemplate, amount, callbackOnLaunch, mothershipLeads)
 	if mothership == nil or not mothership:isValid() then
 		return
 	end
 	if mothership.hangar_queue == nil then
 		mothership.hangar_queue = {}
-		table.insert(shipsWithHangars, mothership)
+		table.insert(self.shipsWithHangars, mothership)
 	end
 
 	local data = { 
@@ -78,6 +82,7 @@ function script_hangar.create(mothership, launchedShipTemplate, amount, callback
 		cooldownRemain = 10.0,
 		triggerRange = 7000,
 		launchDistance = 300,
+		arc = 180,	-- where do ships leave
 		nextIndex = 1,
 		nextLeader = nil,
 		nextSecond = nil,
@@ -97,12 +102,12 @@ end
 -- add new ships to an existing hangar
 -- the ships are launchend after the ships already in the queue and are added to the last formation
 -- when called on a ship without an existing hangar, create is called
-function script_hangar.append(mothership, launchedShipTemplate, amount)
+function script_hangar:append(mothership, launchedShipTemplate, amount)
 	if mothership == nil or not mothership:isValid() then
 		return
 	end
 	if mothership.hangar_queue == nil then
-		script_hangar.create(mothership, launchedShipTemplate, amount)
+		script_hangar:create(mothership, launchedShipTemplate, amount)
 		return
 	end
 	local data = mothership.hangar_queue[#mothership.hangar_queue]
@@ -115,7 +120,7 @@ function script_hangar.append(mothership, launchedShipTemplate, amount)
 end
 
 -- change the configuration of the last created hangar of the given ship
-function script_hangar.config(mothership, key, value)
+function script_hangar:config(mothership, key, value)
 	if mothership == nil or not mothership:isValid() or mothership.hangar_queue == nil then
 		return
 	end

@@ -638,7 +638,7 @@ function spawn_enemies_faction(xOrigin, yOrigin, enemyStrength, enemyFaction, sh
 			end
 			if shipTemplateType == "Ryder" then
 				local fighterTemplate = enemyFactionNameList[ irandom(1,5) ]
-				script_hangar.create(ship, fighterTemplate, 3)
+				script_hangar:create(ship, fighterTemplate, 3)
 			end
 		else
 			--ship:setCommsScript(""):setCommsFunction(commsShip)

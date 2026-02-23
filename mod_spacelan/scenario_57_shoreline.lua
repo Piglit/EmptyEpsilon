@@ -18,7 +18,6 @@
 require("ee.lua")
 require("utils.lua")
 require("xansta_mods.lua")
-require("script_hangar.lua")
 
 --[[-----------------------------------------------------------------
       Dynamic map functions 
@@ -133,7 +132,6 @@ function init()
 	vaiken_damage_timer_interval = 120
 	vaiken_damage_timer = vaiken_damage_timer_interval
 	plotH = helpWarn
-	plotHangar = script_hangar.update
 	primaryOrders = "Defend bases in the area (human navy and independent) from enemy attack."
 	secondaryOrders = ""
 	optionalOrders = ""

@@ -15,7 +15,7 @@ require("utils.lua")
 require("luax.lua")	-- table.filter
 
 require("script_formation.lua")	-- script_formation.spawnFormation
-require("script_hangar.lua")	-- script_hangar.create
+require("script_hangar.lua")	-- script_hangar:create
 require("util_swap_ships.lua")
 require("plots/campaign.lua")
 require("plots/wh_rota.lua")
@@ -72,13 +72,13 @@ end
 
 function createKraylorDreadnought(posx, posy, arc)
 	local ship = CpuShip():setFaction("Kraylor"):setTemplate("Deathbringer"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy)
-	script_hangar.create(ship, "Drone", 2, insertDrone)
+	script_hangar:create(ship, "Drone", 2, insertDrone)
 	return {ship}
 end
 
 function createKraylorDreadnoughtCarrier(posx, posy, arc)
 	local ship = CpuShip():setFaction("Kraylor"):setTemplate("Painbringer"):setPosition(posx, posy):setRotation(arc):orderDefendLocation(posx, posy):setJumpDrive(false)
-	script_hangar.create(ship, "Drone", 4, insertDrone)
+	script_hangar:create(ship, "Drone", 4, insertDrone)
 	return {ship}
 end
 

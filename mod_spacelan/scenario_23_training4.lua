@@ -67,19 +67,19 @@ function init()
     enemy_station = createCarrier()
     enemy_station:setPosition(0, -5*gu):setRotation(90):orderDefendLocation(0, -4*gu):setCallSign("Omega")
 
-    script_hangar.create(enemy_station, "Dagger", 3)
-    script_hangar.append(enemy_station, "Blade", 3)
-    script_hangar.config(enemy_station, "onLaunch", addToEnemiesList)
-    script_hangar.config(enemy_station, "callSignPrefix", "Zeta-")
-    script_hangar.config(enemy_station, "launchDistance", 900)
+    script_hangar:create(enemy_station, "Dagger", 3)
+    script_hangar:append(enemy_station, "Blade", 3)
+    script_hangar:config(enemy_station, "onLaunch", addToEnemiesList)
+    script_hangar:config(enemy_station, "callSignPrefix", "Zeta-")
+    script_hangar:config(enemy_station, "launchDistance", 900)
 
-    script_hangar.create(enemy_station, "Gunner", 3)
-    script_hangar.append(enemy_station, "Shooter", 3)
-    script_hangar.append(enemy_station, "Jagger", 3)
-    script_hangar.config(enemy_station, "triggerRange", gu*2)
-    script_hangar.config(enemy_station, "onLaunch", addToEnemiesList)
-    script_hangar.config(enemy_station, "callSignPrefix", "Gamma-")
-    script_hangar.config(enemy_station, "launchDistance", 900)
+    script_hangar:create(enemy_station, "Gunner", 3)
+    script_hangar:append(enemy_station, "Shooter", 3)
+    script_hangar:append(enemy_station, "Jagger", 3)
+    script_hangar:config(enemy_station, "triggerRange", gu*2)
+    script_hangar:config(enemy_station, "onLaunch", addToEnemiesList)
+    script_hangar:config(enemy_station, "callSignPrefix", "Gamma-")
+    script_hangar:config(enemy_station, "launchDistance", 900)
     table.insert(enemyList, enemy_station)
     
     --createObjectsOnLine(rr/2, rr/4, rr/4, rr/2, 1000, Mine, 2)
@@ -131,7 +131,7 @@ If you want to try another ship, play another training mission.]])
 end
 
 function update(delta)
-    script_hangar.update(delta)
+    script_hangar:update(delta)
     timer = timer + delta
     local enemyCountChanged = false
 

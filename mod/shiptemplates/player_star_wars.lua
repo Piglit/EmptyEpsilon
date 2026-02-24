@@ -449,6 +449,7 @@ var = template:copy("Gozanti Mk Ic")
 var:setRadarTrace("gozanti.png")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
+var:setJumpDrive(true)
 var:setRepairCrewCount(2)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 --var:setRepairDocked(true)

@@ -143,6 +143,10 @@ function TerrainModule:canInsertEnemies()
 	return self.radius > 5000
 end
 
+function TerrainModule:canInsertShip()
+	return true
+end
+
 function TerrainModule:insertStation(station)
 	-- default implementation
 	-- places a station inside the module
@@ -154,6 +158,25 @@ function TerrainModule:insertStation(station)
 		self:insertObject(station, self.station_distance_rad)
 	else
 		self:insertObject(station, 0.75)
+	end
+end
+
+function TerrainModule:insertShip(ship, visitor)
+	-- default implementation
+	-- places a ship inside the module
+	if self.ships == nil then
+		self.ships = {}
+	end
+	table.insert(self.ships, ship)
+	local orientation = "near"
+	if visitor ~= nil and visitor:isValid() then
+		-- in direction of the player that finds this TerrainModule 
+		orientation = angleRotation(visitor, self.x, self.y)
+	end
+	if self.ship_distance_rad ~= nil then
+		self:insertObject(ship, self.ship_distance_rad, orientation)
+	else
+		self:insertObject(ship, 0.99, orientation)
 	end
 end
 
@@ -300,6 +323,9 @@ end
 
 function TerrainModuleAsteroids:canInsertStation()
 	-- between rings, preferably not between the outer two
+	if self.rings_amount == nil then
+		self.rings_amount = math.max(1,math.floor(self.radius / 5000))
+	end
 	return self.rings_amount >= 2
 end
 
@@ -318,6 +344,9 @@ function TerrainModuleAsteroids:insertArtifact()
 end
 
 function TerrainModuleAsteroids:canInsertEnemies()
+	if self.rings_amount == nil then
+		self.rings_amount = math.max(1,math.floor(self.radius / 5000))
+	end
 	return self.rings_amount ~= 2
 end
 
@@ -525,6 +554,7 @@ function TerrainModuleBlackHoles:create()
 	-- places BlackHoles in a nice manner
 	self:check()
 	self.holes = {}
+	self.artifacts = {}
 	local holes = 1
 	if self.radius >= 10000 then
 		holes = irandom(1, math.floor(self.radius/10000))
@@ -554,26 +584,41 @@ function TerrainModuleBlackHoles:canInsertArtifact()
 	return true
 end
 
-function TerrainModuleBlackHoles:insertArtifact()
+function TerrainModuleBlackHoles:insertArtifact(callback)
+	-- callback can be nil for no effect
 	local x,y,speed
+	local artifact_name = _("Black hole stabilizer")
+	local artifact_info = _("This Arlenian device was used to prevent the wormhole from collapsing.")
 	if #self.holes == 1 then
 		x,y = radialPosition(self.x,self.y, 2*self.radius/5, 0)
 		speed = 2
-		local art = wh_artifacts:placeGenericArtifact(x,y)
+		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
+		art.terrain_module = self
+		art.hole = self.holes[1]
+		table.insert(self.artifacts, art)
 	else
 		speed = -0.5
 		x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation)
-		local art = wh_artifacts:placeGenericArtifact(x,y)
+		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
 		x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation + 360/#self.holes)
-		art = wh_artifacts:placeGenericArtifact(x,y)
+		art.terrain_module = self
+		art.hole = self.holes[1]
+		table.insert(self.artifacts, art)
+		art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
+		art.terrain_module = self
+		art.hole = self.holes[2]
+		table.insert(self.artifacts, art)
 		if #self.holes > 2 then
 			x,y = self.holes[2]:getPosition()
 			x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
-			art = wh_artifacts:placeGenericArtifact(x,y)
+			art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 			wh_rota:add_object(art, speed, self.x, self.y)
+			art.terrain_module = self
+			art.hole = self.holes[3]	-- TODO test if numbering is correct
+			table.insert(self.artifacts, art)
 		end
 	end
 end

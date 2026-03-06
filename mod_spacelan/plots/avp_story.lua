@@ -1,11 +1,41 @@
 
-avp_story = {}
+avp_story = {
+	stations_discovered = 0,
+	terrain_discovered = 0,
+	time_first_discoverey = 0,
+--	motivations = arrayShuffle({
+--		"Reputation",	-- high value station
+--		"Artifact",		-- visible, capturable, via maneuver or heavy combat
+--		"Diplomacy",	-- Comms with enemy faction, maybe combat
+--		"Skill",		-- difficult to achieve artifacs, near black hole, mines. Or docking on rotating planet station
+--		"Capture",		-- high value station
+--		"Information",
+--		"Heroism",		-- heavy enemies, as communicated
+--		"Customisation",	-- promise upgrades?
+--	}),
+---- other approach:
+--	({
+--		"Rescue Huge Station",
+--		"Capture Huge Station",
+--		"Support Huge Station",
+--		"Enemy Artifact",
+--		"Skill Artifact",
+--		"Heavy Enemies",
+--	})
+--	motivations_index = 0,
+}
 
 function avp_story:init()
-	self.stations_discovered = 0
-	self.terrain_discovered = 0
-	self.time_first_discoverey = 0
 end
+
+--function avp_story:getMotivation()
+--	self.motivations_index = self.motivations_index +1
+--	if self.motivations_index > #self.motivations then
+--		arrayShuffle(self.motivations)
+--		self.motivations_index = 1
+--	end
+--	return = self.motivations[self.motivations_index]
+--end
 
 function avp_story.onStationCreation(terrain_module)
 	self = avp_story
@@ -14,12 +44,15 @@ function avp_story.onStationCreation(terrain_module)
 		self.time_first_discoverey = getScenarioTime()
 	end
 
-	local station, enemy_faction
+	--local motivation = self:getMotivation()
+
+	local station, enemy_faction, artifact_callback
 
 	if terrain_module:canInsertStation() then
 		self.stations_discovered = self.stations_discovered + 1
 
 		station = avp_stations:createInTerrain(terrain_module)
+		-- TODO determine what station & call to action
 	end
 	if station == nil or terrain_module.terrain_type == "nebulae" then
 		-- Ktlitans and Exuari:
@@ -33,7 +66,10 @@ function avp_story.onStationCreation(terrain_module)
 	end
 
 	if terrain_module:canInsertArtifact() then
-		terrain_module:insertArtifact()
+		if terrain_module.terrain_type == "blackholes" then
+			artifact_callback = vf_blackhole.triggerCollapse
+		end
+		terrain_module:insertArtifact(artifact_callback)
 		if enemy_faction == nil and	random(0,1) > 0.25 then
 			-- Criminals like artifacts
 			enemy_faction = "Criminals"
@@ -86,3 +122,8 @@ function avp_story:enemyStrength(terrain_module)
 	--print(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
 	return difficulty
 end
+
+
+-- module specific events
+
+

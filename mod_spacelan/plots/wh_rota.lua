@@ -28,6 +28,17 @@ function wh_rota:add_object(object, speed, center, center_y)
 	table.insert(self.objects, object)
 end
 
+function wh_rota.move_center(object, amount, direction)
+	-- moves the center of mass and adjust the distance acordingly
+	if object == nil or not object:isValid() or object.center == nil then
+		error("wh_rota.move_center called with invalid object")
+		return
+	end
+	local x,y = vectorFromAngle(direction, amount)
+	object.center[1], object.center[2] = object.center[1]+x, object.center[2]+y
+	object.distance = distance(object, center)
+end
+
 function wh_rota:update(delta)
 	-- move nebulae
     for i=1,#self.objects do

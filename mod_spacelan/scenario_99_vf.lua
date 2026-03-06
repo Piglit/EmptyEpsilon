@@ -30,6 +30,7 @@ function init()
 		"avp_terrain_modules",
 		"avp_stations",
 		"avp_enemies",
+		"vf_blackhole",
 		"avp_story",
 	})
 	gravity_util.gravity_const = 2000000	-- 50 times as high!

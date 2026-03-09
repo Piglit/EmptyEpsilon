@@ -161,7 +161,7 @@ MainMenu::MainMenu()
         new EpsilonServer(defaultServerPort);
         if (game_server)
         {
-            gameGlobalInfo->startScenario("scenario_99_avp.lua");
+            gameGlobalInfo->startScenario("scenario_99_vf.lua");
 
             my_player_info->commandSetShipId(-1);
             destroy();

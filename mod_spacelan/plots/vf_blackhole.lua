@@ -14,6 +14,7 @@
 
 vf_blackhole = {
 	blackholes_to_collapse = {},	-- hole -> terrain_module
+	COLLAPSE_SPEED = 100,	-- should be 100 for playing
 }
 
 function vf_blackhole.triggerCollapse(art, player, collected)
@@ -24,18 +25,46 @@ function vf_blackhole.triggerCollapse(art, player, collected)
 	local hole = art.hole
 	hole.radius_orig = hole:getRadius()
 	hole.gravity_limit_orig = gravity_util:getLimit(hole)
-	hole.collapse_time_total = hole.radius_orig / 100	-- speed: 1u in 10 sec
-	hole.collapse_time_bygone = 0.0001	-- must not be 0 to prevent division by 0
+	hole.collapse_time_total = hole.radius_orig / vf_blackhole.COLLAPSE_SPEED -- speed: 1u in 10 sec
+	hole.collapse_time_bygone = 0.0
 	hole.collapse_progress = 0.0
 	-- center of mass
 	if hole.distance ~= nil then	-- nil for single black holes
-		hole.com_dist_orig = hole.distance
-		hole.com_dist_delta = hole.com_dist_orig / hole.collapse_time	-- com travels this distance per second 
-		hole.com_rota_speed_delta = hole.speed / hole.collapse_time	-- double the speed in collapse_time seconds
+		hole.com_dist_delta = hole.distance * 1.5 / hole.collapse_time_total
+		hole.com_rota_speed_delta = hole.speed / hole.collapse_time_total	-- double the speed in collapse_time_total seconds
 	end
 
 	if self.blackholes_to_collapse[hole] == nil then
-		self.blackholes_to_collapse[hole] == terrain_module
+		self.blackholes_to_collapse[hole] = terrain_module
+	end
+	print("trigger collapse")
+	print(hole.collapse_time_total, hole.distance)
+end
+
+function vf_blackhole:recalculateCenterOfMass(holes)
+	-- clean up first
+	for idx,bh in ipairs(holes) do
+		if not bh:isValid() then
+			table.remove(holes, idx)
+			-- this messes with ipairs, so recall this function again and abort afterwards
+			self:recalculateCenterOfMass(holes)
+			return
+		end
+	end
+	local x, y = 0,0
+	local mass_total = 0
+	for idx,bh in ipairs(holes) do
+		-- now everything is valid
+		local x_b, y_b = bh:getPosition()
+		local mass = bh:getRadius()
+		mass_total = mass_total + mass
+		x = x + x_b * mass
+		y = y + y_b * mass
+	end
+	x = x/mass_total
+	y = y/mass_total
+	for idx,bh in ipairs(holes) do
+		wh_rota.set_center(bh, x, y)
 	end
 end
 
@@ -43,7 +72,7 @@ function vf_blackhole:update(dt)
 	for hole, tm in pairs(self.blackholes_to_collapse) do
 		if hole ~= nil and hole:isValid() then
 			hole.collapse_time_bygone = hole.collapse_time_bygone + dt
-			hole.collapse_progress = hole.collapse_time_total / hole.collapse_time_bygone
+			hole.collapse_progress = hole.collapse_time_bygone / hole.collapse_time_total 
 			if hole.collapse_progress < 1.0 then
 				-- collapse was triggered, shrink it
 				local new_factor = 1 - hole.collapse_progress	-- from 1 to 0
@@ -52,30 +81,40 @@ function vf_blackhole:update(dt)
 				-- TODO add gravity wave
 				if #tm.holes > 1 and hole.center ~= nil then
 					-- move center of mass
-					local amount = hole.com_dist_delta * dt
-					local dir = angleRotation(hole, hole.center)
+					self:recalculateCenterOfMass(tm.holes)
 					local speed_incr = hole.com_rota_speed_delta * dt
-					for _,bh in tm.holes do
-						wh_rota.move_center(bh, amount, dir)	-- also adjusts distance
+					for idx,bh in ipairs(tm.holes) do
 						bh.speed = bh.speed + speed_incr
-						if hole ~= bh and distance(hole,bh) < hole:getRadius() + bh:getRadius() then
-							-- TODO merge when colliding with other black hole
+						if hole ~= bh and distance(hole,bh) < hole:getRadius() + bh:getRadius() and hole:getRadius() < bh:getRadius() then
+							-- merge smaller one when colliding with other black hole
+							hole.collapse_time_bygone = hole.collapse_time_bygone + dt
+
+							bh:setRadius(bh:getRadius() + dt*self.COLLAPSE_SPEED)
+							gravity_util:setLimit(bh, gravity_util:getLimit(bh) + dt*self.COLLAPSE_SPEED)
+							-- stop collapse TODO: nicer solution for 3 holes
+							self.blackholes_to_collapse[bh] = nil
 						end
 					end
+
 					-- move towards new center of mass
 					if hole.distance ~= nil then
-						hole.distance = hole.com_dist_orig * new_factor
+						hole.distance = hole.distance - hole.com_dist_delta * dt --_orig * new_factor
+						wh_rota:update(0)	-- set new position from distance
 					end
-					-- TODO adjust artifacts rotation, since they don't rotate around the black holes, but the zone center!
+
 				end
 
 			else
 				-- TODO explode
 				hole:destroy()
+				self:recalculateCenterOfMass(tm.holes)
+				self.blackholes_to_collapse[hole] = nil
 			end
 		end
 	end
 end
+
+
 
 -- example
 -- dist = r_tm/3, r_bh = r_tm/4

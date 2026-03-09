@@ -1,4 +1,4 @@
--- Name: verhärtete Fronten
+-- Name: Verhärtete Fronten
 -- Type: Development
 -- Proxy: 192.168.2.3
 
@@ -20,7 +20,7 @@ function init()
 
 	plot_manager:init({
 		"campaign",
-		"script_hangar"
+		"script_hangar",
 		"wh_players",
 		"wh_fleetcommand",
 		"wh_artifacts",

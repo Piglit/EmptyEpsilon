@@ -590,7 +590,7 @@ function TerrainModuleBlackHoles:insertArtifact(callback)
 	local artifact_name = _("Black hole stabilizer")
 	local artifact_info = _("This Arlenian device was used to prevent the wormhole from collapsing.")
 	if #self.holes == 1 then
-		x,y = radialPosition(self.x,self.y, 2*self.radius/5, 0)
+		x,y = radialPosition(self.x,self.y, 2*self.radius/5, self.rotation)
 		speed = 2
 		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
@@ -598,28 +598,44 @@ function TerrainModuleBlackHoles:insertArtifact(callback)
 		art.hole = self.holes[1]
 		table.insert(self.artifacts, art)
 	else
-		speed = -0.5
-		x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation)
-		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-		wh_rota:add_object(art, speed, self.x, self.y)
-		x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation + 360/#self.holes)
-		art.terrain_module = self
-		art.hole = self.holes[1]
-		table.insert(self.artifacts, art)
-		art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-		wh_rota:add_object(art, speed, self.x, self.y)
-		art.terrain_module = self
-		art.hole = self.holes[2]
-		table.insert(self.artifacts, art)
-		if #self.holes > 2 then
-			x,y = self.holes[2]:getPosition()
-			x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
-			art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-			wh_rota:add_object(art, speed, self.x, self.y)
+		for idx,bh in ipairs(self.holes) do
+			speed = bh.speed -- the artifact circles the bh once each bh year
+			x,y = bh:getPosition()
+			local rotation = self.rotation -- for 1 or 2 holes, so they are opposite
+			-- for 3 holes:
+			if #self.holes%2 == 1 then
+				rotation = rotation + idx*180/#self.holes
+			end
+			x,y = radialPosition(x,y, self.radius/5, rotation)--+idx*360/#self.holes)
+			local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+			wh_rota:add_object(art, speed, bh)
+			art.hole = bh 
 			art.terrain_module = self
-			art.hole = self.holes[3]	-- TODO test if numbering is correct
 			table.insert(self.artifacts, art)
 		end
+
+		--speed = -0.5
+		--x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation)
+		--local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+		--wh_rota:add_object(art, speed, self.holes[1])
+		--art.terrain_module = self
+		--art.hole = self.holes[1]
+		--table.insert(self.artifacts, art)
+		--x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation + 360/#self.holes)
+		--art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+		--wh_rota:add_object(art, speed, self.holes[2])
+		--art.terrain_module = self
+		--art.hole = self.holes[2]
+		--table.insert(self.artifacts, art)
+		--if #self.holes > 2 then
+		--	x,y = self.holes[2]:getPosition()
+		--	x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
+		--	art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+		--	wh_rota:add_object(art, speed, self.holes[3])
+		--	art.terrain_module = self
+		--	art.hole = self.holes[3]	-- TODO test if numbering is correct
+		--	table.insert(self.artifacts, art)
+		--end
 	end
 end
 
@@ -690,14 +706,15 @@ function TerrainModuleMetaSpiral:create()
 	-- module classes get shuffled and then distributed to the positions
 	-- some modules appear more than once here, to appear more often
 	local modules = {
---FIXME		TerrainModuleAsteroids,
-		TerrainModuleAsteroids,
-		TerrainModuleNebulae,
-		TerrainModuleMines,
-		TerrainModulePlanets,
-		TerrainModuleWormHoles,
+--		TerrainModuleAsteroids,
+--		TerrainModuleNebulae,
+--		TerrainModuleMines,
+--		TerrainModulePlanets,
+--		TerrainModuleWormHoles,
 		TerrainModuleBlackHoles,
-		TerrainModuleNebulae,
+		TerrainModuleBlackHoles,
+		TerrainModuleBlackHoles,
+--		TerrainModuleNebulae,
 	}
 	-- start with the last one in the center (hole), shuffle after
 	local module_idx = #modules -2

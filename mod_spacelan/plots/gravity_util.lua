@@ -21,6 +21,7 @@ end
 
 function gravity_util.addGravitySource(planet, outer_limit)
 	if planet ~= nil and planet:isValid() then
+		assert(gravity_util.sources[planet] == nil)
 		gravity_util.sources[planet] = outer_limit
 --		table.insert(gravity_util.sources, {planet, outer_limit})
 	end
@@ -39,9 +40,9 @@ function gravity_util:updatePlayerShip(delta, p)
 			--local source = s[1]
 			--local limit = s[2]
 		for source, limit in pairs(gravity_util.sources) do
-			if source == nil or not source:isValid() then
+			if not source:isValid() then
 				--table.remove(gravity_util.source, idx)
-				gravity_util[source] = nil
+				gravity_util.sources[source] = nil
 				return
 			end
 			local angle = angleRotation(p, source)
@@ -62,6 +63,6 @@ end
 
 function gravity_util:setLimit(source, limit)
 	-- same as addGravitySource
-	assert(self.sources[source] ~= nil and self.sources[source]:isValid())
+	assert(self.sources[source] ~= nil and source:isValid())
 	self.sources[source] = limit
 end

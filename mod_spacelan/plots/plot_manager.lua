@@ -2,7 +2,7 @@
 -- This is done to make scripting more modular. You can now have multiple script files, with their own init, update and callback functions, and they are called from here.
 --]]
 
-PLOT_DIRECTORY = "" -- use "plots/" for spacelan or "" for sw
+PLOT_DIRECTORY = "plots/" -- use "plots/" for spacelan or "" for sw
 
 plot_manager = {
 	plot_modules_by_name = {},	-- unordered, used for script access

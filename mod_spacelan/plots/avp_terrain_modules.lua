@@ -222,6 +222,18 @@ function TerrainModule:getEnemySpawnPositions()
 	return {{0,0}}
 end
 
+function TerrainModule:calculateSpawnPositionsOnRing(distance)
+	local rot = self.rotation
+	local positions = {}
+	for i = 1, 50 do
+		rot = rot + 360/i
+		local x,y = radialPosition(self.x, self.y, distance, rot)
+		table.insert(positions, {x,y})
+	end
+	return positions
+
+end
+
 function avp_terrain_modules:updatePlayerShip(delta, ship)
 	-- if a hidden module comes into view, create it and call onCreation callbacks
 	for idx, module in ipairs(self.hidden_modules) do
@@ -231,7 +243,7 @@ function avp_terrain_modules:updatePlayerShip(delta, ship)
 			table.remove(self.hidden_modules, idx)
 			if module.onCreationCallbacks ~= nil then
 				for _,cb in ipairs(module.onCreationCallbacks) do
-					cb(module)
+					cb(module, ship)
 				end
 			end
 			return
@@ -356,15 +368,8 @@ function TerrainModuleAsteroids:getEnemySpawnPositions()
 		return {{self.x,self.y}}
 	end
 	-- just inside outermost ring
-	local current = self.rotation
-	local positions = {}
 	local dist = (self.rings_amount-0.5) * self.radius / (self.rings_amount + 1)
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, dist, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(dist)
 end
 
 function TerrainModuleNebulae:create()
@@ -438,15 +443,7 @@ function TerrainModuleMines:insertArtifact()
 end
 
 function TerrainModuleMines:getEnemySpawnPositions()
-	-- between outer and middle ring
-	local current = self.rotation
-	local positions = {}
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, self.radius*5/8, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(self.radius*5/8)
 end
 
 function TerrainModulePlanets:createPlanet(isMoon)
@@ -535,19 +532,12 @@ function TerrainModulePlanets:insertStation(station)
 end
 function TerrainModulePlanets:getEnemySpawnPositions()
 	-- just inside outermost moon
-	local current = self.rotation
-	local positions = {}
 	local dist = self.radius
 	if #self.moons > 0 then
 		local moon_radius = self.radius/(3*(#self.moons+1))
 		dist = self.radius - 2*moon_radius - 1000
 	end
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, dist, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(dist)
 end
 
 function TerrainModuleBlackHoles:create()
@@ -613,42 +603,12 @@ function TerrainModuleBlackHoles:insertArtifact(callback)
 			art.terrain_module = self
 			table.insert(self.artifacts, art)
 		end
-
-		--speed = -0.5
-		--x,y = radialPosition(self.x,self.y, self.radius/3 - self.radius/5, self.rotation)
-		--local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-		--wh_rota:add_object(art, speed, self.holes[1])
-		--art.terrain_module = self
-		--art.hole = self.holes[1]
-		--table.insert(self.artifacts, art)
-		--x,y = radialPosition(self.x,self.y, self.radius/3 + self.radius/5, self.rotation + 360/#self.holes)
-		--art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-		--wh_rota:add_object(art, speed, self.holes[2])
-		--art.terrain_module = self
-		--art.hole = self.holes[2]
-		--table.insert(self.artifacts, art)
-		--if #self.holes > 2 then
-		--	x,y = self.holes[2]:getPosition()
-		--	x,y = radialPosition(x,y, 4-self.radius/5, self.rotation-60)
-		--	art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-		--	wh_rota:add_object(art, speed, self.holes[3])
-		--	art.terrain_module = self
-		--	art.hole = self.holes[3]	-- TODO test if numbering is correct
-		--	table.insert(self.artifacts, art)
-		--end
 	end
 end
 
 function TerrainModuleBlackHoles:getEnemySpawnPositions()
 	-- on the outside of the radius, since station is at 0.75
-	local current = self.rotation
-	local positions = {}
-	for i = 1, 50 do
-		current = current + 360/i
-		local x,y = radialPosition(self.x, self.y, self.radius, current)
-		table.insert(positions, {x,y})
-	end
-	return positions
+	return self:calculateSpawnPositionsOnRing(self.radius)
 end
 
 function TerrainModuleWormHoles:create()

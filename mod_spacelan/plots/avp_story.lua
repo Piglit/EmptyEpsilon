@@ -37,7 +37,7 @@ end
 --	return = self.motivations[self.motivations_index]
 --end
 
-function avp_story.onStationCreation(terrain_module)
+function avp_story.onStationCreation(terrain_module, player)
 	self = avp_story
 	self.terrain_discovered = self.terrain_discovered + 1
 	if self.time_first_discoverey == nil then
@@ -76,9 +76,9 @@ function avp_story.onStationCreation(terrain_module)
 		end	
 	end
 
+	local enemies = {}
 	if terrain_module:canInsertEnemies() then
 		local positions = terrain_module:getEnemySpawnPositions()
-		local enemies
 	   	enemies, enemy_faction = avp_enemies:spawn(positions, enemy_faction, self:enemyStrength(terrain_module))
 	end
 
@@ -93,6 +93,14 @@ function avp_story.onStationCreation(terrain_module)
 	end
 
 
+	if terrain_module.terrain_type == "blackholes" then
+		local questgivers = {
+			station,
+			--ship,
+			enemies[1],	-- maybe more?
+		}
+		vf_cta:contactPlayer(player, questgivers, vf_blackhole.contact)
+	end
 end
 
 function avp_story:enemyStrength(terrain_module)

@@ -12,7 +12,7 @@ The models from EsgaShipSet.pack are used here. Golden ornamental decorations an
 
 Strategic use in scenarios
 --------------------------
-Usually the peaceful Arlenians appear not as enemies of the players, but as important NPCs or questgivers. They might provide support against hostile factions or need help to defend themselfs from them. Discovering their stations might become important. In combat, the players should do the heavy lifting, but specialised Arlenian forces can come to help.
+Usually the peaceful Arlenians appear not as enemies of the players, but as important NPCs or questgivers. They might provide support against hostile factions or need help against attacking enemies. Discovering their stations might become important. In combat, the players should do the heavy lifting, but specialised Arlenian forces can come to help.
 
 Ship Properties
 ---------------
@@ -39,7 +39,10 @@ Ship Classes
 	* destroyers and cruisers - specialisef
 * Carriers...
 
-
+Additional lore for Scenarios
+---
+Arlenians are an energy based lifeform, so their ships and research are focused on energy more than matter.
+Arlenians are huge compared to humans, usually an Arlenian ship only houses one Arlenian, who is captain as well as power source for that ship. The crew of the ships usually consists of different other species, humans beeing one of them. The ships interior is adjusted for the needs of the crew, except for the huge housing of the Arlenian itself. Communication with other ships is achieved by translators inside the crew, who interpret the will of the Arlenian captain and try to behave according to it.
 --]]
 
 

@@ -35,7 +35,7 @@ function init()
 	})
 	gravity_util.gravity_const = 2000000	-- 50 times as high!
 	local terrain = TerrainModuleMetaSpiral:new{x=100000, y=120000, radius=200000, amount=47}
-	terrain:registerOnChildrenCreationCallback(avp_story.onStationCreation)
+	terrain:registerOnChildrenCreationCallback(avp_story.onTerrainCreation)
 	terrain:create()
 	addGMFunction("Create Kraylor Fortress", create_kraylor_fortress)
 	addGMFunction("Create Exuari Boss", create_exuari_boss)

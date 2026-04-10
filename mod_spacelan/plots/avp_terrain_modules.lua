@@ -342,13 +342,13 @@ function TerrainModuleAsteroids:canInsertStation()
 end
 
 function TerrainModuleAsteroids:canInsertArtifact()
-	return random(0,1) > 0.25
+	return true
 end
 
 function TerrainModuleAsteroids:insertArtifact()
 	local dist = self.radius / (self.rings_amount + 1)
 	local x,y = radialPosition(self.x, self.y, dist, self.rotation+90)
-	art = wh_artifacts:placeGenericArtifact(x,y)
+	art = wh_artifacts:placeGenericArtifact(x,y)	-- TODO: more specific description, high level asteroid?
 	if TEST == false then
 		art:setRadarTraceColor(255, 200, 100)	-- camoflage
 	end
@@ -666,15 +666,14 @@ function TerrainModuleMetaSpiral:create()
 	-- module classes get shuffled and then distributed to the positions
 	-- some modules appear more than once here, to appear more often
 	local modules = {
---		TerrainModuleAsteroids,
---		TerrainModuleNebulae,
---		TerrainModuleMines,
---		TerrainModulePlanets,
---		TerrainModuleWormHoles,
+		TerrainModuleAsteroids,
+		TerrainModuleAsteroids,
+		TerrainModuleNebulae,
+		TerrainModuleMines,
+		TerrainModulePlanets,
+		TerrainModuleWormHoles,
 		TerrainModuleBlackHoles,
-		TerrainModuleBlackHoles,
-		TerrainModuleBlackHoles,
---		TerrainModuleNebulae,
+		TerrainModuleNebulae,
 	}
 	-- start with the last one in the center (hole), shuffle after
 	local module_idx = #modules -2

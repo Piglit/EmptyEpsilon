@@ -25,9 +25,119 @@ avp_story = {
 --	motivations_index = 0,
 }
 
+--[[ GOSSIP: (relevant information for players)
+* sometimes there are high valuable asteroids in asteroid fields
+* when an asteroid fields containes a station, usually there are no more high-value asteroids anymore
+* there are about 4 arlenian asteroid mining station in the wider area
+* arlenian mining stations are the source of some wealth. find them and redirect their carriers to your stations for profit.
+* there is an ancient mining station in ...; destroying it could yield something valuable
+* there is an exuari carrier hiding in an asteroid field near ...
+* there is a pirate hideout in the asteroid field in ...
+* a Ktlitan hive is in the asteroid field in ...
+--]]
 function avp_story:init()
+	-- the first entry of any entrypoint (...Reward) must always be applicable!
+	self.randomEffects = {
+		"asteroidsReward" = {"hiddenArtifact", "arlenianMiningStation", "destroyableContainingArtifact"},
+		-- TODO not everything here is a reward
+		"nebulaeReward" = --{"nebulaEffect", "arlenianScienceStation", "exuariCarrier", "destroyableContainingArtifact"},	-- störfelder, artefakt im totesten winkel, verborgene feinde, bewegliche nebel
+		"mines" = --{"mineThrower", "derelictStation", "kraylorFortress"}, -- aushalten/ausweichen, um belohnung zu erlangen
+		"planets" = --landen und einladen --arrayShuffle({self.addConflict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+		"blackholes" = {"collapseArtifact"}--.addAggressor, self.addQuestgiver, self.addTechBase},
+		"wormholes" = --arrayShuffle({self.addInstableWormholeEffect, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+		"destroyableContainingArtifact" = {"derelictStation", "exuariCarrier", "pirateStation", "ktlitanQueen"},
+	}
+	self.effectIndex = {}
 end
 
+function avp_story:selectEffect(effectId)
+	-- calls next effect, reroll sample when all are used once
+	assert(self.randomEffects[effectId] ~= nil)
+	if self.effectIndex[effectId] == nil or self.effectIndex[effectId] >= #self.randomEffects[effectId] then
+		self.randomEffects[effectId] = arrayShuffle(self.randomEffects[effectId])
+		self.effectIndex[effectId] = 1
+	else
+		self.effectIndex[effectId] = self.effectIndex[effectId] + 1
+	end
+	local effect = self.randomEffects[effectId][self.effectIndex[effectId]]
+	assert(self[effect] ~= nil)
+	if self[reward](self, terrain_module) == false then
+		-- try again, if this effect returns false
+		self:selectEffect(effectId)
+	end
+end
+
+function avp_story:selectTerrainReward(terrain_module)
+	-- roll a reward, depending on terrain type
+	local reward = terrain_module.terrain_type .. "Reward"
+	self:selectEffect(reward)
+end
+
+-- specific effect functions
+-- the terrain_module is not created, when this functions are called.
+-- they may use the registerOnCreationCallback funtion of the terrain_module to apply the actual effects
+
+function avp_story:hiddenArtifact(terrain_module)
+	if not terrain_module:canInsertArtifact() then return false end
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		terrain_module:insertArtifact()
+	end)
+	return true
+end
+
+function avp_story:arlenianMiningStation(terrain_module)
+	if not terrain_module:canInsertStation() then return false end
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:destroyableContainingArtifact(terrain_module)
+	if not terrain_module:canInsertStation() then return false end
+	self:selectEffect("destroyableContainingArtifact")
+	return true
+end
+
+function avp_story:derelictStation(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+
+--[[
+	-- effects per terrain type
+	-- there sould be:
+	-- * a combat encounter
+	-- * something to explore / a call to action
+	-- * a challenge
+	-- * a reward
+	-- effects may write additional facts or adjust the difficulty rating for enemies
+	-- every terrain type appears about 7 times. nebulae and asteroids up to 14 times
+
+	if terrain_module.terrain_type == "asteroids" then
+		self.addPirateHideout, self.addConflict, self.addRelict, self.addAggressor, self.addQuestgiver, self.addTechBase
+	elseif terrain_module.terrain_type == "nebulae" then
+		self:addNebulaEffect(terrain_module)	-- Coolant +/-, some malfunction, etc...
+	elseif terrain_module.terrain_type == "mines" then
+	elseif terrain_module.terrain_type == "planets" then
+	elseif terrain_module.terrain_type == "blackholes" then
+		self:addCollapseArtifact(terrain_module)
+	elseif terrain_module.terrain_type == "wormholes" then
+	end
+		"asteroids" = arrayShuffle({}),
+		"nebulae" = arrayShuffle({self.addNebulaEffect, self.addRelict, self.addBoss, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+		"mines" = arrayShuffle({self.addMineThrower, self.addRelict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+		"planets" = arrayShuffle({self.addConflict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+		"blackholes" = {self.addAggressor, self.addQuestgiver, self.addTechBase},
+		"wormholes" = arrayShuffle({self.addInstableWormholeEffect, self.addAggressor, self.addQuestgiver, self.addTechBase}),
+
+end
+--]]
 --function avp_story:getMotivation()
 --	self.motivations_index = self.motivations_index +1
 --	if self.motivations_index > #self.motivations then
@@ -37,12 +147,30 @@ end
 --	return = self.motivations[self.motivations_index]
 --end
 
-function avp_story.onStationCreation(terrain_module, player)
+function avp_story.onTerrainCreation(terrain_module, player)
+	-- so, we generated some terrain, what happens next?
+	-- first, update world and player facts
+	-- terrain specific facts are stored in terrain_module
+	-- then select what effects apply (effects are functions), and call them
+	-- effects may access the facts to determine if or how they apply
+
 	self = avp_story
+
+	-- global facts
 	self.terrain_discovered = self.terrain_discovered + 1
 	if self.time_first_discoverey == nil then
 		self.time_first_discoverey = getScenarioTime()
 	end
+
+	-- player facts
+	if player.terrain_discovered == nil then
+		player.terrain_discovered = 1
+	else
+		player.terrain_discovered = player.terrain_discovered + 1
+	end
+
+	self:selectTerrainReward(terrain_module, player)
+
 
 	--local motivation = self:getMotivation()
 
@@ -133,5 +261,4 @@ end
 
 
 -- module specific events
-
 

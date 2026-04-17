@@ -2,6 +2,7 @@ import lupa
 import pytest
 import os
 import random
+import math
 import matplotlib.pyplot as plt
 
 lua = lupa.LuaRuntime()
@@ -30,7 +31,12 @@ def lua_unpack(*args):
 	# can not mock this, it just won't work
 	return
 
-lua.execute("params = {...} require = params[1] random=params[2] irandom=params[2] table.unpack=params[3]", lua_require, lua_random, lua_unpack)
+def lua_atan2(*args):
+	return math.atan2(*args)
+	
+lua.require("math")
+
+lua.execute("params = {...} require = params[1] random=params[2] irandom=params[2] table.unpack=params[3] math.atan2=params[4]", lua_require, lua_random, lua_unpack, lua_atan2)
 g = lua.globals()
 
 @pytest.fixture(scope="session")
@@ -52,10 +58,17 @@ class SpaceObjects:
 		self.target_positions_y = []
 		self.radii = []
 
+	def isValid(self):
+		# TODO test false for test coverage
+		return True
+
 	def setPosition(self, x, y):
 		self.positions_x.append(x)
 		self.positions_y.append(y)
 		return self
+
+	def getPosition(self):
+		return self.positions_x[-1], self.positions_y[-1]
 
 	def setTargetPosition(self, x, y):
 		# only for wormholes
@@ -70,6 +83,27 @@ class SpaceObjects:
 	def setPlanetRadius(self, radius):
 		# only for planets
 		return self.setRadius(radius)
+
+	def setPlanetSurfaceTexture(self, tex):
+		return self
+
+	def setPlanetCloudTexture(self, tex):
+		return self
+
+	def setPlanetAtmosphereTexture(self, tex):
+		return self
+
+	def setPlanetAtmosphereColor(self, *args):
+		return self
+
+	def setAxialRotationTime(self, time):
+		return self
+
+	def setOrbit(self, obj, orbit):
+		return self
+
+	def setDistanceFromMovementPlane(self, dist):
+		return self
 
 	def setPoints(self, points):
 		# only for zones

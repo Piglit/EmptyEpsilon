@@ -22,8 +22,10 @@ function wh_rota:add_object(object, speed, center, center_y)
         error("wh_rota:add_object() function used incorrectly", 2)
 	end
 	object.center = center
-	object.angle = angleRotation(object, center)
-	object.distance = distance(object, center)
+	local x1, y1 = object:getPosition()	-- angleRotation and distance would also work on the objects and call getPosition. But in our testcases, object may be of type userdata, instad of table, causing _fourArgumentsIntoCoordinates to fail.
+	local x2, y2 = center:getPosition()
+	object.angle = angleRotation(x1, y1, x2, y2)
+	object.distance = distance(x1, y1, x2, y2)
 	object.speed = speed
 	table.insert(self.objects, object)
 end

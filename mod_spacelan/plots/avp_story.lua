@@ -1,3 +1,4 @@
+require "utils"
 
 avp_story = {
 	stations_discovered = 0,
@@ -37,22 +38,39 @@ avp_story = {
 --]]
 function avp_story:init()
 	-- the first entry of any entrypoint (...Reward) must always be applicable!
+	-- every terrain type appears about 7 times. nebulae and asteroids up to 14 times
 	self.randomEffects = {
-		"asteroidsReward" = {"hiddenArtifact", "arlenianMiningStation", "destroyableContainingArtifact"},
-		-- TODO not everything here is a reward
-		"nebulaeReward" = --{"nebulaEffect", "arlenianScienceStation", "exuariCarrier", "destroyableContainingArtifact"},	-- störfelder, artefakt im totesten winkel, verborgene feinde, bewegliche nebel
-		"mines" = --{"mineThrower", "derelictStation", "kraylorFortress"}, -- aushalten/ausweichen, um belohnung zu erlangen
-		"planets" = --landen und einladen --arrayShuffle({self.addConflict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-		"blackholes" = {"collapseArtifact"}--.addAggressor, self.addQuestgiver, self.addTechBase},
-		"wormholes" = --arrayShuffle({self.addInstableWormholeEffect, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-		"destroyableContainingArtifact" = {"derelictStation", "exuariCarrier", "pirateStation", "ktlitanQueen"},
+		-- rewards
+		asteroidsReward = {"hiddenArtifact", "arlenianStation", "asteroidsBoss"},
+		nebulaeReward = {"nebulaEffect", "arlenianStation", "exuariAmbush", "nebulaeBoss"},	-- störfelder, artefakt im totesten winkel, verborgene feinde, bewegliche nebel
+		minesReward = {"mineThrower", "arlenianStation", "kraylorFortress", "minesBoss"}, -- aushalten/ausweichen, um belohnung zu erlangen
+		planetsReward = {"conflict", "arlenianStation", "planetsBoss"},
+		blackholesReward = {"collapseArtifact", "blackholesBoss"},	-- hard challenge, so use it everywhere?
+		wormholesReward = {"instableWormhole", "arlenianStation", "wormholesBoss"},
+
+		-- boss is a subtype of reward; it may set the enemy faction
+		asteroidsBoss = {"derelictStation", "pirateStation", "kraylorBase"},
+		nebulaeBoss = {"exuariCarrier", "pirateStation", "ktlitanQueen"},
+		minesBoss = {"derelictStation", "kraylorBase", "ghostStation"},
+		planetsBoss = {"exuariCarrier", "ktlitanQueen", "ghostStation"},
+		blackholesBoss = {"exuariCarrier", "kraylorBase", "ghostStation"},
+		wormholesBoss = {"pirateStation", "kraylorBase", "ktlitanQueen"},
+
+		-- two default factions; if a bossfight occures, others may be set
+		asteroidsEnemies = {"Criminals", "Kraylor"},
+		nebulaeEnemies = {"Ktlitans", "Ghosts"},
+		minesEnemies = {"Kraylor", "Exuari"},
+		planetsEnemies = {"Ktlitans", "Criminals"},
+		blackholesEnemies = {"Ghosts", "Kraylor"},
+		wormholesEnemies = {"Kraylor", "Exuari"},
 	}
+
 	self.effectIndex = {}
 end
 
 function avp_story:selectEffect(effectId)
 	-- calls next effect, reroll sample when all are used once
-	assert(self.randomEffects[effectId] ~= nil)
+	assert(self.randomEffects[effectId] ~= nil, "no effect category "..effectId)
 	if self.effectIndex[effectId] == nil or self.effectIndex[effectId] >= #self.randomEffects[effectId] then
 		self.randomEffects[effectId] = arrayShuffle(self.randomEffects[effectId])
 		self.effectIndex[effectId] = 1
@@ -60,32 +78,52 @@ function avp_story:selectEffect(effectId)
 		self.effectIndex[effectId] = self.effectIndex[effectId] + 1
 	end
 	local effect = self.randomEffects[effectId][self.effectIndex[effectId]]
-	assert(self[effect] ~= nil)
-	if self[reward](self, terrain_module) == false then
-		-- try again, if this effect returns false
-		self:selectEffect(effectId)
+	assert(self[effect] ~= nil, "no such effect "..effect)
+	return effect
+end
+
+function test_selectEffect()
+	for k,v in pairs(avp_story.randomEffects) do
+		for i=1, 2*#v do
+			avp_story:selectEffect(k)
+		end
 	end
 end
 
 function avp_story:selectTerrainReward(terrain_module)
 	-- roll a reward, depending on terrain type
 	local reward = terrain_module.terrain_type .. "Reward"
-	self:selectEffect(reward)
+	local effect = self:selectEffect(reward)
+	local abort_counter = #self.randomEffects[reward]
+	while self[effect](self, terrain_module) == false do
+		-- try again, if this effect returns false
+		effect = self:selectEffect(reward)
+		abort_counter = abort_counter -1
+		if abort_counter < 0 then
+			print("all effects are invalid for "..reward)
+			return
+		end
+	end
+end
+
+function test_selectTerrainReward()
+	for _,t in ipairs({"asteroids", "nebulae", "mines", "planets", "blackholes", "wormholes", "meta"}) do
+		local tm = {
+			terrain_type = t,
+			canInsertStation = function() return false end,
+			canInsertArtifact = function() return false end,
+			registerOnCreationCallback = function(f) end
+		}
+		avp_story:selectTerrainReward(tm)
+	end
 end
 
 -- specific effect functions
 -- the terrain_module is not created, when this functions are called.
 -- they may use the registerOnCreationCallback funtion of the terrain_module to apply the actual effects
 
-function avp_story:hiddenArtifact(terrain_module)
-	if not terrain_module:canInsertArtifact() then return false end
-	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
-		terrain_module:insertArtifact()
-	end)
-	return true
-end
-
-function avp_story:arlenianMiningStation(terrain_module)
+function avp_story:arlenianStation(terrain_module)
+	-- TODO select type of station depending on terrain type
 	if not terrain_module:canInsertStation() then return false end
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		local station = nil -- TODO; maybe call avp_stations
@@ -95,6 +133,7 @@ function avp_story:arlenianMiningStation(terrain_module)
 end
 
 function avp_story:destroyableContainingArtifact(terrain_module)
+	-- TODO terrain type restricts boss types
 	if not terrain_module:canInsertStation() then return false end
 	self:selectEffect("destroyableContainingArtifact")
 	return true
@@ -108,6 +147,111 @@ function avp_story:derelictStation(terrain_module)
 	return true
 end
 
+function avp_story:exuariCarrier(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:pirateStation(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:ktlitanQueen(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:kraylorBase(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:ghostStation(terrain_module)
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		local station = nil -- TODO; maybe call avp_stations
+		terrain_module:insertStation(station)
+	end)
+	return true
+end
+
+function avp_story:hiddenArtifact(terrain_module)
+	if not terrain_module:canInsertArtifact() then return false end
+	assert(terrain_module.terrain_type == "asteroids")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		terrain_module:insertArtifact()
+	end)
+	return true
+end
+
+function avp_story:collapseArtifact(terrain_module)
+	if not terrain_module:canInsertArtifact() then return false end
+	assert(terrain_module.terrain_type == "blackholes")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		terrain_module:insertArtifact(vf_blackhole.triggerCollapse)
+	end)
+	return true
+end
+
+function avp_story:nebulaEffect(terrain_module)
+	assert(terrain_module.terrain_type == "nebulae")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
+
+function avp_story:exuariAmbush(terrain_module)
+	assert(terrain_module.terrain_type == "nebulae")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
+
+function avp_story:mineThrower(terrain_module)
+	assert(terrain_module.terrain_type == "mines")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
+
+function avp_story:kraylorFortress(terrain_module)
+	assert(terrain_module.terrain_type == "mines")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
+
+function avp_story:conflict(terrain_module)
+	assert(terrain_module.terrain_type == "planets")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
+
+function avp_story:instableWormhole(terrain_module)
+	assert(terrain_module.terrain_type == "wormholes")
+	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
+		-- TODO
+	end)
+	return true
+end
 
 --[[
 	-- effects per terrain type
@@ -193,16 +337,13 @@ function avp_story.onTerrainCreation(terrain_module, player)
 		end
 	end
 
-	if terrain_module:canInsertArtifact() then
-		if terrain_module.terrain_type == "blackholes" then
-			artifact_callback = vf_blackhole.triggerCollapse
-		end
-		terrain_module:insertArtifact(artifact_callback)
-		if enemy_faction == nil and	random(0,1) > 0.25 then
-			-- Criminals like artifacts
-			enemy_faction = "Criminals"
-		end	
-	end
+--	if terrain_module:canInsertArtifact() then
+--		terrain_module:insertArtifact(artifact_callback)
+--		if enemy_faction == nil and	random(0,1) > 0.25 then
+--			-- Criminals like artifacts
+--			enemy_faction = "Criminals"
+--		end	
+--	end
 
 	local enemies = {}
 	if terrain_module:canInsertEnemies() then
@@ -216,19 +357,19 @@ function avp_story.onTerrainCreation(terrain_module, player)
 	end
 	if station ~= nil and enemy_faction == "Exuari" and terrain_module.terrain_type ~= "nebulae" then
 		-- Exuari are attacking the station, so make it Arlenian, so Exuari can attack it
-		-- But Exuati try to hide in nebulae, so do not switch station faction then.
+		-- But Exuari try to hide in nebulae, so do not switch station faction then.
 		station:setFaction("Arlenians")
 	end
 
 
-	if terrain_module.terrain_type == "blackholes" then
-		local questgivers = {
-			station,
-			--ship,
-			enemies[1],	-- maybe more?
-		}
-		vf_cta:contactPlayer(player, questgivers, vf_blackhole.contact)
-	end
+	--if terrain_module.terrain_type == "blackholes" then
+	--	local questgivers = {
+	--		station,
+	--		--ship,
+	--		enemies[1],	-- maybe more?
+	--	}
+	--	vf_cta:contactPlayer(player, questgivers, vf_blackhole.contact)
+	--end
 end
 
 function avp_story:enemyStrength(terrain_module)
@@ -261,4 +402,11 @@ end
 
 
 -- module specific events
+
+-- tests
+if TEST ~= true then
+	avp_story:init()
+	test_selectEffect()
+	test_selectTerrainReward()
+end
 

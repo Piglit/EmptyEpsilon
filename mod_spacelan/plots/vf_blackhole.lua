@@ -12,6 +12,8 @@
 	-- new bh is formed, once they touch
 	-- big emp
 
+require "wh_rota.lua"
+
 vf_blackhole = {
 	blackholes_to_collapse = {},	-- hole -> terrain_module
 	COLLAPSE_SPEED = 100,	-- should be 100 for playing

@@ -21,7 +21,7 @@ end
 
 function gravity_util.addGravitySource(planet, outer_limit)
 	if planet ~= nil and planet:isValid() then
-		assert(gravity_util.sources[planet] == nil)
+		assert(gravity_util.sources[planet] == nil, type(planet))
 		gravity_util.sources[planet] = outer_limit
 --		table.insert(gravity_util.sources, {planet, outer_limit})
 	end

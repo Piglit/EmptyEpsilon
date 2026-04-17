@@ -31,7 +31,8 @@ requires: utils.lua (vectorFromAngle)
 --]]
 
 require "utils.lua"
---require "plots/wh_rota.lua"
+require "plots/wh_rota.lua"
+require "plots/gravity_util.lua"
 
 avp_terrain_modules = {
 	modules = {},
@@ -702,6 +703,9 @@ function TerrainModuleMetaSpiral:create()
 		end
 		module:check()
 
+		if self.onChildrenCreationCallbacks == nil then
+			self.onChildrenCreationCallbacks = {}
+		end
 		if TEST then
 			module:create()
 			for _,callback in ipairs(self.onChildrenCreationCallbacks) do

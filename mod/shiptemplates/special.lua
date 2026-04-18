@@ -310,3 +310,41 @@ var:setSpeed(0, 0, 0)
 var:setBeam(0, 0, 0, 0, 0, 0)
 var:setBeam(1, 0, 0, 0, 0, 0)
 
+-- ISD
+template = ShipTemplate():setName("Star Destroyer"):setClass("Dreadnought", "Imperial"):setModel("star_destroyer"):setType("playership")
+template:setDescription([[]])
+template:setRadarTrace("radar_melon.png")
+template:setJumpDrive(true)
+template:setShields(200, 200)
+template:setHull(250)
+template:setSpeed(90, 10, 20)
+template:setCombatManeuver(400, 250)
+template:setDockClasses("Starfighter")
+--                  Arc, Dir, Range, CycleTime, Dmg
+template:setBeam(0,80, -80, 1500.0, 6.0, 8)
+template:setBeam(1,80,  80, 1500.0, 6.0, 8)
+template:setBeam(2,80, -100, 1500.0, 6.0, 8)
+template:setBeam(3,80,  100, 1500.0, 6.0, 8)
+template:setWeaponStorage("Homing", 12)
+template:setWeaponStorage("Nuke", 4)
+template:setWeaponStorage("Mine", 8)
+template:setWeaponStorage("EMP", 6)
+template:setWeaponStorage("HVLI", 20)
+template:setTubes(4, 8.0) -- Amount of torpedo tubes, and loading time of the tubes.
+template:weaponTubeDisallowMissle(0, "Mine")
+template:weaponTubeDisallowMissle(1, "Mine")
+template:weaponTubeDisallowMissle(2, "Mine")
+template:weaponTubeDisallowMissle(3, "Mine")
+
+template:setTubeDirection(0, 0)
+template:setTubeDirection(1, 0):weaponTubeDisallowMissle(1, "Nuke"):weaponTubeDisallowMissle(1, "EMP")
+template:setTubeDirection(2, 0):weaponTubeDisallowMissle(2, "Nuke"):weaponTubeDisallowMissle(2, "EMP")
+template:setTubeDirection(3, 180):setWeaponTubeExclusiveFor(3, "Mine")
+
+
+var = template:copy("MC80")								 
+var:setModel("calamari")
+
+var = template:copy("Nebulon-B")								 
+var:setModel("nebulon_b")
+

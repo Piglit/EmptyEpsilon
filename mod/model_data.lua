@@ -1,3 +1,10 @@
+SCALE_FACTOR = 2
+
+require("mesh/actioniv.lua")
+--require("mesh/bwing.lua")	-- untested/unused
+require("mesh/gr75.lua")
+require("mesh/hwk290.lua")
+
 model = ModelData()
 model:setName("star_destroyer")
 model:setMesh("mesh/star_destroyer.obj")
@@ -27,11 +34,10 @@ model:setRadius(150)
 model = ModelData()
 model:setName("cr90")
 model:setMesh("mesh/cr90.obj")
-model:setTexture("mesh/cr90.png")
-model:setScale(7)
-model:setRadius(75)
--- len: 150m
-
+model:setTexture("mesh/cr90_color.png")
+model:setScale(SCALE_FACTOR)
+model:setRadius(79 * SCALE_FACTOR)
+model:setCollisionBox(150 * SCALE_FACTOR, 48 * SCALE_FACTOR)
 
 model = ModelData()
 model:setName("tie_fighter")
@@ -40,6 +46,8 @@ model:setTexture("mesh/tie_color.png")
 model:setSpecular("mesh/tie_spec.png")
 model:setScale(4)
 model:setRadius(20)
+-- len*width: 7.24m * 6.7m
+
 model:addBeamPosition(1, -0.5, -0.8)
 model:addBeamPosition(1,  0.5, -0.8)
 model:addTubePosition(1, -0.5, -0.8)
@@ -53,6 +61,7 @@ model:setSpecular("mesh/TieInterceptor_spec.png")
 model:setIllumination("mesh/TieInterceptor_illu.jpeg")
 model:setScale(4)
 model:setRadius(20)
+-- 7.7m
 model:addBeamPosition(3.5, -2.7, -0.8)
 model:addBeamPosition(3.5,  2.7, -0.8)
 model:addTubePosition(3.5, -2.7, -0.8)
@@ -66,6 +75,7 @@ model:setSpecular("mesh/TieBomber_spec.png")
 model:setIllumination("mesh/TieBomber_illu.jpeg")
 model:setScale(5)
 model:setRadius(20)
+-- 7.8m
 model:addBeamPosition(1.4,  0.66, -0.8)
 model:addBeamPosition(1.4,  1.3,  -0.8)
 model:addTubePosition(1.4,  0.66, -0.8)

@@ -1285,11 +1285,6 @@ msgstr ""
 "Die Manövriertriebwerke sind beschädigt, wie an der Hintergrundfarbe des "
 "entsprechenden Raumes zu erkennen ist."
 
-<<<<<<< HEAD
-#: scripts/tutorial/00_all.lua:635
-=======
-#: scripts/tutorial/00_all.lua:613
->>>>>>> 041700603 (locale: german fighter tutorial)
 msgid ""
 "I've also overheated the weapons and impulse systems. As before, the "
 "system's coolant level is increased to mitigate the effect. Note that the "
@@ -1306,11 +1301,6 @@ msgstr ""
 "Dies liegt daran, dass nur eine begrenzte Menge an Kühlflüssigkeit zur "
 "Verfügung steht, die vom Schiff auf die einzelnen Systeme verteilt wird."
 
-<<<<<<< HEAD
-#: scripts/tutorial/00_all.lua:639
-=======
-#: scripts/tutorial/00_all.lua:617
->>>>>>> 041700603 (locale: german fighter tutorial)
 msgid ""
 "Good. Now you know your most important tasks. Next, we'll go over each "
 "system's function in detail.\n"

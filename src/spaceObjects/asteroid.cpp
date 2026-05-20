@@ -45,6 +45,8 @@ Asteroid::Asteroid()
     registerMemberReplication(&size);
 
     PathPlannerManager::getInstance()->addAvoidObject(this, 300);
+    setCollisionTypeStatic();   // static bodies do not collide with other static bodies
+                                // currently only asteroids are static bodies
 }
 
 void Asteroid::draw3D()

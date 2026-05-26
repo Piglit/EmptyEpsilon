@@ -21,9 +21,9 @@ require("shiptemplates/starFighters.lua")
 require("shiptemplates/frigates.lua")
 require("shiptemplates/dreadnaught.lua")
 require("shiptemplates/OLD.lua")
+require("shiptemplates/exuari.lua")
 
 -- modified:
-require("shiptemplates/exuari.lua")
 require("shiptemplates/ktlitan.lua")
 require("shiptemplates/corvette.lua")
 --require("shiptemplates/transport.lua")
@@ -38,5 +38,6 @@ require("shiptemplates/special.lua")
 -- new, sw:
 require("shiptemplates/tie.lua")
 require("shiptemplates/player_star_wars.lua")
+require("shiptemplates/npc_sw.lua")
 
 

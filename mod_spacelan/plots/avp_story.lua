@@ -1,5 +1,22 @@
 require "utils"
 
+--[[
+Design:
+* Multiple high level quests (goals) to give the differnt players a purpose
+* Exploring reveals means to persue that Quests, alsong with obstacles
+* Many obstacles should require working together
+
+High-Level-Goals
+* eliminate Kraylor in the east
+* remove Exuari threat that circles the area
+* diplomacy with Ktiltans
+* diplomacy with Criminals
+* something with Ghosts
+* help Arlenians
+* ? with Independent / Human Navy
+--]]
+
+
 avp_story = {
 	stations_discovered = 0,
 	terrain_discovered = 0,

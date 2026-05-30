@@ -918,7 +918,15 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
     {
         object_sprite = "radar/ship.png";
     }
-
+    float sprite_scale;
+    if (long_range)
+    {
+        sprite_scale = 0.7f;
+    }
+    else
+    {
+        sprite_scale = (1.0f + scale * getRadius() / 32.f * 4) / 2.0f;
+    }
     glm::u8vec4 color;
     if (my_spaceship == this)
     {
@@ -940,7 +948,7 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
         if (factionInfo[getFactionId()])
             color = factionInfo[getFactionId()]->getGMColor();
     }
-    renderer.drawRotatedSprite(object_sprite, position, long_range ? 22.f : 32.f, getRotation() - rotation, color);
+    renderer.drawRotatedSprite(object_sprite, position, 32.f * sprite_scale, getRotation() - rotation, color);
 }
 
 void SpaceShip::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)

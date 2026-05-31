@@ -371,7 +371,7 @@ var:setRepairCrewCount(2)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
 
-var = var:copy("Gozanti C-ROC")
+var1 = var:copy("Gozanti C-ROC")
 var1:setDescription(_([[The C-ROC Gozanti-class light cruiser is an official modified version of the Gozanti-class cruiser that was manufactured by the Corellian Engineering Corporation prominently during the Clone Wars and the Imperial Era.]]))
 var1:setRadarTrace("croc.png")
 --                 Arc, Dir, Range, CycleTime, Dmg
@@ -382,7 +382,7 @@ var1:setBeamWeaponTurret(0, 360, 0, 5)
 var1:setBeamWeaponTurret(1, 0, 0, 5)
 --addRockets(var, false)
 var1:setRepairCrewCount(1)
-var1:copy(" "..var:getName()):setType("ship") -- CpuShip variant
+var1:copy(" "..var1:getName()):setType("ship") -- CpuShip variant
 
 var2 = var1:copy("Gozanti ")	-- Cropdust Nomad variant
 addRockets(var2, false)
@@ -450,6 +450,7 @@ var:setRadarTrace("gozanti.png")
 var:setModel("MultiGunCorvette"..color_player)
 var:setDescription(_([[The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-class TIE carrier and known generally as the Imperial freighter, was a variant of the standard Gozanti-class cruiser used by the Galactic Empire and later by sympathizers of the First Order.]]))
 var:setRepairCrewCount(2)
+var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 --var:setRepairDocked(true)
 --var:setSharesEnergyWithDocked(false)
 --var:setRestocksMissilesDocked("all")

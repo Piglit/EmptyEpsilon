@@ -15,15 +15,19 @@ require("plot_shattered.lua")
 function init()
 	-- collection of scripts from different sources for the plot_manager
 	local plot_modules = {
-		"map_shattered",
-		"gravity_util",
 		"player_ships_util",
 		"perma_damage_util",
+		"map_shattered",
+		"gravity_util",
+		{"plot_shattered_cic", plot_shattered_cic},
 		--plot_shattered_droid,
 		--plot_shattered_network,
 		{"plot_shattered_gozanti", plot_shattered_gozanti},
 		--plot_shattered_crashlander,
 		--plot_shattered_package,
+		{"plot_shattered_fleets", plot_shattered_fleets},
+		"rescue_capsule_util",
+		"proximity_scan",
 	}
 
 	plot_manager:init(plot_modules)

@@ -24,6 +24,7 @@ require("shiptemplates/OLD.lua")
 require("shiptemplates/exuari.lua")
 
 -- modified:
+require("shiptemplates/arlenian.lua")
 require("shiptemplates/ktlitan.lua")
 require("shiptemplates/corvette.lua")
 --require("shiptemplates/transport.lua")

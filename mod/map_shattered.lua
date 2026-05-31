@@ -47,7 +47,7 @@ function map_shattered:init()
     -- create stations and global accessible ships
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
-    self.flight_control:setLongRangeRadarRange(60000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+    self.flight_control:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
     self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Green Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
@@ -65,10 +65,10 @@ function map_shattered:init()
     self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
     self.ground:setRotation(-90)
 
-    self.freighter_imp=CpuShip():setTemplate(" Action IV"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_nr=CpuShip():setTemplate(" Action IV"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_cd=CpuShip():setTemplate(" Action IV"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
-    self.freighter_lf=CpuShip():setTemplate(" Action IV"):setFaction("Crimson Dawn"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN)
+    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_cd=CpuShip():setTemplate("Pheasant"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(2*orbit, -33064):setDescription(_("A luxury casino ship")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(1000):setHull(1000):setShieldsMax(500, 250):setShields(500, 250)
+    self.freighter_lf=CpuShip():setTemplate("Personnel Freighter 3"):setFaction("Independent"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(750):setHull(750):setShieldsMax(250, 250):setShields(250, 250)
 
     -- place escort fighters for the freighters
     local px,py = self.freighter_nr:getPosition()
@@ -86,9 +86,9 @@ function map_shattered:init()
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(self.freighter_cd)
     px,py = self.freighter_lf:getPosition()
-    CpuShip():setFaction("Crimson Dawn"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_lf)
-    CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_lf)
-    CpuShip():setFaction("Crimson Dawn"):setTemplate(" YV-929"):setPosition(px,py-3000):orderDefendTarget(self.freighter_lf)
+    CpuShip():setFaction("Independent"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_lf)
+    CpuShip():setFaction("Independent"):setTemplate(" HWK-290"):setPosition(px-3000,py):orderDefendTarget(self.freighter_lf)
+    CpuShip():setFaction("Independent"):setTemplate(" GX1"):setPosition(px,py-3000):orderDefendTarget(self.freighter_lf)
 
     -- place asteroids and satellites
     px,py = self.planet:getPosition()

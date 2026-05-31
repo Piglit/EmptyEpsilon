@@ -3,6 +3,8 @@ plot_shattered_network = {}
 plot_shattered_gozanti = {}
 plot_shattered_crashlander = {}
 plot_shattered_package = {}
+plot_shattered_cic = {}
+plot_shattered_fleets = {}
 plot_shattered_imp_fleet = {}
 plot_shattered_rep_breaker = {}
 plot_shattered_rep_fleet = {}
@@ -508,24 +510,140 @@ function plot_shattered_package.spawn_package()
 		for i=1,10 do
 			Artifact():setPosition(x+random(-5000, 5000), y+random(-5000, 5000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: leer")):setScanningParameters(3,1):setCallSign(string.format("%d-%s%s%s-%d", irandom(1111,9999), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), irandom(10,99))):allowPickup(true)
 		end
-			Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung für Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59"):allowPickup(true)
+			Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung f. Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59"):allowPickup(true)
         plot_manager.gm_main_menu()
     end)
 end
 
+-- CIC
+function plot_shattered_cic:init()
+	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
+		self:set_infos(10, "SYSTEM-STATUS:")
+		self:set_infos(11, "Radar-Reichweite:                60u (100%)")
+		self:set_infos(12, "Sensor-Reichweite:              90u (100%)")
+		self:set_infos(13, "Funk-Sende-Reichweite:       50u (100%)")
+		self:set_infos(14, "Funk-Empfangs-Reichweite:  60u (100%)")
+		self:set_infos(30, " ")
+		self:set_infos(31, "RADAR-SENSOR-INFO:")
+		self:set_infos(32, "Rot:  Energie")
+		self:set_infos(33, "Grün: Biosign")
+		self:set_infos(34, "Blau:  Metall")
+	end
+end
+
+function plot_shattered_cic:gm_menu()
+	if plot_shattered_cic.blocked then
+		addGMFunction("Unblock CIC radar",plot_shattered_cic.unblock_cic)
+	else
+		addGMFunction("Block CIC radar",plot_shattered_cic.block_cic)
+	end
+end
+
+function plot_shattered_cic.unblock_cic()
+	if plot_shattered_cic.nebula ~= nil and plot_shattered_cic.nebula:isValid() then
+		plot_shattered_cic.nebula:destroy()
+	end
+	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
+		map_shattered.flight_control:commandSetAlertLevel("normal")
+		plot_shattered_cic:set_infos(11, "Radar-Reichweite:               60u (100%)")
+		plot_shattered_cic:set_infos(12, "Sensor-Reichweite:              90u (100%)")
+		plot_shattered_cic:set_infos(40, nil)
+		plot_shattered_cic:set_infos(41, nil)
+		plot_shattered_cic:set_infos(42, nil)
+		plot_shattered_cic:set_infos(43, nil)
+		plot_shattered_cic:set_infos(44, nil)
+	end
+	plot_shattered_cic.blocked = false 
+	plot_manager.gm_main_menu()
+end
+
+function plot_shattered_cic.block_cic()
+	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
+		local x,y = map_shattered.flight_control:getPosition()
+		plot_shattered_cic.nebula = Nebula():setPosition(x, y):setSize(3)
+		map_shattered.flight_control:commandSetAlertLevel("yellow")
+		plot_shattered_cic:set_infos(11, "Radar-Reichweite:               30u ( 50%)")
+		plot_shattered_cic:set_infos(12, "Sensor-Reichweite:                 ? ( 30%)")
+		plot_shattered_cic:set_infos(40, " ")
+		plot_shattered_cic:set_infos(41, "FEHLER / WARNUNGEN:")
+		plot_shattered_cic:set_infos(42, "Warnung: Energie-Sensor gestört      ")
+		plot_shattered_cic:set_infos(43, "Warnung: Biosign-Sensor ausgefallen")
+		plot_shattered_cic:set_infos(44, "Warnung: Langstreckenradar gestört")
+		plot_shattered_cic.blocked = true
+		plot_manager.gm_main_menu()
+	end
+end
+
+function plot_shattered_cic:set_infos(idx, msg)
+	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
+		if msg == nil or msg == "" then
+			map_shattered.flight_control:removeCustom("CIC_"..tostring(idx))
+		else
+			map_shattered.flight_control:addCustomInfo("science", "CIC_"..tostring(idx), msg, idx)
+		end
+	end
+end
 
 ----- fleet arrivals
 
-function plot_shattered_imp_fleet:gm_menu()
-    addGMFunction("Lost Package",plot_shattered_imp_fleet.spawn_fleet)
+function plot_shattered_fleets:gm_menu()
+    addGMFunction("Spawn Plot Fleets", function()
+		clearGMFunctions()
+		addGMFunction("Star Destroyer Victory", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_star_destroyer(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("Breaker VIP", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_breaker(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("NR Fleet", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_nr_fleet(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		gm_menu_back()
+	end)
 end
 
-function plot_shattered_imp_fleet.spawn_fleet()
-	self = plot_shattered_imp_fleet
-	local x,y = vectorFromAngle(60, 70000) 
-    self.isd = CpuShip():setTemplate(" ISD"):setFaction("Imperial"):setCallSign("Victory-1"):setPosition(x,y)
-	x,y = vectorFromAngle(60, 35000)
-	self.isd:orderFlyTowards(x,y)
-	-- TODO hangar							
+function plot_shattered_fleets:spawn_star_destroyer(x,y)
+    self.isd = CpuShip():setTemplate(" Star Destroyer"):setFaction("Imperial"):setCallSign("Victory"):setDescription("Star Destroyer Victory"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x+3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y-3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x+3000,y+3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Bomber"):setPosition(x,y-3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate("TIE-Interceptor"):setPosition(x,y+3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+end
+
+function plot_shattered_fleets:spawn_breaker(x,y)
+    self.breaker = CpuShip():setTemplate(" CR90"):setFaction("Independent"):setCallSign("CB-15"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+end
+
+function plot_shattered_fleets:spawn_nr_fleet(x,y)
+    self.mc = CpuShip():setTemplate(" MC80"):setFaction("New Republic"):setCallSign("Home One"):setDescription("Mon Calamari Cruiser Home One"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+	CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x+3000,y):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y-3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(x,y-3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x,y+3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x+3000,y+3000):orderDefendTarget(self.mc):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" CR90"):setPosition(x+5000,y):orderFlyFormation(self.mc, 0, 5000):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" CR90"):setPosition(x-5000,y):orderFlyFormation(self.mc, 0, -5000):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Nebulon-B"):setPosition(x,y+5000):orderFlyFormation(self.mc, 5000, 0):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
 end
 

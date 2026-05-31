@@ -64,7 +64,7 @@ template:setDescription([[It's a TIE Bomber]])
 template:setModel("tie_bomber")
 template:setRadarTrace("tie_bomber.png")
 template:setImpulseSoundFile("sfx/engine_tie_mixed.wav")
-template:setHull(100)
+template:setHull(50)
 template:setShields()
 template:setSpeed(70, 15, 25, 40, 15)
 --                  Arc, Dir, Range, CycleTime, Dmg

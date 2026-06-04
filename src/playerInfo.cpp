@@ -21,6 +21,7 @@
 #include "screens/extra/databaseScreen.h"
 #include "screens/extra/commsScreen.h"
 #include "screens/extra/shipLogScreen.h"
+#include "screens/extra/radarScreen.h"
 
 #include "screenComponents/mainScreenControls.h"
 #include "screenComponents/selfDestructEntry.h"
@@ -229,6 +230,8 @@ void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer)
             screen->addStationTab(new CommsScreen(container), commsOnly, getCrewPositionName(commsOnly), getCrewPositionIcon(commsOnly));
         if (crew_position[shipLog] & (1 << monitor_index))
             screen->addStationTab(new ShipLogScreen(container), shipLog, getCrewPositionName(shipLog), getCrewPositionIcon(shipLog));
+        if (crew_position[radar] & (1 << monitor_index))
+            screen->addStationTab(new RadarScreen(container), radar, getCrewPositionName(radar), getCrewPositionIcon(radar));
 
         GuiSelfDestructEntry* sde = new GuiSelfDestructEntry(container, "SELF_DESTRUCT_ENTRY");
         for(int n=0; n<max_crew_positions; n++)
@@ -276,6 +279,7 @@ string getCrewPositionName(ECrewPosition position)
     case altRelay: return tr("station","Strategic Map");
     case commsOnly: return tr("station","Comms");
     case shipLog: return tr("station","Ship's Log");
+    case radar: return tr("station","Radar");
     default: return "ErrUnk: " + string(position);
     }
 }
@@ -300,6 +304,7 @@ string getCrewPositionIcon(ECrewPosition position)
     case altRelay: return "";
     case commsOnly: return "";
     case shipLog: return "";
+    case radar: return "";
     default: return "ErrUnk: " + string(position);
     }
 }
@@ -347,6 +352,8 @@ ECrewPosition getCrewPositionByName(string position)
         cp = commsOnly;
     else if (str == "shiplog")
         cp = shipLog;
+    else if (str == "radar")
+        cp = radar;
     else
         cp = max_crew_positions;
     return cp;

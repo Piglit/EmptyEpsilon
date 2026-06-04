@@ -476,24 +476,24 @@ void ShipSelectionScreen::update(float delta)
 CrewPositionSelection::CrewPositionSelection(GuiContainer* owner, string id, int _window_index, std::function<void()> on_cancel, std::function<void()> on_ready)
 : GuiPanel(owner, id), window_index(_window_index)
 {
-    setSize(GuiElement::GuiSizeMax, 800);
+    setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     setPosition(0, 0, sp::Alignment::Center);
-    setMargins(50);
+    setMargins(25);
 
     auto container = new GuiElement(this, "");
     container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "horizontal");
 
     auto left_container = new GuiElement(container, "");
     left_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-    left_container->setMargins(50, 50, 25, 100);
+    left_container->setMargins(25, 25, 25, 75);
 
     auto center_container = new GuiElement(container, "");
     center_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-    center_container->setMargins(25, 50, 25, 100);
+    center_container->setMargins(25, 25, 25, 75);
 
     auto right_container = new GuiElement(container, "");
     right_container->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-    right_container->setMargins(25, 50, 25, 100);
+    right_container->setMargins(25, 25, 25, 75);
 
     // 5-6-crew panel
 

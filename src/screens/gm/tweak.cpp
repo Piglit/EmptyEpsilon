@@ -193,7 +193,7 @@ GuiTweakShipTemplateBasedObject::GuiTweakShipTemplateBasedObject(GuiContainer* o
 
     // Radar ranges
     (new GuiLabel(right_col, "", tr("Short-range radar range:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    short_range_radar_slider = new GuiSlider(right_col, "", 100.0, 20000.0, 0.0, [this](float value) {
+    short_range_radar_slider = new GuiSlider(right_col, "", 100.0, 60000.0, 0.0, [this](float value) {
         target->setShortRangeRadarRange(value);
     });
     short_range_radar_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);

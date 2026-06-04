@@ -15,12 +15,15 @@ class Nebula : public SpaceObject
     static PVector<Nebula> nebula_list;
     static const int cloud_count = 32;
 
+    float size;
     int radar_visual;
     NebulaCloud clouds[cloud_count];
 
 public:
     Nebula();
 
+    void setSize(float size);
+    float getSize();
     virtual void draw3DTransparent() override;
     virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
     virtual void drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;

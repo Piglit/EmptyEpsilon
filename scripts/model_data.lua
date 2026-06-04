@@ -654,18 +654,6 @@ model:setSpecular("bomber_spec_kraylor.png")
 model:setScale(12)
 model:setRadius(15)
 model:addEngineEmitter(-0.84, 0, 0.005,  1.0, 0.2, 0.1, 1.0)
-model:addBeamPosition(0.52, 0, 0.44)
-
--- a kraylor variation of the same ship:
-model = ModelData()
-model:setName("esga_bomber_kraylor")
-model:setMesh("bomber.obj")
-model:setTexture("bomber_diffuse_kraylor.png")
-model:setIllumination("bomber_Emissive_kraylor.png")
-model:setSpecular("bomber_spec_kraylor.png")
-model:setScale(12)
-model:setRadius(15)
-model:addEngineEmitter(-0.84, 0, 0.005,  1.0, 0.2, 0.1, 1.0)
 
 model = ModelData()
 model:setName("esga_fighter")

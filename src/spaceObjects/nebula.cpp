@@ -28,6 +28,13 @@ struct VertexAndTexCoords
 /// Example: nebula = Nebula():setPosition(1000,2000)
 REGISTER_SCRIPT_SUBCLASS(Nebula, SpaceObject)
 {
+    /// Sets this Nebulas radius.
+    /// Example: nebula:setSize(5000)
+    REGISTER_SCRIPT_CLASS_FUNCTION(Nebula, setSize);
+
+    /// Gets this Nebulas radius.
+    /// Example: nebula:getSize()
+    REGISTER_SCRIPT_CLASS_FUNCTION(Nebula, getSize);
 }
 
 PVector<Nebula> Nebula::nebula_list;
@@ -43,7 +50,9 @@ Nebula::Nebula()
     radar_visual = irandom(1, 3);
     setRadarSignatureInfo(0.0, 0.8, -1.0);
 
+    size = 5000;
     registerMemberReplication(&radar_visual);
+    registerMemberReplication(&size);
 
     for(int n=0; n<cloud_count; n++)
     {
@@ -99,6 +108,25 @@ void Nebula::draw3DTransparent()
         std::initializer_list<uint16_t> indices = { 0, 3, 2, 0, 2, 1 };
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, std::begin(indices));
     }
+}
+
+void Nebula::setSize(float size)
+{
+    this->size = size;
+    setRadius(size);
+    for(int n=0; n<cloud_count; n++)
+    {
+        clouds[n].size = random(512, 1024 * 2);
+        clouds[n].texture = irandom(1, 3);
+        float dist_min = clouds[n].size / 2.0f;
+        float dist_max = getRadius() - clouds[n].size;
+        clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
+    }
+}
+
+float Nebula::getSize()
+{
+    return size;
 }
 
 void Nebula::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)

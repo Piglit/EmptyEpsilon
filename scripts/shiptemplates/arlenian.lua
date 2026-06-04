@@ -316,47 +316,47 @@ template:setTubes(1, 24.0)
 template:setTubeSize(0, "large")
 var = template:copy(template:getName().."P"):setType("playership")
 
--- stations		 
-template = ShipTemplate():setName("Arlenian Station 0"):setType("station")
-template:setModel("esga_station_citadel"):setRadarTrace("esga_station_citadel.png")
-template:setHull(500)
-template:setShields(1000)
-
-template = ShipTemplate():setName("Arlenian Station 1"):setType("station")
-template:setModel("esga_station_habitat"):setRadarTrace("esga_station_habitat.png")
-template:setHull(500)
-template:setShields(1000)
-
-template = ShipTemplate():setName("Arlenian Station 2"):setType("station")
-template:setModel("esga_station_starbase"):setRadarTrace("esga_station_starbase.png")
-template:setHull(300)
-template:setShields(600)
-
-template = ShipTemplate():setName("Arlenian Station 3"):setType("station")
-template:setModel("esga_station_assemblyyard"):setRadarTrace("esga_station_assemblyyard.png")
-template:setHull(150)
-template:setShields(300)
--- has beams
-
-template = ShipTemplate():setName("Arlenian Station 4"):setType("station")
-template:setModel("esga_station_habitation"):setRadarTrace("esga_station_habitation.png")
-template:setHull(200)
--- no shields
-
-template = ShipTemplate():setName("Arlenian Station 5"):setType("station")
-template:setModel("esga_station_hangar"):setRadarTrace("esga_station_hangar.png")
-template:setHull(150)
-template:setShields(300)
-
-template = ShipTemplate():setName("Arlenian Station 6"):setType("station")
-template:setModel("esga_station_mining"):setRadarTrace("esga_station_mining.png")
-template:setHull(200)
--- no shields
--- has beams
-
-template = ShipTemplate():setName("Arlenian Station 7"):setType("station")
-template:setModel("esga_station_science"):setRadarTrace("esga_station_science.png")
-template:setHull(150)
-template:setShields(300)
--- has beams
+---- stations		 
+--template = ShipTemplate():setName("Arlenian Station 0"):setType("station")
+--template:setModel("esga_station_citadel"):setRadarTrace("esga_station_citadel.png")
+--template:setHull(500)
+--template:setShields(1000)
+--
+--template = ShipTemplate():setName("Arlenian Station 1"):setType("station")
+--template:setModel("esga_station_habitat"):setRadarTrace("esga_station_habitat.png")
+--template:setHull(500)
+--template:setShields(1000)
+--
+--template = ShipTemplate():setName("Arlenian Station 2"):setType("station")
+--template:setModel("esga_station_starbase"):setRadarTrace("esga_station_starbase.png")
+--template:setHull(300)
+--template:setShields(600)
+--
+--template = ShipTemplate():setName("Arlenian Station 3"):setType("station")
+--template:setModel("esga_station_assemblyyard"):setRadarTrace("esga_station_assemblyyard.png")
+--template:setHull(150)
+--template:setShields(300)
+---- has beams
+--
+--template = ShipTemplate():setName("Arlenian Station 4"):setType("station")
+--template:setModel("esga_station_habitation"):setRadarTrace("esga_station_habitation.png")
+--template:setHull(200)
+---- no shields
+--
+--template = ShipTemplate():setName("Arlenian Station 5"):setType("station")
+--template:setModel("esga_station_hangar"):setRadarTrace("esga_station_hangar.png")
+--template:setHull(150)
+--template:setShields(300)
+--
+--template = ShipTemplate():setName("Arlenian Station 6"):setType("station")
+--template:setModel("esga_station_mining"):setRadarTrace("esga_station_mining.png")
+--template:setHull(200)
+---- no shields
+---- has beams
+--
+--template = ShipTemplate():setName("Arlenian Station 7"):setType("station")
+--template:setModel("esga_station_science"):setRadarTrace("esga_station_science.png")
+--template:setHull(150)
+--template:setShields(300)
+---- has beams
 

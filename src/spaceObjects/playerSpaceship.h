@@ -238,6 +238,7 @@ public:
     void addCustomMessage(ECrewPosition position, string name, string caption);
     void addCustomMessageWithCallback(ECrewPosition position, string name, string caption, ScriptSimpleCallback callback);
     void removeCustom(string name);
+    string getCustomCaption(string name);
 
     ESystem getBeamSystemTarget(){ return beam_system_target; }
     string getBeamSystemTargetName(){ return getSystemName(beam_system_target); }

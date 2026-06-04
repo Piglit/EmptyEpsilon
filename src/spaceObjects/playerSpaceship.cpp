@@ -170,6 +170,9 @@ REGISTER_SCRIPT_SUBCLASS(PlayerSpaceship, SpaceShip)
     /// Removes the custom function, info, or message with the given reference name.
     /// Example: player:removeCustom("show_coolant_max") -- removes the custom item named "show_coolant_max"
     REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, removeCustom);
+    /// Get the caption of the custom element
+    /// Example: player:getCustomCaption("show_coolant_max") -- returns the text of the custom item named "show_coolant_max"
+    REGISTER_SCRIPT_CLASS_FUNCTION(PlayerSpaceship, getCustomCaption);
 
     /// Returns the index of the ESystem targeted by this PlayerSpaceship's weapons.
     /// Returns -1 for the hull.
@@ -1288,6 +1291,19 @@ void PlayerSpaceship::removeCustom(string name)
             it++;
     }
 }
+
+string PlayerSpaceship::getCustomCaption(string name)
+{
+    for(auto it = custom_functions.begin(); it != custom_functions.end();)
+    {
+        if (it->name == name)
+            return it->caption;
+        else
+            it++;
+    }
+    return "";
+}
+
 
 void PlayerSpaceship::setCommsMessage(string message)
 {

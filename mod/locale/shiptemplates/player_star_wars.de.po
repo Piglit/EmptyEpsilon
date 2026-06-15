@@ -1,42 +1,3 @@
-#: mod/shiptemplates/player_star_wars.lua:82
-#: mod/shiptemplates/player_star_wars.lua:280
-#: mod/shiptemplates/player_star_wars.lua:294
-msgctxt "class"
-msgid "Escape Pod"
-msgstr "Rettungskapsel"
-
-#: mod/shiptemplates/player_star_wars.lua:91
-#: mod/shiptemplates/player_star_wars.lua:98
-#: mod/shiptemplates/player_star_wars.lua:104
-#: mod/shiptemplates/player_star_wars.lua:125
-#: mod/shiptemplates/player_star_wars.lua:132
-#: mod/shiptemplates/player_star_wars.lua:147
-#: mod/shiptemplates/player_star_wars.lua:172
-#: mod/shiptemplates/player_star_wars.lua:221
-#: mod/shiptemplates/player_star_wars.lua:276
-#: mod/shiptemplates/player_star_wars.lua:295
-msgctxt "class"
-msgid "Starfighter"
-msgstr "Raumjäger"
-
-#: mod/shiptemplates/player_star_wars.lua:91
-#: mod/shiptemplates/player_star_wars.lua:98
-msgctxt "subclass"
-msgid "Support"
-msgstr "Unterstützung"
-
-#: mod/shiptemplates/player_star_wars.lua:92
-#: mod/shiptemplates/player_star_wars.lua:119
-msgid ""
-"The UT-60D U-wing starfighter/support craft, also known as the UT-60D, U-"
-"wing, or UT-60D U-wing Troop Transport, was a transport/gunship model "
-"manufactured by Incom Corporation and used by the Alliance to Restore the "
-"Republic during the Galactic Civil War. Used to drop troops into battle, and "
-"provide cover fire for them, U-wings were pivotal in transport and "
-"protection of the Rebel Alliance's ground forces during the Battle of Scarif."
-msgstr ""
-
-#: mod/shiptemplates/player_star_wars.lua:99
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
@@ -50,12 +11,53 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: mod/shiptemplates/player_star_wars.lua:104
-msgctxt "subclass"
-msgid "Heavy Attack Fighter"
-msgstr "Schwerer Angriffsjäger"
+#: mod/shiptemplates/player_star_wars.lua:99
+#: mod/shiptemplates/player_star_wars.lua:158
+msgid ""
+"The UT-60D U-wing starfighter/support craft, also known as the UT-60D, U-"
+"wing, or UT-60D U-wing Troop Transport, was a transport/gunship model "
+"manufactured by Incom Corporation and used by the Alliance to Restore the "
+"Republic during the Galactic Civil War. Used to drop troops into battle, and "
+"provide cover fire for them, U-wings were pivotal in transport and "
+"protection of the Rebel Alliance's ground forces during the Battle of Scarif."
+msgstr ""
+"Der/das UT-60D-U-Flügel-Sternjäger/Unterstützungsschiff, auch U-Flügel-"
+"Kanonenboot/Transporter oder einfach U-Flügler genannt, war ein von Incom "
+"produzierter Jäger der Allianz zur Wiederherstellung der Republik und der "
+"Neuen Republik, der als Kanonenboot und Truppentransporter genutzt wurde."
 
-#: mod/shiptemplates/player_star_wars.lua:105
+#: mod/shiptemplates/player_star_wars.lua:106
+msgid ""
+"X-wing starfighters were a type of starfighter marked by their distinctive S-"
+"foils that resembled the High Galactic script's character 'X' in attack "
+"formation. They were heavily armed with four laser cannons on the S-foils "
+"and proton torpedo launchers in the fuselage. X-wings were designed for "
+"dogfighting and long missions."
+msgstr ""
+"Der X-Flügel-Sternjäger, meist kurz X-Flügler genannt, war eine Sternjäger-"
+"Serie der Incom-Gesellschaft, die ihren Name von der markanten Silhouette "
+"der in Angriffsposition aufgeklappten S-Flügel bekam. Bekanntestes Modell "
+"war dabei der T-65-X-Flügel-Sternjäger, welcher durch seine Eigenschaften "
+"und die Beteiligung an zahlreichen entscheidenden Schlachten während des "
+"Galaktischen Bürgerkriegs genauso zu einem Symbol der gesamten Rebellion "
+"wurde."
+
+#: mod/shiptemplates/player_star_wars.lua:115
+msgid ""
+"The Aggressive ReConnaissance-170 starfighter, also known simply as the "
+"ARC-170 starfighter, was a heavy-duty model of starfighter used by the "
+"Galactic Republic during the Clone Wars and was considered the latest in "
+"fighter technology. Jointly manufactured by Incom Corporation and Subpro, it "
+"continued to see usage into the reign of the Galactic Empire, but was "
+"eventually phased out by the newer TIE fighter series, though some found "
+"their way into the hands of the Alliance to Restore the Republic."
+msgstr ""
+"Der Aggressive-ReConnaissance-170-Sternjäger der Incom-Gesellschaft und der "
+"Subpro Corporation, kurz ARC-170-Sternjäger genannt, wurde während der "
+"Klonkriege von der Flotte der Galaktischen Republik eingesetzt. Er war einer "
+"der größten Sternjäger der Alten Republik."
+
+#: mod/shiptemplates/player_star_wars.lua:125
 msgid ""
 "The StarViper-class attack platform was a model of heavy attack starfighter "
 "manufactured by a subdivision of MandalMotors called Mandal Hypernautics. "
@@ -63,35 +65,73 @@ msgid ""
 "weaponry and fast speed. Its high price meant that it was primarily found in "
 "use by larger crime syndicates like Black Sun and the Zann Consortium."
 msgstr ""
+"Der Angriffsjäger der StarViper-Klasse, auch einfach StarViper genannt, "
+"wurde von MandalMotors und MandalHypernautics hergestellte und bildete das "
+"Rückgrat der Raumflotte der Schwarzen Sonne, war aber ebenfalls ein "
+"beliebter und weit verbreiteter Jäger in den Flotten des Zann-Konsortiums."
 
-#: mod/shiptemplates/player_star_wars.lua:125
-msgctxt "subclass"
-msgid "Patrol"
-msgstr "Patrouille"
+#: mod/shiptemplates/player_star_wars.lua:141
+msgid ""
+"The Sheathipede-class transport shuttle, also known as the Sheathipede-class "
+"shuttle and as the Neimoidian escort shuttle, was a short-range transport "
+"used by the Trade Federation and the Confederacy of Independent Systems. A "
+"larger version of the shuttle also existed."
+msgstr ""
+"Das Transportshuttle der Sheathipede-Klasse oder Neimoidianische "
+"Eskortshuttle war ein Personentransporter, der vor den Klonkriegen von der "
+"Handelsföderation eingesetzt worden war. Nach dem Ausbruch der Klonkriege im "
+"Jahr 22 VSY und der Integration der Handelsföderation in die Konföderation "
+"unabhängiger Systeme fand das Shuttle auch Einzug in die Flotte der "
+"Separatisten. Nach dem Krieg und der Auflösung der Separatisten-Allianz "
+"verblieben die meisten Shuttles in neimoidianischer Hand. Sogar während des "
+"Galaktischen Bürgerkriegs waren die Shuttles oft genutzte Transporter."
 
-#: mod/shiptemplates/player_star_wars.lua:126
+#: mod/shiptemplates/player_star_wars.lua:148
+msgid ""
+"The TIE/rp Reaper attack lander, also known simply as the TIE Reaper, was a "
+"troop carrier variant of Sienar Fleet Systems's TIE fighter series used by "
+"the Galactic Empire. The TIE Reaper differed from the standard craft of the "
+"TIE line as it was primarily a troop dropship; it was designed for ferrying "
+"troops amidst the heat of battle"
+msgstr ""
+"Das TIE/sn-Schnitter-Angriffslandungsschiff des Galaktischen Imperiums, auch "
+"Schnitter-Klasse oder oft einfach TIE-Schnitter genannt, war ein bewaffnetes "
+"Landungsschiffsmodell der TIE-Serie der Sienar-Flottensysteme, das als "
+"Hochleistungstruppentransporter und Unterstützung-Sternjäger diente."
+
+#: mod/shiptemplates/player_star_wars.lua:165
 msgid ""
 "The D7-Mantis Patrol Craft was a rare, top-of-the-line starship during the "
 "Cold War. It was meant to meet the demands of larger capital ships."
 msgstr ""
 
-#: mod/shiptemplates/player_star_wars.lua:132
-msgctxt "subclass"
-msgid "Attack Fighter"
-msgstr "Angriffsjäger"
+#: mod/shiptemplates/player_star_wars.lua:178
+msgid ""
+"The Kom'rk-class fighter/transport, also known as Kom'rk Class fighter "
+"transport or the Gauntlet starfighter, was a type of starfighter and troop "
+"transport used by the Mandalorian splinter faction known as Death Watch "
+"during the Clone Wars. The fighters were utilized as part of a move by Death "
+"Watch leader Pre Vizsla to end Satine Kryze's pacifist rule of Mandalore and "
+"restore the Mandalorians to their former warrior past. These ships were "
+"later used by Maul's Shadow Collective army during battles on Zanbar, Ord "
+"Mantell, and Vizsla Keep 09."
+msgstr ""
+"Der Jäger/Transporter der Kom'rk-Klasse, aus Mando'a übersetzt auch simpel "
+"Gauntlet-Jäger genannt, war ein von abtrünnigen Mitgliedern von MandalMotors "
+"für die Death Watch produziertes Modell schwerer Sternjäger und "
+"Kampftransporter. Während der Klonkriege fand es auch beim Schatten-"
+"Kollektiv und dem Mandalore-Widerstand gegen dieses Verwendung, nach "
+"Kriegsende bei Söldnereinheiten und Verbrechergangs, der Schwarzen Sonne, "
+"dem Pyke-Syndikat, Hutten-Kajidics, Imperialen Superkommandos und dem "
+"Mandalorianischen Widerstand gegen das Imperium."
 
-#: mod/shiptemplates/player_star_wars.lua:133
+#: mod/shiptemplates/player_star_wars.lua:186
 msgid ""
 "Custom designed U-Wing, rebuilt as strong fighter. Reduced weight, strong "
 "chasing, very fast impulse drive."
 msgstr ""
 
-#: mod/shiptemplates/player_star_wars.lua:147
-msgctxt "subclass"
-msgid "Scout"
-msgstr "Aufklärer"
-
-#: mod/shiptemplates/player_star_wars.lua:148
+#: mod/shiptemplates/player_star_wars.lua:201
 msgid ""
 "Designed by Incom Corporation at its peak for stealth and speed, the A-24 "
 "was a long and narrow craft, with a distinctive flat and triangular aft that "
@@ -101,55 +141,339 @@ msgid ""
 "sported a cockpit that was offset by panoramic sheets of thick "
 "photosensitive transparisteel."
 msgstr ""
+"Incoms A-24 Sleuth war ein Typ von Scoutschiffen, die in der Zeit des "
+"Imperiums und in der Ära der Rebellion sehr beliebt waren. A-24 Sleuth waren "
+"kleine, schnelle und äußerst wendige Schiffe, die zur Blütezeit der Incom-"
+"Gesellschaft entwickelt und gebaut wurden."
 
-#: mod/shiptemplates/player_star_wars.lua:157
-#: mod/shiptemplates/player_star_wars.lua:170
-#: mod/shiptemplates/player_star_wars.lua:219
-#: mod/shiptemplates/player_star_wars.lua:287
-msgctxt "class"
-msgid "Freighter"
-msgstr "Frachter"
-
-#: mod/shiptemplates/player_star_wars.lua:157
-#: mod/shiptemplates/player_star_wars.lua:170
-#: mod/shiptemplates/player_star_wars.lua:219
-#: mod/shiptemplates/player_star_wars.lua:296
-msgctxt "subclass"
-msgid "Light transport"
-msgstr "Lichter Transporter"
-
-#: mod/shiptemplates/player_star_wars.lua:158
+#: mod/shiptemplates/player_star_wars.lua:208
 msgid ""
 "The HWK-290 was a light freighter manufactured by the Corellian Engineering "
 "Corporation in an effort to break into a new market for fast, small cargo "
 "ships. The production lasted from the decades leading up to the Battle of "
 "Naboo until being discontinued during the Clone Wars."
 msgstr ""
+"Der Leichte HWK-290-Frachter war eine Raumschiffsklasse, die die "
+"Corellianische Ingenieursgesellschaft Jahrzehnte vor der Schlacht von Naboo "
+"im Versuch einführte, sich am schnell wachsenden Markt von \"leichten "
+"Exekutivfrachtern\" zu beteiligen. Das Originaldesign verfügte über keine "
+"Waffen und verließ sich für Schutz auf Geschwindig- und Manövrierfähigkeit, "
+"die leichte Modifizierbarkeit erlaubte jedoch eine Nutzung als exzellenter "
+"(aber teurer) schwerer Sternjäger."
 
-#: mod/shiptemplates/player_star_wars.lua:260
-msgctxt "playerShip"
-msgid "Gozanti"
-msgstr "Gozanti"
+#: mod/shiptemplates/player_star_wars.lua:235
+msgid ""
+"The HWK-1000 light freighter is a transport manufactured by the Corellian "
+"Engineering Corporation during the Imperial Era. It boasted improved speed "
+"and performance over its predecessor, the HWK-290. Even though the Galactic "
+"Empire officially objected to the improved design, several hundred "
+"prototypes were manufactured at the Halyard 2 factory. These prototypes were "
+"sold through various underground channels in the Outer Rim with many being "
+"purchased by smugglers and collectors."
+msgstr ""
 
-#: mod/shiptemplates/player_star_wars.lua:260
-msgctxt "class"
-msgid "Cruiser"
-msgstr "Kreuzer"
+#: mod/shiptemplates/player_star_wars.lua:249
+msgid ""
+"The EML-850 light freighter was designed and produced by the Barsha family "
+"of Corellian industrialists during the Republic Era. It was designed to be "
+"equally well-armored and cargo-capable, making it ideal for smugglers and "
+"other criminals, however its high cost resulted in mass production being "
+"abandoned in favor of other models."
+msgstr ""
 
-#: mod/shiptemplates/player_star_wars.lua:260
-msgctxt "subclass"
-msgid "Freighter"
-msgstr "Frachter"
+#: mod/shiptemplates/player_star_wars.lua:262
+msgid ""
+"Y2K Peregerine Class Light Freighter. Designed and put into production a few "
+"years after the end of the Clone Wars and the formation of the Galactic "
+"Empire, Corellian Engineering Corporation sought to create a smaller-scale "
+"version of their venerable YT-series of freighters, which were beginning to "
+"show their age. Applying lessons learned over the decades, the design team "
+"for the Y2K-series strove to design a courier-vessel, opting to skimp on the "
+"frills and focus on functionality."
+msgstr ""
 
-#: mod/shiptemplates/player_star_wars.lua:287
-msgctxt "subclass"
-msgid "Medium Transport"
-msgstr "Mittelgroßer Transporter"
+#: mod/shiptemplates/player_star_wars.lua:268
+msgid ""
+"The YT-1300 light freighter, also known as the YT-1300 Corellian freighter, "
+"was a type of light freighter manufactured by the Corellian Engineering "
+"Corporation that saw operation in the galaxy during the final days of the "
+"Galactic Republic and the reign of the Galactic Empire. By the year 0 BBY, "
+"it was considered an outdated model."
+msgstr ""
+"Der YT-1300 war ein leichter Raumfrachter, der von der Corellianischen "
+"Ingenieursgesellschaft als Zivilfrachtschiff entwickelt wurde und sich für "
+"das Unternehmen als großer finanzieller Erfolg herausstellte. Er galt "
+"allgemein als wandlungsfähigstes Exemplar seiner Art überhaupt und war eines "
+"der bekanntesten und beliebtesten Modelle der YT-Serie. Das Schiff war sehr "
+"einfach zu modifizieren und erhielt einen guten Ruf als Allzweck-Transporter."
 
-#: mod/shiptemplates/player_star_wars.lua:317
+#: mod/shiptemplates/player_star_wars.lua:277
+msgid ""
+"The YT-2000 transport was designed to be a direct improvement over the "
+"YT-1300, but it only saw a limited production run. Its basic design was "
+"similar to the YT-1930 with its centrally-placed cockpit and symmetrical "
+"design, while the rest of the ship returned to the saucer-like design of the "
+"YT-1300."
+msgstr ""
+"Der YT-2000 Transporter war ein Frachtermodell der Corellianischen "
+"Ingenieursgesellschaft in der YT-Serie. Er war stark an sein Design der "
+"Vorgänger gebunden und sah sehr stark nach einem YT-1300-Frachter aus. Der "
+"hauptsächliche Unterschied bestand darin, dass das Cockpit grundsätzlich "
+"mittig gesetzt war und nicht mehr, wie es bei den meisten 1300ern der Fall "
+"war, seitlich."
+
+#: mod/shiptemplates/player_star_wars.lua:284
+msgid ""
+"The YT-2400 light freighter, also known as the YT-2400 transport, was a "
+"class of YT-series light freighter. During the Imperial Era, this model of "
+"freighter was used by both the Galactic Empire and the Alliance to Restore "
+"the Republic. The YT-2400 also saw use under cargo haulers and pirates."
+msgstr ""
+"Der YT-2400 war ein leichtes Frachtermodell, das von der Corellianischen "
+"Ingenieursgesellschaft in der YT-Serie entwickelt wurde. Um die Erfolge der "
+"leichten YT-1300-Frachter und der moderneren Version der YT-2000-Frachter "
+"weiter fortzusetzen, setzte der Entwickler alles auf eine Karte und "
+"entwickeDer YT-2400 war ein leichtes Frachtermodell, das von der "
+"Corellianischen Ingenieursgesellschaft in der YT-Serie entwickelt wurde. Um "
+"die Erfolge der leichten YT-1300-Frachter und der moderneren Version der "
+"YT-2000-Frachter weiter fortzusetzen, setzte der Entwickler alles auf eine "
+"Karte und entwickelte als weitere Variante der Baureihe diese "
+"Raumfrachterklasse.lte als weitere Variante der Baureihe diese "
+"Raumfrachterklasse."
+
+#: mod/shiptemplates/player_star_wars.lua:291
+msgid ""
+"The VCX-100 light freighter was one of the Corellian Engineering "
+"Corporation's freighter designs."
+msgstr ""
+"Der Leichte VCX-100-Frachter war ein Raumschiffsmodell, das von der "
+"Corellianischen Ingenieursgesellschaft als Leichter Frachter hergestellt "
+"wurde."
+
+#: mod/shiptemplates/player_star_wars.lua:297
+msgid ""
+"The G9 Rigger-class light freighter was a model of freighter manufactured by "
+"the Corellian Engineering Corporation and used during the Clone Wars. Its "
+"only weapons were small blaster cannons attached to the wings and top of the "
+"freighter."
+msgstr ""
+"Der G9-Auslegerfrachter war ein von der Corellianischen "
+"Ingenieursgesellschaft entwickeltes Transportschiff."
+
+#: mod/shiptemplates/player_star_wars.lua:313
+msgid ""
+"The Peregrine-class star yacht was a model of luxurious star yacht used "
+"during the Clone Wars."
+msgstr ""
+"Die Luxussternenjacht der Peregrin-Klasse war ein Raumjachtmodell, welches "
+"von der SoroSuub-Gesellschaft hergestellt wurde. Es konnte von nur einer "
+"Person geflogen werden. Diese steuerte auch die unter dem Cockpit "
+"befestigten vorschnellenden Laserkanonen. Die im Inneren des gold-"
+"saphirblauen Schiffes befindlichen Kabinen waren mit Greelholz und "
+"Apokanische Silbereiche veredelt."
+
+#: mod/shiptemplates/player_star_wars.lua:321
+msgid ""
+"The Delta-class DX-9 stormtrooper transport was an assault vehicle, built by "
+"Telgorn Corporation, which was designed to carry Imperial stormtroopers into "
+"battle."
+msgstr ""
+"Der Dx-9-Transporter der Delta-Klasse, auch einfach Sturmtruppentransporter "
+"genannt, war ein nur ausführlich bewaffneter und mit starken Schutzschilden "
+"ausgestatteter Transporter des Imperiums, vereinzelt auch der Rebellen-"
+"Allianz und kleinerer Parteien. Er wurde dazu benutzt, Sturmtruppen oder "
+"Null-G-Soldaten für Kaperoperationen an Bord eines feindlichen Schiffes zu "
+"bringen. Zu diesem Zweck besaß dieses Schiff einen universellen "
+"Andockmechanismus, der mit nahezu allen Schiffstypen kompatibel war. Hinzu "
+"kam eine Vorrichtung, mit der dieses Schiff notfalls auch eigene Löcher in "
+"feindliche Raumschiffe bohren konnte."
+
+#: mod/shiptemplates/player_star_wars.lua:330
+msgid ""
+"The GX1 short hauler is a shuttle model manufactured by Lantillian "
+"ShipWrights. During the Clone Wars, the Galactic Republic used several top-"
+"of-the-line GX1 short haulers as diplomatic vessels. During the Age of the "
+"Empire, GX1 shuttles were used as starbuses to ferry commuters from one "
+"location to another. The diplomatic variant is usually equipped with double "
+"laser cannons."
+msgstr ""
+"Der GX1 Short Hauler der Lantillian ShipWrights, auch Sternenbus genannt, "
+"war ein Shuttlenmodell, das von der Galaktischen Republik als Diplomaten-"
+"Transporter und später zivil für Pendler genutzt wurde."
+
+#: mod/shiptemplates/player_star_wars.lua:347
+msgid ""
+"The CSS-1 Corellian Star Shuttle was a transport manufactured by Corellian "
+"Engineering Corporation for the Galactic Republic during at least a decade "
+"before the start of the Clone Wars."
+msgstr ""
+"Das Corellianische CSS-1-Sternenshuttle war eine Raumschiffsklasse von "
+"diplomatischen Transportschiffen der C-Serie, die die Corellianische "
+"Ingenieursgesellschaft für die Galaktische Republik produzierte."
+
+#: mod/shiptemplates/player_star_wars.lua:356
+msgid ""
+"The YV-330 light freighter was a YV series light freighter produced by the "
+"Corellian Engineering Corporation. It was 26 meters long, and its standard "
+"armament was a twin laser cannon turret mounted beneath the cockpit. YV-330 "
+"freighters were often used by smugglers, and modified with heavier weaponry."
+msgstr ""
+
+#: mod/shiptemplates/player_star_wars.lua:365
+#: mod/shiptemplates/player_star_wars.lua:451
+msgid ""
+"The Imperial Gozanti-class cruiser, also referred to as the Imperial Gozanti-"
+"class TIE carrier and known generally as the Imperial freighter, was a "
+"variant of the standard Gozanti-class cruiser used by the Galactic Empire "
+"and later by sympathizers of the First Order."
+msgstr ""
+"Der Imperiale Kreuzer oder Bewaffnete Transporter der Gozanti-Klasse, oft "
+"einfach Imperialer Frachter, Gozanti-Transporter, Imperialer "
+"Angriffstransporter oder Gozanti-Kreuzer genannt, war ein Raumkreuzer- und "
+"Transportschiffmodell des Galaktischen Imperiums, das von der "
+"Corellianischen Ingenieursgesellschaft hergestellt wurde. Es stellte eine "
+"militärische Unterart des normalen Kreuzers der Gozanti-Klasse dar; eine "
+"Variante war das IGV-55-Überwachungsschiff. Im Gegensatz zum Standard-Modell "
+"gelangten nicht viele imperiale Gozanti-Klasse-Frachter in die Hände der "
+"Rebellen-Allianz."
+
+#: mod/shiptemplates/player_star_wars.lua:375
+msgid ""
+"The C-ROC Gozanti-class light cruiser is an official modified version of the "
+"Gozanti-class cruiser that was manufactured by the Corellian Engineering "
+"Corporation prominently during the Clone Wars and the Imperial Era."
+msgstr ""
+"Der Leichte C-ROC-Kreuzer der Gozanti-Klasse war ein Transportschiffmodell, "
+"das von der Corellianischen Ingenieursgesellschaft hergestellt wurde. Als "
+"Configuration-Restored Operational Capacity stellte es ein Werftstandard-"
+"Upgrade-Programm für die originale Gozanti-Klasse dar."
+
+#: mod/shiptemplates/player_star_wars.lua:399
+msgid ""
+"The Allanar N3 light freighter was a model of light freighter that saw use "
+"during the era of the Galactic Empire. The ship, which typically required a "
+"crew of 4 to 7, boasted a hyperdrive system, three sublight engines, and "
+"multiple forward facing laser cannons."
+msgstr ""
+
+#: mod/shiptemplates/player_star_wars.lua:406
+msgid ""
+"The Consular-class cruiser (Charger c70 retrofit), is a model of retrofitted "
+"Consular-class cruiser that turn the ships into small frigates. Corellian "
+"Engineering Corporation created this for Supreme Chancellor Palpatine during "
+"the early part of the Clone Wars."
+msgstr ""
+"Der Charger-C70-Umbau des Raumkreuzers der Consular-Klasse war eine meist "
+"als Republikanische Fregatte bekannte Raumschiffsklasse der Corellianischen "
+"Ingenieursgesellschaft, das für die Galaktische Republik in den Klonkriegen "
+"aus Raumkreuzern der Consular-Klasse gefertigt wurde."
+
+#: mod/shiptemplates/player_star_wars.lua:417
+msgid ""
+"The Lambda-class T-4a shuttle, also known as the Imperial Shuttle, was a "
+"standard light utility craft in common with the Imperial military as a "
+"transport for troops and high-ranking individuals."
+msgstr ""
+"Das T-4a-Shuttle der Lambda-Klasse, meist einfach Imperiales Shuttle "
+"genannt, war eine Shuttleklasse der Alphabet-Serie der Sienar-Flottensysteme "
+"und der Cygnus-Raumwerften, die vom Galaktischen Imperium als Mehrzweck-"
+"Transporter genutzt wurde. Die Allianz zur Wiederherstellung der Republik "
+"gelangte in den Besitz einiger solcher verlässlicher Shuttles."
+
+#: mod/shiptemplates/player_star_wars.lua:434
+msgid ""
+"The YV-929 armed freighter was a 22-meter-long light freighter produced by "
+"Corellian Engineering Corporation. It used the same forward cockpit "
+"structure as the much larger YV-100 light freighter. \n"
+"Unlike most CEC freighters, which came off the assembly lines with minimal "
+"weaponry, the YV-929 was designed from the start to be heavily armed for "
+"defense against pirate and Rebel raids, and also featured very strong "
+"shields."
+msgstr ""
+"Der Leichte bzw. Bewaffnete YV-929-Frachter/-Transporter war eines der "
+"letzten Designs der YV-Serie der Corellianischen Ingenieursgesellschaft."
+
+#: mod/shiptemplates/player_star_wars.lua:460
+msgid ""
+"A modular cargo shuttle from the Loronar shipyards, originally designed for "
+"automated cargo runs in mining colonies. After the Empire shut down the "
+"production, many of these CX models were salvaged or sold to pirates."
+msgstr ""
+
+#: mod/shiptemplates/player_star_wars.lua:479
+msgid ""
+"The GR-75 medium transport, sometimes referred to as the Gallofree "
+"transport, was a transport designed and constructed by Gallofree Yards, "
+"Inc.. They were lightly armed with a clamshell-like hull to protect the "
+"cargo pods it carried. They could not reach anymore than 650 kilometers per "
+"hour."
+msgstr ""
+"Der Mittlere GR-75-Transporter der Gallofree-Werften war eine "
+"Raumschiffsklasse mittlerer Transporter der GR-Serie. Da die Allianz zur "
+"Wiederherstellung der Republik viele der Raumschiffe nutzte, erhielten sie "
+"auch den Namen Rebellentransporter. Auch die Neue Republik und der "
+"Widerstand griffen auf sie zurück."
+
+#: mod/shiptemplates/player_star_wars.lua:497
 msgid ""
 "The Action IV transport was a Corellian Engineering Corporation medium bulk "
 "freighter of the Action series. Even though each ship was sold without any "
 "weaponry or defensive shields built in, plenty of after-market systems could "
 "be added to the Action IV."
 msgstr ""
+"Der Aktion-IV-Transporter war ein Modell von Transportschiffen der Aktion-"
+"Serie der Corellianischen Ingenieursgesellschaft, das vor allem auf Einsätze "
+"in Konvois oder sicherem Gebiet ausgelegt war. Nachfolger waren die Action-"
+"V- und -VI-Transporter."
+
+#~ msgctxt "class"
+#~ msgid "Escape Pod"
+#~ msgstr "Rettungskapsel"
+
+#~ msgctxt "class"
+#~ msgid "Starfighter"
+#~ msgstr "Raumjäger"
+
+#~ msgctxt "subclass"
+#~ msgid "Support"
+#~ msgstr "Unterstützung"
+
+#~ msgctxt "subclass"
+#~ msgid "Heavy Attack Fighter"
+#~ msgstr "Schwerer Angriffsjäger"
+
+#~ msgctxt "subclass"
+#~ msgid "Patrol"
+#~ msgstr "Patrouille"
+
+#~ msgctxt "subclass"
+#~ msgid "Attack Fighter"
+#~ msgstr "Angriffsjäger"
+
+#~ msgctxt "subclass"
+#~ msgid "Scout"
+#~ msgstr "Aufklärer"
+
+#~ msgctxt "class"
+#~ msgid "Freighter"
+#~ msgstr "Frachter"
+
+#~ msgctxt "subclass"
+#~ msgid "Light transport"
+#~ msgstr "Lichter Transporter"
+
+#~ msgctxt "playerShip"
+#~ msgid "Gozanti"
+#~ msgstr "Gozanti"
+
+#~ msgctxt "class"
+#~ msgid "Cruiser"
+#~ msgstr "Kreuzer"
+
+#~ msgctxt "subclass"
+#~ msgid "Freighter"
+#~ msgstr "Frachter"
+
+#~ msgctxt "subclass"
+#~ msgid "Medium Transport"
+#~ msgstr "Mittelgroßer Transporter"

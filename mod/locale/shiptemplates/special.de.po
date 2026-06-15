@@ -12,21 +12,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.5\n"
 
-#: mod/shiptemplates/special.lua:213
-msgctxt "class"
-msgid "Satellite"
-msgstr "Droide"
-
-#: mod/shiptemplates/special.lua:213
-msgctxt "subclass"
-msgid "Navigation"
-msgstr "Navigation"
-
-#: mod/shiptemplates/special.lua:240
+#: mod/shiptemplates/special.lua:241
 msgid "Medium Station"
 msgstr "Mittelgroße Station"
 
-#: mod/shiptemplates/special.lua:241
+#: mod/shiptemplates/special.lua:242
 msgid ""
 "Large enough to accommodate small crews for extended periods of times, "
 "stations of this size are often trading posts, refuelling bases, mining "
@@ -39,79 +29,73 @@ msgstr ""
 "wenn ihre Schilde recht stark sind, hat sie gegen koordinierte Angriffe "
 "mehrerer Schiffe wenig entgegenzusetzen."
 
-
-#: mod/shiptemplates/special.lua:258
-msgctxt "class"
-msgid "Starfighter"
-msgstr "Raumjäger"
-
-#: mod/shiptemplates/special.lua:258
-msgctxt "class"
-msgid "Freighter"
-msgstr "Frachter"
-
-#: mod/shiptemplates/special.lua:258
-msgctxt "class"
-msgid "Cruiser"
-msgstr "Kreuzer"
-
-#: mod/shiptemplates/special.lua:261
-msgctxt "class"
-msgid "Escape Pod"
-msgstr "Fluchtkapsel"
-
-#: mod/shiptemplates/special.lua:261
-msgctxt "subclass"
-msgid "Pilot"
-msgstr "Pilot"
-
-#: mod/shiptemplates/special.lua:286 mod/shiptemplates/special.lua:302
+#: mod/shiptemplates/special.lua:287 mod/shiptemplates/special.lua:306
 msgctxt "ship"
 msgid "ANT 615"
 msgstr "Serpent 615"
 
-#: mod/shiptemplates/special.lua:286 mod/shiptemplates/special.lua:297
-msgctxt "class"
-msgid "Droid"
-msgstr "Droide"
-
-#: mod/shiptemplates/special.lua:286
+#: mod/shiptemplates/special.lua:287
 msgctxt "subclass"
 msgid "Sentinel Droid"
 msgstr "Wächterdroide"
 
-#: mod/shiptemplates/special.lua:287
+#: mod/shiptemplates/special.lua:288
 msgid ""
 "Military droid from the old days, back when there was a huge battle station "
 "in the system. Its original purpose was probably to take out other droids."
 msgstr ""
 "Militärdroide aus den alten Tagen, als eine große Kampfstation in diesem "
-"System stationiert war. Sein ursprünglicher Zweck war wahrscheinlich, "
-"andere Droiden zu zerstören."
+"System stationiert war. Sein ursprünglicher Zweck war wahrscheinlich, andere "
+"Droiden zu zerstören."
 
-#: mod/shiptemplates/special.lua:297
+#: mod/shiptemplates/special.lua:301
 msgctxt "ship"
 msgid "Viper Droid"
 msgstr "Viperdroide"
 
-#: mod/shiptemplates/special.lua:297
-msgctxt "subclass"
-msgid "Viper"
-msgstr "Viper"
-
-#: mod/shiptemplates/special.lua:302
-msgctxt "class"
-msgid "Debris"
-msgstr "Trümmer"
-
-#: mod/shiptemplates/special.lua:302
-msgctxt "subclass"
-msgid ""
-msgstr ""
-
-#: mod/shiptemplates/special.lua:303
+#: mod/shiptemplates/special.lua:307
 msgid "Space debris floating around"
 msgstr "Herumschwebender Weltraumschrott"
+
+#~ msgctxt "class"
+#~ msgid "Satellite"
+#~ msgstr "Droide"
+
+#~ msgctxt "subclass"
+#~ msgid "Navigation"
+#~ msgstr "Navigation"
+
+#~ msgctxt "class"
+#~ msgid "Starfighter"
+#~ msgstr "Raumjäger"
+
+#~ msgctxt "class"
+#~ msgid "Freighter"
+#~ msgstr "Frachter"
+
+#~ msgctxt "class"
+#~ msgid "Cruiser"
+#~ msgstr "Kreuzer"
+
+#~ msgctxt "class"
+#~ msgid "Escape Pod"
+#~ msgstr "Fluchtkapsel"
+
+#~ msgctxt "subclass"
+#~ msgid "Pilot"
+#~ msgstr "Pilot"
+
+#~ msgctxt "class"
+#~ msgid "Droid"
+#~ msgstr "Droide"
+
+#~ msgctxt "subclass"
+#~ msgid "Viper"
+#~ msgstr "Viper"
+
+#~ msgctxt "class"
+#~ msgid "Debris"
+#~ msgstr "Trümmer"
 
 #~ msgctxt "subclass"
 #~ msgid "Sentry Series"

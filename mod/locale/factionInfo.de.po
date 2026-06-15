@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.9\n"
 
 #: mod/factionInfo.lua:1
 msgid "Independent"
@@ -23,78 +23,29 @@ msgid ""
 "creating a merchant faction."
 msgstr "Unabhängige Schiffe, die keiner Fraktion angehören."
 
-#: mod/factionInfo.lua:101
-msgid "Imperial"
-msgstr "Imperium"
+#: mod/factionInfo.lua:12
+msgid "Escort craft from Endor"
+msgstr "Eskortenschiffe von Endor"
 
-#: mod/factionInfo.lua:103
-msgid "Remnants of the Imperial Forces"
-msgstr "Überreste der Imperialen Streitkräfte"
+#: mod/factionInfo.lua:18
+msgid "Raiders that may attack you."
+msgstr "Banditen, die möglicherweise angreifen."
 
-#: mod/factionInfo.lua:105
-msgid "New Republic"
-msgstr "Neue Republik"
+#: mod/factionInfo.lua:31
+msgid "Infrastructure around Endor"
+msgstr "Infrastruktur um Endor"
 
-#: mod/factionInfo.lua:107
-msgid "The forces of the New Republic"
-msgstr "Die Streitkräfte der neuen Republik"
-
-#: mod/factionInfo.lua:110
-msgid "Crimson Dawn"
-msgstr "Crimson Dawn"
-
-#: mod/factionInfo.lua:112
-msgid "Ships of the Crimson Dawn syndicate"
-msgstr "Schiffe des Crimson Dawn Syndikats"
-
-#: mod/factionInfo.lua:131
-msgid "Transport"
-msgstr "Transporter"
-
-#: mod/factionInfo.lua:131
-msgid "Transport craft from Endor"
-msgstr "Transportschiffe von Endor"
-
-#: mod/factionInfo.lua:135
-msgid "Endor"
-msgstr "Endor"
-
-#: mod/factionInfo.lua:137
-msgid "Endor flight control and navigation infrastructure."
-msgstr "Endor Flugkontrolle und Navigations-Infrastruktur."
-
-#: mod/factionInfo.lua:139
-msgid "Raider"
-msgstr "Raider"
-
-#: mod/factionInfo.lua:141
-msgid ""
-"Raiders that may attack (more or less) innocent transportation vehicles."
+#: mod/factionInfo.lua:36
+msgid "Debris flying around. Or stuff that you can make to debris..."
 msgstr ""
-"Beutemacher, die es auf (mehr oder weniger) unschuldige Transportschiffe "
-"abgesehen haben."
+"Herumfliegende Trümmer. Oder Dinge, die zu herumfliegenden Trümmern gemacht "
+"werden können."
 
-#: mod/factionInfo.lua:144
-msgid "Environment"
-msgstr "Umgebung"
-
-#: mod/factionInfo.lua:146
-msgid "Debris flying around."
-msgstr "Herumschwirrende Trümmer."
-
-#: mod/factionInfo.lua:149
-msgid "Sky Patrol"
-msgstr "Sky Partol"
-
-#: mod/factionInfo.lua:151
-msgid "Endor Sky Patrol - they enforce the law in orbit."
-msgstr "Endor Sky Patrol - die Ordnungshüter im Orbit von Endor."
-
-#: mod/factionInfo.lua:155
+#: mod/factionInfo.lua:42 mod/factionInfo.lua:83
 msgid "Criminals"
 msgstr "Kriminelle"
 
-#: mod/factionInfo.lua:157
+#: mod/factionInfo.lua:44 mod/factionInfo.lua:85
 msgid ""
 "Despite appearing as a faction, criminals are distinguished primarily by "
 "having no strong affiliation with any faction at all. Pirates, outlaws and "
@@ -102,3 +53,62 @@ msgid ""
 msgstr ""
 "Piraten, Gesetzesbrecher und Flüchtlinge, die allesamt als Kriminelle "
 "gesehen werden."
+
+#: mod/factionInfo.lua:56
+msgid "Remnants of the Imperial Forces"
+msgstr "Überreste der Imperialen Streitkräfte"
+
+#: mod/factionInfo.lua:62
+msgid "The New Republic"
+msgstr "Die Neue Republik"
+
+#: mod/factionInfo.lua:106
+msgid "A TIE pilot drifting around in space."
+msgstr ""
+
+#: mod/factionInfo.lua:133
+msgid "Transport"
+msgstr "Transporter"
+
+#: mod/factionInfo.lua:133
+msgid "Transport craft from Endor"
+msgstr "Transportschiffe von Endor"
+
+#~ msgid "Imperial"
+#~ msgstr "Imperium"
+
+#~ msgid "The forces of the New Republic"
+#~ msgstr "Die Streitkräfte der neuen Republik"
+
+#~ msgid "Crimson Dawn"
+#~ msgstr "Crimson Dawn"
+
+#~ msgid "Ships of the Crimson Dawn syndicate"
+#~ msgstr "Schiffe des Crimson Dawn Syndikats"
+
+#~ msgid "Endor"
+#~ msgstr "Endor"
+
+#~ msgid "Endor flight control and navigation infrastructure."
+#~ msgstr "Endor Flugkontrolle und Navigations-Infrastruktur."
+
+#~ msgid "Raider"
+#~ msgstr "Raider"
+
+#~ msgid ""
+#~ "Raiders that may attack (more or less) innocent transportation vehicles."
+#~ msgstr ""
+#~ "Beutemacher, die es auf (mehr oder weniger) unschuldige Transportschiffe "
+#~ "abgesehen haben."
+
+#~ msgid "Environment"
+#~ msgstr "Umgebung"
+
+#~ msgid "Debris flying around."
+#~ msgstr "Herumschwirrende Trümmer."
+
+#~ msgid "Sky Patrol"
+#~ msgstr "Sky Partol"
+
+#~ msgid "Endor Sky Patrol - they enforce the law in orbit."
+#~ msgstr "Endor Sky Patrol - die Ordnungshüter im Orbit von Endor."

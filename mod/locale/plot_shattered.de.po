@@ -10,14 +10,42 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.9\n"
 
-#: mod/plot_shattered.lua:13
+#: mod/plot_shattered.lua:23
+msgid ""
+"A piece of maybe valuable space junk. Scan to find out the capturing "
+"frequency"
+msgstr ""
+"Ein möglicherweise wertvolles Stück Weltraumschrott. Bitte scannen, um die "
+"Frequenz zum Einfangen herauszufinden"
+
+#: mod/plot_shattered.lua:23 mod/plot_shattered.lua:155
+msgid "Capturing frequency:"
+msgstr "Frequenz zum Einfangen:"
+
+#: mod/plot_shattered.lua:23
+msgid ""
+"Set your shield frequency to match the capturing frequency and activate your "
+"shields to capture it."
+msgstr ""
+"Passe deine Schildfreqenz an, sodass sie der Frequenz zum Einsammeln "
+"entspricht. Aktiviere dann die Schilde und fange das Teil ein."
+
+#: mod/plot_shattered.lua:35
+msgid "Debris captured."
+msgstr "Trümmerteil geborgen."
+
+#: mod/plot_shattered.lua:39
+msgid "Debris was destroyed by impact"
+msgstr "Trümmer wurden beim Einschlag zerstört"
+
+#: mod/plot_shattered.lua:52
 msgctxt "buttonGM"
 msgid "Unusual Readings"
 msgstr "Seltsame Werte"
 
-#: mod/plot_shattered.lua:40
+#: mod/plot_shattered.lua:79
 #, lua-format
 msgid ""
 "We are getting strange readings from sector %s. It looks like the source is "
@@ -27,18 +55,18 @@ msgstr ""
 "von einem nicht mehr genutzten Droiden stammen. Bitte sendet ein Schiff, um "
 "den nach zu gehen, seid aber vorsichtig."
 
-#: mod/plot_shattered.lua:42
+#: mod/plot_shattered.lua:81
 msgid "An abandoned droid"
 msgstr "Ein nicht mehr genutzter Droide"
 
-#: mod/plot_shattered.lua:42
+#: mod/plot_shattered.lua:81
 msgid ""
 "An old military droid. Capturing frequency is blocked. Behaviour unknown."
 msgstr ""
 "Ein alter Militärdroide. Frequenz zum Einfangen wird blockiert. Verhalten "
 "unbekannt."
 
-#: mod/plot_shattered.lua:47
+#: mod/plot_shattered.lua:86
 msgid ""
 "The droid was destroyed. We can no longer find out what caused it's "
 "malfunction."
@@ -46,15 +74,15 @@ msgstr ""
 "Der Droide wurde zerstört. Wir sind nicht mehr in der Lage herauszufinden, "
 "was seine Fehlfunktion verursacht hat."
 
-#: mod/plot_shattered.lua:49
+#: mod/plot_shattered.lua:88
 msgid "Droid destroyed."
 msgstr "Droide zerstört."
 
-#: mod/plot_shattered.lua:62
+#: mod/plot_shattered.lua:101
 msgid "Activating... Searching targets..."
 msgstr "Aktiviere... Suche Ziele..."
 
-#: mod/plot_shattered.lua:84
+#: mod/plot_shattered.lua:123
 msgid ""
 "The droid started to attack objects in its proximity! That way, more "
 "fragments will be created that may harm other ships. You must stop it! "
@@ -66,17 +94,13 @@ msgstr ""
 "verhindert werden! Weißt euer Schiff an, es soll den Droiden NICHT "
 "zerstören, sondern auf seinen Impuls-Antrieb zielen."
 
-#: mod/plot_shattered.lua:116
+#: mod/plot_shattered.lua:155
 msgid "A deactivated military droid. Scan to get the capturing frequency."
 msgstr ""
 "Eine deaktivierter Militär-Droide. Scanne, um die Frequenz zum Einfangen "
 "herauszufinden."
 
-#: mod/plot_shattered.lua:116
-msgid "Capturing frequency:"
-msgstr "Frequenz zum Einfangen:"
-
-#: mod/plot_shattered.lua:116
+#: mod/plot_shattered.lua:155
 msgid ""
 "Set your shield frequency to match the capturing frequency and activate your "
 "shields to capture the droid."
@@ -84,22 +108,21 @@ msgstr ""
 "Passe deine Schildfreqenz an, sodass die der Frequenz zum Einsammeln des "
 "Droiden entspricht. Aktiviere dann die Schilde und fange den Droiden ein."
 
-#: mod/plot_shattered.lua:133
+#: mod/plot_shattered.lua:172
 msgid "Droid captured."
 msgstr "Droide geborgen."
 
-#: mod/plot_shattered.lua:134
+#: mod/plot_shattered.lua:173
 #, lua-format
 msgid "The malfunctioning old droid was captured by %s."
 msgstr "Der Droide mit der Fehlfunktion wurde von %s geborgen."
 
-#: mod/plot_shattered.lua:152
-#, fuzzy
+#: mod/plot_shattered.lua:191
 msgctxt "buttonGM"
 msgid "Droid Showdown"
 msgstr "Droiden Showdown"
 
-#: mod/plot_shattered.lua:181 mod/plot_shattered.lua:183
+#: mod/plot_shattered.lua:220 mod/plot_shattered.lua:222
 msgid ""
 "This is the command node that controls the rogue droids. We have to shut it "
 "down!"
@@ -107,7 +130,7 @@ msgstr ""
 "Dies ist der Kontrollapparat, der die fehlerhaften Militärdroiden "
 "kontrolliert. Wir müssen ihn irgendwie abschalten!"
 
-#: mod/plot_shattered.lua:186
+#: mod/plot_shattered.lua:225
 msgid ""
 "Bad news: A whole group of military droids that should have been out of "
 "service just woke up. If we don't do anything against them, they will slowly "
@@ -129,15 +152,15 @@ msgstr ""
 "die Richtung dieser Signale als wackelnde rote Linie an.\n"
 "Bitte sendet ein Schiff, um die Situation zu untersuchen."
 
-#: mod/plot_shattered.lua:202
+#: mod/plot_shattered.lua:241
 msgid "An old military droid"
 msgstr "Ein alter Militärdroide"
 
-#: mod/plot_shattered.lua:202
+#: mod/plot_shattered.lua:241
 msgid "An old military droid. Capturing frequency is blocked."
 msgstr "Ein alter Militärdroide. Frequenz zum Einfangen wird blockiert."
 
-#: mod/plot_shattered.lua:214
+#: mod/plot_shattered.lua:253
 msgid ""
 "We detected a control node within the group of rougue droids, but a newly "
 "formed dust cloud prevents us to get more details. We don't know if this "
@@ -164,15 +187,15 @@ msgstr ""
 "Benachtichtigt nahe Schiffe, dass sie alle nicht-essentiellen Systeme "
 "ausschalten, bevor sie sich den gefährlichen Droiden nähern."
 
-#: mod/plot_shattered.lua:245 mod/plot_shattered.lua:246
+#: mod/plot_shattered.lua:284 mod/plot_shattered.lua:285
 msgid "Out of reach"
 msgstr "Außer Reichweite"
 
-#: mod/plot_shattered.lua:253 mod/plot_shattered.lua:254
+#: mod/plot_shattered.lua:292 mod/plot_shattered.lua:293
 msgid "Connect to control device"
 msgstr "Verbinden"
 
-#: mod/plot_shattered.lua:256 mod/plot_shattered.lua:257
+#: mod/plot_shattered.lua:295 mod/plot_shattered.lua:296
 msgid ""
 "A droid control device appeared is in range for data transmission. You can "
 "connect to it with the button on the right."
@@ -180,22 +203,22 @@ msgstr ""
 "Ein Droiden-Kontrollapparat ist in Reichweite für Datenübertragungen. Zum "
 "Herstellen einer Datenverbindung dient der Button auf der rechten Seite."
 
-#: mod/plot_shattered.lua:284
+#: mod/plot_shattered.lua:323
 msgid ""
 "Connection established. Keep near the control node, to not lose connection."
 msgstr ""
 "Verbindung hergestellt. Bleibt nahe am Kontrollapparat, um die Verbindung "
 "nicht zu verlieren."
 
-#: mod/plot_shattered.lua:288 mod/plot_shattered.lua:289
+#: mod/plot_shattered.lua:327 mod/plot_shattered.lua:328
 msgid "Connection established."
 msgstr "Verbindung hergestellt."
 
-#: mod/plot_shattered.lua:307 mod/plot_shattered.lua:308
+#: mod/plot_shattered.lua:346 mod/plot_shattered.lua:347
 msgid "Transmitter charging"
 msgstr "Sender wird aufgeladen"
 
-#: mod/plot_shattered.lua:332
+#: mod/plot_shattered.lua:371
 msgid ""
 "If not done yet, you should now change the headline of your sidebar from "
 "'scan' to 'other', so you can send the signal as soon as it is available."
@@ -204,7 +227,7 @@ msgstr ""
 "von \"Scanning\" zu \"Sonstiges\" umgestellt werden, so dass das Signal so "
 "früh wie möglich gesendet werden kann."
 
-#: mod/plot_shattered.lua:333 mod/plot_shattered.lua:334
+#: mod/plot_shattered.lua:372 mod/plot_shattered.lua:373
 msgid ""
 "As soon as your transmitter is fully charged, the weapons officer has to "
 "sync the shields with the transmitter (a Button will appear on the console). "
@@ -216,31 +239,31 @@ msgstr ""
 "sobald es möglich ist). Danach muss an der Operator-Station das Signal "
 "abgesendet werden (ebenfalls nachdem ein neuer Knopf erschienen ist)."
 
-#: mod/plot_shattered.lua:342 mod/plot_shattered.lua:343
+#: mod/plot_shattered.lua:381 mod/plot_shattered.lua:382
 msgid "Transmitter fully charged"
 msgstr "Sender ist aufgeladen"
 
-#: mod/plot_shattered.lua:344 mod/plot_shattered.lua:345
+#: mod/plot_shattered.lua:383 mod/plot_shattered.lua:384
 msgid "Transmitter:"
 msgstr "Sender:"
 
-#: mod/plot_shattered.lua:346 mod/plot_shattered.lua:347
+#: mod/plot_shattered.lua:385 mod/plot_shattered.lua:386
 msgid "Sync with shields"
 msgstr "Mit Schild koppeln"
 
-#: mod/plot_shattered.lua:356 mod/plot_shattered.lua:357
+#: mod/plot_shattered.lua:395 mod/plot_shattered.lua:396
 msgid "Syncing transmitter..."
 msgstr "Sender wird gekoppelt..."
 
-#: mod/plot_shattered.lua:365 mod/plot_shattered.lua:367
+#: mod/plot_shattered.lua:404 mod/plot_shattered.lua:406
 msgid "send signal"
 msgstr "Signal senden"
 
-#: mod/plot_shattered.lua:368 mod/plot_shattered.lua:369
+#: mod/plot_shattered.lua:407 mod/plot_shattered.lua:408
 msgid "Transmitter is ready"
 msgstr "Sender ist bereit"
 
-#: mod/plot_shattered.lua:400
+#: mod/plot_shattered.lua:439
 msgid ""
 "The rougue droids shut down. Congratulations - the ship you sent saved the "
 "global satellite network from destruction. Tell the crew, they did a great "
@@ -249,6 +272,31 @@ msgstr ""
 "Die Droiden wurden abgeschaltet. Gratulation, das Schiff, das ihr gesendet "
 "habt, hat das globale Satellitennetzwerk vor der Zerstörung bewahrt. Richtet "
 "der Crew aus, sie haben großartige Arbeit geleistet!"
+
+#: mod/plot_shattered.lua:528
+msgctxt "buttonGM"
+msgid "Lost Package"
+msgstr "Verlorenes Paket"
+
+#: mod/plot_shattered.lua:541
+msgid "Ein Schiffswrack"
+msgstr "Ein Schiffswrack"
+
+#: mod/plot_shattered.lua:541
+msgid "Das Wrack der Wayfarer's Wisp - ein Hydrotii D-85 Frachter."
+msgstr "Das Wrack der Wayfarer's Wisp - ein Hydrotii D-85 Frachter."
+
+#: mod/plot_shattered.lua:543 mod/plot_shattered.lua:545
+msgid "Eine Frachtkiste"
+msgstr "Eine Frachtkiste"
+
+#: mod/plot_shattered.lua:543
+msgid "Frachtkiste: leer"
+msgstr "Frachtkiste: leer"
+
+#: mod/plot_shattered.lua:545
+msgid "Frachtkiste: Lieferung f. Mr. Kell Murtry"
+msgstr "Frachtkiste: Lieferung für Mr. Kell Murtry"
 
 # Scenario name
 #~ msgid "Kessler"
@@ -545,11 +593,6 @@ msgstr ""
 
 #~ msgid "Transmitter is not linked yet"
 #~ msgstr "Sender ist noch nicht gekoppelt"
-
-#~ msgid "A piece of space junk. Scan to find out the capturing frequency"
-#~ msgstr ""
-#~ "Ein Stück Weltraumschrott. Bitte scannen, um die Frequenz zum Einfangen "
-#~ "herauszufinden"
 
 #~ msgid ""
 #~ "Very good so far! Don't worry, you don't have to clean up all of the "

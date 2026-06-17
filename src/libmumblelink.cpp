@@ -93,7 +93,7 @@ void mumble::update_coordinates(float x, float y, float fx, float fy)
 	if (!lm)
 		return;
 
-	LOG(DEBUG) << "Mumble coordinates: " << x << "," << y << "  " << fx << "," << fy;
+	//LOG(DEBUG) << "Mumble coordinates: " << x << "," << y << "  " << fx << "," << fy;
 	lm->fPosition[0] = x;
 	lm->fPosition[1] = y;
 	lm->fCameraPosition[0] = x;

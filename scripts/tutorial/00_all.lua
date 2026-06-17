@@ -271,7 +271,7 @@ You can manage each system's power level independently. Adding power to a system
 Maximize the power to the front shield system.]]), function() return player:getSystemPower("frontshield") > 2.5 end)
 addToSequence(engineeringTutorial, _([[The added power increases the amount of heat in the system.
 
-Overpower the system until it overheats.]]), function() return player:getSystemHealth("frontshield") < 0.5 end)
+Overpower the system until it overheats.]]), function() return player:getSystemHealth("frontshield") < 0.75 end)
 addToSequence(engineeringTutorial, function() player:setSystemPower("frontshield", 0.0) end)
 addToSequence(engineeringTutorial, function() player:commandSetSystemPowerRequest("frontshield", 0.0) end)
 addToSequence(engineeringTutorial, _([[Note that as the system overheats, it takes damage. Because the system is damaged, it functions less effectively.

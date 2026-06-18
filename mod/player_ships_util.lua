@@ -15,18 +15,18 @@ player_ships_util = {
 	{"Beacon of Civility",	"CSS-1",		"Corellian Star Shuttle von Xiphias Talexecum"},
 	{"Beacon Runner",		"EML-850",		"Ziviles Rettungsschiff EML-850 von Dalen Voss"},
 	{"Black Bantha",		"YV-330",		"YV-330 Frachter von Sorc"},
---	{"Calamity",			"Gozanti",		"Gozanti Cruiser von Lt. Adrien"},
+	{"Calamity",			"Gozanti",		"Gozanti Cruiser von Lt. Adrien"},
 	{"Cribana",				"Gozanti C-ROC","C-ROC Gozanti Cruiser von Valen Andrian Serris"},
 	{"Cropdust Nomad",		"Gozanti ",		"Gozanti Cruiser von Kell Murtry"},
 	{"Drexl",				"Lambda T-4a ",	"Lambda Shuttle von Endira Vask und Treuton Otro"},
 	{"Elza",				"DX-9",			"Umgebauter DX-9 Stormtrooper Transport von Andan Hearch"},
 	{"Greedy Wampa",		"GR-75",		"Umgebauter GR-75 Frachter von Kei Prine"},
---	{"Harlekin",			"Allanar N3",	"Leichter Allanar N3 Frachter von Viveka Torra"},
+	{"Harlekin",			"Allanar N3",	"Leichter Allanar N3 Frachter von Viveka Torra"},
 	{"Hinterhand",			"UT-60D",		"UT-60D U-Wing von Tiv Ohan"},
 	{"Kyr'yc Laar",			"ARC-170",		"Aggressive-ReConnaisance Fighter von Kali Myk"},
 	{"Last Dawn",			"Peregrine yacht",	"Peregrin-Klasse Raumjacht von Atenbi"},
 	{"Crimson Thunder",		"Peregrine yacht",	"Peregrin-Klasse Raumjacht von Atenbi"},
---	{"Lightning",			"Sheathipede",	"Sheathipede von Endor Sky Marshal Ran Korra"},
+	{"Lightning",			"Sheathipede",	"Sheathipede von Endor Sky Marshal Ran Korra"},
 --	{"Lonestar",			"Kuat D7",		"Kuat D7 Patrol von Colton Steele"},
 	{"Miss Understanding",	"HWK-1000",		"Leichter Frachter HWK-1000 von Varik Jeroos"},
 --	{"Nightbrother",		"Kom'rk",		"Kom'rk Klasse von Fenn Bralor"},
@@ -36,13 +36,14 @@ player_ships_util = {
 	{"Rho-4",				"TIE-Interceptor",	"TIE-Interceptor der Rho-Staffel"},
 	{"Ronin",				"Action IV",	"Modifizierter Action IV Frachter von Draic FeenX Professional Services"},
 	{"Sapphire",			"GX1  ",		"GX1 Short Hauler von Aurora Var'Rel"},
+	{"Second Chance",		"G9",			"Ein C9 Auslegefrachter von Slow Moe Jive"},
 	{"Sicaria",				"A-24",			"A-24 Sleuth Scout von Viveka Torra"},
 --	{"Spite",				"HWK-290 ",		"Sehr alter leichter Frachter HWK-290 von Seris Veynar"},
 	{"Still Moving",		"GX1 ",			"GX1 Short Hauler von Korrun Khell und Rovan Tesk"},
 	{"TIE/rp 7901",			"TIE-Reaper",	"TIE Reaper Attack Lander von Ron Jelran"},
 	{"Thunderbolt",			"VCX-100",		"VCX-100 von Dash Meero"},
 --	{"Trummermove",			"CX-9",			"Eine CX-9 von Crimson Dawn"},
-	{"Udesla",				"YT-1300",		"Corellianischer leichter Frachter YT-1300-B von Mn'Taru und Jin-Tetsu"},
+	{"Udesla",				"YT-1300-B",	"Corellianischer leichter Frachter YT-1300-B von Mn'Taru und Jin-Tetsu"},
 	{"Vengence",			"StarViper",	"Star Viper Angriffsjäger von Fenn Bralor"},
 	{"Vigilant",			"UT-60D",		"UT-60D U-Wing von Kalen Dorn"},
 	{"VV-Frightning",		"Lambda T-4a",	"Lambda Shuttle von Val'Kinor"},
@@ -405,8 +406,9 @@ function player_ships_util:updatePlayerShip(delta, ship)
 		for _, system in ipairs(SYSTEMS) do	-- SYSTEMS from ee.lua
 			if ship:hasSystem(system) then
 				if repair_max then
-					local health_max = ship:getSystemHealthMax()
+					local health_max = ship:getSystemHealthMax(system)
 					health_max = health_max + (1 - health_max) / 2
+					ship:setSystemHealthMax(system, health_max)
 				end
 				local health = ship:getSystemHealth(system)
 				health = health + (1 - health) / 2 * delta / ship.repair_diminishing_power_max

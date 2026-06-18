@@ -301,7 +301,6 @@ var:setBeam(1, 0, 0, 0, 6.0, 2*6)
 var:setBeamWeaponTurret(0, 300, -90, 5)
 var:copy(" "..var:getName()):setType("ship") -- CpuShip variant
 
-
 --[[Player Transport, 4-person without turret, two shields ]]
 
 template = createTemplate(4, 2, 0)

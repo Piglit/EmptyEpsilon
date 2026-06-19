@@ -1,6 +1,7 @@
 map_shattered = {
 	moving_debris = {},
 	ground_blue = nil,
+	ground_green= nil,
 	ground_red = nil,
 	flight_control = nil,
 	gm_dummy = nil,
@@ -50,7 +51,7 @@ function map_shattered:init()
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
     self.flight_control:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
-    self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Green Buoy")):setFaction("Endor"):setPosition(-400, -20000)
+    self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Yellow Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
     self.buoy2 = CpuShip():setTemplate("NavSat"):setCallSign(_("Cyan Buoy")):setFaction("Endor"):setPosition(zx[14], zy[14])
@@ -62,20 +63,20 @@ function map_shattered:init()
 
     self.gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign(_("Tantal Observatory")):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
 
-    self.ground_blue=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3 Blau")
+    self.ground_blue=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("LZ-Blau")
 	setCirclePos(self.ground_blue, 0,0, -97, radius+1300)
-    self.ground_blue:setDescription(_("A ground station on Endor. It has a spaceport."))
+    self.ground_blue:setDescription(_("Raumhafen Tantal-3 Landezone Blau"))
     self.ground_blue:setRotation(-90)
 
-    self.ground_red=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3 Rot")
+    self.ground_red=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("LZ-Rot")
 	setCirclePos(self.ground_red, 0,0, -83, radius+1300)
-    self.ground_red:setDescription(_("A ground station on Endor. It has a spaceport."))
+    self.ground_red:setDescription(_("Raumhafen Tantal-3 Landezone Rot"))
     self.ground_red:setRotation(-90)
 
-    self.ground_yellow=SpaceStation():setTemplate("Small Station"):setFaction("Endor"):setCallSign("Tantal-3 Gelb")
-	setCirclePos(self.ground_yellow, 0,0, -109, radius+900)
-    self.ground_yellow:setDescription(_("A ground station on Endor. It has a spaceport."))
-    self.ground_yellow:setRotation(-90)
+    self.ground_green=SpaceStation():setTemplate("Small Station"):setFaction("Endor"):setCallSign("LZ-Grün")
+	setCirclePos(self.ground_green, 0,0, -109, radius+900)
+    self.ground_green:setDescription(_("Landefeld nahe Tantal-3. Nicht für Starts geeignet."))
+    self.ground_green:setRotation(-90)
 
     self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
     self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()

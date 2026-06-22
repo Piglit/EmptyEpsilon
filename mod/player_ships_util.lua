@@ -91,9 +91,6 @@ player_ships_util = {
 function player_ships_util:init()
 	local storage = getScriptStorage()
 	storage["player_ships_util"] = self
-	if ENABLE_MULTI_SHIP_ENGI then
-		customElements:modifyOperatorPositions("Michalsky", self.michalsky_stations)
-	end
 end
 
 function player_ships_util:spawn_player_ship(shipname, template, description, faction)
@@ -129,6 +126,7 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 		ship:commandDock(ground_station)
 	end
 	if string.sub(shipname, 1, 4) == "Rho-" then
+		ship:setCallSign(shipname)
 		ship:commandLoadTube(0, "laser_green")
 		ship:commandLoadTube(1, "laser_green")
 		ship:setSystemPowerFactor("reactor", -10)
@@ -868,6 +866,7 @@ end
 
 if ENABLE_MULTI_SHIP_ENGI then
 	function player_ships_util:enable_michalsky(ship)
+		print("enable michalsky")
 		table.insert(self.multi_engi_fighters, ship)
 		self:update_michalsy_menu()
 	end
@@ -875,6 +874,7 @@ if ENABLE_MULTI_SHIP_ENGI then
 	function player_ships_util:disable_michalsky(ship)
 		for idx, s in ipairs(self.multi_engi_fighters) do
 			if s == nil or not s:isValid() or s == ship then
+				print("disable michalsky")
 				table.remove(self.multi_engi_fighters, idx)
 				-- iterator is now invalid
 				return self:disable_michalsky(ship)
@@ -884,6 +884,7 @@ if ENABLE_MULTI_SHIP_ENGI then
 	end
 
 	function player_ships_util:update_michalsy_menu()
+		customElements:modifyOperatorPositions("Michalsky", self.michalsky_stations)	-- somehow this does not work in init()
 		for idx, ship in ipairs(self.multi_engi_fighters) do
 			customElements:removeCustom(ship, "michalsky_caption")
 			if #self.multi_engi_fighters > 0 then
@@ -892,14 +893,18 @@ if ENABLE_MULTI_SHIP_ENGI then
 			for j = 0, #self.multi_engi_fighters + 5 do
 				customElements:removeCustom(ship, string.format("michalsy_select_%i", j))
 			end
-			for j, other_ship in in ipairs(self.multi_engi_fighters) do
+			for j, other_ship in ipairs(self.multi_engi_fighters) do
 				if other_ship == nil or not other_ship:isValid() then
 					return self:disable_michalsky(other_ship)
 				end
 				if j ~= idx then
 					customElements:addCustomButton(ship, "Michalsky",string.format("michalsy_select_%i", j),string.format("wechsle zu %s", other_ship.shipname), function()
 						for _,station in ipairs(player_ships_util.michalsky_stations) do
-							ship:transferPlayersAtPositionToShip(station, other_ship)
+							if other_ship ~= nil and other_ship:isValid() then
+								ship:transferPlayersAtPositionToShip(station, other_ship)
+							else
+								player_ships_util:update_michalsy_menu()
+							end
 						end
 					end, self.custom_elements_index_base.michalsy+j)
 				end
@@ -910,7 +915,6 @@ if ENABLE_MULTI_SHIP_ENGI then
 	function player_ships_util:set_michalsy_stations(stations)
 		-- gm can change stations by script
 		self.michalsky_stations = stations
-		customElements:modifyOperatorPositions("Michalsky", stations)
 		self:update_michalsy_menu()	-- also removes unwanted
 	end
 end

@@ -1,3 +1,4 @@
+plot_shattered_pickup= {}
 plot_shattered_droid = {}
 plot_shattered_droidspy = {}
 plot_shattered_network = {}
@@ -6,6 +7,39 @@ plot_shattered_crashlander = {}
 plot_shattered_package = {}
 plot_shattered_cic = {}
 plot_shattered_fleets = {}
+
+function plot_shattered_pickup:gm_menu()
+    addGMFunction("Spawn Loot", function()
+		clearGMFunctions()
+		gm_menu_back()
+		onGMClick(function(x,y) 
+			plot_shattered_pickup:create_pickup(x,y)
+		end)
+	end)
+end
+
+function plot_shattered_pickup:create_pickup(x,y)
+	local freq = math.floor(random(20, 40)) * 20
+	local debris = Artifact():setPosition(x, y):setDescriptions(_("A piece of maybe valuable space junk. Scan to find out the capturing frequency"), _("Capturing frequency:").." "..freq..". " .._("Set your shield frequency to match the capturing frequency and activate your shields to capture it."))
+	debris.freq=freq
+	debris:allowPickup(true)
+	debris:setCallSign(""):setFaction("Endor"):setScanningParameters(1, 2):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(164/2,164/2,250/2):setModel("shield_generator")
+	debris:onPickUp(function(art, player)
+		local shieldfreq= 400+(player:getShieldsFrequency())*20
+		local ax, ay = art:getPosition()
+		local x, y = player:getPosition()
+		if shieldfreq == art.freq and player:getShieldsActive() == true then
+			ElectricExplosionEffect():setPosition(x,y):setSize(200)
+			player:takeDamage(1, "kinetic",ax,ay )
+			player:addReputationPoints(10)
+			player:addToShipLog(_("Debris captured."), "cyan")
+		else
+			ExplosionEffect():setPosition(ax,ay):setSize(200)
+			player:takeDamage(50, "kinetic",ax,ay )
+			player:addToShipLog(_("Debris was destroyed by impact"), "red")
+		end
+	end)
+end
 
 -- TODO: Quests: clean up sats 1, 2, 4
 

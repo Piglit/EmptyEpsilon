@@ -232,6 +232,7 @@ template:setCanSelfDestruct(false)
 template:setAutoCoolant(true)
 template:setAutoRepair(true)
 
+template:setExternalDockClasses("Starfighter","Freighter","Shuttle", "Cruiser")
 addSystemsHeavy(template)
 varplayer = template:copy(" NavSat")
 varplayer:setType("playership")

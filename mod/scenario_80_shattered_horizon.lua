@@ -24,7 +24,8 @@ function init()
 		--plot_shattered_network,
 		{"plot_shattered_gozanti", plot_shattered_gozanti},
 		--plot_shattered_crashlander,
-		--plot_shattered_package,
+		{"plot_shattered_package", plot_shattered_package},
+		{"plot_shattered_pickup", plot_shattered_pickup},
 		{"plot_shattered_fleets", plot_shattered_fleets},
 		"rescue_capsule_util",
 		"proximity_scan",
@@ -36,7 +37,8 @@ function init()
 	gravity_util.addGravitySource(map_shattered.planet, 80000)
 	gravity_util.addException(map_shattered.flight_control)
 	gravity_util.addException(map_shattered.ground)
-	player_ships_util.ground_station = map_shattered.ground
+	player_ships_util.ground_station_1 = map_shattered.ground_blue
+	player_ships_util.ground_station_2 = map_shattered.ground_red
 	--plot_shattered_droid.gm_dummy = map_shattered.gm_dummy
 	--plot_shattered_droid.flight_control = map_shattered.flight_control
 	--plot_shattered_network.gm_dummy = map_shattered.gm_dummy

@@ -1,13 +1,11 @@
 plot_shattered_droid = {}
+plot_shattered_droidspy = {}
 plot_shattered_network = {}
 plot_shattered_gozanti = {}
 plot_shattered_crashlander = {}
 plot_shattered_package = {}
 plot_shattered_cic = {}
 plot_shattered_fleets = {}
-plot_shattered_imp_fleet = {}
-plot_shattered_rep_breaker = {}
-plot_shattered_rep_fleet = {}
 
 -- TODO: Quests: clean up sats 1, 2, 4
 
@@ -589,6 +587,22 @@ end
 function plot_shattered_fleets:gm_menu()
     addGMFunction("Spawn Plot Fleets", function()
 		clearGMFunctions()
+		addGMFunction("Raider (one per click)", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				plot_shattered_fleets:spawn_raider(x,y)
+			end)
+		end)
+		addGMFunction("Viper Droid", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_viper_droid(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
 		addGMFunction("Star Destroyer Victory", function()
 			clearGMFunctions()
 			gm_menu_back()
@@ -604,6 +618,15 @@ function plot_shattered_fleets:gm_menu()
 			onGMClick(function(x,y) 
 				onGMClick(nil)
 				plot_shattered_fleets:spawn_breaker(x,y)
+				plot_manager.gm_main_menu()
+			end)
+		end)
+		addGMFunction("NR Opfer Nebulon-B", function()
+			clearGMFunctions()
+			gm_menu_back()
+			onGMClick(function(x,y) 
+				onGMClick(nil)
+				plot_shattered_fleets:spawn_nr_opfer(x,y)
 				plot_manager.gm_main_menu()
 			end)
 		end)
@@ -647,3 +670,20 @@ function plot_shattered_fleets:spawn_nr_fleet(x,y)
     CpuShip():setFaction("New Republic"):setTemplate(" Nebulon-B"):setPosition(x,y+5000):orderFlyFormation(self.mc, 5000, 0):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
 end
 
+function plot_shattered_fleets:spawn_nr_opfer(x,y)
+    self.opfer = CpuShip():setTemplate(" Nebulon-B"):setFaction("New Republic"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+	CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x+3000,y):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(x-3000,y):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(x,y-3000):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(x+3000,y+3000):orderDefendTarget(self.opfer):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+end
+
+function plot_shattered_fleets:spawn_viper_droid(x,y)
+    self.viper = CpuShip():setTemplate("Viper Droid"):setFaction("Environment"):setPosition(x,y):orderStandGround()
+end																																				
+function plot_shattered_fleets:spawn_raider(x,y)
+	local templ = arraySelectRandom({
+		" U-Wing", " X-Wing", " ARC-170", " UT-60D", " A-24", " T-Wing R-60", " Y-Wing BTL-B", " Y-Wing BTL-A4", " Y-Wing BTL-S3", " TIE-Fighter", " TIE-Interceptor", " TIE-Bomber", " TIE-Reaper" 
+	}) 
+	CpuShip():setTemplate(templ):setFaction("Raider"):setPosition(x,y):orderRoaming()
+end

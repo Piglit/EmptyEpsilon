@@ -6,10 +6,10 @@ rescue_capsule_util = {
 	CAPTURE_DISTANCE = 100,
 	pods = {},
 	ships_templates_that_spawn_pods = {
-		"TIE Fighter",
-		"TIE Interceptor",
-		"TIE Bomber",
-		"TIE Reaper",
+		"TIE-Fighter",
+		"TIE-Interceptor",
+		"TIE-Bomber",
+		"TIE-Reaper",
 	},
 }
 
@@ -28,16 +28,22 @@ end
 
 function rescue_capsule_util:gm_menu()
 	addGMFunction("Spawn rescuable pilot", function()
+		clearGMFunctions()
 		onGMClick(function(x,y)
 			rescue_capsule_util.spawnNewPilotPod(x,y)
 			onGMClick(nil)
-		end)	
+			plot_manager.gm_main_menu()
+		end)
+		gm_menu_back()
 	end)
 end
 
 function rescue_capsule_util.spawnNewPilotPod(x,y)
 	local pod = PlayerSpaceship():setTemplate("TIE-Pilot"):setFaction("Independent"):setPosition(x,y):setCanBeDestroyed(false)
 	table.insert(rescue_capsule_util.pods, pod)
+	if gravity_util ~= nil and gravity_util.addException ~= nil then
+		gravity_util.addException(pod)
+	end												
 	return pod
 end
 

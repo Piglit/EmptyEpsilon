@@ -143,6 +143,8 @@ def configure_ship(simulator):
 		("1", "Restart all stations with tutorial with this ship", False),
 		("2", "Spawn ship on server", False),
 		("3", "Restart all stations without tutorial", False),
+		("4", "Start repairing ship", False),
+		("5", "Stop repairing ship", False),
 	]
 	while True:
 		code, actions_chosen = d.checklist(f"Select actions (multiple are possible).", title="Shattered Horizon Launcher", choices=actions)
@@ -172,6 +174,20 @@ def configure_ship(simulator):
 			if code == d.OK:
 				command += [f"autoconnectship=faction=Transport{simulator}"]
 				command_to_simulator(simulator, command)
+		if "4" in actions_chosen:
+			script = f"""getScriptStorage()["player_ships_util"]:startRepair("{shipname}")"""
+			d.code = d.yesno(f"Start repairing {template} {shipname} in simulator {simulator}")
+			if code == d.OK:
+				d.clear()
+				if not _lua_exec(script):
+					exit(1)
+		if "5" in actions_chosen:
+			script = f"""getScriptStorage()["player_ships_util"]:stopRepair("{shipname}")"""
+			d.code = d.yesno(f"Stop repairing {template} {shipname} in simulator {simulator}")
+			if code == d.OK:
+				d.clear()
+				if not _lua_exec(script):
+					exit(1)
 		return
 	
 def configure_stations(simulator):

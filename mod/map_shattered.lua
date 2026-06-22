@@ -1,6 +1,7 @@
 map_shattered = {
 	moving_debris = {},
-	ground = nil,
+	ground_blue = nil,
+	ground_red = nil,
 	flight_control = nil,
 	gm_dummy = nil,
     sectors = {},	-- contains sectors containing asteroid positions
@@ -52,7 +53,7 @@ function map_shattered:init()
     self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Green Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
-    self.buoy2 = CpuShip():setTemplate("NavSat"):setCallSign(_("Red Buoy")):setFaction("Endor"):setPosition(zx[14], zy[14])
+    self.buoy2 = CpuShip():setTemplate("NavSat"):setCallSign(_("Cyan Buoy")):setFaction("Endor"):setPosition(zx[14], zy[14])
     self.buoy2:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
     self.buoy2:setRotation(-90):orderIdle():setScanned(true):setCommsFunction(nil):setCanBeDestroyed(false)
     self.buoy3 = CpuShip():setTemplate("NavSat"):setCallSign(_("Magenta Bouy")):setFaction("Endor"):setPosition(zx[12], zy[12])
@@ -61,9 +62,20 @@ function map_shattered:init()
 
     self.gm_dummy = CpuShip():setTemplate("NavSat"):setCallSign(_("Tantal Observatory")):setFaction("Endor"):setPosition(9999999,9999999):orderIdle():setCommsFunction(nil)
 
-    self.ground=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3"):setPosition(0, -radius-1300)
-    self.ground:setDescription(_("A ground station on Endor. It has a spaceport."))
-    self.ground:setRotation(-90)
+    self.ground_blue=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3 Blau")
+	setCirclePos(self.ground_blue, 0,0, -97, radius+1300)
+    self.ground_blue:setDescription(_("A ground station on Endor. It has a spaceport."))
+    self.ground_blue:setRotation(-90)
+
+    self.ground_red=SpaceStation():setTemplate("Medium Station"):setFaction("Endor"):setCallSign("Tantal-3 Rot")
+	setCirclePos(self.ground_red, 0,0, -83, radius+1300)
+    self.ground_red:setDescription(_("A ground station on Endor. It has a spaceport."))
+    self.ground_red:setRotation(-90)
+
+    self.ground_yellow=SpaceStation():setTemplate("Small Station"):setFaction("Endor"):setCallSign("Tantal-3 Gelb")
+	setCirclePos(self.ground_yellow, 0,0, -109, radius+900)
+    self.ground_yellow:setDescription(_("A ground station on Endor. It has a spaceport."))
+    self.ground_yellow:setRotation(-90)
 
     self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
     self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
@@ -184,13 +196,17 @@ function map_shattered.hideAsteroids()
 end
 
 function map_shattered:gm_menu()
-    addGMFunction("Spawn moving debris", map_shattered.triggerMovingDebris)
-    addGMFunction("Clear moving debris", map_shattered.clearMovingDebris)
-	if self.asteroids_visible then
-		addGMFunction("Hide Asteroids", map_shattered.hideAsteroids)
-	else
-		addGMFunction("Show Asteroids", map_shattered.showAsteroids)
-	end
+    addGMFunction("Manage debris", function()
+		clearGMFunctions()
+		addGMFunction("Spawn moving debris", map_shattered.triggerMovingDebris)
+		addGMFunction("Clear moving debris", map_shattered.clearMovingDebris)
+		if self.asteroids_visible then
+			addGMFunction("Hide debris", map_shattered.hideAsteroids)
+		else
+			addGMFunction("Show debris", map_shattered.showAsteroids)
+		end
+		gm_menu_back()
+	end)
 end
 
 function map_shattered:onProbeLaunch(ship, probe)

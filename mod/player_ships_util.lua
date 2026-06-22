@@ -54,7 +54,8 @@ player_ships_util = {
 	{"H.I.V.E.",			"Lambda T-4a",	"Lambda Shuttle des Galaktischen Imperiums"},
 	{"Zoomer",				"UT-60D",		"Ein U-Wing der Neuen Republik"},
 	},
-	ground_station = nil,
+	ground_station_1 = nil,
+	ground_station_2 = nil,
 	active_ships = {},
 	http_post_send_queue = {},
 	active_ships_by_faction = {},
@@ -68,10 +69,11 @@ player_ships_util = {
 		"Antrieb",
 		"Manöver",
 		"Kühlung",
+		"Droiden",
 	},
 	custom_elements_index_base = {
 		pdu = 10,		-- +3
-		help = 80,		-- +4
+		help = 90,		-- +4
 		upgrade = 20,	-- +70
 	},
 }
@@ -96,14 +98,25 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	ship:setCanSelfDestruct(false)
 	ship:addReputationPoints(50)
 	ship:setSystemPowerFactor("reactor", -20)
-	if self.ground_station ~= nil and self.ground_station:isValid() then
-		local px,py = self.ground_station:getPosition()
+	local ground_station = self.ground_station_1
+	if faction == "Transport2" or faction == "Transport4" then
+		ground_station = self.ground_station_2
+	end
+	if ground_station ~= nil and ground_station:isValid() then
+		local px,py = ground_station:getPosition()
 		local offset = #getActivePlayerShips() -1
 		if offset % 2 == 1 then
 			offset = -offset
 		end
 		ship:setPosition(px+(100*offset),py-600)
-		ship:commandDock(self.ground_station)
+		ship:commandDock(ground_station)
+	end
+	if string.sub(shipname, 1, 4) == "Rho-" then
+		ship:commandLoadTube(0, "laser_green")
+		ship:commandLoadTube(1, "laser_green")
+		ship:setSystemPowerFactor("reactor", -10)
+		ship:setRepairCrewCount(0)
+		ship:setCanBeDestroyed(true)
 	end
 	self.active_ships[shipname] = ship
 	self.active_ships_by_faction[faction] = ship
@@ -144,6 +157,8 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 		ship.coolant_data = nil
 		ship.system_power_factor = {}
 		ship.system_coolant_rates = {}
+		ship.droid_data = nil
+		ship.energy_data = nil
 	end
 	return ship
 end
@@ -162,86 +177,90 @@ function player_ships_util:despawn_player_ship(shipname)
 end
 
 function player_ships_util:gm_menu()
-	addGMFunction(_("buttonGM", "Spawn Player Ship"), function()
+	addGMFunction(_("buttonGM", "Manage Player Ships"), function()
 		clearGMFunctions()
-		for i = 1, 4 do
-			-- faction encodes in what simulator room the ship is
-			addGMFunction(_("buttonGM", "in simulator "..i), function()
+		addGMFunction(_("buttonGM", "Spawn Player Ship"), function()
+			clearGMFunctions()
+			for i = 1, 4 do
+				-- faction encodes in what simulator room the ship is
+				addGMFunction(_("buttonGM", "in simulator "..i), function()
+					clearGMFunctions()
+					for idx, data in pairs(player_ships_util.PLAYER_SHIPS) do
+						if self.active_ships[data[1]] == nil then
+							addGMFunction(_("buttonGM", data[1]), function()
+								player_ships_util:spawn_player_ship(data[1], data[2], data[3],"Transport"..i)
+								plot_manager.gm_main_menu()
+							end, idx)
+						end
+					end
+					gm_menu_back()
+				end)
+			end
+			gm_menu_back()
+		end)
+		addGMFunction(_("buttonGM", "Despawn Player Ship"), function()
+			clearGMFunctions()
+			for shipname, ship in pairs(player_ships_util.active_ships) do
+				addGMFunction(_("buttonGM", shipname), function()
+					player_ships_util:despawn_player_ship(shipname)
+					plot_manager.gm_main_menu()
+				end)
+			end
+			gm_menu_back()
+		end)
+		if ENABLE_UPGRADES then
+			addGMFunction(_("buttonGM", "Upgrade Player Ship"), function()
 				clearGMFunctions()
 				for idx, data in pairs(player_ships_util.PLAYER_SHIPS) do
-					if self.active_ships[data[1]] == nil then
-						addGMFunction(_("buttonGM", data[1]), function()
-							player_ships_util:spawn_player_ship(data[1], data[2], data[3],"Transport"..i)
-							plot_manager.gm_main_menu()
-						end, idx)
-					end
+					local shipname = data[1]
+					addGMFunction(_("buttonGM", shipname), function()
+						player_ships_util:upgrades_gm_menu(shipname)
+					end, idx)
 				end
 				gm_menu_back()
 			end)
 		end
-		gm_menu_back()
-	end)
-	addGMFunction(_("buttonGM", "Despawn Player Ship"), function()
-		clearGMFunctions()
-		for shipname, ship in pairs(player_ships_util.active_ships) do
-			addGMFunction(_("buttonGM", shipname), function()
-				player_ships_util:despawn_player_ship(shipname)
-				plot_manager.gm_main_menu()
-			end)
-		end
-		gm_menu_back()
-	end)
-	if ENABLE_UPGRADES then
-		addGMFunction(_("buttonGM", "Upgrade Player Ship"), function()
-			clearGMFunctions()
-			for idx, data in pairs(player_ships_util.PLAYER_SHIPS) do
-				local shipname = data[1]
-				addGMFunction(_("buttonGM", shipname), function()
-					player_ships_util:upgrades_gm_menu(shipname)
-				end, idx)
-			end
-			gm_menu_back()
-		end)
-	end
-	--addGMFunction(_("buttonGM", "Spawn Special Player Ship"), function()
-	--	clearGMFunctions()
-		--addGMFunction(_("buttonGM", "Calamity @ Rim @ Sim 2"), function()
-		--	-- start at freighter
-		--	local shipname = "Calamity"
-		--	local data = player_ships_util.PLAYER_SHIPS[shipname]	-- FIXME is now index based
-		--	local sim = "2"
-    	--	local px,py = map_shattered.freighter_imp:getPosition()
-		--	local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
-		--	ship:setPosition(px+750,py-500)
-		--	ship:commandAbortDock()
-		--	ship:commandDock(map_shattered.freighter_imp)
-		--	ship:setFaction("Imperial")
-		--	plot_manager.gm_main_menu()
-		--end)
-		--addGMFunction(_("buttonGM", "XB-4 @ Hyper @ Sim 3"), function()
-		--	-- crash land sequence
-		--	-- in radar view of Calamity @ 1:05
-		--	-- in radar view of FC @ 1:23
-		--	-- leave belt @ 2:40
-		--	-- enter atmo @ 3:35
-		--	-- crash @ 3:46
-		--	local shipname = "BX-15"
-		--	local data = player_ships_util.PLAYER_SHIPS[shipname]-- FIXME is now index based
-		--	local sim = "3"
-    	--	local px,py = 75000, -140000
-		--	local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
-		--	ship:commandAbortDock()
-		--	ship:setPosition(px,py):setRotation(210-90):commandTargetRotation(210-90)
-		--	ship:setWarpDrive(true):commandWarp(1)
-		--	ship:setMaxCoolant(0)
-		--	ship:setFaction("New Republic")
-		--	plot_shattered_crashlander.ship = ship
-		--	plot_shattered_crashlander.shipname = shipname
-		--	plot_manager.gm_main_menu()
-		--end)
+		--addGMFunction(_("buttonGM", "Spawn Special Player Ship"), function()
+		--	clearGMFunctions()
+			--addGMFunction(_("buttonGM", "Calamity @ Rim @ Sim 2"), function()
+			--	-- start at freighter
+			--	local shipname = "Calamity"
+			--	local data = player_ships_util.PLAYER_SHIPS[shipname]	-- FIXME is now index based
+			--	local sim = "2"
+			--	local px,py = map_shattered.freighter_imp:getPosition()
+			--	local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
+			--	ship:setPosition(px+750,py-500)
+			--	ship:commandAbortDock()
+			--	ship:commandDock(map_shattered.freighter_imp)
+			--	ship:setFaction("Imperial")
+			--	plot_manager.gm_main_menu()
+			--end)
+			--addGMFunction(_("buttonGM", "XB-4 @ Hyper @ Sim 3"), function()
+			--	-- crash land sequence
+			--	-- in radar view of Calamity @ 1:05
+			--	-- in radar view of FC @ 1:23
+			--	-- leave belt @ 2:40
+			--	-- enter atmo @ 3:35
+			--	-- crash @ 3:46
+			--	local shipname = "BX-15"
+			--	local data = player_ships_util.PLAYER_SHIPS[shipname]-- FIXME is now index based
+			--	local sim = "3"
+			--	local px,py = 75000, -140000
+			--	local ship = player_ships_util:spawn_player_ship(shipname, data[1], data[2], "Transport"..sim)
+			--	ship:commandAbortDock()
+			--	ship:setPosition(px,py):setRotation(210-90):commandTargetRotation(210-90)
+			--	ship:setWarpDrive(true):commandWarp(1)
+			--	ship:setMaxCoolant(0)
+			--	ship:setFaction("New Republic")
+			--	plot_shattered_crashlander.ship = ship
+			--	plot_shattered_crashlander.shipname = shipname
+			--	plot_manager.gm_main_menu()
+			--end)
 
-	--	gm_menu_back()
-	--end)
+		--	gm_menu_back()
+		--end)
+		gm_menu_back()
+	end)
 end
 
 if ENABLE_LOG then
@@ -369,6 +388,38 @@ function player_ships_util:updatePlayerShip(delta, ship)
 			customElements:removeCustom(ship, "help_engi_energy_4")
 		end
 	end	
+	if ship.is_being_repaired then
+		-- triggered by gm, when players start repairing their ship
+		-- the first 60 seconds about half of all systems is repaired.
+		-- after that the time for the next remaining 50% is raised.
+		-- perma damage gets halved whenever the timer runs out, raising the amout that can be repaired.
+		-- the gm max trigger repair again later to reset the timers and accelerate remaining repairs.
+		local repair_max = false
+		local all_finished = true
+		ship.repair_diminishing_power = ship.repair_diminishing_power - delta
+		if ship.repair_diminishing_power <= 0.1 then
+			ship.repair_diminishing_power_max = ship.repair_diminishing_power_max * 1.5
+			ship.repair_diminishing_power = ship.repair_diminishing_power_max
+			repair_max = true
+		end
+		for _, system in ipairs(SYSTEMS) do	-- SYSTEMS from ee.lua
+			if ship:hasSystem(system) then
+				if repair_max then
+					local health_max = ship:getSystemHealthMax()
+					health_max = health_max + (1 - health_max) / 2
+				end
+				local health = ship:getSystemHealth(system)
+				health = health + (1 - health) / 2 * delta / ship.repair_diminishing_power_max
+				ship:setSystemHealth(system, health)
+				if health < 0.995 then
+					all_finished = false
+				end
+			end
+		end
+		if all_finished then
+			ship.is_being_repaired = false
+		end
+	end
 end
 
 function player_ships_util:http_post(endpoint, data)
@@ -615,7 +666,7 @@ if ENABLE_UPGRADES then
 						-- show activation button
 						customElements:addCustomButton(ship, "Engineering", "activate_"..up_name, up_name .. _("-Boost starten"), function()
 							player_ships_util:activate_upgrade(ship, up_name, level)
-						end, self.custom_elements_index_base.upgrade + 60+idx)
+						end, self.custom_elements_index_base.upgrade + 70+idx)
 					end
 					customElements:removeCustom(ship, "status_"..up_name)
 					for i=1,5 do
@@ -719,6 +770,16 @@ if ENABLE_UPGRADES then
 			elseif level == 2 then
 				effects = {"+60% Kühlmittel", "-40% Pumpgeschwindigkeit"}
 			end
+		elseif up_name == "Droiden" then
+			ship.droid_data = ship:getRepairCrewCount()
+			ship:setRepairCrewCount(ship.droid_data + level)
+			ship.energy_data = ship:getMaxEnergy()
+			ship:setMaxEnergy(ship.energy_data * (1-level*0.1))
+			if level == 1 then
+				effects = {"+1 Droide", "-10% Energiekapazität"}
+			elseif level == 2 then
+				effects = {"+2 Droiden", "-20% Energiekapazität"}
+			end
 		end
 		ship.upgrades_active[up_name] = {level, effects}
 		ship.upgrade_changed = true
@@ -760,8 +821,28 @@ if ENABLE_UPGRADES then
 			for _,sys in ipairs({"reactor", "beamweapons", "missilesystem", "frontshield", "rearshield", "impulse", "maneuver", "warp", "jumpdrive"}) do
 				ship:setSystemCoolantRate(sys, ship.system_coolant_rates[sys])
 			end
+		elseif up_name == "Droiden" then
+			ship:setRepairCrewCount(ship.droid_data)
+			ship:setMaxEnergy(ship.energy_data)
 		end
 		ship.upgrades_active[up_name] = nil
 		ship.upgrade_changed = true
 	end
 end
+
+function player_ships_util:startRepair(shipname)
+	local ship = self.active_ships[shipname]
+	if ship ~= nil and ship:isValid() then
+		ship.is_being_repaired = true
+		ship.repair_diminishing_power = 60.0
+		ship.repair_diminishing_power_max = 60.0 -- after half the time, the time gets doubled
+	end
+end
+
+function player_ships_util:stopRepair(shipname)
+	local ship = self.active_ships[shipname]
+	if ship ~= nil and ship:isValid() then
+		ship.is_being_repaired = false
+	end
+end
+

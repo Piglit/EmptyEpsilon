@@ -4,6 +4,7 @@ local ENABLE_PDU = false	-- feature flag for sabotage and tuning unit (hardware)
 local ENABLE_LOG = false	-- feature flag for ship damage and consumption log
 local ENABLE_UPGRADES = true	-- feature flag for ship upgrades
 local ENABLE_HELP = true	-- feature flag for interactive help (engineering)
+local ENABLE_MULTI_SHIP_ENGI = true	-- feature flag for michalsky
 
 require("utils_customElements.lua")	-- customElements (unified custom info)
 
@@ -76,12 +77,23 @@ player_ships_util = {
 		pdu = 10,		-- +3
 		help = 90,		-- +4
 		upgrade = 20,	-- +70
+		michalsy = 100,	-- +5
+	},
+	multi_engi_fighters = {},
+	michalsky_stations = {
+		"Engineering",
+		"Engineering+",
+		"PowerManagement",
+		"DamageControl", 
 	},
 }
 
 function player_ships_util:init()
 	local storage = getScriptStorage()
 	storage["player_ships_util"] = self
+	if ENABLE_MULTI_SHIP_ENGI then
+		customElements:modifyOperatorPositions("Michalsky", self.michalsky_stations)
+	end
 end
 
 function player_ships_util:spawn_player_ship(shipname, template, description, faction)
@@ -99,6 +111,10 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	ship:setCanSelfDestruct(false)
 	ship:addReputationPoints(50)
 	ship:setSystemPowerFactor("reactor", -20)
+	self.active_ships[shipname] = ship
+	self.active_ships_by_faction[faction] = ship
+	ship.shipname = shipname
+	ship.previous_docking_state = 0
 	local ground_station = self.ground_station_1
 	if faction == "Transport2" or faction == "Transport4" then
 		ground_station = self.ground_station_2
@@ -118,11 +134,10 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 		ship:setSystemPowerFactor("reactor", -10)
 		ship:setRepairCrewCount(0)
 		ship:setCanBeDestroyed(true)
+		if ENABLE_MULTI_SHIP_ENGI then
+			self:enable_michalsky(ship)
+		end
 	end
-	self.active_ships[shipname] = ship
-	self.active_ships_by_faction[faction] = ship
-	ship.shipname = shipname
-	ship.previous_docking_state = 0
 
 	if ENABLE_LOG then
 		local data = {
@@ -173,6 +188,9 @@ function player_ships_util:despawn_player_ship(shipname)
 	}
 	player_ships_util:http_post("/ship_state", toJSON(data))
 	self.active_ships_by_faction[ship:getFaction()] = nil
+	if ENABLE_MULTI_SHIP_ENGI then
+		self:disable_michalsky(ship)
+	end
 	ship:destroy()
 	self.active_ships[shipname] = nil
 end
@@ -848,3 +866,51 @@ function player_ships_util:stopRepair(shipname)
 	end
 end
 
+if ENABLE_MULTI_SHIP_ENGI then
+	function player_ships_util:enable_michalsky(ship)
+		table.insert(self.multi_engi_fighters, ship)
+		self:update_michalsy_menu()
+	end
+
+	function player_ships_util:disable_michalsky(ship)
+		for idx, s in ipairs(self.multi_engi_fighters) do
+			if s == nil or not s:isValid() or s == ship then
+				table.remove(self.multi_engi_fighters, idx)
+				-- iterator is now invalid
+				return self:disable_michalsky(ship)
+			end
+		end
+		self:update_michalsy_menu()
+	end
+
+	function player_ships_util:update_michalsy_menu()
+		for idx, ship in ipairs(self.multi_engi_fighters) do
+			customElements:removeCustom(ship, "michalsky_caption")
+			if #self.multi_engi_fighters > 0 then
+				customElements:addCustomInfo(ship, "Michalsky","michalsky_caption",string.format("Verbunden mit %s", ship.shipname), self.custom_elements_index_base.michalsy)
+			end
+			for j = 0, #self.multi_engi_fighters + 5 do
+				customElements:removeCustom(ship, string.format("michalsy_select_%i", j))
+			end
+			for j, other_ship in in ipairs(self.multi_engi_fighters) do
+				if other_ship == nil or not other_ship:isValid() then
+					return self:disable_michalsky(other_ship)
+				end
+				if j ~= idx then
+					customElements:addCustomButton(ship, "Michalsky",string.format("michalsy_select_%i", j),string.format("wechsle zu %s", other_ship.shipname), function()
+						for _,station in ipairs(player_ships_util.michalsky_stations) do
+							ship:transferPlayersAtPositionToShip(station, other_ship)
+						end
+					end, self.custom_elements_index_base.michalsy+j)
+				end
+			end
+		end
+	end
+
+	function player_ships_util:set_michalsy_stations(stations)
+		-- gm can change stations by script
+		self.michalsky_stations = stations
+		customElements:modifyOperatorPositions("Michalsky", stations)
+		self:update_michalsy_menu()	-- also removes unwanted
+	end
+end

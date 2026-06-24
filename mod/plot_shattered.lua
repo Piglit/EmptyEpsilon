@@ -1,3 +1,7 @@
+local ENABLE_PICKUP_BY_GRABBERS = true
+local ENABLE_PICKUP_DEBRIS_BY_COLISSION = true
+local ENABLE_PICKUP_CARGO_BY_COLISSION = false
+
 plot_shattered_pickup= {}
 plot_shattered_droid = {}
 plot_shattered_droidspy = {}
@@ -22,9 +26,8 @@ function plot_shattered_pickup:create_pickup(x,y)
 	local freq = math.floor(random(20, 40)) * 20
 	local debris = Artifact():setPosition(x, y):setDescriptions(_("A piece of maybe valuable space junk. Scan to find out the capturing frequency"), _("Capturing frequency:").." "..freq..". " .._("Set your shield frequency to match the capturing frequency and activate your shields to capture it."))
 	debris.freq=freq
-	debris:allowPickup(true)
 	debris:setCallSign(""):setFaction("Endor"):setScanningParameters(1, 2):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(164/2,164/2,250/2):setModel("shield_generator")
-	debris:onPickUp(function(art, player)
+	debris.on_pickup = function(art, player)
 		local shieldfreq= 400+(player:getShieldsFrequency())*20
 		local ax, ay = art:getPosition()
 		local x, y = player:getPosition()
@@ -38,7 +41,16 @@ function plot_shattered_pickup:create_pickup(x,y)
 			player:takeDamage(50, "kinetic",ax,ay )
 			player:addToShipLog(_("Debris was destroyed by impact"), "red")
 		end
-	end)
+	end
+	if ENABLE_PICKUP_DEBRIS_BY_COLISSION then
+		debris:allowPickup(true)
+		debris:onPickUp(debris.on_pickup)
+	else
+		debris:allowPickup(false)
+	end
+	if ENABLE_PICKUP_BY_GRABBERS then
+		player_ships_util:add_grabbable_object(debris)
+	end
 end
 
 -- TODO: Quests: clean up sats 1, 2, 4
@@ -156,7 +168,7 @@ function plot_shattered_droid:spyprobe_disabled(delta)
     self.spyprobe:setModel("combatsat"):setRadarTraceIcon("probe_droid.png"):setRadarTraceScale(1)
     self.spyprobe:setRotation(r)
     self.spyprobe.freq=freq
-    self.spyprobe:onPickUp(function(art, player)
+	self.spyprobe.on_pickup = function(art, player)
 --        plot_shattered_droid.update = nil
         local shieldfreq= 400+(player:getShieldsFrequency())*20
         local ax, ay = art:getPosition()
@@ -172,7 +184,16 @@ function plot_shattered_droid:spyprobe_disabled(delta)
         player:addToShipLog(_("Droid captured."), "cyan")
         plot_shattered_droid.gm_dummy:sendCommsMessage(plot_shattered_droid.flight_control, string.format(_([[The malfunctioning old droid was captured by %s.]]), player:getCallSign()))
         --It looks like the old droid was hit by a piece of space debris and thus reactivated. This also caused it to malfunction.]]))
-    end)
+    end
+	if ENABLE_PICKUP_DEBRIS_BY_COLISSION then
+		self.spyprobe:allowPickup(true)
+		self.spyprobe:onPickUp(self.spyprobe.on_pickup)
+	else
+		self.spyprobe:allowPickup(false)
+	end
+	if ENABLE_PICKUP_BY_GRABBERS then
+		player_ships_util:add_grabbable_object(self.spyprobe)
+	end
 end
 
 
@@ -540,9 +561,25 @@ function plot_shattered_package.spawn_package()
 		end
 		plot_shattered_package.ship = CpuShip():setCallSign("HW-25"):setFaction("Independent"):setTemplate("Goods Freighter 1"):setHullMax(100):setHull(20):setShieldsMax(0,0):setPosition(x, y):orderIdle():setDescriptions(_("Ein Schiffswrack"),_("Das Wrack der Wayfarer's Wisp - ein Hydrotii D-85 Frachter."))
 		for i=1,10 do
-			Artifact():setPosition(x+random(-5000, 5000), y+random(-5000, 5000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: leer")):setScanningParameters(3,1):setCallSign(string.format("%d-%s%s%s-%d", irandom(1111,9999), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), irandom(10,99))):allowPickup(true)
+			local a = Artifact():setPosition(x+random(-5000, 5000), y+random(-5000, 5000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: leer")):setScanningParameters(3,1):setCallSign(string.format("%d-%s%s%s-%d", irandom(1111,9999), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), string.char(0x40+irandom(1,26)), irandom(10,99)))
+			if ENABLE_PICKUP_CARGO_BY_COLISSION then
+				a:allowPickup(true)
+			else
+				a:allowPickup(false)
+			end
+			if ENABLE_PICKUP_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(a)
+			end
 		end
-			Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung f. Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59"):allowPickup(true)
+			local a = Artifact():setPosition(x+random(-2000, 2000), y+random(-2000, 2000)):setModel("ammo_box"):setDescriptions(_("Eine Frachtkiste"),_("Frachtkiste: Lieferung f. Mr. Kell Murtry")):setScanningParameters(3,1):setCallSign("4478-EXN-59")
+			if ENABLE_PICKUP_CARGO_BY_COLISSION then
+				a:allowPickup(true)
+			else
+				a:allowPickup(false)
+			end
+			if ENABLE_PICKUP_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(a)
+			end
         plot_manager.gm_main_menu()
     end)
 end

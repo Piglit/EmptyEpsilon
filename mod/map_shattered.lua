@@ -1,9 +1,13 @@
+ENABLE_SAT_RECOVERY_BY_COLISSION = false
+ENABLE_SAT_RECOVERY_BY_GRABBERS = true
+
 map_shattered = {
 	moving_debris = {},
 	ground_blue = nil,
 	ground_green= nil,
 	ground_red = nil,
 	flight_control = nil,
+	rebel_sat = nil,
 	gm_dummy = nil,
     sectors = {},	-- contains sectors containing asteroid positions
 	probes = {},	-- all probes, fired from player ships
@@ -50,6 +54,10 @@ function map_shattered:init()
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
     self.flight_control:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+
+    self.rebel_sat = PlayerSpaceship():setTemplate("NavSat"):setCallSign("RS-40"):setFaction("Endor"):setPosition(-40000, 15000)
+    self.rebel_sat:setDescription(_("A navigation satellite - it transmits sensor data to the surface of Endor."))
+    self.rebel_sat:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
     self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Yellow Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))
@@ -328,39 +336,53 @@ function map_shattered:placeArtifactsAroundPoint( amount, dist_min, dist_max, x0
             else
                 debris:setModel("debris-blob")
             end
-            debris:allowPickup(true)
             debris:setCallSign(callsign):setFaction("Endor"):setRadarTraceIcon("asteroid.png"):setRadarTraceColor(64,64,150)
-
-            debris:onPickUp(function(art, player)
-                shieldfreq= 400+(player:getShieldsFrequency())*20
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                if shieldfreq == art.freq and player:getShieldsActive() == true then
-                    ElectricExplosionEffect():setPosition(x,y):setSize(200)
-                    player:takeDamage(1, "kinetic",ax,ay )
-                    player:addReputationPoints(10)
+			debris.on_pickup = function(art, player)
+				shieldfreq= 400+(player:getShieldsFrequency())*20
+				local ax, ay = art:getPosition()
+				local x, y = player:getPosition()
+				if shieldfreq == art.freq and player:getShieldsActive() == true then
+					ElectricExplosionEffect():setPosition(x,y):setSize(200)
+					player:takeDamage(1, "kinetic",ax,ay )
+					player:addReputationPoints(10)
 					player:addToShipLog(_("Debris captured."), "cyan")
-                else
-                    ExplosionEffect():setPosition(ax,ay):setSize(200)
-                    player:takeDamage(50, "kinetic",ax,ay )
+				else
+					ExplosionEffect():setPosition(ax,ay):setSize(200)
+					player:takeDamage(50, "kinetic",ax,ay )
 					player:addToShipLog(_("Debris was destroyed by impact"), "red")
-                end
-            end)
-
+				end
+			end
+			if ENABLE_SAT_RECOVERY_BY_COLISSION then
+				debris:allowPickup(true)
+				debris:onPickUp(debris.on_pickup)
+			else
+				debris:allowPickup(false)
+			end
+			if ENABLE_SAT_RECOVERY_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(debris)
+			end
         else
             callsign="TTY"..string.format("%02d",n)
             sat = Artifact():setPosition(x, y):setDescriptions(_("An operational satellite"),_("This satellite is fully operational. Do not capture!")):setScanningParameters(1, 2)
             sat:setModel("cubesat"):setCallSign(callsign):setRadarTraceIcon("satellite.png"):setRadarTraceScale(1)
-            sat:allowPickup(true)
-
-            sat:onPickUp(function(art, player)
-                local ax, ay = art:getPosition()
-                local x, y = player:getPosition()
-                ExplosionEffect():setPosition(ax,ay):setSize(200)
-                player:takeDamage(50, "kinetic",ax,ay )
-                player:setReputationPoints((player:getReputationPoints()-10))
+			sat.on_pickup = function(art, player)
+				local ax, ay = art:getPosition()
+				local x, y = player:getPosition()
+				ExplosionEffect():setPosition(ax,ay):setSize(200)
+				player:takeDamage(50, "kinetic",ax,ay )
+				player:setReputationPoints((player:getReputationPoints()-10))
 				player:addToShipLog(_("Satellite was destroyed by impact"), "red")
-            end)
+			end
+
+			if ENABLE_SAT_RECOVERY_BY_COLISSION then
+				sat:allowPickup(true)
+				sat:onPickUp(sat.on_pickup)
+			else
+				debris:allowPickup(false)
+			end
+			if ENABLE_SAT_RECOVERY_BY_GRABBERS then
+				player_ships_util:add_grabbable_object(sat)
+			end
         end
     end
 end

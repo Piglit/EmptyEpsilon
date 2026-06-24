@@ -1,4 +1,6 @@
 -- TODO: if carrier captures pod, it is immediately "delivered"
+ENABLE_RESCUE_BUTTONS = false
+ENABLE_RESCUE_BY_GRABBER = true
 require("utils_customElements.lua")
 
 
@@ -22,7 +24,7 @@ function rescue_capsule_util:onNewPlayerShip(ship)
 end
 
 function rescue_capsule_util:updatePlayerShip(delta, ship)
-	if ship:isValid() then
+	if ENABLE_RESCUE_BUTTONS and ship:isValid() then
 		self:addOrUpdateCollectCapsuleButton(ship)
 	end
 end
@@ -44,7 +46,10 @@ function rescue_capsule_util.spawnNewPilotPod(x,y)
 	table.insert(rescue_capsule_util.pods, pod)
 	if gravity_util ~= nil and gravity_util.addException ~= nil then
 		gravity_util.addException(pod)
-	end												
+	end
+	if ENABLE_RESCUE_BY_GRABBER then
+		player_ships_util:add_grabbable_object(pod)
+	end
 	return pod
 end
 

@@ -5,6 +5,7 @@ local ENABLE_LOG = false	-- feature flag for ship damage and consumption log
 local ENABLE_UPGRADES = true	-- feature flag for ship upgrades
 local ENABLE_HELP = true	-- feature flag for interactive help (engineering)
 local ENABLE_MULTI_SHIP_ENGI = true	-- feature flag for michalsky
+local ENABLE_GRABBERS = true	-- feature flag for cargo grabbers
 
 require("utils_customElements.lua")	-- customElements (unified custom info)
 
@@ -75,8 +76,9 @@ player_ships_util = {
 	},
 	custom_elements_index_base = {
 		pdu = 10,		-- +3
-		help = 90,		-- +4
+		grabber = 15,	-- +5
 		upgrade = 20,	-- +70
+		help = 90,		-- +4
 		michalsy = 100,	-- +5
 	},
 	multi_engi_fighters = {},
@@ -86,6 +88,11 @@ player_ships_util = {
 		"PowerManagement",
 		"DamageControl", 
 	},
+	grabbables = {}, 
+	grabber_ui_station = "Weapons",
+	grabber_min_dist = 200,
+	grabber_max_dist = 500,
+	grabber_capture_dist = 1,
 }
 
 function player_ships_util:init()
@@ -112,6 +119,7 @@ function player_ships_util:spawn_player_ship(shipname, template, description, fa
 	self.active_ships_by_faction[faction] = ship
 	ship.shipname = shipname
 	ship.previous_docking_state = 0
+	ship:addToShipLog(string.format("%s %s %s", template, shipname, cs), "white")
 	local ground_station = self.ground_station_1
 	if faction == "Transport2" or faction == "Transport4" then
 		ground_station = self.ground_station_2
@@ -326,6 +334,9 @@ if ENABLE_LOG then
 end
 
 function player_ships_util:updatePlayerShip(delta, ship)
+	if ship == nil or not ship:isValid() then
+		return
+	end
 	local timestamp = getScenarioTime()
 	if ENABLE_LOG then
 		player_ships_util:logFuelConsumption(ship, timestamp, false)
@@ -437,6 +448,10 @@ function player_ships_util:updatePlayerShip(delta, ship)
 		if all_finished then
 			ship.is_being_repaired = false
 		end
+	end
+	if ENABLE_GRABBERS then
+		self:update_grabbers(delta, ship)
+		self:update_grabber_ui(delta, ship)
 	end
 end
 
@@ -916,5 +931,110 @@ if ENABLE_MULTI_SHIP_ENGI then
 		-- gm can change stations by script
 		self.michalsky_stations = stations
 		self:update_michalsy_menu()	-- also removes unwanted
+	end
+end
+
+function player_ships_util:add_grabbable_object(obj)
+	obj.grabbable = true
+	table.insert(self.grabbables, obj)
+end
+
+if ENABLE_GRABBERS then
+	function player_ships_util:update_grabbers(delta, ship)
+		local obj = ship.grabbing
+		if obj ~= nil and obj:isValid() then
+			-- move onj towards ship
+			local dist = distance(obj, ship)
+			local speed = (dist/25) * delta
+			local angle = angleHeading(obj, ship)
+			local x0,y0 = obj:getPosition()
+			local x1,y1 = vectorFromAngle(angle, speed, true)
+			obj:setPosition(x0+x1, y0+y1)
+			if dist <= ship:getRadius() + obj:getRadius() + self.grabber_capture_dist then
+				if ship.shipname and obj:getCallSign() then
+					print(ship.shipname .. " picked up " .. obj:getCallSign())
+				else
+					print("picked up")
+				end
+				if obj.on_pickup ~= nil then
+					-- TODO tie rescue util
+					obj.on_pickup(obj, ship)
+				else
+					-- play sound
+					ElectricExplosionEffect():setPosition(x0+x1,y0+y1):setSize(200)
+				end
+				if obj:isValid() then
+					obj:destroy()
+				end
+				ship.grabbing = nil
+			end
+		end
+	end
+	function player_ships_util:update_grabber_ui(delta, ship)
+		if ship.grabbing ~= nil then
+			if not ship.grabbing:isValid() then
+				-- abort grabbing
+				ship.grabbing = nil
+			else
+				local obj = ship.grabbing
+				-- currently grabbing something
+				for idx=1, ship.max_grabbing_ui_idx do
+					customElements:removeCustom(ship, "POD_"..idx)
+				end
+				ship.max_grabbing_ui_idx = 0
+				local callsign = "Objekt"
+				if obj.getCallSign ~= nil then
+					callsign = obj:getCallSign()
+					if callsign == "" then
+						callsign = "Objekt"
+					end
+				end
+				local dist = distance(ship, obj) - ship:getRadius() - obj:getRadius()
+				if dist > self.grabber_max_dist then
+					ship.grabbing = nil
+				else
+					customElements:addCustomInfo(ship, self.grabber_ui_station, "POD_DIST", string.format(_("Abstand zu %s: %im"), callsign, math.floor(dist)), self.custom_elements_index_base.grabber)
+					customElements:addCustomButton(ship, self.grabber_ui_station, "POD_GRABBING", string.format(_("%s-Bergung abbrechen"), callsign), function()
+						ship.grabbing = nil
+					end, self.custom_elements_index_base.grabber+1)
+				end
+			end
+		else
+			-- currently not grabbing
+			customElements:removeCustom(ship, "POD_DIST")
+			customElements:removeCustom(ship, "POD_GRABBING")
+			local candidates = {}
+			for idx,obj in ipairs(self.grabbables) do
+				if obj == nil or not obj:isValid() then
+					table.remove(self.grabbables, idx)
+					return
+				end
+				if ship ~= obj and distance(ship, obj) <= self.grabber_min_dist + ship:getRadius() + obj:getRadius() then
+					table.insert(candidates, obj)
+				end
+			end
+			if #candidates > 0 then
+				for idx,obj in ipairs(candidates) do
+					local callsign = "Objekt"
+					if obj.getCallSign ~= nil then
+						callsign = obj:getCallSign()
+						if callsign == "" then
+							callsign = "Objekt"
+						end
+					end
+					customElements:addCustomButton(ship, self.grabber_ui_station, "POD_"..idx, string.format(_("%s bergen"), callsign), function()
+						ship.grabbing = obj
+					end, self.custom_elements_index_base.grabber + idx)
+				end
+			end	
+			--remove old ui elements
+			if ship.max_grabbing_ui_idx == nil or ship.max_grabbing_ui_idx < #candidates then
+				ship.max_grabbing_ui_idx = #candidates
+			end
+			for idx=#candidates +1, ship.max_grabbing_ui_idx do
+				customElements:removeCustom(ship, "POD_"..idx)
+			end
+			ship.max_grabbing_ui_idx = #candidates
+		end
 	end
 end

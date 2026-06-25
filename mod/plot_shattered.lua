@@ -11,6 +11,7 @@ plot_shattered_crashlander = {}
 plot_shattered_package = {}
 plot_shattered_cic = {}
 plot_shattered_fleets = {}
+plot_shattered_crybaby = {}
 
 function plot_shattered_pickup:gm_menu()
     addGMFunction("Spawn Loot", function()
@@ -586,71 +587,122 @@ end
 
 -- CIC
 function plot_shattered_cic:init()
-	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
-		self:set_infos(10, "SYSTEM-STATUS:")
-		self:set_infos(11, "Radar-Reichweite:                60u (100%)")
-		self:set_infos(12, "Sensor-Reichweite:              90u (100%)")
-		self:set_infos(13, "Funk-Sende-Reichweite:       50u (100%)")
-		self:set_infos(14, "Funk-Empfangs-Reichweite:  60u (100%)")
-		self:set_infos(30, " ")
-		self:set_infos(31, "RADAR-SENSOR-INFO:")
-		self:set_infos(32, "Rot:  Energie")
-		self:set_infos(33, "Grün: Biosign")
-		self:set_infos(34, "Blau:  Metall")
-	end
+	self:init_cic_infos(map_shattered.flight_control)
 end
 
 function plot_shattered_cic:gm_menu()
-	if plot_shattered_cic.blocked then
-		addGMFunction("Unblock CIC radar",plot_shattered_cic.unblock_cic)
-	else
-		addGMFunction("Block CIC radar",plot_shattered_cic.block_cic)
-	end
-end
-
-function plot_shattered_cic.unblock_cic()
-	if plot_shattered_cic.nebula ~= nil and plot_shattered_cic.nebula:isValid() then
-		plot_shattered_cic.nebula:destroy()
-	end
-	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
-		map_shattered.flight_control:commandSetAlertLevel("normal")
-		plot_shattered_cic:set_infos(11, "Radar-Reichweite:               60u (100%)")
-		plot_shattered_cic:set_infos(12, "Sensor-Reichweite:              90u (100%)")
-		plot_shattered_cic:set_infos(40, nil)
-		plot_shattered_cic:set_infos(41, nil)
-		plot_shattered_cic:set_infos(42, nil)
-		plot_shattered_cic:set_infos(43, nil)
-		plot_shattered_cic:set_infos(44, nil)
-	end
-	plot_shattered_cic.blocked = false 
-	plot_manager.gm_main_menu()
-end
-
-function plot_shattered_cic.block_cic()
-	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
-		local x,y = map_shattered.flight_control:getPosition()
-		plot_shattered_cic.nebula = Nebula():setPosition(x, y):setSize(3)
-		map_shattered.flight_control:commandSetAlertLevel("yellow")
-		plot_shattered_cic:set_infos(11, "Radar-Reichweite:               30u ( 50%)")
-		plot_shattered_cic:set_infos(12, "Sensor-Reichweite:                 ? ( 30%)")
-		plot_shattered_cic:set_infos(40, " ")
-		plot_shattered_cic:set_infos(41, "FEHLER / WARNUNGEN:")
-		plot_shattered_cic:set_infos(42, "Warnung: Energie-Sensor gestört      ")
-		plot_shattered_cic:set_infos(43, "Warnung: Biosign-Sensor ausgefallen")
-		plot_shattered_cic:set_infos(44, "Warnung: Langstreckenradar gestört")
-		plot_shattered_cic.blocked = true
-		plot_manager.gm_main_menu()
-	end
-end
-
-function plot_shattered_cic:set_infos(idx, msg)
-	if map_shattered.flight_control ~= nil and map_shattered.flight_control:isValid() then
-		if msg == nil or msg == "" then
-			map_shattered.flight_control:removeCustom("CIC_"..tostring(idx))
+	addGMFunction("Satelliten", function()
+		clearGMFunctions()
+		if map_shattered.flight_control == nil or not map_shattered.flight_control:isValid() then
+			addGMFunction("CIC Sat", function()
+				map_shattered.flight_control = plot_shattered_cic:spawn_sat(3000, -30000, "FC-03", _("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
+				plot_shattered_cic:init_cic_infos(map_shattered.flight_control)
+				plot_manager.gm_main_menu()
+			end)
 		else
-			map_shattered.flight_control:addCustomInfo("science", "CIC_"..tostring(idx), msg, idx)
+			if map_shattered.flight_control.blocked then
+				addGMFunction("Unblock CIC radar",function()
+					plot_shattered_cic:unblock_cic(map_shattered.flight_control)
+					plot_manager.gm_main_menu()
+				end)
+			else
+				addGMFunction("Block CIC radar",function()
+					plot_shattered_cic:block_cic(map_shattered.flight_control)
+					plot_manager.gm_main_menu()
+				end)
+			end
+		end
+
+		if plot_shattered_cic.rebel_sat == nil or not plot_shattered_cic.rebel_sat:isValid() then
+			addGMFunction("Rebel Sat", function()
+				plot_shattered_cic.rebel_sat = plot_shattered_cic:spawn_sat(-40000, 15000, "RS-04", _("A navigation satellite - it transmits sensor data to the surface of Endor."))
+				plot_shattered_cic:init_cic_infos(plot_shattered_cic.rebel_sat)
+				plot_manager.gm_main_menu()
+			end)
+		else
+			if plot_shattered_cic.rebel_sat.blocked then
+				addGMFunction("Unblock Rebel radar",function()
+					plot_shattered_cic:unblock_cic(plot_shattered_cic.rebel_sat)
+					plot_manager.gm_main_menu()
+				end)
+			else
+				addGMFunction("Block Rebel radar",function()
+					plot_shattered_cic:block_cic(plot_shattered_cic.rebel_sat)
+					plot_manager.gm_main_menu()
+				end)
+			end
+		end
+		gm_menu_back()
+	end)
+end
+
+function plot_shattered_cic:init_cic_infos(sat)
+	if sat ~= nil and sat:isValid() then
+		self:set_infos(sat, 10, "SYSTEM-STATUS:")
+		self:set_infos(sat, 11, "Radar-Reichweite:                60u (100%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:              90u (100%)")
+		if sat == map_shattered.flight_control then
+			-- only for true CIC with comms
+			self:set_infos(sat, 13, "Funk-Sende-Reichweite:       50u (100%)")
+			self:set_infos(sat, 14, "Funk-Empfangs-Reichweite:  60u (100%)")
+		end
+		self:set_infos(sat, 30, " ")
+		self:set_infos(sat, 31, "RADAR-SENSOR-INFO:")
+		self:set_infos(sat, 32, "Rot:  Energie")
+		self:set_infos(sat, 33, "Grün: Biosign")
+		self:set_infos(sat, 34, "Blau:  Metall")
+	end
+end
+
+function plot_shattered_cic:unblock_cic(sat)
+	if sat.nebula ~= nil and sat.nebula:isValid() then
+		sat.nebula:destroy()
+	end
+	if sat ~= nil and sat:isValid() then
+		sat:commandSetAlertLevel("normal")
+		self:set_infos(sat, 11, "Radar-Reichweite:               60u (100%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:              90u (100%)")
+		self:set_infos(sat, 40, nil)
+		self:set_infos(sat, 41, nil)
+		self:set_infos(sat, 42, nil)
+		self:set_infos(sat, 43, nil)
+		self:set_infos(sat, 44, nil)
+	end
+	sat.blocked = false 
+end
+
+function plot_shattered_cic:block_cic(sat)
+	if sat ~= nil and sat:isValid() then
+		local x,y = sat:getPosition()
+		sat.nebula = Nebula():setPosition(x, y):setSize(3)
+		sat:commandSetAlertLevel("yellow")
+		self:set_infos(sat, 11, "Radar-Reichweite:               30u ( 50%)")
+		self:set_infos(sat, 12, "Sensor-Reichweite:                 ? ( 30%)")
+		self:set_infos(sat, 40, " ")
+		self:set_infos(sat, 41, "FEHLER / WARNUNGEN:")
+		self:set_infos(sat, 42, "Warnung: Energie-Sensor gestört      ")
+		self:set_infos(sat, 43, "Warnung: Biosign-Sensor ausgefallen")
+		self:set_infos(sat, 44, "Warnung: Langstreckenradar gestört")
+		sat.blocked = true
+	end
+end
+
+function plot_shattered_cic:set_infos(sat, idx, msg)
+	if sat ~= nil and sat:isValid() then
+		if msg == nil or msg == "" then
+			sat:removeCustom("CIC_"..tostring(idx))
+		else
+			sat:addCustomInfo("science", "CIC_"..tostring(idx), msg, idx)
 		end
 	end
+end
+
+function plot_shattered_cic:spawn_sat(x,y, callsign, description)
+    local sat = PlayerSpaceship():setTemplate("NavSat"):setCallSign(callsign):setFaction("Endor"):setPosition(x,y)
+    sat:setDescription(description)
+    sat:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
+	gravity_util.addException(sat)
+	return sat
 end
 
 ----- fleet arrivals
@@ -705,7 +757,7 @@ function plot_shattered_fleets:gm_menu()
 			clearGMFunctions()
 			gm_menu_back()
 			onGMClick(function(x,y) 
-				onGMClick(nil)
+			onGMClick(nil)
 				plot_shattered_fleets:spawn_nr_fleet(x,y)
 				plot_manager.gm_main_menu()
 			end)
@@ -757,4 +809,21 @@ function plot_shattered_fleets:spawn_raider(x,y)
 		" U-Wing", " X-Wing", " ARC-170", " UT-60D", " A-24", " T-Wing R-60", " Y-Wing BTL-B", " Y-Wing BTL-A4", " Y-Wing BTL-S3", " TIE-Fighter", " TIE-Interceptor", " TIE-Bomber", " TIE-Reaper" 
 	}) 
 	CpuShip():setTemplate(templ):setFaction("Raider"):setPosition(x,y):orderRoaming()
+end
+
+-----
+
+function plot_shattered_crybaby:gm_menu()
+    addGMFunction("Spawn Crybaby", function()
+		clearGMFunctions()
+		gm_menu_back()
+		onGMClick(function(x,y) 
+            onGMClick(nil)
+			plot_shattered_crybaby:create_crybaby(x,y)
+			plot_manager.gm_main_menu()
+		end)
+	end)
+end
+function plot_shattered_crybaby:create_crybaby(x,y)
+	self.crybaby = CpuShip():setTemplate("NavSat"):setRadarTrace("star_destroyer.png"):setFaction("Environment"):setPosition(x,y):orderIdle():setCallSign("Notsignal: Gideons leichter Kreuzer"):setDescriptions("Moff Gideons leichter Kreuzer sendet ein Notsignal! Alle imperialen Schiffe müssen sofort zur Rettung kommen.", "Ein imperiales Notsignal kommt von diesem Objekt, dass sich als Moff Gideons leichter Kreuzer identifiziert.")
 end

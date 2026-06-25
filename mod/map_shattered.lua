@@ -7,7 +7,6 @@ map_shattered = {
 	ground_green= nil,
 	ground_red = nil,
 	flight_control = nil,
-	rebel_sat = nil,
 	gm_dummy = nil,
     sectors = {},	-- contains sectors containing asteroid positions
 	probes = {},	-- all probes, fired from player ships
@@ -54,10 +53,6 @@ function map_shattered:init()
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
     self.flight_control:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
-
-    self.rebel_sat = PlayerSpaceship():setTemplate("NavSat"):setCallSign("RS-40"):setFaction("Endor"):setPosition(-40000, 15000)
-    self.rebel_sat:setDescription(_("A navigation satellite - it transmits sensor data to the surface of Endor."))
-    self.rebel_sat:setLongRangeRadarRange(60000):setShortRangeRadarRange(30000):setRotation(-90):commandTargetRotation(-90):setCanScan(false)
 
     self.buoy = CpuShip():setTemplate("NavSat"):setCallSign(_("Yellow Buoy")):setFaction("Endor"):setPosition(-400, -20000)
     self.buoy:setDescription(_("A navigation buoy that marks the line between atmosphere and space."))

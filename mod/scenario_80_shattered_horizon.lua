@@ -27,6 +27,7 @@ function init()
 		{"plot_shattered_package", plot_shattered_package},
 		{"plot_shattered_pickup", plot_shattered_pickup},
 		{"plot_shattered_fleets", plot_shattered_fleets},
+		{"plot_shattered_crybaby", plot_shattered_crybaby},
 		"rescue_capsule_util",
 		"proximity_scan",
 	}

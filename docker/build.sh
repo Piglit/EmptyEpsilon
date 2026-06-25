@@ -23,7 +23,7 @@ do
     echo "Skip [${git_ref_name}]"
     continue
   fi
-  SERIOUS_PROTON_BRANCH="${git_ref_name}"
+  SERIOUS_PROTON_BRANCH="skystrike"
   output="$(git ls-remote --heads https://github.com/Piglit/SeriousProton "${SERIOUS_PROTON_BRANCH}")"
   if [ -n "${output}" ]; then
     echo "Found SeriousProton branch [${SERIOUS_PROTON_BRANCH}]."

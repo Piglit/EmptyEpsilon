@@ -135,7 +135,7 @@ void AutoConnectScreen::update(float delta)
                 {
                     my_player_info->commandSetName(PreferencesManager::get("username"));
                     if (!connect_to_address.getHumanReadable().empty())
-                        status_label->setText(tr("Waiting for ship on ") + connect_to_address.getHumanReadable()[0] + "...");
+                        status_label->setText(tr("Waiting for ship on ") + " Schiffssystem");// connect_to_address.getHumanReadable()[0] + "...");
                     else
                         status_label->setText(tr("Waiting for ship..."));
                     if (!my_spaceship)

@@ -32,7 +32,7 @@ ScreenMainScreen::ScreenMainScreen(RenderLayer* render_layer)
     viewport->first_person = true;
 
     main_screen_radar = new GuiRadarView(viewport, "VIEWPORT_RADAR", nullptr);
-    main_screen_radar->setStyle(GuiRadarView::CircularMasked)->setSize(200, 200)->setPosition(-20, 20, sp::Alignment::TopRight);
+    main_screen_radar->setStyle(GuiRadarView::CircularMasked)->setSize(200, 200)->setPosition(-20, 20, sp::Alignment::TopRight)->hide();
 
     tactical_radar = new GuiRadarView(this, "TACTICAL", nullptr);
     tactical_radar->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);

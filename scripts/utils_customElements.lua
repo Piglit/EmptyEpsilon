@@ -75,9 +75,10 @@ end
 -- @param name: String identifier of the button (parameter of PlayerShip:addCustomButton)
 -- @param caption: Label of the button (parameter of PlayerShip:addCustomButton)
 -- @param callback: Callback function to be run when button is pressed (parameter of PlayerShip:addCustomButton)
-function customElements:addCustomButton(player_ship, operator, name, caption, callback)
+-- @param order: Use the order value to specify a priority (parameter of PlayerShip:addCustomButton)
+function customElements:addCustomButton(player_ship, operator, name, caption, callback, order)
     for idx, station in ipairs(self:operatorPositions(operator)) do
-        player_ship:addCustomButton(station, name..station, caption, callback)
+        player_ship:addCustomButton(station, name..station, caption, callback, order)
     end
 end
 
@@ -86,9 +87,10 @@ end
 -- @param operator: String identification of operator. 
 -- @param name: String identifier of the message (parameter of PlayerShip:addCustomInfo)
 -- @param caption: Text content of the info field (parameter of PlayerShip:addCustomInfo)
-function customElements:addCustomInfo(player_ship, operator, name, caption)
+-- @param order: Use the order value to specify a priority (parameter of PlayerShip:addCustomInfo)
+function customElements:addCustomInfo(player_ship, operator, name, caption, order)
     for idx, station in ipairs(self:operatorPositions(operator)) do
-        player_ship:addCustomInfo(station, name..station, caption)
+        player_ship:addCustomInfo(station, name..station, caption, order)
     end
 end
 

@@ -13,9 +13,9 @@ fighter_utils = {
 	number_of_rhos = 4,
 	rho_ships = {},	-- contains ship objects with index; also tracks pods
 --	ships_templates_fighters = {
---		"TIE Fighter",
---		"TIE Interceptor",
---		"TIE Bomber",
+--		"TIE-Fighter",
+--		"TIE-Interceptor",
+--		"TIE-Bomber",
 --	},
 --	carriers = {},
 --	docked_number = 0,
@@ -50,7 +50,7 @@ function fighter_utils:placeFighterInCarrier(ship, carrier, idx)
 end
 
 function fighter_utils:createRho(idx)
-	local rho = PlayerSpaceship():setTemplate("TIE Interceptor"):setCallSign("Rho-"..idx):setFaction("Imperial")
+	local rho = PlayerSpaceship():setTemplate("TIE-Interceptor"):setCallSign("Rho-"..idx):setFaction("Imperial")
 	fighter_utils:makeImperialFighterReady(rho)
 	self.rho_ships[idx] = rho
 	return rho
@@ -90,27 +90,27 @@ end
 --[[
 function fighter_utils:init()
 	addGMFunction("Spawn TI Point", function()
-		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE Interceptor"):setCallSign("Rho-"..fighter_utils.squadron_number):setLongRangeRadarRange(10000):setCanScan(false)
+		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE-Interceptor"):setCallSign("Rho-"..fighter_utils.squadron_number):setLongRangeRadarRange(10000):setCanScan(false)
 		 fighter_utils.squadron_number = fighter_utils.squadron_number +1
 	end)
 	addGMFunction("Spawn TI Wing", function()
-		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE Interceptor"):setCallSign("Rho-"..fighter_utils.squadron_number):setLongRangeRadarRange(15000):setCanScan(true)
+		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE-Interceptor"):setCallSign("Rho-"..fighter_utils.squadron_number):setLongRangeRadarRange(15000):setCanScan(true)
 		 fighter_utils.squadron_number = fighter_utils.squadron_number +1
 	end)
 	addGMFunction("Spawn TB", function()
-		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE Bomber"):setCallSign("Gamma")
+		 PlayerSpaceship():setFaction(fighter_utils.default_faction):setTemplate("TIE-Bomber"):setCallSign("Gamma")
 	end)
 	addGMFunction("Spawn TB (CPU)", function()
-		local tb = CpuShip():setFaction(fighter_utils.default_faction):setTemplate("TIE Bomber"):setCallSign("Gamma"):setScanStateByFaction(fighter_utils.default_faction, "fullscan"):setCanBeDestroyed(false)
+		local tb = CpuShip():setFaction(fighter_utils.default_faction):setTemplate("TIE-Bomber"):setCallSign("Gamma"):setScanStateByFaction(fighter_utils.default_faction, "fullscan"):setCanBeDestroyed(false)
 		fighter_utils:onNewPlayerShip(tb)
 	end)
 
 	addGMFunction("Spawn TF (enemy)", function()
-		 PlayerSpaceship():setFaction(fighter_utils.enemy_faction):setTemplate("TIE Fighter"):setCallSign("Alpha-"..fighter_utils.squadron_number)
+		 PlayerSpaceship():setFaction(fighter_utils.enemy_faction):setTemplate("TIE-Fighter"):setCallSign("Alpha-"..fighter_utils.squadron_number)
 		 fighter_utils.squadron_number = fighter_utils.squadron_number +1
 	end)
 	addGMFunction("Spawn TF (enemy, CPU)", function()
-		 local tf = CpuShip():setFaction(fighter_utils.enemy_faction):setTemplate("TIE Fighter"):setCallSign("Alpha-"..fighter_utils.squadron_number):setScanStateByFaction(fighter_utils.enemy_faction, "fullscan")
+		 local tf = CpuShip():setFaction(fighter_utils.enemy_faction):setTemplate("TIE-Fighter"):setCallSign("Alpha-"..fighter_utils.squadron_number):setScanStateByFaction(fighter_utils.enemy_faction, "fullscan")
 		 fighter_utils.squadron_number = fighter_utils.squadron_number +1
 		 fighter_utils:onNewPlayerShip(tf)
 	end)

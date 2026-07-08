@@ -24,6 +24,6 @@ function proximity_scan:updatePlayerShip(delta, p)
 end
 
 function proximity_scan:initTest()
-	local ship1 = PlayerSpaceship():setTemplate("TIE Fighter"):setCallSign("Proximity Scanner"):setPosition(0,0):setRotation(0)
-	local ship2 = CpuShip():setTemplate("TIE-Fighter"):setCallSign("Scan Target"):setPosition(1100,0)
+	local ship1 = PlayerSpaceship():setTemplate("TIE-Fighter"):setCallSign("Proximity Scanner"):setPosition(0,0):setRotation(0)
+	local ship2 = CpuShip():setTemplate(" TIE-Fighter"):setCallSign("Scan Target"):setPosition(1100,0)
 end

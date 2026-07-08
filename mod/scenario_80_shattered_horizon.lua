@@ -47,6 +47,7 @@ function init()
 	--plot_shattered_network.ground = map_shattered.ground
 
 	plot_shattered_fleets:spawn_star_destroyer(35800, -63000)
+	plot_shattered_fleets:spawn_nr_fleet(-44000, -56000)
 
 	plot_shattered_cic.rebel_sat = plot_shattered_cic:spawn_sat(70400, -22000, "RS-04", _("A navigation satellite - it transmits sensor data to the surface of Endor."))
 	plot_shattered_cic:init_cic_infos(plot_shattered_cic.rebel_sat)

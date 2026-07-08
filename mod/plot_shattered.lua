@@ -775,7 +775,7 @@ function plot_shattered_fleets:gm_menu()
 end
 
 function plot_shattered_fleets:spawn_star_destroyer(x,y)
-    self.isd = CpuShip():setTemplate(" Star Destroyer"):setFaction("Imperial"):setCallSign("Victory"):setDescription("Star Destroyer Victory"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
+    self.isd = CpuShip():setTemplate(" Star Destroyer"):setFaction("Imperial"):setCallSign("Harbinger of Dawn"):setDescription("Star Destroyer Harbinger of Dawn"):setPosition(x,y):setScanStateByFaction("Endor", SS_SIMPLE_SCAN):orderStandGround()
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x+3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate("TIE-Fighter"):setPosition(x-3000,y-3000):orderDefendTarget(self.isd):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)

@@ -49,6 +49,9 @@ function map_shattered:init()
         zx[16], zy[16]
     )
 
+	Nebula():setPosition(-3320, -27549)
+	Nebula():setPosition(11089, -30440)
+
     -- create stations and global accessible ships
     self.flight_control = PlayerSpaceship():setTemplate("NavSat"):setCallSign("FC-03"):setFaction("Endor"):setPosition(3000, -30000)
     self.flight_control:setDescription(_("A navigation satellite - the all-seeing eye of Tantal-3 flight control."))
@@ -81,7 +84,8 @@ function map_shattered:init()
     self.ground_green:setDescription(_("Landefeld nahe Tantal-3. Nicht für Starts geeignet."))
     self.ground_green:setRotation(-90)
 
-    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-33064, -2*orbit):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_imp=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Glory-1"):setPosition(-10000, -35000):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
+    self.freighter_imp2=CpuShip():setTemplate(" Nebulon-B"):setFaction("Imperial"):setCallSign("Vengeful Horizon"):setPosition(10000, -35000):setDescription(_("Nebulon-B frigate")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
     self.freighter_nr=CpuShip():setTemplate(" CR90"):setFaction("New Republic"):setCallSign("Pioneer-7"):setPosition(-33064, 2*orbit):setDescription(_("A long haul corvette")):setScanState(SS_SIMPLE_SCAN):orderStandGround()
     self.freighter_cd=CpuShip():setTemplate("Pheasant"):setFaction("Crimson Dawn"):setCallSign("Serpent-3"):setPosition(70000, 27000):setDescription(_("A luxury casino ship")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(1000):setHull(1000):setShieldsMax(500, 250):setShields(500, 250)
 --    self.freighter_lf=CpuShip():setTemplate("Personnel Freighter 3"):setFaction("Independent"):setCallSign("Sanguine-4"):setPosition(-2*orbit, -33064):setDescription(_("A long haul freighter")):setScanState(SS_SIMPLE_SCAN):orderStandGround():setHullMax(750):setHull(750):setShieldsMax(250, 250):setShields(250, 250)
@@ -92,11 +96,19 @@ function map_shattered:init()
     CpuShip():setFaction("New Republic"):setTemplate(" X-Wing"):setPosition(px-3000,py):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-A4"):setPosition(px,py-3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("New Republic"):setTemplate(" Y-Wing BTL-B"):setPosition(px,py+3000):orderDefendTarget(self.freighter_nr):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+
     px,py = self.freighter_imp:getPosition()
     CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate(" TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
     CpuShip():setFaction("Imperial"):setTemplate(" TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+
+    px,py = self.freighter_imp2:getPosition()
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px+3000,py):orderDefendTarget(self.freighter_imp2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Fighter"):setPosition(px-3000,py):orderDefendTarget(self.freighter_imp2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Bomber"):setPosition(px,py-3000):orderDefendTarget(self.freighter_imp2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+    CpuShip():setFaction("Imperial"):setTemplate(" TIE-Interceptor"):setPosition(px,py+3000):orderDefendTarget(self.freighter_imp2):setScanStateByFaction("Endor", SS_SIMPLE_SCAN)
+
     px,py = self.freighter_cd:getPosition()
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" A-24"):setPosition(px+3000,py):orderDefendTarget(self.freighter_cd)
     CpuShip():setFaction("Crimson Dawn"):setTemplate(" G9"):setPosition(px-3000,py):orderDefendTarget(self.freighter_cd)

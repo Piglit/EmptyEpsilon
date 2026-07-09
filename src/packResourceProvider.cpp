@@ -92,7 +92,7 @@ void PackResourceProvider::addPackResourcesForDirectory(const string directory)
     {
         if (!error_code)
         {
-            if (!entry.is_directory() && string { entry.path().extension().u8string() }.lower() == ".pack")
+            if (!entry.is_directory() && string ( entry.path().extension().u8string() ).lower() == ".pack")
                 new PackResourceProvider(entry.path().u8string());
         }
         else

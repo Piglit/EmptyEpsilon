@@ -10,6 +10,7 @@ if(APPLE)
 endif()
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 

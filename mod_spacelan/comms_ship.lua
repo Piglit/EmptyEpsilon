@@ -284,4 +284,12 @@ function special_buy_cost(target, player)
 end
 
 -- `comms_source` and `comms_target` are global in comms script.
-commsShipMainMenu(comms_source, comms_target)
+--commsShipMainMenu(comms_source, comms_target)
+
+-- let's ignore everything above and use the new script:
+
+require("utils.lua")
+require("comms/lib_comms_nodes.lua")
+require("comms/comms_vf_ship.lua")
+local actually_used_comms_function = comms_vf_ship.main:create_comms_main_function()
+actually_used_comms_function(comms_source, comms_target)

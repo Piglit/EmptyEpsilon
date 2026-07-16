@@ -134,7 +134,7 @@ CASD_MainNode:add_choice(CommsAvpInfo)
 CASD_Greetings.choices = CASD_MainNode.choices
 
 -- any undocked node: abort and redirect to docked greeting, when docking
-CommsAvpStationUndocked.add_choice(CASD_Greetings)
+CommsAvpStationUndocked:add_choice(CASD_Greetings)
 
 
 --[[ Definitions of node methods --]]

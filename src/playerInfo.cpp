@@ -252,7 +252,8 @@ void PlayerInfo::spawnUI(int monitor_index, RenderLayer* render_layer)
             sde->enablePosition(relayOfficer);
         }
 
-        if (main_screen_control & (1 << monitor_index))
+        if (!(crew_position[singleFighter] & (1 << monitor_index)) && !(main_screen & (1 << monitor_index)))
+        //if (main_screen_control & (1 << monitor_index))
             new GuiMainScreenControls(container);
 
         screen->finishCreation();

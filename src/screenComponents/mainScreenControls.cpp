@@ -20,48 +20,50 @@ GuiMainScreenControls::GuiMainScreenControls(GuiContainer* owner)
             tactical_button->setVisible(false);
         if (!gameGlobalInfo->allow_main_screen_long_range_radar)
             long_range_button->setVisible(false);
-        if (show_comms_button && onscreen_comms_active)
+        if (show_comms_button && my_spaceship && my_spaceship->main_screen_overlay == MSO_ShowComms)
             show_comms_button->setVisible(false);
-        if (hide_comms_button && !onscreen_comms_active)
+        if (hide_comms_button && my_spaceship && my_spaceship->main_screen_overlay == MSO_HideComms)
             hide_comms_button->setVisible(false);
     });
     open_button->setValue(false);
     open_button->setSize(GuiElement::GuiSizeMax, 50);
 
-    // Front, back, left, and right view buttons.
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_FRONT_BUTTON", tr("mainscreen", "Front"), [this]()
-    {
-        if (my_spaceship)
+    if (my_player_info->crew_position[helmsOfficer] || my_player_info->crew_position[tacticalOfficer] || my_player_info->crew_position[singlePilot])
+	{
+        // Front, back, left, and right view buttons.
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_FRONT_BUTTON", tr("mainscreen", "Front"), [this]()
         {
-            my_spaceship->commandMainScreenSetting(MSS_Front);
-        }
-        closePopup();
-    }));
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_BACK_BUTTON", tr("mainscreen", "Back"), [this]()
-    {
-        if (my_spaceship)
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_Front);
+            }
+            closePopup();
+        }));
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_BACK_BUTTON", tr("mainscreen", "Back"), [this]()
         {
-            my_spaceship->commandMainScreenSetting(MSS_Back);
-        }
-        closePopup();
-    }));
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_LEFT_BUTTON", tr("mainscreen", "Left"), [this]()
-    {
-        if (my_spaceship)
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_Back);
+            }
+            closePopup();
+        }));
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_LEFT_BUTTON", tr("mainscreen", "Left"), [this]()
         {
-            my_spaceship->commandMainScreenSetting(MSS_Left);
-        }
-        closePopup();
-    }));
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_RIGHT_BUTTON", tr("mainscreen", "Right"), [this]()
-    {
-        if (my_spaceship)
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_Left);
+            }
+            closePopup();
+        }));
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_RIGHT_BUTTON", tr("mainscreen", "Right"), [this]()
         {
-            my_spaceship->commandMainScreenSetting(MSS_Right);
-        }
-        closePopup();
-    }));
-
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_Right);
+            }
+            closePopup();
+        }));
+	}
     // If the player has control over weapons targeting, enable the target view
     // option in the main screen controls.
     if (my_player_info->crew_position[weaponsOfficer] || my_player_info->crew_position[tacticalOfficer] || my_player_info->crew_position[singlePilot])
@@ -75,29 +77,32 @@ GuiMainScreenControls::GuiMainScreenControls(GuiContainer* owner)
             closePopup();
         }));
         target_lock_button = buttons.back();
+
+        // Tactical radar button.
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_TACTICAL_BUTTON", tr("mainscreen", "Tactical"), [this]()
+        {
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_Tactical);
+            }
+            closePopup();
+        }));
+        tactical_button = buttons.back();
     }
 
-    // Tactical radar button.
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_TACTICAL_BUTTON", tr("mainscreen", "Tactical"), [this]()
+    if (my_player_info->crew_position[scienceOfficer] || my_player_info->crew_position[operationsOfficer] || my_player_info->crew_position[singlePilot])
     {
-        if (my_spaceship)
+        // Long-range radar button.
+        buttons.push_back(new GuiButton(this, "MAIN_SCREEN_LONG_RANGE_BUTTON", tr("mainscreen", "Long Range"), [this]()
         {
-            my_spaceship->commandMainScreenSetting(MSS_Tactical);
-        }
-        closePopup();
-    }));
-    tactical_button = buttons.back();
-
-    // Long-range radar button.
-    buttons.push_back(new GuiButton(this, "MAIN_SCREEN_LONG_RANGE_BUTTON", tr("mainscreen", "Long Range"), [this]()
-    {
-        if (my_spaceship)
-        {
-            my_spaceship->commandMainScreenSetting(MSS_LongRange);
-        }
-        closePopup();
-    }));
-    long_range_button = buttons.back();
+            if (my_spaceship)
+            {
+                my_spaceship->commandMainScreenSetting(MSS_LongRange);
+            }
+            closePopup();
+        }));
+        long_range_button = buttons.back();
+    }
 
     // If the player has control over comms, they can toggle the comms overlay
     // on the main screen.
@@ -108,7 +113,6 @@ GuiMainScreenControls::GuiMainScreenControls(GuiContainer* owner)
             if (my_spaceship)
             {
                 my_spaceship->commandMainScreenOverlay(MSO_ShowComms);
-                onscreen_comms_active = true;
             }
             closePopup();
         }));
@@ -119,7 +123,6 @@ GuiMainScreenControls::GuiMainScreenControls(GuiContainer* owner)
             if (my_spaceship)
             {
                 my_spaceship->commandMainScreenOverlay(MSO_HideComms);
-                onscreen_comms_active = false;
             }
             closePopup();
         }));
@@ -128,6 +131,7 @@ GuiMainScreenControls::GuiMainScreenControls(GuiContainer* owner)
 
     for(GuiButton* button : buttons)
         button->setSize(GuiElement::GuiSizeMax, 50)->setVisible(false);
+    open_button->setVisible(!buttons.empty());
 }
 
 void GuiMainScreenControls::closePopup()

@@ -21,6 +21,7 @@ private:
     GuiPanel* hailed_box;
     GuiLabel* hailed_label;
     GuiButton* hailed_answer;
+    GuiButton* hailed_answer_to_main;
     GuiButton* hailed_ignore;
 
     GuiPanel* no_response_box;

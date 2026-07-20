@@ -40,13 +40,20 @@ GuiCommsOverlay::GuiCommsOverlay(GuiContainer* owner)
         if (my_spaceship)
             my_spaceship->commandAnswerCommHail(true);
     });
-    hailed_answer->setSize(300, 50)->setPosition(20, -20, sp::Alignment::BottomLeft);
+    hailed_answer->setSize(250, 50)->setPosition(20, -20, sp::Alignment::BottomLeft);
+
+    hailed_answer_to_main = new GuiButton(hailed_box, "COMMS_BEING_HAILED_ANSWER_TO_MAIN", tr("Answer on main screen"), []() {
+        if (my_spaceship)
+            my_spaceship->commandAnswerCommHail(true);
+			my_spaceship->commandMainScreenOverlay(MSO_ShowComms);
+    });
+    hailed_answer_to_main->setSize(250, 50)->setPosition(0, -20, sp::Alignment::BottomCenter);
 
     hailed_ignore = new GuiButton(hailed_box, "COMMS_BEING_HAILED_IGNORE", tr("Ignore"), []() {
         if (my_spaceship)
             my_spaceship->commandAnswerCommHail(false);
     });
-    hailed_ignore->setSize(300, 50)->setPosition(-20, -20, sp::Alignment::BottomRight);
+    hailed_ignore->setSize(250, 50)->setPosition(-20, -20, sp::Alignment::BottomRight);
 
     // Panel for unresponsive hails.
     no_response_box = new GuiPanel(this, "COMMS_OPENING_BOX");

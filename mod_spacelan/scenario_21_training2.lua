@@ -1,6 +1,6 @@
--- Name: Frigates Testing Ground
+-- Name: Testing Ground
 -- Type: Training
--- Short Description: Frigate Training Ground
+-- Short Description: Training Ground
 -- Objective: Destroy all enemy ships in the area.
 -- Duration: 30 minutes
 -- Difficulty: easy-medium
@@ -10,6 +10,25 @@
 -- Ships[Corvettes]: Heavier Corvettes are available
 
 -- secondary objective: show the basic usage of some script modules
+
+--[[
+Design:
+* Allow experienced players to try out different specialiced ships.
+* Frigates and Corvettes, both.
+* Start with default drive config, but allow change later.
+* First Wave: easy enemies,
+* Second Wave: more fitting enemies, with terrain
+* Refuel Station: should show a typical comms situation; can refit drive here.
+* Challenge with encounter - good for other drive. show how encounters work, can gain artifact.
+* Offer to overwhelm them with unfitting wave.
+
+* Later: Multi-Ship Variant
+
+Considerations:
+* Spawn enemies only after the ship was chosen.
+* all enemies are in the same lane, so multi-ship crews don't split up
+--]]
+
 
 require("utils.lua")
 require("luax.lua")	-- table.filter
@@ -42,6 +61,10 @@ function createHumanMineShip(posx, posy, arc)
 	return createHumanShip(" Nautilus", posx, posy, arc)
 end
 
+function createHumanTankShipHeavy(posx, posy, arc)
+	return createHumanShip(" Atlantis", posx, posy, arc)
+end
+
 function createHumanBeamShipHeavy(posx, posy, arc)
 	return createHumanShip(" Maverick", posx, posy, arc)
 end
@@ -49,6 +72,16 @@ end
 function createHumanMissileShipHeavy(posx, posy, arc)
 	return createHumanShip(" Crucible", posx, posy, arc)
 end
+
+function createHumanCarrierShip(posx, posy, arc)
+	return createHumanShip(" Poseidon", posx, posy, arc)
+end
+
+function createHumanCarrierShipHeavy(posx, posy, arc)
+	return createHumanShip(" Neptune", posx, posy, arc)
+end
+
+-- Enemies
 
 function createExuariFighterSquad(posx, posy, arc)
 	local enemyList = script_formation.spawnFormation("Dagger", 2, posx, posy, "Exuari", "Beta-")

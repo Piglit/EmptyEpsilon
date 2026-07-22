@@ -177,8 +177,11 @@ void EngineeringScreen::onDraw(sp::RenderTarget& renderer)
     {
         if (custom_ship_entries->hasEntries())
         {
-            system_config_container->setPosition(20, -20, sp::Alignment::BottomLeft)->setSize(750 + 300, GuiElement::GuiSizeMax);
-            custom_ship_entries->setSize(500, GuiElement::GuiSizeMax);
+            if (my_spaceship->getPlayerShipType() == PST_Station)
+            {
+                system_config_container->setPosition(20, -20, sp::Alignment::BottomLeft)->setSize(750 + 300, GuiElement::GuiSizeMax);
+                custom_ship_entries->setSize(500, GuiElement::GuiSizeMax);
+            }
         }
         // Update the energy usage.
         if (previous_energy_measurement == 0.0f)

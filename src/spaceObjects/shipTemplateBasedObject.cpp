@@ -471,7 +471,7 @@ void ShipTemplateBasedObject::takeDamage(float damage_amount, DamageInfo info)
         }
     }
 
-    if (info.type != DT_EMP && damage_amount > 0.0f)
+    if (damage_amount > 0.0f)
     {
         takeHullDamage(damage_amount, info);
     }
@@ -502,6 +502,8 @@ void ShipTemplateBasedObject::takeDamage(float damage_amount, DamageInfo info)
 
 void ShipTemplateBasedObject::takeHullDamage(float damage_amount, DamageInfo& info)
 {
+    if (info.type == DT_EMP)
+        return;
     hull_strength -= damage_amount;
     if (hull_strength <= 0.0f && !can_be_destroyed)
     {

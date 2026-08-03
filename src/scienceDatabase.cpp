@@ -126,6 +126,10 @@ REGISTER_SCRIPT_CLASS(ScienceDatabase)
     /// ModelData objects define a 3D mesh, textures, adjustments, and collision box, and are loaded from scripts/model_data.lua when EmptyEpsilon is launched.
     /// Example: entry:setModelDataName("AtlasHeavyFighterYellow") -- uses the ModelData named "AtlasHeavyFighterYellow"
     REGISTER_SCRIPT_CLASS_FUNCTION(ScienceDatabase, setModelDataName);
+    /// Get the ModelData name, used for this ScienceDatabase entry.
+    /// Example: entry:getModelDataName() -- returns the name of the ModelData
+    REGISTER_SCRIPT_CLASS_FUNCTION(ScienceDatabase, getModelDataName);
+
 }
 
 PVector<ScienceDatabase> ScienceDatabase::science_databases;
@@ -235,6 +239,11 @@ void ScienceDatabase::setLongDescription(string text)
 void ScienceDatabase::setModelData(P<ModelData> model_data)
 {
     this->model_data_name = model_data->getName();
+}
+
+string ScienceDatabase::getModelDataName()
+{
+    return this->model_data_name;
 }
 
 void ScienceDatabase::setModelDataName(string model_data_name)

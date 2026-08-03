@@ -88,6 +88,7 @@ public:
     }
 
     void setModelData(P<ModelData> model_data);
+    string getModelDataName();
     void setModelDataName(string model_data_name);
     bool hasModelData();
     P<ModelData> getModelData();

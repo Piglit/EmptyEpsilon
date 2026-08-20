@@ -1,0 +1,119 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+#: mod_spacelan/comms/comms_vf_military.lua:89
+msgid "Send reinforcements"
+msgstr "Verstärkung schicken"
+
+#: mod_spacelan/comms/comms_vf_military.lua:90
+msgid "Request friendly warship"
+msgstr "Verbündetes Kriegsschiff anfordern"
+
+#: mod_spacelan/comms/comms_vf_military.lua:91
+msgid "Send military help"
+msgstr "Militärische Unterstützung schicken"
+
+#: mod_spacelan/comms/comms_vf_military.lua:92
+msgid "Get a ship to help us"
+msgstr "Ein Schiff zu unserer Unterstützung schicken"
+
+#: mod_spacelan/comms/comms_vf_military.lua:97
+msgid "What kind of reinforcement ship?"
+msgstr "Welche Art von Verstärkungsschiff?"
+
+#: mod_spacelan/comms/comms_vf_military.lua:98
+msgid "What kind of ship should we send?"
+msgstr "Welche Art von Schiff sollen wir schicken?"
+
+#: mod_spacelan/comms/comms_vf_military.lua:99
+msgid "Specify ship type"
+msgstr "Schiffstyp angeben"
+
+#: mod_spacelan/comms/comms_vf_military.lua:100
+msgid "Identify desired type of ship"
+msgstr "Gewünschten Schiffstyp angeben"
+
+#: mod_spacelan/comms/comms_vf_military.lua:111
+#, lua-format
+msgctxt "stationAssist-comms"
+msgid "%s (%d reputation)"
+msgstr "%s (%d Ruf)"
+
+#: mod_spacelan/comms/comms_vf_military.lua:116
+msgid "No reinforcements available"
+msgstr "Keine Verstärkung verfügbar"
+
+#: mod_spacelan/comms/comms_vf_military.lua:117
+msgid "We don't have any reinforcements"
+msgstr "Wir haben keine Verstärkung"
+
+#: mod_spacelan/comms/comms_vf_military.lua:118
+msgid "No military ships in our inventory, sorry"
+msgstr "Leider haben wir keine Militärschiffe in unserem Bestand"
+
+#: mod_spacelan/comms/comms_vf_military.lua:119
+msgid "Reinforcements unavailable"
+msgstr "Verstärkung nicht verfügbar"
+
+#: mod_spacelan/comms/comms_vf_military.lua:136
+#, lua-format
+msgid "We have dispatched %s to assist at waypoint %s"
+msgstr "Wir haben %s zur Unterstützung bei Wegpunkt %s entsandt"
+
+#: mod_spacelan/comms/comms_vf_military.lua:137
+#, lua-format
+msgid "%s is heading for waypoint %s"
+msgstr "%s ist auf dem Weg zu Wegpunkt %s"
+
+#: mod_spacelan/comms/comms_vf_military.lua:138
+#, lua-format
+msgid "%s has been sent to waypoint %s"
+msgstr "%s wurde zu Wegpunkt %s geschickt"
+
+#: mod_spacelan/comms/comms_vf_military.lua:139
+#, lua-format
+msgid "We ordered %s to help at waypoint %s"
+msgstr "Wir haben %s befohlen, bei Wegpunkt %s zu helfen"
+
+#: mod_spacelan/comms/comms_vf_military.lua:166
+msgid "Insufficient reputation"
+msgstr "Unzureichender Ruf"
+
+#: mod_spacelan/comms/comms_vf_military.lua:340
+msgid "Activating station defense fleet"
+msgstr "Stationsverteidigungsflotte wird aktiviert"
+
+#: mod_spacelan/comms/comms_vf_military.lua:344
+#, lua-format
+msgid "Activate station defense fleet (%s rep)"
+msgstr "Stationsverteidigungsflotte aktivieren (%s Ruf)"
+
+#: mod_spacelan/comms/comms_vf_military.lua:345
+#, lua-format
+msgid "Launch station defense fleet (%s rep)"
+msgstr "Stationsverteidigungsflotte starten (%s Ruf)"
+
+#: mod_spacelan/comms/comms_vf_military.lua:346
+#, lua-format
+msgid "Send out station defense fleet (%s rep)"
+msgstr "Stationsverteidigungsflotte aussenden (%s Ruf)"
+
+#: mod_spacelan/comms/comms_vf_military.lua:347
+#, lua-format
+msgid "Launch %s defenders (%s rep)"
+msgstr "%s Verteidiger starten (%s Ruf)"
+
+#: mod_spacelan/comms/comms_vf_military.lua:348
+#, lua-format
+msgid "Enable %s defenders (%s rep)"
+msgstr "%s Verteidiger aktivieren (%s Ruf)"

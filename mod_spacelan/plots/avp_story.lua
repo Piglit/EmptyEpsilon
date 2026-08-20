@@ -21,7 +21,6 @@ In the stations script, Expansion (taking stations and their services) and Explo
 
 
 avp_story = {
-	stations_discovered = 0,
 	terrain_discovered = 0,
 	time_first_discoverey = 0,
 --	motivations = arrayShuffle({
@@ -194,6 +193,7 @@ function avp_story:arlenianStation(terrain_module)
 				avp_story.arlenianStationsCounter = found -- skip, no motherstation on a planet
 			else
 				template = "Arlenian Motherstation"
+				avp_story.found_motherstation = true
 			end
 		elseif found >= 1 then
 			-- first one is starbase
@@ -218,18 +218,22 @@ function avp_story:arlenianStation(terrain_module)
 				end
 			end
 		end
-
 		log(string.format("%s discovered %s %s with %s (%s, %i)", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter, template, found))
 		local station = avp_stations:createArlenianStation(template, terrain_module)
-		terrain_module:insertStation(station)
+		local x,y = station:getPosition()
+		local strength = avp_story:enemyStrength(terrain_module)
+		local fleet = avp_enemies.modules["Arlenians"]:spawnEnemiesAtPositions({
+			{x+100,y+100},{x-100,y-100},{x+100,y-100},{x-100,y+100}
+		}, strength/2)
+		for __, ship in ipairs(fleet) do
+			ship:orderDefendTarget(station)
+		end
 		if terrain_module:canInsertEnemies() then
-			if terrain_module.zone_name ~= "" then
-				station.zone_name = "called '" .. terrain_module.zone_name .. "' "
-			end
 			vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 		end
 	end)
 	terrain_module.enemy_faction = tableSelectRandom({"Kraylor", "Exuari"})
+	terrain_module.gossip = string.format("From time to time we see ships of the Arlenians near their station in the %s not very far from here.", terrain_module.terrain_type)
 	return true
 end
 
@@ -238,12 +242,10 @@ function avp_story:derelictStation(terrain_module)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local station = avp_stations:createEnemyStation({"Small Station", "Medium Station", "Medium Station"}, {"History", "RandomHumanNeutral", "Random"}, terrain_module)
 		station:setFaction("Empty")
-		terrain_module:insertStation(station)
-		if terrain_module.terrain_type == "planets" then
-			terrain_module:insertArtifact()	-- rotates with station
-		else
-			local x,y = station:getPosition()
-			wh_artifacts:placeGenericArtifact(x,y)
+		local x,y = station:getPosition()
+		local art = wh_artifacts:placeGenericArtifact(x,y)
+		if station.speed ~= nil and station.center ~= nil then
+			wh_rota:add_object(art, station.speed, station.center)
 		end
 		station:setCommsFunction(nil):setCommsScript("")
 	end)
@@ -257,11 +259,12 @@ function avp_story:pirateStation(terrain_module)
 		local station = avp_stations:createEnemyStation({"Large Station", "Medium Station", "Medium Station"}, {"Pop Sci Fi", "RandomGenericSinister", "Random"}, terrain_module)
 		station:setFaction("Criminals")
 		EnemyModuleCriminals:addBossHangar(station, {"capitals", "capitals", "fighters", "fighters"})
-		terrain_module:insertStation(station)
 		local x,y = station:getPosition()
 		local art = wh_artifacts:placeGenericArtifact(x,y)
+		if station.speed ~= nil and station.center ~= nil then
+			wh_rota:add_object(art, station.speed, station.center)
+		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		station.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Criminals"
 	terrain_module.gossip = string.format("Nearby is a filthy area with %s where pirates make a living. It would be nice if someone brought justice to them", terrain_module.terrain_type)
@@ -274,11 +277,13 @@ function avp_story:ghostStation(terrain_module)
 		local station = avp_stations:createEnemyStation({"Large Station", "Medium Station", "Small Station"}, {"Science", "RandomGenericSinister", "Random"}, terrain_module)
 		station:setFaction("Ghosts")
 		EnemyModuleGhosts:addBossHangar(station, {"capitals", "capitals", "fighters", "fighters"})
-		terrain_module:insertStation(station)
 		local x,y = station:getPosition()
 		local art = wh_artifacts:placeGenericArtifact(x,y)
+		station.comms_data.service_available["surrender"] = false
+		if station.speed ~= nil and station.center ~= nil then
+			wh_rota:add_object(art, station.speed, station.center)
+		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		station.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Ghosts"
 	terrain_module.gossip = string.format("We are not far from an area with %s - don't go there, unless you want to have some rouge AI taking over your ship.", terrain_module.terrain_type)
@@ -289,11 +294,11 @@ function avp_story:exuariCarrier(terrain_module)
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local carrier = EnemyModuleExuari:spawnBoss()
-		terrain_module:insertStation(carrier)
+		avp_stations:insertStation(carrier, terrain_module)
 		local x,y = carrier:getPosition()
 		local art = wh_artifacts:placeGenericArtifact(x,y)
+		carrier.comms_data.service_available["surrender"] = false
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		carrier.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Exuari"
 	terrain_module.gossip = string.format("There were sightings of an Exuari carrier ship near the %s nearby.", terrain_module.terrain_type)
@@ -305,11 +310,11 @@ function avp_story:ktlitanQueen(terrain_module)
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local carrier = EnemyModuleKtlitans:spawnBoss()
-		terrain_module:insertStation(carrier)
+		avp_stations:insertStation(carrier, terrain_module)
 		local x,y = carrier:getPosition()
 		local art = wh_artifacts:placeGenericArtifact(x,y)
+		carrier.comms_data.service_available["surrender"] = false
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		carrier.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Ktlitans"
 	terrain_module.gossip = string.format("There is a reservoir full of Ktlitans in the neighbourhood. You can almost see the %s of that area from here.", terrain_module.terrain_type)
@@ -324,12 +329,12 @@ function avp_story:kraylorBase(terrain_module)
 		local x,y = art:getPosition()
 		local last_base = nil
 		for idx, base in ipairs(EnemyModuleKraylor:spawnBossBases()) do
+			avp_stations:insertStation(base, terrain_module)
 			local x1,y1 = radialPosition(x, y, 1000, idx*90)
 			base:setPosition(x1,y1)
 			last_base = base
 		end
 		vf_comms_call_to_action:call_to_action(last_base, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		last_base.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Kraylor"
 	terrain_module.gossip = string.format("The Krailor are near! They will move from their %s to us soon.", terrain_module.terrain_type)
@@ -346,7 +351,6 @@ function avp_story:hiddenArtifact(terrain_module)
 			local station = avp_stations:createIndependentStation(terrain_module)
 			if station ~= nil then
 				terrain_module.cta = vf_comms_call_to_action:call_to_action(station, 20000, terrain_module.encounter)
-				station.comms_data.gossip = terrain_module.collected_gossip
 			end
 		end
 	end)
@@ -365,7 +369,6 @@ function avp_story:collapseArtifact(terrain_module)
 			local station = avp_stations:createIndependentStation(terrain_module)
 			if station ~= nil then
 				terrain_module.cta = vf_comms_call_to_action:call_to_action(station, 20000, terrain_module.encounter)
-				station.comms_data.gossip = terrain_module.collected_gossip
 			end
 		end
 	end)
@@ -391,7 +394,6 @@ function avp_story:nebulaCoolantGain(terrain_module)
 			local station = avp_stations:createIndependentStation(terrain_module)
 			if station ~= nil then
 				terrain_module.cta = vf_comms_call_to_action:call_to_action(station, 20000, terrain_module.encounter)
-				station.comms_data.gossip = terrain_module.collected_gossip
 			end
 		end
 	end)
@@ -423,7 +425,9 @@ function avp_story:exuariAmbush(terrain_module)
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local positions = terrain_module:getEnemySpawnPositions()
-		local enemies = avp_enemies:spawn(positions, "Exuari", self:enemyStrength(terrain_module))
+		table.insert(positions, 1, table.pack(vf_ambush:findBestAmbushPosition(ship)))
+		table.insert(positions, 3, table.pack(vf_ambush:findBestAmbushPosition(ship)))
+		local enemies = avp_enemies:spawn(positions, "Exuari", avp_story:enemyStrength(terrain_module))
 		for _, enemy in ipairs(enemies) do
 			enemy:orderAttack(ship)
 		end
@@ -447,12 +451,10 @@ function avp_story:mineThrowerSeek(terrain_module)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local station = avp_stations:createEnemyStation({"Medium Station"}, {"Spec Sci Fi", "RandomHumanNeutral", "Random"}, terrain_module)
 		station:setFaction(terrain_module.enemy_faction)
-		terrain_module:insertStation(station)
 		for idx,mine in ipairs(terrain_module.mines) do
 			vf_mine_dance:addSeekingMine(mine)
 		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		station.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.gossip = string.format("Recently we intercepted a software-update for target seeking mines on a subspace frequency.")
 	return true
@@ -465,12 +467,10 @@ function avp_story:mineThrowerDance(terrain_module)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local station = avp_stations:createEnemyStation({"Medium Station"}, {"Spec Sci Fi", "RandomHumanNeutral", "Random"}, terrain_module)
 		station:setFaction(terrain_module.enemy_faction)
-		terrain_module:insertStation(station)
 		for idx,mine in ipairs(terrain_module.mines) do
 			vf_mine_dance:addDancingMine(station, mine, terrain_module.radius, idx%2==1)
 		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		station.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.getEnemySpawnPositions = function(self)
 		return self:calculateSpawnPositionsOnRing(self.radius)
@@ -491,7 +491,7 @@ function avp_story:kraylorMotherbase(terrain_module)
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local carrier = EnemyModuleKraylor:spawnBossMothership()
-		terrain_module:insertStation(carrier)
+		avp_stations:insertStation(carrier, terrain_module)
 		local x,y = carrier:getPosition()
 		for idx, base in ipairs(EnemyModuleKraylor:spawnBossBases()) do
 			local x1,y1 = radialPosition(x, y, 3000, idx*90)
@@ -500,7 +500,6 @@ function avp_story:kraylorMotherbase(terrain_module)
 			wh_artifacts:placeGenericArtifact(x1,y1)
 		end
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
-		carrier.comms_data.gossip = terrain_module.collected_gossip
 	end)
 	terrain_module.enemy_faction = "Kraylor"
 	terrain_module.gossip = string.format("From time to time Kraylor supply vessels travel through here to the %s nearby. There must be something there...", terrain_module.terrain_type)
@@ -514,7 +513,7 @@ function avp_story:conflict(terrain_module)
 	terrain_module:registerOnCreationCallback(function(terrain_module, ship)
 		log(string.format("%s discovered %s %s with %s", ship:getCallSign(), terrain_module.terrain_type, terrain_module.zone_name, terrain_module.encounter))
 		local positions = terrain_module:getEnemySpawnPositions()
-		local strength = self:enemyStrength(terrain_module)
+		local strength = avp_story:enemyStrength(terrain_module)
 		local closest_contact = nil
 		local closest_contact_dist = 9999999
 		local farest_contact = nil
@@ -541,9 +540,6 @@ function avp_story:conflict(terrain_module)
 		end
 	end)
 	terrain_module.skip_enemies = true
-	--terrain_module.canInsertEnemies = function(_)
-	--	return false 
-	--end
 	terrain_module.gossip = string.format("There is an ongoing conflict between different faction near the %s next to our area.", terrain_module.terrain_type)
 	return true
 end
@@ -559,7 +555,6 @@ function avp_story:instableWormhole(terrain_module)
 			local station = avp_stations:createIndependentStation(terrain_module)
 			if station ~= nil then
 				terrain_module.cta = vf_comms_call_to_action:call_to_action(station, 20000, terrain_module.encounter)
-				station.comms_data.gossip = terrain_module.collected_gossip
 			end
 		end
 	end)
@@ -574,44 +569,6 @@ function avp_story:boss(terrain_module)
 	return self[encounter](self, terrain_module)
 end
 
---[[
-	-- effects per terrain type
-	-- there sould be:
-	-- * a combat encounter
-	-- * something to explore / a call to action
-	-- * a challenge
-	-- * a reward
-	-- effects may write additional facts or adjust the difficulty rating for enemies
-	-- every terrain type appears about 7 times. nebulae and asteroids up to 14 times
-
-	if terrain_module.terrain_type == "asteroids" then
-		self.addPirateHideout, self.addConflict, self.addRelict, self.addAggressor, self.addQuestgiver, self.addTechBase
-	elseif terrain_module.terrain_type == "nebulae" then
-		self:addNebulaEffect(terrain_module)	-- Coolant +/-, some malfunction, etc...
-	elseif terrain_module.terrain_type == "mines" then
-	elseif terrain_module.terrain_type == "planets" then
-	elseif terrain_module.terrain_type == "blackholes" then
-		self:addCollapseArtifact(terrain_module)
-	elseif terrain_module.terrain_type == "wormholes" then
-	end
-		"asteroids" = arrayShuffle({}),
-		"nebulae" = arrayShuffle({self.addNebulaEffect, self.addRelict, self.addBoss, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-		"mines" = arrayShuffle({self.addMineThrower, self.addRelict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-		"planets" = arrayShuffle({self.addConflict, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-		"blackholes" = {self.addAggressor, self.addQuestgiver, self.addTechBase},
-		"wormholes" = arrayShuffle({self.addInstableWormholeEffect, self.addAggressor, self.addQuestgiver, self.addTechBase}),
-
-end
---]]
---function avp_story:getMotivation()
---	self.motivations_index = self.motivations_index +1
---	if self.motivations_index > #self.motivations then
---		arrayShuffle(self.motivations)
---		self.motivations_index = 1
---	end
---	return = self.motivations[self.motivations_index]
---end
-
 function avp_story.onTerrainCreation(terrain_module, player)
 	--if true then
 	--	return true
@@ -625,7 +582,7 @@ function avp_story.onTerrainCreation(terrain_module, player)
 
 	-- global facts
 	self.terrain_discovered = self.terrain_discovered + 1
-	if self.time_first_discoverey == nil then
+	if self.time_first_discoverey == 0 then
 		self.time_first_discoverey = getScenarioTime()
 	end
 
@@ -639,14 +596,10 @@ function avp_story.onTerrainCreation(terrain_module, player)
 
 	--local motivation = self:getMotivation()
 
-	local station, artifact_callback
+
 
 	if terrain_module.stations == nil and terrain_module:canInsertStation() then
-		self.stations_discovered = self.stations_discovered + 1
-
-		station = avp_stations:createIndependentStation(terrain_module)
-		-- TODO determine what station & call to action
-		station.comms_data.gossip = terrain_module.collected_gossip
+		avp_stations:createIndependentStation(terrain_module)
 	end
 	if terrain_module.enemy_faction == nil then
 		terrain_module.enemy_faction = self:selectEncounter(terrain_module.terrain_type .. "Enemies")
@@ -654,32 +607,28 @@ function avp_story.onTerrainCreation(terrain_module, player)
 	local enemies = {}
 	if terrain_module:canInsertEnemies() then
 		local positions = terrain_module:getEnemySpawnPositions()
-		enemies, terrain_module.enemy_faction = avp_enemies:spawn(positions, terrain_module.enemy_faction, self:enemyStrength(terrain_module))
+		enemies, terrain_module.enemy_faction = avp_enemies:spawn(positions, terrain_module.enemy_faction, avp_story:enemyStrength(terrain_module))
 	end
 
-	station = terrain_module:getStation()
-	if station ~= nil and terrain_module.enemy_faction == "Kraylor" then
-		-- Kraylor already own their stations, overwrites call to action message, if stored
-		station:setFaction("Kraylor")
-		if terrain_module.cta ~= nil and terrain_module.cta.source == station then
-			terrain_module.cta.message = vf_comms_call_to_action:selectMessage("kraylorOccupiedStation")
+	local station = terrain_module:getStation()
+	if station ~= nil and station.typeName == "SpaceStation" and station:getFaction() == "Independent" then
+		if terrain_module.enemy_faction == "Kraylor" then
+			-- Kraylor already own their stations, overwrites call to action message, if stored
+			station.comms_data.orig_faction = station:getFaction()
+			station:setFaction("Kraylor")
+			if terrain_module.cta ~= nil and terrain_module.cta.source == station then
+				terrain_module.cta.message = vf_comms_call_to_action:selectMessage("kraylorOccupiedStation")
+			end
+			log("Kraylor occupied")
+		else
+			if vf_bescheid ~= nil then
+				vf_bescheid:sag_bescheid("independent_station_found", {
+					callsign=station:getCallSign(),
+					sector=station:getSectorName(),
+				})
+			end
 		end
 	end
-	--if station ~= nil and terrain_module.enemy_faction == "Exuari" and terrain_module.terrain_type ~= "nebulae" then
-	--	-- Exuari are attacking the station, so make it Arlenian, so Exuari can attack it
-	--	-- But Exuari try to hide in nebulae, so do not switch station faction then.
-	--	station:setFaction("Arlenians")
-	--end
-
-
-	--if terrain_module.terrain_type == "blackholes" then
-	--	local questgivers = {
-	--		station,
-	--		--ship,
-	--		enemies[1],	-- maybe more?
-	--	}
-	--	vf_cta:contactPlayer(player, questgivers, vf_blackhole.contact)
-	--end
 end
 
 function avp_story:enemyStrength(terrain_module)
@@ -706,10 +655,41 @@ function avp_story:enemyStrength(terrain_module)
 	-- radius_factor: ~1-6
 	-- difficulty: ~ 5-30
 	local difficulty = 10 * (player_strength + hours_of_game + self.terrain_discovered + radius_factor + gm_adjustment)
-	--print(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
+	--log(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
 	return difficulty
 end
 
+function avp_story:spawn_threat(station, player)
+	-- send enemies whenever the players gained some ground
+	-- triggered by upgrades or station favor
+	local terrain_module = station.terrain_module
+	local faction = station:getFaction()
+	if terrain_module == nil then
+		log("spawn_threat: station has no terrain module")
+		terrain_module = {
+			radius = 5000
+		}
+	end
+	local enemy_faction
+	if faction == "Arlenians" then
+		enemy_faction = arraySelectRandom({"Kraylor", "Exuari"})
+	elseif faction == "Independent" then
+		enemy_faction = arraySelectRandom({"Kraylor", "Criminals"})
+	else
+		enemy_faction = arraySelectRandom({"Kraylor", "Exuari", "Criminals"})
+		-- ghosts and hive do not attack
+	end
+	local strength = avp_story:enemyStrength(terrain_module) / 4	-- small
+	local x,y = vf_ambush:findBestAmbushPosition(player)
+	local enemies, enemy_faction = avp_enemies:spawn({{x,y}}, enemy_faction, strength)
+	for __,leader in ipairs(enemies) do
+		if station:isEnemy(leader) then
+			leader:orderAttack(station)
+		else
+			leader:orderAttack(player)
+		end
+	end
+end
 
 -- module specific events
 

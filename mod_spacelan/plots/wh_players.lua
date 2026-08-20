@@ -100,6 +100,10 @@ end
 function wh_players:onNewPlayerShip(p)
 	self:updatePlayerSoftTemplate(p)
 	p:onDestruction(wh_players.onDestruction)
+	local station = getScriptStorage().wh_fleetcommand.station
+	if vf_bescheid ~= nil and station ~= nil and station:isValid() and station ~= p then
+		vf_bescheid:sag_bescheid("first_ship_arrived", {callsign=p:getCallSign()})
+	end
 end
 function wh_players:updatePlayerSoftTemplate(p)
 	--set defaults for those ships not found in the list
@@ -174,9 +178,32 @@ function wh_players.onDestruction(player, instigator)
 		local descr = player:getResourceDescription(name)
 		table.insert(details, {name, descr})
 	end
-	amount = math.min(amount, #details)
+	--amount = math.min(amount, #details)
 	local x,y = player:getPosition()
 	wh_artifacts:artsplosion(x,y,amount,details)
+
+	if vf_bescheid ~= nil then
+		if amount == 0 then
+			vf_bescheid:sag_bescheid("ship_destroyed", {
+				callsign=player:getCallSign(),
+				sector=player:getSectorName(),
+				artifacts_lost="Sie hatten keine Artefakte geladen.",
+			})
+		elseif amount == 1 then
+			vf_bescheid:sag_bescheid("ship_destroyed", {
+				callsign=player:getCallSign(),
+				sector=player:getSectorName(),
+				artifacts_lost="Sie hatten ein Artefakt dabei, das dort noch zu finden sein dürfte.",
+			})
+		else
+			vf_bescheid:sag_bescheid("ship_destroyed", {
+				callsign=player:getCallSign(),
+				sector=player:getSectorName(),
+				artifacts_lost="Sie hatten "..amount.. " Artefakte geladen, die im Sektor verteilt wurden.",
+			})
+		end
+		-- maybe: always, except fighters?
+	end
 end
 
 function wh_players:update(delta)

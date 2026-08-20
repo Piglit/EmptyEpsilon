@@ -323,7 +323,7 @@ function generateStaticWorld()
 	friendlyStations = friendlyStations + 1
 	
 	stationSize = "Small Station"
-	stationFaction = "Blue Star Cartell"
+	stationFaction = "Blue Star"
 	--Feynman (second of three around larger secondary circle of stations)
 	feynmanAngle = bethesdaAngle + random(60,180)
 	xFeynman, yFeynman = vectorFromAngle(feynmanAngle, random(35000,40000))
@@ -409,7 +409,7 @@ function generateStaticWorld()
 	table.insert(stationList,stationAnderson)
 	neutralStations = neutralStations + 1
 	
-	stationFaction = "Blue Star Cartell"
+	stationFaction = "Blue Star"
 	stationSize = "Small Station"
 	
 	--Spot
@@ -514,7 +514,7 @@ function generateStaticWorld()
 	table.insert(stationList,stationMiller)
 	neutralStations = neutralStations + 1
 
-	stationFaction = "Blue Star Cartell"
+	stationFaction = "Blue Star"
 	--O'Brien
 	psx = random(-90000,-50500)
 	psy = random(40500,70000)
@@ -584,7 +584,7 @@ function generateStaticWorld()
 	table.insert(stationList,stationErickson)
 	neutralStations = neutralStations + 1
 
-	stationFaction = "Blue Star Cartell"
+	stationFaction = "Blue Star"
 	--Hayden
 	psx = random(-15000,10000)
 	psy = random(-40000,-29500)
@@ -712,7 +712,7 @@ function generateStaticWorld()
 	end
 	
 	stationSize = "Medium Station"
-	stationFaction = "Blue Star Cartell"
+	stationFaction = "Blue Star"
 
 	--Chatuchak
 	psx = random(-29500,20000)
@@ -1437,7 +1437,7 @@ function transportPlot(delta)
 				name = name .. " Freighter " .. irandom(1, 5)
 			end
 			wfv = string.format("transport model: %s",name)
-			obj = CpuShip():setTemplate(name):setFaction('Blue Star Cartell'):setCommsScript(""):setCommsFunction(commsShip)
+			obj = CpuShip():setTemplate(name):setFaction('Blue Star'):setCommsScript(""):setCommsFunction(commsShip)
 			obj.target = target
 			obj.undock_delay = irandom(1,4)
 			rifl = math.floor(random(1,#goodsList))	-- random item from list

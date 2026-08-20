@@ -266,7 +266,7 @@ Create a node or a derived node type.
 CommsNode:add_choice(node)
 Add a child dialog option.
 
-CommsNode:add_choice_to_all_children(node, recursive)
+CommsNode:add_choice_to_all_children(node, recursive, add_to_self)
 Add a node to the children of all currently registered choices.
 Note that only children are affected, that are registered at the time this function is called.
 
@@ -288,18 +288,6 @@ Add a test.
 CommsNode:set_as_comms_function(obj)
 Register the node as the communications function of an object.
 --]]
-
-
-
--- compatibility with older lua versions
-if table.unpack == nil then
-	-- luacov: disable
-	table.unpack = unpack
-	-- luacov: enable
-end
-if log == nil then
-	log = print
-end
 
 
 if TEST then
@@ -391,23 +379,31 @@ end
 
 -- call from outside
 -- inserts a CommsNode as dialog option.
-function CommsNode:add_choice(node)
+-- if idx is given, add at this position
+function CommsNode:add_choice(node, idx)
 	assert(node)
-	table.insert(self._choices, node)
+	if idx ~= nil then
+		table.insert(self._choices, idx, node)
+	else
+		table.insert(self._choices, node)
+	end
 	return self
 end
 
 -- call from outside
 -- inserts a CommsNode as dialog option to all currently registered choices of this node.
 -- useful for back buttons
-function CommsNode:add_choice_to_all_children(node, recursive)
-	for _,choice in ipairs(self._choices) do
+function CommsNode:add_choice_to_all_children(node, recursive, add_to_self)
+	for __,choice in ipairs(self._choices) do
 		if not arrayContains(choice._choices, node) then
 			choice:add_choice(node)
 			if recursive then
 				choice:add_choice_to_all_children(node, recursive)
 			end
 		end
+	end
+	if add_to_self then
+		self:add_choice(node)
 	end
 	return self
 end
@@ -463,6 +459,7 @@ function CommsNode:select_choice_line(env)
 end
 
 function CommsNode:select_message(env)
+	--log("csm")
 	if self.message ~= nil then
 		return self.message
 	else
@@ -486,11 +483,11 @@ end
 -- returns if this dialog option is available and should be selectable as comms reply.
 -- iterates over conditions - they must all be true
 function CommsNode:_can_select(env)
-	--log("cn-cs", id)
-	if env.last_operation_ok == false and not self.selectable_even_if_checks_failed then
+	if env.last_operation_ok == false then
 		return false
 	end
-	for _, cond in ipairs(self._conditions) do
+	--log("cn-cs")
+	for __, cond in ipairs(self._conditions) do
 		if not cond(env) then
 			return false
 		end
@@ -516,7 +513,7 @@ end
 
 function CommsNode:_apply_effects(env)
 	local ok, msg
-	for _, effect in ipairs(self._effects) do
+	for __, effect in ipairs(self._effects) do
 		ok, msg = effect(self, env)
 		assert(type(ok) == "boolean")
 		env.last_operation_ok = ok	-- mainly used for checks, but can also be used for effects
@@ -540,7 +537,7 @@ function CommsNode:_show_choices(env)
 	if env.abort_comms then
 		return
 	end
-	for _,choice in ipairs(self._choices) do
+	for __,choice in ipairs(self._choices) do
 		if choice:_can_select(env) then
 			addCommsReply(choice:select_choice_line(env), choice:_as_comms_reply(env))
 		end
@@ -549,7 +546,7 @@ end
 
 -- is called from internal
 function CommsNode:_call(env)
-	--log("cn-c")
+	--log("cn-c", env.args)
 	assert(env)
 	table.insert(env.call_stack, self)
 	local ok, msg = self:_apply_checks(env)
@@ -582,14 +579,14 @@ end
 
 function CommsNode:setup_test(env)
 	assert (env)
-	for _, step in ipairs(self._test_setup_steps) do
+	for __, step in ipairs(self._test_setup_steps) do
 		step(env)
 	end
 	return self
 end
 function CommsNode:test(env)
 	assert (env)
-	for _, step in ipairs(self._tests) do
+	for __, step in ipairs(self._tests) do
 		step(self, env)
 	end
 	return self
@@ -597,6 +594,7 @@ end
 
 CommsNode:add_test(function(self, env)
 	--print("test: ", env)
+	env.last_operation_ok = true
 	self:_can_select(env)
 	self:select_choice_line(env)
 	self:_call(env)
@@ -624,7 +622,7 @@ function CommsRedirection:_can_select(env)
 	end
 	-- if one choice is valid 
 	local ok = false
-	for _,choice in ipairs(self._choices) do
+	for __,choice in ipairs(self._choices) do
 		if choice:_can_select(env) then
 			ok = true
 		end
@@ -635,7 +633,7 @@ end
 function CommsRedirection:_call(env)
 	-- select the first available choice and call it.
 	-- this is usually done on entry nodes
-	for _,choice in ipairs(self._choices) do
+	for __,choice in ipairs(self._choices) do
 		if choice:_can_select(env) then
 			return choice:_call(env)
 		end
@@ -647,7 +645,7 @@ function CommsRedirection:select_choice_line(env)
 	if self.choice_line ~= nil then
 		return self.choice_line
 	else
-		for _,choice in ipairs(self._choices) do
+		for __,choice in ipairs(self._choices) do
 			if choice:_can_select(env) then
 				return choice:select_choice_line(env)
 			end
@@ -668,7 +666,7 @@ CommsPipeline = CommsNode:new{
 
 function CommsPipeline:_call(env)
 	local msg = ""
-	for _, choice in ipairs(self._choices) do
+	for __, choice in ipairs(self._choices) do
 		if choice:_can_select(env) then
 			choice:_call(env)
 			if type(env.last_msg) == "string" then
@@ -687,17 +685,28 @@ end
 --]]
 
 CommsBack = CommsNode:new{
-	choice_line = "Back",
-	selectable_even_if_checks_failed = true
+	choice_line = _("choice_line", "Back"),
 }
 
+function CommsBack:_get_last_avail_node(env)
+	local idx = #env.call_stack -1
+	while env.call_stack[idx] ~= nil and env.call_stack[idx].skip_in_back_stack do
+		idx = idx -1
+	end
+	return env.call_stack[idx]
+end
+
 function CommsBack:_can_select(env)
+	local backup_last_operation_ok = env.last_operation_ok
+	env.last_operation_ok = true
 	if not CommsBack.super()._can_select(self, env) then
 		return false
 	end
-	local last_node = env.call_stack[#env.call_stack-1]
-	return last_node ~= nil and
+	local last_node = self:_get_last_avail_node(env)
+	local ok = last_node ~= nil and
 		last_node:_can_select(env)
+	env.last_operation_ok = backup_last_operation_ok
+	return ok
 end
 
 function CommsBack:_call(env)
@@ -733,7 +742,7 @@ function CommsNodeMsgByFaction:select_message(env)
 	if self.message ~= nil then
 		local message = self:select_factional_message(env, self.message)
 		if message == nil then
-			message = "...\n(no response)"
+			message = _("message", "...\n(no response)")
 
 		end
 		return self:replace_message_placeholders(message, env) 
@@ -758,7 +767,8 @@ function CommsNodeMsgByFaction:select_factional_message(env, id)
 	return nil
 end
 function CommsNodeMsgByFaction:replace_message_placeholders(msg, env)
-	msg = string.gsub(msg, "%. ", ".\n")	-- also add newline. may cause problems...
+	msg = string.gsub(msg, "%.  ", ".\n")
+	msg = string.gsub(msg, "!  ", ".\n")
 	msg = string.gsub(msg, "{callsign}", env.target:getCallSign())
 	msg = string.gsub(msg, "{template}", env.target:getTypeName() or "")
 	msg = string.gsub(msg, "{faction}", env.target:getFaction())
@@ -774,13 +784,60 @@ CommsNodeMsgByFaction:add_test_setup(function(env)
 end)
 
 
+CommsNodeGreeter = CommsNode:new({
+	-- Array of greeting strings, indexed by friendliness.
+	messages = {},
+	select_message = function(self, env)
+		if (#self.messages == 0) then
+			return nil
+		end
+		if env.target.comms_data.friendlyness == nil then
+			env.target.comms_data.friendlyness = math.random(1,100)
+		end
+		local percent = math.max(1, math.min(100, env.target.comms_data.friendlyness))
+		local index = math.floor(((100 - percent) / 99) * (#self.messages - 1) + 0.5) + 1
+		local msg = self.messages[index]
+		if msg == nil then
+			msg = self.messages[1]
+		end
+		msg = string.gsub(msg, "%.  ", ".\n")
+		msg = string.gsub(msg, "{target_callsign}", env.target:getCallSign())
+		msg = string.gsub(msg, "{source_callsign}", env.source:getCallSign())
+		return msg
+	end,
+})
+:add_test_setup(function(env)
+	env.target.comms_data.friendlyness = 50
+	env.target.getCallSign = function() return "target" end
+	env.source.getCallSign = function() return "source" end
+end)
+:add_test(function(self, env)
+	self.messages = {"high", "mid", "low"}
+	assert(self:select_message(env) == "mid")
+	env.target.comms_data.friendlyness = -999
+	assert(self:select_message(env) == "low")
+	env.target.comms_data.friendlyness = 25
+	assert(self:select_message(env) == "low")
+	env.target.comms_data.friendlyness = 26
+	assert(self:select_message(env) == "mid")
+	env.target.comms_data.friendlyness = 75
+	assert(self:select_message(env) == "mid")
+	env.target.comms_data.friendlyness = 76
+	assert(self:select_message(env) == "high")
+	env.target.comms_data.friendlyness = 999
+	assert(self:select_message(env) == "high")
+	env.target.comms_data.friendlyness = 50
+end)
+
+
+
 CommsNodeWaypointSelect = CommsNode:new({
 	skip_in_back_stack = true,
 	select_message = function(self, env)
 		if env.source:getWaypointCount() > 0 then
-			return "Select a waypoint"
+			return _("message", "Select a waypoint")
 		else
-			return "Set a waypoint first."
+			return _("message", "Set a waypoint first.")
 		end
 	end,
 	_show_choices = function(self, env)
@@ -788,7 +845,7 @@ CommsNodeWaypointSelect = CommsNode:new({
 			for idx = 1, env.source:getWaypointCount() do
 				assert(env)
 				assert(idx)
-				addCommsReply("Waypoint "..idx, self.with_waypoint:_as_comms_reply(env, idx))
+				addCommsReply(_("choice_line", "Waypoint ")..idx, self.with_waypoint:_as_comms_reply(env, idx))
 			end
 		end
 		CommsNodeWaypointSelect.super()._show_choices(self, env)
@@ -797,13 +854,17 @@ CommsNodeWaypointSelect = CommsNode:new({
 		env.args = 2
 		env.source.getWaypoint = function(self, idx) assert(self); return idx*2, idx*2+1 end
 	end,
-	add_choice_to_all_children = function(self, node, recursive)
+	add_choice_to_all_children = function(self, node, recursive, add_to_self)
 		if self.with_waypoint ~= nil then
 			self.with_waypoint:add_choice(node)
 			if recursive then
 				self.with_waypoint:add_choice_to_all_children(node, recursive)
 			end
 		end
+		if add_to_self then
+			self:add_choice(node)
+		end
+		return self
 	end,
 })
 CommsNodeWaypointSelect:add_test(function(self, env)
@@ -835,15 +896,15 @@ CommsNodeObjectSelect = CommsNode:new({
 	skip_in_back_stack = true,
 	range = 5000,
 	select_message = function(self, env)
-		for _, obj in ipairs(env.target:getObjectsInRange(self.range)) do
+		for __, obj in ipairs(env.target:getObjectsInRange(self.range)) do
 			if self:can_select_object(env, obj) then
-				return "Select a target"
+				return _("message", "Select a target")
 			end
 		end
-		return string.format("There are no valid targets within the range of %iu.", math.floor(self.range/1000))
+		return string.format(_("message", "There are no valid targets within the range of %iu."), math.floor(self.range/1000))
 	end,
 	_show_choices = function(self, env)
-		for _, obj in ipairs(env.target:getObjectsInRange(self.range)) do
+		for __, obj in ipairs(env.target:getObjectsInRange(self.range)) do
 			if self:can_select_object(env, obj) then
 		   		if obj.getCallSign ~= nil then
 					addCommsReply(obj:getCallSign(), self.with_object:_as_comms_reply(env, obj))
@@ -856,11 +917,15 @@ CommsNodeObjectSelect = CommsNode:new({
 		-- dummy impl
 		return false
 	end,
-	add_choice_to_all_children = function(self, node, recursive)
+	add_choice_to_all_children = function(self, node, recursive, add_to_self)
 		self.with_object:add_choice(node)
 		if recursive then
 			self.with_object:add_choice_to_all_children(node, recursive)
 		end
+		if add_to_self then
+			self:add_choice(node)
+		end
+		return self
 	end,
 	test_setup_child = function(env)
 		env.args = {
@@ -872,7 +937,7 @@ CommsNodeObjectSelect = CommsNode:new({
 CommsNodeObjectSelect:add_test(function(self, env)
 	if self.with_object then
 		assert(#env.target:getObjectsInRange(1)>=4)
-		for _, obj in ipairs(env.target:getObjectsInRange(1)) do
+		for __, obj in ipairs(env.target:getObjectsInRange(1)) do
 			assert(obj)
 			local old_env_args = env.args
 			if self:can_select_object(env, obj) then 
@@ -995,7 +1060,7 @@ CommsNodeServiceAvailable._can_select = function(self, env)
 end
 CommsNodeServiceAvailable:add_check(function(self, env)
 	local ok = self:service_available(env)
-	return ok, "This service is no longer available."
+	return ok, _("message", "This service is no longer available.")
 end)
 CommsNodeServiceAvailable:add_test_setup(function(env)
 	env.target.comms_data.service_available = {}
@@ -1027,7 +1092,20 @@ function CommsNodeServiceBuyable.apply_reputation_cost_multiplier(env, cost)
 	if env.target.comms_data.reputation_cost_multipliers.neutral ~= nil then
 		return cost * env.target.comms_data.reputation_cost_multipliers.neutral
 	end
-	return cost
+	return math.ceil(cost)
+end
+
+function CommsNodeServiceBuyable.adjust_factional_modifier(env, factor)
+	if env.target.comms_data.reputation_cost_multipliers ~= nil then
+		if env.target.comms_data.reputation_cost_multipliers.friend then
+			env.target.comms_data.reputation_cost_multipliers.neutral = math.max(env.target.comms_data.reputation_cost_multipliers.friend, env.target.comms_data.reputation_cost_multipliers.neutral * factor )
+		elseif env.target.comms_data.reputation_cost_multipliers.neutral then
+			env.target.comms_data.reputation_cost_multipliers.neutral = env.target.comms_data.reputation_cost_multipliers.neutral * factor
+		end
+--		if env.target.comms_data.reputation_cost_multipliers.neutral < 1 then
+--			env.target.comms_data.reputation_cost_multipliers.neutral = 1
+--		end
+	end
 end
 
 function CommsNodeServiceBuyable:service_cost(env)
@@ -1040,17 +1118,19 @@ function CommsNodeServiceBuyable:service_cost(env)
 end
 CommsNodeServiceBuyable:add_check(function(self, env)
 	local cost = self:service_cost(env)
-	return env.source:getReputationPoints() >= cost, "Insufficient reputation"
+	return env.source:getReputationPoints() >= cost, _("message", "Insufficient reputation")
 end)
 CommsNodeServiceBuyable:add_effect(function(self, env)
 	local cost = self:service_cost(env)
 	if env.source.takeReputationPoints then
-		return env.source:takeReputationPoints(cost), "Insufficient reputation"
+		return env.source:takeReputationPoints(cost), _("message", "Insufficient reputation")
 	end
 	return true
 end)
 CommsNodeServiceBuyable:add_test_setup(function(env)
-	env.target.comms_data.service_cost = {}
+	if env.target.comms_data.service_cost == nil then
+		env.target.comms_data.service_cost = {}
+	end
 	env.target.comms_data.service_cost["dummy"] = 27
 	env.source.getReputationPoints = function(self) assert(self); return 27 end
 	env.source.takeReputationPoints = function(self, amount) assert(self); assert(amount) return amount <= 27 end
@@ -1060,10 +1140,15 @@ CommsNodeServiceBuyable:add_test(function(self, env)
 	local ok, msg = self:_apply_effects(env)
 	assert(ok)
 	assert(msg == nil)
-	env.source.takeReputationPoints = function(self, amount) assert(self); assert(amount) return amount <= 27 end
+	env.target.comms_data.service_cost[self.service_cost] = 1 
 	env.target.comms_data.reputation_cost_multipliers = {}
 	env.target.isFriendly = function() return true end
-	local ok, msg = self:_apply_checks(env)
+	self:_apply_checks(env)
+	self:_apply_effects(env)
+	env.target.comms_data.service_cost[self.service_cost] = 999999 
+	env.target.isFriendly = function() return false end
+	self:_apply_checks(env)
+	self:_apply_effects(env)
 end)
 
 -- upon selection takes the costs - defined in effects
@@ -1072,7 +1157,8 @@ function CommsNodeServiceBuyableArtifacts:service_available(env)
 	assert(self)
 	return CommsNodeServiceBuyableArtifacts.super().service_available(self, env) and
 	env.target.comms_data.service_artifact_cost and
-	type(env.target.comms_data.service_artifact_cost[self.service_name]) == "number"
+	type(env.target.comms_data.service_artifact_cost[self.service_name]) == "number" and
+	env.target.comms_data.service_artifact_cost[self.service_name] > 0
 end
 -- no reputation_cost_multipliers for artifacts
 
@@ -1085,14 +1171,17 @@ function CommsNodeServiceBuyableArtifacts:service_cost(env)
 end
 CommsNodeServiceBuyableArtifacts:add_check(function(self, env)
 	local cost = self:service_cost(env)
-	return env.source:getResourceAmount("Artifacts") >= cost, "You do not have that many artifacts"
+	return env.source:getResourceAmount("Artifacts") >= cost, _("message", "You do not have that many artifacts")
 end)
 CommsNodeServiceBuyableArtifacts:add_effect(function(self, env)
 	local cost = self:service_cost(env)
-	return env.source:decreaseResourceAmount("Artifacts", cost), "You do not have that many artifacts"
+	env.source:decreaseResourceAmount("Artifacts", cost)
+	return true
 end)
 CommsNodeServiceBuyableArtifacts:add_test_setup(function(env)
-	env.target.comms_data.service_artifact_cost = {}
+	if env.target.comms_data.service_artifact_cost == nil then
+		env.target.comms_data.service_artifact_cost = {}
+	end
 	env.target.comms_data.service_artifact_cost["dummy"] = 27
 	env.source.getResourceAmount = function(self) assert(self); return 2 end
 	env.source.decreaseResourceAmount = function(self, name, amount) assert(self); assert(amount) return amount <= 2 end
@@ -1187,6 +1276,14 @@ common_comms_conditions = {
 			env.source.isDocked = function(self, obj) assert(self); assert(obj); return false end
 		end,
 	},
+	arlenian = {
+		condition = function(env)
+			return env.target:getFaction() == "Arlenians"
+		end,
+		test_setup = function(env)
+			env.target.getFaction = function(self) assert(self); return "Arlenians" end
+		end,
+	},
 	disabled = {
 		condition = function(env)
 			return false
@@ -1194,9 +1291,6 @@ common_comms_conditions = {
 		test_setup = function(env)
 		end,
 	},
-
-
-
 
 }
 

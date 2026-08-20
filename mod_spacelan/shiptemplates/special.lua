@@ -181,29 +181,30 @@ addSystemsHeavy(template)
 -- GM: adjust Hull, Shields, Beam-Ranges
 
 
-template = ShipTemplate():setName("SpySat"):setClass(_("class", "Satellite"), _("subclass", "SpySat")):setType("playership")
+template = ShipTemplate():setName("NavSat"):setClass(_("class", "Satellite"), _("subclass", "Satellite"))
 template:setModel("cubesat")
 template:setRadarTrace("satellite.png")
 template:setDescription([[Just some innocent looking satellite.]])
 template:setImpulseSoundFile("sfx/engine_fighter.wav")
 
 template:setHull(10)
-template:setShields(0)
+template:setShields()
 --				spped, turn, accel, rev-speed, rev-accel
 template:setSpeed(1, 1, 1)
 template:setCombatManeuver(20, 15)
 template:setEnergyStorage(100)
 template:setRepairCrewCount(1)
-template:setLongRangeRadarRange(50000)
-template:setShortRangeRadarRange(20000)
 
 template:setCanLaunchProbe(false)
 template:setCanSelfDestruct(false)
-
-template:setAutoCoolant(true)
-template:setAutoRepair(true)
-
 addSystemsSat(template)
+
+variation = template:copy("SpySat")
+variation:setType("playership")
+variation:setLongRangeRadarRange(50000)
+variation:setShortRangeRadarRange(20000)
+variation:setAutoCoolant(true)
+variation:setAutoRepair(true)
 
 
 --------------------------------------------------------------------------------

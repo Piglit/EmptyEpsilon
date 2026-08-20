@@ -79,13 +79,13 @@ yellows:setDescription([[The Yellow Dragon Industrial Mining and Trading Corpora
 
 Since most of the ships of the Human Navy are factored by the Yellow Dragon Industrial Mining and Trading Corporation, the navy is very much interested in protecting the corporate ships and stations.]])
 
-blues = FactionInfo():setName("Blue Star Cartel")
+blues = FactionInfo():setName("Blue Star")
 blues:setGMColor(128, 128, 255)
 blues:setFriendly(human)
-blues:setEnemy(exuari)
+--blues:setEnemy(exuari)
 blues:setEnemy(kraylor)
-blues:setEnemy(Hive)
-blues:setEnemy(GITM)
+--blues:setEnemy(Hive)
+--blues:setEnemy(GITM)
 blues:setDescription([[The Blue Star Trading Cartel is a self declared faction consisting of human merchants and traders and smaller companies. The declared goal of the cartel is to control and monetarise every trading route inside and in between the human territory. They cartel is known to secretly attack or sabotage ships of the conflicting Yellow Dragon Industrial Mining and Trading Corporation and also to hire criminals to attack or sabotage independent traders.
 
 Due to contracts between the Blue Star Trading Cartel and the Human Navy, the Navy must protect cartel ships against attacks from hostile aliens or pirates. In return ships of the Navy can refuel and restock non-contraband weapons on every station of the cartel.]])
@@ -94,6 +94,7 @@ reds = FactionInfo():setName("Criminals")
 reds:setGMColor(255, 128, 128)
 reds:setEnemy(human)
 reds:setEnemy(yellows)
+reds:setEnemy(blues)
 reds:setEnemy(exuari)
 reds:setEnemy(kraylor)
 reds:setEnemy(Hive)

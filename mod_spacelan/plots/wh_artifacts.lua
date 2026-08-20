@@ -191,6 +191,8 @@ function wh_artifacts:transferArtifacts(ps, fc)
 		ps:addToShipLog(msg, "magenta")
 		fc:addToShipLog("Strategic Information from "..ps:getCallSign().." has been uploaded to the fleet database.", "magenta")
 	end
+
+	fc.ui_changed = true
 end
 
 function wh_artifacts:artsplosion(x,y,amount,details)
@@ -205,8 +207,10 @@ function wh_artifacts:artsplosion(x,y,amount,details)
 	}
 	for n=1,amount do
 		local a = Artifact():setPosition(x, y):allowPickup(false):setRadarTraceColor(255,128,255)
-		a.resource_name = details[n][1]
-		a.resource_descr = details[n][2]
+		if details[n] ~= nil then
+			a.resource_name = details[n][1]
+			a.resource_descr = details[n][2]
+		end
 		table.insert(arts.objects, a)
 		table.insert(arts.angles, random(0,360))
 	end

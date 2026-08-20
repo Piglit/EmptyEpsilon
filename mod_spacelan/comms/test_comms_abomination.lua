@@ -2,6 +2,24 @@
 --[[ Code for coverage tests --]]
 --require("serpent")
 TEST=true
+-- compatibility with older lua versions
+if table.unpack == nil then
+	-- luacov: disable
+	table.unpack = unpack
+	-- luacov: enable
+end
+if log == nil then
+	log = print
+end
+function _(context, text)
+	if text ~= nil then
+		return text
+	else
+		return context
+	end
+end
+_("test")
+_("testctx", "test")
 function arrayContains(array, element)
 	for _,value in ipairs(array) do
 		if value == element then
@@ -10,12 +28,38 @@ function arrayContains(array, element)
 	end
 	return false
 end
+function arrayShuffle(array)
+	return array
+end
 function Script()
 	return {
 		setVariable = function(self, var, val) assert(self); assert(var); assert(val); return self end,
 		run = function(self, script) assert(self); assert(script); return self end,
 	}
 end
+function arrayFilter(array, condition)
+	-- luacov: disable
+	local source_idx, target_idx = #array +1, #array + 1
+	for i = 1, #array do
+		if not condition(array[i]) then
+			source_idx = i+1
+			target_idx = i
+			break
+		end
+	end
+	for i = source_idx, #array do
+		local value = array[i]
+		if condition(value) then
+			array[target_idx] = value
+			target_idx = target_idx + 1
+		end
+	end
+	for i = target_idx, #array do
+		array[i] = nil
+	end
+	-- luacov: enable
+end
+
 function setCommsMessage(msg)
 end
 function addCommsReply(msg)
@@ -40,6 +84,7 @@ function sdb_add_entry(self, name)
 		getImage = function(self, img) assert(self); return "image" end,
 		setModelDataName = function(self, name) assert(self); assert(name); end,
 		getModelDataName = function(self) assert(self); return "test" end,
+
 	}
 	table.insert(self._content, self[name])
 	return self[name]
@@ -87,6 +132,8 @@ arraySelectRandom({})
 function CpuShip()
 	return {
 		setFactionId = function(self, num) assert(self); assert(num == 1); return self end,
+		setFaction = function(self, f) assert(self); assert(type(f)=="string"); return self end,
+		getFaction = function(self) assert(self); return "test fac" end,
 		setPosition= function(self, x, y) assert(self); assert(x); assert(y);return self end,
 		setTemplate = function(self, arg) assert(self); assert(arg); return self end,
 		setScanned = function(self, arg) assert(self); assert(arg); return self end,
@@ -94,25 +141,46 @@ function CpuShip()
 		getCallSign = function(self) assert(self); return "test" end,
 		setCallSign = function(self, arg) assert(self); assert(arg); return self end,
 		setShortRangeRadarRange = function(self, arg) assert(self); assert(arg); return self end,
+		isValid = function() return true end,
+		setScannedByFaction = function(self, faction, bool) assert(type(faction)=="string", type(faction)); assert(type(bool)=="boolean", "not boolean enough: "..type(bool)) return self end,
+		setCommsScript = function(self) return self end,
+		setCommsFunction = function(self) return self end,
+		getRotation = function(self) assert(self); return 42 end,
+		setRotation = function(self, rot) assert(self); assert(rot==42); return self end,
+		setHull = function(self, x) assert(self); assert(type(x)=="number"); return self end,
+		getHull = function(self) assert(self); return 2 end,
+		setShields= function(self, x) assert(self); assert(type(x)=="number"); return self end,
+		getShieldLevel= function(self) assert(self); return 2 end,
+		setWarpDrive = function(self, x) assert(self); assert(type(x)=="boolean"); return self end,
+		setWarpSpeed= function(self, x) assert(self); assert(type(x)=="number"); return self end,
+		orderFlyFormation = function(self) assert(self); return self end,
+		orderStandGround = function(self) assert(self); return self end,
+		orderDock= function(self) assert(self); return self end,
+		getTypeName = function(self) assert(self); return "CpuShip" end,
+		getPosition = function(self) assert(self); return 1,2 end,
+		getObjectsInRange= function(self) assert(self); return {} end,
+		destroy= function(self) assert(self); return nil end,
 	}
 end
-
+SpaceStation = CpuShip
 wh_rota = {
 	add_object = function(self, obj) assert(self); assert(obj) end
 }
 
 require("lib_comms_nodes")
 require("comms_vf_ship")
+require("comms_vf_station")
 require("comms_vf_weapons")
 require("comms_vf_military")
-require("comms_vf_station")
 require("comms_vf_scenario_management")
+require("comms_vf_scenario_arlenians")
 
 
 local env = {
 	source = {
 		getCallSign = function() return "Player Ö" end,
 		getFaction = function() return "Test Faction" end,
+		isValid = function(self) assert(self) return true end,
 	},
 	target = {
 		comms_data = {

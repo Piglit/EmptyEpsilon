@@ -25,7 +25,7 @@ buildFormationIncremental: lowest level function. This orders a given ship into 
 --Kraylor: inverse 4-finger formation: fighters in front of leader
 --Exuari:  4-finger formation: fighters behind leader
 --Human Navy: row formation: fight side by side
---Blue Star Cartell: line formation: behind each other
+--Blue Star: line formation: behind each other
 --Mining Corporation: undisciplined 4-finger
 function factionalOffsets(faction, pos)
 
@@ -39,7 +39,7 @@ function factionalOffsets(faction, pos)
 	elseif faction == "Mining Corporation" then
 		x = random(-200,-1000)
 		y = random(200,600)
-	elseif faction == "Blue Star Cartell" then
+	elseif faction == "Blue Star" then
 		x = -300
 		if pos == 3 then
 			x = 2*x

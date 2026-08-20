@@ -56,6 +56,11 @@ Main
     └── Intimidate Station / Change Faction
 
 
+Note: some features are defined in other modules (like comms_vf_weapons.lua).
+Those modules insert their nodes into the station main and automatic tree.
+To use the nodes defined in these modules, they need to be require() from the scenario or comms script.
+This module is designed to work with or without them.
+That way you can enable feature-subtrees for specific scenarios just by requireing the module.
 --]]
 
 
@@ -70,18 +75,14 @@ So in the functions here we can not assume, that a key in comms_data exists.
 
 local ccc = common_comms_conditions	-- from lib_comms_nodes
 
--- cetegories. Non eof these should be comms nodes, but only tables.
+-- categories. None of these should be comms nodes, but only tables.
 comms_vf_station = {
 	automatic = {},
 	info = {},
 	docked = {},
 	undocked = {},
-	friendly = {},
 	enemy = {},
 }
-
---require("comms_vf_weapons.lua")	-- HACK: imported from before, since require messes with test scripts
---require("utils")
 
 --====================================================
 -- Utility functions, can be used multiple times
@@ -153,9 +154,10 @@ end
 local function services_message(env)
 	-- called by services
 	comms_vf_station.automatic.ensure_comms_data:_apply_effects(env)
-	local msg = "We provide the following services:"
+	local msg = _("We provide the following services:")
 	msg = string.format("%s\n%s", msg, failure_messages(env, true))
 
+	--[[ disabled for now
 	if env.target.comms_data.system_repair ~= nil then
 		local system_list_desc = {
 			reactor       = _("situationReport-comms","reactor"),
@@ -205,7 +207,7 @@ local function services_message(env)
 		_("situationReport-comms","Repair these minor systems:"),
 		table.concat(minor_repairs, ", "))
 	end
-
+	--]]
 
 	--local overcharge_service = ""
 	--if env.target.comms_data.jump_overcharge then
@@ -310,6 +312,7 @@ local function services_test_data(env, avail)
 			
 			raise_weapon_cost = avail,
 		}
+	
 	else
 		env.target.comms_data = {}
 		avail = true
@@ -325,34 +328,34 @@ end
 --====================================================
 -- the following nodes are called automatically in comms_vf_station.automatic.pipeline
 
-comms_vf_station.automatic.ensure_comms_data = CommsPipeline:new{
+comms_vf_station.automatic.ensure_comms_data = CommsNode:new({
 	skip_in_back_stack = true,
-	effect = function(env)
-		if env.target.comms_data == nil then
-			env.target.comms_data = {}
-		end
-
-		-- from other files
-		comms_vf_weapons.ensure_comms_data(env)
-		comms_vf_military.ensure_comms_data_reinforcements(env)
-		comms_vf_military.ensure_comms_data_defense_fleet(env)
-
-		local comms_data = env.target.comms_data
-
-		-- from this file
-		comms_vf_station.ensure_comms_data_services(env)
-		comms_vf_station.ensure_comms_data_repair(env)
-		
-		-- single variables
-		if comms_data.friendlyness == nil then	-- this typo is present from the original api
-			comms_data.friendlyness = math.random(0,100)
-		end
+	initialisers = {},
+	add_comms_data_initialiser_function = function(self, fun)
+		table.insert(self.initialisers, fun)
+	end,
+}):add_effect(function(self, env)
+	if env.target.comms_data == nil then
+		env.target.comms_data = {}
 	end
-}
+	local comms_data = env.target.comms_data
+	-- single variables
+	if comms_data.friendlyness == nil then	-- this typo is present from the original api
+		comms_data.friendlyness = math.random(0,100)
+	end
+	-- ensure_comms_data from other modules must be inserted using add_comms_data_initialiser_function.
+	for _,fun in ipairs(self.initialisers) do
+		fun(env)
+	end
+	return true 
+end)
 
 function comms_vf_station.ensure_comms_data_repair(env)
 	local comms_data = env.target.comms_data
-
+	if comms_data._repair_init then
+		return
+	end
+	comms_data._repair_init = true
 	if comms_data.system_repair == nil then
 		comms_data.system_repair = {
 			reactor       = false,
@@ -377,9 +380,14 @@ function comms_vf_station.ensure_comms_data_repair(env)
 		}
 	end
 end
+--comms_vf_station.automatic.ensure_comms_data:add_comms_data_initialiser_function(comms_vf_station.ensure_comms_data_repair)
 
 comms_vf_station.ensure_comms_data_services = function(env)
 	local comms_data = env.target.comms_data
+	if comms_data._services_init then
+		return
+	end
+	comms_data._services_init = true
 	if comms_data.reputation_cost_multipliers == nil then
 		comms_data.reputation_cost_multipliers = {
 			friend = 1.0,
@@ -394,14 +402,15 @@ comms_vf_station.ensure_comms_data_services = function(env)
 			jumpsupplydrop = math.random(110,140),
 			flingsupplydrop = math.random(140,170),
 			activatedefensefleet = math.random(20, 40),
-			servicejonque = math.random(100,150),
-			probe_launch_repair = math.random(1,4) + math.random(1,5),
-			hack_repair = math.random(1,4) + math.random(1,5),
-			scan_repair = math.random(1,4) + math.random(1,5),
-			combat_maneuver_repair = math.random(1,4) + math.random(1,5),
-			self_destruct_repair = math.random(1,4) + math.random(1,5),
-			tube_slow_down_repair = math.random(1,4) + math.random(1,5),
-			refitDrive = 150,
+			--servicejonque = math.random(100,150),
+			--probe_launch_repair = math.random(1,4) + math.random(1,5),
+			--hack_repair = math.random(1,4) + math.random(1,5),
+			--scan_repair = math.random(1,4) + math.random(1,5),
+			--combat_maneuver_repair = math.random(1,4) + math.random(1,5),
+			--self_destruct_repair = math.random(1,4) + math.random(1,5),
+			--tube_slow_down_repair = math.random(1,4) + math.random(1,5),
+			--refitDrive = 150,
+			surrender = env.target:getHullMax() * 2 -- this is 300 - 1600.
 		}
 	if comms_data.service_cost == nil then
 		comms_data.service_cost = {}
@@ -431,19 +440,19 @@ comms_vf_station.ensure_comms_data_services = function(env)
 --				stalker_reinforcements =_("scienceDB","Stalker reinforcements"),
 --				amk8_reinforcements =	_("scienceDB","Adder8 reinforcements"),
 			activatedefensefleet =	_("scienceDB","Activate defense fleet"),
-			servicejonque =			_("scienceDB","Provide service jonque"),
-			shield_overcharge =		_("scienceDB","Overcharge shield"),
-			jump_overcharge =		_("scienceDB","Overcharge jump drive"),
-			scan_repair =           _("situationReport-comms","scanners"),
-			combat_maneuver_repair =_("situationReport-comms","combat maneuver"),
-			hack_repair =           _("situationReport-comms","hacking"),
-			probe_launch_repair =   _("situationReport-comms","probe launch"),
-			tube_slow_down_repair = _("situationReport-comms","slow tube"),
-			self_destruct_repair =  _("situationReport-comms","self destruct"),
+--			servicejonque =			_("scienceDB","Provide service jonque"),
+--			shield_overcharge =		_("scienceDB","Overcharge shield"),
+--			jump_overcharge =		_("scienceDB","Overcharge jump drive"),
+--			scan_repair =           _("situationReport-comms","scanners"),
+--			combat_maneuver_repair =_("situationReport-comms","combat maneuver"),
+--			hack_repair =           _("situationReport-comms","hacking"),
+--			probe_launch_repair =   _("situationReport-comms","probe launch"),
+--			tube_slow_down_repair = _("situationReport-comms","slow tube"),
+--			self_destruct_repair =  _("situationReport-comms","self destruct"),
 		}
 	end
 end
-
+comms_vf_station.automatic.ensure_comms_data:add_comms_data_initialiser_function(comms_vf_station.ensure_comms_data_services)
 
 comms_vf_station.automatic.ensure_comms_data:add_test(function(self, env)
 		comms_vf_station.automatic.ensure_comms_data:_apply_effects(env)
@@ -455,7 +464,7 @@ comms_vf_station.automatic.ensure_comms_data:add_test(function(self, env)
 )
 
 comms_vf_station.automatic.update_database = CommsNode:new({
-	message = "Update Science Database",
+	--message = "Update Science Database",
 	skip_in_back_stack = true,
 	effect = function(env)
 		local station = env.target
@@ -503,6 +512,7 @@ comms_vf_station.automatic.update_database = CommsNode:new({
 		end
 
 		-- remove the old ones after faction change
+		-- assume there are not two stations with the same callsign
 		for _, faction_db in ipairs(stations_db:getEntries()) do
 			if faction_db:getName() ~= faction_key then
 				local old_station_db = queryScienceDatabase(
@@ -560,26 +570,28 @@ comms_vf_station.automatic.update_database = CommsNode:new({
 			station_db:setKeyValue(docking_services_key, table.concat(dock_service, ", "))
 		end
 
-		for i,missile in ipairs(comms_vf_weapons.get_available_weapons(env)) do
-			-- get_available_weapons ensure
-			local cost = comms_vf_weapons.get_weapon_cost(env, missile)
-			if cost ~= nil then
-				local val = string.format(_("scienceDB","%i reputation each"),cost)
-				station_db:setKeyValue(missile,val)
-			end
-		end
-		assert(station.comms_data.function_repair ~= nil)
-		for func, avail in pairs(station.comms_data.function_repair) do
-			if avail then
-				if station.comms_data.service_desc[func] then
-					if station.comms_data.service_cost[func] ~= nil then
-						local key = string.format(_("scienceDB","Repair %s"), station.comms_data.service_desc[func])
-						local val = string.format(_("scienceDB","%s reputation"),station.comms_data.service_cost[func])
-						station_db:setKeyValue(key,val)
-					end
+		if comms_vf_weapons then
+			for i,missile in ipairs(comms_vf_weapons.get_available_weapons(env)) do
+				-- get_available_weapons ensure
+				local cost = comms_vf_weapons.get_weapon_cost(env, missile)
+				if type(cost) == "number" then
+					local val = string.format(_("scienceDB","%d reputation each"),cost)
+					station_db:setKeyValue(missile,val)
 				end
 			end
 		end
+--		assert(station.comms_data.function_repair ~= nil)
+--		for func, avail in pairs(station.comms_data.function_repair) do
+--			if avail then
+--				if station.comms_data.service_desc[func] then
+--					if station.comms_data.service_cost[func] ~= nil then
+--						local key = string.format(_("scienceDB","Repair %s"), station.comms_data.service_desc[func])
+--						local val = string.format(_("scienceDB","%s reputation"),station.comms_data.service_cost[func])
+--						station_db:setKeyValue(key,val)
+--					end
+--				end
+--			end
+--		end
 		assert(station.comms_data.service_available ~= nil)
 		for serv, avail in pairs(station.comms_data.service_available) do
 			if avail and
@@ -595,7 +607,10 @@ comms_vf_station.automatic.update_database = CommsNode:new({
 			end
 		end
 	end,
-}):add_test(function(self, env)
+}):add_test_setup(function(env)
+	comms_vf_station.automatic.ensure_comms_data:_apply_effects(env)
+end):add_test(function(self, env)
+	local old_faction = env.target.getFaction
 	env.target.isFriendly = function(self, obj) assert(self); assert(obj); return false end
 	env.target.isEnemy = function(self, obj) assert(self); assert(obj); return false end
 	env.target.getFaction = function(self) assert(self); return "Independent" end
@@ -618,8 +633,7 @@ comms_vf_station.automatic.update_database:add_test_setup(function(env)
 	env.target.getTypeName = function(self) assert(self); return "Small Station" end
 	env.target.comms_data.general = "general"
 	env.target.comms_data.history = "history"
-	env.target.comms_data.weapon_available.Homing = true
-	env.target.comms_data.function_repair.scan_repair = true
+	--env.target.comms_data.function_repair.scan_repair = true
 	env.target.comms_data.service_desc.scan_repair = _("situationReport-comms","scanners")
 	env.target.comms_data.service_cost.scan_repair = 12
 	env.target.comms_data.service_available.supplydrop = true
@@ -627,81 +641,78 @@ comms_vf_station.automatic.update_database:add_test_setup(function(env)
 	env.target.comms_data.service_cost.supplydrop = 14
 end)
 
-comms_vf_station.automatic.docked_greeting = CommsNode:new({
-	message = "Docked Greeting",
-	skip_in_back_stack = true,
-	select_message = function(self, env)
-		local station_greeting_prompt = {
-			{thresh = 96,    text = string.format(_("station-comms","Hello, space traveler! It's a pleasure to see %s docking with us. How can we make your stay on %s more comfortable?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 92,    text = string.format(_("station-comms","Greetings, cosmic colleague! %s's docking is a cause for celebration here on %s. Any messages or updates to share?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 88,    text = string.format(_("station-comms","Good day, starfaring friend! Your arrival is like a cosmic reunion for %s. Any tales from your travels?"),env.target:getCallSign())},
-			{thresh = 84,    text = string.format(_("station-comms","Salutations, fellow communicator! %s has reached %s safe and sound. Anything exciting to share from your journey?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 80,    text = string.format(_("station-comms","Hello there! Welcome to %s. It's fantastic to have you on board."),env.target:getCallSign())},
-			{thresh = 76,    text = string.format(_("station-comms","Hello, astral envoy! %s has made a stellar entrance. Any interesting discoveries on your voyage to %s?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 72,    text = string.format(_("station-comms","Salutations, space traveler! %s's arrival marks another chapter in %s's cosmic adventures. How can we assist you today?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 68,    text = string.format(_("station-comms","Welcome, %s! It's a pleasure to see you docking with %s. How's the cosmic voyage treating you?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 64,    text = string.format(_("station-comms","Hello there, %s! Your arrival brings a new energy to %s. How was your journey?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 60,    text = string.format(_("station-comms","Greetings, %s! Welcome to our space station. It's an honor to have you on board."),env.source:getCallSign())},
-			{thresh = 56,    text = string.format(_("station-comms","Hello, relay officer. I suppose we should acknowledge the docking of %s, as unremarkable as it may be."),env.source:getCallSign())},
-			{thresh = 52,    text = string.format(_("station-comms","Welcome, spacefaring communicator. %s docks, and the cosmos barely flinches. How typical."),env.source:getCallSign())},
-			{thresh = 48,    text = string.format(_("station-comms","Ah, the celestial messenger has arrived. Do enlighten us with tales of %s's travels, if you must."),env.source:getCallSign())},
-			{thresh = 44,    text = string.format(_("station-comms","Well, well, if it isn't %s. I trust your journey was at least mildly tolerable."),env.source:getCallSign())},
-			{thresh = 40,    text = string.format(_("station-comms","Ah, the starship %s graces us with its presence. How quaint. Welcome to our humble space station."),env.source:getCallSign())},
-			{thresh = 36,    text = string.format(_("station-comms","Welcome, spacefaring communicator. I hope %s's visit won't disrupt %s's delicate equilibrium too much."),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 32,    text = string.format(_("station-comms","Salutations, celestial correspondent. %s's docking disrupted our routine. What urgent message do you bring, if any?"),env.source:getCallSign())},
-			{thresh = 28,    text = string.format(_("station-comms","Hello there, %s. Your arrival was as eagerly anticipated as a space debris collision. What's the news?"),env.source:getCallSign())},
-			{thresh = 24,    text = string.format(_("station-comms","Well, look who decided to drop by. What cosmic inconvenience brings %s to %s today?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 20,    text = string.format(_("station-comms","Oh, joy. The starship %s has graced us with their presence. What brings you here?"),env.source:getCallSign())},
-			{thresh = 16,    text = string.format(_("station-comms","Greetings, stellar correspondent. %s's docking is a source of mild irritation. What cosmic drama unfolds now?"),env.source:getCallSign())},
-			{thresh = 12,    text = string.format(_("station-comms","Welcome aboard, cosmic messenger. %s's docking better have a good reason. We have enough on our plate without your cosmic theatrics."),env.source:getCallSign())},
-			{thresh = 8,    text = string.format(_("station-comms","Hello, starbound emissary. %s's presence is less of a pleasure and more of a cosmic headache. What brings you to %s?"),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 4,    text = string.format(_("station-comms","Salutations, interstellar nuisance. %s's docking is the last thing we needed. What pressing crisis are you here to address?"),env.source:getCallSign())},
-		}
-		local prompt_index = #station_greeting_prompt
-		for i,prompt in ipairs(station_greeting_prompt) do
-			if env.target.comms_data.friendlyness > prompt.thresh then
-				prompt_index = i
-				break
-			end
-		end
-		local msg = station_greeting_prompt[prompt_index].text
-		msg = string.gsub(msg, "%. ", ".\n")
-		return msg
-	end,
-}):add_condition(ccc.docked):add_test_setup(function(env)
-	env.target.comms_data.friendlyness = 50
-end)
+comms_vf_station.automatic.greeter = CommsRedirection:new({})
+
+comms_vf_station.automatic.docked_greeting = CommsNodeGreeter:new({
+--	message = "Docked Greeting",
+	messages = {
+		_("greeted-by-station-docked",
+		"Hello, space traveler!  It's a pleasure to see {source_callsign} docking with us.  How can we make your stay on {target_callsign} more comfortable?"),
+		_("greeted-by-station-docked",
+		"Greetings, cosmic colleague!  {source_callsign}'s docking is a cause for celebration here on {target_callsign}.  Any messages or updates to share?"),
+		_("greeted-by-station-docked",
+		"Good day, starfaring friend!  Your arrival is like a cosmic reunion for {target_callsign}.  Any tales from your travels?"),
+		_("greeted-by-station-docked",
+		"Salutations, fellow communicator!  {source_callsign} has reached {target_callsign} safe and sound.  Anything exciting to share from your journey?"),
+		_("greeted-by-station-docked",
+		"Hello there!  Welcome to {target_callsign}.  It's fantastic to have you on board."),
+		_("greeted-by-station-docked",
+		"Hello, astral envoy!  {source_callsign} has made a stellar entrance.  Any interesting discoveries on your voyage to {target_callsign}?"),
+		_("greeted-by-station-docked",
+		"Salutations, space traveler!  {source_callsign}'s arrival marks another chapter in {target_callsign}'s cosmic adventures.  How can we assist you today?"),
+		_("greeted-by-station-docked",
+		"Welcome, {source_callsign}!  It's a pleasure to see you docking with {target_callsign}.  How's the cosmic voyage treating you?"),
+		_("greeted-by-station-docked",
+		"Hello there, {source_callsign}!  Your arrival brings a new energy to {target_callsign}.  How was your journey?"),
+		_("greeted-by-station-docked",
+		"Greetings, {source_callsign}!  Welcome to our space station.  It's an honor to have you on board."),
+		_("greeted-by-station-docked",
+		"Hello, relay officer.  I suppose we should acknowledge the docking of {source_callsign}, as unremarkable as it may be."),
+		_("greeted-by-station-docked",
+		"Welcome, spacefaring communicator.  {source_callsign} docks, and the cosmos barely flinches.  How typical."),
+		_("greeted-by-station-docked",
+		"Ah, the celestial messenger has arrived.  Do enlighten us with tales of {source_callsign}'s travels, if you must."),
+		_("greeted-by-station-docked",
+		"Well, well, if it isn't {source_callsign}.  I trust your journey was at least mildly tolerable."),
+		_("greeted-by-station-docked",
+		"Ah, the starship {source_callsign} graces us with its presence.  How quaint.  Welcome to our humble space station."),
+		_("greeted-by-station-docked",
+		"Welcome, spacefaring communicator.  I hope {source_callsign}'s visit won't disrupt {target_callsign}'s delicate equilibrium too much."),
+		_("greeted-by-station-docked",
+		"Salutations, celestial correspondent.  {source_callsign}'s docking disrupted our routine.  What urgent message do you bring, if any?"),
+		_("greeted-by-station-docked",
+		"Hello there, {source_callsign}.  Your arrival was as eagerly anticipated as a space debris collision.  What's the news?"),
+		_("greeted-by-station-docked",
+		"Well, look who decided to drop by.  What cosmic inconvenience brings {source_callsign} to {target_callsign} today?"),
+		_("greeted-by-station-docked",
+		"Oh, joy.  The starship {source_callsign} has graced us with their presence.  What brings you here?"),
+		_("greeted-by-station-docked",
+		"Greetings, stellar correspondent.  {source_callsign}'s docking is a source of mild irritation.  What cosmic drama unfolds now?"),
+		_("greeted-by-station-docked",
+		"Welcome aboard, cosmic messenger.  {source_callsign}'s docking better have a good reason.  We have enough on our plate without your cosmic theatrics."),
+		_("greeted-by-station-docked",
+		"Hello, starbound emissary.  {source_callsign}'s presence is less of a pleasure and more of a cosmic headache.  What brings you to {target_callsign}?"),
+		_("greeted-by-station-docked",
+		"Salutations, interstellar nuisance.  {source_callsign}'s docking is the last thing we needed.  What pressing crisis are you here to address?"),
+	},
+}):add_condition(ccc.docked)
 
 
-comms_vf_station.automatic.undocked_greeting = CommsNode:new({
+comms_vf_station.automatic.undocked_greeting = CommsNodeGreeter:new({
 	message = "Undocked Greeting",
 	skip_in_back_stack = true,
-	select_message = function(self, env)
-		local station_greeting_prompt = {
-			{thresh = 90,    text = string.format(_("station-comms","This is %s's communications officer. Go ahead, %s. We're listening."),env.target:getCallSign(),env.source:getCallSign())},
-			{thresh = 80,    text = string.format(_("station-comms","%s to %s, receiving your communication. Proceed with your message."),env.target:getCallSign(),env.source:getCallSign())},
-			{thresh = 70,    text = string.format(_("station-comms","Confirmed, %s. You're connected to %s. Go ahead."),env.source:getCallSign(),env.target:getCallSign())},
-			{thresh = 60,    text = string.format(_("station-comms","This is the %s communications officer. Go ahead, %s."),env.target:getCallSign(),env.source:getCallSign())},
-			{thresh = 50,    text = string.format(_("station-comms","%s acknowledges %s's communication. Pray, don't keep us in suspense any longer."),env.target:getCallSign(),env.source:getCallSign())},
-			{thresh = 40,    text = string.format(_("station-comms","%s, it is positively thrilling to be the recipient of your undoubtedly important message. Please enlighten us."),env.source:getCallSign())},
-			{thresh = 30,    text = string.format(_("station-comms","Acknowledged, %s. Try not to waste our time. What do you want?"),env.source:getCallSign())},
-			{thresh = 20,    text = string.format(_("station-comms","What is it now, %s? Make it quick; we're not here for small talk."),env.source:getCallSign())},
-			{thresh = 10,    text = string.format(_("station-comms","%s reluctantly acknowledges your communication. Make it snappy, %s."),env.target:getCallSign(),env.source:getCallSign())},
-		}
-		local prompt_index = #station_greeting_prompt
-		for i,prompt in ipairs(station_greeting_prompt) do
-			if env.target.comms_data.friendlyness > prompt.thresh then
-				prompt_index = i
-				break
-			end
-		end
-		local msg = station_greeting_prompt[prompt_index].text
-		msg = string.gsub(msg, "%. ", ".\n")
-		return msg
-	end,
-}):add_condition(ccc.undocked):add_condition(ccc.not_enemy_faction):add_test_setup(function(env)
-	env.target.comms_data.friendlyness = 50
-end)
+	messages = {
+		_("greeted-by-station-undocked", "This is {target_callsign}'s communications officer.  Go ahead, {source_callsign}.  We're listening."),
+		_("greeted-by-station-undocked", "{target_callsign} to {source_callsign}, receiving your communication.  Proceed with your message."),
+		_("greeted-by-station-undocked", "Confirmed, {source_callsign}.  You're connected to {target_callsign}.  Go ahead."),
+		_("greeted-by-station-undocked", "This is the {target_callsign} communications officer.  Go ahead, {source_callsign}."),
+		_("greeted-by-station-undocked", "{target_callsign} acknowledges {source_callsign}'s communication.  Pray, don't keep us in suspense any longer."),
+		_("greeted-by-station-undocked", "{source_callsign}, it is positively thrilling to be the recipient of your undoubtedly important message.  Please enlighten us."),
+		_("greeted-by-station-undocked", "Acknowledged, {source_callsign}.  Try not to waste our time.  What do you want?"),
+		_("greeted-by-station-undocked", "What is it now, {source_callsign}?  Make it quick; we're not here for small talk."),
+		_("greeted-by-station-undocked", "{target_callsign} reluctantly acknowledges your communication.  Make it snappy, {source_callsign}."),
+	},
+}):add_condition(ccc.undocked):add_condition(ccc.not_enemy_faction)
 
 comms_vf_station.automatic.enemy_greeting = CommsNode:new({
 	message = _("special-comms", "You are our declared enemy. What do you want?"),
@@ -712,8 +723,9 @@ comms_vf_station.automatic.pipeline = CommsPipeline:new()
 comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.ensure_comms_data)
 comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.update_database)
 --comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.panic_check) -- no benefit to gameplay
-comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.docked_greeting)
-comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.undocked_greeting)
+comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.greeter)
+comms_vf_station.automatic.greeter:add_choice(comms_vf_station.automatic.docked_greeting)
+comms_vf_station.automatic.greeter:add_choice(comms_vf_station.automatic.undocked_greeting)
 comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.enemy_greeting)
 --comms_vf_station.automatic.pipeline should be the entry point of the comms function!
 
@@ -723,10 +735,10 @@ comms_vf_station.automatic.pipeline:add_choice(comms_vf_station.automatic.enemy_
 comms_vf_station.info.main = CommsNode:new({
 	select_choice_line = function(self, env)
 		return arraySelectRandom({
-			"Information",
-			"I need information",
-			"Ask questions",
-			"I need to know what you know",
+			_("Information"),
+			_("I need information"),
+			_("Ask questions"),
+			_("I need to know what you know"),
 		})
 	end,
 	select_message = function(self, env)
@@ -741,17 +753,17 @@ comms_vf_station.info.main = CommsNode:new({
 }):add_condition(ccc.not_enemy_faction)
 
 comms_vf_station.info.status = CommsNode:new({
-	choice_line = "Report station status",
+	choice_line = _("Report station status"),
 	select_message = function(self, env)
 		local comms_target = env.target
-		local msg = "Here is our status:\n"
-        msg = msg .. string.format(_("situationReport-comms","Hull:%s    "),math.floor(comms_target:getHull() / comms_target:getHullMax() * 100))
+		local msg = _("Here is our status:\n")
+        msg = msg .. string.format(_("situationReport-comms","Hull:%s%%    "),math.floor(comms_target:getHull() / comms_target:getHullMax() * 100))
         local shields = comms_target:getShieldCount()
         if shields == 1 then
-            msg = string.format(_("situationReport-comms","%s  Shield:%s"),msg,math.floor(comms_target:getShieldLevel(0) / comms_target:getShieldMax(0) * 100))
+            msg = string.format(_("situationReport-comms","%s  Shield:%s%%"),msg,math.floor(comms_target:getShieldLevel(0) / comms_target:getShieldMax(0) * 100))
         else
             for n=0,shields-1 do
-                msg = string.format(_("situationReport-comms","%s  Shield %s:%s"),msg,n,math.floor(comms_target:getShieldLevel(n) / comms_target:getShieldMax(n) * 100))
+                msg = string.format(_("situationReport-comms","%s  Shield %s:%s%%"),msg,n,math.floor(comms_target:getShieldLevel(n) / comms_target:getShieldMax(n) * 100))
             end
         end
 		msg = string.format("%s\n%s", msg, failure_messages(env, false))
@@ -797,7 +809,7 @@ end):add_test_setup(function(env)
 end)
 
 comms_vf_station.info.general = CommsNode:new({
-	choice_line = "General Information",
+	choice_line = _("General Information"),
 	select_message = function(self, env)
 		return env.target.comms_data.general
 	end
@@ -807,7 +819,7 @@ comms_vf_station.info.general = CommsNode:new({
 end)
 
 comms_vf_station.info.history = CommsNode:new({
-	choice_line = "Station History",
+	choice_line = _("Station History"),
 	select_message = function(self, env)
 		return env.target.comms_data.history
 	end
@@ -817,7 +829,7 @@ comms_vf_station.info.history = CommsNode:new({
 end)
 
 comms_vf_station.info.services = CommsNode:new({
-	choice_line = "Station Services",
+	choice_line = _("Station Services"),
 	select_message = function(self, env)
         return services_message(env)
 	end,
@@ -838,27 +850,11 @@ comms_vf_station.info.services = CommsNode:new({
 	end
 })
 
-comms_vf_station.info.weapons= CommsNode:new({
-	choice_line = "What weapons do you sell?",
-	select_message = function(self, env)
-        return comms_vf_weapons.weapons_available_message(env)
-	end,
-	test = function(self, env)
-		services_test_data(env, nil)
-		self:select_message(env)
-		services_test_data(env, false)
-		self:select_message(env)
-		services_test_data(env, true)
-		self:select_message(env)
-		comms_vf_station.automatic.ensure_comms_data:_apply_effects(env)
-		comms_vf_station.info.services.super().test(self,env)
-	end
-})
 
 comms_vf_station.info.missions = CommsNode:new({
 	choice_line = "Missions / Service Improvements",
 	-- TODO
-})
+}):add_condition(ccc.disabled)
 
 
 --====================================================
@@ -962,9 +958,15 @@ comms_vf_station.docked.improvements.nuke = CommsNode:new({
 --====================================================
 
 comms_vf_station.undocked.supply = CommsNode:new({
-	choice_line = "Supply Drop",
-	message = "What kind of supply drop do you want?"
-}):add_condition(ccc.undocked)
+	choice_line = _("Supply Drop"),
+	message = _("What kind of supply drop do you want?")
+}):add_condition(ccc.undocked):add_test(function(self, env)
+	env.target.comms_data.service_available["supplydrop"] = false
+	env.target.comms_data.service_available["jumpsupplydrop"] = false
+	env.target.comms_data.service_available["flingsupplydrop"] = false
+	self:_can_select(env)
+end)
+:add_condition(ccc.not_enemy_faction)
 
 local function ready_supply_drop_script(env)
 	local waypoint = env.args
@@ -983,10 +985,10 @@ comms_vf_station.undocked.supply.impulse_supply = CommsNodeWaypointSelect:new({
 	select_choice_line = function(self, env)
 		local supply_drop_cost = math.ceil(env.target.comms_data.service_cost["supplydrop"])
 		return arraySelectRandom({
-            string.format("Normal (%i reputation)",supply_drop_cost),
-            string.format("Regular (%i reputation)",supply_drop_cost),
-            string.format("Plain (%i reputation)",supply_drop_cost),
-            string.format("Simple (%i reputation)",supply_drop_cost),
+            string.format(_("Normal (%d reputation)"),supply_drop_cost),
+            string.format(_("Regular (%d reputation)"),supply_drop_cost),
+            string.format(_("Plain (%d reputation)"),supply_drop_cost),
+            string.format(_("Simple (%d reputation)"),supply_drop_cost),
 		})
 	end,
 	with_waypoint = CommsNodeServiceBuyable:new{
@@ -998,10 +1000,10 @@ comms_vf_station.undocked.supply.impulse_supply = CommsNodeWaypointSelect:new({
 			local n = env.args
 			assert(type(env.args) == "number", type(env.args))
 			local supply_ship_en_route = {
-				string.format("We have dispatched a supply ship toward waypoint %d",n),
-				string.format("We sent a supply ship to waypoint %i",n),
-				string.format("There's a ship headed for %i with your supplies",n),
-				string.format("A ship should be arriving soon at waypoint %i with your supplies",n)
+				string.format(_("We have dispatched a supply ship toward waypoint %d."),n),
+				string.format(_("We sent a supply ship to waypoint %d."),n),
+				string.format(_("There's a ship headed for %d with your supplies."),n),
+				string.format(_("A ship should be arriving soon at waypoint %d with your supplies."),n)
 			}
 			return(arraySelectRandom(supply_ship_en_route))
 		end,
@@ -1025,10 +1027,10 @@ comms_vf_station.undocked.supply.jump_supply = CommsNodeWaypointSelect:new({
 	select_choice_line = function(self,env)
 		local cost = math.ceil(env.target.comms_data.service_cost["jumpsupplydrop"])
 		local jump_drop_cost = {
-                string.format("Delivered by jump ship (%d reputation)", cost),
-                string.format("Jump ship drop (%i reputation)", cost),
-                string.format("Deliver with jump ship (%i reputation)", cost),
-                string.format("Jump ship supply drop (%i reputation)", cost),
+                string.format(_("Delivered by jump ship (%d reputation)"), cost),
+                string.format(_("Jump ship drop (%d reputation)"), cost),
+                string.format(_("Deliver with jump ship (%d reputation)"), cost),
+                string.format(_("Jump ship supply drop (%d reputation)"), cost),
             }
 		return arraySelectRandom(jump_drop_cost)
 	end,
@@ -1041,10 +1043,10 @@ comms_vf_station.undocked.supply.jump_supply = CommsNodeWaypointSelect:new({
 			local n = env.args
 			assert(type(env.args) == "number", type(env.args))
 			local supply_ship_en_route = {
-				string.format("We have dispatched a supply ship toward waypoint %d",n),
-				string.format("We sent a supply ship to waypoint %i",n),
-				string.format("There's a ship headed for %i with your supplies",n),
-				string.format("A ship should be arriving soon at waypoint %i with your supplies",n)
+				string.format(_("We have dispatched a supply ship toward waypoint %d."),n),
+				string.format(_("We sent a supply ship to waypoint %d."),n),
+				string.format(_("There's a ship headed for %d with your supplies."),n),
+				string.format(_("A ship should be arriving soon at waypoint %d with your supplies."),n)
 			}
 			return(arraySelectRandom(supply_ship_en_route))
 		end,
@@ -1060,7 +1062,7 @@ end):add_test_setup(function(env)
 	env.target.comms_data.service_cost.jumpsupplydrop = 14
 end)
 comms_vf_station.undocked.supply.jump_supply.with_waypoint:add_test_setup(function(env)
-	comms_vf_station.automatic.ensure_comms_data:_call(env)
+	comms_vf_station.automatic.ensure_comms_data:_apply_effects(env)
 	env.target.getFactionId = function(self) assert(self); return 1 end
 	env.target.comms_data.service_available.jumpsupplydrop = true
 	env.target.comms_data.service_cost.jumpsupplydrop = 14
@@ -1070,13 +1072,8 @@ end)
 
 -- not implemented
 comms_vf_station.undocked.supply.fling_supply = CommsNode:new({
-	choice_line = "Fling Supply Drop",
+	choice_line = _("Fling Supply Drop"),
 }):add_condition(ccc.undocked):add_condition(ccc.disabled)
-
---====================================================
--- Friendly
---====================================================
-
 
 
 
@@ -1084,10 +1081,53 @@ comms_vf_station.undocked.supply.fling_supply = CommsNode:new({
 -- Enemy
 --====================================================
 
-comms_vf_station.enemy.intimidate = CommsNode:new({
-	choice_line = "Intimidate Station / Change Faction",
-}):add_condition(ccc.enemy_faction)
+comms_vf_station.enemy.intimidate = CommsNodeServiceAvailable:new({
+	service_name = "surrender",
+	choice_line = _("intimidate-station", "Surrender to us!"),
+	message = _("We are willing to negotiatiate our surrender."),
+})
+:add_condition(ccc.enemy_faction)
+:add_check(function(self, env)
+	return env.target:areEnemiesInRange(5000), _("intimidate-station", "We will not surrender while we are not under immediate threat.")
+end)
+:add_check(function(self, env)
+	return env.target:getHull() < env.target:getHullMax(), _("intimidate-station", "We will not surrender while our hull remains undamaged.")
+end)
+:add_check(function(self, env)
+	for __, obj in ipairs(env.target:getObjectsInRange(10000)) do
+		if obj ~= env.target and obj:isValid() and env.source:isEnemy(obj) then
+			return false, _("intimidate-station", "We will not surrender while your enemies remain close enough to help us.")
+		end
+	end
+	return true
+end)
+:add_test_setup(function(env)
+	env.source.getFactionId = function() return 1 end
+	env.target.setFactionId = function() end
+end)
 
+comms_vf_station.enemy.intimidate_confirm = CommsNodeServiceBuyable:new({
+	service_name = "surrender",
+	select_choice_line = function(self, env)
+		local cost = self:service_cost(env)
+		return string.format(_("intimidate-station", "Surrender now! [Cost: %d Rep.]"), cost)
+	end,
+	message = _("intimidate-station", "Understood. We surrender."),
+	effect = function(env)
+		if env.target.comms_data.orig_faction == nil then
+			env.target.comms_data.orig_faction = env.target:getFaction()
+		end
+		env.target:setFaction("Independent")
+	end,
+})
+:add_condition(ccc.enemy_faction)
+:add_test_setup(function(env)
+	env.target.setFaction = function() end
+	env.target.comms_data.service_cost["surrender"] = 270
+end)
+
+
+comms_vf_station.enemy.intimidate:add_choice(comms_vf_station.enemy.intimidate_confirm)
 
 --====================================================
 -- Build Tree
@@ -1104,7 +1144,7 @@ comms_vf_station.main:add_choice(comms_vf_station.info.main)
 --comms_vf_station.info.main:add_choice(comms_vf_station.info.station_information)
 comms_vf_station.info.main:add_choice(comms_vf_station.info.status)
 comms_vf_station.info.main:add_choice(comms_vf_station.info.services)
-comms_vf_station.info.main:add_choice(comms_vf_station.info.weapons)
+-- weapons info 
 comms_vf_station.info.main:add_choice(comms_vf_station.info.missions)
 comms_vf_station.info.main:add_choice(comms_vf_station.info.general)
 comms_vf_station.info.main:add_choice(comms_vf_station.info.history)
@@ -1115,7 +1155,6 @@ comms_vf_station.info.missions:add_choice(comms_vf_station.docked.dispatch)
 comms_vf_station.info.missions:add_choice(comms_vf_station.docked.improvements)
 
 -- Docked
-comms_vf_station.main:add_choice(comms_vf_weapons.restock)
 comms_vf_station.main:add_choice(comms_vf_station.docked.repair)
 comms_vf_station.main:add_choice(comms_vf_station.docked.refit)
 comms_vf_station.main:add_choice(comms_vf_station.docked.enhance)
@@ -1145,11 +1184,13 @@ comms_vf_station.main:add_choice(comms_vf_station.undocked.supply)			-- only und
 comms_vf_station.undocked.supply:add_choice(comms_vf_station.undocked.supply.impulse_supply)
 comms_vf_station.undocked.supply:add_choice(comms_vf_station.undocked.supply.jump_supply)
 comms_vf_station.undocked.supply:add_choice(comms_vf_station.undocked.supply.fling_supply)	
+comms_vf_station.undocked.supply:add_condition(function(env)
+	return comms_vf_station.undocked.supply.impulse_supply:_can_select(env) or
+		comms_vf_station.undocked.supply.jump_supply:_can_select(env) or
+		comms_vf_station.undocked.supply.fling_supply:_can_select(env)
+end)	
 
--- Military / Friendly
--- from other file
-comms_vf_station.main:add_choice(comms_vf_military.defense)	
-comms_vf_station.main:add_choice(comms_vf_military.reinforcements)
+
 
 -- Enemy
 comms_vf_station.main:add_choice(comms_vf_station.enemy.intimidate)

@@ -170,6 +170,7 @@ function TerrainModule:insertStation(station)
 	else
 		self:insertObject(station, 0.75)
 	end
+	station.terrain_module = self
 end
 
 function TerrainModule:getStation()
@@ -309,7 +310,7 @@ TerrainModule.zone_names = arrayShuffle({
 	"Fliege des Hundes",
 	"Kupferner Hängeleuchter",
 	"Schnurrhaare des Dachses",
-	"Helm der Königs",
+	"Helm des Königs",
 	"Kern der Melone",
 	"Führung des Tentakels",
 	"Leere der Unerfahrenheit",
@@ -586,7 +587,7 @@ function TerrainModulePlanets:insertOrbitingObject(obj)
 			-- self.radius/4 + orbit_dist/#self.moons + (orbit_dist - orbit_dist / #self.moons) /2
 			dist = self.radius/4 + orbit_dist * (1/#self.moons + (1 - 1 / #self.moons) /2)
 		end							   
-		local x,y = radialPosition(self.x, self.y, dist, linked_moon.arc+180)
+		local x,y = radialPosition(self.x, self.y, dist, linked_moon.arc)
 		obj:setPosition(x,y)
 		wh_rota:add_object(obj, 360/linked_moon.orbit_time, self.x, self.y)
 	else
@@ -806,10 +807,10 @@ function TerrainModuleMetaSpiral:create()
 	for i=2, #self.children-1 do
 		local last = self.children[i-1]
 		local recent = self.children[i]
-		local next = self.children[i+1]
+		local nex = self.children[i+1]
 		assert(last.gossip)
-		assert(next.gossip)
-		recent.collected_gossip = {last.gossip, next.gossip}
+		assert(nex.gossip, nex.encounter)
+		recent.collected_gossip = {last.gossip, nex.gossip}
 	end
 	for terrain_type, counter in pairs(counter) do
 		log(string.format("created %i %s", counter, terrain_type))

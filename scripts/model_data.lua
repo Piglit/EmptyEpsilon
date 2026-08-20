@@ -1009,4 +1009,3 @@ model:addEngineEmitter(-8.25, 0, 0.64,  .21, .67, .40, 2.0)
 model:addBeamPosition(3.89, -8.28, 0.76)
 model:addBeamPosition(3.89,  8.28, 0.76)
 
-

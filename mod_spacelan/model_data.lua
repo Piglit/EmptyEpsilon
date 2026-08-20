@@ -745,3 +745,7 @@ model:setScale(2):setRadius(100)
 model:setMesh("mesh/various/debris-blob.obj")
 model:setTexture("mesh/various/debris-blob.jpg")
 model:setSpecular("mesh/various/debris-blob-specular.jpg")
+
+
+-------- Custom Models
+require("../resources/custom/model_datas.lua")

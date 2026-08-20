@@ -25,3 +25,6 @@ require("shiptemplates/special.lua")
 
 --For now, we add our old ship templates as well. These should be removed at some point.
 --require("shiptemplates/OLD.lua")
+
+-------- Custom Ships
+require("../resources/custom/ship_templates.lua")

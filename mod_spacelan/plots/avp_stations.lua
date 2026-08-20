@@ -24,73 +24,53 @@ avp_stations = {
 
 require "place_station_scenario_utility.lua"
 require "luax.lua"
+require("comms/lib_comms_nodes.lua")
+require("comms/comms_vf_station.lua")
+require("comms/comms_vf_weapons.lua")
+require("comms/comms_vf_military.lua")
+require("comms/comms_vf_scenario_arlenians.lua")
+require("comms/comms_vf_scenario_management.lua")
+
+
 
 function avp_stations:init()
-	self.characters = {
-		{name = "Frank Brown", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Joyce Miller", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Harry Jones", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Emma Davis", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Zhang Wei Chen", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Yu Yan Li", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Li Wei Wang", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Li Na Zhao", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Sai Laghari", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Anaya Khatri", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Vihaan Reddy", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Trisha Varma", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Henry Gunawan", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Putri Febrian", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Stanley Hartono", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Citra Mulyadi", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Bashir Pitafi", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Hania Kohli", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Gohar Lehri", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Sohelia Lau", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Gabriel Santos", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Ana Melo", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Lucas Barbosa", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Juliana Rocha", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Habib Oni", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Chinara Adebayo", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Tanimu Ali", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Naija Bello", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Shamim Khan", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Barsha Tripura", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Sumon Das", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Farah Munsi", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Denis Popov", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Pasha Sokolov", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Burian Ivanov", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Radka Vasiliev", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Jose Hernandez", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Victoria Garcia", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-		{name = "Miguel Lopez", subject_pronoun = "he", object_pronoun = "him", possessive_adjective = "his"},
-		{name = "Renata Rodriguez", subject_pronoun = "she", object_pronoun = "her", possessive_adjective = "her"},
-	}
+	--Currently no missions
+    --self.mission_goods = {}
+    --self.ordnance_missions = {
+    --    "Homing","Nuke","EMP","Mine","HVLI",
+    --}
+    --for i,mission in ipairs(self.ordnance_missions) do
+    --    self.mission_goods[mission] = {"nickel","platinum","gold","dilithium","tritanium","cobalt","circuit","filament"}
+    --end
+    --table.insert(self.mission_goods.Homing,"sensor")
+    --table.insert(self.mission_goods.Nuke,"sensor")
+    --table.insert(self.mission_goods.EMP,"sensor")
+	--assert (vapor_goods ~= nil)	-- from xansta_mods
+end
 
-    self.mission_goods = {}
-    self.ordnance_missions = {
-        "Homing","Nuke","EMP","Mine","HVLI",
-    }
-    for i,mission in ipairs(self.ordnance_missions) do
-        self.mission_goods[mission] = {"nickel","platinum","gold","dilithium","tritanium","cobalt","circuit","filament"}
-    end
-    table.insert(self.mission_goods.Homing,"sensor")
-    table.insert(self.mission_goods.Nuke,"sensor")
-    table.insert(self.mission_goods.EMP,"sensor")
-	assert (vapor_goods ~= nil)	-- from xansta_mods
-
+function avp_stations:insertStation(station, terrain_module)
+	terrain_module:insertStation(station)
+	self:apply_comms_script(station, terrain_module)
+	if terrain_module.zone_name ~= "" then
+		station.called_zone_name = "called '" .. terrain_module.zone_name .. "' "
+	end
+	table.insert(self.stations, station)
 end
 
 function avp_stations:createArlenianStation(template, terrain_module)
-	local groups = {"Generic", "RandomHumanNeutral", "Random"}
+	local groups = {"Generic", "Random"}
 	for _,grpname in ipairs(groups) do
 		local group, station = pickStation(grpname)
 		if station ~= nil then
 			station:setFaction("Arlenians"):setTemplate(template)
-			avp_stations:apply_comms_script(station, terrain_module)
-			table.insert(self.stations, station)
+			self:insertStation(station, terrain_module)
+			self:apply_arlenian_modifiers(station)
+			if vf_bescheid ~= nil then
+				vf_bescheid:sag_bescheid("arlenian_station_found", {
+					callsign=station:getCallSign(),
+					sector=station:getSectorName(),
+				})
+			end
 			return station
 		end
 	end
@@ -102,43 +82,9 @@ function avp_stations:createEnemyStation(templates, name_groups, terrain_module)
 		local group, station = pickStation(grpname)
 		if station ~= nil then
 			station:setTemplate(template)
-			avp_stations:apply_comms_script(station, terrain_module)
-			table.insert(self.stations, station)
+			self:insertStation(station, terrain_module)
+			self:apply_enemy_modifiers(station)
 			return station
-		end
-	end
-end
-
-function avp_stations:createExuariCarrier()
-	local groups = {"Sinister", "RandomGenericSinister", "Random"}
-	for _,grpname in ipairs(groups) do
-		local group, station = pickStation(grpname)
-		if station ~= nil then
-			carrier = CpuShip():setCallSign(station:getCallSign()):setDescription(station:getDescription())
-			carrier.comms_data = station.comms_data
-			station:destroy()
-			local stationSizeRandom = random(1,100)
-			local sizeTemplate
-			if stationSizeRandom <= 66 then
-				sizeTemplate = "Craver"
-			else
-				sizeTemplate = "Ridge"
-			end
-			carrier:setFaction("Exuari"):setTemplate(sizeTemplate):orderStandGround()
-			for idx,grp in ipairs({"frigates", "artillery", "strikers", "fighters"}) do
-				for i = idx, idx*2+1 do
-					local template = EnemyModuleExuari:getClassTemplate(grp)
-					if i == idx then
-						script_hangar:create(carrier, template, i)	-- one bay per class
-					else
-						script_hangar:append(carrier, template, i)
-					end
-				end
-				script_hangar:config(carrier, "cooldownMax", 60/idx)
-				script_hangar:config(carrier, "triggerRange", 50000 - 10000*idx)
-			end	
-			table.insert(self.stations, carrier)
-			return carrier 
 		end
 	end
 end
@@ -146,191 +92,191 @@ end
 function avp_stations:createIndependentStation(terrain_module)
 	-- call sub-functions from the utility
 	local group, station = pickStation("RandomHumanNeutral")	-- could also be a group or a name
-	station:setFaction("Independent")
-	local sizeTemplate = szt()
-	station:setTemplate(sizeTemplate)
-	
-	-- place station
-	if terrain_module ~= nil then
-		terrain_module:insertStation(station)
+	if station ~= nil then
+		station:setFaction("Independent")
+		local sizeTemplate = szt()
+		station:setTemplate(sizeTemplate)
+		self:insertStation(station, terrain_module)
 		if terrain_module.terrain_type == "asteroids" then
 			avp_mining:activateMining(station, 2*terrain_module.radius)
 		end
 	end
-
-	avp_stations:apply_comms_script(station, terrain_module)
-	table.insert(self.stations, station)
 	return station
+end
+
+function avp_stations:start_with_broken_services(station)
+	-- we never call placeStation, so some data is missing:
+	-- removed faction_matters, but keep size_matters
+	local size_matters = station:getHullMax() / 20
+	station:setSharesEnergyWithDocked(random(1,100) <= (50 + size_matters))
+	station:setRepairDocked(random(1,100) <= (55 + size_matters))
+	station:setRestocksScanProbes(random(1,100) <= (45 + size_matters))
+end
+
+function avp_stations:start_with_broken_repair_services(station)
+--	station.comms_data.system_repair = {}
+--	station.comms_data.coolant_pump_repair = {}
+--	local system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
+--	for i, system in ipairs(system_list) do
+--		local chance = 60 + size_matters
+--		local eval = random(1,100)
+--		station.comms_data.system_repair[system] = eval <= chance
+--		--eval = random(1,100)
+--		--station.comms_data.coolant_pump_repair[system] = eval <= chance
+--	end
+	-- we currently don't use function_repair, so leave it missing
+end
+
+function avp_stations:start_with_scarce_weapons(station)
+	-- weapons:
+	-- some weapons are enabled or disabled due to the faction description by the place utility. Most of them get randomly enabled by the difficulty setting at the beginning of the game (when the first call of pickStation occures).
+	-- Let's use them as a suggestion of weapons, they still have in store, but to a limited and very scarce amount.
+	if station.comms_data.weapon_available == nil then
+		station.comms_data.weapon_available = {
+			Nuke = false,
+			EMP = false,
+			Homing = false,
+			Mine = false,
+			HVLI = false,
+		}
+	end
+	local size_matters = station:getHullMax() / 20
+	for weapon, avail in pairs(station.comms_data.weapon_available) do
+		if avail then
+			station.comms_data.weapon_available[weapon] = math.ceil(size_matters)
+		end
+	end
+end
+
+function avp_stations:apply_terrain_modifiers(station, terrain_type)
+	-- stations procude weapons, depending on the terrain. They always sell those.
+	-- warning: Independent stations are not placed in mines and planets!
+	if station.comms_data.weapon_available == nil then
+		station.comms_data.weapon_available = {}
+	end
+	if terrain_type == "asteroids" then
+		station.comms_data.weapon_available.HVLI = true
+		services = {"repair_docked", "sell_weapons"}
+	elseif terrain_type == "nebulae" then
+		station.comms_data.weapon_available.Homing = true
+		services = {"coolant_pump_repair", "restock_probes", "sell_weapons"}
+	elseif terrain_type == "mines" then
+		station.comms_data.weapon_available.Mine = true
+		services = {"sell_weapons", "jump_overcharge"}
+	elseif terrain_type == "blackholes" then
+		station.comms_data.weapon_available.EMP = true
+		services = {"subsystem_repair", "sell_weapons", "share_energy"}
+	elseif terrain_type == "planets" then
+		station.comms_data.weapon_available.Nuke = true
+		services = {"reinforcements", "system_repair", "repair_docked", "sell_weapons"}
+	elseif terrain_type == "wormholes" then
+		station.comms_data.weapon_available.EMP = true
+		services = {"restock_probes", "supplydrop", "jumpsupplydrop"}
+	end
+	
+	-- currently services depend on faction, no need to make it depend on terrain
+
+	---- services depend on terrain type:
+	--local services = {}
+	--local all_services = {
+	--	"reinforcements",
+	--	"supplydrop",
+	--	"jumpsupplydrop",
+	--	"subsystem_repair",
+	--	"system_repair",
+	--	"coolant_pump_repair",
+	--	"jump_overcharge",
+	--	"share_energy",
+	--	"repair_docked",
+	--	"restock_probes",
+	--	"sell_weapons",
+	--}
+
+	---- all the specific services are available for friends only
+	--for _, service in ipairs(services) do
+	--	station.comms_data.services[service] = false--"friend"
+	--end
+
+	---- choose few of the services for neutrals
+	--arrayShuffle(services)
+	--arrayShuffle(all_services)
+	--local amount = 2	-- default
+	--if sizeTemplate == "Small Station" then
+	--	amount = 1
+	--elseif sizeTemplate == "Medium Station" then
+	--	amount = 2
+	--elseif sizeTemplate == "Large Station" then
+	--	amount = 3
+	--elseif sizeTemplate == "Huge Station" then
+	--	amount = 4
+	--end
+	--for i=1, amount do
+	--	local service = table.remove(services)
+	--	if service == nil then	-- all local services used up, add common ones
+	--		service = table.remove(all_services)
+	--	end
+	--	station.comms_data.services[service] = "neutral"
+	--end
+end
+
+function avp_stations:apply_arlenian_modifiers(station)
+	if station.comms_data.service_available == nil then
+		station.comms_data.service_available = {}
+	end
+	station.comms_data.service_available["sell_weapons"] = false
+	station:setSharesEnergyWithDocked(true)
+	station:setRepairDocked(true)
+	station:setRestocksScanProbes(true)
+end
+
+function avp_stations:apply_enemy_modifiers(station)
+	-- relevant if you make stations surrender
+	-- we dont have the faction here, it is set afterwards
+	-- so we don't know anything about this station
+	-- it may have broken services (unrepairable)
+	-- and it has terrain-specific weapons.
+	-- we just add a large weapons cache here, for the players to buy
+	local env = {
+		target = station
+	}
+	station.comms_data.size_factor = station:getHullMax() / 20 -- 5 times as high as the normal size_factor
+	comms_vf_weapons.increase_available_weapons(env)
 end
 
 -- modify comms_data to fit to our missions
 function avp_stations:apply_comms_script(station, terrain_module)
 	comms_vf_station.entry:set_as_comms_function(station)
-	local hull_modifier = station:getHullMax() / 100
-	-- small: 1.5
-	-- medium: 4
-	-- large: 5
-	-- huge: 8
 
-	station.surrender_hull_threshold = math.random(40,80)	-- for wh_kraylor
-
+	if station.comms_data == nil then
+		station.comms_data = {}
+	end
+	station.comms_data.gossip = terrain_module.collected_gossip
+	
 	-- do not use most of the comms data from the utility,
 	-- keep description, general, history as they are descriptive.
-	
-	-- these are are the same for all stations. just remove them and add them later
+	-- these are are the same for all stations.
+	-- just remove them here and add them later in the defaut initialisers
 	station.comms_data.services = nil
 	station.comms_data.service_available = {}
 	station.comms_data.service_cost = {}
-
 	-- disable xanstas trade system, since I dont really like it
 	station.comms_data.goods = {}
 	station.comms_data.trade = nil
 
-	-- patch in case it is missing
-	if station.comms_data.reputation_cost_multipliers == nil then
-		station.comms_data.reputation_cost_multipliers = {
-			friend = 			1.0, 
-			neutral = 			irandom(2,3),	-- is given by utility per station
-		}
-	end
-	-- we never call placeStation, so some data is missing:
-	-- removed faction_matters, but keep size_matters
-	local size_matters = hull_modifier * 5
-	station:setSharesEnergyWithDocked(random(1,100) <= (50 + size_matters))
-	station:setRepairDocked(random(1,100) <= (55 + size_matters))
-	station:setRestocksScanProbes(random(1,100) <= (45 + size_matters))
-	station.comms_data.system_repair = {}
---	station.comms_data.coolant_pump_repair = {}
-	local system_list = {"reactor","beamweapons","missilesystem","maneuver","impulse","warp","jumpdrive","frontshield","rearshield"}
-	for i, system in ipairs(system_list) do
-		local chance = 60 + size_matters
-		local eval = random(1,100)
-		station.comms_data.system_repair[system] = eval <= chance
-		--eval = random(1,100)
-		--station.comms_data.coolant_pump_repair[system] = eval <= chance
-	end
-	-- we currently don't use function_repair, so leave it missing
-	
-	-- don't know if needed:
-	--station:setSharesEnergyWithDocked(station.comms_data.services.share_energy ~= false)
-	--station:setRepairDocked(station.comms_data.services.repair_docked ~= false)
-	--station:setRestocksScanProbes(station.comms_data.services.restock_probes ~= false)
+	self:start_with_scarce_weapons(station)
+	self:start_with_broken_services(station)
+	--self:start_with_broken_repair_services(station)
+	--self:setRepairMissions(station) -- currently disabled
+	self:apply_terrain_modifiers(station, terrain_module.terrain_type)
 
-	self:setRepairMissions(station)
-
-	-- weapons:
-	-- some weapons are enabled or disabled due to the faction description by the place utility. Most of them get randomly enabled by the difficulty setting at the beginning of the game (when the first call of pickStation occures).
-	-- Let's use them as a suggestion of weapons, they still have in store, but to a limited and very scarce amount.
-
-	assert(station.comms_data.weapon_available)
-	for weapon, avail in pairs(station.comms_data.weapon_available) do
-		if avail then
-			station.comms_data.weapon_available[weapon] = math.ceil(hull_modifier)
-		end
-	end
-
-	-- stations procude weapons, depending on the terrain. They always sell those.
-	-- warning: Independent stations are not placed in mines and planets!
-	assert(terrain_module)
-	if terrain_module.terrain_type == "asteroids" then
-		station.comms_data.weapon_available.HVLI = true
-		services = {"repair_docked", "sell_weapons"}
-	elseif terrain_module.terrain_type == "nebulae" then
-		station.comms_data.weapon_available.Homing = true
-		services = {"coolant_pump_repair", "restock_probes", "sell_weapons"}
-	elseif terrain_module.terrain_type == "mines" then
-		station.comms_data.weapon_available.Mine = true
-		services = {"sell_weapons", "jump_overcharge"}
-	elseif terrain_module.terrain_type == "blackholes" then
-		station.comms_data.weapon_available.EMP = true
-		services = {"subsystem_repair", "sell_weapons", "share_energy"}
-	elseif terrain_module.terrain_type == "planets" then
-		station.comms_data.weapon_available.Nuke = true
-		services = {"reinforcements", "system_repair", "repair_docked", "sell_weapons"}
-	elseif terrain_module.terrain_type == "wormholes" then
-		services = {"restock_probes", "supplydrop", "jumpsupplydrop"}
-	end
-
-
-
-	local character = table.remove(self.characters)	-- pop one into this station
-	if character ~= nil then
-		station.characters = {character}
-	end
-
-
-	
-
-	-- this table is for isAllowedTo, it understands "friend" and "neutral" - everything else is denied.
-	-- disable all as default, enable selected later
-	station.comms_data.services = {	
-		reinforcements = false,
-		supplydrop = false,	-- TODO "friend", when contents match our docking services.
-		jumpsupplydrop = false,
-		subsystem_repair = false,	-- TODO were different ones for every subsystem
-		system_repair = false,		-- TODO were different ones for every system
-		coolant_pump_repair = false,	-- TODO were different ones for every system
-		jump_overcharge = false,
-		share_energy = false,
-		repair_docked = false,
-		restock_probes = false,
-		sell_weapons = false,	-- TODO checked before weapon_available
+	-- enable for all station that match the criteria (friendly/enemy)
+	station.comms_data.service_available = {
+		supplydrop = true,
+		jumpsupplydrop = true,
+		activatedefensefleet = true,
+		surrender = true,
+		reinforcements = true,
 	}
-	station.comms_data.service_cost = {
-		supplydrop =		math.random(80,120), 
-		reinforcements =	math.random(125,175),
-		jumpsupplydrop =	math.random(110,140),
-		subsystem_repair =	math.random(2,8),
-		system_repair =		math.random(4,18),
-		coolant_pump_repair = math.random(3,12),
-		jump_overcharge =	math.random(20,40),
-		share_energy =		math.random(10,20),
-		repair_docked =		math.random(10,30),
-		restock_probes =	math.random(10,20),
-	}
-
-
-	-- services depend on terrain type:
-	local services = {}
-	local all_services = {
-		"reinforcements",
-		"supplydrop",
-		"jumpsupplydrop",
-		"subsystem_repair",
-		"system_repair",
-		"coolant_pump_repair",
-		"jump_overcharge",
-		"share_energy",
-		"repair_docked",
-		"restock_probes",
-		"sell_weapons",
-	}
-
-	-- all the specific services are available for friends only
-	for _, service in ipairs(services) do
-		station.comms_data.services[service] = false--"friend"
-	end
-
-	-- choose few of the services for neutrals
-	arrayShuffle(services)
-	arrayShuffle(all_services)
-	local amount = 2	-- default
-	if sizeTemplate == "Small Station" then
-		amount = 1
-	elseif sizeTemplate == "Medium Station" then
-		amount = 2
-	elseif sizeTemplate == "Large Station" then
-		amount = 3
-	elseif sizeTemplate == "Huge Station" then
-		amount = 4
-	end
-	for i=1, amount do
-		local service = table.remove(services)
-		if service == nil then	-- all local services used up, add common ones
-			service = table.remove(all_services)
-		end
-		station.comms_data.services[service] = "neutral"
-	end
 
 	return station
 end
@@ -550,11 +496,12 @@ function avp_stations:setRepairMissions(station)
 	--]]
 end
 function avp_stations:update(delta)
+	arrayFilter(self.stations, function(obj)
+		return obj ~= nil and obj:isValid()
+	end)
 	for _, station in ipairs(self.stations) do
-		if station:isValid() then
-			-- stations produce their buy value in one hour
-			local gain = station:getHullMax() * 4 / 3600
-			station:addReputationPoints(gain*delta)
-		end
+		-- stations produce their buy value in one hour
+		local gain = station:getHullMax() * 4 / 3600
+		station:addReputationPoints(gain*delta)
 	end
 end

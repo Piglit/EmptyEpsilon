@@ -13,7 +13,6 @@ player_ships_util = {
 		"Schild",
 		"Antrieb",
 		"Manöver",
-		"Droiden",
 	},
 	custom_elements_index_base = {
 		upgrade = 20,	-- +70

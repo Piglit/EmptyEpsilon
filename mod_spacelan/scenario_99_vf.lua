@@ -17,58 +17,69 @@ end
 
 TEST = false
 
+local scenario = {}
 function init()
 	difficulty = 1	-- global var from xanstas stuff
 	init_constants_xansta()
 
 	plot_manager:init({
 		"campaign",
-		"wh_players",
+		"vf_bescheid",
 		"wh_fleetcommand",
+		"wh_players",
 		"wh_artifacts",
 		"script_hangar",
 		"wh_rota",
 		"gravity_util",
 		"avp_mining",
 		"avp_terrain_modules",
-		"avp_stations",
+		"avp_stations",	-- requires the comms functions for stations
 		"avp_enemies",
 		"vf_blackhole",
 		"vf_nebulae",
 		"vf_mine_dance",
 		"vf_comms_call_to_action",
 		"vf_wormhole_instable",
+		"vf_trade_network",
+		"vf_upgrades",
+		"vf_ambush",
 		"avp_story",
+		{"scenario", scenario},
 	})
 	gravity_util.gravity_const = 2000000	-- 50 times as high!
 	local terrain = TerrainModuleMetaSpiral:new{x=100000, y=120000, radius=200000, amount=47}
 	terrain:registerOnChildrenCheckCallback(avp_story.onTerrainCheck)
 	terrain:registerOnChildrenCreationCallback(avp_story.onTerrainCreation)
 	terrain:create()
-	addGMFunction("Create Kraylor Fortress", create_kraylor_fortress)
-	addGMFunction("Create Exuari Boss", create_exuari_boss)
-	addGMFunction("Create Ktlitan Boss", create_ktlitan_boss)
-	addGMFunction("Create Terrain 2", create_terrain_2)
-
 end
 
-function create_terrain_2()
+
+
+function scenario:gm_menu()
+	addGMFunction("Create Kraylor Fortress", scenario.create_kraylor_fortress)
+	addGMFunction("Create Exuari Boss", scenario.create_exuari_boss)
+	addGMFunction("Create Ktlitan Boss", scenario.create_ktlitan_boss)
+	addGMFunction("Create Terrain 2", scenario.create_terrain_2)
+end
+
+function scenario.create_terrain_2()
 	local amount = 47
 	local terrain = TerrainModuleMetaSpiral:new{x=500000, y=120000, radius=200000, rotation=180+3*360/amount, amount=amount}
+	terrain:registerOnChildrenCheckCallback(avp_story.onTerrainCheck)
 	terrain:registerOnChildrenCreationCallback(avp_story.onStationCreation)
 	terrain:create()
 	removeGMFunction("Create Terrain 2")
 end
 
-function create_exuari_boss()
+function scenario.create_exuari_boss()
 	onGMClick(function(x,y)
 		EnemyModuleExuari:spawnEnemiesAtPositions({{x, y}}, 1000)
 		onGMClick(nil)
-		sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir fangen eine starke Warpsignatur aus Sektor ".. getSectorName(x,y) .."auf.\nDort ist gerade etwas großes angekommen!")
+		--sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir fangen eine starke Warpsignatur aus Sektor ".. getSectorName(x,y) .."auf.\nDort ist gerade etwas großes angekommen!")
 	end)
 end
 
-function create_ktlitan_boss()
+function scenario.create_ktlitan_boss()
 	onGMClick(function(x,y)
 		EnemyModuleKtlitans:spawnEnemiesAtPositions({{x, y}}, 500)
 		onGMClick(nil)
@@ -76,7 +87,7 @@ function create_ktlitan_boss()
 	end)
 end
 
-function createKraylorDestroyer()
+function scenario.createKraylorDestroyer()
     local destroyers = {
         "Deathbringer",
         "Painbringer",
@@ -86,7 +97,7 @@ function createKraylorDestroyer()
     return CpuShip():setFaction("Kraylor"):setTemplate(destroyers[math.random(#destroyers)])
 end
 
-function createKraylorGunship()
+function scenario.createKraylorGunship()
     local gunships = {
         "Rockbreaker",
         "Rockbreaker Merchant",
@@ -101,7 +112,7 @@ function createKraylorGunship()
     return CpuShip():setFaction("Kraylor"):setTemplate(gunships[math.random(#gunships)])
 end
 
-function create_kraylor_fortress()
+function scenario.create_kraylor_fortress()
 	local x_0,y_0 = 20000,100000
     local kraylor_defense_line = {
         WarpJammer():setFaction("Kraylor"):setRange(18000):setPosition(x_0 +264940, y_0 + 7657),
@@ -130,10 +141,10 @@ function create_kraylor_fortress()
 
     for idx, warp_jammer in ipairs(kraylor_defense_line) do
         local x, y = warp_jammer:getPosition()
-        local ship = createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
+        local ship = scenario.createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
 		script_hangar:create(ship, "Drone", 4)
         for n = 1, 3 do
-            local ship2 = createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)
+            local ship2 = scenario.createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)
         end
     end
 
@@ -151,14 +162,14 @@ function create_kraylor_fortress()
 
     for idx, station in ipairs(kraylor_forward_line) do
         local x, y = station:getPosition()
-        local ship = createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
+        local ship = scenario.createKraylorDestroyer():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendLocation(x, y)
 		script_hangar:create(ship, "Drone", 2)
 
         for n = 1, 3 do
-            local ship2 = createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)
+            local ship2 = scenario.createKraylorGunship():setPosition(x + random(-1000, 1000), y + random(-1000, 1000)):orderDefendTarget(ship)
         end
     end
 
-	sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir empfangen starke Warp-Störsignale aus Sektor ".. getSectorName(x_0 +297462, y_0 -4252) ..".\nWir vermuten dort eine Kraylor-Befestigungsanlage!")
+	--sendMessageToCampaignServer("fernschreiber", "Human Navy Tiefraum-Abhördienst an die Flotte:\nWir empfangen starke Warp-Störsignale aus Sektor ".. getSectorName(x_0 +297462, y_0 -4252) ..".\nWir vermuten dort eine Kraylor-Befestigungsanlage!")
 	removeGMFunction("Create Kraylor Fortress")
 end

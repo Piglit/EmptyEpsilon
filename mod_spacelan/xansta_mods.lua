@@ -26,7 +26,7 @@ function init_constants_xansta()
 			["Piranha F12"]= 15,
 			["Nirvana R3"]= 17,
 		},
-		["Blue Star Cartell"]= {
+		["Blue Star"]= {
 			["Blue Hornet"]= 5,
 			["Blue Lindworm"]= 7,
 			["Blue Adder MK5"]= 7,
@@ -118,6 +118,28 @@ function init_constants_xansta()
 			["Diva"]= 120,	
 			["Tsarina"]= 150,	
 		},
+		["Arlenians"]= {
+			["Widow"]= 2,
+			["Matron"]= 4,
+			["Goldfinch"]= 5,
+			["Gentoo"]= 6,
+			["Hoatzin"]= 7,
+			["Macaw"]= 10,
+			["Spix"]= 10,
+			["Pigeon"]= 15,
+			["Grosbeak"]= 20,
+			["Woodpecker"]= 30,
+			["Swallow"]= 30,
+			["Linnet"]= 30,
+			["Pheasant"]= 50,
+			["Grebe"]= 50,
+			["Pochard"]= 50,
+			["Crane"]= 50,
+			["Towhee"]= 40,
+			["Pelican"]= 40,
+			["Kite"]= 100,
+			["Heron"]= 80,
+		},
 		["other"]= {
 			["MT52 Hornet"]= 5,
 			["WX-Lindworm"]= 7,
@@ -129,7 +151,6 @@ function init_constants_xansta()
 		}
 	}
 	stl["Interplanetary Union"] = stl["Mining Corporation"]
-	stl["Arlenians"] = stl["Blue Star Cartell"]
 	stln = {}
 	stnl = {}
 	stsl = {}
@@ -338,8 +359,8 @@ function init_constants_xansta()
 		{"reactor","maneuver","frontshield"},
 		{"reactor","maneuver","rearshield"}
 	}
-	feature_cargoInventory = true
-	feature_autoCoolant = true
+	feature_cargoInventory = false
+	feature_autoCoolant = false
 	feature_crewFate = true
 	--Damage to ship can kill repair crew members, deplete coolant and --disable ship functions--
 	--ship functions may no be repairable, make sure, stations can heal it.
@@ -771,7 +792,7 @@ function xanstas_player_update(delta)
 				x_autoCoolant(p)
 			end
 			if feature_crewFate then
-				if p.exclude_from_health_check ~= nil then
+				if not p.exclude_from_health_check then
 					x_healthCheck(delta, p)
 				end
 			end

@@ -646,4 +646,46 @@ function EnemyModuleCriminals:spawnEnemiesAtPositions(positions, strength)
 	return fleet_leaders
 end
 
+--[[ Arlenians --]]
+
+EnemyModuleArlenians = EnemyModule:new{
+	faction="Arlenians",
+	classes={
+		fighters = arrayShuffle({"Widow", "Matron", "Goldfinch", "Gentoo", "Hoatzin"}),
+		transports = arrayShuffle({"Macaw", "Spix", "Pigeon", "Grosbeak"}),
+		escorts = arrayShuffle({"Woodpecker", "Swallow", "Linnet"}),
+		cruisers = arrayShuffle({"Pheasant", "Grebe", "Pochard", "Crane"}),
+	}
+}
+
+function EnemyModuleArlenians:spawnEnemiesAtPositions(positions, strength)
+	local position_index = 0
+	local fleet_leaders = {}
+	while strength >= 0 do
+		position_index = position_index % #positions + 1
+		local templates
+		if position_index % 2 == 1 then
+			templates = {
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+				self:getClassTemplate("fighters"),
+			}
+		else	
+			templates = {
+				self:getClassTemplate("escorts"),
+				self:getClassTemplate("transports"),
+				self:getClassTemplate("escorts"),
+				self:getClassTemplate("transports"),
+				self:getClassTemplate("cruisers"),
+				self:getClassTemplate("transports"),
+			}
+		end
+		local used_strength, leader = self:spawnFormation(positions[position_index], strength, templates)
+		strength = strength - used_strength
+		table.insert(fleet_leaders, leader)
+	end
+	return fleet_leaders
+end
+
 

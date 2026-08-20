@@ -84,7 +84,7 @@ Per default all weapons are sold, just like in the original comms_ship.lua
 function comms_vf_weapons.ensure_comms_data(env)
 	local comms_data = env.target.comms_data
 	assert(comms_data)
-	if comms_data._weapons_checked then
+	if comms_data._weapons_initialized then
 		return
 	end
 	local default_costs = {
@@ -127,7 +127,10 @@ function comms_vf_weapons.ensure_comms_data(env)
 			comms_data.weapon_desc[missile] = missile_types_desc[missile]
 		end
 	end
-	comms_data._weapons_checked = true
+	if comms_data.service_available["sell_weapons"] == nil then
+		comms_data.service_available["sell_weapons"] = true
+	end
+	comms_data._weapons_initialized = true
 end
 
 --[[
@@ -140,6 +143,9 @@ Returns true when the weapon is either:
 Returns false when the weapon is not sold or its limited supply has reached zero.
 ]]
 function comms_vf_weapons.is_weapon_available(env, missile_type)
+	if not env.target.comms_data.service_available["sell_weapons"] then
+		return false
+	end
 	local avail = env.target.comms_data.weapon_available[missile_type]
 	return avail == true or
 		(type(avail) == "number" and
@@ -193,6 +199,17 @@ function comms_vf_weapons.get_available_weapons(env)
 	return available_missiles
 end
 
+
+-- returns the amount of buyable weapons
+function comms_vf_weapons.get_max_weapon_storage(env, missile)
+	local storage = env.source:getWeaponStorage(missile)
+	local max = env.source:getWeaponStorageMax(missile)
+	if env.target.comms_data.weapon_factional_limit and not env.target:isFriendly(env.source) then
+		max = math.ceil(max/2)
+	end
+	return math.max(0, max - storage)
+end
+
 --[[
 Returns the current reputation cost of one missile of the given type.
 
@@ -202,15 +219,13 @@ The station's reputation cost multiplier is applied when one is configured.
 ]]
 function comms_vf_weapons.get_weapon_cost(env, missile)
 	comms_vf_weapons.ensure_comms_data(env)
-	if env.target.comms_data.weapon_available ~= nil and
-	env.target.comms_data.weapon_cost ~= nil and
-	env.target.comms_data.weapon_available[missile] and
-	env.target.comms_data.weapon_cost[missile] then
-		local cost = env.target.comms_data.weapon_cost[missile]
-		cost = CommsNodeServiceBuyable.apply_reputation_cost_multiplier(env, cost)
-		return cost
+	if not comms_vf_weapons.is_weapon_available(env, missile) then
+		return nil	-- avail
 	end
-	return nil 
+	local cost = env.target.comms_data.weapon_cost[missile]
+	assert(cost ~= nil)
+	cost = CommsNodeServiceBuyable.apply_reputation_cost_multiplier(env, cost)
+	return math.ceil(cost)
 end
 
 --[[
@@ -231,12 +246,12 @@ function comms_vf_weapons.weapons_available_message(env)
 		if cost ~= nil then
 			if comms_vf_weapons.is_weapon_limited(env, missile) then
 				table.insert(missile_provision_msgs,
-				string.format(_("situationReport-comms","%i %s for %i rep"),
+				string.format(_("situationReport-comms","%d %s for %d rep"),
 				env.target.comms_data.weapon_available[missile],
 				env.target.comms_data.weapon_desc[missile], cost))
 			else
 				table.insert(missile_provision_msgs,
-				string.format(_("situationReport-comms","%s for %i rep"),
+				string.format(_("situationReport-comms","%s for %d rep"),
 				env.target.comms_data.weapon_desc[missile], cost))
 			end
 		end
@@ -248,6 +263,32 @@ function comms_vf_weapons.weapons_available_message(env)
 		table.concat(missile_provision_msgs, "\n  ")), true
 	end
 end
+
+-- called from comms_vf_station_management
+function comms_vf_weapons.increase_available_weapons(env)
+	if env.target.comms_data.size_factor == nil then
+		env.target.comms_data.size_factor = env.target:getHullMax() / 100	-- 1.5 to 8
+	end
+	for missile, avail in pairs(env.target.comms_data.weapon_available) do
+		if avail == false then
+			env.target.comms_data.weapon_available[missile] = math.floor(math.random(1,5) * env.target.comms_data.size_factor)
+		elseif type(avail) == "number" then
+			env.target.comms_data.weapon_available[missile] = math.floor(env.target.comms_data.weapon_available[missile] + math.floor(math.random(5,10) * env.target.comms_data.size_factor))
+		end
+	end
+end
+
+function comms_vf_weapons.disable_weapon_factional_limit(env)
+	env.target.comms_data.weapon_factional_limit = false
+end
+
+comms_vf_weapons.info_weapons = CommsNode:new({
+	choice_line = _("What weapons do you sell?"),
+	select_message = function(self, env)
+        return comms_vf_weapons.weapons_available_message(env)
+	end,
+})
+
 
 --[[
 Calculates the purchase information for one weapon type.
@@ -280,12 +321,7 @@ function comms_vf_weapons.get_missile_data(env, missile_type)
 		missile_data.amount_available = comms_data.weapon_available[missile_type]
 	end
 
-	local storage = env.source:getWeaponStorage(missile_type)
-	local max = env.source:getWeaponStorageMax(missile_type)
-	if comms_data.weapon_factional_limit and not env.target:isFriendly(env.source) then
-		max = math.ceil(max/2)
-	end
-	missile_data.amount_storable = max - storage
+	missile_data.amount_storable = comms_vf_weapons.get_max_weapon_storage(env, missile_type)
 	if missile_data.amount_available == nil then
 		missile_data.amount_available = missile_data.amount_storable
 	end
@@ -310,11 +346,6 @@ function comms_vf_weapons.get_missile_data(env, missile_type)
 --			missile_data.cost_half = missile_data.cost_half + math.ceil((missile_data.amount_half * (missile_data.amount_half +1)) * 0.5 * missile_data.raise_cost)
 --		end
 
-	-- The single one option is always selectable as long as missile_data.available is set.
-	-- It may still not be buyable, for different reasons - the reason is shown in the message after selectin it.
-	missile_data.choice_line_single = string.format("Buy one %s missile for %.0f reputation", missile_type, missile_data.cost)
-	missile_data.choice_line_half = string.format("Buy %d %s missiles for %.0f reputation", missile_data.amount_half, missile_type, missile_data.cost_half)
-	missile_data.choice_line_full = string.format("Buy %d %s missiles for %.0f reputation", missile_data.amount_full, missile_type, missile_data.cost_full)
 	return missile_data	
 end
 
@@ -326,38 +357,58 @@ It then offers different quantities for each weapon and passes the selected
 weapon, quantity, and calculated price to the "with_missile" node.
 ]]
 comms_vf_weapons.restock = CommsNode:new({
-	choice_line = "Restock ordnance",
+	choice_line = _("Restock ordnance"),
 	select_message = function(self, env)
+		if env.target.comms_data.service_available["sell_weapons"] == false then
+			return _("You have to understand that our people are pacifists, so we will not sell weapons to you.")
+		end
 		local msg, ok = comms_vf_weapons.weapons_available_message(env)
 		if not ok then
-			return "We do not sell weapons."
+			return _("We do not sell weapons.")
 		else
-			return string.format("What type of ordnance do you need?\n%s", msg)
+			return string.format(_("What type of ordnance do you need?\n%s"), msg)
 		end
 	end,
 	_show_choices = function(self, env)
-		for idx, missile_type in ipairs(MISSILE_TYPES) do
-			local missile_data = comms_vf_weapons.get_missile_data(env, missile_type)
-			if missile_data.available then
-				addCommsReply(missile_data.choice_line_single, self.with_missile:_as_comms_reply(env, {
-					missile_type=missile_type,
-					missile_data=missile_data,
-					amount=1
-				}))
-				-- only display half, if it is not the same as one or full
-				if missile_data.amount_half > 1 and missile_data.amount_half < missile_data.amount_full then
-					addCommsReply(missile_data.choice_line_half, self.with_missile:_as_comms_reply(env, {
-					missile_type=missile_type,
-					missile_data=missile_data,
-					amount=missile_data.amount_half
-				}))
-				end
-				if missile_data.amount_full > 1 then
-					addCommsReply(missile_data.choice_line_full, self.with_missile:_as_comms_reply(env, {
-					missile_type=missile_type,
-					missile_data=missile_data,
-					amount=missile_data.amount_full
-				}))
+		if env.target.comms_data.service_available["sell_weapons"] then
+			for idx, missile_type in ipairs(MISSILE_TYPES) do
+				local missile_data = comms_vf_weapons.get_missile_data(env, missile_type)
+				if missile_data.available then
+					-- The single one option is always selectable as long as missile_data.available is set.
+					-- It may still not be buyable, for different reasons - the reason is shown in the message after selectin it.
+					addCommsReply(
+						string.format(_("Buy one %s missile for %.0f reputation"), missile_type, missile_data.cost),
+						self.with_missile:_as_comms_reply(env, {
+							missile_type=missile_type,
+							missile_data=missile_data,
+							amount=1
+						})
+					)
+					-- only display half, if it is not the same as one or full
+					if missile_data.amount_half > 1 and missile_data.amount_half < missile_data.amount_full then
+						addCommsReply(
+							string.format(_("Buy %d %s missiles for %.0f reputation"),
+								missile_data.amount_half, missile_type, missile_data.cost_half),
+							self.with_missile:_as_comms_reply(env, {
+								missile_type=missile_type,
+								missile_data=missile_data,
+								amount=missile_data.amount_half
+							}
+						)
+					)
+					end
+					if missile_data.amount_full > 1 then
+						addCommsReply(
+							string.format(_("Buy %d %s missiles for %.0f reputation"),
+								missile_data.amount_full, missile_type, missile_data.cost_full),
+						self.with_missile:_as_comms_reply(env, {
+							missile_type=missile_type,
+							missile_data=missile_data,
+							amount=missile_data.amount_full
+							}
+						)
+					)
+					end
 				end
 			end
 		end
@@ -383,7 +434,7 @@ comms_vf_weapons.restock:add_test(function(self, env)
 	self:_show_choices(env)
 	self:_call(env)
 	comms_vf_station.apply_reputation_cost_multiplier = backup
-	env.target.comms_data._weapons_checked = false
+	env.target.comms_data._weapons_initialized = false
 	env.target.comms_data.weapon_available = nil
 	self:_call(env)
 	env.target.comms_data.weapon_available = {
@@ -424,58 +475,41 @@ missiles to the ship, and reduces the station's stock when applicable.
 
 -- Check 1: Is this weapon still being sold?
 comms_vf_weapons.restock.with_missile:add_check(function(self, env)
-	assert(env.args)
 	assert(env.args.missile_type)
-	return comms_vf_weapons.is_weapon_available(env, env.args.missile_type), "We do not sell this missiles anymore."
+	return comms_vf_weapons.is_weapon_available(env, env.args.missile_type), _("We do no longer sell that weapon.")
 end)
 
 -- Check 2: If the station has limited stock, does it have enough missiles left to fulfill this purchase?
 comms_vf_weapons.restock.with_missile:add_check(function(self, env)
 	-- Does the station have enough stock?
-	assert(env.args)
-	assert(env.args.missile_type)
 	assert(env.args.amount)
 	return comms_vf_weapons.has_weapon_quantity_avail(env, env.args.missile_type, env.args.amount), "We do not have that many missiles left."
 end)
 
 -- Check 3: Does the player's ship have enough storage space?
 comms_vf_weapons.restock.with_missile:add_check(function(self, env)
-	assert(env.args)
-	assert(env.args.amount)
 	local missile_type = env.args.missile_type
 	local amount = env.args.amount
 	local storage = env.source:getWeaponStorage(missile_type)
 	local max = env.source:getWeaponStorageMax(missile_type)
-	return max - storage >= amount, string.format("You do not have enough storage space for %d %s missiles", amount, missile_type)
+	return max - storage >= amount, string.format(_("You do not have enough storage space for %d %s missiles"), amount, missile_type)
 end)
 
 -- Check 4: Apply any additional storage restriction for customers that are not friendly with the station's faction.
 comms_vf_weapons.restock.with_missile:add_check(function(self, env)
 	-- after factional reduction, does the station want to sell this amount?
-	assert(env.args)
-	assert(env.args.amount)
 	local missile_type = env.args.missile_type
 	local amount = env.args.amount
-	local storage = env.source:getWeaponStorage(missile_type)
-	local max = env.source:getWeaponStorageMax(missile_type)
-	if env.target.comms_data.weapon_factional_limit and not env.target:isFriendly(env.source) then
-		max = max / 2
-		if max - storage < amount then
-			return false, "Our customer regulations forbid selling you more of that weapon."
-		end
-	end
-	return true
+	return comms_vf_weapons.get_max_weapon_storage(env, missile_type) >= amount, _("Our customer regulations forbid selling you more of that weapon.")
 end)
 
 -- Check 5: Does the player's faction have enough reputation to pay for the requested number of missiles?
 comms_vf_weapons.restock.with_missile:add_check(function(self, env)
 	-- Does the ship have enough reputation?
-	assert(env.args)
-	assert(env.args.amount)
 	assert(env.args.missile_data.cost)
 	local amount = env.args.amount
 	local cost = env.args.missile_data.cost	-- pre-calculated. You can accept an offer later, even if the cost would have risen, as long as you do not close the comms node. This is effectifly how tradng works. We do not want the price to change between the offer and accepting it.
-	return env.source:getReputationPoints() >= cost * amount, string.format("The %s has not enough reputation.", env.source:getFaction())
+	return env.source:getReputationPoints() >= cost * amount, _("You do not have enough reputation.")
 end)
 
 -- Complete the purchase.
@@ -495,7 +529,7 @@ comms_vf_weapons.restock.with_missile:add_effect(function(self, env)
 	local missile_data = env.args.missile_data
 	local cost = missile_data.cost	-- pre-calculated
 	if not env.source:takeReputationPoints(cost * amount) then
-		return false, string.format("The %s has not enough reputation.", env.source:getFaction())
+		return false, _("You do not have enough reputation.")
 	end
 	local storage = env.source:getWeaponStorage(missile_type)
 	storage = storage + amount
@@ -511,7 +545,7 @@ comms_vf_weapons.restock.with_missile.select_message = function(self, env)
 	local missile_type = env.args.missile_type
 	local amount = env.args.amount
 	local cost = env.args.missile_data.cost
-	return string.format("You bought %i %s missiles for %.0f reputation", amount, missile_type, cost * amount)
+	return string.format(_("You bought %d %s missiles for %.0f reputation."), amount, missile_type, cost * amount)
 end
 
 comms_vf_weapons.restock.with_missile:add_test_setup(function(env)
@@ -535,6 +569,14 @@ comms_vf_weapons.restock.with_missile:add_test(function(self,env)
 	self:_call(env)
 	env.target.comms_data.weapon_available.Homing = 12
 	self:_call(env)
+	env.target.comms_data.weapon_cost.Homing = nil
+	self:_call(env)
+	env.args.missile_data.cost = 500
+	self:_apply_effects(env)
+	env.target.comms_data.weapon_available.Homing = 12
+	env.args.missile_data.cost = 5
+	self:_apply_effects(env)
+	self:_call(env)
 	env.source.getReputationPoints = function(self) assert(self); return 0 end
 	env.source.takeReputationPoints = function(self, amount) assert(self); assert(amount); return false end
 	self:_call(env)
@@ -552,7 +594,14 @@ comms_vf_weapons.restock.with_missile:add_test(function(self,env)
 	env.target.comms_data.weapon_factional_limit = false
 	self:_call(env)
 end)
+
+
 comms_vf_weapons.restock.with_missile:add_choice(CommsBack)
 comms_vf_weapons.restock.with_missile:add_condition(ccc.docked)
 
+comms_vf_weapons.info_weapons:add_choice(CommsBack)
+comms_vf_weapons.restock:add_choice_to_all_children(CommsBack, true, true)
 
+comms_vf_station.automatic.ensure_comms_data:add_comms_data_initialiser_function(comms_vf_weapons.ensure_comms_data)
+comms_vf_station.info.main:add_choice(comms_vf_weapons.info_weapons,3)
+comms_vf_station.main:add_choice(comms_vf_weapons.restock, 2)

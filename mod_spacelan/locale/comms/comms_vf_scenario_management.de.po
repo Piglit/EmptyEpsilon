@@ -1,0 +1,275 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:257
+msgid "I want to talk to the station management"
+msgstr "Ich möchte mit der Stationsleitung sprechen"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:258
+msgid ""
+"Station management is available.\n"
+"We are looking forward working more closely with the Human Navy.\n"
+"Would you like to discuss something we have to offer?"
+msgstr ""
+"Die Stationsleitung ist verfügbar.\n"
+"Wir freuen uns darauf, enger mit der Menschlichen Navy zusammenzuarbeiten.\n"
+"Möchtet ihr etwas besprechen, das wir anzubieten haben?"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:274
+msgid "Defensive contract"
+msgstr "Verteidigungsvertrag"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:275
+msgid ""
+"It would be beneficial for both of us if threats that endanger space travel "
+"near our station would vanish.\n"
+"We would greatly appreciate if you would clear the area of enemy raiders.\n"
+"We will consider working more closely with you if you keep us clear of any "
+"threats."
+msgstr ""
+"Es wäre für uns beide von Vorteil, wenn Bedrohungen, die den Raumverkehr in "
+"der Nähe unserer Station gefährden, verschwinden würden.\n"
+"Wir würden es sehr begrüßen, wenn ihr das Gebiet von feindlichen Plünderern "
+"befreit.\n"
+"Wir werden eine engere Zusammenarbeit mit euch in Betracht ziehen, wenn ihr "
+"uns von Bedrohungen freihaltet."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:276
+msgid ""
+"We greatly appreciate your effort. We will consider this in our future "
+"offers."
+msgstr ""
+"Wir wissen eure Bemühungen sehr zu schätzen. Wir werden dies bei unseren "
+"zukünftigen Angeboten berücksichtigen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:278
+msgid "We will keep the area free of enemy ships"
+msgstr "Wir werden das Gebiet von feindlichen Schiffen freihalten"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:284
+msgid ""
+"We appreciate your offer. Our sensors currently show enemy presence within "
+"30u."
+msgstr ""
+"Wir wissen euer Angebot zu schätzen. Unsere Sensoren zeigen derzeit eine "
+"feindliche Präsenz innerhalb von 30u."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:334
+msgid "Navigation buoy"
+msgstr "Navigationsboje"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:335
+msgid ""
+"Other ships may have trouble finding our station out here.\n"
+"We could launch a buoy, that will show the station and its surroundings on "
+"your tactical maps.\n"
+"This would be a first step in a mutually beneficial relationship between us."
+msgstr ""
+"Andere Schiffe könnten Schwierigkeiten haben, unsere Station hier draußen zu "
+"finden.\n"
+"Wir könnten eine Boje aussetzen, die die Station und ihre Umgebung auf euren "
+"taktischen Karten anzeigt.\n"
+"Dies wäre ein erster Schritt zu einer beidseitig vorteilhaften Beziehung "
+"zwischen uns."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:336
+msgid ""
+"We started a navigation buoy for the Human Navy.\n"
+"Now all your ships should be able to find us."
+msgstr ""
+"Wir haben eine Navigationsboje für die Menschliche Navy ausgesetzt.\n"
+"Nun sollten alle eure Schiffe uns finden können."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:337
+#, lua-format
+msgid "Start a navigation buoy for %d reputation."
+msgstr "Eine Navigationsboje für %d Ruf aussetzen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:349
+msgid ""
+"We already launched a satellite for you.\n"
+"One should be enough for now.\n"
+"If you need more radar coverage, consider buying a radar satellite from us."
+msgstr ""
+"Wir haben bereits einen Satelliten für euch gestartet.\n"
+"Einer sollte vorerst genügen.\n"
+"Wenn ihr eine größere Radarabdeckung benötigt, erwägt den Kauf eines "
+"Radarsatelliten von uns."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:362
+msgid "Radar satellite"
+msgstr "Radarsatellit"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:363
+msgid ""
+"Considering your recently shown interest in our neighbourhood, we could "
+"launch a radar satellite for you.\n"
+"It will reveal a larger area around our station on your tactical maps, "
+"giving your ships better awareness of their surroundings."
+msgstr ""
+"Angesichts eures kürzlich gezeigten Interesses an unserer Umgebung könnten "
+"wir einen Radarsatelliten für euch starten.\n"
+"Er wird ein größeres Gebiet um unsere Station auf euren taktischen Karten "
+"aufdecken und euren Schiffen einen besseren Überblick über ihre Umgebung "
+"verschaffen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:364
+msgid ""
+"We started a radar satellite for you.\n"
+"Your ships should now have a much better view of the area around our station."
+msgstr ""
+"Wir haben einen Radarsatelliten für euch gestartet.\n"
+"Eure Schiffe sollten nun einen deutlich besseren Überblick über das Gebiet "
+"um unsere Station haben."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:365
+#, lua-format
+msgid "Start a radar satellite for %d reputation."
+msgstr "Einen Radarsatelliten für %d Ruf starten."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:384
+msgid "Repair our docking services"
+msgstr "Unsere Andockdienste reparieren"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:385
+msgid ""
+"The facilities that provide our docking services are currently not working.\n"
+"If you can provide an artifact to help us repair it, we can restore the "
+"services.\n"
+"Your generosity would also improve our opinion of your faction and make "
+"future negotiations considerably easier."
+msgstr ""
+"Die Einrichtungen für unsere Andockdienste funktionieren derzeit nicht.\n"
+"Wenn ihr uns ein Artefakt zur Reparatur zur Verfügung stellen könnt, können "
+"wir die Dienste wiederherstellen.\n"
+"Eure Großzügigkeit würde außerdem unsere Meinung über eure Fraktion "
+"verbessern und zukünftige Verhandlungen erheblich erleichtern."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:386
+msgid ""
+"The artifact has been put to good use.\n"
+"We have repaired our damaged equipment.\n"
+"Your assistance has earned our lasting gratitude, and future negotiations "
+"with us will be much easier."
+msgstr ""
+"Das Artefakt wurde sinnvoll eingesetzt.\n"
+"Wir haben unsere beschädigte Ausrüstung repariert.\n"
+"Eure Unterstützung hat euch unsere dauerhafte Dankbarkeit eingebracht, und "
+"zukünftige Verhandlungen mit uns werden wesentlich einfacher sein."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:387
+#, lua-format
+msgid "Give %d artifact to repair the docking services."
+msgstr "%d Artefakt zur Reparatur der Andockdienste geben."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:411
+msgid "Weapons supply subscription"
+msgstr "Waffenversorgungsabonnement"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:412
+msgid ""
+"We can offer you a weapons supply subscription.\n"
+"This will give your ships access to our hidden weapons stocks and allow them "
+"to purchase ordnance on better terms.\n"
+"As part of the agreement, the restrictions on how much ordnance your ships "
+"can load will also be lifted."
+msgstr ""
+"Wir können euch ein Waffenversorgungsabonnement anbieten.\n"
+"Damit erhalten eure Schiffe Zugang zu unseren verborgenen Waffenbeständen "
+"und können Munition zu besseren Konditionen erwerben.\n"
+"Im Rahmen dieser Vereinbarung werden außerdem die Beschränkungen aufgehoben, "
+"wie viel Munition eure Schiffe laden können."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:413
+msgid ""
+"The weapons supply agreement is now active.\n"
+"Your ships will receive better prices, access to our hidden weapons stocks, "
+"and can load their weapon storage to full capacity."
+msgstr ""
+"Die Waffenversorgungsvereinbarung ist nun aktiv.\n"
+"Eure Schiffe erhalten bessere Preise, Zugang zu unseren verborgenen "
+"Waffenbeständen und können ihre Waffenvorräte vollständig auffüllen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:414
+#, lua-format
+msgid "Subscribe to the weapons supply for %d reputation."
+msgstr "Die Waffenversorgung für %d Ruf abonnieren."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:452
+msgid "Tell me about the Trade Network"
+msgstr "Erzählt mir vom Handelsnetzwerk"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:453
+msgid ""
+"We can connect this station to the Trade Network.\n"
+"This will allow trade ships to travel between us and other stations in the "
+"network, bringing new goods to improve our services and weapons you can buy "
+"to this station."
+msgstr ""
+"Wir können diese Station mit dem Handelsnetzwerk verbinden.\n"
+"Dadurch können Handelsschiffe zwischen uns und anderen Stationen im Netzwerk "
+"verkehren und neue Waren zur Verbesserung unserer Dienste sowie Waffen, die "
+"ihr dann auf dieser Station kaufen könnt, hierherbringen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:454
+msgid ""
+"We are now connected to the Trade Network.\n"
+"Trade ships will begin travelling between this station and other network "
+"stations."
+msgstr ""
+"Wir sind nun mit dem Handelsnetzwerk verbunden.\n"
+"Handelsschiffe werden beginnen, zwischen dieser Station und anderen "
+"Stationen des Netzwerks zu verkehren."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:455
+#, lua-format
+msgid "Join the Trade Network for %d reputation."
+msgstr "Dem Handelsnetzwerk für %d Ruf beitreten."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:487
+msgid "Exclusive contract for the Human Navy"
+msgstr "Exklusivvertrag mit der Menschlichen Navy"
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:488
+msgid ""
+"We are prepared to enter an exclusive contract with the Human Navy.\n"
+"In return for your support, we will align ourselves with the Human Navy and "
+"no longer offer our services to other factions.\n"
+"You will get the best prices and may use this station for military purposes."
+msgstr ""
+"Wir sind bereit, einen Exklusivvertrag mit der Menschlichen Navy "
+"abzuschließen.\n"
+"Im Gegenzug für eure Unterstützung werden wir uns der Menschlichen Navy "
+"anschließen und unsere Dienste anderen Fraktionen nicht mehr anbieten.\n"
+"Ihr erhaltet die besten Preise und dürft diese Station für militärische "
+"Zwecke nutzen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:489
+msgid ""
+"The contract is signed.\n"
+"This station is now operating exclusively for the Human Navy."
+msgstr ""
+"Der Vertrag ist unterzeichnet.\n"
+"Diese Station arbeitet nun ausschließlich für die Menschliche Navy."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:490
+#, lua-format
+msgid "Sign an exclusive contract for %d reputation."
+msgstr "Einen Exklusivvertrag für %d Ruf unterzeichnen."
+
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:513
+#, lua-format
+msgid "Sign an exclusive Human Navy contract for %d artifacts."
+msgstr ""
+"Einen Menschlichen Navy Exklusivvertrag mit der für %d Artefakte "
+"unterzeichnen."

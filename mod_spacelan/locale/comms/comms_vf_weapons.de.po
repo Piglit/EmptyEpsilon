@@ -1,0 +1,129 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:98
+msgctxt "situationReport-comms"
+msgid "nukes"
+msgstr "Nuklearwaffen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:99
+msgctxt "situationReport-comms"
+msgid "EMPs"
+msgstr "EMPs"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:100
+msgctxt "situationReport-comms"
+msgid "homings"
+msgstr "Zielsuchraketen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:101
+msgctxt "situationReport-comms"
+msgid "mines"
+msgstr "Minen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:102
+msgctxt "situationReport-comms"
+msgid "HVLIs"
+msgstr "HGBIs"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:249
+#, lua-format
+msgctxt "situationReport-comms"
+msgid "%d %s for %d rep"
+msgstr "%d %s für %d Ruf"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:254
+#, lua-format
+msgctxt "situationReport-comms"
+msgid "%s for %d rep"
+msgstr "%s für %d Ruf"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:260
+msgctxt "situationReport-comms"
+msgid "No ordnance available."
+msgstr "Keine Waffen verfügbar."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:262
+#, lua-format
+msgctxt "situationReport-comms"
+msgid ""
+"Ordnance available: \n"
+"  %s"
+msgstr ""
+"Verfügbare Waffen: \n"
+"  %s"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:286
+msgid "What weapons do you sell?"
+msgstr "Welche Waffen verkaufen Sie?"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:360
+msgid "Restock ordnance"
+msgstr "Waffen auffüllen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:363
+msgid ""
+"You have to understand that our people are pacifists, so we will not sell "
+"weapons to you."
+msgstr ""
+"Sie müssen verstehen, dass unser Volk pazifistisch ist. Daher werden wir "
+"Ihnen keine Waffen verkaufen."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:367
+msgid "We do not sell weapons."
+msgstr "Wir verkaufen keine Waffen."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:369
+#, lua-format
+msgid ""
+"What type of ordnance do you need?\n"
+"%s"
+msgstr ""
+"Welche Art von Waffen benötigen Sie?\n"
+"%s"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:380
+#, lua-format
+msgid "Buy one %s missile for %.0f reputation"
+msgstr "Eine %s für %.0f Ruf kaufen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:390
+#: mod_spacelan/comms/comms_vf_weapons.lua:402
+#, lua-format
+msgid "Buy %d %s missiles for %.0f reputation"
+msgstr "%d %s für %.0f Ruf kaufen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:479
+msgid "We do no longer sell that weapon."
+msgstr "Wir verkaufen diese Waffe nicht mehr."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:495
+#, lua-format
+msgid "You do not have enough storage space for %d %s missiles"
+msgstr "Sie haben nicht genügend Lagerplatz für %d %s-Raketen"
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:503
+msgid "Our customer regulations forbid selling you more of that weapon."
+msgstr ""
+"Unsere Kundenbestimmungen verbieten es uns, Ihnen weitere dieser Waffe zu "
+"verkaufen."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:512
+#: mod_spacelan/comms/comms_vf_weapons.lua:532
+msgid "You do not have enough reputation."
+msgstr "Sie haben nicht genügend Ruf."
+
+#: mod_spacelan/comms/comms_vf_weapons.lua:548
+#, fuzzy, lua-format
+msgid "You bought %d %s missiles for %.0f reputation."
+msgstr "Sie haben %d %s für %.0f Ruf gekauft."

@@ -325,7 +325,7 @@ function vf_comms_call_to_action:replace_message_placeholders(msg, source, targe
 	msg = string.gsub(msg, "{callsign}", source:getCallSign())
 	msg = string.gsub(msg, "{sector}", source:getSectorName())
 	msg = string.gsub(msg, "{faction}", source:getFaction())
-	msg = string.gsub(msg, "{zone}", source.zone_name or "")
+	msg = string.gsub(msg, "{zone}", source.called_zone_name or "")
 	msg = string.gsub(msg, "{distance}", distance(source, target))
 	msg = string.gsub(msg, "{direction}", angleHeading(target, source))
 	return msg

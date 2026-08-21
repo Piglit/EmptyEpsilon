@@ -60,11 +60,11 @@ WeaponsScreen::WeaponsScreen(GuiContainer* owner)
     if (my_spaceship && my_spaceship->hasSystem(SYS_BeamWeapons) && (gameGlobalInfo->use_beam_shield_frequencies || gameGlobalInfo->use_system_damage))
     {
         GuiElement* beam_info_box = new GuiElement(this, "BEAM_INFO_BOX");
-        beam_info_box->setPosition(-20, -170, sp::Alignment::BottomRight)->setSize(280, 150);
+        beam_info_box->setPosition(-20, -170, sp::Alignment::BottomRight)->setSize(280, 200);
         (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beam info"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
         (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setSize(GuiElement::GuiSizeMax, 50);
         (new GuiBeamFrequencySelector(beam_info_box, "BEAM_FREQUENCY_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(GuiElement::GuiSizeMax, 50);
-        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, -50, sp::Alignment::BottomRight)->setSize(GuiElement::GuiSizeMax, 50);
+        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR", false))->setPosition(0, -50, sp::Alignment::BottomRight)->setSize(GuiElement::GuiSizeMax, 100);
 
         if (!gameGlobalInfo->use_beam_shield_frequencies)
         {   //If we do have system damage, but no shield frequencies, we can partially overlap this with the shield button.

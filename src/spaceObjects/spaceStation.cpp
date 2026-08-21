@@ -36,14 +36,14 @@ SpaceStation::SpaceStation()
 
 void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
-    float sprite_scale = scale * getRadius() * 1.5f / 32;
+    float sprite_scale = scale * getRadius() * 1.5f;
 
     if (!long_range)
     {
-        sprite_scale *= 0.7f;
-        drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale, true);
+        //sprite_scale *= 0.7f;
+        drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale / 32.0f, true);
     }
-    sprite_scale = std::max(0.15f, sprite_scale);
+    //sprite_scale = std::max(0.15f * 32.0f, sprite_scale);
     glm::u8vec4 color{255,255,255,255};
     if (factionInfo[getFactionId()])
         color = factionInfo[getFactionId()]->getGMColor();
@@ -56,7 +56,7 @@ void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, f
         else
             color = glm::u8vec4(128, 128, 255, 255);
     }
-    renderer.drawSprite(radar_trace, position, sprite_scale * 32, color);
+    renderer.drawRotatedSprite(radar_trace, position, sprite_scale, getRotation() - rotation, color);
 }
 
 void SpaceStation::applyTemplateValues()

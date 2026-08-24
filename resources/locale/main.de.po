@@ -263,7 +263,6 @@ msgid "Ship's Log"
 msgstr "Schiffslog"
 
 #: src/playerInfo.cpp:283
-#, fuzzy
 msgctxt "station"
 msgid "Radar"
 msgstr "Radar"
@@ -416,10 +415,9 @@ msgid "Last Session ({last})"
 msgstr "Letzte Sitzung ({last})"
 
 #: src/menus/mainMenus.cpp:73
-#, fuzzy
 msgctxt "Credits"
 msgid "Space LAN Version: {version}"
-msgstr "Skystrike-Version: {version}"
+msgstr "Space LAN-Version: {version}"
 
 #: src/menus/mainMenus.cpp:75
 msgctxt "mainMenu"
@@ -492,36 +490,32 @@ msgid "Special thanks:"
 msgstr "Besonderen Dank an:"
 
 #: src/menus/campaignMenu.cpp:42
-#, fuzzy
 msgid "Space LAN Version: {version}"
-msgstr "Skystrike-Version: {version}"
+msgstr "Space LAN-Version: {version}"
 
 #: src/menus/campaignMenu.cpp:45
-#, fuzzy
 msgid "Ship Name:"
-msgstr "Typ-Name:"
+msgstr "Schiffsname:"
 
 #: src/menus/campaignMenu.cpp:53
-#, fuzzy
 msgid "Ship Password:"
-msgstr "Serverpasswort: "
+msgstr "Schiffspasswort:"
 
 #: src/menus/campaignMenu.cpp:65
 msgid "To Mission Selection"
-msgstr ""
+msgstr "Zur Missionsauswahl"
 
 #: src/menus/campaignMenu.cpp:67
-#, fuzzy
 msgid "Connect"
 msgstr "Verbinden"
 
 #: src/menus/campaignMenu.cpp:68
 msgid "Campaign Server:"
-msgstr ""
+msgstr "Kampagnen Server:"
 
 #: src/menus/campaignMenu.cpp:98
 msgid "Leave Campaign"
-msgstr ""
+msgstr "Kampagne verlassen"
 
 #: src/menus/serverCreationScreen.cpp:37
 msgid "Server configuration"
@@ -612,79 +606,71 @@ msgstr "Szenario auswählen"
 
 #: src/menus/serverCreationScreen.cpp:301
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #: src/menus/serverCreationScreen.cpp:320
-#, fuzzy
 msgid "Instructions"
-msgstr "Schnittstellen-Optionen"
+msgstr "Anweisungen"
 
 #: src/menus/serverCreationScreen.cpp:328
-#, fuzzy
 msgid "Server"
-msgstr "Serverinfo"
+msgstr "Server"
 
 #: src/menus/serverCreationScreen.cpp:329
-#, fuzzy
 msgid "Server Name:"
-msgstr "Servername: "
+msgstr "Servername:"
 
 #: src/menus/serverCreationScreen.cpp:330
-#, fuzzy
 msgid "Server IP:"
-msgstr "Server-IP: "
+msgstr "Server-IP:"
 
 #: src/menus/serverCreationScreen.cpp:331
-#, fuzzy
 msgid "Server Version:"
-msgstr "Serverinfo"
+msgstr "Server Version:"
 
 #: src/menus/serverCreationScreen.cpp:347
 #: src/menus/serverCreationScreen.cpp:687
 msgid "Crew"
-msgstr ""
+msgstr "Crew"
 
 #: src/menus/serverCreationScreen.cpp:353
 msgid "Help"
-msgstr ""
+msgstr "Hilfe"
 
 #: src/menus/serverCreationScreen.cpp:383
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 #: src/menus/serverCreationScreen.cpp:388
-#, fuzzy
 msgid "Join scenario"
-msgstr "Szenario kopieren"
+msgstr "Szenario beitreten"
 
 #: src/menus/serverCreationScreen.cpp:554
 msgid "Score"
-msgstr ""
+msgstr "Punkte"
 
 #: src/menus/serverCreationScreen.cpp:559 src/screens/missionScoreScreen.cpp:29
 msgid "Progress:"
-msgstr ""
+msgstr "Fortschritt"
 
 #: src/menus/serverCreationScreen.cpp:560
 #: src/menus/serverCreationScreen.cpp:568
 #: src/menus/serverCreationScreen.cpp:576 src/screens/missionScoreScreen.cpp:44
 #: src/screens/missionScoreScreen.cpp:60 src/screens/missionScoreScreen.cpp:74
 msgid "Fleet best:"
-msgstr ""
+msgstr "Flottenbester:"
 
 #: src/menus/serverCreationScreen.cpp:567
 msgid "Best Time:"
-msgstr ""
+msgstr "Bestzeit:"
 
 #: src/menus/serverCreationScreen.cpp:575 src/screens/missionScoreScreen.cpp:70
-#, fuzzy
 msgid "Artifacts:"
-msgstr "Artefakt"
+msgstr "Artefakte:"
 
 #: src/menus/serverCreationScreen.cpp:583 src/screens/missionScoreScreen.cpp:39
-#, fuzzy
 msgid "Reputation Bonus:"
-msgstr "Reputation:"
+msgstr "Reputationsbonus:"
 
 #: src/menus/serverCreationScreen.cpp:650
 msgid "Back"
@@ -692,72 +678,60 @@ msgstr "Zurück"
 
 #: src/menus/serverCreationScreen.cpp:716
 #: src/screens/missionControlScreen.cpp:107
-#, fuzzy
 msgid "Ship configuration"
-msgstr "Server-Einstellungen"
+msgstr "Schiffseinstellungen"
 
 #: src/menus/serverCreationScreen.cpp:718
 #: src/screens/missionControlScreen.cpp:109
-#, fuzzy
 msgid "Select ship type:"
-msgstr "Wähle Schiff"
+msgstr "Schiffstyp auswählen:"
 
 #: src/menus/serverCreationScreen.cpp:735
 #: src/screens/missionControlScreen.cpp:130
-#, fuzzy
 msgid "Select drive type:"
-msgstr "Wähle System Sprungantrieb"
+msgstr "Antriebstyp auswählen:"
 
 #: src/menus/serverCreationScreen.cpp:744
 #: src/screens/missionControlScreen.cpp:140
-#, fuzzy
 msgid "Create ship"
-msgstr "Wähle Schiff"
+msgstr "Erstelle Schiff"
 
 #: src/menus/serverCreationScreen.cpp:805 src/menus/autoConnectScreen.cpp:23
 #: src/menus/autoConnectScreen.cpp:110
-#, fuzzy
 msgid "Searching for connection..."
-msgstr "Suche nach Zielen."
+msgstr "Suche nach Verbindung."
 
 #: src/menus/serverCreationScreen.cpp:808 src/menus/shipSelectionScreen.cpp:417
 msgid "Disconnect"
 msgstr "Verbindung trennen"
 
 #: src/menus/serverCreationScreen.cpp:819
-#, fuzzy
 msgid "Connecting."
-msgstr "Verbinde..."
+msgstr "Verbinde."
 
 #: src/menus/serverCreationScreen.cpp:821
-#, fuzzy
 msgid "Connecting.."
-msgstr "Verbinde..."
+msgstr "Verbinde.."
 
 #: src/menus/serverCreationScreen.cpp:823 src/menus/autoConnectScreen.cpp:120
-#, fuzzy
 msgid "Connecting..."
 msgstr "Verbinde..."
 
 #: src/menus/serverCreationScreen.cpp:831
-#, fuzzy
 msgid "Waiting for ship."
-msgstr "Kein Schiff verfügbar - Warte auf Server"
+msgstr "Warte auf Schiff."
 
 #: src/menus/serverCreationScreen.cpp:833
-#, fuzzy
 msgid "Waiting for ship.."
-msgstr "Kein Schiff verfügbar - Warte auf Server"
+msgstr "Warte auf Schiff.."
 
 #: src/menus/serverCreationScreen.cpp:836 src/menus/autoConnectScreen.cpp:140
-#, fuzzy
 msgid "Waiting for ship..."
-msgstr "Kein Schiff verfügbar - Warte auf Server"
+msgstr "Warte auf Schiff..."
 
 #: src/menus/serverCreationScreen.cpp:848
-#, fuzzy
 msgid "Connected"
-msgstr "Verbinden"
+msgstr "Verbunden"
 
 #: src/menus/tutorialMenu.cpp:28
 msgctxt "title"
@@ -1066,28 +1040,24 @@ msgid "--- Crew ---"
 msgstr "--- Crew ---"
 
 #: src/menus/autoConnectScreen.cpp:100
-#, fuzzy
 msgid "Using autoconnect server "
-msgstr "Verbindung zum Server konnte nicht hergestellt werden"
+msgstr "Verwende autoconnect Server"
 
 #: src/menus/autoConnectScreen.cpp:105
 msgid "Found connection"
-msgstr ""
+msgstr "Verbindung gefungen"
 
 #: src/menus/autoConnectScreen.cpp:118
-#, fuzzy
 msgid "Connecting: "
-msgstr "Verbinde..."
+msgstr "Verbinde mit"
 
 #: src/menus/autoConnectScreen.cpp:138
-#, fuzzy
 msgid "Waiting for ship on "
-msgstr "Kein Schiff verfügbar - Warte auf Server"
+msgstr "Warte auf Schiff auf"
 
 #: src/menus/autoConnectScreen.cpp:164
-#, fuzzy
 msgid "Connected, waiting for data..."
-msgstr "Verbinde..."
+msgstr "Verbunden, warte auf Daten"
 
 #: src/menus/hotkeyMenu.cpp:70
 msgid ""
@@ -1507,17 +1477,16 @@ msgid "Heat"
 msgstr "Wärme"
 
 #: src/screens/missionControlScreen.cpp:40
-#, fuzzy
 msgid "Mission control"
-msgstr "Hauptschirm-Steuerung"
+msgstr "Missionskontrolle"
 
 #: src/screens/missionControlScreen.cpp:44
 msgid "Mission Name"
-msgstr ""
+msgstr "Missionsname"
 
 #: src/screens/missionControlScreen.cpp:49
 msgid "Mission Time"
-msgstr ""
+msgstr "Missionszeit"
 
 #: src/screens/missionControlScreen.cpp:54
 #: src/screens/gm/gameMasterScreen.cpp:40
@@ -1527,37 +1496,31 @@ msgstr "Pause"
 
 #: src/screens/missionControlScreen.cpp:65
 msgid "Quit Mission"
-msgstr ""
+msgstr "Mission beenden"
 
 #: src/screens/missionControlScreen.cpp:83
-#, fuzzy
 msgid "Ship info"
-msgstr "Schiffsinfo..."
+msgstr "Schiffsinfo"
 
 #: src/screens/missionControlScreen.cpp:85
-#, fuzzy
 msgid "Ship Name"
-msgstr "Schiff"
+msgstr "Schiffsname"
 
 #: src/screens/missionControlScreen.cpp:88
-#, fuzzy
 msgid "Ship Drive"
-msgstr "Warpantrieb"
+msgstr "Schiffsantrieb"
 
 #: src/screens/missionControlScreen.cpp:91
-#, fuzzy
 msgid "Ship Type"
-msgstr "Typ"
+msgstr "Schiffstyp"
 
 #: src/screens/missionControlScreen.cpp:94
-#, fuzzy
 msgid "Ship Class"
-msgstr "Klasse"
+msgstr "Schiffsklasse"
 
 #: src/screens/missionControlScreen.cpp:97
-#, fuzzy
 msgid "Ship Subclass"
-msgstr "Unterklasse"
+msgstr "Schiffs-Unterklasse"
 
 #: src/screens/gm/gameMasterScreen.cpp:52
 msgctxt "button"
@@ -2239,19 +2202,19 @@ msgstr "Scantiefe:"
 
 #: src/screens/missionScoreScreen.cpp:24
 msgid "Score of "
-msgstr ""
+msgstr "Punkte der"
 
 #: src/screens/missionScoreScreen.cpp:35
 msgid "Your best progress:"
-msgstr ""
+msgstr "Euer bester Fortschritt"
 
 #: src/screens/missionScoreScreen.cpp:56
 msgid "Time:"
-msgstr ""
+msgstr "Zeit:"
 
 #: src/screens/missionScoreScreen.cpp:58 src/screens/missionScoreScreen.cpp:72
 msgid "Best:"
-msgstr ""
+msgstr "Best:"
 
 #: src/screenComponents/aimLock.cpp:11
 msgctxt "missile"
@@ -2374,9 +2337,8 @@ msgid "Confirm!"
 msgstr "Bestätige!"
 
 #: src/screenComponents/shieldFreqencySelect.cpp:16
-#, fuzzy
 msgid "Shield info"
-msgstr "Schilde"
+msgstr "Schildinfo"
 
 #: src/screenComponents/shieldFreqencySelect.cpp:24
 msgctxt "shields"
@@ -2482,7 +2444,7 @@ msgstr "Geschätzer Hüllenschaden:"
 
 #: src/screenComponents/beamTargetSelector.cpp:76
 msgid "{dmg}/s"
-msgstr ""
+msgstr "{dmg}/s"
 
 #: src/screenComponents/scanTargetButton.cpp:11
 msgctxt "scienceButton"
@@ -2531,9 +2493,8 @@ msgid "Answer"
 msgstr "Antworten"
 
 #: src/screenComponents/commsOverlay.cpp:45
-#, fuzzy
 msgid "Answer on main screen"
-msgstr "Hauptschirm"
+msgstr "Auf den Schirm"
 
 #: src/screenComponents/commsOverlay.cpp:52
 msgid "Ignore"
@@ -2753,7 +2714,7 @@ msgstr "HGBI"
 #: src/spaceObjects/spaceship.cpp:1992
 msgctxt "missile"
 msgid "Officer"
-msgstr ""
+msgstr "Offizier"
 
 #: src/spaceObjects/cpuShip.cpp:175
 msgctxt "cpulog"
@@ -3507,10 +3468,9 @@ msgid "Select HVLI"
 msgstr "Wähle HGBI"
 
 #: src/gui/hotkeyConfig.cpp:377
-#, fuzzy
 msgctxt "hotkey_Weapons"
 msgid "Select Officer"
-msgstr "Wähle Raumjäger"
+msgstr "Wähle Offizier"
 
 #: src/gui/hotkeyConfig.cpp:380
 msgctxt "hotkey_Weapons"
@@ -3618,10 +3578,9 @@ msgid "Scan object"
 msgstr "Objekt scannen"
 
 #: src/gui/hotkeyConfig.cpp:404
-#, fuzzy
 msgctxt "hotkey_Science"
 msgid "Abort scan"
-msgstr "Docking abbrechen"
+msgstr "Scan abbrechen"
 
 #: src/gui/hotkeyConfig.cpp:405
 msgctxt "hotkey_Science"
@@ -3689,16 +3648,14 @@ msgid "Select rear shields system"
 msgstr "Wähle System: Heckschilde"
 
 #: src/gui/hotkeyConfig.cpp:423
-#, fuzzy
 msgctxt "hotkey_Engineering"
 msgid "Select next system"
-msgstr "Wähle Reaktorsystem"
+msgstr "Wähle nächstes System"
 
 #: src/gui/hotkeyConfig.cpp:424
-#, fuzzy
 msgctxt "hotkey_Engineering"
 msgid "Select previous system"
-msgstr "Wähle Reaktorsystem"
+msgstr "Wähle vorheriges System"
 
 #: src/gui/hotkeyConfig.cpp:425
 msgctxt "hotkey_Engineering"

@@ -60,9 +60,9 @@ function comms_vf_military.ensure_comms_data_reinforcements(env)
 				template = template,
 				threshold = env.target.comms_data.reinforcement_threshold[template],
 				cost = math.ceil(env.target.comms_data.reinforcement_cost[template]),
-				stocked = math.random(1,100) <= 72 -- dafuq? always have 72% chance for every type?
+				stocked = true, --math.random(1,100) <= 72 -- dafuq? always have 72% chance for every type?
 			}
-			info.selectable = stocked and comms_data.friendlyness > info.threshold	-- assume the stats above are immutable
+			info.selectable = stocked and (info.threshold == nil or comms_data.friendlyness > info.threshold)	-- assume the stats above are immutable
 			table.insert(comms_data.reinforcement_info, info)
 		end
 	end

@@ -211,7 +211,7 @@ variation:setAutoRepair(true)
 -- Station
 --------------------------------------------------------------------------------
 
-template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
+template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2_fixedcol"):setType("playership")
 template:setRadarTrace("largestation.png")
 template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
 
@@ -235,7 +235,7 @@ template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
 template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"), _("class", "Prototype"))
 template:setInternalDockClasses(_("class", "Starfighter"))
-template:setSpawnShips("MP52 Hornet", "ZX-Lindworm", "Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon")
+template:setSpawnShips("MP52 Hornet", "ZX-Lindworm", "Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon","Kestrel")
 template:setPlayerShipType("station")
 addSystemsStation(template)
 

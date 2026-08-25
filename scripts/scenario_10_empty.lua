@@ -10,10 +10,10 @@ require("comms/comms_vf_ship.lua")
 
 function init()
 
-	PlayerSpaceship():setTemplate("Phobos M3P"):setCallSign("A1"):setPosition(1000, 0):setFaction("Human Navy")
-    local other = CpuShip():setTemplate("Adder MK5"):setPosition(0, 2000):setFaction("Human Navy")
+--	PlayerSpaceship():setTemplate("Phobos M3P"):setCallSign("A1"):setPosition(1000, 0):setFaction("Human Navy")
+--	local other = CpuShip():setTemplate("Adder MK5"):setPosition(0, 2000):setFaction("Human Navy")
 																		  
-	comms_vf_ship.nav_all:set_as_comms_function(other)
+--	comms_vf_ship.nav_all:set_as_comms_function(other)
 --	PlayerSpaceship():setTemplate("Arlenian 1"):setCallSign("A1"):setPosition(0, 0):setFaction("Human Navy"):setRotation(0)
 --	PlayerSpaceship():setTemplate("Arlenian 7tcP"):setCallSign("Arl-3"):setPosition(0, 500):setFaction("Human Navy"):setRotation(0)
 --	PlayerSpaceship():setTemplate("Arlenian 7scP"):setCallSign("Arl-4"):setPosition(0, 700):setFaction("Human Navy"):setRotation(0)

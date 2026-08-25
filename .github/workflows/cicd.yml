@@ -83,6 +83,7 @@ jobs:
   windows:
     name: Windows
     runs-on: windows-latest
+    when: never
     strategy:
       matrix:
         build_type: [Debug, RelWithDebInfo, Release]

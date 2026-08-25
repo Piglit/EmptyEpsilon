@@ -72,7 +72,7 @@ jobs:
         run: |
           mkdir -p _build_macos
           cd _build_macos
-          cmake ../EmptyEpsilon -G Ninja -DSERIOUS_PROTON_DIR=../SeriousProton -DCMAKE_INSTALL_PREFIX=. -DWARNING_IS_ERROR=1
+          cmake ../EmptyEpsilon -G Ninja -DSERIOUS_PROTON_DIR=../SeriousProton -DCMAKE_INSTALL_PREFIX=. -DWARNING_IS_ERROR=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           ninja
           ninja install
       - name: store artifact

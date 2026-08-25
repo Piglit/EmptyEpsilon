@@ -9,4 +9,4 @@ As the files build up to the pack are licensed under the licence from cgtrader. 
 
 The EsgaShipSet pack is only to be distributed as a whole, without modifications with copies of EmptyEpsilon.
 
-As the files build up to the pack are licensed under the licence from Feivelyn Art (https://sketchfab.org/feivelyn). So no other redistrubution, or reverse engineering of the pack files is allowed.
+As the files build up to the pack are licensed under the licence from Feivelyn Art (https://sketchfab.com/feivelyn). So no other redistrubution, or reverse engineering of the pack files is allowed.

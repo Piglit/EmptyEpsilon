@@ -34,6 +34,17 @@ model:setRadius(1300)
 model:setCollisionBox(1400, 1000)
 
 model = ModelData()
+model:setName("space_station_2_fixedcol")
+model:setMesh("space_station_2/space_station_2.model")
+model:setTexture("space_station_2/space_station_2_color.jpg")
+model:setSpecular("space_station_2/space_station_2_specular.jpg")
+model:setIllumination("space_station_2/space_station_2_illumination.jpg")
+model:setRenderOffset(-32, 0, 5) -- X more negative pushes the "landing bay" further out
+model:setScale(20)
+model:setRadius(25 * 20)
+model:setCollisionBox(25 * 2 * 20, 33 * 2 * 20)
+
+model = ModelData()
 model:setName("space_station_1")
 model:setMesh("space_station_1/space_station_1.model")
 model:setTexture("space_station_1/space_station_1_color.jpg")

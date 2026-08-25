@@ -460,6 +460,10 @@ template:setRepairCrewCount(4)
 template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
 addSystemsMineLayer(template)
 npc = template:copy(" "..template:getName()):setType("ship")
+var = template:copy("Honeybadger")
+var:setModel("honeybadger")
+npc = var:copy(" "..var:getName()):setType("ship")
+
 
 --[[Corvette--]]
 template = ShipTemplate():setName("Atlantis"):setClass(_("class", "Corvette"), _("subclass", "Destroyer")):setModel("AtlasHeavyDreadnought"..color_player):setType("playership")

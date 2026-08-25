@@ -94,7 +94,7 @@ template:setRepairCrewCount(2) -- 3 crew -1 steuermann
 
 
 template:addRoomSystem(8, 3, 1, 2, "Maneuver");
-template:addRoom(7,3, 1, 2);
+template:addRoomSystem(7, 3, 1, 2, "Warp");
 
 template:addRoomSystem(5, 2, 2, 2, "FrontShield");
 template:addRoomSystem(5, 4, 2, 2, "RearShield");
@@ -126,3 +126,6 @@ template:addDoor(1, 3, true);
 template:addDoor(2, 3, true);
 template:addDoor(1, 5, true);
 template:addDoor(2, 5, true);
+
+-- NPC variant
+npc = template:copy(" "..template:getName()):setType("ship")

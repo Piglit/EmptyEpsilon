@@ -210,7 +210,7 @@ addSystemsSat(template)
 -- Station
 --------------------------------------------------------------------------------
 
-template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
+template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2_fixedcol"):setType("playership")
 template:setRadarTrace("largestation.png")
 template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
 

@@ -1,0 +1,7 @@
+#: mod_spacelan/plots/avp_terrain_modules.lua:645
+msgid "Black hole stabilizer"
+msgstr "Schwarzes-Loch-Stabilisator"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:646
+msgid "This Arlenian device was used to prevent the wormhole from collapsing."
+msgstr "Dieses arlenische Gerät wurde verwendet, um den Kollaps des Wurmlochs zu verhindern."

@@ -1,0 +1,16 @@
+#: mod_spacelan/plots/wh_artifacts.lua:45
+msgid "A piece of space junk. Scan to find out the capturing frequency"
+msgstr "Ein Stück Weltraumschrott. Scannen, um die Einfangfrequenz herauszufinden"
+
+#: mod_spacelan/plots/wh_artifacts.lua:45
+#: mod_spacelan/plots/wh_artifacts.lua:75
+msgid ""
+"\n"
+"Capturing frequency:"
+msgstr ""
+"\n"
+"Einfangfrequenz:"
+
+#: mod_spacelan/plots/wh_artifacts.lua:75
+msgid ". Scan to find out the capturing frequency"
+msgstr ". Scannen, um die Einfangfrequenz herauszufinden"

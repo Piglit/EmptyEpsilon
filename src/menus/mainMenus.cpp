@@ -174,4 +174,9 @@ MainMenu::MainMenu()
         new DebugAllModelView();
     }))->setPosition({370, -180}, sp::Alignment::BottomLeft)->setSize(300, 50);
 #endif
+
+    if (PreferencesManager::get("campaign_server_only") != "") {
+		new CampaignMenu();
+		destroy();
+	}
 }

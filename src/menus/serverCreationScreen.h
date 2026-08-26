@@ -90,6 +90,7 @@ private:
     string briefing_text;
 	std::map<string, string> score;
 	std::map<string, string> proxies;
+	float update_timer = 10.0f;
 };
 
 class ProxyJoinScreen: public GuiCanvas//, Updatable
@@ -98,6 +99,7 @@ private:
     GuiSelector* ship_template_selector;
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
+    GuiLabel* ship_created;
     sp::io::network::Address host;
     int listenPort;
 public:
@@ -115,7 +117,7 @@ private:
     string callsign;
 public:
     ProxyConnectedScreen(sp::io::network::Address host, int listenPort, string callsign);
-    virtual void update(float delta) override;
+    //virtual void update(float delta) override;
 };
 
 #endif//SERVER_CREATION_SCREEN_H

@@ -332,6 +332,8 @@ function init()
 
 	campaign:initScore()
 	onNewPlayerShip(onNewPlayerShipSpawned)
+
+	campaign:allowReinforcements()
 end
 
 function commsInstr()

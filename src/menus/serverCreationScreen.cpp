@@ -240,7 +240,7 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
             // Destroy this screen and move on to ship selection.
             destroy();
             if (gameGlobalInfo->campaign_running) {
-                new MissionControlScreen(getRenderLayer());
+                new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
             } else {
                 returnToShipSelection(getRenderLayer());
             }
@@ -414,7 +414,7 @@ ServerCampaignScreen::ServerCampaignScreen()
 
                 // Destroy this screen and move on to control screen 
                 destroy();
-                new MissionControlScreen(getRenderLayer());
+                new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
             }
             else
             {
@@ -662,7 +662,7 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
         destroy();
 
         if (gameGlobalInfo->campaign_running) {
-            new MissionControlScreen(getRenderLayer());
+			new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
         } else {
             returnToShipSelection(getRenderLayer());
         }

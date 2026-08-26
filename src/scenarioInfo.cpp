@@ -12,6 +12,7 @@ ScenarioInfo::ScenarioInfo(string filename)
     this->filename = filename;
     name = filename.substr(9, -4);
 	proxy = "";
+	spawn_x = spawn_y = spawn_rot = 0.0f;
 
     // load scenario from file
     P<ResourceStream> stream = getResourceStream(filename);
@@ -115,6 +116,18 @@ void ScenarioInfo::addKeyValue(string key, string value)
     else if (key.lower() == "proxy")
     {
         proxy = value;
+    }
+    else if (key.lower() == "spawn_x")
+    {
+        spawn_x = std::stof(value);
+    }
+    else if (key.lower() == "spawn_y")
+    {
+        spawn_y = std::stof(value);
+    }
+    else if (key.lower() == "spawn_rot")
+    {
+        spawn_rot = std::stof(value);
     }
     else if (additional == "" || !addSettingOption(key, additional, value))
     {

@@ -146,7 +146,7 @@ function EnemyModule:addBossHangar(carrier, hangar_classes)
 			end
 		end
 		script_hangar:config(carrier, "cooldownMax", 60/idx)
-		script_hangar:config(carrier, "triggerRange", 50000 - 10000*idx)
+		script_hangar:config(carrier, "triggerRange", math.max(50000 - 10000*idx, 5000))
 		script_hangar:config(carrier, "arc", 90+90*idx)
 	end	
 	return carrier
@@ -655,6 +655,7 @@ EnemyModuleArlenians = EnemyModule:new{
 		transports = arrayShuffle({"Macaw", "Spix", "Pigeon", "Grosbeak"}),
 		escorts = arrayShuffle({"Woodpecker", "Swallow", "Linnet"}),
 		cruisers = arrayShuffle({"Pheasant", "Grebe", "Pochard", "Crane"}),
+		specialists = {"Towhee", "Pelican", "Heron", "Kite"}, -- not shuffled
 	}
 }
 
@@ -688,4 +689,20 @@ function EnemyModuleArlenians:spawnEnemiesAtPositions(positions, strength)
 	return fleet_leaders
 end
 
+function EnemyModuleArlenians:spawnSpecialist(positions, strength)
+	-- they are not shuffled initially - so their strength will increase with every call.
+	local template = self:getClassTemplate("specialists")
+	local ship, used_strength = self:spawnShipAtPosition(template, positions[1])
+	if template == "Kite" then
+		self:addBossHangar(ship, {"fighters", "fighters", "fighters"})
+		used_strength = used_strength + 15*4
+	end
+	if #positions > 1 then
+		table.remove(positions,1)
+	end
+	local fleet = self:spawnEnemiesAtPositions(positions, strength - used_strength)
+
+	table.insert(fleet, 1, ship)
+	return fleet
+end
 

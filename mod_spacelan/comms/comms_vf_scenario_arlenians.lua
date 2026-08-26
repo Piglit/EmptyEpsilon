@@ -105,6 +105,7 @@ function comms_vf_station_arlenian.ensure_comms_data(env)
 	end
 	if comms_vf_station_arlenian.is_arlenian_motherstation(env) then
 		env.target.linked_motherstation = env.target
+		comms_data.mother_modules = {}
 	end
 	if comms_data.friendlyness == nil then
 		comms_data.friendlyness = math.random(1,100)
@@ -530,6 +531,8 @@ comms_vf_station_arlenian.confirm_change_to_docked = CommsNode:new({
 		station.comms_data.friendlyness = station.comms_data.friendlyness + 10
 		-- Enable the stronger variant for the escorting player.
 		table.insert(station.comms_data.mother_grant_upgrades_to_players[env.target.comms_data.upgrade_to_offer], env.source)
+		-- store docked station
+		table.insert(station.comms_data.mother_modules, env.target)
 		-- relink comms_data, change target
 		env.target.linked_motherstation = station
 --		env.target = comms_vf_station_arlenian:change_mobile_to_station(env.target) -- don't switch back, to prevent docking
@@ -539,6 +542,16 @@ comms_vf_station_arlenian.confirm_change_to_docked = CommsNode:new({
 		-- After receiving an upgrade enemies will attack here
 		if avp_story ~= nil then
 			avp_story:spawn_threat(station, env.source)
+		end
+		if avp_enemies ~= nil then
+			local x,y = station:getPosition()
+			local positions = {
+				{x+1000, y},
+				{x, y+1000},
+				{x-1000, y},
+				{x, y-1000},
+			}
+			EnemyModuleArlenians:spawnSpecialist(positions, 50 * #station.comms_data.mother_modules)
 		end
 	end,
 })

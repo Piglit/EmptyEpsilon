@@ -517,6 +517,19 @@ void ServerCampaignScreen::loadCampaign()
         score[key] = value;
     }
 }
+/*
+void ServerCampaignScreen::update()
+{
+    nlohmann::json campaign = campaign_client->getCampaign();
+	if (campaign["scenarios"].size() != scenario_list->size())
+	{
+		// TODO
+	}
+	// same with proxies
+	// what about selection index?
+	// what about adding one but removing another scenario?
+}
+*/
 
 void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
 {

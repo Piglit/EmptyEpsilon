@@ -110,6 +110,13 @@ function wh_players:updatePlayerSoftTemplate(p)
 			addGMMessage(string.format("Player ship %s's template type (%s) could not be found in table PlayerShipStats",p:getCallSign(),tempTypeName))
 		end
 	end
+	-- TODO test:
+	--if p:isFighter() then
+	--	ship:commandLoadTube(0, "laser_green")
+	--	ship:commandLoadTube(1, "laser_green")
+	--	ship:setSystemPowerFactor("reactor", -10)
+	--	ship:setRepairCrewCount(0)
+	--end
 	p.maxRepairCrew = p:getRepairCrewCount()
 	p.healthyShield = 1.0
 	p.prevShield = 1.0

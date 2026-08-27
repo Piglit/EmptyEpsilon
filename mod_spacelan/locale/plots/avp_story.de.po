@@ -1,0 +1,181 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: mod_spacelan/plots/avp_story.lua:237
+#, lua-format
+msgid ""
+"From time to time we see ships of the Arlenians near their station in the %s "
+"not very far from here."
+msgstr ""
+"Von Zeit zu Zeit sehen wir Schiffe der Arlenier bei ihrer Station bei den "
+"%s, nicht weit von hier entfernt."
+
+#: mod_spacelan/plots/avp_story.lua:253
+#, lua-format
+msgid ""
+"Last time we looked, there was a derelict space station near some %s not "
+"very far from here."
+msgstr ""
+"Als wir das letzte Mal nachgesehen haben, gab es eine verlassene Raumstation "
+"bei einigen %s, nicht weit von hier entfernt."
+
+#: mod_spacelan/plots/avp_story.lua:277
+#, fuzzy, lua-format
+msgid ""
+"Nearby is a filthy area with %s where pirates make a living. It would be "
+"nice if someone brought justice to them."
+msgstr ""
+"In der Nähe befindet sich ein dreckiges Gebiet mit %s, in dem Piraten ihr "
+"Unwesen treiben. Es wäre schön, wenn jemand ihnen Gerechtigkeit widerfahren "
+"ließe."
+
+#: mod_spacelan/plots/avp_story.lua:296
+#, lua-format
+msgid ""
+"We are not far from an area with %s - don't go there, unless you want to "
+"have some rouge AI taking over your ship."
+msgstr ""
+"Wir sind nicht weit von einem Gebiet mit %s entfernt – flieg nicht dorthin, "
+"es sei denn, du möchtest, dass eine durchgedrehte KI dein Schiff übernimmt."
+
+#: mod_spacelan/plots/avp_story.lua:311
+#, lua-format
+msgid "There were sightings of an Exuari carrier ship near the %s nearby."
+msgstr "Bei den %s in der Nähe wurde ein Trägerschiff der Exuari gesichtet."
+
+#: mod_spacelan/plots/avp_story.lua:327
+#, lua-format
+msgid ""
+"There is a reservoir full of Ktlitans in the neighbourhood. You can almost "
+"see the %s of that area from here."
+msgstr ""
+"In der Nachbarschaft gibt es ein Reservoir voller Ktlitans. Von hier aus "
+"kannst du fast die %s dieses Gebiets sehen."
+
+#: mod_spacelan/plots/avp_story.lua:347
+#, lua-format
+msgid "The Krailor are near! They will move from their %s to us soon."
+msgstr ""
+"Die Kraylor sind ganz in der Nähe! Sie werden bald von ihren %s zu uns "
+"vorrücken."
+
+#: mod_spacelan/plots/avp_story.lua:365
+#, lua-format
+msgid ""
+"A small flotilla of independent miners recently came through here. They "
+"moved to the %s not far from here. They believe they might strike rich "
+"mining asteroids. I guess without the Human Navy, some troublemakers could "
+"benefit from them in one way or the other."
+msgstr ""
+"Vor Kurzem kam eine kleine Flottille unabhängiger Minenarbeiter hier vorbei. "
+"Sie sind zu den %s weitergezogen, die nicht weit von hier entfernt sind. Sie "
+"glauben, dass sie beim Abbau von Asteroiden reich werden könnten. Ich "
+"schätze, ohne die menschliche Navy könnten einige Unruhestifter auf die eine "
+"oder andere Weise von ihnen profitieren."
+
+#: mod_spacelan/plots/avp_story.lua:382
+#, lua-format
+msgid ""
+"They say, some black holes have orbiting stabiliser artifacts from an "
+"ancient civilisation that keep them from collapsing. If you ever see a black "
+"hole collapse, flee from that area fast and as far as possible!"
+msgstr ""
+"Man sagt, dass einige Schwarze Löcher von Artefakten einer uralten "
+"Zivilisation umkreist werden, die sie am Kollabieren hindern. Falls du "
+"jemals siehst, wie ein Schwarzes Loch kollabiert, flieh schnell und so weit "
+"wie möglich aus diesem Gebiet!"
+
+#: mod_spacelan/plots/avp_story.lua:407
+#, lua-format
+msgid ""
+"Did you know, you can harvest certain kinds of nebulae to use their gases as "
+"coolant fluid?"
+msgstr ""
+"Wusstest du, dass man bestimmte Arten von Nebeln abernten und ihre Gase als "
+"Kühlmittel verwenden kann?"
+
+#: mod_spacelan/plots/avp_story.lua:424
+#, lua-format
+msgid ""
+"Some nebulae consist of particles that are not stopped by your shields or "
+"hull, but can react with your coolant fluid, making your pumps clog."
+msgstr ""
+"Einige Nebel bestehen aus Partikeln, die weder von deinen Schilden noch vom "
+"Rumpf aufgehalten werden, aber mit deinem Kühlmittel reagieren und dadurch "
+"deine Pumpen verstopfen können."
+
+#: mod_spacelan/plots/avp_story.lua:447
+#, lua-format
+msgid ""
+"The Exuari sometimes appear near here out of nowhere, kill someone, and are "
+"away again."
+msgstr ""
+"Die Exuari tauchen hier manchmal wie aus dem Nichts auf, töten jemanden und "
+"sind anschließend wieder verschwunden."
+
+#: mod_spacelan/plots/avp_story.lua:466
+#, lua-format
+msgid ""
+"Recently we intercepted a software-update for target seeking mines on a "
+"subspace frequency."
+msgstr ""
+"Kürzlich haben wir auf einer Subraumfrequenz ein Software-Update für "
+"zielsuchende Minen abgefangen."
+
+#: mod_spacelan/plots/avp_story.lua:491
+#, lua-format
+msgid ""
+"A mad scientist sometimes visits us. They must have a laboratory somewhere "
+"near."
+msgstr ""
+"Manchmal besucht uns ein verrückter Wissenschaftler. Er muss irgendwo in der "
+"Nähe ein Labor haben."
+
+#: mod_spacelan/plots/avp_story.lua:518
+#, lua-format
+msgid ""
+"From time to time Kraylor supply vessels travel through here to the %s "
+"nearby. There must be something there..."
+msgstr ""
+"Von Zeit zu Zeit fliegen Versorgungsschiffe der Kraylor hier durch zu den "
+"nahegelegenen %s. Dort muss etwas sein ..."
+
+#: mod_spacelan/plots/avp_story.lua:556
+#, lua-format
+msgid ""
+"There is an ongoing conflict between different faction near the %s next to "
+"our area."
+msgstr ""
+"In der Nähe der %s neben unserem Gebiet herrscht ein andauernder Konflikt "
+"zwischen verschiedenen Fraktionen."
+
+#: mod_spacelan/plots/avp_story.lua:574
+#, lua-format
+msgid ""
+"From time to time we get reading from objects that travel through the "
+"wormholes nearby. Our reading show, that a wormhole is slowly collapsing, "
+"making travel more risky with every jump."
+msgstr ""
+"Von Zeit zu Zeit empfangen wir Messwerte von Objekten, die durch die "
+"Wurmlöcher in der Nähe reisen. Unsere Messungen zeigen, dass ein Wurmloch "
+"langsam kollabiert, wodurch das Reisen mit jedem Sprung riskanter wird."
+
+#: mod_spacelan/plots/avp_story.lua:682
+msgctxt "buttonGM"
+msgid "Lower Enemy Strength"
+msgstr "Feindstärke verringern"
+
+#: mod_spacelan/plots/avp_story.lua:686
+msgctxt "buttonGM"
+msgid "Raise Enemy Strength"
+msgstr "Feindstärke erhöhen"

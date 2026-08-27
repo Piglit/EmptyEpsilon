@@ -203,7 +203,7 @@ Strategische Informationen über feindliche Stationen
 ----------------------------------------------------
 Einige Stationen, die von Feinden besetzt sind, können eingeschüchtert werden.
 Dazu müssen wir ihre Umgebung von feindlichen bewaffneten Schiffen befreien und unsere eigenen Kriegsschiffe um die Station positionieren. Manchmal hilft auch ein Warnschuss. Spätestens, wenn die Schilde der Station durchbrochen sind, sollten sie über eine Kapitulation nachdenken.
-Nicht jede feindliche Fraktion ist bereit, sich uns zu ergeben.]]
+Nicht jede feindliche Fraktion ist bereit, sich uns zu ergeben.]],
 		turned_enemy_independent = 
 [[Aufklärungsbericht
 ------------------

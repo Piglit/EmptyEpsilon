@@ -125,14 +125,13 @@ function wh_artifacts.onPickUp(art, player)
 			art.info_destroyed = art.info_destroyed .. _("(Your shields are not active)")
 		elseif not art:isScannedBy(player) then
 			art.info_destroyed = art.info_destroyed .. _("(Scan an artifact to find the capture frequency)")
-		elseif shieldfreq != art.freq then
+		elseif shieldfreq ~= art.freq then
 			art.info_destroyed = art.info_destroyed .. string.format(_("(Your shields are calibrated to %dGHZ, not to %dGHz)"), shieldfreq, art.freq)
 		end
 		player:addCustomMessage("Science", "artifact_destroyed", art.info_destroyed)
 		player:addCustomMessage("Operations", "artifact_destroyed", art.info_destroyed)
 		player:addCustomMessage("Single", "artifact_destroyed", art.info_destroyed)
 		player:addToShipLog(art.info_destroyed, "magenta")
-		-- TODO translations!
 	end
 end
 

@@ -79,7 +79,7 @@ function wh_players:respawnedShipOnCommandStation(ship)
 end
 
 function wh_players:spawnedShipEnterSector(ship, callsign)
-	ship:setPosition(-20000, 0)
+	ship:setPosition(-90000, -50000)
 	ship:setRotation(0):commandTargetRotation(0)
 end
 

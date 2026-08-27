@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.9\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #: mod_spacelan/comms/comms_vf_station.lua:99
 msgctxt "situationReport-comms"
@@ -627,6 +627,10 @@ msgstr "%s  Schild:%s%%"
 msgctxt "situationReport-comms"
 msgid "%s  Shield %s:%s%%"
 msgstr "%s  Schild %s:%s%%"
+
+#: mod_spacelan/comms/comms_vf_station.lua:793
+msgid "Gossip"
+msgstr "Gibt es Gerüchte über die Gegend?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:812
 msgid "General Information"

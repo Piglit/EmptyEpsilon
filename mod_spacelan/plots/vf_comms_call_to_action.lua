@@ -341,7 +341,7 @@ function vf_comms_call_to_action:update(dt)
 		if cta.countdown > 0 then
 			cta.countdown = cta.countdown - dt
 		else
-			for _,ship in ipairs(players) do
+			for __,ship in ipairs(players) do
 				if distance(cta.source, ship) <= cta.radius then
 					if cta.source:sendCommsMessageNoLog(ship, self:replace_message_placeholders(cta.message, cta.source, ship)) then
 						-- ship was hailed, but can choose to ignore

@@ -234,7 +234,7 @@ function avp_story:arlenianStation(terrain_module)
 		end
 	end)
 	terrain_module.enemy_faction = tableSelectRandom({"Kraylor", "Exuari"})
-	terrain_module.gossip = string.format("From time to time we see ships of the Arlenians near their station in the %s not very far from here.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("From time to time we see ships of the Arlenians near their station in the %s not very far from here."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -250,7 +250,7 @@ function avp_story:derelictStation(terrain_module)
 		end
 		station:setCommsFunction(nil):setCommsScript("")
 	end)
-	terrain_module.gossip = string.format("Last time we looked, there was a derelict space station near some %s not very far from here.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("Last time we looked, there was a derelict space station near some %s not very far from here."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -266,9 +266,15 @@ function avp_story:pirateStation(terrain_module)
 			wh_rota:add_object(art, station.speed, station.center)
 		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
+		if vf_bescheid ~= nil then
+			vf_bescheid:sag_bescheid("convertable_station", {
+				callsign=station:getCallSign(),
+				sector=station:getSectorName(),
+			})
+		end
 	end)
 	terrain_module.enemy_faction = "Criminals"
-	terrain_module.gossip = string.format("Nearby is a filthy area with %s where pirates make a living. It would be nice if someone brought justice to them", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("Nearby is a filthy area with %s where pirates make a living. It would be nice if someone brought justice to them."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -287,7 +293,7 @@ function avp_story:ghostStation(terrain_module)
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
 	terrain_module.enemy_faction = "Ghosts"
-	terrain_module.gossip = string.format("We are not far from an area with %s - don't go there, unless you want to have some rouge AI taking over your ship.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("We are not far from an area with %s - don't go there, unless you want to have some rouge AI taking over your ship."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -302,7 +308,7 @@ function avp_story:exuariCarrier(terrain_module)
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
 	terrain_module.enemy_faction = "Exuari"
-	terrain_module.gossip = string.format("There were sightings of an Exuari carrier ship near the %s nearby.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("There were sightings of an Exuari carrier ship near the %s nearby."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -318,7 +324,7 @@ function avp_story:ktlitanQueen(terrain_module)
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
 	terrain_module.enemy_faction = "Ktlitans"
-	terrain_module.gossip = string.format("There is a reservoir full of Ktlitans in the neighbourhood. You can almost see the %s of that area from here.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("There is a reservoir full of Ktlitans in the neighbourhood. You can almost see the %s of that area from here."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -338,7 +344,7 @@ function avp_story:kraylorBase(terrain_module)
 		vf_comms_call_to_action:call_to_action(last_base, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
 	terrain_module.enemy_faction = "Kraylor"
-	terrain_module.gossip = string.format("The Krailor are near! They will move from their %s to us soon.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("The Krailor are near! They will move from their %s to us soon."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -356,7 +362,7 @@ function avp_story:hiddenArtifact(terrain_module)
 		end
 	end)
 	terrain_module.enemy_faction = "Criminals"
-	terrain_module.gossip = string.format("A small flotilla of independent miners recently came through here. They moved to the %s not far from here. They believe they might strike rich mining asteroids. I guess without the Human Navy, some troublemakers could benefit from them in one way or the other.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("A small flotilla of independent miners recently came through here. They moved to the %s not far from here. They believe they might strike rich mining asteroids. I guess without the Human Navy, some troublemakers could benefit from them in one way or the other."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -373,7 +379,7 @@ function avp_story:collapseArtifact(terrain_module)
 			end
 		end
 	end)
-	terrain_module.gossip = string.format("They say, some black holes have orbiting stabiliser artifacts from an ancient civilisation that keep them from collapsing. If you ever see a black hole collapse, flee from that area fast and as far as possible!")
+	terrain_module.gossip = string.format(_("They say, some black holes have orbiting stabiliser artifacts from an ancient civilisation that keep them from collapsing. If you ever see a black hole collapse, flee from that area fast and as far as possible!"))
 	return true
 end
 
@@ -398,7 +404,7 @@ function avp_story:nebulaCoolantGain(terrain_module)
 			end
 		end
 	end)
-	terrain_module.gossip = string.format("Did you know, you can harvest certain kinds of nebulae to use their gases as coolant fluid?")
+	terrain_module.gossip = string.format(_("Did you know, you can harvest certain kinds of nebulae to use their gases as coolant fluid?"))
 	return true
 end
 function avp_story:nebulaCoolantDrain(terrain_module)
@@ -415,7 +421,7 @@ function avp_story:nebulaCoolantDrain(terrain_module)
 			end
 		end
 	end)
-	terrain_module.gossip = string.format("Some nebulae consist of particles that are not stopped by your shields or hull, but can react with your coolant fluid, making your pumps clog.")
+	terrain_module.gossip = string.format(_("Some nebulae consist of particles that are not stopped by your shields or hull, but can react with your coolant fluid, making your pumps clog."))
 	return true
 end
 
@@ -438,7 +444,7 @@ function avp_story:exuariAmbush(terrain_module)
 	end)
 	terrain_module.enemy_faction = "Exuari"
 	terrain_module.skip_enemies = true
-	terrain_module.gossip = string.format("The Exuari sometimes appear near here out of nowhere, kill someone, and are away again.")
+	terrain_module.gossip = string.format(_("The Exuari sometimes appear near here out of nowhere, kill someone, and are away again."))
 	--terrain_module.canInsertEnemies = function(_)
 	--	return false
 	--end
@@ -457,7 +463,7 @@ function avp_story:mineThrowerSeek(terrain_module)
 		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
-	terrain_module.gossip = string.format("Recently we intercepted a software-update for target seeking mines on a subspace frequency.")
+	terrain_module.gossip = string.format(_("Recently we intercepted a software-update for target seeking mines on a subspace frequency."))
 	return true
 end
 
@@ -472,11 +478,17 @@ function avp_story:mineThrowerDance(terrain_module)
 			vf_mine_dance:addDancingMine(station, mine, terrain_module.radius, idx%2==1)
 		end
 		vf_comms_call_to_action:call_to_action(station, math.max(terrain_module.radius, 30000), terrain_module.encounter)
+		if vf_bescheid ~= nil then
+			vf_bescheid:sag_bescheid("convertable_station", {
+				callsign=station:getCallSign(),
+				sector=station:getSectorName(),
+			})
+		end
 	end)
 	terrain_module.getEnemySpawnPositions = function(self)
 		return self:calculateSpawnPositionsOnRing(self.radius)
 	end
-	terrain_module.gossip = string.format("A mad scientist sometimes visits us. They must have a laboratory somewhere near.")
+	terrain_module.gossip = string.format(_("A mad scientist sometimes visits us. They must have a laboratory somewhere near."))
 	return true
 end
 
@@ -503,7 +515,7 @@ function avp_story:kraylorMotherbase(terrain_module)
 		vf_comms_call_to_action:call_to_action(carrier, math.max(terrain_module.radius, 30000), terrain_module.encounter)
 	end)
 	terrain_module.enemy_faction = "Kraylor"
-	terrain_module.gossip = string.format("From time to time Kraylor supply vessels travel through here to the %s nearby. There must be something there...", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("From time to time Kraylor supply vessels travel through here to the %s nearby. There must be something there..."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -541,7 +553,7 @@ function avp_story:conflict(terrain_module)
 		end
 	end)
 	terrain_module.skip_enemies = true
-	terrain_module.gossip = string.format("There is an ongoing conflict between different faction near the %s next to our area.", terrain_module.terrain_type)
+	terrain_module.gossip = string.format(_("There is an ongoing conflict between different faction near the %s next to our area."), terrain_module.terrain_type_localised)
 	return true
 end
 
@@ -559,7 +571,7 @@ function avp_story:instableWormhole(terrain_module)
 			end
 		end
 	end)
-	terrain_module.gossip = string.format("From time to time we get reading from objects that travel through the wormholes nearby. Our reading show, that a wormhole is slowly collapsing, making travel more risky with every jump.")
+	terrain_module.gossip = string.format(_("From time to time we get reading from objects that travel through the wormholes nearby. Our reading show, that a wormhole is slowly collapsing, making travel more risky with every jump."))
 	return true
 end
 
@@ -621,6 +633,12 @@ function avp_story.onTerrainCreation(terrain_module, player)
 				terrain_module.cta.message = vf_comms_call_to_action:selectMessage("kraylorOccupiedStation")
 			end
 			log("Kraylor occupied")
+			if vf_bescheid ~= nil then
+				vf_bescheid:sag_bescheid("convertable_station", {
+					callsign=station:getCallSign(),
+					sector=station:getSectorName(),
+				})
+			end
 		else
 			if vf_bescheid ~= nil then
 				vf_bescheid:sag_bescheid("independent_station_found", {
@@ -665,7 +683,7 @@ function avp_story:gm_menu()
 		avp_story.gm_difficulty_adjustment = avp_story.gm_difficulty_adjustment -1
 		log("Difficulty adjustment:", avp_story.gm_difficulty_adjustment)
 	end)
-    addGMFunction(_("buttonGM", "Raise Enemy Strength"), function 
+    addGMFunction(_("buttonGM", "Raise Enemy Strength"), function ()
 		avp_story.gm_difficulty_adjustment = avp_story.gm_difficulty_adjustment +1
 		log("Difficulty adjustment:", avp_story.gm_difficulty_adjustment)
 	end)

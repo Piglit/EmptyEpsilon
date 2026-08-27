@@ -392,13 +392,6 @@ end
 
 function wh_fleetcommand:update_docked_ship(delta, ps)
 	local fc = self.station
-	if not vf_bescheid:woas_scho("with_artifacts") then	-- TODO, what about Campaign Artifacts
-		vf_bescheid:sag_bescheid("docked_with_fc", {
-			callsign=ps:getCallSign(),
-			artifacts=ps:getResourceAmount("Artifacts"),
-		})
-	end
-
 	-- Repair crew
 	if fc:getResourceAmount("Medical Bay") > 0 then
 		local max_repair_crew = ps.maxRepairCrew
@@ -472,6 +465,12 @@ function wh_fleetcommand:update_docked_ship(delta, ps)
 		customElements:removeCustom(ps, "e_artifact_counter")
 		customElements:removeCustom(ps, "e_artifact_send")
 	end
+	if vf_bescheid ~= nil then
+		vf_bescheid:sag_bescheid("docked_with_fc", {
+			callsign=ps:getCallSign(),
+			artifacts=amount,
+		})
+	end
 end
 
 function wh_fleetcommand:gm_menu()
@@ -483,6 +482,9 @@ end
 function wh_fleetcommand:update(delta)
 	-- unregister status reciever if destroyed
 	local fc = self.station
+	if fc == nil then
+		return
+	end
 	if not fc:isValid() then
 		sendMessageToCampaignServer("fleetcommand-deleted", "")
 		self.station = nil

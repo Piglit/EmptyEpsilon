@@ -605,7 +605,7 @@ msgstr ""
 msgid "Yes, thank you. Goodbye."
 msgstr "Ja, danke. Auf Wiedersehen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:569
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:579
 msgid ""
 "Our people have shared much knowledge with the civilizations of this region, "
 "and we remain willing to do so.\n"
@@ -621,7 +621,7 @@ msgstr ""
 "Vielleicht verfügt eine andere arlenianische Station noch über Wissen, das "
 "hierhergebracht werden könnte."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:585
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:595
 msgid ""
 "Your cooperation has helped some of our people return to the greater "
 "Arlenian community.\n"
@@ -636,13 +636,13 @@ msgstr ""
 "Nutzt es weise, und möge es als eine weitere Brücke zwischen unseren "
 "Zivilisationen dienen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:590
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:595
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:600
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:605
 #, lua-format
 msgid "Install the %s technology on our ship."
 msgstr "Installiert die %s-Technologie auf unserem Schiff."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:618
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:628
 #, lua-format
 msgid ""
 "You did more than accept our technology, Captain.\n"
@@ -663,7 +663,7 @@ msgstr ""
 "Andere Schiffe eures Volkes können hier weiterhin die leichter zugängliche "
 "Form dieses Wissens erhalten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:620
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:630
 #, lua-format
 msgid ""
 "We are pleased to share our %s technology with your vessel.\n"
@@ -674,7 +674,7 @@ msgstr ""
 "Wir bieten sie in der Hoffnung an, dass sie eurem Volk zugutekommt und das "
 "Verständnis zwischen unseren Zivilisationen vertieft."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:632
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:642
 msgid ""
 "We recognize that your vessel already possesses this level of the "
 "technology.\n"
@@ -685,7 +685,7 @@ msgstr ""
 "Es besteht keine Notwendigkeit, etwas zu duplizieren, das ihr bereits "
 "besitzt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:659
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:669
 #, lua-format
 msgid ""
 "We are willing to give you an upgrade to your %s systems.\n"
@@ -695,15 +695,15 @@ msgstr ""
 "Wir sind bereit, diese Verbesserung allen %s-Schiffen zu gewähren, die hier "
 "vorbeikommen und andocken."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:668
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:678
 msgid "Install the upgrade to our ship"
 msgstr "Installiert die Verbesserung auf unserem Schiff"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:670
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:680
 #, lua-format
 msgid "Installed %s upgrade to your ship."
 msgstr "%s-Verbesserung auf eurem Schiff installiert."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:684
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:694
 msgid "You already have that kind of upgrade installed on your ship."
 msgstr "Eine solche Verbesserung ist bereits auf eurem Schiff installiert."

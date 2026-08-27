@@ -551,8 +551,18 @@ comms_vf_station_arlenian.confirm_change_to_docked = CommsNode:new({
 				{x-1000, y},
 				{x, y-1000},
 			}
-			EnemyModuleArlenians:spawnSpecialist(positions, 50 * #station.comms_data.mother_modules)
+			local specialists = EnemyModuleArlenians:spawnSpecialist(positions, 50 * #station.comms_data.mother_modules)
+			for __,ship in ipairs(specialists) do
+				ship:orderDefendTarget(station)
+			end
 		end
+		if vf_bescheid ~= nil then
+			vf_bescheid:sag_bescheid("arlenian_escort_complete",{
+				callsign_station = station:getCallSign(),
+				sector = station:getSectorName(),
+			})
+		end
+		env.abort_comms = true
 	end,
 })
 

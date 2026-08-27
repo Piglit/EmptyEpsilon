@@ -1,7 +1,55 @@
-#: mod_spacelan/plots/avp_terrain_modules.lua:645
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:306
+msgid "asteroids"
+msgstr "Asteroiden"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:307
+msgid "nebulae"
+msgstr "Nebel"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:308
+msgid "mines"
+msgstr "Minen"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:309
+msgid "planets"
+msgstr "Planeten"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:310
+msgid "blackholes"
+msgstr "schwarze Löcher"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:311
+msgid "wormholes"
+msgstr "Wurmlöcher"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:414
+msgid "High value asteroid"
+msgstr "Wertvoller Asteroid"
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:415
+msgid "This asteroid contains rare materials an should be captured."
+msgstr ""
+"Dieser Asteroid enthält seltene Materialien und sollte eingefangen werden."
+
+#: mod_spacelan/plots/avp_terrain_modules.lua:658
 msgid "Black hole stabilizer"
 msgstr "Schwarzes-Loch-Stabilisator"
 
-#: mod_spacelan/plots/avp_terrain_modules.lua:646
+#: mod_spacelan/plots/avp_terrain_modules.lua:659
 msgid "This Arlenian device was used to prevent the wormhole from collapsing."
-msgstr "Dieses arlenische Gerät wurde verwendet, um den Kollaps des Wurmlochs zu verhindern."
+msgstr ""
+"Dieses arlenische Gert wurde verwendet, um den Kollaps des Wurmlochs zu "
+"verhindern."

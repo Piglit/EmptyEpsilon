@@ -23,6 +23,7 @@ In the stations script, Expansion (taking stations and their services) and Explo
 avp_story = {
 	terrain_discovered = 0,
 	time_first_discoverey = 0,
+	gm_difficulty_adjustment = 0,
 --	motivations = arrayShuffle({
 --		"Reputation",	-- high value station
 --		"Artifact",		-- visible, capturable, via maneuver or heavy combat
@@ -634,7 +635,7 @@ end
 function avp_story:enemyStrength(terrain_module)
 	local hours_of_game = (getScenarioTime() - self.time_first_discoverey) / 3600
 	local radius_factor = math.sqrt(terrain_module.radius / 5000)
-	local gm_adjustment = 0	--TODO
+	local gm_adjustment = self.gm_difficulty_adjustment
 	local player_strength = 0
 	for _,ship in ipairs(getActivePlayerShips()) do
 		local hull = ship:getHullMax()
@@ -653,10 +654,21 @@ function avp_story:enemyStrength(terrain_module)
 	-- hours: ~1-5
 	-- discovery_score: ~1-35
 	-- radius_factor: ~1-6
-	-- difficulty: ~ 5-30
-	local difficulty = 10 * (player_strength + hours_of_game + self.terrain_discovered + radius_factor + gm_adjustment)
+	-- difficulty: ~ 5-30 * 10
+	local difficulty = 10 * math.max(1,(player_strength + hours_of_game + self.terrain_discovered + radius_factor + gm_adjustment))
 	--log(string.format("Difficulty: %.1f\tPlayers: %.1f\tTime: %.1f\tDiscovery: %.1f\tRadius: %.1f", difficulty, player_strength, hours_of_game, self.terrain_discovered, radius_factor))
 	return difficulty
+end
+
+function avp_story:gm_menu()
+    addGMFunction(_("buttonGM", "Lower Enemy Strength"), function()
+		avp_story.gm_difficulty_adjustment = avp_story.gm_difficulty_adjustment -1
+		log("Difficulty adjustment:", avp_story.gm_difficulty_adjustment)
+	end)
+    addGMFunction(_("buttonGM", "Raise Enemy Strength"), function 
+		avp_story.gm_difficulty_adjustment = avp_story.gm_difficulty_adjustment +1
+		log("Difficulty adjustment:", avp_story.gm_difficulty_adjustment)
+	end)
 end
 
 function avp_story:spawn_threat(station, player)

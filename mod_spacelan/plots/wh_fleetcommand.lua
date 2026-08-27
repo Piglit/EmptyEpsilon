@@ -11,7 +11,7 @@ require "utils_customElements.lua"
 
 function wh_fleetcommand:init()
 	self.station = nil
-	self.upgrades_done = 4 -- TODO 0 in production	-- if station gets destroyed, the respawned one will get a number of artifacts, matching the amount of upgrades.
+	self.upgrades_done = 0	-- if station gets destroyed, the respawned one will get a number of artifacts, matching the amount of upgrades.
 	self.spawnFleetCommand()
 	getScriptStorage().wh_fleetcommand = self 
 end

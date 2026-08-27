@@ -54,7 +54,6 @@ function vf_mine_dance:updateDance(delta)
 					local target_dist = dist + mine.radial_velocity * delta
 					local x2,y2 = vectorFromAngle(target_angle, target_dist)
 					mine:setPosition(x0+x2,y0+y2)
-					-- TODO test: right direction or sign/order error?
 					mine.vector_x = (x0+x2-x1)	/ delta
 					mine.vector_y = (y0+y2-y1)	/ delta
 					-- speed up

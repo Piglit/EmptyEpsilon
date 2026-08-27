@@ -572,9 +572,7 @@ EnemyModuleGhosts = EnemyModule:new{
 }
 
 function EnemyModuleGhosts:spawnEnemiesAtPositions(positions, strength)
-	--[[TODO better strategy?
-		always send a captial ship and two fighters
-	--]]
+	-- always send a captial ship and two fighters
 	local position_index = 0
 	local fleet_leaders = {}
 	while strength >= 0 do

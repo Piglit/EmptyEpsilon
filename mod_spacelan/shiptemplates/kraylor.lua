@@ -232,7 +232,7 @@ template:weaponTubeDisallowMissle(1, "EMP")
 -- The weapons-platform is a stationary platform with beam-weapons. It's extremely slow to turn, but it's beam weapons do a huge amount of damage.
 template = ShipTemplate():setName("Battlestation"):setClass("Kraylor", "Station"):setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful Kraylor rapid devastor beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
-template:setRadarTrace("smallstation.png")
+template:setRadarTrace("smallstation_detail.png")
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 --Reputation Score: 87
@@ -253,7 +253,7 @@ template:setRestocksScanProbes(true)
 --Key features: stationary. Maybe add a Homing tube as variant.
 
 template = ShipTemplate():setName("Goddess of Destruction"):setClass("Kraylor", "Station"):setModel("space_station_2")
-template:setRadarTrace("largestation.png")
+template:setRadarTrace("largestation_detail.png")
 template:setDescription([[The Goddess of Destruction is a "ship" so large and unique that it's almost a class of its own.
 
 The ship is often nicknamed the "all-mother", a name that aptly describes the many roles this ship can fulfill. It's both a supply station and an extremely heavily armored and shielded weapon station capable of annihilating small fleets on its own.

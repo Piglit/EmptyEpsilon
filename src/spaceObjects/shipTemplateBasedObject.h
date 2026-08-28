@@ -24,6 +24,8 @@ public:
     string type_name;
     string model_name;
     string radar_trace;
+    float radar_trace_scale; // this can be used to override the radius defined in the model for more accurate radar traces
+    float radar_trace_shield_scale; // this can be used to override the radius defined in the model for more accurate radar traces
     string impulse_sound_file;
     P<ShipTemplate> ship_template;
 
@@ -106,6 +108,13 @@ public:
     void setLongRangeRadarRange(float range) { range = std::max(range, 100.0f); long_range_radar_range = range; short_range_radar_range = std::min(short_range_radar_range, range); }
     void setShortRangeRadarRange(float range) { range = std::max(range, 100.0f); short_range_radar_range = range; long_range_radar_range = std::max(long_range_radar_range, range); }
 
+    float getRadarTraceScale(float radius_multiplier)
+    {
+        if (radar_trace_scale > 0) {
+            return radar_trace_scale;
+        }
+        return this->getRadius() * radius_multiplier;
+    }
     void setRadarTrace(string trace) { radar_trace = "radar/" + trace; }
     void setImpulseSoundFile(string sound) { impulse_sound_file = sound; }
 

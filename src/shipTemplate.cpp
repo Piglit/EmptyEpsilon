@@ -362,6 +362,8 @@ ShipTemplate::ShipTemplate()
     long_range_radar_range = 30000.0f;
     short_range_radar_range = 5000.0f;
     radar_trace = "radar/ship.png";
+    radar_trace_scale = 0;
+    radar_trace_shield_scale = 0;
     impulse_sound_file = "sfx/engine.wav";
     default_ai_name = "default";
 
@@ -713,9 +715,11 @@ void ShipTemplate::addDoor(glm::ivec2 position, bool horizontal)
     doors.push_back(ShipDoorTemplate(position, horizontal));
 }
 
-void ShipTemplate::setRadarTrace(string trace)
+void ShipTemplate::setRadarTrace(string trace, std::optional<float> scale, std::optional<float> shield_scale)
 {
     radar_trace = "radar/" + trace;
+    radar_trace_scale = scale.value_or(0);
+    radar_trace_shield_scale = shield_scale.value_or(0);
 }
 
 void ShipTemplate::setLongRangeRadarRange(float range)
@@ -789,6 +793,8 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     for(int n=0; n<MW_Count; n++)
         result->weapon_storage[n] = weapon_storage[n];
     result->radar_trace = radar_trace;
+    result->radar_trace_scale = radar_trace_scale;
+    result->radar_trace_shield_scale = radar_trace_shield_scale;
     result->long_range_radar_range = long_range_radar_range;
     result->short_range_radar_range = short_range_radar_range;
     result->impulse_sound_file = impulse_sound_file;

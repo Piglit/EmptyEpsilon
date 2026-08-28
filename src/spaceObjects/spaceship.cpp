@@ -533,7 +533,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&combat_maneuver_strafe_active, 0.2f);
     registerMemberReplication(&combat_maneuver_boost_speed);
     registerMemberReplication(&combat_maneuver_strafe_speed);
-    registerMemberReplication(&radar_trace);
+    //registerMemberReplication(&radar_trace); // <-- error??
     registerMemberReplication(&docking_target_id);
     registerMemberReplication(&missile_resupply_delay);
 
@@ -891,19 +891,30 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
             draw_arc(arc_center, getRotation() - rotation + (turret_direction - turret_arc / 2.0f), turret_arc, beam_range * scale, color);
         }
     }
-    // If not on long-range radar ...
-    if (!long_range)
+
+    // ships and space stations should follow the same rules when drawing their minimap icon (radar trace):
+    // - in close range mode, draw the radar trace as accurate as possible
+    // - in long range mode, don't draw extra stuff (shields, beam arcs, etc)
+    // - in long range mode, draw icons at a constant size, EXCEPT:
+    // --- when the real size of the icon would be larger than the constant size, use the real size (so large objects still look large in long range mode)
+
+    // if the ship is actually a mobile station, apply station scaling
+    float sprite_scale = scale * getRadarTraceScale(ship_template->player_ship_type == EPlayerShipType::PST_Station ? RADIUS_MULTIPLIER_STATION : RADIUS_MULTIPLIER_SHIP);
+
+    if (long_range)
     {
-        // ... and the ship being drawn is either not our ship or has been
-        // scanned ...
-        if (!my_spaceship || getScannedStateFor(my_spaceship) >= SS_SimpleScan)
-        {
-            // ... draw and show shield indicators on our radar.
-            drawShieldsOnRadar(renderer, position, scale, rotation, 1.f, true);
-        } else {
-            // Otherwise, draw the indicators, but don't show them.
-            drawShieldsOnRadar(renderer, position, scale, rotation, 1.f, false);
-        }
+        // in long range mode, we can't get smaller than a certain size
+        sprite_scale = std::max(sprite_scale, SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE);
+    }
+    else
+    {
+        float shield_scale = radar_trace_shield_scale <= 0 ? sprite_scale : radar_trace_shield_scale;
+
+        // Whether shield levels are shown or not, depends on us being either a spectator or having scanned the other ship already.
+        auto show_levels = !my_spaceship || getScannedStateFor(my_spaceship) >= SS_SimpleScan;
+
+        // this /32.0f is pure magic, and is fed into a mess of a formula. oh well. as long as it looks ok... :)
+        drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale / 32.0f, show_levels);
     }
 
     // Set up the radar sprite for objects.
@@ -914,20 +925,19 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
     {
         object_sprite = "radar/ship.png";
     }
-    float sprite_scale;
-    if (long_range)
+
+    glm::u8vec4 color{255, 255, 255, 255};
+    
+    if (factionInfo[getFactionId()])
     {
-        sprite_scale = 22.4f; //0.7f * 32.0f;
+        color = factionInfo[getFactionId()]->getGMColor();
     }
-    else
-    {
-        sprite_scale = scale * getRadius() * 3.0f; //32.0f * (1.0f + scale * getRadius() / 32.f * 4) / 2.0f;
-    }
-    glm::u8vec4 color;
+
     if (my_spaceship == this)
     {
         color = glm::u8vec4(192, 192, 255, 255);
-    }else if (my_spaceship)
+    }
+    else if (my_spaceship)
     {
         if (getScannedStateFor(my_spaceship) != SS_NotScanned)
         {
@@ -937,12 +947,11 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
                 color = glm::u8vec4(128, 255, 128, 255);
             else
                 color = glm::u8vec4(128, 128, 255, 255);
-        }else{
+        }
+        else
+        {
             color = glm::u8vec4(192, 192, 192, 255);
         }
-    }else{
-        if (factionInfo[getFactionId()])
-            color = factionInfo[getFactionId()]->getGMColor();
     }
     renderer.drawRotatedSprite(object_sprite, position, sprite_scale, getRotation() - rotation, color);
 }

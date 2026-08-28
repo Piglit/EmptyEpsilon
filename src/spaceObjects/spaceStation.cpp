@@ -36,11 +36,26 @@ SpaceStation::SpaceStation()
 
 void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
-    float sprite_scale = scale * getRadius() * 1.5f;
+    // ships and space stations should follow the same rules when drawing their minimap icon (radar trace):
+    // - in close range mode, draw the radar trace as accurate as possible
+    // - in long range mode, don't draw extra stuff (shields, beam arcs, etc)
+    // - in long range mode, draw icons at a constant size, EXCEPT:
+    // --- when the real size of the icon would be larger than the constant size, use the real size (so large objects still look large in long range mode)
 
-    if (!long_range)
+    float sprite_scale = scale * getRadarTraceScale(RADIUS_MULTIPLIER_STATION);
+
+    if (long_range)
     {
-        //sprite_scale *= 0.7f;
+        // in long range mode, we can't get smaller than a certain size
+        sprite_scale = std::max(sprite_scale, SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE);
+    }
+    else
+    {
+        // shields are only drawn when close range
+        // allow overriding of the shield distance, as large radar sprites could otherwise really screw with this
+        float shield_scale = radar_trace_shield_scale <= 0 ? sprite_scale : radar_trace_shield_scale;
+
+        // this /32.0f is pure magic, and is fed into a mess of a formula. oh well. as long as it looks ok... :)
         drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale / 32.0f, true);
     }
     //sprite_scale = std::max(0.15f * 32.0f, sprite_scale);

@@ -119,7 +119,7 @@ template:addDoor(8, 4, false);
 --[[ Hack-Sat --]]
 --[[template = ShipTemplate():setName("XB-4"):setClass("Satellite", "Relay"):setType("playership")
 template:setModel("SensorBuoyMKII")
-template:setRadarTrace("radartrace_smallstation.png")
+template:setRadarTrace("smallstation.png")
 template:setShields(20)
 template:setHull(20)
 template:setSpeed(0, 0, 0)
@@ -211,8 +211,8 @@ variation:setAutoRepair(true)
 -- Station
 --------------------------------------------------------------------------------
 
-template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2_fixedcol"):setType("playership")
-template:setRadarTrace("largestation.png")
+template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
+template:setRadarTrace("largestation_detail.png")
 template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
 
 template:setJumpDrive(true)

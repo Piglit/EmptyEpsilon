@@ -89,6 +89,10 @@ template:setTubeSize(2, "medium")
 template:setTubeLoadTime(2, 20)
 
 
+-- tiny spacecraft may dock
+template:setDockClasses(_("class", "Satellite"), _("class", "Shuttle"))
+
+
 -- FTL... ääh.... räume halt
 template:setRepairCrewCount(2) -- 3 crew -1 steuermann
 

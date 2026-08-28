@@ -314,6 +314,7 @@ model:setTexture("assemblyyard_diffuse.png")
 model:setIllumination("assemblyyard_Emissive.png")
 model:setSpecular("assemblyyard_spec.png")
 model:setScale(12*2)
+model:setCollisionBox(10.5 * 2 * 2*12, 6 * 2 * 2*12) -- a box fits better
 model:setRadius(130*2)
 model:addEngineEmitter(-10.86, 0, 0.69,  .21, .67, .40, 2.0)
 model:addBeamPosition(5.27, 0, -3.58)

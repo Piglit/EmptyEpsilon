@@ -216,7 +216,7 @@ template:addDoor(10,4, true)
 -- Smaller ships can dock to this platform to re-supply.
 template = ShipTemplate():setName("Defense platform"):setLocaleName(_("ship", "Defense platform")):setClass(_("class", "Corvette"), _("subclass", "Support")):setModel("space_station_4")
 template:setDescription(_([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]]))
-template:setRadarTrace("smallstation.png")
+template:setRadarTrace("smallstation_detail.png")
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 template:setSpeed(0, 0.5, 0)

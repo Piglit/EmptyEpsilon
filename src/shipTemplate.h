@@ -154,6 +154,8 @@ public:
     int weapon_storage[MW_Count];
 
     string radar_trace;
+    float radar_trace_scale; // this can be used to override the radius defined in the model for more accurate radar traces
+    float radar_trace_shield_scale; // this can be used to override the radius defined in the model for more accurate radar traces
     float long_range_radar_range;
     float short_range_radar_range;
     string impulse_sound_file;
@@ -228,7 +230,7 @@ public:
     void addRoom(glm::ivec2 position, glm::ivec2 size);
     void addRoomSystem(glm::ivec2 position, glm::ivec2 size, ESystem system);
     void addDoor(glm::ivec2 position, bool horizontal);
-    void setRadarTrace(string trace);
+    void setRadarTrace(string trace, std::optional<float> scale, std::optional<float> shield_scale);
     void setLongRangeRadarRange(float range);
     void setShortRangeRadarRange(float range);
     void setImpulseSoundFile(string sound);

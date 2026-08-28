@@ -790,7 +790,7 @@ comms_vf_station.info.status = CommsNode:new({
 --})
 
 comms_vf_station.info.gossip = CommsNode:new({
-	choice_line = "Gossip",
+	choice_line = _("Gossip"),
 	select_message = function(self, env)
 		if env.target.comms_data.gossip then
 			return table.concat(env.target.comms_data.gossip, "\n\n")
@@ -1118,6 +1118,13 @@ comms_vf_station.enemy.intimidate_confirm = CommsNodeServiceBuyable:new({
 			env.target.comms_data.orig_faction = env.target:getFaction()
 		end
 		env.target:setFaction("Independent")
+		if vf_bescheid ~= nil then
+			vf_bescheid:sag_bescheid("convertable_station", {
+				callsign_ship=env.source:getCallSign(),
+				callsign_station=env.target:getCallSign(),
+				sector=env.target:getSectorName(),
+			})
+		end
 	end,
 })
 :add_condition(ccc.enemy_faction)

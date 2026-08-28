@@ -495,6 +495,11 @@ for __, confirm in ipairs(comms_vf_station_management.change_faction.confirm_opt
 	:add_effect(function(self,env)
 		-- Change the station's faction to the Human Navy.
 		env.target:setFactionId(env.source:getFactionId())
+		if vf_bescheid ~= nil then
+			vf_bescheid:sag_bescheid("turned_independent_friendly", {
+				callsign_station=env.target:getCallSign(),
+			})
+		end
 		return true
 	end)
 	:add_check(function(self,env)

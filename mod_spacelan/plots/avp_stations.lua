@@ -52,7 +52,7 @@ function avp_stations:insertStation(station, terrain_module)
 	terrain_module:insertStation(station)
 	self:apply_comms_script(station, terrain_module)
 	if terrain_module.zone_name ~= "" then
-		station.called_zone_name = "called '" .. terrain_module.zone_name .. "' "
+		station.called_zone_name = _("called '") .. terrain_module.zone_name .. "' "
 	end
 	table.insert(self.stations, station)
 end

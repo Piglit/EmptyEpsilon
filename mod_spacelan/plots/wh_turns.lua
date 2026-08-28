@@ -15,7 +15,6 @@ lateGame:
 
 wh_turns = {}
 
--- TODO soft slow
 
 function wh_turns:init()
 	self.state = "interlude"	-- states: turn -> pause -> interlude

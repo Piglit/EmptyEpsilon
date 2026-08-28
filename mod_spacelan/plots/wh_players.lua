@@ -26,7 +26,9 @@ function wh_players:init()
 		["Maverick"]			= { strength = 45,	cargo = 5,	distance = 200,	probes = 9,},
 		["MP52 Hornet"] 		= { strength = 7, 	cargo = 1,	distance = 100,	probes = 5,},
 		["Nautilus"]			= { strength = 12,	cargo = 7,	distance = 200,	probes = 10,},
+		["Honeybadger"]			= { strength = 12,	cargo = 7,	distance = 200,	probes = 10,},
 		["Phobos M3P"]			= { strength = 19,	cargo = 10,	distance = 200,	probes = 6,},
+		["Kestrel"]				= { strength = 19,	cargo = 10,	distance = 200,	probes = 6,},
 		["Piranha M5P"]			= { strength = 16,	cargo = 8,	distance = 200,	probes = 6,},
 		["Player Cruiser"]		= { strength = 40,	cargo = 6,	distance = 400,	probes = 10,},
 		["Player Missile Cr."]	= { strength = 45,	cargo = 8,	distance = 200,	probes = 9,},
@@ -43,15 +45,14 @@ function wh_players:init()
 		["Pod"]					= { strength = 1,	cargo = 0,	distance = 100, probes = 0,},
 	}
 
-campaign:allowReinforcements(function (ship, instance, callsign)
-		--[[
-		if self.shipsByInstance[instance] == nil then
-			self:spawnedShipEnterSector(ship, callsign)
+	self.shipsByInstance = {}
+	campaign:allowReinforcements(function (ship, instance, callsign)
+		if wh_players.shipsByInstance[instance] == nil then
+			wh_players:spawnedShipEnterSector(ship, callsign)
+			wh_players.shipsByInstance[instance] = true
 		else
-			self:respawnedPlayerShip(ship)
+			wh_players:respawnedShipOnCommandStation(ship)
 		end
-		--]]
-		wh_players:spawnedShipOnCommandStation(ship)
 		sendMessageToCampaignServer("request_reputation", callsign)
 		sendMessageToCampaignServer("request_artifacts", callsign)
 	end)
@@ -63,39 +64,24 @@ end
 --	self:onProxySpawn("localhost", "TestSpawn", "Phobos M3P", "warp", "")
 --end
 
-function wh_players:spawnedShipOnCommandStation(ship)
+function wh_players:respawnedShipOnCommandStation(ship)
 	local station = getScriptStorage().wh_fleetcommand.station
 	if station ~= nil and station:isValid() then
 		local x,y = station:getPosition()
 		setCirclePos(ship, x,y, random(0,360), 500)
 		ship:commandDock(station)
-		--[[
 		for _,missile in ipairs(MISSILE_TYPES) do
 			ship:setWeaponStorage(missile, 0)
 		end
-		--]]
-	end
-end
-
---[[
-function wh_players:spawnedShipEnterSector(ship, callsign)
-	local angle = wh_wormhole.wormhole_a.angle
-	local ax, ay = vectorFromAngle(angle, -25000)	-- opposite side
-	ship:setPosition(wh_wormhole.a_center[1]+ax, wh_wormhole.a_center[2]+ay)
-	ship:setRotation(angle):commandTargetRotation(angle)
-end
-
-function wh_players:respawnedPlayerShip(ship)
-	local station = getScriptStorage().wh_fleetcommand.station
-	if station ~= nil and station:isValid() then
-		local x,y = station:getPosition()
-		setCirclePos(ship, x,y, random(0,360), 500)
-		ship:commandDock(station)
 	else
 		self:spawnedShipEnterSector(ship)
 	end
 end
---]]
+
+function wh_players:spawnedShipEnterSector(ship, callsign)
+	ship:setPosition(-90000, -50000)
+	ship:setRotation(0):commandTargetRotation(0)
+end
 
 function wh_players:onNewPlayerShip(p)
 	self:updatePlayerSoftTemplate(p)
@@ -124,6 +110,13 @@ function wh_players:updatePlayerSoftTemplate(p)
 			addGMMessage(string.format("Player ship %s's template type (%s) could not be found in table PlayerShipStats",p:getCallSign(),tempTypeName))
 		end
 	end
+	-- TODO test:
+	--if p:isFighter() then
+	--	ship:commandLoadTube(0, "laser_green")
+	--	ship:commandLoadTube(1, "laser_green")
+	--	ship:setSystemPowerFactor("reactor", -10)
+	--	ship:setRepairCrewCount(0)
+	--end
 	p.maxRepairCrew = p:getRepairCrewCount()
 	p.healthyShield = 1.0
 	p.prevShield = 1.0

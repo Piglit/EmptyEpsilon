@@ -48,6 +48,9 @@ function TerrainModule:new(obj)
 	--if obj.terrain_type ~= nil then
 	--	log("new "..obj.terrain_type)
 	--end
+	if obj.terrain_type ~= nil then
+		obj.terrain_type_localised = _(obj.terrain_type)
+	end
 	return obj
 end
 
@@ -299,6 +302,14 @@ TerrainModuleWormHoles = TerrainModule:new{terrain_type="wormholes", all_wormhol
 TerrainModuleMeta = TerrainModule:new{terrain_type="meta"}
 TerrainModuleMetaSpiral = TerrainModuleMeta:new{}
 
+-- locale:
+_("asteroids")
+_("nebulae")
+_("mines")
+_("planets")
+_("blackholes")
+_("wormholes")
+
 function TerrainModuleMeta:placeZone()
 	-- do not create a zone for the meta modules
 	return self
@@ -399,10 +410,12 @@ function TerrainModuleAsteroids:canInsertArtifact()
 	return true
 end
 
-function TerrainModuleAsteroids:insertArtifact()
+function TerrainModuleAsteroids:insertArtifact(callback)
+	local artifact_name = _("High value asteroid")
+	local artifact_info = _("This asteroid contains rare materials an should be captured.")
 	local dist = self.radius / (self.rings_amount + 1)
 	local x,y = radialPosition(self.x, self.y, dist, self.rotation+90)
-	art = wh_artifacts:placeGenericArtifact(x,y)	-- TODO: more specific description, high level asteroid?
+	local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 	if TEST == false then
 		art:setRadarTraceColor(255, 200, 100)	-- camoflage
 	end

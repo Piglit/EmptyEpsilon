@@ -240,7 +240,7 @@ ServerScenarioSelectionScreen::ServerScenarioSelectionScreen()
             // Destroy this screen and move on to ship selection.
             destroy();
             if (gameGlobalInfo->campaign_running) {
-                new MissionControlScreen(getRenderLayer());
+                new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
             } else {
                 returnToShipSelection(getRenderLayer());
             }
@@ -414,7 +414,7 @@ ServerCampaignScreen::ServerCampaignScreen()
 
                 // Destroy this screen and move on to control screen 
                 destroy();
-                new MissionControlScreen(getRenderLayer());
+                new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
             }
             else
             {
@@ -517,6 +517,19 @@ void ServerCampaignScreen::loadCampaign()
         score[key] = value;
     }
 }
+/*
+void ServerCampaignScreen::update()
+{
+    nlohmann::json campaign = campaign_client->getCampaign();
+	if (campaign["scenarios"].size() != scenario_list->size())
+	{
+		// TODO
+	}
+	// same with proxies
+	// what about selection index?
+	// what about adding one but removing another scenario?
+}
+*/
 
 void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
 {
@@ -662,7 +675,7 @@ ServerScenarioOptionsScreen::ServerScenarioOptionsScreen(string filename)
         destroy();
 
         if (gameGlobalInfo->campaign_running) {
-            new MissionControlScreen(getRenderLayer());
+			new MissionControlScreen(getRenderLayer(), glm::vec2(info.spawn_x, info.spawn_y), info.spawn_rot);
         } else {
             returnToShipSelection(getRenderLayer());
         }

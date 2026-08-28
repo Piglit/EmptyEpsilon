@@ -12,8 +12,8 @@ model:addTubePosition(5.8, -5.06, 0)
 model:addTubePosition(5.8, 5.06, 0)
 model:addTubePosition(-18.53,  0, 3.1) -- will be dropped at the plane anyway
 
-model:addBeamPosition(17.67, 3.9, 2.88)
 model:addBeamPosition(17.67, -3.9, 2.88)
+model:addBeamPosition(17.67, 3.9, 2.88)
 
 model:addEngineEmitter(-17.25, 10.8, 1.33,  1.0, 0.85, 0.13, 3.0)
 model:addEngineEmitter(-17.25, 8.23, 1.33,  1.0, 0.85, 0.13, 3.0)

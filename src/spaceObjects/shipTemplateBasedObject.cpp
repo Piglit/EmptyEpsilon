@@ -266,6 +266,8 @@ ShipTemplateBasedObject::ShipTemplateBasedObject(float collision_range, string m
         registerMemberReplication(&shield_hit_effect[n], 0.5);
     }
     registerMemberReplication(&radar_trace);
+    registerMemberReplication(&radar_trace_scale);
+    registerMemberReplication(&radar_trace_shield_scale);
     registerMemberReplication(&impulse_sound_file);
     registerMemberReplication(&hull_strength, 0.5);
     registerMemberReplication(&hull_max);
@@ -553,6 +555,8 @@ void ShipTemplateBasedObject::setTemplate(string template_name)
     short_range_radar_range = ship_template->short_range_radar_range;
 
     radar_trace = ship_template->radar_trace;
+    radar_trace_scale = ship_template->radar_trace_scale;
+    radar_trace_shield_scale = ship_template->radar_trace_shield_scale;
     impulse_sound_file = ship_template->impulse_sound_file;
 
     shares_energy_with_docked = ship_template->shares_energy_with_docked;

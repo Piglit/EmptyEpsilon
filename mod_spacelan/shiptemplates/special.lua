@@ -235,7 +235,7 @@ template:setRestocksScanProbes(true)
 template:setRepairDocked(true)
 template:setExternalDockClasses(_("class", "Frigate"), _("class", "Corvette"), _("class", "Prototype"))
 template:setInternalDockClasses(_("class", "Starfighter"))
-template:setSpawnShips("MP52 Hornet", "ZX-Lindworm", "Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon","Kestrel")
+template:setSpawnShips("MP52 Hornet", "ZX-Lindworm", "Adder MK7","Phobos M3P","Hathcock","Piranha M5P","Nautilus","Atlantis","Crucible","Maverick","Poseidon","Kestrel","Honeybadger")
 template:setPlayerShipType("station")
 addSystemsStation(template)
 

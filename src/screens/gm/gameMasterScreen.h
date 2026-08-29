@@ -71,6 +71,7 @@ private:
     } click_and_drag_state;
     glm::vec2 drag_start_position{};
     glm::vec2 drag_previous_position{};
+    bool was_proper_drag{};
 
     GuiButton* create_button;
     GuiButton* cancel_action_button;

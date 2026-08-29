@@ -219,7 +219,7 @@ template:setJumpDrive(true)
 template:setEnergyStorage(5000)
 template:setTubes(4, 6.0)
 template:setWeaponStorage("Homing", 40)
-for n=0,4 do
+for n=0,3 do -- lua is strange, this is 4 iterations now
     template:setBeamWeapon(n, 90,  n * 90, 2200, 6, 5)
     template:setTubeDirection(n, n * 90)
     template:setTubeSize(n, "large")

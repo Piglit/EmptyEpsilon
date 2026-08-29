@@ -219,7 +219,8 @@ template:setJumpDrive(true)
 template:setEnergyStorage(5000)
 template:setTubes(4, 6.0)
 template:setWeaponStorage("Homing", 40)
-for n=0,3 do -- lua is strange, this is 4 iterations now
+for n=0,4 do
+    -- This generates 5 sections, with 2 of them overlapping. This is by design, giving the station a "strong side".
     template:setBeamWeapon(n, 90,  n * 90, 2200, 6, 5)
     template:setTubeDirection(n, n * 90)
     template:setTubeSize(n, "large")

@@ -31,7 +31,7 @@ SlidingTilePuzzle::SlidingTilePuzzle(GuiPanel* owner, GuiHackingDialog* parent, 
 void SlidingTilePuzzle::disable()
 {
 	MiniGame::disable();
-	for (int i = 0; i < board.size(); i++)
+	for (size_t i = 0; i < board.size(); i++)
 	{
 		auto item = getFieldItem(i);
 		item->disable();
@@ -180,7 +180,8 @@ void SlidingTilePuzzle::onFieldClick(int index)
 
 	// move into a free neighbour
 	auto coords = tryGetCoords(index).value();
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		auto neighbour_coords = coords;
 		moveCoords(&neighbour_coords, i);
 		auto neighbour_idx = tryGetIndex(neighbour_coords);

@@ -914,7 +914,7 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
         auto show_levels = !my_spaceship || getScannedStateFor(my_spaceship) >= SS_SimpleScan;
 
         // this /32.0f is pure magic, and is fed into a mess of a formula. oh well. as long as it looks ok... :)
-        drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale / 32.0f, show_levels);
+        drawShieldsOnRadar(renderer, position, scale, rotation, shield_scale / 32.0f, show_levels);
     }
 
     // Set up the radar sprite for objects.

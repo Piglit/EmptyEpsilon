@@ -56,7 +56,7 @@ void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, f
         float shield_scale = radar_trace_shield_scale <= 0 ? sprite_scale : radar_trace_shield_scale;
 
         // this /32.0f is pure magic, and is fed into a mess of a formula. oh well. as long as it looks ok... :)
-        drawShieldsOnRadar(renderer, position, scale, rotation, sprite_scale / 32.0f, true);
+        drawShieldsOnRadar(renderer, position, scale, rotation, shield_scale / 32.0f, true);
     }
     //sprite_scale = std::max(0.15f * 32.0f, sprite_scale);
     glm::u8vec4 color{255,255,255,255};

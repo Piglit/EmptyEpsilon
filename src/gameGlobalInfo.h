@@ -32,6 +32,7 @@ enum EHackingGames
 {
     HG_Mine,
     HG_Lights,
+    HG_SlidingTilePuzzle,
     HG_All
 };
 

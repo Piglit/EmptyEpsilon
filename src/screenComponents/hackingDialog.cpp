@@ -6,6 +6,7 @@
 #include "spaceObjects/playerSpaceship.h"
 #include "mineSweeper.h"
 #include "lightsOut.h"
+#include "newMinigames/slidingTilePuzzle.h"
 #include "miniGame.h"
 #include <memory>
 #include <algorithm>
@@ -145,9 +146,17 @@ void GuiHackingDialog::onMiniGameComplete(bool success)
 void GuiHackingDialog::getNewGame() {
     int difficulty = 2;
     EHackingGames games = HG_All;
-    if (gameGlobalInfo) {
+    if (gameGlobalInfo)
+    {
       difficulty = gameGlobalInfo->hacking_difficulty;
       games = gameGlobalInfo->hacking_games;
+    }
+
+    //games = HG_SlidingTilePuzzle; // TODO: Remove me
+
+    if (games <= 0 || games >= HG_All)
+    {
+        games = static_cast<EHackingGames>(irandom(0, HG_All - 1));
     }
 
     switch (games)
@@ -158,8 +167,12 @@ void GuiHackingDialog::getNewGame() {
     case HG_Mine:
       game = std::make_shared<MineSweeper>(minigame_box, this, difficulty);
       break;
+    case HG_SlidingTilePuzzle:
+      game = std::make_shared<SlidingTilePuzzle>(minigame_box, this, difficulty);
+      break;
     default:
-      irandom(0,1) ? game = std::make_shared<LightsOut>(minigame_box, this, difficulty) : game = std::make_shared<MineSweeper>(minigame_box, this, difficulty);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Could not find minigame", nullptr);
+        exit(1);
     }
     glm::vec2 board_size = game->getBoardSize();
 

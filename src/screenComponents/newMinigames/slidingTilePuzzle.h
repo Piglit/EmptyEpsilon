@@ -1,5 +1,5 @@
-/** An implementation of mineSweeper for use as a hacking minigame.
- *  Original implementation by https://github.com/daid
+/** 
+* Sliding Puzzle minigame by AyCe
  */
 
 #ifndef SLIDINGTILEPUZZLE_H

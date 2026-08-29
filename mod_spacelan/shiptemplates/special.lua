@@ -213,6 +213,7 @@ variation:setAutoRepair(true)
 
 template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
 template:setRadarTrace("largestation_detail.png")
+template:setRadarTraceLongRangeScale(LONG_RANGE_SCALE_LARGE_STATION)
 template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
 
 template:setJumpDrive(true)

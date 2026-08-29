@@ -11,10 +11,6 @@
 #include "spaceshipParts/weaponTube.h"
 #include "tween.h"
 
-static const float SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE = 22.4f;
-static const float RADIUS_MULTIPLIER_STATION = 1.5f;
-static const float RADIUS_MULTIPLIER_SHIP = 3.0f;
-
 enum EMainScreenSetting
 {
     MSS_Front = 0,

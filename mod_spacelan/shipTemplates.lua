@@ -12,6 +12,10 @@ These are:
 
 Player ships are in general large frigates to small corvette class
 --]]
+
+LONG_RANGE_SCALE_SMALL_STATION = 0.6
+LONG_RANGE_SCALE_LARGE_STATION = 1.25
+
 require("shiptemplates/stations.lua")
 require("shiptemplates/transport.lua")
 require("shiptemplates/player.lua")

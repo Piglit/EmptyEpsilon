@@ -7,6 +7,7 @@ template:setDescription(_([[Stations of this size are often used as research out
 template:setHull(150)
 template:setShields(300)
 template:setRadarTrace("smallstation_detail.png")
+template:setRadarTraceLongRangeScale(LONG_RANGE_SCALE_SMALL_STATION)
 
 template = ShipTemplate():setName("Medium Station"):setLocaleName(_("Medium Station")):setModel("space_station_3"):setType("station")
 template:setDescription(_([[Large enough to accommodate small crews for extended periods of times, stations of this size are often trading posts, refuelling bases, mining operations, and forward military bases. While their shields are strong, concerted attacks by many ships can bring them down quickly.]]))
@@ -19,9 +20,11 @@ template:setDescription(_([[These spaceborne communities often represent permane
 template:setHull(500)
 template:setShields(1000, 1000, 1000)
 template:setRadarTrace("largestation_detail.png")
+template:setRadarTraceLongRangeScale(LONG_RANGE_SCALE_LARGE_STATION)
 
 template = ShipTemplate():setName("Huge Station"):setLocaleName(_("Huge Station")):setModel("space_station_1"):setType("station")
 template:setDescription(_([[The size of a sprawling town, stations at this scale represent a faction's center of spaceborne power in a region. They serve many functions at once and represent an extensive investment of time, money, and labor. A huge station's shields and thick hull can keep it intact long enough for reinforcements to arrive, even when faced with an ongoing siege or massive, perfectly coordinated assault.]]))
 template:setHull(800)
 template:setShields(1200, 1200, 1200, 1200)
 template:setRadarTrace("hugestation_detail.png")
+template:setRadarTraceLongRangeScale(1.4)

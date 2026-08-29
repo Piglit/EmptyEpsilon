@@ -47,7 +47,7 @@ void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, f
     if (long_range)
     {
         // in long range mode, we can't get smaller than a certain size
-        sprite_scale = std::max(sprite_scale, SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE);
+        sprite_scale = std::max(sprite_scale, getLongRangeRadarTraceScale());
     }
     else
     {

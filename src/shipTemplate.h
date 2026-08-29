@@ -156,6 +156,7 @@ public:
     string radar_trace;
     float radar_trace_scale; // this can be used to override the radius defined in the model for more accurate radar traces
     float radar_trace_shield_scale; // this can be used to override the radius defined in the model for more accurate radar traces
+    float radar_trace_long_range_scale; // this is a multiplier for the minimum size that this object's radar trace is shown at in the long range radar. some radar traces might make an object look deceptively small.
     float long_range_radar_range;
     float short_range_radar_range;
     string impulse_sound_file;
@@ -230,7 +231,8 @@ public:
     void addRoom(glm::ivec2 position, glm::ivec2 size);
     void addRoomSystem(glm::ivec2 position, glm::ivec2 size, ESystem system);
     void addDoor(glm::ivec2 position, bool horizontal);
-    void setRadarTrace(string trace, std::optional<float> scale, std::optional<float> shield_scale);
+    void setRadarTrace(string trace, std::optional<float> scale, std::optional<float> shield_scale, std::optional<float> long_range_scale);
+    void setRadarTraceLongRangeScale(float long_range_scale);
     void setLongRangeRadarRange(float range);
     void setShortRangeRadarRange(float range);
     void setImpulseSoundFile(string sound);

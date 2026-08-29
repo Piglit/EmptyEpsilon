@@ -899,8 +899,7 @@ void SpaceShip::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, floa
     // --- when the real size of the icon would be larger than the constant size, use the real size (so large objects still look large in long range mode)
 
     // if the ship is actually a mobile station, apply station scaling
-    auto is_station = player_ship_type == EPlayerShipType::PST_Station || ship_template->getType() == ShipTemplate::TemplateType::Station;
-    float sprite_scale = scale * getRadarTraceScale(is_station ? RADIUS_MULTIPLIER_STATION : RADIUS_MULTIPLIER_SHIP);
+    float sprite_scale = scale * getRadarTraceScale();
 
     if (long_range)
     {

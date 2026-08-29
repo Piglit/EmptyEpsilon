@@ -6,8 +6,7 @@
 #include "shipTemplate.h"
 
 static const float SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE = 22.4f;
-static const float RADIUS_MULTIPLIER_STATION = 1.5f;
-static const float RADIUS_MULTIPLIER_SHIP = 3.0f;
+static const float SHIP_OR_STATION_RADIUS_MULTIPLIER = 3.0f;
 
 class SpaceShip;
 
@@ -113,12 +112,12 @@ public:
     void setLongRangeRadarRange(float range) { range = std::max(range, 100.0f); long_range_radar_range = range; short_range_radar_range = std::min(short_range_radar_range, range); }
     void setShortRangeRadarRange(float range) { range = std::max(range, 100.0f); short_range_radar_range = range; long_range_radar_range = std::max(long_range_radar_range, range); }
 
-    float getRadarTraceScale(float radius_multiplier)
+    float getRadarTraceScale()
     {
         if (radar_trace_scale > 0) {
             return radar_trace_scale;
         }
-        return this->getRadius() * radius_multiplier;
+        return this->getRadius() * SHIP_OR_STATION_RADIUS_MULTIPLIER;
     }
     float getLongRangeRadarTraceScale()
     {

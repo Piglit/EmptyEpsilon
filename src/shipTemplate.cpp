@@ -256,7 +256,7 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// Radar trace images should be white with a transparent background.
     /// Defaults to ship.png. ShipTemplate:setType("station") sets this to blip.png.
     /// Additional optional arguments:
-    /// - float scale: Normally, the trace scale is radius*RADIUS_MULTIPLIER. The multiplier is 1.5 for stations and 3.0 for ships. This parameter allows you to override this and define an explicit size.
+    /// - float scale: Normally, the trace scale is radius*RADIUS_MULTIPLIER. The multiplier is 1.5 for stations and 3.0 for ships. This parameter allows you to override this and define an explicit scale for the radar trace without taking radius into account.
     /// - float shield_scale: Similarly, the distance of the shield to the center of the object is the above as well, unless you override it. This parameter allows you to override the actual size/distance of the rendered shields. Useful when the radar trace sprite is larger than the "real" radius of your ship.
     /// - float long_range_scale: All spaceships and stations are shown with a minimum size on the long range radar. For some sprites, this makes them look too small or too big, as they might use their space less or more efficiently. This parameter allows you to define an additional scaling factor to raise the minimum size on the long range radar to compensate for this.
     /// Example: template:setRadarTrace("cruiser.png")
@@ -376,7 +376,6 @@ ShipTemplate::ShipTemplate()
     radar_trace_long_range_scale = 1;
     impulse_sound_file = "sfx/engine.wav";
     default_ai_name = "default";
-
 }
 
 void ShipTemplate::setBeamTexture(int index, string texture)
@@ -447,12 +446,8 @@ void ShipTemplate::setType(TemplateType type)
     {
         repair_docked = true;
 
-
-        // This feature would be cool, but right now the Arlenian ships all have misaligned radar traces.
-        // Right now, we fall back to using ship radar traces for the mobile stations - sucks, but at least the beam arcs are more accurate.
-        
         // this causes mobile variants of stations to be correctly recognized as stations by some code
-        //player_ship_type = EPlayerShipType::PST_Station;
+        player_ship_type = EPlayerShipType::PST_Station;
     }
     this->type = type;
 }

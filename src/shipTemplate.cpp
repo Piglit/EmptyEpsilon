@@ -255,8 +255,17 @@ REGISTER_SCRIPT_CLASS(ShipTemplate)
     /// Valid values are filenames of PNG images relative to the resources/radar/ directory.
     /// Radar trace images should be white with a transparent background.
     /// Defaults to ship.png. ShipTemplate:setType("station") sets this to blip.png.
+    /// Additional optional arguments:
+    /// - float scale: Normally, the trace scale is radius*RADIUS_MULTIPLIER. The multiplier is 1.5 for stations and 3.0 for ships. This parameter allows you to override this and define an explicit scale for the radar trace without taking radius into account.
+    /// - float shield_scale: Similarly, the distance of the shield to the center of the object is the above as well, unless you override it. This parameter allows you to override the actual size/distance of the rendered shields. Useful when the radar trace sprite is larger than the "real" radius of your ship.
+    /// - float long_range_scale: All spaceships and stations are shown with a minimum size on the long range radar. For some sprites, this makes them look too small or too big, as they might use their space less or more efficiently. This parameter allows you to define an additional scaling factor to raise the minimum size on the long range radar to compensate for this.
     /// Example: template:setRadarTrace("cruiser.png")
     REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRadarTrace);
+    /// Sets the scaling factor that is used to determine the minimum size of the radar trace on the long range radar.
+    /// This allows you to size the radar image up/down, depending on the type of object.
+    /// In close range radar, size is always dependent on the real size of the object or the optional values for setRadarTrace (scale and shield_scale).
+    /// Example: template:setRadarTraceLongRangeScale(2.0)
+    REGISTER_SCRIPT_CLASS_FUNCTION(ShipTemplate, setRadarTraceLongRangeScale);
     /// Sets the long-range radar range of SpaceShips created from this ShipTemplate.
     /// PlayerSpaceships use this range on the science and operations screens' radar.
     /// AI orders of CpuShips use this range to detect potential targets.
@@ -362,9 +371,11 @@ ShipTemplate::ShipTemplate()
     long_range_radar_range = 30000.0f;
     short_range_radar_range = 5000.0f;
     radar_trace = "radar/ship.png";
+    radar_trace_scale = 0;
+    radar_trace_shield_scale = 0;
+    radar_trace_long_range_scale = 1;
     impulse_sound_file = "sfx/engine.wav";
     default_ai_name = "default";
-
 }
 
 void ShipTemplate::setBeamTexture(int index, string texture)
@@ -432,7 +443,12 @@ void ShipTemplate::setType(TemplateType type)
         radar_trace = "radar/blip.png";
     }
     if (type == Station)
+    {
         repair_docked = true;
+
+        // this causes mobile variants of stations to be correctly recognized as stations by some code
+        player_ship_type = EPlayerShipType::PST_Station;
+    }
     this->type = type;
 }
 
@@ -713,9 +729,17 @@ void ShipTemplate::addDoor(glm::ivec2 position, bool horizontal)
     doors.push_back(ShipDoorTemplate(position, horizontal));
 }
 
-void ShipTemplate::setRadarTrace(string trace)
+void ShipTemplate::setRadarTrace(string trace, std::optional<float> scale, std::optional<float> shield_scale, std::optional<float> long_range_scale)
 {
     radar_trace = "radar/" + trace;
+    radar_trace_scale = scale.value_or(0);
+    radar_trace_shield_scale = shield_scale.value_or(0);
+    radar_trace_long_range_scale = long_range_scale.value_or(1);
+}
+
+void ShipTemplate::setRadarTraceLongRangeScale(float long_range_scale)
+{
+    radar_trace_long_range_scale = long_range_scale;
 }
 
 void ShipTemplate::setLongRangeRadarRange(float range)
@@ -789,6 +813,9 @@ P<ShipTemplate> ShipTemplate::copy(string new_name)
     for(int n=0; n<MW_Count; n++)
         result->weapon_storage[n] = weapon_storage[n];
     result->radar_trace = radar_trace;
+    result->radar_trace_scale = radar_trace_scale;
+    result->radar_trace_shield_scale = radar_trace_shield_scale;
+    result->radar_trace_long_range_scale = radar_trace_long_range_scale;
     result->long_range_radar_range = long_range_radar_range;
     result->short_range_radar_range = short_range_radar_range;
     result->impulse_sound_file = impulse_sound_file;

@@ -645,10 +645,12 @@ template:setRestocksScanProbes(true)
 -- The weapons-platform is a stationary platform with beam-weapons. It's extremely slow to turn, but it's beam weapons do a huge amount of damage.
 -- Smaller ships can dock to this platform to re-supply.
 template = ShipTemplate():setName("Defense platform"):setLocaleName(_("Defense platform"))
+template:setPlayerShipType("station") -- so it's correctly detected as a station by some code
 template:setClass(_("Corvette"), _("Support"))
 template:setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
 template:setRadarTrace("smallstation_detail.png")
+template:setRadarTraceLongRangeScale(LONG_RANGE_SCALE_SMALL_STATION)
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 --Reputation Score: 87

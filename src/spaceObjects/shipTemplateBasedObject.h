@@ -5,6 +5,10 @@
 #include "spaceObject.h"
 #include "shipTemplate.h"
 
+static const float SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE = 22.4f;
+static const float RADIUS_MULTIPLIER_STATION = 1.5f;
+static const float RADIUS_MULTIPLIER_SHIP = 3.0f;
+
 class SpaceShip;
 
 /**
@@ -26,6 +30,7 @@ public:
     string radar_trace;
     float radar_trace_scale; // this can be used to override the radius defined in the model for more accurate radar traces
     float radar_trace_shield_scale; // this can be used to override the radius defined in the model for more accurate radar traces
+    float radar_trace_long_range_scale; // this is a multiplier for the minimum size that this object's radar trace is shown at in the long range radar. some radar traces might make an object look deceptively small.
     string impulse_sound_file;
     P<ShipTemplate> ship_template;
 
@@ -114,6 +119,10 @@ public:
             return radar_trace_scale;
         }
         return this->getRadius() * radius_multiplier;
+    }
+    float getLongRangeRadarTraceScale()
+    {
+        return SHIP_OR_STATION_LONG_RANGE_MIN_RADAR_SIZE * radar_trace_long_range_scale;
     }
     void setRadarTrace(string trace) { radar_trace = "radar/" + trace; }
     void setImpulseSoundFile(string sound) { impulse_sound_file = sound; }

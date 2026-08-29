@@ -457,12 +457,16 @@ void GameMasterScreen::onMouseDown(sp::io::Pointer::Button button, glm::vec2 pos
             for(P<SpaceObject> obj : targets.getTargets())
             {
                 if (glm::length(obj->getPosition() - position) < std::max(min_drag_distance, obj->getRadius()))
+                {
                     click_and_drag_state = CD_DragObjects;
+                    break;
+                }
             }
         }
     }
     drag_start_position = position;
     drag_previous_position = position;
+    was_proper_drag = false;
 }
 
 void GameMasterScreen::onMouseDrag(glm::vec2 position)
@@ -495,11 +499,25 @@ void GameMasterScreen::onMouseDrag(glm::vec2 position)
     default:
         break;
     }
-    drag_previous_position = position;
+
+    if (drag_previous_position != position)
+    {
+        drag_previous_position = position;
+        was_proper_drag = true;
+    }
 }
 
 void GameMasterScreen::onMouseUp(glm::vec2 position)
 {
+    // if our "drag" is actually just a click, only select one of the objects (cycle through all eligible ones)
+    auto was_just_click = !was_proper_drag && drag_start_position == position;
+
+    if (click_and_drag_state == CD_DragObjects && was_just_click)
+    {
+        // We're just clicking! The user probably wants to cycle through objects below the cursor!
+        click_and_drag_state = CD_BoxSelect;
+    }
+
     switch(click_and_drag_state)
     {
     case CD_DragViewOrOrder:
@@ -571,6 +589,7 @@ void GameMasterScreen::onMouseUp(glm::vec2 position)
             bool shift_down = SDL_GetModState() & KMOD_SHIFT;
             bool ctrl_down = SDL_GetModState() & KMOD_CTRL;
             bool alt_down = SDL_GetModState() & KMOD_ALT;
+
             PVector<Collisionable> objects = CollisionManager::queryArea(drag_start_position, position);
             PVector<SpaceObject> space_objects;
             foreach(Collisionable, c, objects)
@@ -583,13 +602,77 @@ void GameMasterScreen::onMouseUp(glm::vec2 position)
                     continue;
                 space_objects.push_back(c);
             }
-            if (shift_down)
+
+            // Single object selection or cycling
+            if (was_just_click)
             {
+                // If we already have selected objects in the list, prefer the first unselected one coming after a selected one (so we can cycle through).
+                // Otherwise fall back to the first unselected object.
+                // If we don't have an unselected object, deselect it instead.
+                P<SpaceObject> first_unselected_object {};
+                P<SpaceObject> found_object {};
+                auto existing_targets = targets.getTargets();
+
+                // If we hold shift we want to add to selection. In this case, or the case where nothing is selected yet, prefer the first element (that isn't in the current list).
+                auto next_object_would_be_ideal = shift_down || existing_targets.empty();
+
+                foreach(SpaceObject, s, space_objects)
+                {
+                    auto already_in_targets = false;
+                    foreach(SpaceObject, target, existing_targets)
+                    {
+                        if (*target == *s)
+                        {
+                            already_in_targets = true;
+                            break;
+                        }
+                    }
+                    if (already_in_targets)
+                    {
+                        next_object_would_be_ideal = true;
+                    }
+                    else
+                    {
+                        if (!first_unselected_object)
+                        {
+                            first_unselected_object = s;
+                        }
+                        if (next_object_would_be_ideal)
+                        {
+                            found_object = s;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found_object)
+                {
+                    // use the first object, if found
+                    found_object = first_unselected_object;
+                }
+
+                if (!shift_down)
+                {
+                    // replace selection
+                    targets.clear();
+                }
+                if (found_object)
+                {
+                    // there is one object!
+                    targets.add(found_object);
+                }
+            }
+            else if (shift_down)
+            {
+                // add to selection
                 foreach(SpaceObject, s, space_objects)
                 {
                     targets.add(s);
                 }
-            } else {
+            }
+            else
+            {
+                // replace selection
                 targets.set(space_objects);
             }
 

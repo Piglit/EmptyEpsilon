@@ -42,7 +42,7 @@ void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, f
     // - in long range mode, draw icons at a constant size, EXCEPT:
     // --- when the real size of the icon would be larger than the constant size, use the real size (so large objects still look large in long range mode)
 
-    float sprite_scale = scale * getRadarTraceScale(RADIUS_MULTIPLIER_STATION);
+    float sprite_scale = scale * getRadarTraceScale();
 
     if (long_range)
     {

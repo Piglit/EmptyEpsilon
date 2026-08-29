@@ -50,20 +50,19 @@ function campaign:victoryScore(progress)
 end
 
 function campaign:placeArtifact(x,y,name,descr,callback)
-	-- only first call causes artifact, further calls are ignored
 	if self.artifacts_init == false then
 		self.artifacts_init = true
 		wh_artifacts:init()
-		local art = wh_artifacts:placeDetailedArtifact(x,y,name,descr,function(art, pl, collected)
-			sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr})
-			sendMessageToCampaignServer("score", toJSON({artifacts = collected}))
-			if callback ~= nil then
-				callback(art, pl, collected)
-			end
-		end)
-		art:setScanningParameters(3, 1)	-- reduced difficulty for single ship campaign missions
-		return art
 	end
+	local art = wh_artifacts:placeDetailedArtifact(x,y,name,descr,function(art, pl, collected)
+		sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr})
+		sendMessageToCampaignServer("score", toJSON({artifacts = collected}))
+		if callback ~= nil then
+			callback(art, pl, collected)
+		end
+	end)
+	art:setScanningParameters(3, 1)	-- reduced difficulty for single ship campaign missions
+	return art
 end
 
 function campaign:progressEnemyCount(enemyList, clean_up_list_in_place, on_change)

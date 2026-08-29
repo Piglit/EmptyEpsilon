@@ -416,10 +416,11 @@ function TerrainModuleAsteroids:insertArtifact(callback)
 	local dist = self.radius / (self.rings_amount + 1)
 	local x,y = radialPosition(self.x, self.y, dist, self.rotation+90)
 	local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
-	if TEST == false then
-		art:setRadarTraceColor(255, 200, 100)	-- camoflage
+	if not TEST then
+		art:setRadarTraceColor(255, 220, 80)	-- camoflage. Ast: 255, 200, 100
 	end
 	art:setCallSign("")
+	return art
 end
 
 function TerrainModuleAsteroids:canInsertEnemies()
@@ -506,7 +507,7 @@ end
 
 function TerrainModuleMines:insertArtifact()
 	-- if no station is placed
-	wh_artifacts:placeGenericArtifact(self.x,self.y)
+	return wh_artifacts:placeGenericArtifact(self.x,self.y)
 end
 
 function TerrainModuleMines:getEnemySpawnPositions()
@@ -579,6 +580,7 @@ end
 function TerrainModulePlanets:insertArtifact()
 	local art = wh_artifacts:placeGenericArtifact(0,0)	-- TODO: more specific description
 	self:insertOrbitingObject(art)
+	return art
 end
 function TerrainModulePlanets:insertOrbitingObject(obj)
 	if #self.moons > 0 then
@@ -600,10 +602,16 @@ function TerrainModulePlanets:insertOrbitingObject(obj)
 			-- self.radius/4 + orbit_dist/#self.moons + (orbit_dist - orbit_dist / #self.moons) /2
 			dist = self.radius/4 + orbit_dist * (1/#self.moons + (1 - 1 / #self.moons) /2)
 		end							   
-		local x,y = radialPosition(self.x, self.y, dist, linked_moon.arc)
+		local angle = linked_moon.arc
+		if linked_moon.angle ~= nil then
+			angle = linked_moon.angle
+		end
+		local x,y = radialPosition(self.x, self.y, dist, angle)
 		obj:setPosition(x,y)
 		wh_rota:add_object(obj, 360/linked_moon.orbit_time, self.x, self.y)
 	else
+		local x,y = radialPosition(self.x, self.y, self.radius/2, 0)
+		obj:setPosition(x,y)
 		wh_rota:add_object(obj, 0.5, self.x, self.y)
 	end
 end
@@ -657,10 +665,11 @@ function TerrainModuleBlackHoles:insertArtifact(callback)
 	local x,y,speed
 	local artifact_name = _("Black hole stabilizer")
 	local artifact_info = _("This Arlenian device was used to prevent the wormhole from collapsing.")
+	local art
 	if #self.holes == 1 then
 		x,y = radialPosition(self.x,self.y, 2*self.radius/5, self.rotation)
 		speed = 2
-		local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+		art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 		wh_rota:add_object(art, speed, self.x, self.y)
 		art.terrain_module = self
 		art.hole = self.holes[1]
@@ -675,13 +684,14 @@ function TerrainModuleBlackHoles:insertArtifact(callback)
 				rotation = rotation + idx*180/#self.holes
 			end
 			x,y = radialPosition(x,y, self.radius/5, rotation)--+idx*360/#self.holes)
-			local art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
+			art = wh_artifacts:placeDetailedArtifact(x,y, artifact_name, artifact_info, callback)
 			wh_rota:add_object(art, speed, bh)
 			art.hole = bh 
 			art.terrain_module = self
 			table.insert(self.artifacts, art)
 		end
 	end
+	return art
 end
 
 function TerrainModuleBlackHoles:getEnemySpawnPositions()

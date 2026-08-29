@@ -13,24 +13,38 @@ msgstr ""
 
 # Scenario name
 msgid "Specialist Training Course"
-msgstr ""
+msgstr "Spezialisten-Training"
 
 # Scenario description
-msgid "TODO\n"
-msgstr ""
-
-#: mod_spacelan/scenario_26_specialist_training.lua:241
-#, lua-format
-msgid "Artifact extracted from %s"
-msgstr ""
-
-#: mod_spacelan/scenario_26_specialist_training.lua:246
 msgid ""
-"Collecting this artifact fulfills the bonus objective of the specialist "
-"training mission."
+"Fight against different kinds of enemies, using the special powers of your "
+"ship."
 msgstr ""
+"Kämpft gegen verschiedene Gegnerarten, indem ihr sie Spezialausrüstung eures "
+"Schiffs verwendet."
 
-#: mod_spacelan/scenario_26_specialist_training.lua:345
+#: mod_spacelan/scenario_26_specialist_training.lua:245
+msgctxt "artifact"
+msgid "Orbital relict"
+msgstr "Orbitales Relikt"
+
+#: mod_spacelan/scenario_26_specialist_training.lua:245
+msgctxt "artifact"
+msgid "A relict from previous battles in the orbit of a planet."
+msgstr ""
+"Ein Relikt aus einer längst vergangenen Schlacht im Orbit eines Planeten."
+
+#: mod_spacelan/scenario_26_specialist_training.lua:257
+msgctxt "artifact"
+msgid "Nebulizer"
+msgstr "Neblisierer"
+
+#: mod_spacelan/scenario_26_specialist_training.lua:257
+msgctxt "artifact"
+msgid "A relict found in a nebular cloud."
+msgstr "Ein Relikt, gefunden in einer Nebelwolke."
+
+#: mod_spacelan/scenario_26_specialist_training.lua:362
 msgctxt "goal-incCall"
 msgid ""
 "This is Commander Saberhagen.\n"
@@ -58,7 +72,7 @@ msgstr ""
 "\n"
 "Commander Saberhagen out."
 
-#: mod_spacelan/scenario_26_specialist_training.lua:356
+#: mod_spacelan/scenario_26_specialist_training.lua:373
 #, lua-format
 msgctxt "goal-incCall"
 msgid ""
@@ -82,7 +96,7 @@ msgstr ""
 "\n"
 "Commander Saberhagen out."
 
-#: mod_spacelan/scenario_26_specialist_training.lua:365
+#: mod_spacelan/scenario_26_specialist_training.lua:382
 msgctxt "goal-incCall"
 msgid ""
 "This is Commander Saberhagen.\n"

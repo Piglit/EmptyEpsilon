@@ -46,11 +46,8 @@ function wh_artifacts:placeGenericArtifact(x,y,callback)
 	artifact:setScanningParameters(4, 1)
 
 	artifact.freq=freq
-	if freq < 595 then
-		artifact:setModel("debris-cubesat")
-	else
-		artifact:setModel("debris-blob")
-	end
+	artifact:setModel("artifact"..tostring(math.random(1,8)))
+	artifact:setRadarSignatureInfo(0.1, 0.5, 0.1)
 	artifact.callback = callback	-- can be nil
 	artifact:allowPickup(true)
 	artifact:setCallSign(callsign):setRadarTraceColor(96,128,255)

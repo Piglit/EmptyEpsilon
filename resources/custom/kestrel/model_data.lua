@@ -4,13 +4,17 @@ model:setMesh("custom/kestrel/kestrel_model.obj")
 model:setTexture("custom/kestrel/Kestrel_diffuse.png")
 model:setSpecular("custom/kestrel/Kestrel_roughness.png")
 model:setIllumination("custom/kestrel/Kestrel_emission.png")
-model:setScale(7/2)
-model:setRadius(40)
+model:setScale(5)
+model:setRadius(60)
+
+-- a box would work, but the gameplay is worse, as you can no longer slide across other colliders properly, making everything feel janky
+-- a pointed mesh would be best. one day... :)
+-- model:setCollisionBox(95 * 2, 29 * 2)
 
 -- Visual positions of the beams/missiletubes (blender: -X, Y, Z)
 model:addTubePosition(5.8, -5.06, 0)
 model:addTubePosition(5.8, 5.06, 0)
-model:addTubePosition(-18.53,  0, 3.1) -- will be dropped at the plane anyway
+model:addTubePosition(-18.53, 0, 3.1) -- will be dropped at the plane anyway
 
 model:addBeamPosition(17.67, -3.9, 2.88)
 model:addBeamPosition(17.67, 3.9, 2.88)

@@ -1546,7 +1546,7 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
             ESystem system;
             float request;
             packet >> system >> request;
-            if (system < SYS_COUNT && request >= 0.0f && request <= 3.0f)
+            if (system > SYS_None && system < SYS_COUNT && request >= 0.0f && request <= 3.0f)
                 systems[system].power_request = request;
         }
         break;
@@ -2273,7 +2273,7 @@ void PlayerSpaceship::onReceiveServerCommand(sp::io::DataBuffer& packet)
             string sound_name;
             packet >> position >> sound_name;
             // play the sound if it's for the main screen and we are the main screen or for a position and we are in that position
-            if ((position == max_crew_positions && my_player_info->main_screen) || (position < max_crew_positions && my_player_info->crew_position[position]))
+            if ((position == max_crew_positions && my_player_info->main_screen) || (position >= 0 && position < max_crew_positions && my_player_info->crew_position[position]))
             {
                 soundManager->playSound(sound_name);
             }

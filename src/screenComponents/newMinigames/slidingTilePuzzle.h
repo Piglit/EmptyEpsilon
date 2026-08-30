@@ -19,10 +19,18 @@ class SlidingTilePuzzle : public MiniGame {
     class TileData
     {
     public:
-        TileData(int index, bool is_free);
+        TileData(size_t terrain_index, bool is_free);
 
-        int index;
+        size_t terrain_index;
         bool is_free;
+    };
+    class TerrainInfo
+    {
+    public:
+        TerrainInfo(string sprite, float rotation);
+
+        string sprite;
+        float rotation;
     };
   protected:
     virtual void gameComplete() override;
@@ -30,6 +38,9 @@ class SlidingTilePuzzle : public MiniGame {
     void onFieldClick(int index);
     int width;
     int height;
+    std::vector<size_t> map;
+    std::vector<TerrainInfo> terrain;
+
     float progress;
     class FieldItem : public GuiToggleButton
     {

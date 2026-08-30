@@ -648,7 +648,7 @@ template = ShipTemplate():setName("Defense platform"):setLocaleName(_("Defense p
 template:setClass(_("Corvette"), _("Support"))
 template:setModel("space_station_4")
 template:setDescription([[This stationary defense platform operates like a station, with docking and resupply functions, but is armed with powerful beam weapons and can slowly rotate. Larger systems often use these platforms to resupply patrol ships.]])
-template:setRadarTrace("radartrace_smallstation.png")
+template:setRadarTrace("smallstation_detail.png")
 template:setHull(150)
 template:setShields(120, 120, 120, 120, 120, 120)
 --Reputation Score: 87

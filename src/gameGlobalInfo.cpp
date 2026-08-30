@@ -15,6 +15,7 @@
 #include <SDL_assert.h>
 #include "libmumblelink.h"
 #include "scenarioInfo.h"
+#include <set>
 
 P<GameGlobalInfo> gameGlobalInfo;
 
@@ -25,7 +26,11 @@ GameGlobalInfo::GameGlobalInfo()
     SDL_assert(!gameGlobalInfo);
 
     callsign_counter = 0;
+
     victory_faction = -1;
+    winner_reason = "";
+    loser_reason = "";
+
     gameGlobalInfo = this;
 
     for(int n=0; n<max_player_ships; n++)
@@ -55,6 +60,8 @@ GameGlobalInfo::GameGlobalInfo()
     registerMemberReplication(&global_message_timeout, 1.0);
     registerMemberReplication(&banner_string);
     registerMemberReplication(&victory_faction);
+    registerMemberReplication(&winner_reason);
+    registerMemberReplication(&loser_reason);
     registerMemberReplication(&use_beam_shield_frequencies);
     registerMemberReplication(&use_system_damage);
     registerMemberReplication(&allow_main_screen_tactical_radar);
@@ -226,7 +233,11 @@ void GameGlobalInfo::reset()
         reputation_points[n] = 0;
     elapsed_time = 0.0f;
     callsign_counter = 0;
+
     victory_faction = -1;
+    winner_reason = "";
+    loser_reason = "";
+
     allow_new_player_ships = true;
     global_message = "";
     global_message_timeout = 0.0f;
@@ -467,16 +478,42 @@ REGISTER_SCRIPT_FUNCTION(sectorToXY);
 static int victory(lua_State* L)
 {
     string faction = luaL_checkstring(L, 1);
-    gameGlobalInfo->setVictory(faction);
+
+    bool has_winner_reason = !lua_isnoneornil(L, 2);
+    bool has_loser_reason = !lua_isnoneornil(L, 3);
+
+    string winner_reason = has_winner_reason
+        ? luaL_checkstring(L, 2)
+        : "Mission accomplished!"; // TODO: Translate
+
+    string loser_reason = has_loser_reason
+        ? luaL_checkstring(L, 3)
+        : has_winner_reason
+        ? winner_reason // same message for both
+        : "Mission failed!"; // TODO: Translate
+
+    gameGlobalInfo->setVictory(faction, winner_reason, loser_reason);
     if (engine->getObject("scenario"))
     {
-        if (my_spaceship) {
+        nlohmann::json json;
+        if (my_spaceship)
+        {
             if (my_spaceship->getFaction().lower() == faction.lower())
-                gameGlobalInfo->notifyCampaignServerScenario("victory");
+            {
+                json["reason"] = winner_reason;
+                gameGlobalInfo->notifyCampaignServerScenario("victory", json);
+            }
             else
-                gameGlobalInfo->notifyCampaignServerScenario("defeat");
-        } else {
-            gameGlobalInfo->notifyCampaignServerScenario("end");
+            {
+                json["reason"] = loser_reason;
+                gameGlobalInfo->notifyCampaignServerScenario("defeat", json);
+            }
+        }
+        else
+        {
+            json["winner_reason"] = winner_reason;
+            json["loser_reason"] = loser_reason;
+            gameGlobalInfo->notifyCampaignServerScenario("end", json);
         }
         engine->getObject("scenario")->destroy();
     }
@@ -484,9 +521,13 @@ static int victory(lua_State* L)
     return 0;
 }
 /// void victory(string faction_name)
+/// void victory(string faction_name, string reason)
+/// void victory(string faction_name, string winner_reason, string loser_reason)
 /// Sets the given faction as the scenario's victor and ends the scenario.
 /// (The GM can unpause the game, but the scenario with its update function is destroyed.)
 /// Example: victory("Exuari") -- ends the scenario, Exuari win
+/// Example: victory("Human Navy", "Artifact was retrieved succesfully!")
+/// Example: victory("Exuari", "You destroyed all humans forces! :)", "Exuari destroyed all human forces. :(")
 REGISTER_SCRIPT_FUNCTION(victory);
 
 static int globalMessage(lua_State* L)
@@ -973,6 +1014,18 @@ static int getEEVersion(lua_State* L)
 /// Returns a string with the current EmptyEpsilon version number, such as "20221029".
 /// Example: getEEVersion() -- returns 20221029 on EE-2022.10.29
 REGISTER_SCRIPT_FUNCTION(getEEVersion);
+
+std::set<string> ee_features = {"better_radar"};
+static int hasFeature(lua_State* L)
+{
+    auto feature = lua_tostring(L, 1);
+    lua_pushboolean(L, ee_features.count(feature) > 0);
+    return 1;
+}
+
+/// bool hasFeature(string name)
+/// Returns a boolean whether the game engine supports a given feature. Useful to guard lua code against calling functions that don't actually exist.
+REGISTER_SCRIPT_FUNCTION(hasFeature);
 
 static int httpPost(lua_State* L)
 {

@@ -10,6 +10,7 @@
 #include "gui/gui2_label.h"
 #include "gui/gui2_panel.h"
 #include "gui/gui2_button.h"
+#include "gui/gui2_scrolltext.h"
 
 GuiIndicatorOverlays::GuiIndicatorOverlays(GuiContainer* owner)
 : GuiElement(owner, "INDICATOR_OVERLAYS")
@@ -31,9 +32,13 @@ GuiIndicatorOverlays::GuiIndicatorOverlays(GuiContainer* owner)
 
     victory_overlay = new GuiOverlay(this, "VICTORY", glm::u8vec4(0, 0, 0, 128));
     victory_panel = new GuiPanel(victory_overlay, "VICTORY_BOX");
-    victory_panel->setPosition(0, 0, sp::Alignment::Center)->setSize(500, 100);
+    victory_panel->setPosition(0, 0, sp::Alignment::Center)->setSize(500, 500);
     victory_label = new GuiLabel(victory_panel, "VICTORY_LABEL", "...", 70);
-    victory_label->setPosition(0, 0, sp::Alignment::Center)->setSize(GuiSizeMax, GuiSizeMax);
+    victory_label->setPosition(0, 0, sp::Alignment::TopCenter)->setSize(GuiSizeMax, 100);
+    ending_reason_label = new GuiScrollText(victory_panel, "ENDING_REASON_LABEL", "...");
+    ending_reason_label->setTextSize(40);
+	ending_reason_label->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(victory_panel->getSize().x-40, victory_panel->getSize().y - victory_label->getSize().y - 40);
+    ending_reason_label->setTextAlignment(sp::Alignment::Center);
 }
 
 GuiIndicatorOverlays::~GuiIndicatorOverlays()
@@ -127,6 +132,7 @@ void GuiIndicatorOverlays::onDraw(sp::RenderTarget& renderer)
             {
                 fvf_state = FactionInfo::getState(gameGlobalInfo->getVictoryFactionId(), my_spaceship->getFactionId());
             }
+            ending_reason_label->setText(gameGlobalInfo->getEndingReason(fvf_state != FVF_Enemy));
             switch(fvf_state)
             {
             case FVF_Enemy:

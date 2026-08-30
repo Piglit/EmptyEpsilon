@@ -93,7 +93,7 @@ Assist %s in the assault on the Exuari base in sector E2. Expect heavy resistanc
                 main_station:sendCommsMessage(
                     ship,
                     string.format(_("incCall", [[We know there is an Exuari base in the area, but we don't know where it is. There is another ship, the %s in the area, but they seem to have lost track of the Exuari.
-Lead the search the area for Exuari ships - maybe you can find out where they come from and destroy their base.
+Lead the search of the area for Exuari ships - maybe you can find out where they come from and destroy their base.
 You may order %s to assist in your mission.]]), player:getCallSign(), player:getCallSign())
                 )
             end

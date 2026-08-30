@@ -1,7 +1,6 @@
 #include "spaceship.h"
 
 #include <array>
-#include <format>
 
 #include <i18n.h>
 
@@ -1648,7 +1647,7 @@ void SpaceShip::takeHullDamage(float damage_amount, DamageInfo& info)
 {
     if (gameGlobalInfo->use_system_damage)
     {
-        if (info.system_target != SYS_None)
+        if (info.system_target > SYS_None && info.system_target < SYS_COUNT)
         {
             //Target specific system
             float system_damage = (damage_amount / hull_max) * 2.0f;
@@ -1732,7 +1731,7 @@ bool SpaceShip::hasSystem(ESystem system)
     case SYS_Impulse:
         return impulse_max_speed > 0.0f;
     }
-    return true;
+    return system > SYS_None && system < SYS_COUNT;
 }
 
 float SpaceShip::getSystemEffectiveness(ESystem system)

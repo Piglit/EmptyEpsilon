@@ -6,6 +6,7 @@
 class GuiOverlay;
 class GuiPanel;
 class GuiLabel;
+class GuiScrollText;
 /**
     * Full screen overlay for shield hit effect
     * Full screen overlay for hull hit effect
@@ -25,6 +26,7 @@ private:
     GuiOverlay* victory_overlay;
     GuiPanel* victory_panel;
     GuiLabel* victory_label;
+    GuiScrollText* ending_reason_label;
     bool has_global_message = false;
 
 public:

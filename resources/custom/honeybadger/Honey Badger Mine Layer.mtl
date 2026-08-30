@@ -1,0 +1,13 @@
+# Blender 5.2.0 LTS MTL File: 'Honey Badger Mine Layer.blend'
+# www.blender.org
+
+newmtl Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Honey Badger Mine Layer Albedo.png
+map_Ns Honey Badger Mine Layer Roughnes.png
+map_Ke Honey Badger Mine Layer Illumination.png
+map_Bump -bm 1.000000 Honey Badger Mine Layer Normal.png

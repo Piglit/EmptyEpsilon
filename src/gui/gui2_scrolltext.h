@@ -11,6 +11,7 @@ protected:
     string text;
     float text_size;
     bool auto_scroll_down;
+    sp::Alignment text_alignment;
 public:
     GuiScrollText(GuiContainer* owner, string id, string text);
 
@@ -22,6 +23,7 @@ public:
     GuiScrollText* setTextSize(float text_size) { this->text_size = text_size; return this; }
 
     GuiScrollText* setScrollbarWidth(float width);
+    GuiScrollText* setTextAlignment(sp::Alignment alignment);
 
     virtual void onDraw(sp::RenderTarget& renderer) override;
 };

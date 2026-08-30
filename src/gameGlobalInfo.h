@@ -45,7 +45,11 @@ public:
      */
     static const int max_player_ships = 32;
 private:
+
     int victory_faction;
+    string winner_reason;
+    string loser_reason;
+
     int32_t playerShipId[max_player_ships];
     int callsign_counter;
     /*!
@@ -100,12 +104,18 @@ public:
      * \brief Set a faction to victorious.
      * \param string Name of the faction that won.
      */
-    void setVictory(string faction_name) { victory_faction = FactionInfo::findFactionId(faction_name); }
+    void setVictory(string faction_name, string win_reason, string loss_reason)
+    {
+        victory_faction = FactionInfo::findFactionId(faction_name);
+        winner_reason = win_reason;
+        loser_reason = loss_reason;
+    }
     /*!
      * \brief Get ID of faction that won.
      * \param int
      */
     int getVictoryFactionId() { return victory_faction; }
+    string getEndingReason(bool winner) { return winner ? winner_reason : loser_reason; }
 
     void addScript(P<Script> script);
     //Reset the global game state (called when we want to load a new scenario, and clear out this one)

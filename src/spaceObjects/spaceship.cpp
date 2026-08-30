@@ -507,6 +507,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&target_rotation, 1.5f);
     registerMemberReplication(&manual_turn, 0.1f);
     registerMemberReplication(&last_rotation_command_was_manual, 0.1f);
+    registerMemberReplication(&current_turn_speed);
     registerMemberReplication(&impulse_request, 0.1f);
     registerMemberReplication(&current_impulse, 0.5f);
     registerMemberReplication(&has_warp_drive);
@@ -521,7 +522,6 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&weapon_tube_count);
     registerMemberReplication(&target_id);
     registerMemberReplication(&turn_speed);
-    registerMemberReplication(&current_turn_speed);
     registerMemberReplication(&impulse_max_speed);
     registerMemberReplication(&impulse_max_reverse_speed);
     registerMemberReplication(&impulse_acceleration);

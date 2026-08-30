@@ -1429,12 +1429,13 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     switch(command)
     {
     case CMD_TARGET_ROTATION:
-        turnSpeed = 0;
+        last_rotation_command_was_manual = false;
+        manual_turn = 0;
         packet >> target_rotation;
         break;
     case CMD_TURN_SPEED:
-        target_rotation = getRotation();
-        packet >> turnSpeed;
+        last_rotation_command_was_manual = true;
+        packet >> manual_turn;
         break;
     case CMD_IMPULSE:
         packet >> impulse_request;

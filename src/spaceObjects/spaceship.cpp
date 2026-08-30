@@ -1,6 +1,7 @@
 #include "spaceship.h"
 
 #include <array>
+#include <format>
 
 #include <i18n.h>
 
@@ -498,11 +499,14 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     impulse_reverse_acceleration = 20.f;
     energy_level = 1000;
     max_energy_level = 1000;
-    turnSpeed = 0.0f;
+    manual_turn = 0.0f;
+    last_rotation_command_was_manual = false;
+    current_turn_speed = 0;
     auto_reload_tube_enabled = false;
 
     registerMemberReplication(&target_rotation, 1.5f);
-    registerMemberReplication(&turnSpeed, 0.1f);
+    registerMemberReplication(&manual_turn, 0.1f);
+    registerMemberReplication(&last_rotation_command_was_manual, 0.1f);
     registerMemberReplication(&impulse_request, 0.1f);
     registerMemberReplication(&current_impulse, 0.5f);
     registerMemberReplication(&has_warp_drive);
@@ -517,6 +521,7 @@ SpaceShip::SpaceShip(string multiplayerClassName, float multiplayer_significant_
     registerMemberReplication(&weapon_tube_count);
     registerMemberReplication(&target_id);
     registerMemberReplication(&turn_speed);
+    registerMemberReplication(&current_turn_speed);
     registerMemberReplication(&impulse_max_speed);
     registerMemberReplication(&impulse_max_reverse_speed);
     registerMemberReplication(&impulse_acceleration);
@@ -1060,24 +1065,71 @@ void SpaceShip::update(float delta)
             warp_request = 0;
     }
 
-    float rotationDiff;
-    if (fabs(turnSpeed) < 0.0005f) {
+    // we can't turn any faster than this under any circumstance
+    float maximum_turn_speed = fabs(turn_speed * getSystemEffectiveness(SYS_Maneuver));
+
+    // bulky ships must first "crank up" their turn rate, making small corrections slower than with maneuverable ones
+    float sec_from_0_to_1_turn_rate = std::clamp((1 - (maximum_turn_speed / MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED)) * MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE, 0.0f, MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE);
+    // this is frame-rate dependent:
+    // - when delta is small (high FPS), this code runs more often in the same time, so we adjust it slower
+    // - when delta is larger (low FPS), this code runs less often in the same time, so we adjust it faster
+    // There is still a difference, we can never get the exact same result without doing some other things, but it should be reasonably similar.
+    // (this is why a dynamic-rate update function for anything physics related is a rather bad idea!)
+    float maximum_turn_speed_change = maximum_turn_speed * (sec_from_0_to_1_turn_rate <= 0.0f ? 2 : std::min(delta / sec_from_0_to_1_turn_rate, 2.0f));
+
+    float desired_turn_speed;
+    if (last_rotation_command_was_manual)
+    {
+        // use manual_turn (-1.0 to 1.0)
+        // This simply turns relative to the maximum turn rate. It doesn't smooth out at all, making it very responsive.
+        desired_turn_speed = manual_turn * maximum_turn_speed;
+
+        // if we're back to straight-on
+        if (fabs(desired_turn_speed) < 0.0005f && fabs(current_turn_speed) < 0.0005f)
+        {
+            // close enough. this prevents ships from compensating for overshooting... IN MANUAL MODE!! (that's the responsibility of the pilot, not the ship!)
+            last_rotation_command_was_manual = false;
+            target_rotation = getRotation();
+        }
+    }
+    else
+    {
         // use target_rotation
-        rotationDiff = angleDifference(getRotation(), target_rotation);
-    } else {
-        // use turnSpeed
-        rotationDiff = turnSpeed;
+        // x10 means that we're a bit less smooth, but much more responsive for small to medium changes
+        // TODO: Add more code to calculate when we need to downscale this x10 effect for the purposes of preventing overshooting while still wanting maximum responsiveness
+        // Right now there is some slight overshooting for slow-turning ships.
+        desired_turn_speed = angleDifference(getRotation(), target_rotation) * 10;
     }
 
-    // Smooth turn when turn speed is high and frame rate is low
-    if (fabs(rotationDiff) < delta * 10.0f)
-        rotationDiff *= delta;
-    if (rotationDiff > 1.0f)
-        setAngularVelocity(turn_speed * getSystemEffectiveness(SYS_Maneuver));
-    else if (rotationDiff < -1.0f)
-        setAngularVelocity(-turn_speed * getSystemEffectiveness(SYS_Maneuver));
-    else
-        setAngularVelocity(rotationDiff * turn_speed * getSystemEffectiveness(SYS_Maneuver));
+    // the desired turn speed is still limited by our actual maximum turn speed
+    desired_turn_speed = std::clamp(desired_turn_speed, -maximum_turn_speed, maximum_turn_speed);
+
+    if (current_turn_speed < desired_turn_speed)
+    {
+        if (current_turn_speed < 0)
+        {
+			// we're going from -1 to [-1;0], that's faster than 0 to 1! but only for the part of our change where current_turn_speed is above 0!
+			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change), desired_turn_speed - current_turn_speed);
+			maximum_turn_speed_change += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
+		}
+		current_turn_speed = std::min(current_turn_speed + maximum_turn_speed_change, desired_turn_speed);
+	}
+	else
+	{
+		if (current_turn_speed > 0)
+		{
+			// we're going from 1 to [0;1], that's faster than 0 to -1! but only for the part of our change where current_turn_speed is below 0!
+			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change), current_turn_speed - desired_turn_speed);
+			maximum_turn_speed_change += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
+		}
+        current_turn_speed = std::max(current_turn_speed - maximum_turn_speed_change, desired_turn_speed);
+    }
+    
+    //string s = "TURN DEBUG: delta: {a} , max: {b} , sec: {c} , max_chg: {d} , desi: {e} , curr: {f}";
+    //LOG(WARNING) << s.format({ {string{"a"},std::to_string(delta)}, {string{"b"},std::to_string(maximum_turn_speed)}, {string{"c"},std::to_string(sec_from_0_to_1_turn_rate)}, {string{"d"},std::to_string(maximum_turn_speed_change)}, {string{"e"},std::to_string(desired_turn_speed)}, {string{"f"},std::to_string(current_turn_speed)} });
+
+    // push the ship to rotate
+    setAngularVelocity(current_turn_speed);
 
     //Here we want to have max speed at 100% impulse, and max reverse speed at -100% impulse
     float cap_speed = impulse_max_speed;

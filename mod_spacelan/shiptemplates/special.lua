@@ -119,7 +119,7 @@ template:addDoor(8, 4, false);
 --[[ Hack-Sat --]]
 --[[template = ShipTemplate():setName("XB-4"):setClass("Satellite", "Relay"):setType("playership")
 template:setModel("SensorBuoyMKII")
-template:setRadarTrace("radartrace_smallstation.png")
+template:setRadarTrace("smallstation.png")
 template:setShields(20)
 template:setHull(20)
 template:setSpeed(0, 0, 0)
@@ -211,7 +211,7 @@ addSystemsSat(template)
 --------------------------------------------------------------------------------
 
 template = ShipTemplate():setName("Targaryen"):setLocaleName(_("ship", "Targaryen")):setClass(_("class", "Dreadnought"), _("subclass", "Targaryen")):setModel("space_station_2"):setType("playership")
-template:setRadarTrace("largestation.png")
+template:setRadarTrace("largestation_detail.png")
 template:setDescription(_([[The Targaryen is a station that supports the fleet as a mobile ship factory and resupply dock. The station is often nicknamed the "dragon-mother".]]))
 
 template:setJumpDrive(true)
@@ -219,6 +219,7 @@ template:setEnergyStorage(5000)
 template:setTubes(4, 6.0)
 template:setWeaponStorage("Homing", 40)
 for n=0,4 do
+    -- This generates 5 sections, with 2 of them overlapping. This is by design, giving the station a "strong side".
     template:setBeamWeapon(n, 90,  n * 90, 2200, 6, 5)
     template:setTubeDirection(n, n * 90)
     template:setTubeSize(n, "large")

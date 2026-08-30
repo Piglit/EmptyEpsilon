@@ -477,34 +477,20 @@ REGISTER_SCRIPT_FUNCTION(sectorToXY);
 static int victory(lua_State* L)
 {
     string faction = luaL_checkstring(L, 1);
-    gameGlobalInfo->setVictory(faction, "Mission accomplished!", "Mission failed!"); // TODO: Translate
-    if (engine->getObject("scenario"))
-    {
-        if (my_spaceship) {
-            if (my_spaceship->getFaction().lower() == faction.lower())
-                gameGlobalInfo->notifyCampaignServerScenario("victory");
-            else
-                gameGlobalInfo->notifyCampaignServerScenario("defeat");
-        }
-        else {
-            gameGlobalInfo->notifyCampaignServerScenario("end");
-        }
-        engine->getObject("scenario")->destroy();
-    }
-    engine->setGameSpeed(0.0);
-    return 0;
-}
-/// void victory(string faction_name)
-/// Sets the given faction as the scenario's victor and ends the scenario.
-/// (The GM can unpause the game, but the scenario with its update function is destroyed.)
-/// Example: victory("Exuari") -- ends the scenario, Exuari win
-REGISTER_SCRIPT_FUNCTION(victory);
 
-static int victory2(lua_State* L)
-{
-    string faction = luaL_checkstring(L, 1);
-    string winner_reason = luaL_checkstring(L, 2);
-    string loser_reason = luaL_checkstring(L, 3);
+    bool has_winner_reason = !lua_isnoneornil(L, 2);
+    bool has_loser_reason = !lua_isnoneornil(L, 3);
+
+    string winner_reason = has_winner_reason
+        ? luaL_checkstring(L, 2)
+        : "Mission accomplished!"; // TODO: Translate
+
+    string loser_reason = has_loser_reason
+        ? luaL_checkstring(L, 3)
+        : has_winner_reason
+        ? winner_reason // same message for both
+        : "Mission failed!"; // TODO: Translate
+
     gameGlobalInfo->setVictory(faction, winner_reason, loser_reason);
     if (engine->getObject("scenario"))
     {
@@ -533,11 +519,15 @@ static int victory2(lua_State* L)
     engine->setGameSpeed(0.0);
     return 0;
 }
-/// void victory2(string faction_name, string winner_reason, string loser_reason)
+/// void victory(string faction_name)
+/// void victory(string faction_name, string reason)
+/// void victory(string faction_name, string winner_reason, string loser_reason)
 /// Sets the given faction as the scenario's victor and ends the scenario.
 /// (The GM can unpause the game, but the scenario with its update function is destroyed.)
-/// Example: victory("Exuari", "You destroyed all humans forces! :)", "Exuari destroyed all human forces. :(") -- ends the scenario, Exuari win
-REGISTER_SCRIPT_FUNCTION(victory2);
+/// Example: victory("Exuari") -- ends the scenario, Exuari win
+/// Example: victory("Human Navy", "Artifact was retrieved succesfully!")
+/// Example: victory("Exuari", "You destroyed all humans forces! :)", "Exuari destroyed all human forces. :(")
+REGISTER_SCRIPT_FUNCTION(victory);
 
 static int globalMessage(lua_State* L)
 {

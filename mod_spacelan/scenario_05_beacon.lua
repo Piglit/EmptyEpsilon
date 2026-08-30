@@ -490,7 +490,7 @@ end
 
 function checkDefeatCondition(object, object_callsign)
     if not object:isValid() then
-        victory2("Exuari", string.format(_("You destroyed %s!"), object_callsign), string.format(_("Mission: FAILED (%s was destroyed)"), object_callsign))
+        victory("Exuari", string.format(_("Mission: FAILED (%s was destroyed)"), object_callsign))
         --local text = string.format(_("Mission: FAILED (%s was destroyed)"), object_callsign)
         --globalMessage(text)
         --setBanner(text)
@@ -515,7 +515,7 @@ function update(delta)
         else
             campaign:victoryScore()
         end
-        victory2("Human Navy", "You destroyed the Exuari base.", "Your base was destroyed.")
+        victory("Human Navy", "You destroyed the Exuari base.")
         return
     end
 

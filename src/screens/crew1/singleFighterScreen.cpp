@@ -35,6 +35,8 @@
 SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
 : GuiOverlay(owner, "SINGLEPILOT_SCREEN", colorConfig.background)
 {
+    last_turn_speed_sent = 999; // so we always update it initially
+
     viewport = new GuiViewport3D(this, "VIEWPORT");
     viewport->setPosition(0, 0, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
     //viewport->showCallsigns();
@@ -187,8 +189,9 @@ void SingleFighterScreen::onUpdate()
     {
         auto angle = (keys.helms_turn_right.getValue() - keys.helms_turn_left.getValue())/* * 5.0f*/;
         // make sure, the controller axis is only set for one of thje two keybindings
-//        if (angle != 0.0f)
+        if (last_turn_speed_sent != angle)
         {
+            last_turn_speed_sent = angle;
             //my_spaceship->commandTargetRotation(my_spaceship->getRotation() + angle);
             my_spaceship->commandTurnSpeed(/*my_spaceship->turn_speed **/ angle);
         }

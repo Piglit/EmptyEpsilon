@@ -31,6 +31,8 @@ private:
     GuiRadarView* radar;
     GuiMissileTubeControls* tube_controls;
     GuiElement* beam_info_box;
+
+    float last_turn_speed_sent;
 public:
     SingleFighterScreen(GuiContainer* owner);
 

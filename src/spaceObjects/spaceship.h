@@ -77,6 +77,13 @@ public:
     }
 };
 
+// Ships with this turn rate or higher can change their turn speed instantly
+static const float MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED = 20.0f;
+// Even the most unmaneuverable ship will take at most this long to start/stop to fully turn (smoothing).
+static const float MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE = 1.0f;
+// When stopping from a turn, we may want to allow ships to turn back to head-on faster
+static const float TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER = 2.0f;
+
 class SpaceShip : public ShipTemplateBasedObject
 {
 public:
@@ -107,7 +114,12 @@ public:
     /*!
      *[input] Ship will rotate in this velocity. ([-1,1], overrides target_rotation)
      */
-    float turnSpeed;
+    float manual_turn;
+
+    /*!
+     *[input] If this is true, target_rotation will be ignored until the ship is aligned again or a target_rotation is set via command.
+     */
+    bool last_rotation_command_was_manual;
 
     /*!
      * [input] Amount of impulse requested from the user (-1.0 to 1.0)
@@ -123,6 +135,11 @@ public:
      * [config] Speed of rotation, in deg/second
      */
     float turn_speed;
+
+    /*!
+     * [config] Current speed of rotation, in deg/second, used to smooth out turning for less maneuverable ships.
+     */
+    float current_turn_speed;
 
     /*!
      * [config] Max speed of the impulse engines, in m/s

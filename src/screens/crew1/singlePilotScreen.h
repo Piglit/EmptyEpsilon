@@ -32,6 +32,8 @@ private:
     GuiMissileTubeControls* tube_controls;
     GuiToggleButton* lock_aim;
     bool drag_rotate;
+
+    float last_turn_speed_sent;
 public:
     SinglePilotScreen(GuiContainer* owner);
 

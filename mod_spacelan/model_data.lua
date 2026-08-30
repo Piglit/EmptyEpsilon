@@ -39,7 +39,7 @@ model:setRenderOffset(-32, 0, 5) -- X more negative pushes the "landing bay" fur
 model:setScale(20)
 --model:setRadius(1300)
 --model:setCollisionBox(1400, 1000)
-model:setRadius(1100 / 2) -- fix oversized radar icon (until a better icon is provided, reflecting the 'bay')
+model:setRadius(1100 / 2)
 model:setCollisionBox(25 * 2 * 20, 33 * 2 * 20)
 
 model = ModelData()

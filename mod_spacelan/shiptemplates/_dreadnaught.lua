@@ -28,6 +28,6 @@ for n=0,15 do
 end
 template:setHull(2000)
 template:setShields(1200, 1200, 1200, 1200, 1200, 1200)
-template:setSpeed(0, 1, 0
+template:setSpeed(0, 1, 0)
 
 -- despite its model, this does not appear to be a proper station

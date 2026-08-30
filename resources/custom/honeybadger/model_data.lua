@@ -4,7 +4,7 @@ model:setMesh("custom/honeybadger/Honey Badger Mine Layer.obj")
 model:setTexture("custom/honeybadger/Honey Badger Mine Layer Albedo.png")
 --model:setSpecular("custom/honeybadger/Honey Badger Mine Layer Specular.png")
 model:setIllumination("custom/honeybadger/Honey Badger Mine Layer Illumination.png")
-model:setScale(50)
+model:setScale(70)
 model:setRadius(80)
 
 model:addEngineEmitter(-0.65, 0.70, 0.0,  0.5, 0.5, 1.0, 0.2)

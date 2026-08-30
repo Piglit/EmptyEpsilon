@@ -29,7 +29,7 @@ msgstr ""
 "Ein Stck Weltraumschrott. Scannen, um die Einfangfrequenz herauszufinden"
 
 #: mod_spacelan/plots/wh_artifacts.lua:45
-#: mod_spacelan/plots/wh_artifacts.lua:75
+#: mod_spacelan/plots/wh_artifacts.lua:72
 msgid ""
 "\n"
 "Capturing frequency:"
@@ -37,7 +37,7 @@ msgstr ""
 "\n"
 "Einfangfrequenz:"
 
-#: mod_spacelan/plots/wh_artifacts.lua:61
+#: mod_spacelan/plots/wh_artifacts.lua:58
 msgid ""
 "Artifact collected\n"
 "\n"
@@ -50,7 +50,7 @@ msgstr ""
 "Jedes geborgene Artefakt kann zum Ausbau der Flottenkommandostation "
 "verwendet werden."
 
-#: mod_spacelan/plots/wh_artifacts.lua:62
+#: mod_spacelan/plots/wh_artifacts.lua:59
 msgid ""
 "Artifact was destroyed.\n"
 "To collect artifacts you need to have shields active and calibrated to the "
@@ -60,11 +60,11 @@ msgstr ""
 "Um Artefakte zu bergen, mssen die Schilde aktiv und auf die Einfangfrequenz "
 "des Artefakts kalibriert sein."
 
-#: mod_spacelan/plots/wh_artifacts.lua:75
+#: mod_spacelan/plots/wh_artifacts.lua:72
 msgid ". Scan to find out the capturing frequency"
 msgstr ". Scannen, um die Einfangfrequenz herauszufinden"
 
-#: mod_spacelan/plots/wh_artifacts.lua:75
+#: mod_spacelan/plots/wh_artifacts.lua:72
 msgid ""
 ".\n"
 "Calibrate your shields to this frequency and activate them to capture it."
@@ -73,7 +73,7 @@ msgstr ""
 "Kalibriere deine Schilde auf diese Frequenz und aktiviere sie, um das "
 "Artefakt einzufangen."
 
-#: mod_spacelan/plots/wh_artifacts.lua:78
+#: mod_spacelan/plots/wh_artifacts.lua:75
 #, lua-format
 msgid ""
 "Collected %s.\n"
@@ -93,7 +93,7 @@ msgstr ""
 "Jedes geborgene Artefakt kann zum Ausbau der Flottenkommandostation "
 "verwendet werden."
 
-#: mod_spacelan/plots/wh_artifacts.lua:79
+#: mod_spacelan/plots/wh_artifacts.lua:76
 msgid ""
 " was destroyed.\n"
 "To collect artifacts you need to have shields active and calibrated to the "
@@ -103,11 +103,11 @@ msgstr ""
 "Um Artefakte zu bergen, mssen die Schilde aktiv und auf die Einfangfrequenz "
 "des Artefakts kalibriert sein."
 
-#: mod_spacelan/plots/wh_artifacts.lua:92
+#: mod_spacelan/plots/wh_artifacts.lua:89
 msgid "Deliver Artifacts to the fleet command station."
 msgstr "Liefere Artefakte an der Flottenkommandostation ab."
 
-#: mod_spacelan/plots/wh_artifacts.lua:97
+#: mod_spacelan/plots/wh_artifacts.lua:94
 #, lua-format
 msgid ""
 "Collected %s\n"
@@ -127,20 +127,20 @@ msgstr ""
 "Jedes geborgene Artefakt kann zum Ausbau der Flottenkommandostation "
 "verwendet werden."
 
-#: mod_spacelan/plots/wh_artifacts.lua:125
+#: mod_spacelan/plots/wh_artifacts.lua:122
 msgid "(Your shields are not active)"
 msgstr "(Die Schilde sind nicht aktiv)"
 
-#: mod_spacelan/plots/wh_artifacts.lua:127
+#: mod_spacelan/plots/wh_artifacts.lua:124
 msgid "(Scan an artifact to find the capture frequency)"
 msgstr "(Scannen, um die Einfangfrequenz herauszufinden)"
 
-#: mod_spacelan/plots/wh_artifacts.lua:129
+#: mod_spacelan/plots/wh_artifacts.lua:126
 #, lua-format
 msgid "(Your shields are calibrated to %dGHZ, not to %dGHz)"
 msgstr "(Die Schilde sind auf %dGHz kalibriert, nicht auf %dGHz)"
 
-#: mod_spacelan/plots/wh_artifacts.lua:158
+#: mod_spacelan/plots/wh_artifacts.lua:155
 #, lua-format
 msgid ""
 "%d of your %d artifacts from previous missions contain new strategic "
@@ -150,7 +150,7 @@ msgstr ""
 "Informationen für das Flottenkommando und sind für den Stationausbau "
 "geeignet."
 
-#: mod_spacelan/plots/wh_artifacts.lua:160
+#: mod_spacelan/plots/wh_artifacts.lua:157
 msgid ""
 "One of your artifacts from previous missions contains new strategic "
 "information for the fleet command and is applicable for station upgrades."
@@ -159,7 +159,7 @@ msgstr ""
 "Informationen für das Flottenkommando und ist für den Stationsausbau "
 "geeignet."
 
-#: mod_spacelan/plots/wh_artifacts.lua:162
+#: mod_spacelan/plots/wh_artifacts.lua:159
 msgid ""
 "None of your Artifacts from previous missions are applicable for station "
 "upgrades, since the fleet command already possesses similar artifacts."
@@ -167,15 +167,15 @@ msgstr ""
 "Keines der Artefakte aus früheren Missionen ist für den Stationsausbau "
 "geeignet, da das Flottenkommando bereits ähnliche Artefakte besitzt."
 
-#: mod_spacelan/plots/wh_artifacts.lua:171
+#: mod_spacelan/plots/wh_artifacts.lua:168
 msgid " Artifact"
 msgstr " Artefakt"
 
-#: mod_spacelan/plots/wh_artifacts.lua:173
+#: mod_spacelan/plots/wh_artifacts.lua:170
 msgid "s"
 msgstr "e"
 
-#: mod_spacelan/plots/wh_artifacts.lua:175
+#: mod_spacelan/plots/wh_artifacts.lua:172
 #, lua-format
 msgid ""
 "Transferred %s to the station. The fleet command may use them for upgrades."
@@ -183,22 +183,22 @@ msgstr ""
 "%s wurden der Station übergeben. Das Flottenkommando kann sie für Ausbauten "
 "verwenden."
 
-#: mod_spacelan/plots/wh_artifacts.lua:180
+#: mod_spacelan/plots/wh_artifacts.lua:177
 #, lua-format
 msgid "Received %s from %s."
 msgstr "%s von %s erhalten."
 
-#: mod_spacelan/plots/wh_artifacts.lua:190
+#: mod_spacelan/plots/wh_artifacts.lua:187
 #, lua-format
 msgid "Received strategic information from %s: %s"
 msgstr "Strategische Informationen von %s empfangen: %s"
 
-#: mod_spacelan/plots/wh_artifacts.lua:196
+#: mod_spacelan/plots/wh_artifacts.lua:193
 msgid "Strategic information was uploaded to the fleet's databases."
 msgstr ""
 "Strategische Informationen wurden in die Flottendatenbanken hochgeladen."
 
-#: mod_spacelan/plots/wh_artifacts.lua:197
+#: mod_spacelan/plots/wh_artifacts.lua:194
 msgid ""
 "\n"
 "(Reputation +"
@@ -206,7 +206,7 @@ msgstr ""
 "\n"
 "(Reputation +"
 
-#: mod_spacelan/plots/wh_artifacts.lua:199
+#: mod_spacelan/plots/wh_artifacts.lua:196
 #, lua-format
 msgid "Strategic Information from %s has been uploaded to the fleet database."
 msgstr ""

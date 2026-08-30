@@ -44,11 +44,11 @@ msgid "This asteroid contains rare materials an should be captured."
 msgstr ""
 "Dieser Asteroid enthält seltene Materialien und sollte eingefangen werden."
 
-#: mod_spacelan/plots/avp_terrain_modules.lua:658
+#: mod_spacelan/plots/avp_terrain_modules.lua:666
 msgid "Black hole stabilizer"
 msgstr "Schwarzes-Loch-Stabilisator"
 
-#: mod_spacelan/plots/avp_terrain_modules.lua:659
+#: mod_spacelan/plots/avp_terrain_modules.lua:667
 msgid "This Arlenian device was used to prevent the wormhole from collapsing."
 msgstr ""
 "Dieses arlenische Gert wurde verwendet, um den Kollaps des Wurmlochs zu "

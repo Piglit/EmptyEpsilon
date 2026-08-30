@@ -4,8 +4,7 @@
 -- Objective: Destroy all enemy ships in the area.
 -- Duration: 30 minutes
 -- Difficulty: Easy
--- Description: TODO 
---- 
+-- Description: Fight against different kinds of enemies, using the special powers of your ship.
 
 require("utils.lua")    -- formatTime
 require("luax.lua")     -- table.filter
@@ -231,24 +230,38 @@ local function create_terrain()
 	return modules
 end
 
-local function place_artifact(modules)
-	--unused
-	local art_placed = false
-	while not art_placed do
-		local art_location = arraySelectRandom(modules)
-		if art_location:canInsertArtifact() then
-			art_placed = true
-			art_name = string.format(_("Artifact extracted from %s"), art_location.terrain_type)
-			--local art1 = art_location:insertArtifact()
-			--local x,y = art1:getPosition()
-			--art1:destroy()
-			-- TODO pos!
-			campaign:placeArtifact(x,y, art_name, _("Collecting this artifact fulfills the bonus objective of the specialist training mission."))
+local function place_artifact()
+	if artifacts_placed < #getActivePlayerShips() and artifacts_placed < #terrain_modules_placed then
+		local module = terrain_modules_placed[artifact_module_index]
+		artifact_module_index = artifact_module_index -1
+		artifacts_placed = artifacts_placed +1
+		if module.terrain_type == "asteroids" then
+			local art = module:insertArtifact(function(art, pl, collected)
+				sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr})
+				sendMessageToCampaignServer("score", toJSON({artifacts = collected}))
+			end)
+			art:setScanningParameters(3, 1)	-- reduced difficulty
+		elseif module.terrain_type == "planets" then
+			local art = campaign:placeArtifact(0,0,_("artifact", "Orbital relict"), _("artifact", "A relict from previous battles in the orbit of a planet."))
+			module:insertOrbitingObject(art)
+		elseif module.terrain_type == "blackholes" then
+			local art = module:insertArtifact(function(art, pl, collected)
+				sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr})
+				sendMessageToCampaignServer("score", toJSON({artifacts = collected}))
+			end)
+			art:setScanningParameters(3, 1)	-- reduced difficulty
+		elseif module.terrain_type == "nebulae" then
+			local neb = module.nebulae[1]
+			if neb ~= nil then
+				local x,y = neb:getPosition()
+				local art = campaign:placeArtifact(x,y,_("artifact", "Nebulizer"), _("artifact", "A relict found in a nebular cloud."))
+			end
 		end
 	end
 end
 
 local function spawn_enemies(playershiptype)
+
 	local set = enemySets[playershiptype]
 	if set == nil then
 		set = enemySets["Phobos M3P"]
@@ -295,15 +308,26 @@ end
 function onNewPlayerShipSpawned(ship)
 	ship:setRotation(0):commandTargetRotation(0)
 	campaign:requestReputation()
-	spawn_enemies(ship:getTypeName())
-	add_reinforecements(ship:getTypeName())
+	local playershiptype = ship:getTypeName()
+	if playershiptype == "Kestrel" then
+		playershiptype = "Phobos M3P"
+	elseif playershiptype == "Honeybadger" then
+		playershiptype = "Nautilus"
+	end
+
+	spawn_enemies(playershiptype)
+	add_reinforecements(playershiptype)
+	place_artifact()
+	commsInstr(ship)
 end
 
 -- init
 function init()
 	wh_artifacts:init()
-	create_terrain()
-	commandStation = SpaceStation():setTemplate("Large Station"):setPosition(20000,0):setFaction("Human Navy")
+	gravity_util.gravity_const = 2000000	-- 50 times as high!
+
+	terrain_modules_placed = create_terrain()
+	commandStation = SpaceStation():setTemplate("Large Station"):setPosition(20000,0):setFaction("Human Navy"):setCallSign("Command Station")
 	comms_vf_station.entry:set_as_comms_function(commandStation)
 	commandStation.comms_data = {
 		friendlyness = 100,
@@ -322,13 +346,9 @@ function init()
     enemyList = {}
     finishedTimer = 5
     finishedFlag = false
---    instr1 = false
---    assist_timer = 60
---
---    bonusAvail = true
---    bonusCaptured = false 
---    bonus = createExuariShuttle():setCallSign("bonus"):setPosition(-2341, -17052):orderFlyTowardsBlind(-80000, -40000):setHeading(-60)
---	bonus:onDestruction(bonusDestroyed)
+	first_instr = false
+	artifacts_placed = 0
+	artifact_module_index = 4
 
 	campaign:initScore()
 	onNewPlayerShip(onNewPlayerShipSpawned)
@@ -336,48 +356,40 @@ function init()
 	campaign:allowReinforcements()
 end
 
-function commsInstr()
-    if not instr1 and player:isValid() and getScenarioTime() > 8.0 then
-        instr1 = true
-        command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
+function commsInstr(player)
+	if not first_instr then
+		first_instr = true
+		commandStation:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
 
-In this training mission you will practice the basic controls of a Phobos light cruiser.
-Since this is not a tutorial, you will be on your own to decide how to destroy all enemy targets in an Exuari training ground.
-There will be not much resistance, so you can try different approaches and tactics savely.
+In this mission you will encounter different kinds of enemies within hostile terrain.
+Learn to use your ships abilities and decide which enemies you want to attack first.
+There is a Human Navy station in the area - you can resupply there.
+After you defeated some enemies, you may request reinforcements there to help you against the harder enemies.
 
-Here's your chance to beat up some helpless opponents.
 Commander Saberhagen out.]]))
-    end
+	else
+		for __, pl2 in ipairs(getActivePlayerShips()) do
+			if pl2 ~= player then
+				commandStation:sendCommsMessage(pl2, string.format(_("goal-incCall", [[Reinforcements have arrived!
+Coordinate your actions with the crew of the %s.
+Some enemies may be easier for them than for you.
+Some other enemies may require that you attack them together.
+
+New enemies just arrived here. There may be some conflict between enemy ships. Maybe you can use that to your advantage.
+
+Commander Saberhagen out.]]), player:getCallSign()))
+			else
+				commandStation:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
+In this mission you will encounter different kinds of enemies within hostile terrain.
+Coordinate with your allies. Some enemies may be easier to defeat when attacked together.
+There is a Human Navy station in the area - you can resupply there.
+
+Commander Saberhagen out.]]))
+			end
+		end
+	end
 end
 
-function needHelp(delta)
-    if not player:isValid() then
-        return
-    end
-    if player:areEnemiesInRange(20000) then
-        assist_timer = 60
-    else
-        assist_timer = assist_timer - delta
-        if assist_timer < 0 then
-            assist_timer = 120
-            local nearest_dist = 99999999
-            local nearest_enemy = nil
-            for _,enemy in ipairs(enemyList) do
-                if enemy:isValid() then
-                    local dist = distance(enemy, player)
-                    if dist < nearest_dist then
-                        nearest_dist = dist
-                        nearest_enemy = enemy
-                    end
-                end
-            end
-            if nearest_enemy ~= nil then
-                command:sendCommsMessage(player, _("goal-incCall", [[This is Commander Saberhagen.
-According to our sensors there are still enemies in sector ]]) .. nearest_enemy:getSectorName())
-            end
-        end
-    end
-end
 
 function finished(delta)
     finishedTimer = finishedTimer - delta
@@ -388,19 +400,6 @@ function finished(delta)
     if finishedFlag == false then
         finishedFlag = true
 		campaign:victoryScore()
-        local bonusString = _("msgMainscreen-bonusTarget", "escaped.")
-        --[[if not bonus:isValid() then
-            bonusString = _("msgMainscreen-bonusTarget", "destroyed.")
-			if bonusCaptured then
-				bonusString = bonusString .. _("msgMainscreen-bonusTarget"," Artifact captured.")
-			else
-				bonusString = bonusString .. _("msgMainscreen-bonusTarget"," Artifact was destroyed.")
-			end
-        end
-		--]]
-        globalMessage(string.format(_("msgMainscreen", [[Mission Complete.
-Your Time: %s
-Bonus target %s]]), formatTime(timer), bonusString))
     end
 end
 
@@ -414,6 +413,10 @@ function bonusDestroyed(bonus, _)
 end
 
 function update(delta)
+	wh_rota:update(delta)
+	for __, ship in ipairs(getActivePlayerShips()) do
+		gravity_util:updatePlayerShip(delta, ship)
+	end
     local enemyCount = campaign:progressEnemyCount(enemyList, true) -- true: remove all invalid objects enemies from the list
 
     if enemyCount == 0 then

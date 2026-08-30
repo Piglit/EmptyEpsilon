@@ -20,7 +20,7 @@ require("place_station_scenario_utility.lua")
 function init()
 	local enemy_faction = "Kraylor"
 
-	PlayerSpaceship():setTemplate("Adder MK7"):setCallSign("A1"):setPosition(1000, 0):setFaction("Human Navy"):setReputationPoints(2000)
+	PlayerSpaceship():setTemplate("Adder MK7"):setCallSign("A1"):setPosition(1000, 0):setFaction("Human Navy"):setReputationPoints(2000)--:setRadarTrace("probe.png")
     local hn = CpuShip():setTemplate("Adder MK5"):setPosition(0, 2000):setFaction("Human Navy"):orderIdle()
     local ind = CpuShip():setTemplate("Adder MK5"):setPosition(1000, 2000):setFaction("Independent"):orderIdle()
 --    local enemy_unknown = CpuShip():setTemplate("Adder MK5"):setPosition(-1000, -2000):setFaction(enemy_faction):orderIdle()

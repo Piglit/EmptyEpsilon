@@ -233,7 +233,7 @@ model:setTexture("mesh/ship/Ender Battlecruiser.png")
 model:setSpecular("mesh/ship/Ender Battlecruiser_illumination.png")
 model:setIllumination("mesh/ship/Ender Battlecruiser_illumination.png")
 model:setScale(5)
-model:setRadius(1000)
+model:setRadius(600)
 --model:setCollisionBox(2000, 600) -- it's slight too much
 model:setCollisionBox(185 * 2 * 5, 600)
 -- Visual positions of the beams/missiletubes (blender: -X, Y, Z)

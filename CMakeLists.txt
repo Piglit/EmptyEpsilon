@@ -31,7 +31,7 @@ else()
     # - PROJECT_VERSION_PATCH
     string(TIMESTAMP MAJOR "2026")
     string(TIMESTAMP MINOR "08")
-    string(TIMESTAMP PATCH "25")
+    string(TIMESTAMP PATCH "31")
 endif()
 
 project(EmptyEpsilon LANGUAGES CXX C  VERSION ${MAJOR}.${MINOR}.${PATCH})

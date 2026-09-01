@@ -22,6 +22,29 @@ import coloredlogs
 log = logging.getLogger(__name__)
 
 PROXIES_ALWAY_AVAIL = True
+TEMPLATES = {
+	"default": {
+		"scenarios": ["20_training1"],
+		"ships": ["Phobos M3P"],
+	},
+	"beginner": {
+		"scenarios": ["20_training1"],
+		"ships": ["Phobos M3P"],
+	},
+	"custom": {
+		"scenarios": ["20_training1"],
+		"ships": [],
+	},
+	"small crew": {
+		"scenarios": ["20_training1", "26_specialist_training"],
+		"ships": ["Hathcock", "Piranha M5P"],
+	},
+	"big crew": {
+		"scenarios": ["20_training1", "26_specialist_training"],
+		"ships": ["Atlantis", "Crucible", "Maverick"],
+	},
+}	# set via fleetcommand
+
 
 class Crew:
 	def __init__(self, instance_name, crew_name, template):
@@ -353,7 +376,15 @@ class Crew:
 
 
 	def setProfile(self, profile: str):
+		"""applies scenarios, ships and briefing to the crew"""
 		self.profile = profile
+		if profile in TEMPLATES:
+			if "scenarios" in TEMPLATES[profile]:
+				self.setScenarios(TEMPLATES[profile]["scenarios"].copy())
+			if "ships" in TEMPLATES[profile]:
+				self.ships = TEMPLATES[profile]["ships"].copy()
+			if "briefing" in TEMPLATES[profile]:
+				self.setBriefing(TEMPLATES[profile]["briefing"])
 
 	def getProfile(self) -> str:
 		return self.profile

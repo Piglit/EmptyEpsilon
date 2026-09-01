@@ -266,6 +266,8 @@ def selectShips():
 		"Atlantis":		"Schwerer Kreuzer, Crew muss gut zusammenarbeiten. Standardschiff für Story-Missionen",
 		"Crucible":		"Raketen-Korvette, schweres Schiff für Frontalangriffe.",
 		"Maverick":		"Laser-Korvette, schweres Schiff mit Rundumverteidigung.",
+		"Honeybadger":	"Minen-Fregatte - für die Crew der Honeybadger.",
+		"Kestrel":		"Leichter Kreuzer - für die Crew der Kestrel.",
 	}
 	msg += """
 
@@ -306,12 +308,14 @@ def selectProfiles():
 	crew = selectCrew()
 	if not crew:
 		return None
-	msg = """Das Profil einer Crew bestimmt, welche Missionen die Crew zugeteilt bekommt.
+	msg = """Das Profil einer Crew bestimmt, welche Schiffe und Missionen die Crew zugeteilt bekommt. Das Setzen des Profils überschreibt alle bisherigen Einstellungen.
 {crew_name} - aktuelles Profil: {profile}""".format(**crew)
 	code, tag = d.menu(msg, choices=[
-		("beginner", "Schwierigkeitsgrad: Einfach, Training 1"),
-		("default", "Schwierigkeitsgrad: Normal, Specialist Training"),
-		("veteran", "Schwierigkeitsgrad: Schwer, Specialist Training"),
+		("default", "Normal, Training 1, Light Cruiser"),
+		("beginner", "Einfach, Training 1, Light Cruiser"),
+		("custom", "Normal, Training 1?, Schiff muss extra festgelegt werden."),
+		("small crew", "Schwierigkeitsgrad: Normal, Specialist Training, Fregatten"),
+		("big crew", "Schwierigkeitsgrad: Schwer, Specialist Training, Korvetten"),
 	])
 	if code == d.OK:
 		crews.setProfile(crew["instance_name"], tag)

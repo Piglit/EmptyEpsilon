@@ -333,3 +333,26 @@ core.subscribe("scenario_event", scenario_event)
 
 
 #campaign.test_run()
+
+
+
+# Crews 2026:
+# Spacy 6, beginner, Light Cruiser
+# Honeybadger 6, experienced, Mine-Layer
+
+# Regenbogenpony 6, veteran, ? -> Atlantis?
+# Miris Schiff 5+, experienced ? -> Maverick?
+
+# Brassheart 5, experiences, ? Hathcock
+# Melonidas 5, veteran, Crucible?? / Piranha
+# Kraken 5, experienced, ? Piranha
+# Trancerapid 5, experienced -> Hathcock
+
+# Kestrel 4, beginner, Kestrel / Scout?
+
+# Scenarios:
+# invade: pairings: Heavy + Light:
+# Maverick + Piranha
+# Crucible + Hathcock
+# Atlantis + Adder
+# Mine-Layer, Kestrel, Phobos(warp) ? 

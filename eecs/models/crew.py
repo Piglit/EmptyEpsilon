@@ -21,6 +21,8 @@ import coloredlogs
 
 log = logging.getLogger(__name__)
 
+PROXIES_ALWAY_AVAIL = True
+
 class Crew:
 	def __init__(self, instance_name, crew_name, template):
 		self.instance_name = instance_name
@@ -53,9 +55,15 @@ class Crew:
 		return self.scenarios
 
 	def getProxies(self) -> dict[str,str]:
+		proxies = {}
 		for instance_name, crew in crews.items():
-			if not crew.proxy_open and instance_name in self.proxies:
+			if crew.proxy_open:
+				if PROXIES_ALWAY_AVAIL:
+					proxies[instance_name] = crew.crew_name
+			elif instance_name in self.proxies:
 				del self.proxies[instance_name]
+		if PROXIES_ALWAY_AVAIL:
+			return proxies
 		return self.proxies
 
 	def isScenarioUnlocked(self, s):

@@ -309,9 +309,9 @@ def selectProfiles():
 	msg = """Das Profil einer Crew bestimmt, welche Missionen die Crew zugeteilt bekommt.
 {crew_name} - aktuelles Profil: {profile}""".format(**crew)
 	code, tag = d.menu(msg, choices=[
-		("beginner", "Schwierigkeitsgrad: Einfach, Einzelmission: Edge of Space."),
-		("default", "Schwierigkeitsgrad: Normal, Einzelmission: Birth of Atlantis."),
-		("veteran", "Schwierigkeitsgrad: Schwer, Einzelmission: Ghosts from the Past."),
+		("beginner", "Schwierigkeitsgrad: Einfach, Training 1"),
+		("default", "Schwierigkeitsgrad: Normal, Specialist Training"),
+		("veteran", "Schwierigkeitsgrad: Schwer, Specialist Training"),
 	])
 	if code == d.OK:
 		crews.setProfile(crew["instance_name"], tag)

@@ -50,24 +50,21 @@ Nebula::Nebula()
     radar_visual = irandom(1, 3);
     setRadarSignatureInfo(0.0, 0.8, -1.0);
 
-    size = 5000;
+    setSize(getRadius());
+
     registerMemberReplication(&radar_visual);
     registerMemberReplication(&size);
-
-    for(int n=0; n<cloud_count; n++)
-    {
-        clouds[n].size = random(512, 1024 * 2);
-        clouds[n].texture = irandom(1, 3);
-        float dist_min = clouds[n].size / 2.0f;
-        float dist_max = getRadius() - clouds[n].size;
-        clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
-    }
 
     nebula_list.push_back(this);
 }
 
 void Nebula::draw3DTransparent()
 {
+    if (size != getRadius())
+    {
+        setSize(size);
+    }
+
     ShaderRegistry::ScopedShader shader(ShaderRegistry::Shaders::Billboard);
 
     std::array<VertexAndTexCoords, 4> quad{
@@ -119,7 +116,7 @@ void Nebula::setSize(float size)
         clouds[n].size = random(512, 1024 * 2);
         clouds[n].texture = irandom(1, 3);
         float dist_min = clouds[n].size / 2.0f;
-        float dist_max = getRadius() - clouds[n].size;
+        float dist_max = std::max(dist_min, getRadius() - clouds[n].size);
         clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
     }
 }
@@ -131,11 +128,21 @@ float Nebula::getSize()
 
 void Nebula::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
+    if (size != getRadius())
+    {
+        setSize(size);
+    }
+
     renderer.drawRotatedSpriteBlendAdd("Nebula" + string(radar_visual) + ".png", position, getRadius() * scale * 3.0f, getRotation()-rotation);
 }
 
 void Nebula::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
+    if (size != getRadius())
+    {
+        setSize(size);
+    }
+
     renderer.drawCircleOutline(position, getRadius() * scale, 2.0, glm::u8vec4(255, 255, 255, 64));
 }
 

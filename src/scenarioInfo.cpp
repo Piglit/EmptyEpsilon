@@ -72,6 +72,8 @@ void ScenarioInfo::addKeyValue(string key, string value)
         additional = key.substr(key.find("[") + 1, -1);
         key = key.substr(0, key.find("["));
     }
+
+    bool is_recognized_key = true;
     if (key.lower() == "name")
     {
         name = locale->tr(value);
@@ -129,9 +131,16 @@ void ScenarioInfo::addKeyValue(string key, string value)
     {
         spawn_rot = std::stof(value);
     }
-    else if (additional == "" || !addSettingOption(key, additional, value))
+    else
     {
-        LOG(WARNING) << "Unknown scenario meta data: " << key << ": " << value;
+        is_recognized_key = false;
+    }
+    if (additional == "" || !addSettingOption(key, additional, value))
+    {
+        if (!is_recognized_key)
+        {
+            LOG(WARNING) << "Unknown scenario meta data: " << key << ": " << value;
+        }
     }
 }
 

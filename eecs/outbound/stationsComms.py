@@ -88,6 +88,7 @@ def status_update(crew, what, **kwargs):
 		pass
 
 def subscribe_comms_log(server, shipname):
+	global existing_subscription
 	existing_subscription = (server, shipname)
 	storage.storeInfo(existing_subscription, "station_comms_subscription")
 

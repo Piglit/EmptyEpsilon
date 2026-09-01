@@ -46,16 +46,6 @@ function wh_players:init()
 	}
 
 	self.shipsByInstance = {}
-	campaign:allowReinforcements(function (ship, instance, callsign)
-		if wh_players.shipsByInstance[instance] == nil then
-			wh_players:spawnedShipEnterSector(ship, callsign)
-			wh_players.shipsByInstance[instance] = true
-		else
-			wh_players:respawnedShipOnCommandStation(ship)
-		end
-		sendMessageToCampaignServer("request_reputation", callsign)
-		sendMessageToCampaignServer("request_artifacts", callsign)
-	end)
 
 	getScriptStorage().wh_players = self
 end
@@ -199,6 +189,24 @@ function wh_players.onDestruction(player, instigator)
 	end
 end
 
+function wh_players:gm_menu()
+	if not self.free_for_all then
+		addGMFunction(_("buttonGM", "Mission freigeben"), function()
+			campaign:allowReinforcements(function (ship, instance, callsign)
+				if wh_players.shipsByInstance[instance] == nil then
+					wh_players:spawnedShipEnterSector(ship, callsign)
+					wh_players.shipsByInstance[instance] = true
+				else
+					wh_players:respawnedShipOnCommandStation(ship)
+				end
+				sendMessageToCampaignServer("request_reputation", callsign)
+				sendMessageToCampaignServer("request_artifacts", callsign)
+			end)
+			wh_players.free_for_all = true
+			removeGMFunction(_("buttonGM", "Mission freigeben"))
+		end)
+	end
+end
 function wh_players:update(delta)
 	xanstas_player_update(delta)
 end

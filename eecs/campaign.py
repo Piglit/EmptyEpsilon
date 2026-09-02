@@ -28,8 +28,7 @@ scenarios = [
 	"scenario_06_edgeofspace.lua",	# unlocks kraylor waves if progress<100%
 	"scenario_07_gftp.lua",			# if not artifact: unlock ghost wave
 	"scenario_08_atlantis.lua",
-
-	"scenario_99_avp.lua",
+	"scenario_99_vf.lua",
 ]
 
 campaign = models.campaign.Campaign(scenarios) 

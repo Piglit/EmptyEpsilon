@@ -17,6 +17,7 @@ plot_manager = {
 -- string: requires lua file, that must have a global table with the same name as the file.
 -- table (string, table): name and global table.
 function plot_manager:init(plot_modules)
+	local storage = getScriptStorage()
 	if not self.init_run then
 		-- distribute callbacks to modules that have an onNewPlayerShip function
 		onNewPlayerShip(function(ship)
@@ -29,7 +30,6 @@ function plot_manager:init(plot_modules)
 		end)
 
 		-- expose everything to storage for outside script access.
-		local storage = getScriptStorage()
 		storage["plot_manager"] = self
 
 		self.init_run = true
@@ -56,6 +56,7 @@ function plot_manager:init(plot_modules)
 		self.plot_modules_by_name[name] = module
 		table.insert(self.plot_modules_by_index, module)
 
+		storage[name] = module
 		-- call init and initTest on all modules that have those functions
 		if module.init ~= nil then
 			module:init()

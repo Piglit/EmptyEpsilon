@@ -80,13 +80,21 @@ class Campaign:
 
 	def _request_reputation(self, scenario, crew, target_crew):
 		if target_crew:
-			models.crew.getCrewByCallsign(target_crew).sendReputation(server="localhost", reduce=True)	# XXX server is hacky
+			existing_subscription = storage.loadInfo("station_comms_subscription") # or None if not found
+			if not existing_subscription:	# XXX what if...
+				return
+			(station_server, station_name) = existing_subscription
+			models.crew.getCrewByCallsign(target_crew).sendReputation(server=station_server, reduce=True)
 		else:
 			crew.sendReputation()
 
 	def _request_artifacts(self, scenario, crew, target_crew):
 		assert isinstance(target_crew, str)
-		models.crew.getCrewByCallsign(target_crew).sendArtifacts(server="localhost") # XXX server is hacky
+		existing_subscription = storage.loadInfo("station_comms_subscription") # or None if not found
+		if not existing_subscription:	# XXX what if...
+			return
+		(station_server, station_name) = existing_subscription
+		models.crew.getCrewByCallsign(target_crew).sendArtifacts(server=station_server) # XXX test!
 
 
 	def test_run(self):

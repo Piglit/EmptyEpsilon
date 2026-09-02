@@ -19,7 +19,9 @@ function vf_timesync:sync_time(time_in_sec)
 	assert(type(time_in_sec) == "number")
 	-- set game time minute to real time hour
 	self.desired_time = time_in_sec/60
-	if self.desired_time > getScenarioTime() then
+	sc_time = getScenarioTime()
+	if self.desired_time > sc_time then
+		self.desired_time = self.desired_time + (self.desired_time - sc_time)/60
 		unslowGame()
 		self.timesync_active = true
 	end
@@ -41,7 +43,7 @@ end
 
 function vf_timesync:update(delta)
 	if self.timesync_active then
-		if desired_time <= getScenarioTime() then
+		if self.desired_time <= getScenarioTime() then
 			self.timesync_active = false
 			superSlowGame()
 		end

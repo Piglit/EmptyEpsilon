@@ -180,6 +180,9 @@ int main(int argc, char** argv)
         textureManager.setDisabled(true);
 
     new DirectoryResourceProvider("mod_spacelan/");	// scripts or other resources in the mod directory take precedence before resources in other directories, since this provider is added first. Notice that other resources with the same name are not used anymore!
+#ifdef RESOURCE_BASE_DIR
+    new DirectoryResourceProvider(RESOURCE_BASE_DIR "mod_spacelan/");
+#endif
     if (PreferencesManager::get("mod") != "")
     {
         string mod = PreferencesManager::get("mod");

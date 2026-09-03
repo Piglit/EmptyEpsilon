@@ -390,11 +390,11 @@ class Crew:
 	def getProfile(self) -> str:
 		return self.profile
 
-	def setActivity(self, what) -> bool:
-		if self.activity != what:
-			self.activity = what
-			return True
-		return False
+	def setActivity(self, what:str):
+		self.last_activity = what
+
+	def getActivity(self) -> str:
+		return self.last_activity
 
 	def storeCrew(self):
 		storage.storeInfo(self, self.instance_name, subdir="crews")

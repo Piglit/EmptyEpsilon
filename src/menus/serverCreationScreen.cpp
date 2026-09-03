@@ -759,7 +759,7 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
 
 	ship_created = new GuiLabel(ship_content, "SHIP_CREATED", tr("Schiff ist bereit!"), 30);
-	ship_content->setSize(GuiElement::GuiSizeMax, 50)->hide();
+	ship_created->setSize(GuiElement::GuiSizeMax, 50)->hide();
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();

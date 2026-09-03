@@ -56,7 +56,6 @@ campaign = models.campaign.Campaign(scenarios)
 # uses scriptId
 campaign.setReputationFactor("20_training1", 0.25)
 campaign.setReputationFactor("00_basic", 0.5)
-campaign.setReputationFactor("26_specialist_training", 0.75)
 campaign.setReputationFactor("03_waves", 10) # 10 per wave per difficulty
 
 

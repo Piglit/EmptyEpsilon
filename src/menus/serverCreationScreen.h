@@ -99,6 +99,7 @@ private:
     GuiSelector* ship_template_selector;
     GuiSelector* ship_drive_selector;
     GuiButton* ship_create_button;
+    GuiLabel* ship_created;
     sp::io::network::Address host;
     int listenPort;
 public:

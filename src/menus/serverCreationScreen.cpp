@@ -452,6 +452,8 @@ ServerCampaignScreen::ServerCampaignScreen()
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50)->disable()->hide();
 
+    scenario_list->setSelectionIndex(-1);
+    proxy_list->setSelectionIndex(-1);
     loadCampaign();
 //    campaign_client->notifyCampaignServerScreen("scenario selection");
 
@@ -495,7 +497,6 @@ void ServerCampaignScreen::loadCampaign()
 
     briefing_text = campaign["briefing"].get<std::string>();
 
-    scenario_list->setSelectionIndex(-1);
     scenario_list->setOptions({});
     for (auto scenario : campaign["scenarios"])
     {
@@ -503,14 +504,18 @@ void ServerCampaignScreen::loadCampaign()
         ScenarioInfo info(filename);
         scenario_list->addEntry(info.name, info.filename);
     }
+	if (scenario_list->getSelectionIndex() > scenario_list->entryCount())
+		scenario_list->setSelectionIndex(-1);
 
-    proxy_list->setSelectionIndex(-1);
     proxy_list->setOptions({});
     for (auto const& [key, value]: campaign["proxies"].items())
     {
         proxies[key] = value;
         proxy_list->addEntry(value, key);
     }
+	if (proxy_list->getSelectionIndex() > proxy_list->entryCount())
+		proxy_list->setSelectionIndex(-1);
+
     auto score_json = campaign["score"];
     for (auto const& [key, value]: score_json.items())
     {
@@ -700,11 +705,11 @@ void ServerCampaignScreen::update(float delta)
 	{
 		update_timer = 10.0f;
 		nlohmann::json campaign = campaign_client->getCampaign();
-		if (campaign["scenarios"].size() != scenario_list->entryCount())
-		{
+		//if (campaign["scenarios"].size() != scenario_list->entryCount())
+		//{
 			loadCampaign();
 			// what about selection index?
-		}
+		//}
 		// what about adding one but removing another scenario?
 	}
 
@@ -753,6 +758,8 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     ship_drive_selector->setSelectionIndex(0);
     ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
 
+	ship_created = new GuiLabel(ship_content, "SHIP_CREATED", tr("Schiff ist bereit!"), 30);
+	ship_content->setSize(GuiElement::GuiSizeMax, 50)->hide();
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();
@@ -760,6 +767,9 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
             ship_create_button->enable();
         else
         {
+			ship_created->show();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            ship_create_button->enable();
 //            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
 //            destroy();
         }

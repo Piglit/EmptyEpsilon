@@ -26,13 +26,13 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
         {
             auto line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_progress = new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.5, tr("Progress:"), "0%");
+            score_progress = new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.6, tr("Progress:"), "0%");
             score_progress->setSize(600, 50)->hide();
             score_progress_bar = new GuiProgressbar(score_progress, "SCORE_PROGRESS_BAR", 0, 100, 0);
             score_progress_bar->setDrawBackground(false)->setSize(600, 50)->setPosition(0,0)->hide();
             line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_progress_best = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_BEST", 0.5, tr("Your best progress:"), score["best_progress"]);
+            score_progress_best = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_BEST", 0.6, tr("Your best progress:"), score["best_progress"]);
             score_progress_best->setSize(300, 50)->hide();
             if (score.find("reputation") != score.end())
             {

@@ -700,11 +700,14 @@ void ServerCampaignScreen::update(float delta)
             crew_text_label->setText("No one is connected");
         }
 	}
+	if (delta <= 0.0f)
+		delta = 1.0f/60.0f;
 	update_timer -= delta;
 	if (update_timer < 0.0f)
 	{
+		LOG(INFO) << "Cyclic reload";
 		update_timer = 10.0f;
-		nlohmann::json campaign = campaign_client->getCampaign();
+		//nlohmann::json campaign = campaign_client->getCampaign();
 		//if (campaign["scenarios"].size() != scenario_list->entryCount())
 		//{
 			loadCampaign();

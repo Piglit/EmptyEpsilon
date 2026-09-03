@@ -1,2 +1,2 @@
 #!/bin/sh
-while true ; do	./fleeetCommand.py ; done
+while true ; do	eecs/tools/fleeetCommand.py ; done

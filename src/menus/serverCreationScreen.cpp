@@ -724,9 +724,9 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
     auto container = new GuiElement(this, "");
-    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 420+50+50)->setAttribute("layout", "horizontal");
+    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 490+50+50)->setAttribute("layout", "horizontal");
     auto panel = new GuiPanel(container, "");
-    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 420);
+    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 490);
      
     // ship creation panel
     auto ship_content = new GuiElement(panel, "");
@@ -762,7 +762,7 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
 
 	ship_created = new GuiLabel(ship_content, "SHIP_CREATED", tr("Schiff ist bereit!"), 30);
-	ship_created->setSize(GuiElement::GuiSizeMax, 50)->hide();
+	ship_created->setPosition(0,20,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50)->hide();
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();

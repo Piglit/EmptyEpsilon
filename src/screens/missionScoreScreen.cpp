@@ -26,7 +26,7 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
         {
             auto line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_progress = new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.6, tr("Progress:"), "0%");
+            score_progress = new GuiKeyValueDisplay(line, "SCORE_PROGRESS", 0.5, tr("Progress:"), "0%");
             score_progress->setSize(600, 50)->hide();
             score_progress_bar = new GuiProgressbar(score_progress, "SCORE_PROGRESS_BAR", 0, 100, 0);
             score_progress_bar->setDrawBackground(false)->setSize(600, 50)->setPosition(0,0)->hide();
@@ -41,7 +41,7 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
             }
             line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_progress_fleet = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.6, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]);
+            score_progress_fleet = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.5, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]);
             score_progress_fleet->setSize(600, 50)->hide();
             score_elements.push_back(score_progress);
             score_elements.push_back(score_progress_bar);

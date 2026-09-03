@@ -21,7 +21,7 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
         layout = new GuiElement(panel, "");
         layout->setMargins(25)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
 
-        (new GuiLabel(layout, "SCORE_HEADING", tr("Score of ") + score["current_scenario_name"], 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
+        (new GuiLabel(layout, "SCORE_HEADING", tr("ScenarioName", "Score of ") + score["current_scenario_name"], 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50);
         if (score.find("current_progress") != score.end())
         {
             auto line = new GuiElement(layout, "");
@@ -41,7 +41,7 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
             }
             line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_progress_fleet = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.15, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]);
+            score_progress_fleet = new GuiKeyValueDisplay(line, "SCORE_PROGRESS_FLEET", 0.6, tr("Fleet best:"), score["fleet_progress"] + score["fleet_progress_name"]);
             score_progress_fleet->setSize(600, 50)->hide();
             score_elements.push_back(score_progress);
             score_elements.push_back(score_progress_bar);
@@ -53,11 +53,11 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
         {
             auto line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_time = new GuiKeyValueDisplay(line, "SCORE_TIME", 0.6, tr("Time:"), score["current_time"]);
+            score_time = new GuiKeyValueDisplay(line, "SCORE_TIME", 0.5, tr("Time:"), score["current_time"]);
             score_time->setSize(150, 50)->hide();
-            score_time_best = new GuiKeyValueDisplay(line, "SCORE_TIME_BEST", 0.5, tr("Best:"), score["best_time"]);
+            score_time_best = new GuiKeyValueDisplay(line, "SCORE_TIME_BEST", 0.4, tr("Best:"), score["best_time"]);
             score_time_best->setSize(125, 50)->hide();
-            score_time_fleet = new GuiKeyValueDisplay(line, "SCORE_TIME_FLEET", 0.3, tr("Fleet best:"), score["fleet_time"] + score["fleet_time_name"]);
+            score_time_fleet = new GuiKeyValueDisplay(line, "SCORE_TIME_FLEET", 0.4, tr("Fleet best:"), score["fleet_time"] + score["fleet_time_name"]);
             score_time_fleet->setSize(325, 50)->hide();
             score_elements.push_back(score_time);
             score_elements.push_back(score_time_best);
@@ -67,11 +67,11 @@ MissionScoreScreen::MissionScoreScreen(RenderLayer* render_layer): GuiCanvas(ren
         {
             auto line = new GuiElement(layout, "");
             line->setMargins(0,-10,0,0)->setSize(600, 50)->setAttribute("layout", "horizontal");
-            score_artifacts = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS", 0.6, tr("Artifacts:"), score["current_artifacts"]);
+            score_artifacts = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS", 0.5, tr("Artifacts:"), score["current_artifacts"]);
             score_artifacts->setSize(150, 50)->hide();
-            score_artifacts_best = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_BEST", 0.5, tr("Best:"), score["best_artifacts"]);
+            score_artifacts_best = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_BEST", 0.4, tr("Best:"), score["best_artifacts"]);
             score_artifacts_best->setSize(125, 50)->hide();
-            score_artifacts_fleet = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_FLEET", 0.3, tr("Fleet best:"), score["fleet_artifacts"] + score["fleet_artifacts_name"]);
+            score_artifacts_fleet = new GuiKeyValueDisplay(line, "SCORE_ARTIFACTS_FLEET", 0.4, tr("Fleet best:"), score["fleet_artifacts"] + score["fleet_artifacts_name"]);
             score_artifacts_fleet->setSize(325, 50)->hide();
             score_elements.push_back(score_artifacts);
             score_elements.push_back(score_artifacts_best);

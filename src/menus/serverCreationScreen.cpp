@@ -452,6 +452,8 @@ ServerCampaignScreen::ServerCampaignScreen()
     });
     start_button->setPosition(250, -50, sp::Alignment::BottomCenter)->setSize(300, 50)->disable()->hide();
 
+    scenario_list->setSelectionIndex(-1);
+    proxy_list->setSelectionIndex(-1);
     loadCampaign();
 //    campaign_client->notifyCampaignServerScreen("scenario selection");
 
@@ -495,7 +497,6 @@ void ServerCampaignScreen::loadCampaign()
 
     briefing_text = campaign["briefing"].get<std::string>();
 
-    scenario_list->setSelectionIndex(-1);
     scenario_list->setOptions({});
     for (auto scenario : campaign["scenarios"])
     {
@@ -503,33 +504,24 @@ void ServerCampaignScreen::loadCampaign()
         ScenarioInfo info(filename);
         scenario_list->addEntry(info.name, info.filename);
     }
+	if (scenario_list->getSelectionIndex() > scenario_list->entryCount())
+		scenario_list->setSelectionIndex(-1);
 
-    proxy_list->setSelectionIndex(-1);
     proxy_list->setOptions({});
     for (auto const& [key, value]: campaign["proxies"].items())
     {
         proxies[key] = value;
         proxy_list->addEntry(value, key);
     }
+	if (proxy_list->getSelectionIndex() > proxy_list->entryCount())
+		proxy_list->setSelectionIndex(-1);
+
     auto score_json = campaign["score"];
     for (auto const& [key, value]: score_json.items())
     {
         score[key] = value;
     }
 }
-/*
-void ServerCampaignScreen::update()
-{
-    nlohmann::json campaign = campaign_client->getCampaign();
-	if (campaign["scenarios"].size() != scenario_list->size())
-	{
-		// TODO
-	}
-	// same with proxies
-	// what about selection index?
-	// what about adding one but removing another scenario?
-}
-*/
 
 void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
 {
@@ -708,6 +700,22 @@ void ServerCampaignScreen::update(float delta)
             crew_text_label->setText("No one is connected");
         }
 	}
+	if (delta <= 0.0f)
+		delta = 1.0f/60.0f;
+	update_timer -= delta;
+	if (update_timer < 0.0f)
+	{
+		LOG(INFO) << "Cyclic reload";
+		update_timer = 10.0f;
+		//nlohmann::json campaign = campaign_client->getCampaign();
+		//if (campaign["scenarios"].size() != scenario_list->entryCount())
+		//{
+			loadCampaign();
+			// what about selection index?
+		//}
+		// what about adding one but removing another scenario?
+	}
+
 }
 
 ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort): host(host), listenPort(listenPort)
@@ -716,9 +724,9 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
 
     auto container = new GuiElement(this, "");
-    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 420+50+50)->setAttribute("layout", "horizontal");
+    container->setPosition(0,0,sp::Alignment::Center)->setSize(510+50, 490+50+50)->setAttribute("layout", "horizontal");
     auto panel = new GuiPanel(container, "");
-    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 420);
+    panel->setPosition(50 ,50, sp::Alignment::TopLeft)->setSize(510, 490);
      
     // ship creation panel
     auto ship_content = new GuiElement(panel, "");
@@ -753,6 +761,8 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
     ship_drive_selector->setSelectionIndex(0);
     ship_drive_selector->setSize(GuiElement::GuiSizeMax, 50);
 
+	ship_created = new GuiLabel(ship_content, "SHIP_CREATED", tr("Schiff ist bereit!"), 30);
+	ship_created->setPosition(0,20,sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50)->hide();
     // Spawn a ship of the selected template near 0,0 and give it a random heading.
     ship_create_button = new GuiButton(ship_content, "CREATE_SHIP_BUTTON", tr("Create ship"), [this, host, listenPort]() {
         ship_create_button->disable();
@@ -760,8 +770,11 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
             ship_create_button->enable();
         else
         {
-            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
-            destroy();
+			ship_created->show();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            ship_create_button->enable();
+//            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
+//            destroy();
         }
     });
     ship_create_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
@@ -808,24 +821,24 @@ bool ProxyJoinScreen::proxySpawn(string templ, string drive)
 
 ProxyConnectedScreen::ProxyConnectedScreen(sp::io::network::Address host, int listenPort, string callsign): host(host), listenPort(listenPort), callsign(callsign)
 {
-    if (!game_client)
-    {
-        new GameClient(VERSION_NUMBER, host, listenPort);
-        LOG(DEBUG) << "created new client";
-    }
-    new GuiOverlay(this, "", colorConfig.background);
-    (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
-    status_label = new GuiLabel(this, "STATUS", tr("Searching for connection..."), 50);
-    status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
+    //if (!game_client)
+    //{
+    //    new GameClient(VERSION_NUMBER, host, listenPort);
+    //    LOG(DEBUG) << "created new client";
+    //}
+    //new GuiOverlay(this, "", colorConfig.background);
+    //(new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
+    //status_label = new GuiLabel(this, "STATUS", tr("Searching for connection..."), 50);
+    //status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
 	// Close server button.
 	(new GuiButton(this, "CLOSE_SERVER", tr("Disconnect"), [this]() {
-		campaign_client->notifyCampaignServerScreen("login");
+		//campaign_client->notifyCampaignServerScreen("login");
 		destroy();
 		disconnectFromServer();
 		new CampaignMenu();
 	}))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(200, 50);
 }
-
+/*
 void ProxyConnectedScreen::update(float delta)
 {
     if (!game_client)
@@ -861,4 +874,4 @@ void ProxyConnectedScreen::update(float delta)
             status_label->setText(tr("Connected"));
     }
 }
-
+*/

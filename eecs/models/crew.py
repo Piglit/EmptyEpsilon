@@ -62,6 +62,7 @@ class Crew:
 		self.artifacts = {}
 		self.code = ""
 		self.profile = "default"
+		self.last_activity = ""
 
 	def setCrewName(self, name):
 		self.crew_name = name
@@ -388,6 +389,12 @@ class Crew:
 
 	def getProfile(self) -> str:
 		return self.profile
+
+	def setActivity(self, what) -> bool:
+		if self.activity != what:
+			self.activity = what
+			return True
+		return False
 
 	def storeCrew(self):
 		storage.storeInfo(self, self.instance_name, subdir="crews")

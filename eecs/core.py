@@ -18,8 +18,9 @@ def unsubscribe(event, fun):
 # topics
 
 def activity(crew, what, event=None, scenario=None):
-	for sub in subscriptions.get("activity",[]):
-		if crew.setActivity(what):
+	if crew.getActivity() != what:
+		crew.setActivity(what)
+		for sub in subscriptions.get("activity",[]):
 			sub(crew, what, event=event, scenario=scenario)
 	if event and scenario:
 		scenario_event(scenario, crew, event.value)

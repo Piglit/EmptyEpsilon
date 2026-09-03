@@ -6,8 +6,8 @@
 -- Difficulty: Easy
 -- Description: Fight against different kinds of enemies, using the special powers of your ship.
 
-require("utils.lua")    -- formatTime
-require("luax.lua")     -- table.filter
+require("utils.lua")	-- formatTime
+require("luax.lua")	 -- table.filter
 require("plots/campaign.lua")
 require("plots/wh_rota.lua")
 require("plots/gravity_util.lua")
@@ -62,7 +62,7 @@ function insertDrone(mother, newShip, idx)
 end
 
 function createExuariShuttle()
-    return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
+	return CpuShip():setFaction("Exuari"):setTemplate("Racer"):setTypeName("Exuari shuttle"):setWarpDrive(false):setBeamWeapon(0, 0, 355, 0, 0.1, 0.1):setBeamWeapon(1, 0, 355, 0, 0.1, 0.1)
 end
 
 local enemySets = {
@@ -319,10 +319,15 @@ function onNewPlayerShipSpawned(ship)
 	add_reinforecements(playershiptype)
 	place_artifact()
 	commsInstr(ship)
+	started = true
+	if campaign.enemyCountStart ~= nil then
+		campaign.enemyCountStart = #enemyList
+	end
 end
 
 -- init
 function init()
+	started = false
 	wh_artifacts:init()
 	gravity_util.gravity_const = 2000000	-- 50 times as high!
 
@@ -342,10 +347,10 @@ function init()
 		},
 	}
 
-    enemyGroups = {}
-    enemyList = {}
-    finishedTimer = 5
-    finishedFlag = false
+	enemyGroups = {}
+	enemyList = {}
+	finishedTimer = 5
+	finishedFlag = false
 	first_instr = false
 	artifacts_placed = 0
 	artifact_module_index = 4
@@ -392,15 +397,15 @@ end
 
 
 function finished(delta)
-    finishedTimer = finishedTimer - delta
+	finishedTimer = finishedTimer - delta
 	local timer = getScenarioTime()
-    if finishedTimer < 0 then
-        victory("Human Navy")
-    end
-    if finishedFlag == false then
-        finishedFlag = true
+	if finishedTimer < 0 then
+		victory("Human Navy")
+	end
+	if finishedFlag == false then
+		finishedFlag = true
 		campaign:victoryScore()
-    end
+	end
 end
 
 function bonusDestroyed(bonus, _)
@@ -414,32 +419,35 @@ end
 
 function update(delta)
 	wh_rota:update(delta)
+	if not started then
+		return
+	end
 	for __, ship in ipairs(getActivePlayerShips()) do
 		gravity_util:updatePlayerShip(delta, ship)
 	end
-    local enemyCount = campaign:progressEnemyCount(enemyList, true) -- true: remove all invalid objects enemies from the list
+	local enemyCount = campaign:progressEnemyCount(enemyList, false) -- true: remove all invalid objects enemies from the list
 
-    if enemyCount == 0 then
-        if not bonusAvail then
-            finished(delta)
-        else
-            if not bonus:isValid() then
-                finished(delta)
-            end
-        end
-    end
+	if enemyCount == 0 then
+		if not bonusAvail then
+			finished(delta)
+		else
+			if not bonus:isValid() then
+				finished(delta)
+			end
+		end
+	end
 
---    if bonus:isValid() then
---        local x, y = bonus:getPosition()
---        if x < -40000 then
---            bonus:setWarpDrive(true)
---        end
---        if x < -50000 then
---            bonusAvail = false
---        end
---    end
+--	if bonus:isValid() then
+--		local x, y = bonus:getPosition()
+--		if x < -40000 then
+--			bonus:setWarpDrive(true)
+--		end
+--		if x < -50000 then
+--			bonusAvail = false
+--		end
+--	end
 --
---    commsInstr()
---    needHelp(delta)
+--	commsInstr()
+--	needHelp(delta)
 end
 

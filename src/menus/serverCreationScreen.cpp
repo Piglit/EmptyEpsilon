@@ -517,19 +517,6 @@ void ServerCampaignScreen::loadCampaign()
         score[key] = value;
     }
 }
-/*
-void ServerCampaignScreen::update()
-{
-    nlohmann::json campaign = campaign_client->getCampaign();
-	if (campaign["scenarios"].size() != scenario_list->size())
-	{
-		// TODO
-	}
-	// same with proxies
-	// what about selection index?
-	// what about adding one but removing another scenario?
-}
-*/
 
 void ServerCampaignScreen::displayDetails(string caption, std::vector<std::pair<string, string> > details)
 {
@@ -708,6 +695,19 @@ void ServerCampaignScreen::update(float delta)
             crew_text_label->setText("No one is connected");
         }
 	}
+	update_timer -= delta;
+	if (update_timer < 0.0f)
+	{
+		update_timer = 10.0f;
+		nlohmann::json campaign = campaign_client->getCampaign();
+		if (campaign["scenarios"].size() != scenario_list->entryCount())
+		{
+			loadCampaign();
+			// what about selection index?
+		}
+		// what about adding one but removing another scenario?
+	}
+
 }
 
 ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort): host(host), listenPort(listenPort)
@@ -760,8 +760,8 @@ ProxyJoinScreen::ProxyJoinScreen(sp::io::network::Address host, int listenPort):
             ship_create_button->enable();
         else
         {
-            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
-            destroy();
+//            new ProxyConnectedScreen(host, listenPort, PreferencesManager::get("shipname"));
+//            destroy();
         }
     });
     ship_create_button->setPosition(20, 20, sp::Alignment::TopLeft)->setSize(GuiElement::GuiSizeMax, 50);
@@ -808,24 +808,24 @@ bool ProxyJoinScreen::proxySpawn(string templ, string drive)
 
 ProxyConnectedScreen::ProxyConnectedScreen(sp::io::network::Address host, int listenPort, string callsign): host(host), listenPort(listenPort), callsign(callsign)
 {
-    if (!game_client)
-    {
-        new GameClient(VERSION_NUMBER, host, listenPort);
-        LOG(DEBUG) << "created new client";
-    }
-    new GuiOverlay(this, "", colorConfig.background);
-    (new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
-    status_label = new GuiLabel(this, "STATUS", tr("Searching for connection..."), 50);
-    status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
+    //if (!game_client)
+    //{
+    //    new GameClient(VERSION_NUMBER, host, listenPort);
+    //    LOG(DEBUG) << "created new client";
+    //}
+    //new GuiOverlay(this, "", colorConfig.background);
+    //(new GuiOverlay(this, "", glm::u8vec4{255,255,255,255}))->setTextureTiled("gui/background/crosses.png");
+    //status_label = new GuiLabel(this, "STATUS", tr("Searching for connection..."), 50);
+    //status_label->setPosition(0, 300, sp::Alignment::TopCenter)->setSize(0, 50);
 	// Close server button.
 	(new GuiButton(this, "CLOSE_SERVER", tr("Disconnect"), [this]() {
-		campaign_client->notifyCampaignServerScreen("login");
+		//campaign_client->notifyCampaignServerScreen("login");
 		destroy();
 		disconnectFromServer();
 		new CampaignMenu();
 	}))->setPosition(0, -50, sp::Alignment::BottomCenter)->setSize(200, 50);
 }
-
+/*
 void ProxyConnectedScreen::update(float delta)
 {
     if (!game_client)
@@ -861,4 +861,4 @@ void ProxyConnectedScreen::update(float delta)
             status_label->setText(tr("Connected"));
     }
 }
-
+*/

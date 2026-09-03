@@ -72,6 +72,7 @@ void ScenarioInfo::addKeyValue(string key, string value)
         additional = key.substr(key.find("[") + 1, -1);
         key = key.substr(0, key.find("["));
     }
+
     if (key.lower() == "name")
     {
         name = locale->tr(value);
@@ -80,7 +81,7 @@ void ScenarioInfo::addKeyValue(string key, string value)
     {
         description = locale->tr(value);
     }
-    else if (key.lower() == "short description" || key.lower() == "objective" || key.lower() == "duration" || key.lower() == "difficulty")
+    else if (additional.empty() && (key.lower() == "short description" || key.lower() == "objective" || key.lower() == "duration" || key.lower() == "difficulty"))
     {
         detailed_description.push_back({key, locale->tr(value)});
     }

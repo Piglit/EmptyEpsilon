@@ -56,6 +56,12 @@ void Zone::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float sca
     if (!long_range || !outline.size())
         return;
 
+    // TODO: This compares two entire vectors. It may be fine. But I would rather have a better way to tell clients to call the setup function than brute force it.
+    if (outline != client_outline)
+    {
+        setPoints(outline);
+    }
+
     if (label.length() > 0)
     {
         float font_size = getRadius() * scale / label.length();
@@ -91,6 +97,7 @@ void Zone::setColor(int r, int g, int b)
 void Zone::setPoints(const std::vector<glm::vec2>& points)
 {
     triangles.clear();
+    client_outline = points;
     outline = points;
 
     glm::vec2 position = centerOfMass(outline);

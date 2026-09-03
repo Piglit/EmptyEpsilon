@@ -90,7 +90,7 @@ function campaign:progressEnemyCount(enemyList, clean_up_list_in_place, on_chang
 	end
     if self.enemyCount ~= object_count then
 		self.enemyCount = object_count
-        sendProgressToCampaignServer(self.enemyCountStart - object_count, self.enemyCountStart)
+        sendProgressToCampaignServer(math.max(0, self.enemyCountStart - object_count), self.enemyCountStart)
 		if on_change ~= nil then
 			on_change()
 		end

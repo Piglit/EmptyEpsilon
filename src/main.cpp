@@ -391,7 +391,9 @@ int main(int argc, char** argv)
 #endif
 
     P<HardwareController> hardware_controller = new HardwareController();
-    hardware_controller->loadConfiguration(configuration_path + "/hardware.ini");
+
+    if (PreferencesManager::get("nodmx") == "")
+		hardware_controller->loadConfiguration(configuration_path + "/hardware.ini");
 
 #if WITH_DISCORD
     {

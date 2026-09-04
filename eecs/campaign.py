@@ -5,6 +5,7 @@ import models.scenario
 import models.campaign
 import outbound.stationsComms
 import outbound.pyroMessage
+from outbound.log import log
 from utils import lua
 from interfaces import storage
 import json
@@ -35,17 +36,17 @@ scenarios = [
 campaign = models.campaign.Campaign(scenarios) 
 
 def bescheid(what, callsign=None, mission=None):
-	now = datetime.datetime.now()
+	now = datetime.now()
 	time = f"{now.hour}:{now.minute}"
 	details = '{' + f'time = "{time}",'
 	if callsign:
 		details += f' callsign = "{lua.sanitize_lua_string(callsign)}",'
 	if mission:
-		details += f' callsign = "{lua.sanitize_lua_string(mission)}",'
+		details += f' mission = "{lua.sanitize_lua_string(mission)}",'
 	details += '}'
 	script = f"""return getScriptStorage().vf_bescheid:sag_bescheid("{what}", {details})"""
-	print(script)
-	lua.exec(lua.sanitize_lua_string(script), server="192.168.2.4:8080")
+	log.info(script)
+	lua.exec(script, server="192.168.2.4:8080")
 
 
 # best progress [0,100] of a played scenario times this factor results in the multiplayer rep bonus.
@@ -110,7 +111,7 @@ Gesammelte Artefakte können in einer späteren Mission an Raumstationen eingese
 Jede Mission enthält ein Missions-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
 """)
 		if artifact['collected'] == True:
-			bescheid("first_artifact_gathered", callsign=crew.name)
+			bescheid("first_artifact_gathered", callsign=crew.crew_name)
 		elif artifact['collected'] == False:
 			bescheid("first_artifact_destroyed")
 
@@ -324,11 +325,11 @@ Der Reputations-Bonus ergibt sich aus dem gewählten Schwierigkeitsgrad und dem 
 	if event_topic in ["started", "quit", "victory", "defeat", "end", "joined"]:
 		crew.setProxyOpen(False)
 
-	if event_topic == "started":
-		bescheid("first_mission_started", callsign=crew.name, mission=scenario.name)
+	if event_topic == "started" and scenario.name != "Verhärtete Fronten":
+		bescheid("first_mission_started", callsign=crew.crew_name, mission=scenario.name)
 
 	if event_topic == "victory":
-		bescheid("first_mission_finished", callsign=crew.name, mission=scenario.name)
+		bescheid("first_mission_finished", callsign=crew.crew_name, mission=scenario.name)
 
 core.subscribe("scenario_event", scenario_event)
 

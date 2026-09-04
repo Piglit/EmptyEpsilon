@@ -12,7 +12,7 @@ def timesync(server):
 	exec(code, server=server+":8080")
 	print(f"sent time '{time}' to {server}")
 
-	code = f"""return getScriptStorage().vf_bescheid:sag_bescheid("init")"""
+	code = """return getScriptStorage().vf_bescheid:sag_bescheid("init", {})"""
 	exec(code, server=server+":8080")
 	print(f"sent bescheid init")
 

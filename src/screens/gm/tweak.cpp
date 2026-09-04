@@ -42,12 +42,6 @@ GuiObjectTweak::GuiObjectTweak(GuiContainer* owner, ETweakType tweak_type)
         list->addEntry(tr("tab", "Ship"), "");
     }
 
-    if (tweak_type == TW_Asteroid)
-    {
-        pages.push_back(new GuiAsteroidTweak(this));
-        list->addEntry(tr("tab", "Asteroid"), "");
-    }
-
     if (tweak_type == TW_Jammer)
     {
         pages.push_back(new GuiJammerTweak(this));
@@ -430,32 +424,32 @@ void GuiJammerTweak::onDraw(sp::RenderTarget& renderer)
     hull_slider->setValue(target->getHull());
 }
 
-GuiAsteroidTweak::GuiAsteroidTweak(GuiContainer* owner)
-: GuiTweakPage(owner)
-{
-    auto left_col = new GuiElement(this, "LEFT_LAYOUT");
-    left_col->setPosition(50, 25, sp::Alignment::TopLeft)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
-    auto right_col = new GuiElement(this, "RIGHT_LAYOUT");
-    right_col->setPosition(-25, 25, sp::Alignment::TopRight)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
-
-    (new GuiLabel(left_col, "", tr("Asteroid Size:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
-    asteroid_size_slider = new GuiSlider(left_col, "", 10, 500, 0, [this](float value) {
-        target->setSize(value);
-    });
-    asteroid_size_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
-}
-
-void GuiAsteroidTweak::open(P<SpaceObject> target)
-{
-    P<Asteroid> asteroid = target;
-    this->target = asteroid;
-}
-
-void GuiAsteroidTweak::onDraw(sp::RenderTarget& renderer)
-{
-    asteroid_size_slider->setValue(target->getSize());
-}
+//GuiAsteroidTweak::GuiAsteroidTweak(GuiContainer* owner)
+//: GuiTweakPage(owner)
+//{
+//    auto left_col = new GuiElement(this, "LEFT_LAYOUT");
+//    left_col->setPosition(50, 25, sp::Alignment::TopLeft)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+//
+//    auto right_col = new GuiElement(this, "RIGHT_LAYOUT");
+//    right_col->setPosition(-25, 25, sp::Alignment::TopRight)->setSize(300, GuiElement::GuiSizeMax)->setAttribute("layout", "vertical");
+//
+//    (new GuiLabel(left_col, "", tr("Asteroid Size:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
+//    asteroid_size_slider = new GuiSlider(left_col, "", 10, 500, 0, [this](float value) {
+//        target->setSize(value);
+//    });
+//    asteroid_size_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+//}
+//
+//void GuiAsteroidTweak::open(P<SpaceObject> target)
+//{
+//    P<Asteroid> asteroid = target;
+//    this->target = asteroid;
+//}
+//
+//void GuiAsteroidTweak::onDraw(sp::RenderTarget& renderer)
+//{
+//    asteroid_size_slider->setValue(target->getSize());
+//}
 
 void GuiShipTweakMissileWeapons::onDraw(sp::RenderTarget& renderer)
 {
@@ -1337,6 +1331,17 @@ GuiObjectTweakBase::GuiObjectTweakBase(GuiContainer* owner)
         target->setScanningParameters(target->scanningComplexity(target),value);
     });
     scanning_depth_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
+
+	size_label = new GuiLabel(right_col, "", "Size", 30);
+	size_label->setSize(GuiElement::GuiSizeMax, 50);
+	size_slider = new GuiSlider(right_col, "", 1, 5, 0, [this](float value) {
+		auto sizable_obj = dynamic_cast<ISpaceObjectWithSize*>(*target);
+		if (sizable_obj)
+		{
+			sizable_obj->setSize(value);
+		}
+	});
+	size_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
 }
 
 void GuiObjectTweakBase::onDraw(sp::RenderTarget& renderer)
@@ -1355,6 +1360,23 @@ void GuiObjectTweakBase::onDraw(sp::RenderTarget& renderer)
     // but doing it forces the slider to round to a integer
     scanning_complexity_slider->setValue(target->scanningComplexity(target));
     scanning_depth_slider->setValue(target->scanningChannelDepth(target));
+
+    auto sizable_obj = dynamic_cast<ISpaceObjectWithSize*>(*target);
+    if (sizable_obj)
+    {
+        if (!size_label->isVisible())
+        {
+            size_label->show();
+            size_slider->show();
+        }
+        size_slider->setRange(sizable_obj->getReasonableMinValue(), sizable_obj->getReasonableMaxValue());
+        size_slider->setValue(sizable_obj->getSize());
+    }
+    else if(size_label->isVisible())
+    {
+        size_label->hide();
+        size_slider->hide();
+    }
 }
 
 void GuiObjectTweakBase::open(P<SpaceObject> target)

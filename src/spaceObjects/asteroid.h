@@ -2,51 +2,46 @@
 #define ASTEROID_H
 
 #include "spaceObject.h"
+#include "spaceObjectWithSize.h"
 
-class Asteroid : public SpaceObject
+class AbstractAsteroid : public SpaceObjectWithSize
 {
 public:
     float rotation_speed;
     float z;
-    float size;
     int model_number;
 
-    Asteroid();
+    AbstractAsteroid(string multiplayerName);
+    virtual ~AbstractAsteroid() = default;
 
     virtual void draw3D() override;
+    virtual void setSize(float size) override;
+    virtual float getReasonableMaxValue() override { return 1000; }
 
-    virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
-
-    virtual void collide(Collisionable* target, float force) override;
-
-    void setSize(float size);
-    float getSize();
-
-    virtual string getExportLine() override { return "Asteroid():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + ")" + ":setSize(" + string(getSize(),0) + ")"; }
+    virtual string getExportLineStart() = 0;
+    virtual string getExportLine() override { return getExportLineStart() + ":setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + ")" + ":setSize(" + string(getSize(), 0) + ")"; }
 
 protected:
     glm::mat4 getModelMatrix() const override;
 };
 
-class VisualAsteroid : public SpaceObject
+class Asteroid : public AbstractAsteroid
 {
 public:
-    float rotation_speed;
-    float z;
-    float size;
-    int model_number;
+    Asteroid();
 
+    virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
+    virtual void collide(Collisionable* target, float force) override;
+
+    virtual string getExportLineStart() override { return "Asteroid()"; }
+};
+
+class VisualAsteroid : public AbstractAsteroid
+{
+public:
     VisualAsteroid();
 
-    virtual void draw3D() override;
-
-    void setSize(float size);
-    float getSize();
-
-    virtual string getExportLine() override { return "VisualAsteroid():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + ")" ":setSize(" + string(getSize(),0) + ")"; }
-
-protected:
-    glm::mat4 getModelMatrix() const override;
+    virtual string getExportLineStart() override { return "VisualAsteroid()"; }
 };
 
 #endif//ASTEROID_H

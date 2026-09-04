@@ -12,12 +12,8 @@
 /// This is a cosmetic effect and does not deal damage on its own.
 /// See also the ElectricExplosionEffect class for EMP missile effects.
 /// Example: explosion = ExplosionEffect():setPosition(500,5000):setSize(20):setOnRadar(true)
-REGISTER_SCRIPT_SUBCLASS(ExplosionEffect, SpaceObject)
+REGISTER_SCRIPT_SUBCLASS(ExplosionEffect, SpaceObjectWithSize)
 {
-    /// Sets the ExplosionEffect's radius.
-    /// Defaults to 1.0.
-    /// Example: explosion:setSize(1000) -- sets the explosion radius to 1U
-    REGISTER_SCRIPT_CLASS_FUNCTION(ExplosionEffect, setSize);
     /// Defines whether to draw the ExplosionEffect on short-range radar.
     /// Defaults to false.
     /// Example: explosion:setOnRadar(true)
@@ -26,17 +22,14 @@ REGISTER_SCRIPT_SUBCLASS(ExplosionEffect, SpaceObject)
 
 REGISTER_MULTIPLAYER_CLASS(ExplosionEffect, "ExplosionEffect");
 ExplosionEffect::ExplosionEffect()
-: SpaceObject(1000.0, "ExplosionEffect")
+: SpaceObjectWithSize(1, 1, "ExplosionEffect")
 {
-    size = 1.f;
     explosion_sound = "sfx/explosion.wav";
     on_radar = false;
-    setCollisionRadius(1.0);
     lifetime = maxLifetime;
     for(int n=0; n<particleCount; n++)
         particleDirections[n] = glm::normalize(glm::vec3(random(-1, 1), random(-1, 1), random(-1, 1))) * random(0.8f, 1.2f);
 
-    registerMemberReplication(&size);
     registerMemberReplication(&on_radar);
 
     static_assert(4 * max_quad_count <= std::numeric_limits<uint16_t>::max(), "Quad count is too large, busts u16 indices size!");

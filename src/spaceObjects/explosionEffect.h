@@ -3,14 +3,14 @@
 
 #include "spaceObject.h"
 #include "glObjects.h"
+#include "spaceObjectWithSize.h"
 
-class ExplosionEffect : public SpaceObject, public Updatable
+class ExplosionEffect : public SpaceObjectWithSize, public Updatable
 {
     constexpr static float maxLifetime = 2.f;
     constexpr static int particleCount = 1000;
 
     float lifetime;
-    float size;
     string explosion_sound;
     glm::vec3 particleDirections[particleCount];
     bool on_radar;
@@ -25,9 +25,9 @@ public:
     virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool longRange) override;
     virtual void update(float delta) override;
 
-    void setSize(float size) { this->size = size; }
     void setExplosionSound(string sound) { this->explosion_sound = sound; }
     void setOnRadar(bool on_radar) { this->on_radar = on_radar; }
+    virtual float getReasonableMaxValue() override { return 100; }
 private:
     void initializeParticles();
 };

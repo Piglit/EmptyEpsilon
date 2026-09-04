@@ -26,42 +26,26 @@ struct VertexAndTexCoords
 /// Likewise, a SpaceShip fully inside of a nebula has effectively no long-range radar functionality.
 /// In 3D space, a Nebula resembles a dense cloud of colorful gases.
 /// Example: nebula = Nebula():setPosition(1000,2000)
-REGISTER_SCRIPT_SUBCLASS(Nebula, SpaceObject)
+REGISTER_SCRIPT_SUBCLASS(Nebula, SpaceObjectWithSize)
 {
-    /// Sets this Nebulas radius.
-    /// Example: nebula:setSize(5000)
-    REGISTER_SCRIPT_CLASS_FUNCTION(Nebula, setSize);
-
-    /// Gets this Nebulas radius.
-    /// Example: nebula:getSize()
-    REGISTER_SCRIPT_CLASS_FUNCTION(Nebula, getSize);
 }
 
 PVector<Nebula> Nebula::nebula_list;
 
 REGISTER_MULTIPLAYER_CLASS(Nebula, "Nebula")
 Nebula::Nebula()
-: SpaceObject(5000, "Nebula")
+: SpaceObjectWithSize(5000, 5000, "Nebula")
 {
     // Nebulae need a large radius to render properly from a distance, but
     // collision isn't important, so set the collision radius to a tiny range.
-    setCollisionRadius(1);
+    //setCollisionRadius(1); // already done above
     setRotation(random(0, 360));
     radar_visual = irandom(1, 3);
     setRadarSignatureInfo(0.0, 0.8, -1.0);
 
-    size = 5000;
-    registerMemberReplication(&radar_visual);
-    registerMemberReplication(&size);
+    setSize(5000);
 
-    for(int n=0; n<cloud_count; n++)
-    {
-        clouds[n].size = random(512, 1024 * 2);
-        clouds[n].texture = irandom(1, 3);
-        float dist_min = clouds[n].size / 2.0f;
-        float dist_max = getRadius() - clouds[n].size;
-        clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
-    }
+    registerMemberReplication(&radar_visual);
 
     nebula_list.push_back(this);
 }
@@ -112,30 +96,30 @@ void Nebula::draw3DTransparent()
 
 void Nebula::setSize(float size)
 {
-    this->size = size;
+    SpaceObjectWithSize::setSize(size);
+
     setRadius(size);
     for(int n=0; n<cloud_count; n++)
     {
         clouds[n].size = random(512, 1024 * 2);
         clouds[n].texture = irandom(1, 3);
         float dist_min = clouds[n].size / 2.0f;
-        float dist_max = getRadius() - clouds[n].size;
+        float dist_max = std::max(dist_min, getRadius() - clouds[n].size);
         clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
     }
 }
 
-float Nebula::getSize()
-{
-    return size;
-}
-
 void Nebula::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
+    checkSizeMatchesRadius();
+
     renderer.drawRotatedSpriteBlendAdd("Nebula" + string(radar_visual) + ".png", position, getRadius() * scale * 3.0f, getRotation()-rotation);
 }
 
 void Nebula::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range)
 {
+    checkSizeMatchesRadius();
+
     renderer.drawCircleOutline(position, getRadius() * scale, 2.0, glm::u8vec4(255, 255, 255, 64));
 }
 

@@ -133,10 +133,6 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
             {
                 jammer_tweak_dialog->open(obj);
             }
-            else if (P<Asteroid>(obj))
-            {
-                asteroid_tweak_dialog->open(obj);
-            }
             else
             {
                 object_tweak_dialog->open(obj);
@@ -224,8 +220,6 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
     station_tweak_dialog->hide();
     jammer_tweak_dialog = new GuiObjectTweak(this, TW_Jammer);
     jammer_tweak_dialog->hide();
-    asteroid_tweak_dialog = new GuiObjectTweak(this, TW_Asteroid);
-    asteroid_tweak_dialog->hide();
 
     global_message_entry = new GuiGlobalMessageEntryView(this);
     global_message_entry->hide();

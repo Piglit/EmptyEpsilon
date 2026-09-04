@@ -231,6 +231,9 @@ function vf_bescheid:sag_bescheid(about, details, always)
 		msg = string.gsub(msg, "{"..key.."}", val)
 	end
 	log("Bescheid:", msg)
+	if wh_fleetcommand ~= nil and wh_fleetcommand.station ~= nil and wh_fleetcommand.station:isValid() then
+		wh_fleetcommand.station:addToShipLog(msg, "green")
+	end
 	sendMessageToCampaignServer("fernschreiber", msg)
 	self.sent[about] = true
 end

@@ -55,7 +55,7 @@ function campaign:placeArtifact(x,y,name,descr,callback)
 		wh_artifacts:init()
 	end
 	local art = wh_artifacts:placeDetailedArtifact(x,y,name,descr,function(art, pl, collected)
-		sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr})
+		sendMessageToCampaignServer("artifact", toJSON{name = art.resource_name, description = art.resource_descr, collected = collected})
 		sendMessageToCampaignServer("score", toJSON({artifacts = collected}))
 		if callback ~= nil then
 			callback(art, pl, collected)

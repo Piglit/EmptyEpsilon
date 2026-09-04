@@ -5,6 +5,7 @@ import models.scenario
 import models.campaign
 import outbound.stationsComms
 import outbound.pyroMessage
+from utils import lua
 from interfaces import storage
 import json
 import string
@@ -33,23 +34,18 @@ scenarios = [
 
 campaign = models.campaign.Campaign(scenarios) 
 
-# profiles:
-# beginner:
-	# Goal: learn the game
-	# Ships: Phobos light criuser
-	# Missions: 20_training1, 00_basic[Easy], 06_edgeofspace
-	# Timeline:				1:00,			1:30,			2:30
-# default/experienced:
-	# Goal: explore the game
-	# Ships: Supporters / Atlantis
-	# Missions: 20_training1, 00_basic[Normal], 21_training2 && 08_atlantis
-	# Timeline:				0:30,			1:00,			2:00
-# veteran:
-	# Goal: master the game
-	# Ships: their choice
-	# Missions: 20_training1, 00_basic[Hard], 07_gftp
-	# Timeline:				0:30,			1:00,			2:00
-
+def bescheid(what, callsign=None, mission=None):
+	now = datetime.datetime.now()
+	time = f"{now.hour}:{now.minute}"
+	details = '{' + f'time = "{time}",'
+	if callsign:
+		details += f' callsign = "{lua.sanitize_lua_string(callsign)}",'
+	if mission:
+		details += f' callsign = "{lua.sanitize_lua_string(mission)}",'
+	details += '}'
+	script = f"""return getScriptStorage().vf_bescheid:sag_bescheid("{what}", {details})"""
+	print(script)
+	lua.exec(lua.sanitize_lua_string(script), server="192.168.2.4:8080")
 
 
 # best progress [0,100] of a played scenario times this factor results in the multiplayer rep bonus.
@@ -113,6 +109,10 @@ Ihr habt in dieser Mission das Artefakt '{artifact['name']}' eingesammelt.
 Gesammelte Artefakte können in einer späteren Mission an Raumstationen eingesetzt werden, um diese Stationen mit Upgrades zu versorgen.
 Jede Mission enthält ein Missions-spezifisches Artefakt. Das gleiche Artefakt mehrfach einzusammeln bringt keine Vorteile; jedes Artefakt kann nur einmal eingesetzt werden.
 """)
+		if artifact['collected'] == True:
+			bescheid("first_artifact_gathered", callsign=crew.name)
+		elif artifact['collected'] == False:
+			bescheid("first_artifact_destroyed")
 
 	progress = campaign.scenario_event(scenario, crew, event_topic, details)
 	# progress can be None, if the event was not progress-related
@@ -324,8 +324,11 @@ Der Reputations-Bonus ergibt sich aus dem gewählten Schwierigkeitsgrad und dem 
 	if event_topic in ["started", "quit", "victory", "defeat", "end", "joined"]:
 		crew.setProxyOpen(False)
 
+	if event_topic == "started":
+		bescheid("first_mission_started", callsign=crew.name, mission=scenario.name)
 
-
+	if event_topic == "victory":
+		bescheid("first_mission_finished", callsign=crew.name, mission=scenario.name)
 
 core.subscribe("scenario_event", scenario_event)
 

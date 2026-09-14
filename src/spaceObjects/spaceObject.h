@@ -135,6 +135,7 @@ public:
     void setRadius(float radius) { object_radius = radius; setCollisionRadius(radius); }
 
     bool hasWeight() { return has_weight; }
+    virtual bool isGMSelectable() const { return true; }
 
     // Return the object's raw radar signature. The default signature is 0,0,0.
     virtual RawRadarSignatureInfo getRadarSignatureInfo() { return radar_signature; }

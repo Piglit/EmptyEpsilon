@@ -13,6 +13,7 @@ public:
 
     virtual bool canHideInNebula()  override { return false; }
     virtual ERadarLayer getRadarLayer() const override { return ERadarLayer::BackgroundZone; }
+    virtual bool isGMSelectable() const override { return false; }
 
     // Set the outline of the zone. Can say whether the points are relative to the Zone's position or absolute. The position (text coordinates) stay as they were.
     void setOutline(bool absolute, const std::vector<glm::vec2>& points);

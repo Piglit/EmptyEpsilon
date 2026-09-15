@@ -24,7 +24,6 @@ enum ETweakType
     TW_Ship,    // Ships
     TW_Station, // Space stations
     TW_Player,  // Player ships
-    TW_Asteroid // Asteroid
 };
 
 class GuiTweakPage : public GuiElement
@@ -111,19 +110,19 @@ public:
     virtual void open(P<SpaceObject> target) override;
 };
 
-class GuiAsteroidTweak : public GuiTweakPage
-{
-private:
-    P<Asteroid> target;
-
-    GuiSlider* asteroid_size_slider;
-public:
-    GuiAsteroidTweak(GuiContainer* owner);
-
-    virtual void onDraw(sp::RenderTarget& target) override;
-
-    virtual void open(P<SpaceObject> target) override;
-};
+//class GuiAsteroidTweak : public GuiTweakPage
+//{
+//private:
+//	P<Asteroid> target;
+//
+//	GuiSlider* asteroid_size_slider;
+//public:
+//	GuiAsteroidTweak(GuiContainer* owner);
+//
+//	virtual void onDraw(sp::RenderTarget& target) override;
+//
+//	virtual void open(P<SpaceObject> target) override;
+//};
 
 class GuiShipTweakMissileWeapons : public GuiTweakPage
 {
@@ -323,6 +322,8 @@ private:
     GuiSlider* heading_slider;
     GuiSlider* scanning_complexity_slider;
     GuiSlider* scanning_depth_slider;
+    GuiLabel* size_label;
+    GuiSlider* size_slider;
 public:
     GuiObjectTweakBase(GuiContainer* owner);
 

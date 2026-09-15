@@ -30,7 +30,7 @@ struct VertexAndTexCoords
 /// Any SpaceObject that reaches its center is teleported to another point in space.
 /// AI behaviors avoid WormHoles by a 2U margin.
 /// Example: wormhole = WormHole():setPosition(1000,1000):setTargetPosition(10000,10000)
-REGISTER_SCRIPT_SUBCLASS(WormHole, SpaceObject)
+REGISTER_SCRIPT_SUBCLASS(WormHole, SpaceObjectWithSize)
 {
     /// Sets the target teleportation coordinates for SpaceObjects that pass through the center of this WormHole.
     /// Example: wormhole:setTargetPosition(10000,10000)
@@ -48,12 +48,15 @@ REGISTER_SCRIPT_SUBCLASS(WormHole, SpaceObject)
 
 REGISTER_MULTIPLAYER_CLASS(WormHole, "WormHole");
 WormHole::WormHole()
-: SpaceObject(DEFAULT_COLLISION_RADIUS, "WormHole")
+: SpaceObjectWithSize(DEFAULT_COLLISION_RADIUS, "WormHole")
 {
-    pathPlanner = PathPlannerManager::getInstance();
-    pathPlanner->addAvoidObject(this, (DEFAULT_COLLISION_RADIUS * AVOIDANCE_MULTIPLIER) );
+    setSize(size);
+    ensureIsInAvoidList(this);
+}
 
-    setRadarSignatureInfo(0.9, 0.0, 0.0);
+float WormHole::getAvoidSize()
+{
+    return DEFAULT_COLLISION_RADIUS * AVOIDANCE_MULTIPLIER;
 }
 
 void WormHole::draw3DTransparent()
@@ -105,7 +108,18 @@ void WormHole::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, flo
 
 void WormHole::update(float delta)
 {
+    SpaceObjectWithSize::update(delta);
+
     update_delta = delta;
+}
+
+void WormHole::setSize(float size)
+{
+    SpaceObjectWithSize::setSize(size);
+
+    float size_scale = size / DEFAULT_COLLISION_RADIUS;
+
+    setRadarSignatureInfo(0.9f * size_scale, 0.0, 0.0);
 }
 
 void WormHole::collide(Collisionable* target, float collision_force)

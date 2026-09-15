@@ -2,8 +2,9 @@
 #define SPACE_STATION_H
 
 #include "shipTemplateBasedObject.h"
+#include "pathPlanner.h"
 
-class SpaceStation : public ShipTemplateBasedObject
+class SpaceStation : public ShipTemplateBasedObject, public virtual IAvoidableSpaceObject
 {
 public:
     SpaceStation();
@@ -12,6 +13,7 @@ public:
     virtual DockStyle canBeDockedBy(P<SpaceObject> obj) override;
     virtual void destroyedByDamage(DamageInfo& info) override;
     virtual void applyTemplateValues() override;
+    virtual float getAvoidSize() override;
 
     virtual string getExportLine() override;
 };

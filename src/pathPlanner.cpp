@@ -1,5 +1,6 @@
 #include "pathPlanner.h"
 #include "spaceObjects/spaceObject.h"
+#include "spaceObjects/spaceObjectWithSize.h"
 
 
 const float small_object_grid_size = 5000.0f;
@@ -20,55 +21,200 @@ static uint32_t hashPosition(glm::vec2 position)
     return hashSector(positionToSector(position.x), positionToSector(position.y));
 }
 
+#define getSector(size, source) (size <= 0.f ? sectorSize0Objs : hashPosition(source->getPosition()));
+
 P<PathPlannerManager> PathPlannerManager::instance;
+
+// a sector dedicated to objects that have a size of 0 or negative - we still want to recheck their size (it might change!), but they should be out of the way
+// if they want to be removed permanently (or until they call ensureIsInAvoidList() again) they should return REMOVE_ME_FROM_AVOID_LIST in getAvoidSize()
+const uint32_t sectorSize0Objs = ((1 << 15) - 1); // X = 32767, Y = 0
+
+//#define DEBUG_DYNAMIC_AVOID
+
+#ifndef DEBUG
+#undef DEBUG_DYNAMIC_AVOID
+#endif
 
 void PathPlannerManager::addAvoidObject(P<SpaceObject> source, float size)
 {
+    if (size == REMOVE_ME_FROM_AVOID_LIST)
+    {
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, source->getMultiplayerId(), " not adding object, doesn't want to be here after all");
+#endif
+        return;
+    }
+
+    auto avoidable_object = dynamic_cast<IAvoidableSpaceObject*>(*source);
+    if (avoidable_object)
+    {
+        if (avoidable_object->_is_in_avoid_list)
+        {
+            // these objects are guarded - other objects could potentially be added multiple times - be careful!
+#ifdef DEBUG_DYNAMIC_AVOID
+            LOG(Info, source->getMultiplayerId(), " NOT added (guarded)");
+#endif
+            return;
+        }
+        avoidable_object->_is_in_avoid_list = true;
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, source->getMultiplayerId(), " added (guarded)");
+#endif
+    }
+    else if(size <= 0.f)
+    {
+        // this is not an IAvoidableSpaceObject (so it cannot change its avoid size after adding)
+        // -> adding it makes no sense!
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, source->getMultiplayerId(), " NOT added (size = ", size, ")");
+#endif
+        return;
+    }
+
+    // Size is used for objects NOT implementing ISpaceObjectWithSize, which has a getSize() method that is used each frame to update the size.
+
     // Make a classification for small objects which fit in a grid, so the checkToAvoid function does not has to iterate on all objects.
     // Until then, astroids and mines should not generate avoidAreas to prevent performance issues.
     if (size < small_object_max_size)
     {
-        uint32_t hash = hashPosition(source->getPosition());
-        small_objects[hash].push_back(PathPlannerAvoidObject(source, size));
-    }else{
+        auto sector = getSector(size, source);
+        small_objects[sector].push_back(PathPlannerAvoidObject(source, size));
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, source->getMultiplayerId(), " SMALL object added, sector: ", sector);
+#endif
+    }
+    else
+    {
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, source->getMultiplayerId(), " BIG object added");
+#endif
         big_objects.push_back(PathPlannerAvoidObject(source, size));
     }
 }
 
 void PathPlannerManager::update(float delta)
 {
-    for(std::list<PathPlannerManager::PathPlannerAvoidObject>::iterator i = big_objects.begin(); i != big_objects.end(); )
+    std::vector<PathPlannerAvoidObject> add_list;
+
+    for (std::list<PathPlannerManager::PathPlannerAvoidObject>::iterator i = big_objects.begin(); i != big_objects.end(); )
     {
-        if (i->source)
+        if (!(i->source))
         {
-            i++;
-        }else{
+            // object is no more
+#ifdef DEBUG_DYNAMIC_AVOID
+            LOG(Info, "BIG object deleted");
+#endif
             i = big_objects.erase(i);
+            continue;
         }
+
+        auto avoidable_object = dynamic_cast<IAvoidableSpaceObject*>(*i->source);
+        if (avoidable_object)
+        {
+            auto new_size = avoidable_object->getAvoidSize();
+
+            if (new_size == REMOVE_ME_FROM_AVOID_LIST)
+            {
+                // the call to getAvoidSize() returned the magic valid to remove the object from the check list altogether
+                avoidable_object->_is_in_avoid_list = false;
+                i = big_objects.erase(i);
+                continue;
+            }
+
+            if (new_size != i->size)
+            {
+                i->size = new_size;
+
+                // check if new size still fits the list
+                if (new_size < small_object_max_size)
+                {
+                    // nope, must go into the small list
+#ifdef DEBUG_DYNAMIC_AVOID
+                    LOG(Info, i->source->getMultiplayerId(), " Object moved from BIG to SMALL");
+#endif
+                    add_list.push_back(*i);
+                    i = big_objects.erase(i);
+                    continue;
+                }
+            }
+        }
+
+        // nothing changed, next!
+        i++;
     }
 
-    std::vector<PathPlannerAvoidObject> add_list;
     for(auto h_it = small_objects.begin(); h_it != small_objects.end(); h_it++)
     {
-        for(auto it = h_it->second.begin(); it != h_it->second.end();)
+        for (auto it = h_it->second.begin(); it != h_it->second.end();)
         {
-            if (it->source && hashPosition(it->source->getPosition()) == h_it->first)
+            if (!(it->source))
             {
-                it++;
-            }else{
-                if (it->source)
+                // object is no more
+#ifdef DEBUG_DYNAMIC_AVOID
+                LOG(Info, "SMALL object deleted (sector: ", h_it->first, ")");
+#endif
+                it = h_it->second.erase(it);
+                continue;
+            }
+
+            auto avoidable_object = dynamic_cast<IAvoidableSpaceObject*>(*it->source);
+            if (avoidable_object)
+            {
+                auto new_size = avoidable_object->getAvoidSize();
+
+                if (new_size == REMOVE_ME_FROM_AVOID_LIST)
                 {
-                    add_list.emplace_back(it->source, it->size);
+                    // the call to getAvoidSize() returned the magic valid to remove the object from the check list altogether
+                    avoidable_object->_is_in_avoid_list = false;
+                    it = h_it->second.erase(it);
+                    continue;
                 }
 
+                if (new_size != it->size)
+                {
+                    it->size = new_size;
+
+                    // check if new size still fits the list
+                    if (new_size >= small_object_max_size)
+                    {
+                        // nope, must go into the big list
+#ifdef DEBUG_DYNAMIC_AVOID
+                        LOG(Info, it->source->getMultiplayerId(), " Object moved from SMALL (sector: ", h_it->first, ") to BIG");
+#endif
+                        big_objects.push_back(*it);
+                        it = h_it->second.erase(it);
+                        continue;
+                    }
+                }
+            }
+
+            auto sector = getSector(it->size, it->source);
+            if (sector == h_it->first)
+            {
+                // still the same sector
+                it++;
+            }
+            else
+            {
+                // object moved, sector has changed
+#ifdef DEBUG_DYNAMIC_AVOID
+                LOG(Info, it->source->getMultiplayerId(), " SMALL Object moved from sector: ", h_it->first, " to sector: ", sector);
+#endif
+                add_list.push_back(*it);
                 it = h_it->second.erase(it);
             }
         }
     }
+
+    // re-add objects that either moved from big to small or within small
     for(PathPlannerAvoidObject& obj : add_list)
     {
-        if (obj.source)
-            small_objects[hashPosition(obj.source->getPosition())].emplace_back(obj.source, obj.size);
+        SDL_assert(obj.source);
+        auto sector = getSector(obj.size, obj.source);
+        small_objects[sector].push_back(obj);
+#ifdef DEBUG_DYNAMIC_AVOID
+        LOG(Info, obj.source->getMultiplayerId(), " SMALL Object inserted into sector: ", sector);
+#endif
     }
 }
 
@@ -171,18 +317,21 @@ bool PathPlanner::checkToAvoid(glm::vec2 start, glm::vec2 end, glm::vec2& new_po
     {
         if (i->source)
         {
-            auto position = i->source->getPosition();
-            float f = glm::dot(startEndDiff, position - start) / startEndLength;
-            if (f > 0 && f < startEndLength - i->size)
+            if (i->size > 0.f)
             {
-                glm::vec2 q = start + startEndDiff / startEndLength * f;
-                if (glm::length2(q - position) < (i->size + my_size) * (i->size + my_size))
+                auto position = i->source->getPosition();
+                float f = glm::dot(startEndDiff, position - start) / startEndLength;
+                if (f > 0 && f < startEndLength - i->size)
                 {
-                    if (f < firstAvoidF)
+                    glm::vec2 q = start + startEndDiff / startEndLength * f;
+                    if (glm::length2(q - position) < (i->size + my_size) * (i->size + my_size))
                     {
-                        avoidObject = *i;
-                        firstAvoidF = f;
-                        firstAvoidQ = q;
+                        if (f < firstAvoidF)
+                        {
+                            avoidObject = *i;
+                            firstAvoidF = f;
+                            firstAvoidQ = q;
+                        }
                     }
                 }
             }
@@ -235,18 +384,21 @@ bool PathPlanner::checkToAvoid(glm::vec2 start, glm::vec2 end, glm::vec2& new_po
             {
                 if (i->source)
                 {
-                    glm::vec2 position = i->source->getPosition();
-                    float f = glm::dot(startEndDiff, position - start) / startEndLength;
-                    if (f > 0 && f < startEndLength - i->size)
+                    if (i->size > 0.f)
                     {
-                        glm::vec2 q = start + startEndDiff / startEndLength * f;
-                        if (glm::length2(q - position) < (i->size + my_size) * (i->size + my_size))
+                        glm::vec2 position = i->source->getPosition();
+                        float f = glm::dot(startEndDiff, position - start) / startEndLength;
+                        if (f > 0 && f < startEndLength - i->size)
                         {
-                            if (f < firstAvoidF)
+                            glm::vec2 q = start + startEndDiff / startEndLength * f;
+                            if (glm::length2(q - position) < (i->size + my_size) * (i->size + my_size))
                             {
-                                avoidObject = *i;
-                                firstAvoidF = f;
-                                firstAvoidQ = q;
+                                if (f < firstAvoidF)
+                                {
+                                    avoidObject = *i;
+                                    firstAvoidF = f;
+                                    firstAvoidQ = q;
+                                }
                             }
                         }
                     }

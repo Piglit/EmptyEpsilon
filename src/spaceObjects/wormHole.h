@@ -2,15 +2,14 @@
 #define WORM_HOLE_H
 
 #include "nebula.h"
-#include "spaceObject.h"
+#include "spaceObjectWithSize.h"
 #include "pathPlanner.h"
 
-class WormHole : public SpaceObject, public Updatable
+class WormHole : public SpaceObjectWithSize, public virtual IAvoidableSpaceObject
 {
 private:
     glm::vec2 target_position = glm::vec2(0.0f, 0.0f);
     float update_delta = 0.0f;
-    P<PathPlannerManager>  pathPlanner;
 
     ScriptSimpleCallback on_teleportation;
 
@@ -28,7 +27,11 @@ public:
     glm::vec2 getTargetPosition();
     void onTeleportation(ScriptSimpleCallback callback);
 
-    virtual string getExportLine() override { return "WormHole():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + "):setTargetPosition(" + string(target_position.x, 0) + ", " + string(target_position.y, 0) + ")"; }
+    virtual string getExportLine() override { return "WormHole():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + "):setTargetPosition(" + string(target_position.x, 0) + ", " + string(target_position.y, 0) + "):setSize(" + string(getSize(), 0) + ")"; }
+
+    virtual void setSize(float size) override;
+    virtual float getReasonableMaxValue() override { return 50000; }
+    virtual float getAvoidSize() override;
 };
 
 #endif//WORM_HOLE_H

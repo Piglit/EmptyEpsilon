@@ -2,6 +2,7 @@
 #define NEBULA_H
 
 #include "spaceObject.h"
+#include "spaceObjectWithSize.h"
 
 class NebulaCloud
 {
@@ -10,20 +11,19 @@ public:
     int texture;
     float size;
 };
-class Nebula : public SpaceObject
+class Nebula : public SpaceObjectWithSize
 {
     static PVector<Nebula> nebula_list;
     static const int cloud_count = 32;
 
-    float size;
     int radar_visual;
     NebulaCloud clouds[cloud_count];
 
 public:
     Nebula();
 
-    void setSize(float size);
-    float getSize();
+    virtual float getReasonableMaxValue() override { return 50000; }
+    virtual void setSize(float size) override;
     virtual void draw3DTransparent() override;
     virtual void drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
     virtual void drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, float scale, float rotation, bool long_range) override;
@@ -35,7 +35,7 @@ public:
     static glm::vec2 getFirstBlockedPosition(glm::vec2 start, glm::vec2 end);
     static PVector<Nebula> getNebulas();
 
-    virtual string getExportLine() override { return "Nebula():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + ")"; }
+    virtual string getExportLine() override { return "Nebula():setPosition(" + string(getPosition().x, 0) + ", " + string(getPosition().y, 0) + "):setSize(" + string(getSize(), 0) + ")"; }
 
 protected:
     glm::mat4 getModelMatrix() const override;

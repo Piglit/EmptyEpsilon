@@ -1429,16 +1429,21 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
     switch(command)
     {
     case CMD_TARGET_ROTATION:
-        last_rotation_command_was_manual = false;
         manual_turn = 0;
-        packet >> target_rotation;
+        float value;
+        packet >> value;
+        setTargetRotation(value);
+        // target_rotation is fed into angleDifference(), which normalizes it anyway
         break;
     case CMD_TURN_SPEED:
         last_rotation_command_was_manual = true;
         packet >> manual_turn;
+        // no need to validate, logic clamps it
         break;
     case CMD_IMPULSE:
-        packet >> impulse_request;
+        float new_impulse_request;
+        packet >> new_impulse_request;
+        setImpulseRequest(new_impulse_request);
         break;
     case CMD_WARP:
         packet >> warp_request;
@@ -1448,6 +1453,7 @@ void PlayerSpaceship::onReceiveClientCommand(int32_t client_id, sp::io::DataBuff
         {
             float distance;
             packet >> distance;
+            // this is fine, jump function validates distance
             initializeJump(distance);
         }
         break;

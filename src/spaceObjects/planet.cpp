@@ -265,6 +265,13 @@ void Planet::setOrbit(P<SpaceObject> target, float orbit_time)
     this->orbit_time = orbit_time;
 }
 
+float Planet::getAvoidSize()
+{
+    // TODO: Support changing planet size on the fly - update clients, update avoid size
+    // TODO: use REMOVE_ME_FROM_AVOID_LIST when it changed so that it is no longer to be avoided
+    return std::max(0.f, collision_size);
+}
+
 void Planet::update(float delta)
 {
     update_delta = delta;
@@ -272,7 +279,7 @@ void Planet::update(float delta)
     {
         updateCollisionSize();
         if (collision_size > 0.0f)
-            PathPlannerManager::getInstance()->addAvoidObject(this, collision_size);
+            ensureIsInAvoidList(this);
     }
 
     if (orbit_distance > 0.0f)

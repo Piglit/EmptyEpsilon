@@ -4,6 +4,8 @@
 #include "spaceObjects/spaceObject.h"
 #include <list>
 
+static const float REMOVE_ME_FROM_AVOID_LIST = -12345678.f;
+
 class PathPlannerManager : public Updatable
 {
     static P<PathPlannerManager> instance;
@@ -46,6 +48,37 @@ public:
 private:
     void recursivePlan(glm::vec2 start, glm::vec2 end, int& recursion_counter);
     bool checkToAvoid(glm::vec2 start, glm::vec2 end, glm::vec2& new_point, glm::vec2* alt_point=NULL);
+};
+
+// These objects have additional capabilities compared to regular SpaceObjects calling addAvoidObject():
+// - Automatically updates its avoid size on each tick by calling getAvoidSize()
+// - Ensures that it cannot be added to the avoid list multiple times via a built-in boolean
+// - You can completely remove it from the avoid list by providing a special value in getAvoidSize()
+// - Otherwise, if <= 0 is provided as the size, the object will still be checked
+class IAvoidableSpaceObject
+{
+public:
+    virtual ~IAvoidableSpaceObject() {}
+    virtual float getAvoidSize() = 0;
+private:
+    bool _is_in_avoid_list = false;
+
+    friend class PathPlannerManager;
+
+protected:
+    template<typename T>
+    static void ensureIsInAvoidList(T* object)
+    {
+        static_assert(std::is_base_of_v<SpaceObject, T>);
+        static_assert(std::is_base_of_v<IAvoidableSpaceObject, T>);
+
+        if (object->_is_in_avoid_list)
+        {
+            return;
+        }
+
+        PathPlannerManager::getInstance()->addAvoidObject(object, object->getAvoidSize());
+    }
 };
 
 #endif//PATH_PLANNER_H

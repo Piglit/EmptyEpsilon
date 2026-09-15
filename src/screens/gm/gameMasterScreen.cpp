@@ -133,10 +133,6 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
             {
                 jammer_tweak_dialog->open(obj);
             }
-            else if (P<Asteroid>(obj))
-            {
-                asteroid_tweak_dialog->open(obj);
-            }
             else
             {
                 object_tweak_dialog->open(obj);
@@ -224,8 +220,6 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
     station_tweak_dialog->hide();
     jammer_tweak_dialog = new GuiObjectTweak(this, TW_Jammer);
     jammer_tweak_dialog->hide();
-    asteroid_tweak_dialog = new GuiObjectTweak(this, TW_Asteroid);
-    asteroid_tweak_dialog->hide();
 
     global_message_entry = new GuiGlobalMessageEntryView(this);
     global_message_entry->hide();
@@ -594,13 +588,16 @@ void GameMasterScreen::onMouseUp(glm::vec2 position)
             PVector<SpaceObject> space_objects;
             foreach(Collisionable, c, objects)
             {
-                if (P<Zone>(c))
+                auto space_object = dynamic_cast<SpaceObject*>(*c);
+                if (!space_object || !space_object->isGMSelectable())
+                {
                     continue;
-                if (ctrl_down && !P<ShipTemplateBasedObject>(c))
+                }
+                if (ctrl_down && !dynamic_cast<ShipTemplateBasedObject*>(space_object))
                     continue;
-                if (alt_down && (!P<SpaceObject>(c) || (int)(P<SpaceObject>(c))->getFactionId() != faction_selector->getSelectionIndex()))
+                if (alt_down && (int)(space_object->getFactionId()) != faction_selector->getSelectionIndex())
                     continue;
-                space_objects.push_back(c);
+                space_objects.push_back(space_object);
             }
 
             // Single object selection or cycling

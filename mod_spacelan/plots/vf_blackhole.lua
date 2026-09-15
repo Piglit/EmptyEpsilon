@@ -26,7 +26,7 @@ function vf_blackhole.triggerCollapse(art, player, collected)
 	local self = vf_blackhole
 	local terrain_module = art.terrain_module
 	local hole = art.hole
-	hole.radius_orig = hole:getRadius()
+	hole.radius_orig = hole:getSize()
 	hole.gravity_limit_orig = gravity_util:getLimit(hole)
 	hole.collapse_time_total = hole.radius_orig / vf_blackhole.COLLAPSE_SPEED -- speed: 1u in 10 sec
 	hole.collapse_time_bygone = 0.0
@@ -58,7 +58,7 @@ function vf_blackhole:recalculateCenterOfMass(holes)
 	for idx,bh in ipairs(holes) do
 		-- now everything is valid
 		local x_b, y_b = bh:getPosition()
-		local mass = bh:getRadius()
+		local mass = bh:getSize()
 		mass_total = mass_total + mass
 		x = x + x_b * mass
 		y = y + y_b * mass
@@ -76,7 +76,7 @@ function vf_blackhole:collapse(hole, dt)
 	if hole.collapse_progress < 1.0 then
 		-- collapse was triggered, shrink it
 		local new_factor = 1 - hole.collapse_progress	-- from 1 to 0
-		hole:setRadius(hole.radius_orig * new_factor)
+		hole:setSize(hole.radius_orig * new_factor)
 		gravity_util:setLimit(hole, hole.gravity_limit_orig * new_factor)	-- outer limit shrinks linaer, gravity pull shrinks quadratic
 		-- reduce grav increase electrival
 		hole:setRadarSignatureInfo(0.9*new_factor,hole.collapse_progress,0)
@@ -96,10 +96,10 @@ end
 
 function vf_blackhole:collide(hole, tm, dt)
 	for idx,bh in ipairs(tm.holes) do
-		if hole ~= bh and distance(hole,bh) < hole:getRadius() + bh:getRadius() and hole:getRadius() < bh:getRadius() then
+		if hole ~= bh and distance(hole,bh) < hole:getSize() + bh:getSize() and hole:getSize() < bh:getSize() then
 			-- merge smaller one when colliding with other black hole
 			hole.collapse_time_bygone = hole.collapse_time_bygone + dt	-- double collapse speed
-			bh:setRadius(bh:getRadius() + dt*self.COLLAPSE_SPEED)
+			bh:setSize(bh:getSize() + dt*self.COLLAPSE_SPEED)
 			gravity_util:setLimit(bh, gravity_util:getLimit(bh) + dt*self.COLLAPSE_SPEED)
 			-- stop collapse, but still consider this hole for falling into other holes
 			bh.collapsing = false

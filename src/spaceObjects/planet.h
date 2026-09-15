@@ -5,7 +5,7 @@
 #include "spaceObject.h"
 #include "pathPlanner.h"
 
-class Planet : public SpaceObject, public Updatable
+class Planet : public SpaceObject, public Updatable, public IAvoidableSpaceObject
 {
 public:
     Planet();
@@ -22,6 +22,7 @@ public:
 
     float getPlanetRadius();
     float getCollisionSize();
+    virtual float getAvoidSize() override;
 
     void setPlanetAtmosphereColor(float r, float g, float b);
     void setPlanetAtmosphereTexture(std::string_view texture_name);

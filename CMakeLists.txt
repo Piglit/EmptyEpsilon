@@ -344,6 +344,7 @@ set(MAIN_SOURCES
     src/spaceObjects/spaceship.cpp
     src/spaceObjects/wormHole.cpp
     src/spaceObjects/spaceObject.cpp
+    src/spaceObjects/spaceObjectWithSize.cpp
     src/spaceObjects/nebula.cpp
     src/spaceObjects/explosionEffect.cpp
     src/spaceObjects/cpuShip.cpp
@@ -531,6 +532,7 @@ set(MAIN_SOURCES
     src/spaceObjects/scanProbe.h
     src/spaceObjects/shipTemplateBasedObject.h
     src/spaceObjects/spaceObject.h
+    src/spaceObjects/spaceObjectWithSize.h
     src/spaceObjects/spaceship.h
     src/spaceObjects/spaceshipParts/beamWeapon.h
     src/spaceObjects/spaceshipParts/weaponTube.h

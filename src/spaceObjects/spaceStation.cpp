@@ -7,7 +7,6 @@
 #include "factionInfo.h"
 #include "mesh.h"
 #include "main.h"
-#include "pathPlanner.h"
 
 #include "scriptInterface.h"
 
@@ -76,7 +75,12 @@ void SpaceStation::drawOnRadar(sp::RenderTarget& renderer, glm::vec2 position, f
 
 void SpaceStation::applyTemplateValues()
 {
-    PathPlannerManager::getInstance()->addAvoidObject(this, getRadius() * 1.5f);
+    ensureIsInAvoidList(this);
+}
+
+float SpaceStation::getAvoidSize()
+{
+    return getRadius() * 1.5f;
 }
 
 void SpaceStation::destroyedByDamage(DamageInfo& info)

@@ -638,13 +638,13 @@ function TerrainModuleBlackHoles:create()
 	if holes > 1 then
 		for i = 1, holes do
 			local x,y = radialPosition(self.x, self.y, self.radius/3, self.rotation+(i*360/holes))
-			local bh = BlackHole():setRadius(self.radius/4):setPosition(x, y)
+			local bh = BlackHole():setSize(self.radius/4):setPosition(x, y)
 			table.insert(self.holes, bh)
 			wh_rota:add_object(bh, -0.5, self.x, self.y)
 			gravity_util.addGravitySource(bh, self.radius*2/3)					
 		end
 	else
-		local bh = BlackHole():setRadius(self.radius/2):setPosition(self.x, self.y)
+		local bh = BlackHole():setSize(self.radius/2):setPosition(self.x, self.y)
 		table.insert(self.holes, bh)
 		gravity_util.addGravitySource(bh, self.radius)
 	end

@@ -116,8 +116,8 @@ end
 function vf_nebulae:updateCoolantGivenPlayer(p, nebula, delta)
 	p:setMaxCoolant(p:getMaxCoolant() + nebula.gain*delta)
 	-- Slowly shrink the nebula
-	local r = nebula:getRadius() 
-	nebula:setRadius(r- 100*nebula.gain*delta)
+	local r = nebula:getSize() 
+	nebula:setSize(r- 100*nebula.gain*delta)
 	if random(10, 110) > p:getMaxCoolant() then
 		-- each coolant point adds 1% to the failure change each tick
 		local engine_choice = arraySelectRandom({"impulse", "warp", "jumpdrive"})

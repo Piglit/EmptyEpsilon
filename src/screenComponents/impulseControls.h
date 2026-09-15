@@ -12,6 +12,8 @@ private:
     GuiKeyValueDisplay* label;
     GuiSlider* slider;
     bool set_active = false;
+    float sw_last_player_input = 0;
+    float sw_last_update = 0;
 public:
     GuiImpulseControls(GuiContainer* owner, string id);
 

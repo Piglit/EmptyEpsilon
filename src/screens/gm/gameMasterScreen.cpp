@@ -168,7 +168,7 @@ GameMasterScreen::GameMasterScreen(RenderLayer* render_layer)
         {
             if (n == index)
             {
-                auto& cb = callback.callback;
+                auto cb = callback.callback;
                 cb.call<void>();
                 return;
             }

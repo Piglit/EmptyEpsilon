@@ -993,7 +993,7 @@ void SpaceShip::update(float delta)
             if (!docking_target)
                 docking_state = DS_NotDocking;
             else
-                target_rotation = vec2ToAngle(getPosition() - docking_target->getPosition());
+                setTargetRotation(vec2ToAngle(getPosition() - docking_target->getPosition()));
             if (fabs(angleDifference(target_rotation, getRotation())) < 10.0f)
                 setImpulseRequest(-1.f);
             else
@@ -1007,7 +1007,7 @@ void SpaceShip::update(float delta)
                 docked_style = DockStyle::None;
             }else{
                 setPosition(docking_target->getPosition() + rotateVec2(docking_offset, docking_target->getRotation()));
-                target_rotation = vec2ToAngle(getPosition() - docking_target->getPosition());
+                setTargetRotation(vec2ToAngle(getPosition() - docking_target->getPosition()));
 
                 P<ShipTemplateBasedObject> docked_with_template_based = docking_target;
                 if (docked_with_template_based && docked_with_template_based->repair_docked)  //Check if what we are docked to allows hull repairs, and if so, do it.
@@ -1081,7 +1081,7 @@ void SpaceShip::update(float delta)
     {
         // use manual_turn (-1.0 to 1.0)
         // This simply turns relative to the maximum turn rate. It doesn't smooth out at all, making it very responsive.
-        desired_turn_speed = manual_turn * maximum_turn_speed;
+        desired_turn_speed = std::clamp(manual_turn, -1.f, 1.f) * maximum_turn_speed;
 
         // if we're back to straight-on
         if (fabs(desired_turn_speed) < 0.0005f && fabs(current_turn_speed) < 0.0005f)

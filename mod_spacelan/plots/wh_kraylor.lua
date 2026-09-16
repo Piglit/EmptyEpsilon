@@ -139,7 +139,7 @@ function wh_kraylor:spawn_enemies_kraylor(xOrigin, yOrigin, enemyStrength)
 	-- drones
 	local droneNum = math.ceil(enemyStrength / 5)
 	if droneNum > 0 and #enemyList > 0 then
-		script_hangar.create(enemyList[1], "Drone", droneNum)
+		script_hangar:create(enemyList[1], "Drone", droneNum)
 		totalStrength = totalStrength + 5 * droneNum
 	end
 	return enemyList, totalStrength

@@ -69,7 +69,7 @@ function update(delta)
 			plot:updateTest()
 		end
 	end
-	script_hangar.update(delta)
+	script_hangar:update(delta)
 end
 
 

@@ -2969,7 +2969,7 @@ function addStationHangar(station)
 	local fighterTemplate = nil
 	fighterTemplate = fighterNameList[ irandom(1,#fighterNameList) ]
 	local amount = math.ceil((100 - stationSizeRandom) / 10)
-	script_hangar.create(station, fighterTemplate, amount)
+	script_hangar:create(station, fighterTemplate, amount)
 end
 function placeAramanth()
 	--Aramanth
@@ -6540,6 +6540,6 @@ function update(delta)
 	if plotH ~= nil then	--health
 		plotH(delta)
 	end
-	script_hangar.update(delta)
+	script_hangar:update(delta)
 	xanstas_player_update(delta)
 end

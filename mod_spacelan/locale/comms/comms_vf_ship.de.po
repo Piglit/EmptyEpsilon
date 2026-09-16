@@ -1,0 +1,1670 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:125 mod_spacelan/comms/comms_vf_ship.lua:136
+msgctxt "choice_line"
+msgid "Identify yourself!"
+msgstr "Identifizieren Sie sich!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:126
+msgctxt "message-Arlenians"
+msgid ""
+"Greetings, Captain.  This is {faction} {template} {callsign}.  We are transmitting our "
+"ship's data for your review."
+msgstr ""
+"Seien Sie gegrüßt, Captain.  Hier ist {faction} {template} {callsign}.  Wir übermitteln "
+"Ihnen die Daten unseres Schiffes zur Prüfung."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:127
+msgctxt "message-Criminals"
+msgid ""
+"Alright, alright.  This is {faction} {template} {callsign}.  Sending over our scan data "
+"now."
+msgstr ""
+"Schon gut, schon gut.  Hier ist {faction} {template} {callsign}.  Wir übermitteln jetzt "
+"unsere Scandaten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:128
+msgctxt "message-Exuari"
+msgid ""
+"Hear us well!  This is {faction} {template} {callsign}.  Learn our strength as we "
+"transmit our scan data!"
+msgstr ""
+"Hört gut zu!  Hier ist {faction} {template} {callsign}.  Erkennt unsere Stärke, während "
+"wir unsere Scandaten übermitteln!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:129
+msgctxt "message-Ghosts"
+msgid ""
+"Identity confirmed.  {faction} {template} {callsign}.  Scan data transmission initiated."
+msgstr ""
+"Identität bestätigt.  {faction} {template} {callsign}.  Übertragung der Scandaten "
+"eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:130
+msgctxt "message-Human Navy"
+msgid "This is {faction} {template} {callsign}.  Transmitting scan data."
+msgstr "Hier ist {faction} {template} {callsign}.  Scandaten werden übermittelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:131
+msgctxt "message-Independent"
+msgid "This is {faction} {template} {callsign}.  Transmitting our scan data as requested."
+msgstr ""
+"Hier ist {faction} {template} {callsign}.  Wir übermitteln wie angefordert unsere "
+"Scandaten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:132
+msgctxt "message-Kraylor"
+msgid "This is {faction} {template} {callsign}.  Scan data follows."
+msgstr "Hier ist {faction} {template} {callsign}.  Scandaten folgen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:133
+msgctxt "message-Ktlitans"
+msgid ""
+"Your request has been observed.  This vessel is classified as {faction} {template} "
+"{callsign}.  Additional information exchange will improve future interaction."
+msgstr ""
+"Ihre Anfrage wurde zur Kenntnis genommen.  Dieses Schiff ist als {faction} {template} "
+"{callsign} klassifiziert.  Ein zusätzlicher Informationsaustausch wird künftige "
+"Interaktionen verbessern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:137
+msgctxt "message-Arlenians"
+msgid "We are the {faction} vessel {callsign}.  We have nothing further to disclose."
+msgstr "Wir sind das {faction}-Schiff {callsign}.  Wir haben nichts weiter mitzuteilen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:138
+msgctxt "message-Criminals"
+msgid "Name's {callsign}.  That's all you're getting."
+msgstr "Wir sind {callsign}.  Mehr bekommt ihr nicht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:139
+msgctxt "message-Exuari"
+msgid ""
+"Know this well!  We are the {faction} ship {callsign}.  The rest you may learn in "
+"battle!"
+msgstr ""
+"Merkt euch das gut!  Wir sind das {faction}-Schiff {callsign}.  Den Rest könnt ihr im "
+"Kampf erfahren!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:140
+msgctxt "message-Ghosts"
+msgid "Identity confirmed.  {faction} vessel {callsign}.  Additional data access denied."
+msgstr ""
+"Identität bestätigt.  {faction}-Schiff {callsign}.  Zugriff auf zusätzliche Daten "
+"verweigert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:141
+msgctxt "message-Human Navy"
+msgid "This is {faction} vessel {callsign}.  No further information will be transmitted."
+msgstr ""
+"Hier ist das {faction}-Schiff {callsign}.  Es werden keine weiteren Informationen "
+"übermittelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:142
+msgctxt "message-Independent"
+msgid "We are the {faction} ship {callsign}.  That's all you need to know."
+msgstr "Wir sind das {faction}-Schiff {callsign}.  Das ist alles, was ihr wissen müsst."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:143
+msgctxt "message-Kraylor"
+msgid "This is {faction} warship {callsign}.  Further inquiries are denied."
+msgstr ""
+"Hier ist das {faction}-Kriegsschiff {callsign}.  Weitere Anfragen werden abgewiesen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:144
+msgctxt "message-Ktlitans"
+msgid ""
+"Your request for classification has been received.  This vessel belongs to the "
+"{faction}.  Further details remain outside current information exchange."
+msgstr ""
+"Ihre Anfrage zur Klassifizierung wurde empfangen.  Dieses Schiff gehört zur {faction}.  "
+"Weitere Einzelheiten liegen außerhalb des derzeitigen Informationsaustauschs."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:147
+msgctxt "choice_line"
+msgid "Report your status!"
+msgstr "Melden Sie Ihren Status!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:148
+msgctxt "message-Arlenians"
+msgid "Certainly, Captain.  Here is our current status report:"
+msgstr "Natürlich, Captain.  Hier ist unser aktueller Statusbericht:"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:149
+msgctxt "message-Criminals"
+msgid "Here's how things are lookin' on our end:"
+msgstr "So sieht's bei uns aus:"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:150
+msgctxt "message-Exuari"
+msgid "Hear the strength of our vessel!  Our status is as follows:"
+msgstr "Erkennt die Stärke unseres Schiffes!  Unser Status lautet wie folgt:"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:151
+msgctxt "message-Ghosts"
+msgid "Status request acknowledged.  Transmitting operational status."
+msgstr "Statusanfrage bestätigt.  Betriebsstatus wird übermittelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:152
+msgctxt "message-Human Navy"
+msgid "Understood.  Status report follows."
+msgstr "Verstanden.  Statusbericht folgt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:153
+msgctxt "message-Independent"
+msgid "Sure, captain.  Here's how we're doing:"
+msgstr "Klar, Captain.  So sieht's bei uns aus:"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:154
+msgctxt "message-Kraylor"
+msgid "Status report follows.  Review and issue further orders."
+msgstr "Statusbericht folgt.  Prüfen Sie ihn und erteilen Sie weitere Befehle."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:155
+msgctxt "message-Ktlitans"
+msgid "Status inquiry observed.  Current vessel condition will be provided."
+msgstr ""
+"Statusanfrage zur Kenntnis genommen.  Der aktuelle Zustand des Schiffes wird mitgeteilt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:158 mod_spacelan/comms/comms_vf_ship.lua:169
+#: mod_spacelan/comms/comms_vf_ship.lua:817
+msgctxt "choice_line"
+msgid "Are enemies in your vicinity?"
+msgstr "Befinden sich Feinde in der Nähe?"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:159
+msgctxt "message-Arlenians"
+msgid ""
+"Greetings, Captain.  Yes, hostile vessels have been detected within {range}.  Most "
+"appear to belong to the {enemy_faction}.  The nearest contact is bearing {direction} "
+"from us, approximately {distance}u away.  We advise caution."
+msgstr ""
+"Seien Sie gegrüßt, Captain.  Ja, innerhalb von {range} wurden feindliche Schiffe "
+"entdeckt.  Die meisten scheinen der {enemy_faction} anzugehören.  Der nächste Kontakt "
+"befindet sich in Richtung {direction}, etwa {distance}u von uns entfernt.  Wir raten "
+"zur Vorsicht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:160
+msgctxt "message-Criminals"
+msgid ""
+"Yeah, we've got company.  There's trouble within {range}, mostly {enemy_faction}.  "
+"Closest one's {direction}, about {distance}u out.  Just say the word."
+msgstr ""
+"Ja, wir haben Gesellschaft.  Innerhalb von {range} gibt's Ärger, hauptsächlich "
+"{enemy_faction}.  Der Nächste ist in Richtung {direction}, etwa {distance}u entfernt.  "
+"Gebt Bescheid, wenn's losgeht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:161
+msgctxt "message-Exuari"
+msgid ""
+"Ha!  Worthy prey has entered our hunting grounds!  Enemies are within {range}, mostly "
+"{enemy_faction}.  The nearest coward waits {direction}, only {distance}u away.  Their "
+"glory will soon be ours!"
+msgstr ""
+"Ha!  Würdige Beute ist in unser Jagdgebiet eingedrungen!  Feinde befinden sich "
+"innerhalb von {range}, hauptsächlich {enemy_faction}.  Der nächste Feigling wartet in "
+"Richtung {direction}, nur {distance}u entfernt.  Ihr Ruhm wird bald unser sein!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:162
+msgctxt "message-Ghosts"
+msgid ""
+"Hostile contacts confirmed.  Detection range: {range}.  Primary classification: "
+"{enemy_faction}.  Nearest target bearing {direction}.  Distance: {distance}u."
+msgstr ""
+"Feindliche Kontakte bestätigt.  Erfassungsreichweite: {range}.  Primäre "
+"Klassifizierung: {enemy_faction}.  Nächstes Ziel in Richtung {direction}.  Entfernung: "
+"{distance}u."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:163
+msgctxt "message-Human Navy"
+msgid ""
+"Confirmed.  Enemy vessels are operating within {range}.  The majority are identified as "
+"{enemy_faction}.  Nearest hostile contact is bearing {direction} at a distance of "
+"approximately {distance}u."
+msgstr ""
+"Bestätigt.  Feindliche Schiffe operieren innerhalb von {range}.  Die Mehrheit wurde als "
+"{enemy_faction} identifiziert.  Der nächste feindliche Kontakt befindet sich in "
+"Richtung {direction}, in einer Entfernung von etwa {distance}u."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:164
+msgctxt "message-Independent"
+msgid ""
+"Yeah, we've spotted enemies nearby.  They're within {range}, mostly {enemy_faction}.  "
+"Closest contact is {direction}, around {distance}u from our position."
+msgstr ""
+"Ja, wir haben Feinde in der Nähe gesichtet.  Sie befinden sich innerhalb von {range}, "
+"hauptsächlich {enemy_faction}.  Der nächste Kontakt ist in Richtung {direction}, etwa "
+"{distance}u von unserer Position entfernt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:165
+msgctxt "message-Kraylor"
+msgid ""
+"Enemy vessels detected within {range}.  Most are identified as {enemy_faction}.  "
+"Nearest target bearing {direction}, distance {distance}u.  Awaiting authorization to "
+"eliminate them."
+msgstr ""
+"Feindliche Schiffe innerhalb von {range} entdeckt.  Die meisten wurden als "
+"{enemy_faction} identifiziert.  Nächstes Ziel in Richtung {direction}, Entfernung "
+"{distance}u.  Wir erwarten die Genehmigung zu ihrer Vernichtung."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:166
+msgctxt "message-Ktlitans"
+msgid ""
+"Hostile vessel activity has been observed within {range}.  Current classification "
+"indicates a predominance of {enemy_faction}.  The nearest contact is located toward "
+"{direction} at approximately {distance}u.  Continued observation will refine threat "
+"assessment."
+msgstr ""
+"Feindliche Schiffsaktivität wurde innerhalb von {range} beobachtet.  Die aktuelle "
+"Klassifizierung weist auf eine überwiegende Präsenz der {enemy_faction} hin.  Der "
+"nächste Kontakt befindet sich in Richtung {direction}, etwa {distance}u entfernt.  "
+"Fortgesetzte Beobachtung wird die Bedrohungsanalyse verfeinern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:170
+msgctxt "message-Arlenians"
+msgid ""
+"Greetings, Captain.  We have detected no hostile vessels within {range}.  The "
+"surrounding region appears peaceful at present."
+msgstr ""
+"Seien Sie gegrüßt, Captain.  Wir haben innerhalb von {range} keine feindlichen Schiffe "
+"entdeckt.  Die umliegende Region scheint derzeit friedlich zu sein."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:171
+msgctxt "message-Criminals"
+msgid ""
+"Nope.  Doesn't look like anyone's itching for a fight around here.  We're clear within "
+"{range}."
+msgstr ""
+"Nö.  Sieht nicht so aus, als hätte hier jemand Lust auf einen Kampf.  Innerhalb von "
+"{range} ist alles ruhig."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:172
+msgctxt "message-Exuari"
+msgid ""
+"No prey reveals itself within {range}.  The hunt must continue until worthy foes are "
+"found!"
+msgstr ""
+"Innerhalb von {range} zeigt sich keine Beute.  Die Jagd muss weitergehen, bis würdige "
+"Gegner gefunden sind!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:173
+msgctxt "message-Ghosts"
+msgid "Negative.  No hostile contacts detected within {range}.  Sensor sweep complete."
+msgstr ""
+"Negativ.  Keine feindlichen Kontakte innerhalb von {range} entdeckt.  Sensorabtastung "
+"abgeschlossen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:174
+msgctxt "message-Human Navy"
+msgid ""
+"Negative.  No enemy vessels detected within {range}.  The area is currently secure."
+msgstr ""
+"Negativ.  Keine feindlichen Schiffe innerhalb von {range} entdeckt.  Das Gebiet ist "
+"derzeit gesichert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:175
+msgctxt "message-Independent"
+msgid ""
+"Nothing hostile out here.  We've scanned within {range} and the area's clear for now."
+msgstr ""
+"Hier draußen ist nichts Feindliches.  Wir haben den Bereich innerhalb von {range} "
+"abgesucht, und momentan ist alles ruhig."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:176
+msgctxt "message-Kraylor"
+msgid "No enemy vessels detected within {range}.  The absence of targets is temporary."
+msgstr ""
+"Keine feindlichen Schiffe innerhalb von {range} entdeckt.  Die Abwesenheit von Zielen "
+"ist nur vorübergehend."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:177
+msgctxt "message-Ktlitans"
+msgid ""
+"Observation of the surrounding region has detected no hostile vessel activity within "
+"{range}.  Current environmental behavior indicates no immediate threat.  Continued "
+"observation remains in progress."
+msgstr ""
+"Die Beobachtung der umliegenden Region hat innerhalb von {range} keine feindliche "
+"Schiffsaktivität festgestellt.  Das derzeitige Verhalten der Umgebung weist auf keine "
+"unmittelbare Bedrohung hin.  Die Beobachtung wird fortgesetzt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:180 mod_spacelan/comms/comms_vf_ship.lua:912
+msgctxt "choice_line"
+msgid "Identify a nearby target ..."
+msgstr "Identifizieren Sie ein nahegelegenes Ziel ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:181
+msgctxt "message-Arlenians"
+msgid ""
+"Certainly, Captain.  The nearby vessel has been identified as {args_faction} "
+"{args_template} {args_callsign}.  We are transmitting all available scan data for your "
+"review."
+msgstr ""
+"Natürlich, Captain.  Das nahegelegene Schiff wurde als {args_faction} {args_template} "
+"{args_callsign} identifiziert.  Wir übermitteln Ihnen alle verfügbaren Scandaten zur "
+"Prüfung."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:182
+msgctxt "message-Criminals"
+msgid ""
+"Got 'em.  That's {args_faction} {args_template} {args_callsign}.  Sending everything "
+"we've got on 'em now."
+msgstr ""
+"Hab ihn.  Das ist {args_faction} {args_template} {args_callsign}.  Wir schicken jetzt "
+"alles rüber, was wir über ihn haben."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:183
+msgctxt "message-Exuari"
+msgid ""
+"The prey has been revealed!  It is {args_faction} {args_template} {args_callsign}.  "
+"Learn your enemy well - their scan data is being transmitted!"
+msgstr ""
+"Die Beute ist enthüllt!  Es ist {args_faction} {args_template} {args_callsign}.  Lernt "
+"euren Feind gut kennen – seine Scandaten werden übermittelt!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:184
+msgctxt "message-Ghosts"
+msgid ""
+"Target identification complete.  {args_faction} {args_template} {args_callsign}.  Scan "
+"data transmission initiated."
+msgstr ""
+"Zielidentifikation abgeschlossen.  {args_faction} {args_template} {args_callsign}.  "
+"Übertragung der Scandaten eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:185
+msgctxt "message-Human Navy"
+msgid ""
+"Target identified as {args_faction} {args_template} {args_callsign}.  Transmitting "
+"available scan data."
+msgstr ""
+"Ziel als {args_faction} {args_template} {args_callsign} identifiziert.  Verfügbare "
+"Scandaten werden übermittelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:186
+msgctxt "message-Independent"
+msgid ""
+"We've identified the nearby vessel as {args_faction} {args_template} {args_callsign}.  "
+"Sending over the scan data now."
+msgstr ""
+"Wir haben das nahegelegene Schiff als {args_faction} {args_template} {args_callsign} "
+"identifiziert.  Wir schicken jetzt die Scandaten rüber."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:187
+msgctxt "message-Kraylor"
+msgid ""
+"Target confirmed.  {args_faction} {args_template} {args_callsign}.  Scan data follows.  "
+"Evaluate the target accordingly."
+msgstr ""
+"Ziel bestätigt.  {args_faction} {args_template} {args_callsign}.  Scandaten folgen.  "
+"Bewerten Sie das Ziel entsprechend."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:188
+msgctxt "message-Ktlitans"
+msgid ""
+"Nearby vessel classification has been completed.  Designation: {args_faction} "
+"{args_template} {args_callsign}.  Available vessel information will now be transferred "
+"for further analysis."
+msgstr ""
+"Klassifizierung des nahegelegenen Schiffes abgeschlossen.  Bezeichnung: {args_faction} "
+"{args_template} {args_callsign}.  Verfügbare Schiffsinformationen werden nun zur "
+"weiteren Analyse übertragen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:191 mod_spacelan/comms/comms_vf_ship.lua:577
+msgctxt "choice_line"
+msgid "Attack a nearby target ..."
+msgstr "Greift ein nahegelegenes Ziel an ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:192
+msgctxt "message-Arlenians"
+msgid ""
+"Greetings, Captain.  We regret the necessity of this engagement, but will carry out "
+"your orders with precision."
+msgstr ""
+"Seien Sie gegrüßt, Captain.  Wir bedauern die Notwendigkeit dieses Gefechtseinsatzes, "
+"werden Ihre Befehle jedoch präzise ausführen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:193
+msgctxt "message-Criminals"
+msgid ""
+"Alright, captain, we'll take a swing at that ship nearby.  Let's see what they got."
+msgstr ""
+"Na gut, Captain, wir knöpfen uns das Schiff da drüben vor.  Mal sehen, was die "
+"draufhaben."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:194
+msgctxt "message-Exuari"
+msgid "Target spotted!  We will tear them apart and take their glory!"
+msgstr "Ziel gesichtet!  Wir werden sie zerreißen und ihren Ruhm an uns reißen!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:195
+msgctxt "message-Ghosts"
+msgid "Target vessel identified.  Engagement protocol initiated."
+msgstr "Zielschiff identifiziert.  Gefechtsprotokoll eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:196
+msgctxt "message-Human Navy"
+msgid ""
+"Target identified.  Engaging hostile vessel as ordered.  Standing by for further "
+"commands."
+msgstr ""
+"Ziel identifiziert.  Feindliches Schiff wird wie befohlen angegriffen.  Bereit für "
+"weitere Befehle."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:197
+msgctxt "message-Independent"
+msgid ""
+"I've noted the position of the nearby ship.  We'll intercept the target and open fire "
+"upon contact."
+msgstr ""
+"Ich habe die Position des nahegelegenen Schiffes erfasst.  Wir werden das Ziel abfangen "
+"und bei Kontakt das Feuer eröffnen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:198
+msgctxt "message-Kraylor"
+msgid "Target identified.  Attack protocol engaged.  Destroy without hesitation."
+msgstr "Ziel identifiziert.  Angriffsprotokoll aktiviert.  Ohne Zögern zerstören."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:199
+msgctxt "message-Ktlitans"
+msgid ""
+"Hostile vessel interaction detected.  Current behavior indicates conflict conditions.  "
+"Response action will modify the observed outcome."
+msgstr ""
+"Interaktion mit einem feindlichen Schiff festgestellt.  Das aktuelle Verhalten weist "
+"auf eine Konfliktsituation hin.  Die Reaktion wird das beobachtete Ergebnis verändern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:202
+msgctxt "choice_line"
+msgid "Attack us!"
+msgstr "Greift uns an!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:203
+msgctxt "message-Arlenians"
+msgid ""
+"We recognize the challenge you present.  Though we regret this course, we will meet "
+"your aggression with steadfast resolve."
+msgstr ""
+"Wir erkennen die Herausforderung an, die Sie uns stellen.  Auch wenn wir diesen Weg "
+"bedauern, werden wir Ihrer Aggression mit unerschütterlicher Entschlossenheit begegnen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:204
+msgctxt "message-Criminals"
+msgid "Heh, you wanna dance? Fine by me.  Be ready when we come knockin'."
+msgstr "Heh, ihr wollt tanzen? Von mir aus.  Seid bereit, wenn wir anklopfen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:205
+msgctxt "message-Exuari"
+msgid "Ha!  You want us? Come and get us - your blood will feed the stars!"
+msgstr "Ha!  Ihr wollt uns? Dann holt uns!  Euer Blut wird die Sterne nähren!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:206
+msgctxt "message-Ghosts"
+msgid "Hostile signals detected.  Counter-engagement initiated."
+msgstr "Feindselige Signale entdeckt.  Gegenangriff eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:207
+msgctxt "message-Human Navy"
+msgid "Your insolence will be dealt with.  We are engaging your vessel now."
+msgstr "Ihre Unverschämtheit wird Konsequenzen haben.  Wir greifen Ihr Schiff jetzt an."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:208
+msgctxt "message-Independent"
+msgid ""
+"I hear your words, but actions speak louder.  Prepare yourself; we're coming in hot."
+msgstr ""
+"Ich höre Ihre Worte, aber Taten sprechen lauter.  Machen Sie sich bereit; wir kommen "
+"mit Volldampf."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:209
+msgctxt "message-Kraylor"
+msgid "Your challenge is accepted.  Prepare for destruction."
+msgstr "Eure Herausforderung ist angenommen.  Bereitet euch auf die Vernichtung vor."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:210
+msgctxt "message-Ktlitans"
+msgid ""
+"Hostile intent has been observed.  Current interaction no longer supports peaceful "
+"convergence.  Defensive adaptation will proceed."
+msgstr ""
+"Feindselige Absicht wurde festgestellt.  Die aktuelle Interaktion erlaubt keine "
+"friedliche Annäherung mehr.  Defensive Anpassung wird eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:213
+msgctxt "message-Arlenians"
+msgid "Your command is acknowledged, Captain.  We stand ready to cooperate."
+msgstr "Ihr Befehl wurde bestätigt, Captain.  Wir stehen zur Zusammenarbeit bereit."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:214
+msgctxt "message-Criminals"
+msgid "Alright, captain.  What's the deal this time?"
+msgstr "Na gut, Captain.  Was ist diesmal der Plan?"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:215
+msgctxt "message-Exuari"
+msgid "Good.  Send orders.  We await victory."
+msgstr "Gut.  Erteilt die Befehle.  Wir erwarten den Sieg."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:216
+msgctxt "message-Ghosts"
+msgid "Transmission acknowledged.  Awaiting command sequence."
+msgstr "Übertragung bestätigt.  Warte auf Befehlssequenz."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:217
+msgctxt "message-Human Navy"
+msgid "Acknowledged.  Standing by for further orders."
+msgstr "Bestätigt.  Bereit für weitere Befehle."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:218
+msgctxt "message-Independent"
+msgid "Understood.  Ready to receive your new instructions."
+msgstr "Verstanden.  Bereit, Ihre neuen Anweisungen zu empfangen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:219
+msgctxt "message-Kraylor"
+msgid "Awaiting Orders.  Will execute without delay."
+msgstr "Warten auf Befehle.  Werden ohne Verzögerung ausgeführt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:220
+msgctxt "message-Ktlitans"
+msgid "Communication received.  New behavioral input will enter current evaluation."
+msgstr ""
+"Kommunikation empfangen.  Die neuen Verhaltensdaten werden in die aktuelle Bewertung "
+"einbezogen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:223
+msgctxt "choice_line"
+msgid "Patrol around your current position!"
+msgstr "Patrouillieren Sie um Ihre aktuelle Position!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:224
+msgctxt "message-Arlenians"
+msgid ""
+"We will maintain a vigilant patrol in our current position, ensuring the safety of our "
+"surroundings with care."
+msgstr ""
+"Wir werden an unserer aktuellen Position eine aufmerksame Patrouille durchführen und "
+"sorgfältig für die Sicherheit unserer Umgebung sorgen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:225
+msgctxt "message-Criminals"
+msgid "We'll patrol around here, mate.  Eyes peeled for anyone sniffin' around."
+msgstr "Wir patrouillieren hier, Kumpel.  Augen offen für jeden, der herumschnüffelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:226
+msgctxt "message-Exuari"
+msgid "We'll hunt around these coordinates.  Let any fools wander into our claws!"
+msgstr ""
+"Wir werden diese Koordinaten durchstreifen.  Sollen sich nur Narren in unsere Klauen "
+"verirren!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:227
+msgctxt "message-Ghosts"
+msgid "Current coordinates secured.  Patrol routines active.  Threat detection ongoing."
+msgstr ""
+"Aktuelle Koordinaten gesichert.  Patrouillenroutinen aktiv.  Bedrohungserkennung läuft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:228
+msgctxt "message-Human Navy"
+msgid ""
+"Patrol commenced at current location.  Scanning for potential threats and maintaining "
+"readiness."
+msgstr ""
+"Patrouille an der aktuellen Position begonnen.  Suche nach potenziellen Bedrohungen "
+"unter Aufrechterhaltung der Einsatzbereitschaft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:229
+msgctxt "message-Independent"
+msgid "We'll maintain a patrol here and stay alert for any disturbances."
+msgstr "Wir werden hier patrouillieren und auf mögliche Störungen achten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:230
+msgctxt "message-Kraylor"
+msgid "Maintaining patrol at current coordinates.  No deviation allowed."
+msgstr ""
+"Patrouille an den aktuellen Koordinaten wird aufrechterhalten.  Keine Abweichung "
+"erlaubt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:231
+msgctxt "message-Ktlitans"
+msgid ""
+"Current location observation initiated.  Local activity patterns will be monitored.  "
+"Unexpected behavior will be evaluated as it occurs."
+msgstr ""
+"Beobachtung des aktuellen Standorts eingeleitet.  Lokale Aktivitätsmuster werden "
+"überwacht.  Unerwartetes Verhalten wird bei seinem Auftreten bewertet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:234 mod_spacelan/comms/comms_vf_ship.lua:533
+msgctxt "choice_line"
+msgid "Move to a waypoint and stay there ..."
+msgstr "Begeben Sie sich zu einem Wegpunkt und bleiben Sie dort ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:235
+msgctxt "message-Arlenians"
+msgid ""
+"We shall proceed to the designated location and maintain a careful watch over the area "
+"upon arrival."
+msgstr ""
+"Wir werden uns zum angegebenen Ort begeben und nach unserer Ankunft das Gebiet "
+"sorgfältig überwachen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:236
+msgctxt "message-Criminals"
+msgid ""
+"Alright, we're heading over there now.  We'll keep an eye on the place and make sure "
+"nobody causes trouble."
+msgstr ""
+"Na gut, wir machen uns jetzt auf den Weg.  Wir behalten den Ort im Auge und sorgen "
+"dafür, dass hier niemand Ärger macht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:237
+msgctxt "message-Exuari"
+msgid ""
+"We fly to the hunting grounds and claim our place.  Let any prey come near, and they "
+"will meet our fury!"
+msgstr ""
+"Wir fliegen zu den Jagdgründen und beanspruchen unseren Platz.  Sollte sich Beute "
+"nähern, wird sie unseren Zorn zu spüren bekommen!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:238
+msgctxt "message-Ghosts"
+msgid ""
+"Navigational route confirmed.  Proceeding to assigned coordinates.  Sector monitoring "
+"will commence upon arrival."
+msgstr ""
+"Navigationsroute bestätigt.  Kurs auf die zugewiesenen Koordinaten gesetzt.  Die "
+"Sektorüberwachung beginnt nach der Ankunft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:239
+msgctxt "message-Human Navy"
+msgid ""
+"Proceeding to designated sector.  Patrol operations will begin upon arrival and "
+"position will be maintained."
+msgstr ""
+"Wir begeben uns zum angegebenen Sektor.  Die Patrouillenoperation beginnt bei der "
+"Ankunft und die Position wird gehalten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:240
+msgctxt "message-Independent"
+msgid ""
+"Understood.  We'll head to the assigned area and stay there, keeping watch for anything "
+"unusual."
+msgstr ""
+"Verstanden.  Wir begeben uns zum zugewiesenen Gebiet und bleiben dort, um nach allem "
+"Ungewöhnlichen Ausschau zu halten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:241
+msgctxt "message-Kraylor"
+msgid ""
+"Advancing to assigned coordinates.  Position will be secured.  Any hostile presence "
+"will be eliminated."
+msgstr ""
+"Vorrücken zu den zugewiesenen Koordinaten.  Position wird gesichert.  Jede feindliche "
+"Präsenz wird beseitigt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:242
+msgctxt "message-Ktlitans"
+msgid ""
+"Movement toward specified coordinates has begun.  Arrival will establish a new "
+"observation area.  Local behavior patterns will then be evaluated."
+msgstr ""
+"Die Bewegung zu den angegebenen Koordinaten wurde begonnen.  Mit der Ankunft wird ein "
+"neues Beobachtungsgebiet eingerichtet.  Anschließend werden die lokalen "
+"Verhaltensmuster bewertet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:245 mod_spacelan/comms/comms_vf_ship.lua:592
+msgctxt "choice_line"
+msgid "Protect a nearby target ..."
+msgstr "Schützen Sie ein nahegelegenes Ziel ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:246
+msgctxt "message-Arlenians"
+msgid ""
+"Protecting the assigned ship is our priority.  We shall act decisively to safeguard it."
+msgstr ""
+"Der Schutz des zugewiesenen Schiffes hat für uns Priorität.  Wir werden entschlossen "
+"handeln, um es zu beschützen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:247
+msgctxt "message-Criminals"
+msgid "Got their back, captain.  No one's touching that ship while I'm around."
+msgstr ""
+"Wir halten ihnen den Rücken frei, Captain.  Solange ich hier bin, kommt niemand diesem "
+"Schiff zu nahe."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:248
+msgctxt "message-Exuari"
+msgid "Your precious ship is under our fierce protection.  None shall harm it!"
+msgstr ""
+"Euer kostbares Schiff steht unter unserem erbarmungslosen Schutz.  Niemand wird ihm "
+"etwas antun!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:249
+msgctxt "message-Ghosts"
+msgid "Designated vessel protected.  Perimeter monitoring commenced."
+msgstr "Zugewiesenes Schiff geschützt.  Überwachung des Perimeters eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:250
+msgctxt "message-Human Navy"
+msgid ""
+"Protective detail established around assigned vessel.  All threats will be engaged to "
+"maintain security."
+msgstr ""
+"Schutzeskorte um das zugewiesene Schiff eingerichtet.  Alle Bedrohungen werden "
+"bekämpft, um die Sicherheit zu gewährleisten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:251
+msgctxt "message-Independent"
+msgid ""
+"Protection detail confirmed.  We'll stay close to the ship and guard against any "
+"threats."
+msgstr ""
+"Schutzauftrag bestätigt.  Wir bleiben in der Nähe des Schiffes und schützen es vor "
+"Bedrohungen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:252
+msgctxt "message-Kraylor"
+msgid "Protection detail established.  We will destroy any hostiles that approach."
+msgstr "Schutzauftrag eingerichtet.  Wir werden jeden Feind vernichten, der sich nähert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:253
+msgctxt "message-Ktlitans"
+msgid ""
+"Assigned vessel proximity will be maintained.  Threat patterns affecting the vessel "
+"will be observed.  Corrective action will occur if stability decreases."
+msgstr ""
+"Die Nähe zum zugewiesenen Schiff wird aufrechterhalten.  Bedrohungsmuster, die das "
+"Schiff betreffen, werden beobachtet.  Bei abnehmender Stabilität werden "
+"Korrekturmaßnahmen eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:256 mod_spacelan/comms/comms_vf_ship.lua:607
+msgctxt "choice_line"
+msgid "Dock with a nearby target ..."
+msgstr "Docken Sie an einem nahegelegenen Ziel an ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:257
+msgctxt "message-Arlenians"
+msgid "We prepare to dock with the specified vessel."
+msgstr "Wir bereiten das Andocken an das angegebene Ziel vor."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:258
+msgctxt "message-Criminals"
+msgid "Docking with the ship now.  Let's keep this smooth and quiet."
+msgstr "Wir docken jetzt am Ziel an.  Machen wir das ruhig und unauffällig."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:259
+msgctxt "message-Exuari"
+msgid "Docking with the vessel.  Stay alert, we'll be ready for the next battle."
+msgstr ""
+"Wir docken an dem Ziel an.  Bleibt wachsam, wir werden für den nächsten Kampf bereit "
+"sein."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:260
+msgctxt "message-Ghosts"
+msgid "Docking sequence initiated.  Systems aligning."
+msgstr "Andocksequenz eingeleitet.  Systeme werden ausgerichtet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:261
+msgctxt "message-Human Navy"
+msgid "Docking procedures initiated with designated ship."
+msgstr "Andockvorgang mit dem zugewiesenen Ziel eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:262
+msgctxt "message-Independent"
+msgid "Preparing to dock with the specified ship."
+msgstr "Bereiten das Andocken an das angegebene Ziel vor."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:263
+msgctxt "message-Kraylor"
+msgid "Docking with assigned vessel.  Operations proceed after clearance."
+msgstr "Andocken an das zugewiesene Ziel.  Operationen werden nach Freigabe fortgesetzt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:264
+msgctxt "message-Ktlitans"
+msgid ""
+"Docking interaction with the vessel has begun.  Exchange conditions are being "
+"observed.  Future cooperation potential will be evaluated."
+msgstr ""
+"Der Andockvorgang mit dem Ziel hat begonnen.  Die Bedingungen des Austauschs werden "
+"beobachtet.  Das Potenzial für künftige Zusammenarbeit wird bewertet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:267 mod_spacelan/comms/comms_vf_ship.lua:636
+msgctxt "choice_line"
+msgid "Join the formation of a target ..."
+msgstr "Schließen Sie sich einer Formation an ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:268
+msgctxt "message-Arlenians"
+msgid ""
+"We will assume position within the formation, following the lead ship with disciplined "
+"coordination."
+msgstr ""
+"Wir werden eine Position innerhalb der Formation einnehmen und dem Führungsschiff "
+"diszipliniert folgen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:269
+msgctxt "message-Criminals"
+msgid "Falling into formation, captain.  Let's show 'em how a real crew moves."
+msgstr ""
+"Wir gehen in Formation, Captain.  Zeigen wir ihnen, wie eine richtige Crew manövriert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:270
+msgctxt "message-Exuari"
+msgid "Falling into formation under your banner.  Together we strike like lightning."
+msgstr "Wir formieren uns unter eurem Banner.  Gemeinsam schlagen wir wie ein Blitz zu."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:271
+msgctxt "message-Ghosts"
+msgid "Formation parameters set.  Synchronization with lead vessel confirmed."
+msgstr "Formationsparameter gesetzt.  Synchronisierung mit dem Führungsschiff bestätigt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:272
+msgctxt "message-Human Navy"
+msgid ""
+"Assuming formation with specified leader.  Maintaining assigned position and readiness."
+msgstr ""
+"Formation mit dem angegebenen Führungsschiff wird eingenommen.  Zugewiesene Position "
+"und Einsatzbereitschaft werden aufrechterhalten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:273
+msgctxt "message-Independent"
+msgid "Falling into formation with the lead ship as ordered.  Maintaining vigilance."
+msgstr "Wir gehen wie befohlen mit dem Führungsschiff in Formation.  Wir bleiben wachsam."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:274
+msgctxt "message-Kraylor"
+msgid "Assuming formation under designated leader.  Coordination optimal."
+msgstr ""
+"Formation unter dem zugewiesenen Anführer wird eingenommen.  Koordination optimal."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:275
+msgctxt "message-Ktlitans"
+msgid ""
+"Formation behavior with the designated vessel has begun.  Movement patterns will be "
+"observed.  Coordination accuracy will improve future predictions."
+msgstr ""
+"Das Formationsverhalten mit dem zugewiesenen Schiff wurde begonnen.  Bewegungsmuster "
+"werden beobachtet.  Eine präzisere Koordination wird künftige Vorhersagen verbessern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:278
+msgctxt "choice_line"
+msgid "Follow us!"
+msgstr "Folgen Sie uns!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:279
+msgctxt "message-Arlenians"
+msgid ""
+"Greetings, Captain.  We accept your invitation to follow and will maintain position "
+"carefully behind your vessel."
+msgstr ""
+"Seien Sie gegrüßt, Captain.  Wir nehmen Ihre Aufforderung zum Folgen an und werden "
+"sorgfältig hinter Ihrem Schiff Position halten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:280
+msgctxt "message-Criminals"
+msgid "Following you closely.  Keep your eyes open."
+msgstr "Wir sind direkt hinter euch.  Haltet die Augen offen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:281
+msgctxt "message-Exuari"
+msgid "We follow in your wake.  Lead us to worthy prey!"
+msgstr "Wir folgen euch.  Führt uns zu würdiger Beute!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:282
+msgctxt "message-Ghosts"
+msgid "Position locked aft.  Synchronizing course.  Following directive."
+msgstr ""
+"Position achteraus fixiert.  Kurs wird synchronisiert.  Folgeanweisung ausgeführt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:283
+msgctxt "message-Human Navy"
+msgid "Acknowledged.  We will maintain position behind your vessel as ordered, Captain."
+msgstr "Bestätigt.  Wir werden wie befohlen hinter Ihrem Schiff Position halten, Captain."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:284
+msgctxt "message-Independent"
+msgid ""
+"Got it, I'll keep your engines in sight and follow right behind.  Let me know if you "
+"change course."
+msgstr ""
+"Verstanden, ich behalte eure Triebwerke im Blick und fliege direkt dahinter her.  Gebt "
+"Bescheid, wenn ihr den Kurs ändert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:285
+msgctxt "message-Kraylor"
+msgid ""
+"Following your ship at designated position.  Maintaining relative position behind your "
+"vessel."
+msgstr ""
+"Wir folgen Ihrem Schiff an der zugewiesenen Position.  Relative Position hinter Ihrem "
+"Schiff wird gehalten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:286
+msgctxt "message-Ktlitans"
+msgid ""
+"Following behavior has been established.  Relative movement patterns are now "
+"observable.  Continued interaction will improve classification accuracy."
+msgstr ""
+"Folgeverhalten wurde eingeleitet.  Relative Bewegungsmuster sind nun beobachtbar.  "
+"Fortgesetzte Interaktion wird die Genauigkeit der Klassifizierung verbessern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:289
+msgctxt "choice_line"
+msgid "Hold your position!"
+msgstr "Halten Sie Ihre Position!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:290
+msgctxt "message-Arlenians"
+msgid "Holding our current position as ordered.  We remain alert to any developments."
+msgstr ""
+"Wir halten wie befohlen unsere aktuelle Position.  Wir bleiben aufmerksam gegenüber "
+"allen Entwicklungen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:291
+msgctxt "message-Criminals"
+msgid "Holding position here.  We won't move away unless ordered."
+msgstr ""
+"Wir halten hier die Position.  Wir rücken nicht ab, solange nichts anderes befohlen "
+"wird."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:292
+msgctxt "message-Exuari"
+msgid "Holding steady.  Waiting for your next glorious command."
+msgstr "Wir halten still.  Wir warten auf euren nächsten ruhmreichen Befehl."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:293
+msgctxt "message-Ghosts"
+msgid "Position maintained.  System status stable."
+msgstr "Position gehalten.  Systemstatus stabil."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:294
+msgctxt "message-Human Navy"
+msgid "Holding position at current coordinates.  Standing by for further orders."
+msgstr "Position an den aktuellen Koordinaten wird gehalten.  Bereit für weitere Befehle."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:295
+msgctxt "message-Independent"
+msgid "Holding position here.  We'll monitor the surroundings and maintain readiness."
+msgstr ""
+"Wir halten hier die Position.  Wir überwachen die Umgebung und bleiben einsatzbereit."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:296
+msgctxt "message-Kraylor"
+msgid "Holding current position as ordered.  Ready for engagement."
+msgstr "Wir halten wie befohlen die aktuelle Position.  Bereit zum Gefecht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:297
+msgctxt "message-Ktlitans"
+msgid ""
+"Current position remains unchanged.  Surrounding activity will continue to be "
+"observed.  Additional behavior patterns may emerge."
+msgstr ""
+"Die aktuelle Position bleibt unverändert.  Die Aktivität in der Umgebung wird weiter "
+"beobachtet.  Weitere Verhaltensmuster könnten erkennbar werden."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:300
+msgctxt "choice_line"
+msgid "Shutdown your drive and weapons!"
+msgstr "Schalten Sie Antrieb und Waffen ab!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:301
+msgctxt "message-Arlenians"
+msgid ""
+"Engines and weapons will be powered down as instructed.  We stay ready to resume "
+"operations if necessary."
+msgstr ""
+"Triebwerke und Waffen werden wie angewiesen abgeschaltet.  Wir bleiben bereit, den "
+"Betrieb bei Bedarf wieder aufzunehmen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:302
+msgctxt "message-Criminals"
+msgid "Engines and weapons off, laying low.  Let me know if things heat up."
+msgstr ""
+"Triebwerke und Waffen aus, wir halten uns bedeckt.  Sagt Bescheid, wenn's heiß wird."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:303
+msgctxt "message-Exuari"
+msgid ""
+"Engines and weapons powering down.  Even the hunter must rest before the next hunt."
+msgstr ""
+"Triebwerke und Waffen werden heruntergefahren.  Selbst der Jäger muss vor der nächsten "
+"Jagd ruhen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:304
+msgctxt "message-Ghosts"
+msgid "Power reduction sequence engaged.  Engines and weapons offline."
+msgstr "Energiesparsequenz aktiviert.  Triebwerke und Waffen offline."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:305
+msgctxt "message-Human Navy"
+msgid "Engines and weapons powering down as ordered.  Systems set to standby status."
+msgstr ""
+"Triebwerke und Waffen werden wie befohlen heruntergefahren.  Systeme auf Bereitschaft "
+"geschaltet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:306
+msgctxt "message-Independent"
+msgid ""
+"Engines and weapons shutting down as requested.  We'll remain on standby for further "
+"instructions."
+msgstr ""
+"Triebwerke und Waffen werden wie gewünscht abgeschaltet.  Wir bleiben für weitere "
+"Anweisungen in Bereitschaft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:307
+msgctxt "message-Kraylor"
+msgid "Engines and weapons powered down.  Communication systems remain on alert status."
+msgstr ""
+"Triebwerke und Waffen abgeschaltet.  Kommunikationssysteme bleiben in Alarmbereitschaft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:308
+msgctxt "message-Ktlitans"
+msgid ""
+"Reduced activity state has been accepted.  Resource expenditure will decrease.  Future "
+"actions remain dependent on communicated behaviour pattern."
+msgstr ""
+"Der Zustand reduzierter Aktivität wurde akzeptiert.  Der Ressourcenverbrauch wird "
+"sinken.  Künftige Aktionen bleiben vom mitgeteilten Verhaltensmuster abhängig."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:311 mod_spacelan/comms/comms_vf_ship.lua:621
+msgctxt "choice_line"
+msgid "Restock at a nearby target ..."
+msgstr "Versorgen Sie sich bei einem nahegelegenen Ziel ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:312
+msgctxt "message-Arlenians"
+msgid ""
+"We acknowledge the order to resupply from the designated ship and will proceed to dock "
+"with them."
+msgstr ""
+"Wir bestätigen den Befehl, uns von dem angegebenen Schiff mit Vorräten zu versorgen, "
+"und werden dort andocken."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:313
+msgctxt "message-Criminals"
+msgid "Heading over to grab supplies.  We'll be back in one piece - hopefully."
+msgstr "Wir holen uns dort Vorräte.  Hoffentlich kommen wir heil zurück."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:314
+msgctxt "message-Exuari"
+msgid "We retreat to that ship for supplies.  Strength restored, we return fiercer!"
+msgstr ""
+"Wir ziehen uns zu diesem Schiff zurück, um Vorräte aufzunehmen.  Mit erneuerter Stärke "
+"kehren wir noch wilder zurück!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:315
+msgctxt "message-Ghosts"
+msgid ""
+"Supply location identified.  Resource transfer state initiated.  Vessel continuity will "
+"be restored through acquisition."
+msgstr ""
+"Versorgungsort identifiziert.  Zustand der Ressourcenübertragung eingeleitet.  Die "
+"Einsatzfähigkeit des Schiffes wird durch Aufnahme von Ressourcen wiederhergestellt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:316
+msgctxt "message-Human Navy"
+msgid "Retreat course set for supply transfer.  Docking with assigned ship upon arrival."
+msgstr ""
+"Rückzugskurs zur Vorratsübernahme gesetzt.  Andocken am zugewiesenen Ziel nach der "
+"Ankunft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:317
+msgctxt "message-Independent"
+msgid ""
+"Understood.  We'll proceed to dock and gather supplies from the specified ship promptly."
+msgstr ""
+"Verstanden.  Wir werden dort andocken und umgehend Vorräte von dem angegebenen Ziel "
+"aufnehmen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:318
+msgctxt "message-Kraylor"
+msgid "Retreating to supply vessel.  Resupply and regroup initiated."
+msgstr "Rückzug zum Versorgungsort.  Nachversorgung und Neuformierung eingeleitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:319
+msgctxt "message-Ktlitans"
+msgid ""
+"Movement toward supply exchange location has begun.  Resource restoration will alter "
+"current condition.  Further action depends on updated capability."
+msgstr ""
+"Die Bewegung zum Ort des Versorgungsaustauschs wurde begonnen.  Die Wiederherstellung "
+"von Ressourcen wird den aktuellen Zustand verändern.  Weitere Aktionen hängen von den "
+"aktualisierten Fähigkeiten ab."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:322
+msgctxt "choice_line"
+msgid "Find enemies and attack them!"
+msgstr "Finden Sie Feinde und greifen Sie sie an!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:323
+msgctxt "message-Arlenians"
+msgid ""
+"We will conduct a thorough search for threats, endeavoring to maintain strategic "
+"awareness.  We shall engage any hostile vessels we encounter."
+msgstr ""
+"Wir werden gründlich nach Bedrohungen suchen und dabei die strategische Übersicht "
+"wahren.  Auf feindliche Schiffe, denen wir begegnen, werden wir das Gefecht eröffnen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:324
+msgctxt "message-Criminals"
+msgid "Roaming the space lanes.  We'll find trouble or make some, whichever comes first."
+msgstr ""
+"Wir ziehen durch die Raumstraßen.  Entweder wir finden Ärger oder wir sorgen für "
+"welchen – je nachdem, was zuerst passiert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:325
+msgctxt "message-Exuari"
+msgid "Seeking worthy foes across the void.  Our hunt will not end until glory is ours!"
+msgstr ""
+"Wir suchen im leeren Raum nach würdigen Gegnern.  Unsere Jagd endet erst, wenn der Ruhm "
+"unser ist!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:326
+msgctxt "message-Ghosts"
+msgid "External entities detected.  Search state active.  Response state prepared."
+msgstr "Externe Entitäten entdeckt.  Suchmodus aktiv.  Reaktionsmodus vorbereitet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:327
+msgctxt "message-Human Navy"
+msgid "Commencing wide area patrol.  Scanning for enemy contacts."
+msgstr "Großräumige Patrouille wird begonnen.  Suche nach feindlichen Kontakten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:328
+msgctxt "message-Independent"
+msgid ""
+"Setting a course to scout for potential threats.  Staying observant and will attack on "
+"contact."
+msgstr ""
+"Wir setzen Kurs, um nach potenziellen Bedrohungen zu suchen.  Wir bleiben wachsam und "
+"greifen bei Kontakt an."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:329
+msgctxt "message-Kraylor"
+msgid "Searching for enemies.  Area dominance will be enforced."
+msgstr "Suche nach Feinden.  Die Vorherrschaft über das Gebiet wird durchgesetzt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:330
+msgctxt "message-Ktlitans"
+msgid ""
+"Search behavior has begun.  Hostile activity patterns will be identified.  Future "
+"interaction will depend on observed responses."
+msgstr ""
+"Suchverhalten wurde eingeleitet.  Muster feindlicher Aktivitäten werden identifiziert.  "
+"Künftige Interaktionen hängen von den beobachteten Reaktionen ab."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:333 mod_spacelan/comms/comms_vf_ship.lua:519
+msgctxt "choice_line"
+msgid "Eliminate enemies in the area, then proceed to a waypoint ..."
+msgstr ""
+"Schalten Sie die Feinde in diesem Gebiet aus und begeben Sie sich dann zu einem "
+"Wegpunkt ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:334
+msgctxt "message-Arlenians"
+msgid ""
+"We shall secure the designated area of hostile threats before proceeding to the "
+"assigned destination with due caution."
+msgstr ""
+"Wir werden das angegebene Gebiet von feindlichen Bedrohungen säubern, bevor wir mit der "
+"gebotenen Vorsicht zum zugewiesenen Ziel weiterfliegen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:335
+msgctxt "message-Criminals"
+msgid ""
+"We'll clean out anyone causing trouble around here, then head for the waypoint.  Easy "
+"enough."
+msgstr ""
+"Wir räumen hier jeden aus dem Weg, der Ärger macht, und fliegen dann zum Wegpunkt.  "
+"Ganz einfach."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:336
+msgctxt "message-Exuari"
+msgid ""
+"The prey in this sector will fall before us!  When the hunt is complete, we charge "
+"onward to the next destination!"
+msgstr ""
+"Die Beute in diesem Sektor wird vor uns fallen!  Wenn die Jagd beendet ist, stürmen wir "
+"weiter zum nächsten Ziel!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:337
+msgctxt "message-Ghosts"
+msgid ""
+"Sector sweep initiated.  Hostile entities will be neutralized.  Proceeding to "
+"designated coordinates upon completion."
+msgstr ""
+"Sektordurchsuchung eingeleitet.  Feindliche Entitäten werden neutralisiert.  Nach "
+"Abschluss wird zu den angegebenen Koordinaten weitergeflogen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:338
+msgctxt "message-Human Navy"
+msgid ""
+"Proceeding to the designated sector.  Hostile contacts will be engaged and eliminated "
+"before continuing to the assigned waypoint."
+msgstr ""
+"Wir begeben uns zum angegebenen Sektor.  Feindliche Kontakte werden bekämpft und "
+"ausgeschaltet, bevor wir zum zugewiesenen Wegpunkt weiterfliegen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:339
+msgctxt "message-Independent"
+msgid ""
+"Understood.  We'll deal with any hostiles we find in the area, then continue on to the "
+"waypoint as ordered."
+msgstr ""
+"Verstanden.  Wir kümmern uns um alle Feinde, die wir in diesem Gebiet finden, und "
+"setzen dann wie befohlen zum Wegpunkt fort."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:340
+msgctxt "message-Kraylor"
+msgid ""
+"Assigned sector will be purged of hostile presence.  Advance to designated waypoint "
+"follows mission completion."
+msgstr ""
+"Der zugewiesene Sektor wird von feindlicher Präsenz gesäubert.  Nach Abschluss der "
+"Mission erfolgt der Vorstoß zum angegebenen Wegpunkt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:341
+msgctxt "message-Ktlitans"
+msgid ""
+"Area contains unresolved hostile behavior.  Observation will continue until dangerous "
+"patterns are reduced.  Movement onward will follow environmental evaluation."
+msgstr ""
+"Das Gebiet weist ungelöstes feindliches Verhalten auf.  Die Beobachtung wird "
+"fortgesetzt, bis gefährliche Muster reduziert sind.  Die weitere Bewegung wird anhand "
+"der Bewertung der Umgebung erfolgen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:344 mod_spacelan/comms/comms_vf_ship.lua:545
+msgctxt "choice_line"
+msgid "Find enemies on the way to a waypoint ..."
+msgstr "Suchen Sie auf dem Weg zu einem Wegpunkt nach Feinden ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:345
+msgctxt "message-Arlenians"
+msgid ""
+"We shall proceed to the assigned destination while remaining vigilant for hostile "
+"vessels along our route.  Any threat will be dealt with prudently."
+msgstr ""
+"Wir werden uns zum zugewiesenen Ziel begeben und dabei auf unserem Weg nach feindlichen "
+"Schiffen Ausschau halten.  Jede Bedrohung wird umsichtig behandelt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:346
+msgctxt "message-Criminals"
+msgid ""
+"We'll head for the waypoint.  If anyone's looking for a fight along the way, they'll "
+"find one."
+msgstr ""
+"Wir machen uns auf zum Wegpunkt.  Wenn unterwegs jemand einen Kampf sucht, wird er ihn "
+"bekommen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:347
+msgctxt "message-Exuari"
+msgid ""
+"Our course is set!  Let any prey cross our path, and we shall claim their glory before "
+"reaching our destination!"
+msgstr ""
+"Unser Kurs steht fest!  Sollte Beute unseren Weg kreuzen, werden wir ihren Ruhm an uns "
+"reißen, bevor wir unser Ziel erreichen!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:348
+msgctxt "message-Ghosts"
+msgid ""
+"Course vector established.  En route threat detection active.  Hostile contacts will be "
+"neutralized."
+msgstr ""
+"Kursvektor festgelegt.  Bedrohungserkennung entlang der Route aktiv.  Feindliche "
+"Kontakte werden neutralisiert."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:349
+msgctxt "message-Human Navy"
+msgid ""
+"Course set for assigned destination.  All hostile contacts encountered en route will be "
+"engaged."
+msgstr ""
+"Kurs auf das zugewiesene Ziel gesetzt.  Alle unterwegs angetroffenen feindlichen "
+"Kontakte werden bekämpft."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:350
+msgctxt "message-Independent"
+msgid ""
+"Understood.  We'll make for the waypoint and deal with any hostiles we encounter along "
+"the way."
+msgstr ""
+"Verstanden.  Wir fliegen zum Wegpunkt und kümmern uns unterwegs um alle Feinde, denen "
+"wir begegnen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:351
+msgctxt "message-Kraylor"
+msgid ""
+"Destination locked.  Enemy vessels encountered during transit will be destroyed without "
+"delay."
+msgstr ""
+"Ziel festgelegt.  Während des Transits angetroffene feindliche Schiffe werden ohne "
+"Verzögerung zerstört."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:352
+msgctxt "message-Ktlitans"
+msgid ""
+"Travel toward the destination has begun.  Unusual vessel behavior along the route will "
+"be observed.  Responses will adapt to discovered patterns."
+msgstr ""
+"Die Reise zum Ziel hat begonnen.  Ungewöhnliches Schiffsverhalten entlang der Route "
+"wird beobachtet.  Die Reaktionen werden an erkannte Muster angepasst."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:355 mod_spacelan/comms/comms_vf_ship.lua:557
+msgctxt "choice_line"
+msgid "Set course directly towards a waypoint ..."
+msgstr "Setzen Sie direkten Kurs auf einen Wegpunkt ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:356
+msgctxt "message-Arlenians"
+msgid ""
+"Plotting direct course to the target area, prioritizing efficiency and timely arrival."
+msgstr ""
+"Direkter Kurs zum Zielgebiet wird berechnet, wobei Effizienz und rechtzeitige Ankunft "
+"Priorität haben."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:357
+msgctxt "message-Criminals"
+msgid "Cutting right through to the destination.  No detours, no delays."
+msgstr "Wir fliegen direkt zum Ziel.  Keine Umwege, keine Verzögerungen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:358
+msgctxt "message-Exuari"
+msgid "Direct route chosen.  Speed is honor; we arrive ready to conquer!"
+msgstr ""
+"Direkte Route gewählt.  Geschwindigkeit ist Ehre; wir werden nach der Ankunft zur "
+"Eroberung bereit sein!"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:359
+msgctxt "message-Ghosts"
+msgid ""
+"Direct movement state selected.  Navigation constraints reduced.  Transit process "
+"continues toward assigned coordinates."
+msgstr ""
+"Direkter Bewegungsmodus ausgewählt.  Navigationsbeschränkungen reduziert.  Transit zu "
+"den zugewiesenen Koordinaten wird fortgesetzt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:360
+msgctxt "message-Human Navy"
+msgid "Direct course engaged to target sector.  Bypassing standard waypoints as ordered."
+msgstr ""
+"Direkter Kurs zum Zielsektor eingeschlagen.  Standardwegpunkte werden wie befohlen "
+"umgangen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:361
+msgctxt "message-Independent"
+msgid "Direct course established to the target area.  Proceeding without delay."
+msgstr ""
+"Direkter Kurs zum Zielgebiet festgelegt.  Wir setzen uns unverzüglich in Bewegung."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:362
+msgctxt "message-Kraylor"
+msgid "Direct course set for target zone.  Proceeding at maximum speed."
+msgstr "Direkter Kurs auf die Zielzone gesetzt.  Wir fliegen mit Höchstgeschwindigkeit."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:363
+msgctxt "message-Ktlitans"
+msgid ""
+"Direct movement toward the destination has been selected.  Reduced deviation increases "
+"arrival efficiency.  Outcome will be evaluated after completion."
+msgstr ""
+"Direkte Bewegung zum Ziel wurde ausgewählt.  Eine geringere Abweichung erhöht die "
+"Effizienz der Ankunft.  Das Ergebnis wird nach Abschluss bewertet."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:366
+msgctxt "taunt-Criminals"
+msgid "Even pirates laugh at your reputation."
+msgstr "Selbst Piraten lachen über euren Ruf."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:367
+msgctxt "taunt-Exuari"
+msgid "We've seen civilians fight harder than you."
+msgstr "Wir haben schon Zivilisten härter kämpfen sehen als euch."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:368
+msgctxt "taunt-Human Navy"
+msgid "Your uniform hides cowardice, not courage."
+msgstr "Eure Uniform verbirgt Feigheit, keinen Mut."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:369
+msgctxt "taunt-Arlenians"
+msgid "Your diplomacy saves nobody. Hiding behind words is not wisdom."
+msgstr "Diplomatie rettet niemanden. Sich hinter Worten zu verstecken ist keine Weisheit."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:370
+msgctxt "taunt-Independent"
+msgid "Nobody trusts your cargo or your promises."
+msgstr "Niemand vertraut eurer Fracht oder euren Versprechen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:371
+msgctxt "taunt-Kraylor"
+msgid "Your faith breeds bullies, not warriors."
+msgstr "Euer Glaube bringt Schläger hervor, keine Krieger."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:372
+msgctxt "taunt-Ghosts"
+msgid "Forgotten machines pretending they're still alive."
+msgstr "Vergessene Maschinen, die so tun, als wären sie noch am Leben."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:373
+msgctxt "taunt-Ktlitans"
+msgid "Centuries searching. Still homeless. Impressive failure."
+msgstr "Jahrhunderte der Suche. Noch immer heimatlos. Imposantes Versagen."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:376
+msgctxt "message-Arlenians"
+msgid ""
+"Your words suggest you seek a response beyond conversation, Captain.  We recognize that "
+"frustration can sometimes wear the mask of confidence.  We see no benefit in answering "
+"provocation with violence, and we believe restraint can demonstrate strength as surely "
+"as victory."
+msgstr ""
+"Ihre Worte lassen vermuten, dass Sie eine Reaktion suchen, die über ein Gespräch "
+"hinausgeht, Captain.  Wir wissen, dass Frustration sich manchmal als Selbstvertrauen "
+"tarnt.  Wir sehen keinen Vorteil darin, Provokation mit Gewalt zu beantworten, und sind "
+"überzeugt, dass Zurückhaltung Stärke ebenso deutlich zeigen kann wie ein Sieg."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:377
+msgctxt "message-Criminals"
+msgid ""
+"Nice try, Captain.  My crew's still getting paid whether you get your fight or not.  If "
+"somebody's going to start shooting today, it's going to be because the price made "
+"sense, not because you bruised our pride."
+msgstr ""
+"Netter Versuch, Captain.  Meine Crew wird bezahlt, ganz egal, ob Sie Ihren Kampf "
+"bekommen oder nicht.  Wenn heute jemand anfängt zu schießen, dann weil sich der Preis "
+"dafür lohnt, nicht weil Sie unseren Stolz verletzt haben."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:378
+msgctxt "message-Exuari"
+msgid ""
+"Ha!  You were hoping for an easy fight? No, Human captain.  A real warrior chooses the "
+"right battle, not every loud voice drifting through the stars.  Keep your fire for "
+"someone foolish enough to waste it."
+msgstr ""
+"Ha!  Ihr habt auf einen leichten Kampf gehofft? Nein, menschlicher Captain.  Ein wahrer "
+"Krieger wählt den richtigen Kampf und hört nicht auf jede laute Stimme, die durch die "
+"Sterne hallt.  Spart euer Feuer für jemanden auf, der töricht genug ist, es zu "
+"verschwenden."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:379
+msgctxt "message-Ghosts"
+msgid ""
+"Provocation signal received.  Intent classified.  Response criteria not satisfied.  "
+"Conflict state not entered.  Execution continues."
+msgstr ""
+"Provokationssignal empfangen.  Absicht klassifiziert.  Kriterien für eine Reaktion "
+"nicht erfüllt.  Konfliktstatus nicht aktiviert.  Ausführung wird fortgesetzt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:380
+msgctxt "message-Human Navy"
+msgid ""
+"Your attempt to provoke a response has been noted.  This vessel will not participate in "
+"conduct that serves no operational purpose.  Professional discipline remains intact."
+msgstr ""
+"Ihr Versuch, eine Reaktion zu provozieren, wurde zur Kenntnis genommen.  Dieses Schiff "
+"wird sich nicht an Handlungen beteiligen, die keinem operativen Zweck dienen.  Die "
+"professionelle Disziplin bleibt gewahrt."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:381
+msgctxt "message-Independent"
+msgid ""
+"Captain, I've been around long enough to know the difference between a bad joke and a "
+"bad decision.  Whatever you're trying to prove isn't worth the repair bills.  We'd "
+"rather stay on schedule and keep our customers happy."
+msgstr ""
+"Captain, ich bin lange genug dabei, um den Unterschied zwischen einem schlechten Witz "
+"und einer schlechten Entscheidung zu kennen.  Was auch immer Sie beweisen wollen, ist "
+"die Reparaturkosten nicht wert.  Wir bleiben lieber im Zeitplan und halten unsere "
+"Kunden zufrieden."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:382
+msgctxt "message-Kraylor"
+msgid ""
+"Human Navy vessel.  Provocation detected.  Tactical value assessed as negligible.  "
+"Weapons remain under command authorization.  Your transmission does not alter "
+"operational objectives."
+msgstr ""
+"Schiff der Menschenflotte.  Provokation erkannt.  Taktischer Wert als vernachlässigbar "
+"eingestuft.  Waffen bleiben unter Befehlsfreigabe.  Ihre Übertragung verändert die "
+"operativen Ziele nicht."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:383
+msgctxt "message-Ktlitans"
+msgid ""
+"Your communication contains deliberate provocation.  The behavior suggests an attempt "
+"to alter the current interaction through emotional response.  Existing observations "
+"indicate no adaptive advantage in accepting those conditions.  Current prediction "
+"favors continued restraint."
+msgstr ""
+"Ihre Kommunikation enthält eine gezielte Provokation.  Das Verhalten deutet auf den "
+"Versuch hin, die aktuelle Interaktion durch eine emotionale Reaktion zu verändern.  "
+"Bisherige Beobachtungen zeigen keinen Anpassungsvorteil darin, diese Bedingungen "
+"anzunehmen.  Die aktuelle Prognose spricht für anhaltende Zurückhaltung."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:386
+msgctxt "taunt-Arlenians"
+msgid "Another convoy needs your protection more than we ever could."
+msgstr ""
+"Ein anderer Konvoi braucht Ihren Schutz dringender, als wir es je leisten könnten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:387
+msgctxt "taunt-Criminals"
+msgid "That freighter's cargo looks far more profitable."
+msgstr "Die Fracht eines anderen Frachters sieht weitaus profitabler aus."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:388
+msgctxt "taunt-Exuari"
+msgid "A stronger warrior waits beyond us."
+msgstr "Jenseits von uns wartet ein weitaus mächtigerer Krieger."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:389
+msgctxt "taunt-Ghosts"
+msgid "Another vessel carries older forgotten archives."
+msgstr "Ein anderes Schiff führt ältere vergessene Archive mit sich."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:390
+msgctxt "taunt-Human Navy"
+msgid "Another hostile vessel threatens civilians right now."
+msgstr "Ein anderes feindliches Schiff bedroht gerade Zivilisten."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:391
+msgctxt "taunt-Independent"
+msgid "Someone else is stealing your customers."
+msgstr "Jemand anderes stiehlt euch eure Kunden."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:392
+msgctxt "taunt-Kraylor"
+msgid "Another unbeliever insults your strength openly."
+msgstr "Ein anderer Ungläubiger beleidigt offen eure Stärke."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:393
+msgctxt "taunt-Ktlitans"
+msgid "Another colony competes for your future home."
+msgstr "Eine andere Kolonie konkurriert um eure künftige Heimat."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:652
+msgctxt "choice_line"
+msgid "We have new orders for you"
+msgstr "Wir haben neue Befehle für Sie"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:673
+msgctxt "choice_line"
+msgid "We have new orders for you ..."
+msgstr "Wir haben neue Befehle für Sie ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:693
+msgctxt "choice_line"
+msgid "We ask you to do something for us ..."
+msgstr "Wir bitten Sie, etwas für uns zu erledigen ..."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:749
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid ""
+"\n"
+"Hull: %d%%\n"
+msgstr ""
+"\n"
+"Hülle: %d%%\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:753
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Shield: %d%%\n"
+msgstr "Schilde: %d%%\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:755
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Front Shield: %d%%\n"
+msgstr "Frontschilde: %d%%\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:756
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Rear Shield: %d%%\n"
+msgstr "Heckschilde: %d%%\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:759
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Shield %d: %d%%\n"
+msgstr "Schildsegment %d: %d%%\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:766
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "%s Missiles: %d/%d\n"
+msgstr "%s Raketen: %d/%d\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:772
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Current target: %s\n"
+msgstr "Aktuelles Ziel: %s\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:778
+#, lua-format
+msgctxt "ship-info-statusreport"
+msgid "Current target: direction %d in %du\n"
+msgstr "Aktuelles Ziel: Richtung %d in %du\n"
+
+#: mod_spacelan/comms/comms_vf_ship.lua:935 mod_spacelan/comms/comms_vf_ship.lua:939
+msgctxt "message"
+msgid "This target evades our scanners."
+msgstr "Dieses Ziel entzieht sich unseren Scannern."
+
+#: mod_spacelan/comms/comms_vf_ship.lua:1006
+msgctxt "choice_line"
+msgid "[Provoke ...]"
+msgstr "[Provozieren ...]"

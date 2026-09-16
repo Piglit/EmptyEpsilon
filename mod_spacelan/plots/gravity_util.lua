@@ -1,6 +1,6 @@
 gravity_util = {
     gravity_const = 100000000,
-	sources = {},
+	sources = {},	-- source -> limit
 	exceptions = {}
 }
 
@@ -21,7 +21,9 @@ end
 
 function gravity_util.addGravitySource(planet, outer_limit)
 	if planet ~= nil and planet:isValid() then
-		table.insert(gravity_util.sources, {planet, outer_limit})
+		assert(gravity_util.sources[planet] == nil, type(planet))
+		gravity_util.sources[planet] = outer_limit
+--		table.insert(gravity_util.sources, {planet, outer_limit})
 	end
 end
 
@@ -34,11 +36,13 @@ function gravity_util:updatePlayerShip(delta, p)
 		if arrayContains(self.exceptions, p) then
 			return
 		end
-		for idx,s in ipairs(gravity_util.sources) do
-			local source = s[1]
-			local limit = s[2]
-			if source == nil or not source:isValid() then
-				table.remove(gravity_util.source, idx)
+		--for idx,s in ipairs(gravity_util.sources) do
+			--local source = s[1]
+			--local limit = s[2]
+		for source, limit in pairs(gravity_util.sources) do
+			if not source:isValid() then
+				--table.remove(gravity_util.source, idx)
+				gravity_util.sources[source] = nil
 				return
 			end
 			local angle = angleRotation(p, source)
@@ -53,3 +57,12 @@ function gravity_util:updatePlayerShip(delta, p)
 	end
 end
 
+function gravity_util:getLimit(source)
+	return self.sources[source]
+end
+
+function gravity_util:setLimit(source, limit)
+	-- same as addGravitySource
+	assert(self.sources[source] ~= nil and source:isValid())
+	self.sources[source] = limit
+end

@@ -336,7 +336,7 @@ function createEnemyGroupKraylor(difficulty)
                 totalScore = totalScore + cost 
             end
             dest = dest - cost
-            script_hangar.create(ship, "Drone", 3, function (_, fighter, _)
+            script_hangar:create(ship, "Drone", 3, function (_, fighter, _)
                 table.insert(enemyList, fighter)
             end)
         else

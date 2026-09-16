@@ -104,6 +104,18 @@ OptionsMenu::OptionsMenu()
         destroy();
     }))->setSize(GuiElement::GuiSizeMax, 50);
 
+    // Impulse control speed
+    auto initial_impulse_control_speed = PreferencesManager::get("impulse_control_speed", "0.75").toFloat();
+    auto impulse_control_speed_slider = new GuiBasicSlider(interface_page, "CONTROL_IMPULSE_CONTROL_SPEED_SLIDER", 0.1f, 2.f, initial_impulse_control_speed, [this](float value) {
+        PreferencesManager::set("impulse_control_speed", value);
+        updateImpulseControlSpeedLabel(value);
+    });
+    impulse_control_speed_slider->setSize(GuiElement::GuiSizeMax, 50);
+    // Override overlay label.
+    impulse_control_speed_overlay_label = new GuiLabel(impulse_control_speed_slider, "CONTROL_IMPULSE_CONTROL_SPEED_SLIDER_LABEL", "", 30);
+    impulse_control_speed_overlay_label->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+    updateImpulseControlSpeedLabel(initial_impulse_control_speed);
+
     //Select the language
     {
         (new GuiLabel(interface_page, "LANGUAGE_OPTIONS_LABEL", tr("Language (applies on back)"), 30))->addBackground()->setSize(GuiElement::GuiSizeMax, 50)->layout.margin.top = 20;
@@ -218,6 +230,11 @@ void OptionsMenu::update(float delta)
         soundManager->stopMusic();
         returnToMainMenu(getRenderLayer());
     }
+}
+
+void OptionsMenu::updateImpulseControlSpeedLabel(float value)
+{
+    impulse_control_speed_overlay_label->setText(tr("Impulse speed from 0% to 100% in {sec}s holding Up/Down").format({ {"sec", string(value, 2)} }));
 }
 
 void OptionsMenu::setupGraphicsOptions()

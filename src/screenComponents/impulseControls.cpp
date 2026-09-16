@@ -5,10 +5,7 @@
 #include "powerDamageIndicator.h"
 #include "gui/gui2_keyvaluedisplay.h"
 #include "gui/gui2_slider.h"
-
-// How many seconds of holding down "UP" should it take to bring the slider from 0 to 1?
-const float SEC_FROM_0_TO_1 = 0.75;
-const float CHANGE_MULTIPLIER = 1.f / SEC_FROM_0_TO_1;
+#include "preferenceManager.h"
 
 // After this many seconds of no input change, the server value (source of truth) overrides the client's value.
 const float SEC_RESYNC_TO_SERVER_AFTER = 0.5;
@@ -19,7 +16,8 @@ bool canControl()
 }
 
 GuiImpulseControls::GuiImpulseControls(GuiContainer* owner, string id)
-: GuiElement(owner, id)
+: GuiElement(owner, id),
+impulse_control_speed(PreferencesManager::get("impulse_control_speed", "0.75").toFloat())
 {
     slider = new GuiSlider(this, id + "_SLIDER", 1.0, -1.0, 0.0, [this](float value) {
         // called when the slider is clicked manually, not called when the slider value is set via setValue()
@@ -66,7 +64,7 @@ void GuiImpulseControls::onUpdate()
         const auto old_value = slider->getValue();
         auto new_value = old_value;
 
-        const auto oneTickChange = delta * CHANGE_MULTIPLIER;
+        const auto oneTickChange = delta / impulse_control_speed;
 
         const float change = keys.helms_increase_impulse.getValue() - keys.helms_decrease_impulse.getValue();
 

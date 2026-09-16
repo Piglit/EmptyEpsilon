@@ -31,9 +31,12 @@ private:
 
     std::vector<string> hotkey_categories;
     GuiLabel* impulse_volume_overlay_label;
+    GuiLabel* impulse_control_speed_overlay_label;
 
     void setupGraphicsOptions();
     void setupAudioOptions();
+
+    void updateImpulseControlSpeedLabel(float value);
 public:
     OptionsMenu();
 

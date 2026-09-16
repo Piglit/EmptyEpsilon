@@ -7,6 +7,7 @@
 #include "GMMessage.h"
 #include "gameStateLogger.h"
 #include <io/json.h>
+#include "minigames.h"
 
 class GameStateLogger;
 class GameGlobalInfo;
@@ -27,13 +28,6 @@ enum EScanningComplexity
     SC_Simple,
     SC_Normal,
     SC_Advanced,
-};
-enum EHackingGames
-{
-    HG_Mine,
-    HG_Lights,
-    HG_SlidingTilePuzzle,
-    HG_All
 };
 
 class GameGlobalInfo : public MultiplayerObject, public Updatable
@@ -137,7 +131,7 @@ string getSectorName(glm::vec2 position);
 glm::vec2 sectorToXY(string sectorName);
 
 REGISTER_MULTIPLAYER_ENUM(EScanningComplexity);
-REGISTER_MULTIPLAYER_ENUM(EHackingGames);
+//REGISTER_MULTIPLAYER_ENUM(EHackingGames);
 
 template<> int convert<EScanningComplexity>::returnType(lua_State* L, EScanningComplexity complexity);
 template<> void convert<EScanningComplexity>::param(lua_State* L, int& idx, EScanningComplexity& complexity);

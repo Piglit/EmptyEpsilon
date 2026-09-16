@@ -246,9 +246,41 @@ ShipSelectionScreen::ShipSelectionScreen()
         row = new GuiElement(extra_settings, "");
         row->setSize(GuiElement::GuiSizeMax, 50)->setAttribute("layout", "horizontal");
         (new GuiLabel(row, "GAME_HACKING_GAMES_LABEL", tr("Hacking type: "), 30))->setAlignment(sp::Alignment::CenterRight)->setSize(250, GuiElement::GuiSizeMax);
+        // TODO: Refactor this input field - it should be a "checklist" rather than just a single selection
+        std::vector<string> hacking_game_options;
+        auto num_choices = 1 << available_hacking_games.size();
+        for (auto i=0;i<num_choices;i++)
+        {
+            string name = "";
+            bool is_all = true;
+            for (auto j = 0; j < available_hacking_games.size(); j++)
+            {
+                if (i & (1 << j))
+                {
+                    if (!name.empty())
+                    {
+                        name += "+";
+                    }
+                    name += tr("hacking", available_hacking_games[j].pretty_name);
+                }
+                else
+                {
+                    is_all = false;
+                }
+            }
+            if (name.empty())
+            {
+                name = "-";
+            }
+            else if (is_all)
+            {
+                name = tr("hacking", "All");
+            }
+            hacking_game_options.push_back(name);
+        }
         (new GuiSelector(row, "GAME_HACKING_GAME", [](int index, string value) {
-            gameGlobalInfo->hacking_games = EHackingGames(index);
-        }))->setOptions({tr("hacking", "Mine"), tr("hacking", "Lights"), tr("hacking", "All")})->setSelectionIndex((int)gameGlobalInfo->hacking_games)->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
+            gameGlobalInfo->hacking_games = value == tr("hacking", "All") ? HackingGame::All : index;
+        }))->setOptions(hacking_game_options)->setSelectionIndex(std::min((uint32_t)(hacking_game_options.size()-1), gameGlobalInfo->hacking_games))->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
 
         // Frequency and system damage row.
         row = new GuiElement(extra_settings, "");

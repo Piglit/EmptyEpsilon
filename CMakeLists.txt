@@ -226,6 +226,7 @@ set(MAIN_SOURCES
     src/commsScriptInterface.cpp
     src/modelData.cpp
     src/gameGlobalInfo.cpp
+    src/minigames.cpp
     src/GMActions.cpp
     src/script.cpp
     src/playerInfo.cpp
@@ -390,6 +391,7 @@ set(MAIN_SOURCES
     src/factionInfo.h
     src/featureDefs.h
     src/gameGlobalInfo.h
+    src/minigames.h
     src/gameStateLogger.h
     src/glObjects.h
     src/GMActions.h

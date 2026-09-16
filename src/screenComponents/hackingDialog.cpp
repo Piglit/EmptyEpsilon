@@ -4,9 +4,6 @@
 #include "gameGlobalInfo.h"
 #include "spaceObjects/spaceObject.h"
 #include "spaceObjects/playerSpaceship.h"
-#include "mineSweeper.h"
-#include "lightsOut.h"
-#include "newMinigames/slidingTilePuzzle.h"
 #include "miniGame.h"
 #include <memory>
 #include <algorithm>
@@ -145,35 +142,49 @@ void GuiHackingDialog::onMiniGameComplete(bool success)
 
 void GuiHackingDialog::getNewGame() {
     int difficulty = 2;
-    EHackingGames games = HG_All;
+    EHackingGames games = HackingGame::All;
     if (gameGlobalInfo)
     {
       difficulty = gameGlobalInfo->hacking_difficulty;
       games = gameGlobalInfo->hacking_games;
     }
 
-    //games = HG_SlidingTilePuzzle; // TODO: Remove me
-
-    if (games <= 0 || games >= HG_All)
+    // Get one out of all available games
+    int num_games_available = 0;
+    for (auto i = available_hacking_games.size(); i > 0; i--)
     {
-        games = static_cast<EHackingGames>(irandom(0, HG_All - 1));
+        if (games & (1 << (i-1)))
+        {
+            num_games_available++;
+        }
     }
 
-    switch (games)
+    if (num_games_available == 0)
     {
-    case HG_Lights:
-      game = std::make_shared<LightsOut>(minigame_box, this, difficulty);
-      break;
-    case HG_Mine:
-      game = std::make_shared<MineSweeper>(minigame_box, this, difficulty);
-      break;
-    case HG_SlidingTilePuzzle:
-      game = std::make_shared<SlidingTilePuzzle>(minigame_box, this, difficulty);
-      break;
-    default:
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Could not find minigame", nullptr);
-        exit(1);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "No minigames available", nullptr);
+        //exit(1);
+        return;
     }
+
+    // Instantiate that game
+    int chosen_game = irandom(0, num_games_available - 1);
+    for (auto i = available_hacking_games.size(); i > 0; i--)
+    {
+        if (games & (1 << (i-1)))
+        {
+            if (chosen_game == 0)
+            {
+                // that one
+                game = available_hacking_games[(i-1)].factory(minigame_box, this, difficulty);
+                break;
+            }
+            else
+            {
+                chosen_game--;
+            }
+        }
+    }
+
     glm::vec2 board_size = game->getBoardSize();
 
     minigame_box->setSize(std::max(board_size.x + 100, 500.f), std::max(board_size.y + 150, 450.f));

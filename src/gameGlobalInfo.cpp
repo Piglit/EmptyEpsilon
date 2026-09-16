@@ -41,7 +41,7 @@ GameGlobalInfo::GameGlobalInfo()
     global_message_timeout = 0.0;
     scanning_complexity = SC_Normal;
     hacking_difficulty = 2;
-    hacking_games = HG_All;
+    hacking_games = HackingGame::All;
     use_beam_shield_frequencies = true;
     use_system_damage = true;
     allow_main_screen_tactical_radar = true;
@@ -891,9 +891,9 @@ static int getHackingGames(lua_State* L)
 {
     return convert<EHackingGames>::returnType(L, gameGlobalInfo->hacking_games);
 }
-/// EHackingGames getHackingGames()
-/// Returns the running scenario's hacking difficulty setting.
-/// Example: getHackingGames() -- returns "all" by default
+/// string getHackingGames()
+/// Returns a comma-separated list of all games available for players. Will return the actual game names instead of "all", if all games are enabled.
+/// Example: getHackingGames() -- returns "mines,lights,slidingTilePuzzle" by default
 REGISTER_SCRIPT_FUNCTION(getHackingGames);
 
 static int setHackingGames(lua_State* L)
@@ -902,8 +902,11 @@ static int setHackingGames(lua_State* L)
     convert<EHackingGames>::param(L, idx, gameGlobalInfo->hacking_games);
     return 1;
 }
-/// void setHackingGames(EHackingGames games)
-/// Set the hacking games setting
+/// void setHackingGames(string games)
+/// Set which hacking games are available for players. "all" will enable all available games. Otherwise you can provide a comma-separated list of the game's names.
+/// Example: setHackingGames("mines,lights") -- only allows Minesweeper and Lights Out
+/// Example: setHackingGames("") -- disable hacking minigames
+/// Example: setHackingGames("all") -- enable all hacking minigames
 REGISTER_SCRIPT_FUNCTION(setHackingGames);
 
 static int areBeamShieldFrequenciesUsed(lua_State* L)

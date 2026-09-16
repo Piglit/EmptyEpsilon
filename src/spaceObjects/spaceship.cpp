@@ -225,6 +225,10 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(SpaceShip, ShipTemplateBasedObject)
     /// ship:setImpulseMaxSpeed(30,20) -- sets the max forward speed to 30 and reverse to 20
     /// ship:setImpulseMaxSpeed(30) -- sets the max forward and reverse speed to 30
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setImpulseMaxSpeed);
+    /// Sets this SpaceShip's maximum reverse impulse speeds.
+    /// Examples:
+    /// ship:setImpulseMaxReverseSpeed(30)
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setImpulseMaxReverseSpeed);
     /// Returns this SpaceShip's maximum rotational speed, in degrees per second?
     /// Example: ship:getRotationMaxSpeed()
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, getRotationMaxSpeed);

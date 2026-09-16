@@ -47,6 +47,7 @@ function init()
 		"vf_upgrades",
 		"vf_ambush",
 		"avp_story",
+		"vf_timesync",
 		{"scenario", scenario},
 	})
 	gravity_util.gravity_const = 2000000	-- 50 times as high!

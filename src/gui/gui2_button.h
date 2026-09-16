@@ -19,6 +19,7 @@ protected:
     float icon_rotation;
     const GuiThemeStyle* back_style;
     const GuiThemeStyle* front_style;
+    sp::io::Pointer::Button last_mouse_button = sp::io::Pointer::Button::Unknown;
 public:
     GuiButton(GuiContainer* owner, string id, string text, func_t func);
 
@@ -32,6 +33,7 @@ public:
     GuiButton* setStyle(const string& style);
     string getText() const;
     string getIcon() const;
+    sp::io::Pointer::Button getLastMouseButton() { return last_mouse_button; }
 };
 
 #endif//GUI2_BUTTON_H

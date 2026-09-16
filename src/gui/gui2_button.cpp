@@ -44,6 +44,7 @@ void GuiButton::onDraw(sp::RenderTarget& renderer)
 
 bool GuiButton::onMouseDown(sp::io::Pointer::Button button, glm::vec2 position, sp::io::Pointer::ID id)
 {
+    last_mouse_button = button;
     return true;
 }
 

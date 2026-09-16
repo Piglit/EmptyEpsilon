@@ -89,18 +89,28 @@ glm::vec2 MineSweeper::getBoardSize()
 void MineSweeper::onFieldClick(int x, int y)
 {
     FieldItem* item = getFieldItem(x, y);
-    if (item->getValue() || item->getText() == "X" || error_count > 1 || correct_count == (field_size * field_size - bomb_count))
+    const auto is_right_click = item->getLastMouseButton() == sp::io::Pointer::Button::Right;
+    if (item->getValue() || item->getText() == "X" || (!is_right_click && item->getText() == "?") || error_count > 1 || correct_count == (field_size * field_size - bomb_count))
     {
         //Unpressing an already pressed button.
         return;
     }
-    item->setValue(true);
+
+    if (is_right_click)
+    {
+        // just mark the tile (toggle) - no logic
+        item->setText(item->getText().empty()?"?":"");
+        item->setValue(false);
+        return;
+    }
+
     if (item->bomb)
     {
         item->setText("X");
         item->setValue(false);
         error_count++;
     }else{
+        item->setValue(true);
         correct_count++;
         int proximity = 0;
         if (x > 0 && y > 0 && getFieldItem(x - 1, y - 1)->bomb) proximity++;

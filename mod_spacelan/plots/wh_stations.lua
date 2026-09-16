@@ -5,6 +5,11 @@ wh_stations = {}
 
 require "place_station_scenario_utility.lua"
 require "luax.lua"
+require "comms/lib_comms_nodes.lua"
+require "comms/comms_vf_station.lua"
+require "comms/comms_vf_weapons.lua"
+require "comms/comms_vf_military.lua"
+require "comms/comms_vf_scenario_management.lua"
 
 function wh_stations:init()
 	local center_x, center_y = 0,0

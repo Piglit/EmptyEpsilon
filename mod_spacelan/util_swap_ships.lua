@@ -1,5 +1,5 @@
 -- utility functions to swap ships and transfer crew.
--- beware, that attributes that only slayer ships have get deleted when transfering
+-- beware, that attributes that only player ships have get deleted when transfering
 -- this means, that swapping back and forth will reset some attributes
 -- also note, that script defined attributes will get deleted, too.
 

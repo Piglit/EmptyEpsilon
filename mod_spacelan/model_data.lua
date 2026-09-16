@@ -1,3 +1,5 @@
+require("model_arl.lua")
+
 model = ModelData()
 model:setName("space_station_4")
 model:setMesh("space_station_4/space_station_4.model")

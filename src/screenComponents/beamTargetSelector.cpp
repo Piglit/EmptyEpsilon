@@ -3,14 +3,33 @@
 #include "gameGlobalInfo.h"
 #include "beamTargetSelector.h"
 
-GuiBeamTargetSelector::GuiBeamTargetSelector(GuiContainer* owner, string id)
-: GuiSelector(owner, id, [](int index, string value) { if (my_spaceship) my_spaceship->commandSetBeamSystemTarget(ESystem(index + SYS_None)); })
+GuiBeamTargetSelector::GuiBeamTargetSelector(GuiContainer* owner, string id, bool horizontal)
+:GuiElement(owner, id)
 {
-    addEntry(tr("target","Hull"), "-1");
+    selector = new GuiSelector(this, "SELECTOR", [](int index, string value) { if (my_spaceship) my_spaceship->commandSetBeamSystemTarget(ESystem(index + SYS_None)); });
+    selector->addEntry(tr("target","Hull"), "-1");
     for(int n=0; n<SYS_COUNT; n++)
-        addEntry(getLocaleSystemName(ESystem(n)), string(n));
+        selector->addEntry(getLocaleSystemName(ESystem(n)), string(n));
     if (my_spaceship)
-        setSelectionIndex(my_spaceship->beam_system_target - SYS_None);
+        selector->setSelectionIndex(my_spaceship->beam_system_target - SYS_None);
+
+    if (horizontal)
+    {
+        // tactical sceen config 
+        setAttribute("layout", "horizontal");
+        selector->setSize(250, GuiElement::GuiSizeMax);
+        info = new GuiKeyValueDisplay(this, "DISPLAY", 0.50, tr("Dmg:"), "");
+        info->setSize(90, GuiElement::GuiSizeMax);
+    }
+    else
+    {
+        // weapon sceen config 
+        setAttribute("layout", "vertical");
+        selector->setSize(GuiElement::GuiSizeMax, 50);
+        info = new GuiKeyValueDisplay(this, "DISPLAY", 0.70, tr("Estimated hull damage:"), "");
+        info->setSize(GuiElement::GuiSizeMax, 50);
+    }
+
     if (!gameGlobalInfo->use_system_damage)
         hide();
 }
@@ -21,18 +40,41 @@ void GuiBeamTargetSelector::onUpdate()
     {
         if (keys.weapons_beam_subsystem_target_next.getDown())
         {
-            if (getSelectionIndex() >= (int)entries.size() - 1)
-                setSelectionIndex(0);
+            if (selector->getSelectionIndex() >= (int)selector->entryCount() - 1)
+                selector->setSelectionIndex(0);
             else
-                setSelectionIndex(getSelectionIndex() + 1);
-            callback();
+                selector->setSelectionIndex(selector->getSelectionIndex() + 1);
+            selector->callback();
         }
         if (keys.weapons_beam_subsystem_target_previous.getDown())
         {
-            if (getSelectionIndex() <= 0)
-                setSelectionIndex(entries.size() - 1);
+            if (selector->getSelectionIndex() <= 0)
+                selector->setSelectionIndex(selector->entryCount() - 1);
             else
-                setSelectionIndex(getSelectionIndex() - 1);
+                selector->setSelectionIndex(selector->getSelectionIndex() - 1);
         }
+
+        float beam_dps = 0.0;
+        for(int n=0; n<max_beam_weapons; n++)
+        {
+            BeamWeapon& beam = my_spaceship->beam_weapons[n];
+            if (beam.getRange() > 0)
+            {
+                if (beam.getCycleTime() > 0.0f)
+                {
+                    if (selector->getSelectionIndex() == 0)
+                    {
+                        beam_dps += beam.getDamage() / beam.getCycleTime();
+                    }
+                    else
+                    {
+                        beam_dps += 1 / beam.getCycleTime();
+                    }
+                }
+            }
+        }
+
+        beam_dps *= my_spaceship->getSystemEffectiveness(SYS_BeamWeapons);
+        info->setValue(tr("{dmg}/s").format({{"dmg", string(beam_dps, 1)}}));
     }
 }

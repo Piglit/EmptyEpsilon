@@ -108,7 +108,7 @@ SingleFighterScreen::SingleFighterScreen(GuiContainer* owner)
     beam_info_box->setSize(460, 50);
     (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams Target"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
     (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
-    (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
+    (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR", true))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
 
     // Weapon tube controls.
     tube_controls = new GuiMissileTubeControls(weapons_layout, "MISSILE_TUBES");

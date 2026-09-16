@@ -1,6 +1,9 @@
 -- Name: Verhärtete Fronten
 -- Type: Development
 -- Proxy: 192.168.2.3
+-- spawn_x = -90000
+-- spawn_y = -50000
+-- spawn_rot = 0
 
 require "plots/plot_manager.lua"
 

@@ -889,7 +889,7 @@ REGISTER_SCRIPT_FUNCTION(setHackingDifficulty);
 
 static int getHackingGames(lua_State* L)
 {
-    return convert<EHackingGames>::returnType(L, gameGlobalInfo->hacking_games);
+    return hackingGamesToString(L, gameGlobalInfo->hacking_games);
 }
 /// string getHackingGames()
 /// Returns a comma-separated list of all games available for players. Will return the actual game names instead of "all", if all games are enabled.
@@ -899,7 +899,7 @@ REGISTER_SCRIPT_FUNCTION(getHackingGames);
 static int setHackingGames(lua_State* L)
 {
     int idx = 1;
-    convert<EHackingGames>::param(L, idx, gameGlobalInfo->hacking_games);
+    stringToHackingGames(L, idx, gameGlobalInfo->hacking_games);
     return 1;
 }
 /// void setHackingGames(string games)

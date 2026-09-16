@@ -37,7 +37,7 @@ template<> int convert<EScanningComplexity>::returnType(lua_State* L, EScanningC
 }
 
 /* Define script conversion function for the EHackingGames enum. */
-template<> void convert<EHackingGames>::param(lua_State* L, int& idx, EHackingGames& eh)
+void stringToHackingGames(lua_State* L, int& idx, EHackingGames& eh)
 {
     string str = string(luaL_checkstring(L, idx++)).lower();
 
@@ -64,7 +64,7 @@ template<> void convert<EHackingGames>::param(lua_State* L, int& idx, EHackingGa
     }
 }
 
-template<> int convert<EHackingGames>::returnType(lua_State* L, EHackingGames game)
+int hackingGamesToString(lua_State* L, EHackingGames game)
 {
     // returns "all", if all available games are selected, otherwise returns a list of game names concatenated with "," - may be empty, if no games are selected
 

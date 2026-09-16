@@ -9,60 +9,72 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.9\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #: mod_spacelan/comms/comms_vf_station.lua:99
 msgctxt "situationReport-comms"
 msgid "Cannot replenish scan probes due to fabrication unit failure."
 msgstr ""
-"Aufgrund eines Ausfalls der Fertigungseinheit können wir keine Scan-Sonden nachproduzieren."
+"Aufgrund eines Ausfalls der Fertigungseinheit können wir keine Scan-Sonden "
+"nachproduzieren."
 
 #: mod_spacelan/comms/comms_vf_station.lua:100
 msgctxt "situationReport-comms"
 msgid "Parts shortage prevents scan probe replenishment."
-msgstr "Ein Mangel an Ersatzteilen verhindert die Nachproduktion von Scan-Sonden."
+msgstr ""
+"Ein Mangel an Ersatzteilen verhindert die Nachproduktion von Scan-Sonden."
 
 #: mod_spacelan/comms/comms_vf_station.lua:101
 msgctxt "situationReport-comms"
-msgid "Station management has curtailed scan probe replenishment for cost cutting reasons."
+msgid ""
+"Station management has curtailed scan probe replenishment for cost cutting "
+"reasons."
 msgstr ""
-"Die Stationsleitung hat die Nachproduktion von Scan-Sonden aus Kostengründen eingeschränkt."
+"Die Stationsleitung hat die Nachproduktion von Scan-Sonden aus Kostengründen "
+"eingeschränkt."
 
 #: mod_spacelan/comms/comms_vf_station.lua:108
 msgctxt "situationReport-comms"
 msgid "We're out of the necessary materials and supplies for hull repair."
-msgstr "Uns fehlen die notwendigen Materialien und Vorräte für die Rumpfreparatur."
+msgstr ""
+"Uns fehlen die notwendigen Materialien und Vorräte für die Rumpfreparatur."
 
 #: mod_spacelan/comms/comms_vf_station.lua:109
 msgctxt "situationReport-comms"
 msgid "Hull repair automation unavailable while it is undergoing maintenance."
-msgstr "Die automatische Rumpfreparatur ist während der Wartung nicht verfügbar."
+msgstr ""
+"Die automatische Rumpfreparatur ist während der Wartung nicht verfügbar."
 
 #: mod_spacelan/comms/comms_vf_station.lua:110
 msgctxt "situationReport-comms"
 msgid "All hull repair technicians quarantined to quarters due to illness."
-msgstr "Alle Rumpfreparaturtechniker befinden sich aufgrund einer Erkrankung in Quarantäne."
+msgstr ""
+"Alle Rumpfreparaturtechniker befinden sich aufgrund einer Erkrankung in "
+"Quarantäne."
 
 #: mod_spacelan/comms/comms_vf_station.lua:117
 msgctxt "situationReport-comms"
-msgid "A recent reactor failure has put us on auxiliary power, so we cannot recharge ships."
+msgid ""
+"A recent reactor failure has put us on auxiliary power, so we cannot "
+"recharge ships."
 msgstr ""
-"Ein kürzlicher Reaktorausfall hat uns auf Notstromversorgung umgestellt, daher können wir keine "
-"Schiffe aufladen."
+"Ein kürzlicher Reaktorausfall hat uns auf Notstromversorgung umgestellt, "
+"daher können wir keine Schiffe aufladen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:118
 msgctxt "situationReport-comms"
 msgid "A damaged power coupling makes it too dangerous to recharge ships."
-msgstr "Eine beschädigte Stromkupplung macht das Aufladen von Schiffen zu gefährlich."
+msgstr ""
+"Eine beschädigte Stromkupplung macht das Aufladen von Schiffen zu gefährlich."
 
 #: mod_spacelan/comms/comms_vf_station.lua:119
 msgctxt "situationReport-comms"
 msgid ""
-"An asteroid strike damaged our solar cells and we are short on power, so we can't recharge "
-"ships right now."
+"An asteroid strike damaged our solar cells and we are short on power, so we "
+"can't recharge ships right now."
 msgstr ""
-"Ein Asteroideneinschlag hat unsere Solarzellen beschädigt und wir haben zu wenig Energie, daher "
-"können wir Schiffe derzeit nicht aufladen."
+"Ein Asteroideneinschlag hat unsere Solarzellen beschädigt und wir haben zu "
+"wenig Energie, daher können wir Schiffe derzeit nicht aufladen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:130
 #, lua-format
@@ -123,7 +135,8 @@ msgctxt "scienceDB"
 msgid "Activate defense fleet"
 msgstr "Verteidigungsflotte aktivieren"
 
-#: mod_spacelan/comms/comms_vf_station.lua:477 mod_spacelan/comms/comms_vf_station.lua:622
+#: mod_spacelan/comms/comms_vf_station.lua:477
+#: mod_spacelan/comms/comms_vf_station.lua:622
 msgctxt "scienceDB"
 msgid "Stations"
 msgstr "Stationen"
@@ -131,23 +144,25 @@ msgstr "Stationen"
 #: mod_spacelan/comms/comms_vf_station.lua:494
 msgctxt "scienceDB"
 msgid ""
-"Friendly stations share their short range telemetry with your ship on the Relay and Strategic "
-"Map consoles. The service costs are lower compared to neutral stations."
+"Friendly stations share their short range telemetry with your ship on the "
+"Relay and Strategic Map consoles. The service costs are lower compared to "
+"neutral stations."
 msgstr ""
-"Verbündete Stationen teilen ihre Kurzstrecken-Telemetriedaten über die Relais- und "
-"Strategiekartenkonsolen mit Ihrem Schiff. Die Dienstkosten sind niedriger als bei neutralen "
-"Stationen."
+"Verbündete Stationen teilen ihre Kurzstrecken-Telemetriedaten über die "
+"Relais- und Strategiekartenkonsolen mit Ihrem Schiff. Die Dienstkosten sind "
+"niedriger als bei neutralen Stationen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:496
 msgctxt "scienceDB"
 msgid ""
-"Neutral stations don't share their short range telemetry with your ship, but they do allow for "
-"docking. They will not sell you many EMPs or Nukes and service costs will be higher compared to "
-"friendly stations."
+"Neutral stations don't share their short range telemetry with your ship, but "
+"they do allow for docking. They will not sell you many EMPs or Nukes and "
+"service costs will be higher compared to friendly stations."
 msgstr ""
-"Neutrale Stationen teilen ihre Kurzstrecken-Telemetriedaten nicht mit Ihrem Schiff, erlauben "
-"jedoch das Andocken. Sie verkaufen Ihnen nur wenige EMPs oder Nuklearwaffen, und die "
-"Dienstkosten sind höher als bei verbündeten Stationen."
+"Neutrale Stationen teilen ihre Kurzstrecken-Telemetriedaten nicht mit Ihrem "
+"Schiff, erlauben jedoch das Andocken. Sie verkaufen Ihnen nur wenige EMPs "
+"oder Nuklearwaffen, und die Dienstkosten sind höher als bei verbündeten "
+"Stationen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:499
 #, lua-format
@@ -233,282 +248,313 @@ msgstr "Versorgungsabwurf"
 #: mod_spacelan/comms/comms_vf_station.lua:650
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello, space traveler!  It's a pleasure to see {source_callsign} docking with us.  How can we "
-"make your stay on {target_callsign} more comfortable?"
+"Hello, space traveler!  It's a pleasure to see {source_callsign} docking "
+"with us.  How can we make your stay on {target_callsign} more comfortable?"
 msgstr ""
-"Hallo, Raumfahrer!  Es freut uns, {source_callsign} bei uns andocken zu sehen.  Wie können wir "
-"Ihren Aufenthalt auf {target_callsign} angenehmer gestalten?"
+"Hallo, Raumfahrer!  Es freut uns, {source_callsign} bei uns andocken zu "
+"sehen.  Wie können wir Ihren Aufenthalt auf {target_callsign} angenehmer "
+"gestalten?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:652
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Greetings, cosmic colleague!  {source_callsign}'s docking is a cause for celebration here on "
-"{target_callsign}.  Any messages or updates to share?"
+"Greetings, cosmic colleague!  {source_callsign}'s docking is a cause for "
+"celebration here on {target_callsign}.  Any messages or updates to share?"
 msgstr ""
-"Seid gegrüßt, kosmischer Kollege!  Das Andocken von {source_callsign} ist hier auf "
-"{target_callsign} ein Grund zum Feiern.  Haben Sie Nachrichten oder Neuigkeiten für uns?"
+"Seid gegrüßt, kosmischer Kollege!  Das Andocken von {source_callsign} ist "
+"hier auf {target_callsign} ein Grund zum Feiern.  Haben Sie Nachrichten oder "
+"Neuigkeiten für uns?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:654
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Good day, starfaring friend!  Your arrival is like a cosmic reunion for {target_callsign}.  Any "
-"tales from your travels?"
+"Good day, starfaring friend!  Your arrival is like a cosmic reunion for "
+"{target_callsign}.  Any tales from your travels?"
 msgstr ""
-"Guten Tag, Sternenreisender!  Ihre Ankunft ist für {target_callsign} wie ein kosmisches "
-"Wiedersehen.  Haben Sie Geschichten von Ihren Reisen zu erzählen?"
+"Guten Tag, Sternenreisender!  Ihre Ankunft ist für {target_callsign} wie ein "
+"kosmisches Wiedersehen.  Haben Sie Geschichten von Ihren Reisen zu erzählen?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:656
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Salutations, fellow communicator!  {source_callsign} has reached {target_callsign} safe and "
-"sound.  Anything exciting to share from your journey?"
+"Salutations, fellow communicator!  {source_callsign} has reached "
+"{target_callsign} safe and sound.  Anything exciting to share from your "
+"journey?"
 msgstr ""
-"Seid gegrüßt, Kommunikationskollege!  {source_callsign} hat {target_callsign} sicher erreicht.  "
-"Gibt es etwas Aufregendes von Ihrer Reise zu berichten?"
+"Seid gegrüßt, Kommunikationskollege!  {source_callsign} hat "
+"{target_callsign} sicher erreicht.  Gibt es etwas Aufregendes von Ihrer "
+"Reise zu berichten?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:658
 msgctxt "greeted-by-station-docked"
-msgid "Hello there!  Welcome to {target_callsign}.  It's fantastic to have you on board."
-msgstr "Hallo!  Willkommen auf {target_callsign}.  Es ist großartig, Sie an Bord zu haben."
+msgid ""
+"Hello there!  Welcome to {target_callsign}.  It's fantastic to have you on "
+"board."
+msgstr ""
+"Hallo!  Willkommen auf {target_callsign}.  Es ist großartig, Sie an Bord zu "
+"haben."
 
 #: mod_spacelan/comms/comms_vf_station.lua:660
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello, astral envoy!  {source_callsign} has made a stellar entrance.  Any interesting "
-"discoveries on your voyage to {target_callsign}?"
+"Hello, astral envoy!  {source_callsign} has made a stellar entrance.  Any "
+"interesting discoveries on your voyage to {target_callsign}?"
 msgstr ""
-"Hallo, astraler Gesandter!  {source_callsign} hat einen wahrhaft stellaren Auftritt hingelegt.  "
-"Haben Sie auf Ihrer Reise nach {target_callsign} interessante Entdeckungen gemacht?"
+"Hallo, astraler Gesandter!  {source_callsign} hat einen wahrhaft stellaren "
+"Auftritt hingelegt.  Haben Sie auf Ihrer Reise nach {target_callsign} "
+"interessante Entdeckungen gemacht?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:662
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Salutations, space traveler!  {source_callsign}'s arrival marks another chapter in "
-"{target_callsign}'s cosmic adventures.  How can we assist you today?"
+"Salutations, space traveler!  {source_callsign}'s arrival marks another "
+"chapter in {target_callsign}'s cosmic adventures.  How can we assist you "
+"today?"
 msgstr ""
-"Seid gegrüßt, Raumfahrer!  Die Ankunft von {source_callsign} ist ein weiteres Kapitel in den "
-"kosmischen Abenteuern von {target_callsign}.  Wie können wir Ihnen heute behilflich sein?"
+"Seid gegrüßt, Raumfahrer!  Die Ankunft von {source_callsign} ist ein "
+"weiteres Kapitel in den kosmischen Abenteuern von {target_callsign}.  Wie "
+"können wir Ihnen heute behilflich sein?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:664
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Welcome, {source_callsign}!  It's a pleasure to see you docking with {target_callsign}.  How's "
-"the cosmic voyage treating you?"
+"Welcome, {source_callsign}!  It's a pleasure to see you docking with "
+"{target_callsign}.  How's the cosmic voyage treating you?"
 msgstr ""
-"Willkommen, {source_callsign}!  Es freut uns, Sie bei {target_callsign} andocken zu sehen.  Wie "
-"ist Ihre kosmische Reise verlaufen?"
+"Willkommen, {source_callsign}!  Es freut uns, Sie bei {target_callsign} "
+"andocken zu sehen.  Wie ist Ihre kosmische Reise verlaufen?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:666
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello there, {source_callsign}!  Your arrival brings a new energy to {target_callsign}.  How "
-"was your journey?"
+"Hello there, {source_callsign}!  Your arrival brings a new energy to "
+"{target_callsign}.  How was your journey?"
 msgstr ""
-"Hallo, {source_callsign}!  Ihre Ankunft bringt neue Energie nach {target_callsign}.  Wie war "
-"Ihre Reise?"
+"Hallo, {source_callsign}!  Ihre Ankunft bringt neue Energie nach "
+"{target_callsign}.  Wie war Ihre Reise?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:668
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Greetings, {source_callsign}!  Welcome to our space station.  It's an honor to have you on "
-"board."
+"Greetings, {source_callsign}!  Welcome to our space station.  It's an honor "
+"to have you on board."
 msgstr ""
-"Seid gegrüßt, {source_callsign}!  Willkommen auf unserer Raumstation.  Es ist uns eine Ehre, "
-"Sie an Bord zu haben."
+"Seid gegrüßt, {source_callsign}!  Willkommen auf unserer Raumstation.  Es "
+"ist uns eine Ehre, Sie an Bord zu haben."
 
 #: mod_spacelan/comms/comms_vf_station.lua:670
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello, relay officer.  I suppose we should acknowledge the docking of {source_callsign}, as "
-"unremarkable as it may be."
+"Hello, relay officer.  I suppose we should acknowledge the docking of "
+"{source_callsign}, as unremarkable as it may be."
 msgstr ""
-"Hallo, Kommunikationsoffizier.  Ich nehme an, wir sollten das Andocken von {source_callsign} "
-"zur Kenntnis nehmen, so unspektakulär es auch sein mag."
+"Hallo, Kommunikationsoffizier.  Ich nehme an, wir sollten das Andocken von "
+"{source_callsign} zur Kenntnis nehmen, so unspektakulär es auch sein mag."
 
 #: mod_spacelan/comms/comms_vf_station.lua:672
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Welcome, spacefaring communicator.  {source_callsign} docks, and the cosmos barely flinches.  "
-"How typical."
+"Welcome, spacefaring communicator.  {source_callsign} docks, and the cosmos "
+"barely flinches.  How typical."
 msgstr ""
-"Willkommen, Raumfahrt-Kommunikator.  {source_callsign} dockt an, und der Kosmos zuckt kaum mit "
-"der Wimper.  Wie typisch."
+"Willkommen, Raumfahrt-Kommunikator.  {source_callsign} dockt an, und der "
+"Kosmos zuckt kaum mit der Wimper.  Wie typisch."
 
 #: mod_spacelan/comms/comms_vf_station.lua:674
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Ah, the celestial messenger has arrived.  Do enlighten us with tales of {source_callsign}'s "
-"travels, if you must."
+"Ah, the celestial messenger has arrived.  Do enlighten us with tales of "
+"{source_callsign}'s travels, if you must."
 msgstr ""
-"Ah, der himmlische Bote ist eingetroffen.  Erhellen Sie uns doch, wenn es denn sein muss, mit "
-"Geschichten von {source_callsign}s Reisen."
+"Ah, der himmlische Bote ist eingetroffen.  Erhellen Sie uns doch, wenn es "
+"denn sein muss, mit Geschichten von {source_callsign}s Reisen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:676
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Well, well, if it isn't {source_callsign}.  I trust your journey was at least mildly tolerable."
+"Well, well, if it isn't {source_callsign}.  I trust your journey was at "
+"least mildly tolerable."
 msgstr ""
-"Nun, nun, wenn das nicht {source_callsign} ist.  Ich hoffe, Ihre Reise war zumindest "
-"einigermaßen erträglich."
+"Nun, nun, wenn das nicht {source_callsign} ist.  Ich hoffe, Ihre Reise war "
+"zumindest einigermaßen erträglich."
 
 #: mod_spacelan/comms/comms_vf_station.lua:678
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Ah, the starship {source_callsign} graces us with its presence.  How quaint.  Welcome to our "
-"humble space station."
+"Ah, the starship {source_callsign} graces us with its presence.  How "
+"quaint.  Welcome to our humble space station."
 msgstr ""
-"Ah, das Raumschiff {source_callsign} beehrt uns mit seiner Anwesenheit.  Wie reizend.  "
-"Willkommen auf unserer bescheidenen Raumstation."
+"Ah, das Raumschiff {source_callsign} beehrt uns mit seiner Anwesenheit.  Wie "
+"reizend.  Willkommen auf unserer bescheidenen Raumstation."
 
 #: mod_spacelan/comms/comms_vf_station.lua:680
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Welcome, spacefaring communicator.  I hope {source_callsign}'s visit won't disrupt "
-"{target_callsign}'s delicate equilibrium too much."
+"Welcome, spacefaring communicator.  I hope {source_callsign}'s visit won't "
+"disrupt {target_callsign}'s delicate equilibrium too much."
 msgstr ""
-"Willkommen, Raumfahrt-Kommunikator.  Ich hoffe, der Besuch von {source_callsign} wird das "
-"empfindliche Gleichgewicht von {target_callsign} nicht allzu sehr stören."
+"Willkommen, Raumfahrt-Kommunikator.  Ich hoffe, der Besuch von "
+"{source_callsign} wird das empfindliche Gleichgewicht von {target_callsign} "
+"nicht allzu sehr stören."
 
 #: mod_spacelan/comms/comms_vf_station.lua:682
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Salutations, celestial correspondent.  {source_callsign}'s docking disrupted our routine.  What "
-"urgent message do you bring, if any?"
+"Salutations, celestial correspondent.  {source_callsign}'s docking disrupted "
+"our routine.  What urgent message do you bring, if any?"
 msgstr ""
-"Seid gegrüßt, himmlischer Korrespondent.  Das Andocken von {source_callsign} hat unsere Routine "
-"gestört.  Welche dringende Nachricht bringen Sie, wenn überhaupt?"
+"Seid gegrüßt, himmlischer Korrespondent.  Das Andocken von {source_callsign} "
+"hat unsere Routine gestört.  Welche dringende Nachricht bringen Sie, wenn "
+"überhaupt?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:684
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello there, {source_callsign}.  Your arrival was as eagerly anticipated as a space debris "
-"collision.  What's the news?"
+"Hello there, {source_callsign}.  Your arrival was as eagerly anticipated as "
+"a space debris collision.  What's the news?"
 msgstr ""
-"Hallo, {source_callsign}.  Ihre Ankunft wurde mit ebenso großer Begeisterung erwartet wie eine "
-"Kollision mit Weltraumschrott.  Was gibt es Neues?"
+"Hallo, {source_callsign}.  Ihre Ankunft wurde mit ebenso großer Begeisterung "
+"erwartet wie eine Kollision mit Weltraumschrott.  Was gibt es Neues?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:686
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Well, look who decided to drop by.  What cosmic inconvenience brings {source_callsign} to "
-"{target_callsign} today?"
+"Well, look who decided to drop by.  What cosmic inconvenience brings "
+"{source_callsign} to {target_callsign} today?"
 msgstr ""
-"Na, sehen Sie mal, wer sich zu uns verirrt hat.  Welche kosmische Unannehmlichkeit führt "
-"{source_callsign} heute nach {target_callsign}?"
+"Na, sehen Sie mal, wer sich zu uns verirrt hat.  Welche kosmische "
+"Unannehmlichkeit führt {source_callsign} heute nach {target_callsign}?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:688
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Oh, joy.  The starship {source_callsign} has graced us with their presence.  What brings you "
-"here?"
+"Oh, joy.  The starship {source_callsign} has graced us with their presence.  "
+"What brings you here?"
 msgstr ""
-"Oh, welch Freude.  Das Raumschiff {source_callsign} beehrt uns mit seiner Anwesenheit.  Was "
-"führt Sie hierher?"
+"Oh, welch Freude.  Das Raumschiff {source_callsign} beehrt uns mit seiner "
+"Anwesenheit.  Was führt Sie hierher?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:690
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Greetings, stellar correspondent.  {source_callsign}'s docking is a source of mild irritation.  "
-"What cosmic drama unfolds now?"
+"Greetings, stellar correspondent.  {source_callsign}'s docking is a source "
+"of mild irritation.  What cosmic drama unfolds now?"
 msgstr ""
-"Seid gegrüßt, stellarer Korrespondent.  Das Andocken von {source_callsign} ist eine Quelle "
-"leichter Verärgerung.  Welches kosmische Drama spielt sich nun ab?"
+"Seid gegrüßt, stellarer Korrespondent.  Das Andocken von {source_callsign} "
+"ist eine Quelle leichter Verärgerung.  Welches kosmische Drama spielt sich "
+"nun ab?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:692
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Welcome aboard, cosmic messenger.  {source_callsign}'s docking better have a good reason.  We "
-"have enough on our plate without your cosmic theatrics."
+"Welcome aboard, cosmic messenger.  {source_callsign}'s docking better have a "
+"good reason.  We have enough on our plate without your cosmic theatrics."
 msgstr ""
-"Willkommen an Bord, kosmischer Bote.  Das Andocken von {source_callsign} sollte einen guten "
-"Grund haben.  Wir haben auch ohne Ihre kosmatische Theatralik schon genug um die Ohren."
+"Willkommen an Bord, kosmischer Bote.  Das Andocken von {source_callsign} "
+"sollte einen guten Grund haben.  Wir haben auch ohne Ihre kosmatische "
+"Theatralik schon genug um die Ohren."
 
 #: mod_spacelan/comms/comms_vf_station.lua:694
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Hello, starbound emissary.  {source_callsign}'s presence is less of a pleasure and more of a "
-"cosmic headache.  What brings you to {target_callsign}?"
+"Hello, starbound emissary.  {source_callsign}'s presence is less of a "
+"pleasure and more of a cosmic headache.  What brings you to "
+"{target_callsign}?"
 msgstr ""
-"Hallo, sternengebundener Gesandter.  Die Anwesenheit von {source_callsign} ist weniger ein "
-"Vergnügen als vielmehr ein kosmischer Kopfschmerz.  Was führt Sie nach {target_callsign}?"
+"Hallo, sternengebundener Gesandter.  Die Anwesenheit von {source_callsign} "
+"ist weniger ein Vergnügen als vielmehr ein kosmischer Kopfschmerz.  Was "
+"führt Sie nach {target_callsign}?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:696
 msgctxt "greeted-by-station-docked"
 msgid ""
-"Salutations, interstellar nuisance.  {source_callsign}'s docking is the last thing we needed.  "
-"What pressing crisis are you here to address?"
+"Salutations, interstellar nuisance.  {source_callsign}'s docking is the last "
+"thing we needed.  What pressing crisis are you here to address?"
 msgstr ""
-"Seid gegrüßt, interstelläre Plage.  Das Andocken von {source_callsign} ist das Letzte, was wir "
-"jetzt gebraucht haben.  Welche dringende Krise wollen Sie hier lösen?"
+"Seid gegrüßt, interstelläre Plage.  Das Andocken von {source_callsign} ist "
+"das Letzte, was wir jetzt gebraucht haben.  Welche dringende Krise wollen "
+"Sie hier lösen?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:705
 msgctxt "greeted-by-station-undocked"
 msgid ""
-"This is {target_callsign}'s communications officer.  Go ahead, {source_callsign}.  We're "
-"listening."
+"This is {target_callsign}'s communications officer.  Go ahead, "
+"{source_callsign}.  We're listening."
 msgstr ""
-"Hier ist der Kommunikationsoffizier von {target_callsign}.  Sprechen Sie, {source_callsign}.  "
-"Wir hören zu."
+"Hier ist der Kommunikationsoffizier von {target_callsign}.  Sprechen Sie, "
+"{source_callsign}.  Wir hören zu."
 
 #: mod_spacelan/comms/comms_vf_station.lua:706
 msgctxt "greeted-by-station-undocked"
 msgid ""
-"{target_callsign} to {source_callsign}, receiving your communication.  Proceed with your "
-"message."
+"{target_callsign} to {source_callsign}, receiving your communication.  "
+"Proceed with your message."
 msgstr ""
-"{target_callsign} an {source_callsign}, wir empfangen Ihre Kommunikation.  Fahren Sie mit Ihrer "
-"Nachricht fort."
+"{target_callsign} an {source_callsign}, wir empfangen Ihre Kommunikation.  "
+"Fahren Sie mit Ihrer Nachricht fort."
 
 #: mod_spacelan/comms/comms_vf_station.lua:707
 msgctxt "greeted-by-station-undocked"
-msgid "Confirmed, {source_callsign}.  You're connected to {target_callsign}.  Go ahead."
-msgstr "Bestätigt, {source_callsign}.  Sie sind mit {target_callsign} verbunden.  Sprechen Sie."
+msgid ""
+"Confirmed, {source_callsign}.  You're connected to {target_callsign}.  Go "
+"ahead."
+msgstr ""
+"Bestätigt, {source_callsign}.  Sie sind mit {target_callsign} verbunden.  "
+"Sprechen Sie."
 
 #: mod_spacelan/comms/comms_vf_station.lua:708
 msgctxt "greeted-by-station-undocked"
-msgid "This is the {target_callsign} communications officer.  Go ahead, {source_callsign}."
+msgid ""
+"This is the {target_callsign} communications officer.  Go ahead, "
+"{source_callsign}."
 msgstr ""
-"Hier ist der Kommunikationsoffizier von {target_callsign}.  Sprechen Sie, {source_callsign}."
+"Hier ist der Kommunikationsoffizier von {target_callsign}.  Sprechen Sie, "
+"{source_callsign}."
 
 #: mod_spacelan/comms/comms_vf_station.lua:709
 msgctxt "greeted-by-station-undocked"
 msgid ""
-"{target_callsign} acknowledges {source_callsign}'s communication.  Pray, don't keep us in "
-"suspense any longer."
+"{target_callsign} acknowledges {source_callsign}'s communication.  Pray, "
+"don't keep us in suspense any longer."
 msgstr ""
-"{target_callsign} bestätigt die Kommunikation von {source_callsign}.  Bitte lassen Sie uns "
-"nicht länger im Ungewissen."
+"{target_callsign} bestätigt die Kommunikation von {source_callsign}.  Bitte "
+"lassen Sie uns nicht länger im Ungewissen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:710
 msgctxt "greeted-by-station-undocked"
 msgid ""
-"{source_callsign}, it is positively thrilling to be the recipient of your undoubtedly important "
-"message.  Please enlighten us."
+"{source_callsign}, it is positively thrilling to be the recipient of your "
+"undoubtedly important message.  Please enlighten us."
 msgstr ""
-"{source_callsign}, es ist geradezu berauschend, Empfänger Ihrer zweifellos wichtigen Nachricht "
-"zu sein.  Bitte klären Sie uns auf."
+"{source_callsign}, es ist geradezu berauschend, Empfänger Ihrer zweifellos "
+"wichtigen Nachricht zu sein.  Bitte klären Sie uns auf."
 
 #: mod_spacelan/comms/comms_vf_station.lua:711
 msgctxt "greeted-by-station-undocked"
-msgid "Acknowledged, {source_callsign}.  Try not to waste our time.  What do you want?"
+msgid ""
+"Acknowledged, {source_callsign}.  Try not to waste our time.  What do you "
+"want?"
 msgstr ""
-"Bestätigt, {source_callsign}.  Versuchen Sie, unsere Zeit nicht zu verschwenden.  Was wollen "
-"Sie?"
+"Bestätigt, {source_callsign}.  Versuchen Sie, unsere Zeit nicht zu "
+"verschwenden.  Was wollen Sie?"
 
 #: mod_spacelan/comms/comms_vf_station.lua:712
 msgctxt "greeted-by-station-undocked"
-msgid "What is it now, {source_callsign}?  Make it quick; we're not here for small talk."
+msgid ""
+"What is it now, {source_callsign}?  Make it quick; we're not here for small "
+"talk."
 msgstr ""
-"Was ist es diesmal, {source_callsign}?  Fassen Sie sich kurz; wir sind nicht zum Plaudern hier."
+"Was ist es diesmal, {source_callsign}?  Fassen Sie sich kurz; wir sind nicht "
+"zum Plaudern hier."
 
 #: mod_spacelan/comms/comms_vf_station.lua:713
 msgctxt "greeted-by-station-undocked"
 msgid ""
-"{target_callsign} reluctantly acknowledges your communication.  Make it snappy, "
-"{source_callsign}."
+"{target_callsign} reluctantly acknowledges your communication.  Make it "
+"snappy, {source_callsign}."
 msgstr ""
-"{target_callsign} bestätigt widerwillig Ihre Kommunikation.  Fassen Sie sich kurz, "
-"{source_callsign}."
+"{target_callsign} bestätigt widerwillig Ihre Kommunikation.  Fassen Sie sich "
+"kurz, {source_callsign}."
 
 #: mod_spacelan/comms/comms_vf_station.lua:718
 msgctxt "special-comms"
@@ -582,6 +628,10 @@ msgctxt "situationReport-comms"
 msgid "%s  Shield %s:%s%%"
 msgstr "%s  Schild %s:%s%%"
 
+#: mod_spacelan/comms/comms_vf_station.lua:793
+msgid "Gossip"
+msgstr "Gibt es Gerüchte über die Gegend?"
+
 #: mod_spacelan/comms/comms_vf_station.lua:812
 msgid "General Information"
 msgstr "Allgemeine Informationen"
@@ -622,25 +672,31 @@ msgstr "Standard (%d Ruf)"
 msgid "Simple (%d reputation)"
 msgstr "Einfach (%d Ruf)"
 
-#: mod_spacelan/comms/comms_vf_station.lua:1003 mod_spacelan/comms/comms_vf_station.lua:1046
+#: mod_spacelan/comms/comms_vf_station.lua:1003
+#: mod_spacelan/comms/comms_vf_station.lua:1046
 #, lua-format
 msgid "We have dispatched a supply ship toward waypoint %d."
 msgstr "Wir haben ein Versorgungsschiff zu Wegpunkt %d entsandt."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1004 mod_spacelan/comms/comms_vf_station.lua:1047
+#: mod_spacelan/comms/comms_vf_station.lua:1004
+#: mod_spacelan/comms/comms_vf_station.lua:1047
 #, lua-format
 msgid "We sent a supply ship to waypoint %d."
 msgstr "Wir haben ein Versorgungsschiff zu Wegpunkt %d geschickt."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1005 mod_spacelan/comms/comms_vf_station.lua:1048
+#: mod_spacelan/comms/comms_vf_station.lua:1005
+#: mod_spacelan/comms/comms_vf_station.lua:1048
 #, lua-format
 msgid "There's a ship headed for %d with your supplies."
 msgstr "Ein Schiff mit Ihren Versorgungsgütern ist auf dem Weg zu %d."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1006 mod_spacelan/comms/comms_vf_station.lua:1049
+#: mod_spacelan/comms/comms_vf_station.lua:1006
+#: mod_spacelan/comms/comms_vf_station.lua:1049
 #, lua-format
 msgid "A ship should be arriving soon at waypoint %d with your supplies."
-msgstr "Ein Schiff mit Ihren Versorgungsgütern sollte bald bei Wegpunkt %d eintreffen."
+msgstr ""
+"Ein Schiff mit Ihren Versorgungsgütern sollte bald bei Wegpunkt %d "
+"eintreffen."
 
 #: mod_spacelan/comms/comms_vf_station.lua:1030
 #, lua-format
@@ -666,37 +722,42 @@ msgstr "Versorgungsabwurf per Sprungschiff (%d Ruf)"
 msgid "Fling Supply Drop"
 msgstr "Versorgungsabwurf schleudern"
 
-#: mod_spacelan/comms/comms_vf_station.lua:1085
+#: mod_spacelan/comms/comms_vf_station.lua:1086
 msgctxt "intimidate-station"
 msgid "Surrender to us!"
 msgstr "Ergeben Sie sich uns!"
 
-#: mod_spacelan/comms/comms_vf_station.lua:1086
+#: mod_spacelan/comms/comms_vf_station.lua:1087
 msgid "We are willing to negotiatiate our surrender."
 msgstr "Wir sind bereit, über unsere Kapitulation zu verhandeln."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1090
+#: mod_spacelan/comms/comms_vf_station.lua:1091
 msgctxt "intimidate-station"
 msgid "We will not surrender while we are not under immediate threat."
-msgstr "Wir werden uns nicht ergeben, solange wir keiner unmittelbaren Bedrohung ausgesetzt sind."
+msgstr ""
+"Wir werden uns nicht ergeben, solange wir keiner unmittelbaren Bedrohung "
+"ausgesetzt sind."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1093
+#: mod_spacelan/comms/comms_vf_station.lua:1094
 msgctxt "intimidate-station"
 msgid "We will not surrender while our hull remains undamaged."
 msgstr "Wir werden uns nicht ergeben, solange unser Rumpf unbeschädigt ist."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1100
+#: mod_spacelan/comms/comms_vf_station.lua:1099
 msgctxt "intimidate-station"
-msgid "We will not surrender while your enemies remain close enough to help us."
-msgstr "Wir werden uns nicht ergeben, solange Ihre Feinde nahe genug sind, um uns zu helfen."
+msgid ""
+"We will not surrender while your enemies remain close enough to help us."
+msgstr ""
+"Wir werden uns nicht ergeben, solange Ihre Feinde nahe genug sind, um uns zu "
+"helfen."
 
-#: mod_spacelan/comms/comms_vf_station.lua:1111
+#: mod_spacelan/comms/comms_vf_station.lua:1113
 #, lua-format
 msgctxt "intimidate-station"
 msgid "Surrender now! [Cost: %d Rep.]"
 msgstr "Ergeben Sie sich jetzt! [Kosten: %d Ruf]"
 
-#: mod_spacelan/comms/comms_vf_station.lua:1113
+#: mod_spacelan/comms/comms_vf_station.lua:1115
 msgctxt "intimidate-station"
 msgid "Understood. We surrender."
 msgstr "Verstanden. Wir ergeben uns."
@@ -718,4 +779,6 @@ msgstr "Verstanden. Wir ergeben uns."
 
 #, lua-format
 #~ msgid "A ship should be arriving soon at waypoint %d with your supplies"
-#~ msgstr "Ein Schiff mit Ihren Versorgungsgütern sollte bald bei Wegpunkt %d eintreffen."
+#~ msgstr ""
+#~ "Ein Schiff mit Ihren Versorgungsgütern sollte bald bei Wegpunkt %d "
+#~ "eintreffen."

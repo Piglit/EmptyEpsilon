@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.9\n"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:150
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:151
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Greetings, Captain.  We are pleased to welcome you and your crew to "
@@ -23,7 +23,7 @@ msgstr ""
 "angenehm sein wird und sich Möglichkeiten für einen bedeutsamen Austausch "
 "ergeben."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:151
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:152
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  We recognize the significance of your arrival at "
@@ -34,18 +34,18 @@ msgstr ""
 "{target_callsign} bewusst und freuen uns, euch zu empfangen.  Solltet ihr "
 "etwas benötigen, helfen wir euch gerne."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:152
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:153
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Greetings, Captain.  It is good to see {source_callsign} safely arrived at "
-"{target_callsign}.  We appreciate the opportunity to speak with you and learn "
-"from your travels."
+"{target_callsign}.  We appreciate the opportunity to speak with you and "
+"learn from your travels."
 msgstr ""
-"Seid gegrüßt, Captain.  Es ist gut zu sehen, dass {source_callsign} sicher auf "
-"{target_callsign} angekommen ist.  Wir schätzen die Gelegenheit, mit euch zu "
-"sprechen und aus euren Reisen zu lernen."
+"Seid gegrüßt, Captain.  Es ist gut zu sehen, dass {source_callsign} sicher "
+"auf {target_callsign} angekommen ist.  Wir schätzen die Gelegenheit, mit "
+"euch zu sprechen und aus euren Reisen zu lernen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:153
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:154
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome to {target_callsign}, Captain.  We hope your journey was a peaceful "
@@ -56,7 +56,7 @@ msgstr ""
 "friedlich.  Wenn wir etwas tun können, um euren Aufenthalt angenehmer zu "
 "gestalten, lasst es uns bitte wissen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:154
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:155
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Greetings, Captain.  We welcome {source_callsign} to {target_callsign}.  May "
@@ -65,21 +65,22 @@ msgstr ""
 "Seid gegrüßt, Captain.  Wir heißen {source_callsign} auf {target_callsign} "
 "willkommen.  Möge dieser Besuch für unsere beiden Völker von Nutzen sein."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:155
-msgctxt "greeted-by-arlenian-docked"
-msgid ""
-"Welcome, Captain.  Your arrival at {target_callsign} is appreciated.  We would "
-"be pleased to hear what brings you here and how we might be of assistance."
-msgstr ""
-"Willkommen, Captain.  Wir begrüßen eure Ankunft auf {target_callsign}.  Wir "
-"würden gerne erfahren, was euch hierherführt und wie wir euch behilflich sein "
-"können."
-
 #: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:156
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Greetings, Captain.  We recognize {source_callsign}'s arrival and welcome you "
-"aboard {target_callsign}.  We hope there will be an opportunity for "
+"Welcome, Captain.  Your arrival at {target_callsign} is appreciated.  We "
+"would be pleased to hear what brings you here and how we might be of "
+"assistance."
+msgstr ""
+"Willkommen, Captain.  Wir begrüßen eure Ankunft auf {target_callsign}.  Wir "
+"würden gerne erfahren, was euch hierherführt und wie wir euch behilflich "
+"sein können."
+
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:157
+msgctxt "greeted-by-arlenian-docked"
+msgid ""
+"Greetings, Captain.  We recognize {source_callsign}'s arrival and welcome "
+"you aboard {target_callsign}.  We hope there will be an opportunity for "
 "cooperation during your visit."
 msgstr ""
 "Seid gegrüßt, Captain.  Wir haben die Ankunft von {source_callsign} zur "
@@ -87,7 +88,7 @@ msgstr ""
 "Wir hoffen, dass sich während eures Besuchs eine Gelegenheit zur "
 "Zusammenarbeit ergibt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:157
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:158
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  It is a pleasure to receive you at {target_callsign}.  We "
@@ -95,49 +96,50 @@ msgid ""
 "yours."
 msgstr ""
 "Willkommen, Captain.  Es ist uns eine Freude, euch auf {target_callsign} zu "
-"empfangen.  Wir wissen, dass jede Reise einen Zweck hat, und wir sind bereit, "
-"den euren zu erfahren."
-
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:158
-msgctxt "greeted-by-arlenian-docked"
-msgid ""
-"Greetings, Captain.  We are glad to see you safely docked.  Please tell us how "
-"we may assist you during your visit to {target_callsign}."
-msgstr ""
-"Seid gegrüßt, Captain.  Wir freuen uns, dass ihr sicher angedockt habt.  Bitte "
-"sagt uns, wie wir euch während eures Besuchs auf {target_callsign} behilflich "
-"sein können."
+"empfangen.  Wir wissen, dass jede Reise einen Zweck hat, und wir sind "
+"bereit, den euren zu erfahren."
 
 #: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:159
+msgctxt "greeted-by-arlenian-docked"
+msgid ""
+"Greetings, Captain.  We are glad to see you safely docked.  Please tell us "
+"how we may assist you during your visit to {target_callsign}."
+msgstr ""
+"Seid gegrüßt, Captain.  Wir freuen uns, dass ihr sicher angedockt habt.  "
+"Bitte sagt uns, wie wir euch während eures Besuchs auf {target_callsign} "
+"behilflich sein können."
+
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:160
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  We acknowledge your arrival aboard {target_callsign}.  If "
 "you wish to discuss your needs or intentions, we are listening."
 msgstr ""
 "Willkommen, Captain.  Wir nehmen eure Ankunft an Bord von {target_callsign} "
-"zur Kenntnis.  Wenn ihr über eure Bedürfnisse oder Absichten sprechen möchtet, "
-"hören wir euch zu."
+"zur Kenntnis.  Wenn ihr über eure Bedürfnisse oder Absichten sprechen "
+"möchtet, hören wir euch zu."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:160
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:161
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Greetings, Captain.  We recognize your arrival at {target_callsign}.  If there "
-"is a matter you wish to discuss, we are prepared to hear your perspective."
+"Greetings, Captain.  We recognize your arrival at {target_callsign}.  If "
+"there is a matter you wish to discuss, we are prepared to hear your "
+"perspective."
 msgstr ""
 "Seid gegrüßt, Captain.  Wir haben eure Ankunft auf {target_callsign} zur "
 "Kenntnis genommen.  Wenn es eine Angelegenheit gibt, die ihr besprechen "
 "möchtet, sind wir bereit, eure Sichtweise anzuhören."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:161
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:162
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  {source_callsign} has arrived safely, and we acknowledge "
 "your presence.  Please tell us what brings you here."
 msgstr ""
-"Willkommen, Captain.  {source_callsign} ist sicher angekommen, und wir nehmen "
-"eure Anwesenheit zur Kenntnis.  Bitte sagt uns, was euch hierherführt."
+"Willkommen, Captain.  {source_callsign} ist sicher angekommen, und wir "
+"nehmen eure Anwesenheit zur Kenntnis.  Bitte sagt uns, was euch hierherführt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:162
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:163
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Greetings, Captain.  We understand that you have chosen to visit "
@@ -148,42 +150,43 @@ msgstr ""
 "{target_callsign} zu besuchen.  Wir würden es vorziehen, zunächst eure "
 "Absichten zu verstehen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:163
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:164
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  Your arrival is noted.  Whatever has brought "
-"{source_callsign} here, we believe it is better understood through discussion."
+"{source_callsign} here, we believe it is better understood through "
+"discussion."
 msgstr ""
 "Willkommen, Captain.  Eure Ankunft wurde zur Kenntnis genommen.  Was auch "
 "immer {source_callsign} hierhergeführt hat, wir glauben, dass es sich durch "
 "ein Gespräch besser verstehen lässt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:164
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:165
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Greetings, Captain.  We recognize that your visit to {target_callsign} may "
 "have a purpose of importance to you.  We are willing to discuss it."
 msgstr ""
 "Seid gegrüßt, Captain.  Wir erkennen an, dass euer Besuch auf "
-"{target_callsign} für euch einen wichtigen Zweck haben mag.  Wir sind bereit, "
-"darüber zu sprechen."
+"{target_callsign} für euch einen wichtigen Zweck haben mag.  Wir sind "
+"bereit, darüber zu sprechen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:165
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:166
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Captain, we acknowledge your arrival at {target_callsign}.  There may be "
-"matters between us that deserve attention.  Let us begin by understanding one "
-"another."
+"matters between us that deserve attention.  Let us begin by understanding "
+"one another."
 msgstr ""
 "Captain, wir nehmen eure Ankunft auf {target_callsign} zur Kenntnis.  Es mag "
 "Angelegenheiten zwischen uns geben, die unsere Aufmerksamkeit verdienen.  "
 "Beginnen wir damit, einander zu verstehen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:166
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:167
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Greetings, Captain.  We recognize your presence aboard {target_callsign}.  If "
-"there is disagreement between our peoples, we would rather understand its "
+"Greetings, Captain.  We recognize your presence aboard {target_callsign}.  "
+"If there is disagreement between our peoples, we would rather understand its "
 "cause than allow it to deepen."
 msgstr ""
 "Seid gegrüßt, Captain.  Wir haben eure Anwesenheit an Bord von "
@@ -191,47 +194,47 @@ msgstr ""
 "unseren Völkern geben, möchten wir ihre Ursache lieber verstehen, als "
 "zuzulassen, dass sie sich vertieft."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:167
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:168
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "Welcome, Captain.  Your arrival has given us reason for concern, but concern "
 "need not become hostility.  Tell us what you seek."
 msgstr ""
-"Willkommen, Captain.  Eure Ankunft gibt uns Anlass zur Sorge, doch Sorge muss "
-"nicht zu Feindseligkeit werden.  Sagt uns, wonach ihr sucht."
-
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:168
-msgctxt "greeted-by-arlenian-docked"
-msgid ""
-"Captain, we acknowledge your arrival.  We may not share the same understanding "
-"of recent events, but we are willing to hear your perspective."
-msgstr ""
-"Captain, wir nehmen eure Ankunft zur Kenntnis.  Möglicherweise haben wir die "
-"jüngsten Ereignisse nicht auf dieselbe Weise verstanden, aber wir sind bereit, "
-"eure Sichtweise anzuhören."
+"Willkommen, Captain.  Eure Ankunft gibt uns Anlass zur Sorge, doch Sorge "
+"muss nicht zu Feindseligkeit werden.  Sagt uns, wonach ihr sucht."
 
 #: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:169
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Greetings, Captain.  We recognize that our relationship has become difficult.  "
-"Even so, we believe there remains value in speaking openly."
+"Captain, we acknowledge your arrival.  We may not share the same "
+"understanding of recent events, but we are willing to hear your perspective."
+msgstr ""
+"Captain, wir nehmen eure Ankunft zur Kenntnis.  Möglicherweise haben wir die "
+"jüngsten Ereignisse nicht auf dieselbe Weise verstanden, aber wir sind "
+"bereit, eure Sichtweise anzuhören."
+
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:170
+msgctxt "greeted-by-arlenian-docked"
+msgid ""
+"Greetings, Captain.  We recognize that our relationship has become "
+"difficult.  Even so, we believe there remains value in speaking openly."
 msgstr ""
 "Seid gegrüßt, Captain.  Wir erkennen an, dass unser Verhältnis schwierig "
 "geworden ist.  Dennoch glauben wir, dass es weiterhin sinnvoll ist, offen "
 "miteinander zu sprechen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:170
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:171
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Captain, your arrival is not without consequence.  We ask only that you allow "
-"us to understand your intentions before either of our peoples takes further "
-"action."
+"Captain, your arrival is not without consequence.  We ask only that you "
+"allow us to understand your intentions before either of our peoples takes "
+"further action."
 msgstr ""
 "Captain, eure Ankunft bleibt nicht ohne Folgen.  Wir bitten euch lediglich, "
 "uns eure Absichten verstehen zu lassen, bevor eines unserer Völker weitere "
 "Maßnahmen ergreift."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:171
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:172
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
 "We acknowledge you, Captain.  There is considerable distance between our "
@@ -242,56 +245,57 @@ msgstr ""
 "eine beträchtliche Distanz, doch wir halten gegenseitiges Verständnis nicht "
 "für unmöglich.  Sprecht, und wir werden zuhören."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:172
-msgctxt "greeted-by-arlenian-docked"
-msgid ""
-"Captain, we recognize your presence at {target_callsign}.  Our patience should "
-"not be mistaken for indifference, nor our desire for peace for weakness.  Tell "
-"us what you intend."
-msgstr ""
-"Captain, wir nehmen eure Anwesenheit auf {target_callsign} zur Kenntnis.  "
-"Unsere Geduld sollte nicht mit Gleichgültigkeit verwechselt werden, ebenso "
-"wenig unser Wunsch nach Frieden mit Schwäche.  Sagt uns, was ihr beabsichtigt."
-
 #: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:173
 msgctxt "greeted-by-arlenian-docked"
 msgid ""
-"Greetings, Captain.  Relations between us are strained, yet we remain willing "
-"to hear you.  If there is a peaceful path forward, we would prefer to find it "
-"together."
+"Captain, we recognize your presence at {target_callsign}.  Our patience "
+"should not be mistaken for indifference, nor our desire for peace for "
+"weakness.  Tell us what you intend."
 msgstr ""
-"Seid gegrüßt, Captain.  Die Beziehungen zwischen uns sind angespannt, dennoch "
-"sind wir bereit, euch anzuhören.  Wenn es einen friedlichen Weg nach vorn "
-"gibt, würden wir ihn lieber gemeinsam finden."
+"Captain, wir nehmen eure Anwesenheit auf {target_callsign} zur Kenntnis.  "
+"Unsere Geduld sollte nicht mit Gleichgültigkeit verwechselt werden, ebenso "
+"wenig unser Wunsch nach Frieden mit Schwäche.  Sagt uns, was ihr "
+"beabsichtigt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:184
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:174
+msgctxt "greeted-by-arlenian-docked"
+msgid ""
+"Greetings, Captain.  Relations between us are strained, yet we remain "
+"willing to hear you.  If there is a peaceful path forward, we would prefer "
+"to find it together."
+msgstr ""
+"Seid gegrüßt, Captain.  Die Beziehungen zwischen uns sind angespannt, "
+"dennoch sind wir bereit, euch anzuhören.  Wenn es einen friedlichen Weg nach "
+"vorn gibt, würden wir ihn lieber gemeinsam finden."
+
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:185
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
-"Greetings, Captain.  This is {target_callsign}.  We welcome the opportunity to "
-"speak with you.  Please, go ahead."
+"Greetings, Captain.  This is {target_callsign}.  We welcome the opportunity "
+"to speak with you.  Please, go ahead."
 msgstr ""
 "Seid gegrüßt, Captain.  Hier ist {target_callsign}.  Wir begrüßen die "
 "Gelegenheit, mit euch zu sprechen.  Bitte, fahrt fort."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:185
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:186
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "Greetings, Captain.  {target_callsign} is listening.  We would be pleased to "
 "hear what you wish to discuss."
 msgstr ""
-"Seid gegrüßt, Captain.  {target_callsign} hört zu.  Wir würden gerne erfahren, "
-"was ihr besprechen möchtet."
+"Seid gegrüßt, Captain.  {target_callsign} hört zu.  Wir würden gerne "
+"erfahren, was ihr besprechen möchtet."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:186
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:187
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
-"Captain, you are connected with {target_callsign}.  We recognize your request "
-"to speak, and we are listening."
+"Captain, you are connected with {target_callsign}.  We recognize your "
+"request to speak, and we are listening."
 msgstr ""
 "Captain, ihr seid mit {target_callsign} verbunden.  Wir haben eure "
 "Gesprächsanfrage erhalten und hören euch zu."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:187
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:188
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "This is {target_callsign}.  Greetings, Captain.  Please continue; we wish to "
@@ -300,16 +304,16 @@ msgstr ""
 "Hier ist {target_callsign}.  Seid gegrüßt, Captain.  Bitte fahrt fort; wir "
 "möchten verstehen, was euch zu uns führt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:188
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:189
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "Greetings, Captain.  {target_callsign} acknowledges your communication.  "
 "Please share what is on your mind."
 msgstr ""
-"Seid gegrüßt, Captain.  {target_callsign} hat eure Nachricht erhalten.  Bitte "
-"teilt uns mit, was euch beschäftigt."
+"Seid gegrüßt, Captain.  {target_callsign} hat eure Nachricht erhalten.  "
+"Bitte teilt uns mit, was euch beschäftigt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:189
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:190
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "Captain, we have received your communication.  We may have different "
@@ -319,7 +323,7 @@ msgstr ""
 "unterschiedliche Sichtweisen auf die jüngsten Ereignisse, aber wir sind "
 "bereit, eure anzuhören."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:190
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:191
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "Greetings, Captain.  We recognize your attempt to reach us.  Please explain "
@@ -329,17 +333,17 @@ msgstr ""
 "Kenntnis genommen.  Bitte erklärt, wonach ihr sucht, und wir werden es "
 "sorgfältig prüfen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:191
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:192
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
-"Captain, we are listening.  Relations between us have become difficult, but we "
-"do not believe that makes communication without value.  Please continue."
+"Captain, we are listening.  Relations between us have become difficult, but "
+"we do not believe that makes communication without value.  Please continue."
 msgstr ""
 "Captain, wir hören euch zu.  Die Beziehungen zwischen uns sind schwierig "
 "geworden, aber wir glauben nicht, dass Gespräche dadurch sinnlos werden.  "
 "Bitte fahrt fort."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:192
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:193
 msgctxt "greeted-by-arlenian-undocked"
 msgid ""
 "We have received your communication, Captain.  Our concerns are significant, "
@@ -348,11 +352,11 @@ msgstr ""
 "Wir haben eure Nachricht erhalten, Captain.  Unsere Bedenken sind erheblich, "
 "doch wir sind weiterhin bereit, euren Standpunkt zu verstehen.  Sprecht."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:204
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:205
 msgid "Are you willing to share some of your technology with us?"
 msgstr "Seid ihr bereit, einen Teil eurer Technologie mit uns zu teilen?"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:229
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:230
 #, lua-format
 msgid ""
 "We have already entrusted the vessel %s with an enhancement to its %s "
@@ -365,7 +369,7 @@ msgstr ""
 "Wir sind bereit, einem Schiff, das uns bei einer wichtigen Angelegenheit "
 "hilft, eine fortschrittlichere Form dieser Technologie anzubieten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:240
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:241
 #, lua-format
 msgid ""
 "We are willing to entrust your people with an enhancement to %s systems.\n"
@@ -378,11 +382,11 @@ msgstr ""
 "Ihr könnt entscheiden, ob euer Schiff sie erhalten soll oder ob ein anderes "
 "Schiff mehr von dieser Gelegenheit profitieren würde."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:251
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:252
 msgid "We would like you to install the technology on our ship."
 msgstr "Wir möchten, dass ihr die Technologie auf unserem Schiff installiert."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:253
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:254
 #, lua-format
 msgid ""
 "We have entrusted your vessel with our %s technology.\n"
@@ -396,7 +400,7 @@ msgstr ""
 "Wenn ihr bereit seid, gibt es etwas, bei dessen Umsetzung ihr uns vielleicht "
 "helfen könnt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:270
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:271
 msgid ""
 "We recognize that your vessel already possesses this technology.\n"
 "It would be better to entrust our contribution to a ship that does not yet "
@@ -407,7 +411,7 @@ msgstr ""
 "Es wäre besser, unseren Beitrag einem Schiff anzuvertrauen, das noch nicht "
 "über sie verfügt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:277
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:278
 #, lua-format
 msgid ""
 "We have already entrusted this first implementation to the vessel %s.\n"
@@ -415,14 +419,14 @@ msgid ""
 "will arise."
 msgstr ""
 "Wir haben diese erste Implementierung bereits dem Schiff %s anvertraut.\n"
-"Wir schätzen euer Interesse und hoffen, dass sich eine weitere Gelegenheit zur "
-"Zusammenarbeit ergeben wird."
+"Wir schätzen euer Interesse und hoffen, dass sich eine weitere Gelegenheit "
+"zur Zusammenarbeit ergeben wird."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:293
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:294
 msgid "What can we do to help?"
 msgstr "Was können wir tun, um zu helfen?"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:294
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:295
 msgid ""
 "The Arlenian residing within this station has been separated from its people "
 "for some time.\n"
@@ -438,11 +442,11 @@ msgstr ""
 "Wenn ihr bereit seid, uns zu helfen, bitten wir euch, uns zu einer solchen "
 "Station zu führen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:298
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:299
 msgid "We know where to find a Motherstation. Follow us."
 msgstr "Wir wissen, wo sich eine Mutterstation befindet. Folgt uns."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:299
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:300
 msgid ""
 "We appreciate your willingness to help us.\n"
 "Before we leave our current configuration, we would like to confirm that you "
@@ -456,18 +460,18 @@ msgstr ""
 "Wir wissen eure Bereitschaft zu helfen zu schätzen.\n"
 "Bevor wir unsere derzeitige Konfiguration verlassen, möchten wir bestätigt "
 "haben, dass ihr wünscht, dass wir euer Schiff begleiten.\n"
-"Wenn ihr einverstanden seid, werden wir uns für die Reise umkonfigurieren und "
-"euch zur Mutterstation folgen.\n"
+"Wenn ihr einverstanden seid, werden wir uns für die Reise umkonfigurieren "
+"und euch zur Mutterstation folgen.\n"
 "Während wir uns in der Reisekonfiguration befinden, könnt ihr nicht an uns "
 "andocken.\n"
 "Um in die Reisekonfiguration zu wechseln, müssen wir diese Kommunikations-"
 "sitzung beenden."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:314
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:315
 msgid "Yes. Prepare to accompany us."
 msgstr "Ja. Bereitet euch darauf vor, uns zu begleiten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:332
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:333
 #, lua-format
 msgid ""
 "We are already accompanying %s.\n"
@@ -476,11 +480,11 @@ msgstr ""
 "Wir begleiten %s bereits.\n"
 "Wir würden es vorziehen, die bereits eingegangene Verpflichtung einzuhalten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:357
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:358
 msgid "Stop here for now."
 msgstr "Haltet vorerst hier an."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:358
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:359
 msgid ""
 "We understand, Captain.\n"
 "We are stopping right here.\n"
@@ -502,16 +506,16 @@ msgstr ""
 "Um in die stationäre Konfiguration zu wechseln, müssen wir diese "
 "Kommunikationssitzung vorerst beenden."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:377
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:378
 msgid "Yes. Return to your stationary configuration."
 msgstr "Ja. Kehrt in eure stationäre Konfiguration zurück."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:399
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:414
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:400
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:415
 msgid "We are ready to continue. Resume following us."
 msgstr "Wir sind bereit weiterzumachen. Folgt uns wieder."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:400
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:401
 msgid ""
 "Of course, Captain.\n"
 "We are ready to resume our journey.\n"
@@ -521,7 +525,7 @@ msgstr ""
 "Wir sind bereit, unsere Reise fortzusetzen.\n"
 "Wir werden eurem Schiff wieder folgen und auf eure Anweisungen warten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:415
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:416
 msgid ""
 "Of course, Captain.\n"
 "We are ready to resume our journey.\n"
@@ -541,18 +545,18 @@ msgstr ""
 "\n"
 "Bevor wir unsere derzeitige Konfiguration verlassen, möchten wir die "
 "Bestätigung haben, dass ihr wünscht, dass wir euer Schiff begleiten.\n"
-"Wenn ihr einverstanden seid, werden wir uns für die Reise umkonfigurieren und "
-"euch zur Mutterstation folgen.\n"
+"Wenn ihr einverstanden seid, werden wir uns für die Reise umkonfigurieren "
+"und euch zur Mutterstation folgen.\n"
 "Während wir uns in der Reisekonfiguration befinden, könnt ihr nicht an uns "
 "andocken.\n"
 "Um in die Reisekonfiguration zu wechseln, müssen wir diese "
 "Kommunikationssitzung beenden."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:431
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:432
 msgid "The Motherstation is here. Dock with it."
 msgstr "Die Mutterstation ist hier. Dockt an ihr an."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:432
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:433
 msgid ""
 "We recognize the Motherstation ahead.\n"
 "We will approach it carefully and prepare to join with our people.\n"
@@ -566,11 +570,11 @@ msgstr ""
 "Captain.\n"
 "Bitte sprecht wieder mit uns, sobald unser Andockvorgang abgeschlossen ist."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:480
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:481
 msgid "Have you finished docking?"
 msgstr "Seid ihr mit dem Andocken fertig?"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:481
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:482
 msgid ""
 "Yes, Captain.\n"
 "We have completed the connection with the Motherstation.\n"
@@ -586,10 +590,10 @@ msgstr ""
 "Wissen wurde wieder mit unserem Volk vereint.\n"
 "Wir sind dankbar für die Rolle, die ihr dabei gespielt habt, uns wieder "
 "zusammenzuführen.\n"
-"Wenn ihr einverstanden seid, beenden wir dieses Gespräch vorerst und sehen uns "
-"auf der Mutterstation wieder."
+"Wenn ihr einverstanden seid, beenden wir dieses Gespräch vorerst und sehen "
+"uns auf der Mutterstation wieder."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:491
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:492
 msgid ""
 "We have not yet completed our connection with the Motherstation.\n"
 "Please give us a little more time."
@@ -597,30 +601,30 @@ msgstr ""
 "Wir haben die Verbindung mit der Mutterstation noch nicht abgeschlossen.\n"
 "Bitte gebt uns noch etwas Zeit."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:515
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:516
 msgid "Yes, thank you. Goodbye."
 msgstr "Ja, danke. Auf Wiedersehen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:556
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:579
 msgid ""
 "Our people have shared much knowledge with the civilizations of this region, "
 "and we remain willing to do so.\n"
 "At present, however, no new technology has been entrusted to this "
 "Motherstation for wider sharing.\n"
-"Perhaps another Arlenian station still carries knowledge that could be brought "
-"here."
+"Perhaps another Arlenian station still carries knowledge that could be "
+"brought here."
 msgstr ""
 "Unser Volk hat viel Wissen mit den Zivilisationen dieser Region geteilt, und "
 "wir sind bereit, dies weiterhin zu tun.\n"
-"Derzeit wurde dieser Mutterstation jedoch keine neue Technologie zur weiteren "
-"Verbreitung anvertraut.\n"
+"Derzeit wurde dieser Mutterstation jedoch keine neue Technologie zur "
+"weiteren Verbreitung anvertraut.\n"
 "Vielleicht verfügt eine andere arlenianische Station noch über Wissen, das "
 "hierhergebracht werden könnte."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:572
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:595
 msgid ""
-"Your cooperation has helped some of our people return to the greater Arlenian "
-"community.\n"
+"Your cooperation has helped some of our people return to the greater "
+"Arlenian community.\n"
 "In recognition of that cooperation, we are prepared to make the following "
 "knowledge available to your people.\n"
 "Use it wisely, and may it serve as another bridge between our civilizations."
@@ -632,23 +636,23 @@ msgstr ""
 "Nutzt es weise, und möge es als eine weitere Brücke zwischen unseren "
 "Zivilisationen dienen."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:577
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:582
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:600
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:605
 #, lua-format
 msgid "Install the %s technology on our ship."
 msgstr "Installiert die %s-Technologie auf unserem Schiff."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:605
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:628
 #, lua-format
 msgid ""
 "You did more than accept our technology, Captain.\n"
-"You helped us reunite with our people, and you honored the trust we placed in "
-"you.\n"
+"You helped us reunite with our people, and you honored the trust we placed "
+"in you.\n"
 "In recognition of this, we will entrust your vessel with a more advanced "
 "expression of our %s technology.\n"
 "This is a gift we will offer to you only once.\n"
-"Other ships of your people may still receive the more accessible form of this "
-"knowledge here."
+"Other ships of your people may still receive the more accessible form of "
+"this knowledge here."
 msgstr ""
 "Ihr habt mehr getan, als unsere Technologie anzunehmen, Captain.\n"
 "Ihr habt uns geholfen, wieder mit unserem Volk vereint zu werden, und das "
@@ -659,7 +663,7 @@ msgstr ""
 "Andere Schiffe eures Volkes können hier weiterhin die leichter zugängliche "
 "Form dieses Wissens erhalten."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:607
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:630
 #, lua-format
 msgid ""
 "We are pleased to share our %s technology with your vessel.\n"
@@ -670,16 +674,18 @@ msgstr ""
 "Wir bieten sie in der Hoffnung an, dass sie eurem Volk zugutekommt und das "
 "Verständnis zwischen unseren Zivilisationen vertieft."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:619
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:642
 msgid ""
-"We recognize that your vessel already possesses this level of the technology.\n"
+"We recognize that your vessel already possesses this level of the "
+"technology.\n"
 "There is no need for us to duplicate what you already have."
 msgstr ""
 "Wir müssen feststellen, dass euer Schiff bereits über diese Stufe der "
 "Technologie verfügt.\n"
-"Es besteht keine Notwendigkeit, etwas zu duplizieren, das ihr bereits besitzt."
+"Es besteht keine Notwendigkeit, etwas zu duplizieren, das ihr bereits "
+"besitzt."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:646
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:669
 #, lua-format
 msgid ""
 "We are willing to give you an upgrade to your %s systems.\n"
@@ -689,15 +695,15 @@ msgstr ""
 "Wir sind bereit, diese Verbesserung allen %s-Schiffen zu gewähren, die hier "
 "vorbeikommen und andocken."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:655
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:678
 msgid "Install the upgrade to our ship"
 msgstr "Installiert die Verbesserung auf unserem Schiff"
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:657
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:680
 #, lua-format
 msgid "Installed %s upgrade to your ship."
 msgstr "%s-Verbesserung auf eurem Schiff installiert."
 
-#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:671
+#: mod_spacelan/comms/comms_vf_scenario_arlenians.lua:694
 msgid "You already have that kind of upgrade installed on your ship."
 msgstr "Eine solche Verbesserung ist bereits auf eurem Schiff installiert."

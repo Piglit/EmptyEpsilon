@@ -93,7 +93,7 @@ TacticalScreen::TacticalScreen(GuiContainer* owner)
         beam_info_box->setPosition(0, -20, sp::Alignment::BottomCenter)->setSize(460, 50);
         (new GuiLabel(beam_info_box, "BEAM_INFO_LABEL", tr("Beams Target"), 30))->addBackground()->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
         (new GuiPowerDamageIndicator(beam_info_box, "", SYS_BeamWeapons, sp::Alignment::CenterLeft))->setPosition(0, 0, sp::Alignment::BottomLeft)->setSize(160, 50);
-        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR"))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
+        (new GuiBeamTargetSelector(beam_info_box, "BEAM_TARGET_SELECTOR", true))->setPosition(0, 0, sp::Alignment::BottomRight)->setSize(288, 50);
     }
 
     // Weapon tube locking, and manual aiming controls.

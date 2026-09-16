@@ -127,7 +127,7 @@ You may order %s to assist in your mission.]]), player:getCallSign(), player:get
     CpuShip():setTemplate("Sentinel"):setFaction("Exuari"):setPosition(-47000, -14000):orderDefendTarget(enemy_station)
     CpuShip():setTemplate("Warden"):setFaction("Exuari"):setPosition(-46000, -18000):orderDefendTarget(enemy_station)
 
-    script_hangar.create(enemy_station, "Blade", 3)
+    script_hangar:create(enemy_station, "Blade", 3)
 
     transport_RT4 = CpuShip():setTemplate("Flavia"):setFaction("Human Navy"):setPosition(3750, 31250)
     transport_RT4:orderIdle():setCallSign("RT-4"):setCommsScript("")
@@ -498,7 +498,7 @@ function checkDefeatCondition(object, object_callsign)
 end
 
 function update(delta)
-    script_hangar.update(delta)
+    script_hangar:update(delta)
     -- When the player ship or the research station is destroyed, call it a victory for the Exuari
     if player ~= nil then
         checkDefeatCondition(player, "ship")

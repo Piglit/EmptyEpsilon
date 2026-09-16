@@ -31,7 +31,7 @@ function init()
 		return
 	end
 	--name, faction _id and template set by calling script
-	my_ship = CpuShip():setCallSign(string.format("%s %s",station_name,name)):setCommsScript(""):setCommsFunction(commsDefendShip):setFactionId(faction_id):setPosition(position_x, position_y):setTemplate(template):setScanned(true):orderDefendTarget(my_station)
+	my_ship = CpuShip():setCallSign(string.format("%s %s",station_name,name)):setFactionId(faction_id):setPosition(position_x, position_y):setTemplate(template):setScanned(true):orderDefendTarget(my_station)
 end
 function shipHealthy()
 	if my_ship:getHull() < my_ship:getHullMax() then return false end
@@ -115,7 +115,7 @@ function update(delta)
 			check_timer = check_interval
 		end
 	else
-		my_ship:setCommsScript(""):setCommsFunction(commsShip)
+		--my_ship:setCommsScript(""):setCommsFunction(commsShip)
 		destroyScript()
 	end
 end

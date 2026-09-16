@@ -267,7 +267,7 @@ msgstr ""
 msgid "Sign an exclusive contract for %d reputation."
 msgstr "Einen Exklusivvertrag für %d Ruf unterzeichnen."
 
-#: mod_spacelan/comms/comms_vf_scenario_management.lua:513
+#: mod_spacelan/comms/comms_vf_scenario_management.lua:518
 #, lua-format
 msgid "Sign an exclusive Human Navy contract for %d artifacts."
 msgstr ""

@@ -1,0 +1,77 @@
+#: mod_spacelan/plots/avp_stations.lua:55
+msgid "called '"
+msgstr ""
+
+#: mod_spacelan/plots/avp_stations.lua:299
+#: mod_spacelan/plots/avp_stations.lua:357
+msgctxt "situationReport-comms"
+msgid ""
+"A recent reactor failure has put us on auxiliary power, so we cannot "
+"recharge ships."
+msgstr ""
+"Ein krzlich aufgetretener Reaktorausfall hat uns auf Notstrom umgestellt, "
+"sodass wir keine Schiffe aufladen knnen."
+
+#: mod_spacelan/plots/avp_stations.lua:302
+#: mod_spacelan/plots/avp_stations.lua:358
+msgctxt "situationReport-comms"
+msgid "A damaged power coupling makes it too dangerous to recharge ships."
+msgstr ""
+"Eine beschdigte Stromkupplung macht das Aufladen von Schiffen zu gefhrlich."
+
+#: mod_spacelan/plots/avp_stations.lua:305
+#: mod_spacelan/plots/avp_stations.lua:359
+msgctxt "situationReport-comms"
+msgid ""
+"An asteroid strike damaged our solar cells and we are short on power, so we "
+"can't recharge ships right now."
+msgstr ""
+"Ein Asteroideneinschlag hat unsere Solarzellen beschdigt, und wir haben zu "
+"wenig Energie, sodass wir derzeit keine Schiffe aufladen knnen."
+
+#: mod_spacelan/plots/avp_stations.lua:310
+#: mod_spacelan/plots/avp_stations.lua:348
+msgctxt "situationReport-comms"
+msgid "We're out of the necessary materials and supplies for hull repair."
+msgstr ""
+"Uns fehlen die fr die Rumpfreparatur erforderlichen Materialien und Vorrte."
+
+#: mod_spacelan/plots/avp_stations.lua:313
+#: mod_spacelan/plots/avp_stations.lua:349
+msgctxt "situationReport-comms"
+msgid "Hull repair automation unavailable while it is undergoing maintenance."
+msgstr ""
+"Die automatisierte Rumpfreparatur ist whrend der Wartung nicht verfgbar."
+
+#: mod_spacelan/plots/avp_stations.lua:316
+#: mod_spacelan/plots/avp_stations.lua:350
+msgctxt "situationReport-comms"
+msgid "All hull repair technicians quarantined to quarters due to illness."
+msgstr ""
+"Alle Rumpfreparaturtechniker wurden wegen einer Erkrankung unter Quarantne "
+"gestellt."
+
+#: mod_spacelan/plots/avp_stations.lua:321
+#: mod_spacelan/plots/avp_stations.lua:339
+msgctxt "situationReport-comms"
+msgid "Cannot replenish scan probes due to fabrication unit failure."
+msgstr ""
+"Aufgrund eines Ausfalls der Fertigungseinheit knnen keine Scan-Sonden "
+"nachproduziert werden."
+
+#: mod_spacelan/plots/avp_stations.lua:324
+#: mod_spacelan/plots/avp_stations.lua:340
+msgctxt "situationReport-comms"
+msgid "Parts shortage prevents scan probe replenishment."
+msgstr ""
+"Ein Mangel an Ersatzteilen verhindert die Nachproduktion von Scan-Sonden."
+
+#: mod_spacelan/plots/avp_stations.lua:327
+#: mod_spacelan/plots/avp_stations.lua:341
+msgctxt "situationReport-comms"
+msgid ""
+"Station management has curtailed scan probe replenishment for cost cutting "
+"reasons."
+msgstr ""
+"Die Stationsleitung hat die Nachproduktion von Scan-Sonden aus Kostengrnden "
+"eingeschrnkt."

@@ -3,7 +3,7 @@
 -- Type: Development
 
 --- Scenario
--- @script scenario_11_empty
+-- @script scenario_11_zone_test
 
 require("utils.lua")
 require("comms/comms_vf_ship.lua")

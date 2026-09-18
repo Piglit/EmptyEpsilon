@@ -26,8 +26,10 @@ class MiniGame : sp::NonCopyable
     virtual bool isGameComplete();
     virtual glm::vec2 getBoardSize();
 
+    virtual void start() {}
     virtual void reset();
     virtual void disable();
+    virtual void onDraw(sp::RenderTarget& renderer) {}
 
   protected:
     int difficulty;

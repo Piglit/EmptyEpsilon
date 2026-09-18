@@ -334,7 +334,10 @@ set(MAIN_SOURCES
     src/screenComponents/miniGame.cpp
     src/screenComponents/mineSweeper.cpp
     src/screenComponents/impulseSound.cpp
+    src/screenComponents/newMinigames/newMinigameUtils.cpp
     src/screenComponents/newMinigames/slidingTilePuzzle.cpp
+    src/screenComponents/newMinigames/realtimeMinigame.cpp
+    src/screenComponents/newMinigames/hotWireGame.cpp
     src/spaceObjects/missiles/missileWeapon.cpp
     src/spaceObjects/missiles/EMPMissile.cpp
     src/spaceObjects/missiles/homingMissile.cpp
@@ -481,7 +484,10 @@ set(MAIN_SOURCES
     src/screenComponents/viewport3d.h
     src/screenComponents/viewportMainScreen.h
     src/screenComponents/warpControls.h
+    src/screenComponents/newMinigames/newMinigameUtils.h
     src/screenComponents/newMinigames/slidingTilePuzzle.h
+    src/screenComponents/newMinigames/realtimeMinigame.h
+    src/screenComponents/newMinigames/hotWireGame.h
     src/screens/cinematicViewScreen.h
     src/screens/crew1/singlePilotScreen.h
     src/screens/crew1/singleFighterScreen.h

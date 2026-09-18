@@ -97,6 +97,7 @@ void GuiHackingDialog::onDraw(sp::RenderTarget& renderer)
         return;
     }
     GuiOverlay::onDraw(renderer);
+    game->onDraw(renderer);
     if (game->isGameComplete())
     {
         if (reset_time - engine->getElapsedTime() < 0.0f)
@@ -184,6 +185,8 @@ void GuiHackingDialog::getNewGame() {
             }
         }
     }
+
+    game->start();
 
     glm::vec2 board_size = game->getBoardSize();
 

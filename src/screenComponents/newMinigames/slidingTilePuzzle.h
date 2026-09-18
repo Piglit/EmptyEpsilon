@@ -7,6 +7,7 @@
 
 #include "../miniGame.h"
 #include "gui/gui2_togglebutton.h"
+#include "newMinigameUtils.h"
 
 
 class SlidingTilePuzzle : public MiniGame {
@@ -36,9 +37,7 @@ class SlidingTilePuzzle : public MiniGame {
     virtual void gameComplete() override;
   private:
     void onFieldClick(int index);
-    int width;
-    int height;
-    std::vector<size_t> map;
+    BlockMap<size_t> map;
     std::vector<TerrainInfo> terrain;
 
     float progress;
@@ -51,9 +50,6 @@ class SlidingTilePuzzle : public MiniGame {
     };
     FieldItem* getFieldItem(int idx);
     void checkGameState();
-    std::optional<std::pair<int, int>> tryGetCoords(int index);
-    std::optional<int> tryGetIndex(std::pair<int, int> coords);
-    void moveCoords(std::pair<int, int>* coords, int direction);
 };
 
 #endif//SLIDINGTILEPUZZLE_H

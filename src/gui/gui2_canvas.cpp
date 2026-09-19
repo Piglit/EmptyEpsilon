@@ -51,7 +51,7 @@ bool GuiCanvas::onPointerDown(sp::io::Pointer::Button button, glm::vec2 position
 void GuiCanvas::onPointerDrag(glm::vec2 position, sp::io::Pointer::ID id)
 {
     mouse_position = position;
-    if (click_element)
+    if (click_element && click_element->isEnabled())
         click_element->onMouseDrag(position, id);
 }
 

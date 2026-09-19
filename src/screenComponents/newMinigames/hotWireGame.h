@@ -12,12 +12,12 @@
 #include "realtimeMinigame.h"
 #include "gui/gui2_label.h"
 #include "newMinigameUtils.h"
+#include "gui/gui2_slider.h"
 
 class HotWireGame : public RealtimeMinigame
 {
 public:
     HotWireGame(GuiPanel* owner, GuiHackingDialog* parent, int difficulty);
-    virtual glm::vec2 getBoardSize() override;
 
     enum Terrain
     {
@@ -61,15 +61,21 @@ public:
 #endif
     };
 protected:
+    virtual void initialize() override;
     virtual void onNewGame() override;
-    virtual void tick(float delta) override;
+    virtual void tick(float delta) override {};
     virtual void createNewMap();
     virtual Map::GenerationResult generateMap(int attempt);
     virtual void finalizeMap();
+    virtual void onSliderChange(float x, float y);
+    virtual void updateSliders();
+    virtual void gameComplete(bool success) override;
+    virtual void render(sp::RenderTarget& renderer) override;
     Map map;
-private:
-    GuiLabel* label;
-    int frames = 0;
+    GuiBasicSlider* slider_horizontal = nullptr;
+    GuiBasicSlider* slider_vertical = nullptr;
+    bool can_fail;
+    bool can_teleport = false;
 };
 
 class Labyrinth : public HotWireGame

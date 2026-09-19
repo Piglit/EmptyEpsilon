@@ -29,7 +29,6 @@ class MiniGame : sp::NonCopyable
     virtual void start() {}
     virtual void reset();
     virtual void disable();
-    virtual void onDraw(sp::RenderTarget& renderer) {}
 
   protected:
     int difficulty;

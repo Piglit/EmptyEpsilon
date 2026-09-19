@@ -2,6 +2,7 @@
 #include "random.h"
 #include <bitset>
 #include <i18n.h>
+#include "graphics/opengl.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -9,18 +10,100 @@
 
 HotWireGame::HotWireGame(GuiPanel* owner, GuiHackingDialog* parent, int difficulty) :
     RealtimeMinigame(owner, parent, difficulty),
-    map(10 + 5 * difficulty, 10 + 5 * difficulty)
+    map(10 + 10 * difficulty, 10 + 10 * difficulty),
+    can_fail(difficulty > 0)
+{}
+
+const float SLIDER_THICKNESS = 50;
+const float SLIDER_MARGIN = 20;
+const float MAP_BORDER = SLIDER_THICKNESS / 2.f;
+const auto SLIDER_BLOCK = SLIDER_THICKNESS + SLIDER_MARGIN * 2;
+
+void HotWireGame::initialize()
 {
-    label = new GuiLabel(owner, "", "", 30);
-    label->setSize(GuiElement::GuiSizeMax, GuiElement::GuiSizeMax);
-    label->setPosition(0, 0, sp::Alignment::Center);
-    board.emplace_back(label);
+    RealtimeMinigame::initialize();
+
+    auto board_size = proxy_canvas->getSize();
+
+    slider_horizontal = new GuiBasicSlider(proxy_canvas, "HOT_WIRE_HORIZONTAL", 0, 1, 0, [this](float value) {
+        onSliderChange(value, map.pawn.y);
+        });
+    slider_horizontal->setSize(board_size.x - SLIDER_BLOCK, SLIDER_THICKNESS);
+    slider_horizontal->setPosition(SLIDER_BLOCK * 0.5f, -SLIDER_MARGIN, sp::Alignment::BottomCenter);
+    board.emplace_back(slider_horizontal);
+
+    slider_vertical = new GuiBasicSlider(proxy_canvas, "HOT_WIRE_VERTICAL", 0, 1, 0, [this](float value) {
+        onSliderChange(map.pawn.x, value);
+        });
+    slider_vertical->setSize(SLIDER_THICKNESS, board_size.y - SLIDER_BLOCK);
+    slider_vertical->setPosition(SLIDER_MARGIN, -SLIDER_BLOCK *0.5f, sp::Alignment::CenterLeft);
+    board.emplace_back(slider_vertical);
+
+
+    // the canvas size would be fine, but we want additional sliders
+    //proxy_canvas->setSize()
+}
+
+void HotWireGame::updateSliders()
+{
+    slider_horizontal->setValue(map.pawn.x);
+    slider_vertical->setValue(map.pawn.y);
+    auto game_over = isGameComplete();
+    slider_horizontal->setEnable(!game_over);
+    slider_vertical->setEnable(!game_over);
+}
+
+void HotWireGame::gameComplete(bool success)
+{
+    RealtimeMinigame::gameComplete(success);
+    updateSliders();
+}
+
+void HotWireGame::onSliderChange(float x, float y)
+{
+    if (game_complete)
+    {
+        return;
+    }
+
+    auto previous_position = map.pawn;
+    map.pawn.x = std::clamp(x, 0.f, 1.f);
+    map.pawn.y = std::clamp(y, 0.f, 1.f);
+
+    auto tile = map.tryGetMapTile(map.pawn);
+    if (tile)
+    {
+        if (tile->terrain == Terrain::Goal)
+        {
+            progress = 1;
+            gameComplete(true);
+        }
+        else if (tile->terrain != Terrain::Road)
+        {
+            if (can_fail)
+            {
+                progress = 0;
+                gameComplete(false);
+            }
+            else
+            {
+                // TODO: prevent skipping walls
+                // TODO: can_teleport
+                map.pawn = previous_position;
+            }
+        }
+        else
+        {
+            progress = tile->progress;
+        }
+    }
 }
 
 void HotWireGame::onNewGame()
 {
     createNewMap();
     finalizeMap();
+    updateSliders();
 }
 
 void HotWireGame::createNewMap()
@@ -48,22 +131,61 @@ void HotWireGame::createNewMap()
     map = best_map.value();
 }
 
-glm::vec2 HotWireGame::getBoardSize()
+void HotWireGame::render(sp::RenderTarget& renderer)
 {
-    return glm::vec2(700, 700);
-}
+    RealtimeMinigame::render(renderer);
 
-void HotWireGame::tick(float delta)
-{
-    auto pawn_tile = map.tryGetMapTile(map.pawn);
-    if (pawn_tile)
+    auto& owner_rect = proxy_canvas->getRect();
+
+    // we need to leave some space to the left and bottom, as there are sliders
+
+    float off_x = owner_rect.position.x + SLIDER_BLOCK;
+    float off_y = owner_rect.position.y;
+    float width = owner_rect.size.x - SLIDER_BLOCK;
+    float height = owner_rect.size.y - SLIDER_BLOCK;
+
+    renderer.finish();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glm::u8vec4 wall_color;
+    auto now = engine->getElapsedTime();
+    if (isGameCompleteSuccess())
     {
-        progress = pawn_tile->progress;
+        wall_color = glm::u8vec4(0, 128, 0, 255);
+    }
+    else
+    {
+        // blink red, blink very fast when failed
+        wall_color = glm::u8vec4((int)(100.f * (1.f - std::fabsf(std::sinf(now * (isGameCompleteFailure() ? 10.f : 2.f))))), 0, 0, 255);
+    }
+    renderer.fillRect(sp::Rect(off_x, off_y, width, height), wall_color);
+
+    // map borders
+    width -= MAP_BORDER*2;
+    height -= MAP_BORDER*2;
+    off_x += MAP_BORDER;
+    off_y += MAP_BORDER;
+
+    const float tile_width = width / map.width;
+    const float tile_height = height / map.height;
+
+    for (int x = 0; x < map.width; x++)
+    {
+        for (int y = 0; y < map.height; y++)
+        {
+            auto terrain = map.getTile({ x, y }).terrain;
+            if (terrain == Terrain::Road || terrain == Terrain::Goal)
+            {
+                renderer.fillRect(sp::Rect(off_x + x * tile_width, off_y + y * tile_height, tile_width, tile_height), terrain == Terrain::Goal ? glm::u8vec4(255, 255, 0, 255) : glm::u8vec4(200, 200, 200, 255));
+            }
+        }
     }
 
-    frames++;
-    label->setText(tr("frames: {frames}").format({ {"frames", string(frames)} }));
-    next_tick_at += 0.1f;
+    const float pawn_size = std::min(tile_width, tile_height) * 0.25f;
+    glm::vec2 pawn_pos = glm::vec2(off_x + map.pawn.x * width, off_y + map.pawn.y * height);
+    renderer.fillCircle(pawn_pos, pawn_size, glm::u8vec4(0, 0, 255, 255));
+    auto ping_progress = std::fmodf(now, 1.f);
+    renderer.drawCircleOutline(pawn_pos, pawn_size + ping_progress * 100, pawn_size, glm::u8vec4(255, 255, 255, (int)(128 * (1- ping_progress))));
+    renderer.finish();
 }
 
 HotWireGame::Map::GenerationResult HotWireGame::generateMap(int attempt)

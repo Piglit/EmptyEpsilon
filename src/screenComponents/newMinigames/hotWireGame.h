@@ -1,7 +1,8 @@
 /**
-* A game where you must carefully move your pawn on a maze-like map to a goal using X and Y sliders while avoiding touching the walls.
-*
-* Comes in a linear and a labyrinth version.
+* Hot Wire: A game where you must carefully move your pawn to a goal using X and Y sliders while avoiding touching the walls.
+* Maze/Labyrinth: Similar to Hot Wire, but the walls are harmless and the map is full of branching dead-ends.
+* 
+* Special: In Hot Wire difficulty 0 the walls are harmless and below difficulty 2 you can "teleport" across walls - small easter egg. :)
 * 
 * by AyCe
  */
@@ -34,12 +35,14 @@ public:
         Terrain terrain;
         float progress;
 
-        Tile(Terrain terrain);
+        Tile(const Terrain terrain);
+        bool isPassable() const;
     };
     class Map final : public BlockMap<Tile> {
     public:
-        Map(int width, int height);
-        Tile* tryGetMapTile(glm::vec2 pos);
+        Map(const int width, const int height);
+        xy toXY(const glm::vec2& pos) const;
+        Tile* tryGetMapTile(const glm::vec2& pos);
 
         struct GenerationResult
         {
@@ -48,12 +51,13 @@ public:
         };
 
         // generate the rough map
-        GenerationResult generate(int difficulty, bool labyrinth);
+        GenerationResult generate(const int difficulty, const bool labyrinth);
 
         // make this map ready to play
-        Map finalize(bool score_based_on_actual_pf_distance);
+        Map finalize(const bool score_based_on_actual_pf_distance);
 
         glm::vec2 pawn {0, 0};
+        void setPawn(const xy& coords);
 
 #ifdef DEBUG
         static void debugWireMapGeneration();
@@ -67,7 +71,8 @@ protected:
     virtual void createNewMap();
     virtual Map::GenerationResult generateMap(int attempt);
     virtual void finalizeMap();
-    virtual void onSliderChange(float x, float y);
+    virtual void onSlider(float value, bool horizontal);
+    virtual void setPawnPosition(float x, float y, bool teleport);
     virtual void updateSliders();
     virtual void gameComplete(bool success) override;
     virtual void render(sp::RenderTarget& renderer) override;

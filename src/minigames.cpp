@@ -28,5 +28,5 @@ const std::vector<HackingGame> available_hacking_games = {
     hacking_minigame<LightsOut>("lights", "Lights"),
     hacking_minigame<SlidingTilePuzzle>("slidingTilePuzzle", "Sliding Tile Puzzle"),
     hacking_minigame<HotWireGame>("hotWire", "Hot Wire"),
-    //hacking_minigame<Labyrinth>("labyrinth", "Labyrinth"),
+    hacking_minigame<Labyrinth>("maze", "Maze"),
 };

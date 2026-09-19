@@ -93,9 +93,13 @@ void RealtimeMinigame::render(sp::RenderTarget& renderer)
 
 void RealtimeMinigame::gameComplete(bool success)
 {
+    if (game_complete)
+    {
+        return;
+    }
+    game_complete = true;
     game_complete_success = success;
     parent->onMiniGameComplete(success);
-    game_complete = true;
 }
 
 void RealtimeMinigame::gameComplete()

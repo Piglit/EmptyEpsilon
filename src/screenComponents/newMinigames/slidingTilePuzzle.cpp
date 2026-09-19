@@ -40,7 +40,7 @@ SlidingTilePuzzle::SlidingTilePuzzle(GuiPanel* owner, GuiHackingDialog* parent, 
 
     for (int i = 0; i < map.length; i++)
     {
-        auto& [x, y] = map.getCoords(i);
+        auto [x, y] = map.getCoords(i);
 
         // build a box
         int terrain_id;

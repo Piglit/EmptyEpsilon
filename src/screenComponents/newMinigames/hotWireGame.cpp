@@ -11,7 +11,8 @@
 HotWireGame::HotWireGame(GuiPanel* owner, GuiHackingDialog* parent, int difficulty) :
     RealtimeMinigame(owner, parent, difficulty),
     map(10 + 10 * difficulty, 10 + 10 * difficulty),
-    can_fail(difficulty > 0)
+    can_fail(difficulty > 0),
+    can_teleport(difficulty < 2)
 {}
 
 const float SLIDER_THICKNESS = 50;
@@ -26,22 +27,28 @@ void HotWireGame::initialize()
     auto board_size = proxy_canvas->getSize();
 
     slider_horizontal = new GuiBasicSlider(proxy_canvas, "HOT_WIRE_HORIZONTAL", 0, 1, 0, [this](float value) {
-        onSliderChange(value, map.pawn.y);
+        onSlider(value, true);
         });
     slider_horizontal->setSize(board_size.x - SLIDER_BLOCK, SLIDER_THICKNESS);
     slider_horizontal->setPosition(SLIDER_BLOCK * 0.5f, -SLIDER_MARGIN, sp::Alignment::BottomCenter);
     board.emplace_back(slider_horizontal);
 
     slider_vertical = new GuiBasicSlider(proxy_canvas, "HOT_WIRE_VERTICAL", 0, 1, 0, [this](float value) {
-        onSliderChange(map.pawn.x, value);
+        onSlider(value, false);
         });
     slider_vertical->setSize(SLIDER_THICKNESS, board_size.y - SLIDER_BLOCK);
-    slider_vertical->setPosition(SLIDER_MARGIN, -SLIDER_BLOCK *0.5f, sp::Alignment::CenterLeft);
+    slider_vertical->setPosition(SLIDER_MARGIN, -SLIDER_BLOCK * 0.5f, sp::Alignment::CenterLeft);
     board.emplace_back(slider_vertical);
 
 
     // the canvas size would be fine, but we want additional sliders
     //proxy_canvas->setSize()
+}
+
+void HotWireGame::onSlider(float value, bool horizontal)
+{
+    setPawnPosition(horizontal ? value : map.pawn.x, !horizontal ? value : map.pawn.y, can_teleport);
+    updateSliders();
 }
 
 void HotWireGame::updateSliders()
@@ -59,43 +66,139 @@ void HotWireGame::gameComplete(bool success)
     updateSliders();
 }
 
-void HotWireGame::onSliderChange(float x, float y)
+void HotWireGame::setPawnPosition(float x, float y, bool teleport)
 {
     if (game_complete)
     {
         return;
     }
 
-    auto previous_position = map.pawn;
-    map.pawn.x = std::clamp(x, 0.f, 1.f);
-    map.pawn.y = std::clamp(y, 0.f, 1.f);
+    x = std::clamp(x, 0.f, 0.9999f);
+    y = std::clamp(y, 0.f, 0.9999f);
 
-    auto tile = map.tryGetMapTile(map.pawn);
-    if (tile)
+    auto target_coords = map.toXY({ x, y });
+    HotWireGame::Tile const* target_tile = map.tryGetTile(target_coords);
+    assert(target_tile);
+
+    auto current_coords = map.toXY(map.pawn);
+    auto current_tile = map.tryGetTile(current_coords);
+    if (!teleport && current_tile)
     {
-        if (tile->terrain == Terrain::Goal)
+        bool unimpeded = true;
+        while (current_tile != target_tile)
         {
-            progress = 1;
-            gameComplete(true);
-        }
-        else if (tile->terrain != Terrain::Road)
-        {
-            if (can_fail)
+            // Moving diagonally isn't really a thing, but if it were, we should make sure to move "fairer" than this.
+            auto diff_x = target_coords.x - current_coords.x;
+            auto diff_y = target_coords.y - current_coords.y;
+            auto moved_x = std::abs(diff_x) > std::abs(diff_y);
+            bool moved_positive;
+            if (moved_x)
             {
-                progress = 0;
-                gameComplete(false);
+                // move x
+                moved_positive = target_coords.x > current_coords.x;
+                current_coords.x += moved_positive ? 1 : -1;
             }
             else
             {
-                // TODO: prevent skipping walls
-                // TODO: can_teleport
-                map.pawn = previous_position;
+                // move y
+                moved_positive = target_coords.y > current_coords.y;
+                current_coords.y += moved_positive ? 1 : -1;
             }
+            auto& next_tile = map.getTileRef(current_coords);
+            if (!next_tile.isPassable())
+            {
+                // uh oh
+                if (can_fail)
+                {
+                    target_tile = &next_tile;
+                    // right up into that tile so we get detected as failed
+                    if (moved_x)
+                    {
+                        map.pawn.x = (current_coords.x + (moved_positive ? 0.01f : 0.99f)) / map.width;
+                    }
+                    else
+                    {
+                        map.pawn.y = (current_coords.y + (moved_positive ? 0.01f : 0.99f)) / map.height;
+                    }
+                }
+                else
+                {
+                    target_tile = current_tile;
+                    // move right up to the tile, but not into it
+                    if (moved_x)
+                    {
+                        map.pawn.x = (current_coords.x + (moved_positive ? -0.01f : 1.01f)) / map.width;
+                    }
+                    else
+                    {
+                        map.pawn.y = (current_coords.y + (moved_positive ? -0.01f : 1.01f)) / map.height;
+                    }
+                }
+                unimpeded = false;
+                break;
+            }
+            else if (&next_tile != target_tile)
+            {
+                // just move into the center of the tile
+                if (moved_x)
+                {
+                    map.pawn.x = (current_coords.x + 0.5f) / map.width;
+                }
+                else
+                {
+                    map.pawn.y = (current_coords.y + 0.5f) / map.height;
+                }
+            }
+            current_tile = &next_tile;
         }
-        else
+        if (unimpeded)
         {
-            progress = tile->progress;
+            map.pawn.x = x;
+            map.pawn.y = y;
         }
+
+        // TODO: proper diagonal movement
+        //int num_tiles_to_travel = std::abs(target_coords.x - current_coords.x) + std::abs(target_coords.y - current_coords.y); // taxi!
+        //float total_x_quota = map.pawn.y == previous_position.y ? 1.f : (std::fabs(map.pawn.x - previous_position.x) / std::fabs(map.pawn.y - previous_position.y));
+        //while(current_tile != target_tile)
+        //{
+        //    float current_x_quota = current_coords.y == target_coords.y ? 1.f : (std::fabs(target_coords.x - current_coords.x) / std::fabs(target_coords.y - current_coords.y));
+        //    // quota explanation:
+        //    // when only y changes: =0
+        //    // when only x changes: >=1
+        //    // when both change equally: =1
+        //    // when x changes more: >1
+        //    // when y changes more: <1
+
+        //    // but what really matters is the difference between total_x_quota and current_x_quota, determining if we change x or y next
+        //    bool change_x_next = total_x_quota - current_x_quota >= 0;
+        //}
+    }
+    else if (can_fail || target_tile->isPassable() || !current_tile)
+    {
+        // Easy, just go right there. If we're inside a wall, too bad.
+        map.pawn = { x,y };
+    }
+    else
+    {
+        // otherwise we just stay where we were
+        target_tile = current_tile;
+    }
+
+    if (target_tile->terrain == Terrain::Goal)
+    {
+        progress = 1;
+        gameComplete(true);
+    }
+    else if (target_tile->terrain != Terrain::Road)
+    {
+        // if we're inside a wall, we lose
+        progress = 0;
+        gameComplete(false);
+    }
+    else
+    {
+        progress = target_tile->progress;
     }
 }
 
@@ -103,6 +206,7 @@ void HotWireGame::onNewGame()
 {
     createNewMap();
     finalizeMap();
+    setPawnPosition(map.pawn.x, map.pawn.y, true);
     updateSliders();
 }
 
@@ -152,16 +256,20 @@ void HotWireGame::render(sp::RenderTarget& renderer)
     {
         wall_color = glm::u8vec4(0, 128, 0, 255);
     }
-    else
+    else if (can_fail)
     {
         // blink red, blink very fast when failed
         wall_color = glm::u8vec4((int)(100.f * (1.f - std::fabsf(std::sinf(now * (isGameCompleteFailure() ? 10.f : 2.f))))), 0, 0, 255);
     }
+    else
+    {
+        wall_color = glm::u8vec4(0, 0, 0, 255);
+    }
     renderer.fillRect(sp::Rect(off_x, off_y, width, height), wall_color);
 
     // map borders
-    width -= MAP_BORDER*2;
-    height -= MAP_BORDER*2;
+    width -= MAP_BORDER * 2;
+    height -= MAP_BORDER * 2;
     off_x += MAP_BORDER;
     off_y += MAP_BORDER;
 
@@ -172,10 +280,10 @@ void HotWireGame::render(sp::RenderTarget& renderer)
     {
         for (int y = 0; y < map.height; y++)
         {
-            auto terrain = map.getTile({ x, y }).terrain;
-            if (terrain == Terrain::Road || terrain == Terrain::Goal)
+            auto& tile = map.getTile({ x, y });
+            if (tile.isPassable())
             {
-                renderer.fillRect(sp::Rect(off_x + x * tile_width, off_y + y * tile_height, tile_width, tile_height), terrain == Terrain::Goal ? glm::u8vec4(255, 255, 0, 255) : glm::u8vec4(200, 200, 200, 255));
+                renderer.fillRect(sp::Rect(off_x + x * tile_width, off_y + y * tile_height, tile_width, tile_height), tile.terrain == Terrain::Goal ? glm::u8vec4(255, 255, 0, 255) : glm::u8vec4(200, 200, 200, 255));
             }
         }
     }
@@ -184,7 +292,7 @@ void HotWireGame::render(sp::RenderTarget& renderer)
     glm::vec2 pawn_pos = glm::vec2(off_x + map.pawn.x * width, off_y + map.pawn.y * height);
     renderer.fillCircle(pawn_pos, pawn_size, glm::u8vec4(0, 0, 255, 255));
     auto ping_progress = std::fmodf(now, 1.f);
-    renderer.drawCircleOutline(pawn_pos, pawn_size + ping_progress * 100, pawn_size, glm::u8vec4(255, 255, 255, (int)(128 * (1- ping_progress))));
+    renderer.drawCircleOutline(pawn_pos, pawn_size + ping_progress * 100, pawn_size, glm::u8vec4(255, 255, 255, (int)(128 * (1 - ping_progress))));
     renderer.finish();
 }
 
@@ -198,9 +306,13 @@ void HotWireGame::finalizeMap()
     map = map.finalize(true);
 }
 
-Labyrinth::Labyrinth(GuiPanel* owner, GuiHackingDialog* parent, int difficulty)
-    : HotWireGame(owner, parent, difficulty)
-{}
+Labyrinth::Labyrinth(GuiPanel* owner, GuiHackingDialog* parent, int difficulty) :
+    HotWireGame(owner, parent, difficulty)
+{
+    // labyrinths are much more maze-like, but you also can't fail due to touching walls
+    can_fail = false;
+    can_teleport = false;
+}
 
 HotWireGame::Map::GenerationResult Labyrinth::generateMap(int attempt)
 {
@@ -227,9 +339,9 @@ HotWireGame::Map::Map(int width, int height) :
 //	return false;
 //}
 
-HotWireGame::Tile* HotWireGame::Map::tryGetMapTile(glm::vec2 pos)
+HotWireGame::Tile* HotWireGame::Map::tryGetMapTile(const glm::vec2& pos)
 {
-    auto index = tryGetIndex({ (int)(pos.x * width), (int)(pos.y * height) });
+    auto index = tryGetIndex(toXY(pos));
     if (!index)
     {
         return nullptr;
@@ -237,10 +349,25 @@ HotWireGame::Tile* HotWireGame::Map::tryGetMapTile(glm::vec2 pos)
     return &tiles[*index];
 }
 
-HotWireGame::Tile::Tile(Terrain terrain) :
+void HotWireGame::Map::setPawn(const xy& coords)
+{
+    pawn = { (coords.x + 0.5f) / width, (coords.y + 0.5f) / height };
+}
+
+xy HotWireGame::Map::toXY(const glm::vec2& pos) const
+{
+    return { (int)(pos.x * width), (int)(pos.y * height) };
+}
+
+HotWireGame::Tile::Tile(const Terrain terrain) :
     terrain(terrain),
     progress(0)
 {}
+
+bool HotWireGame::Tile::isPassable() const
+{
+    return terrain == Terrain::Road || terrain == Terrain::Goal;
+}
 
 #ifdef DEBUG
 void HotWireGame::Map::dumpToConsole()
@@ -257,7 +384,7 @@ void HotWireGame::Map::dumpToConsole()
         for (int x = 0; x < width; x++)
         {
             auto& tile = getTile({ x, y });
-            std::cout << (tile.terrain == Terrain::Road ? " O" : tile.terrain == Terrain::Goal ? " X" : "  ");
+            std::cout << (tile.terrain == Terrain::Road ? " #" : tile.terrain == Terrain::Goal ? " X" : tile.terrain == Terrain::Border ? " °" : "  ");
         }
         std::cout << " |\n";
     }
@@ -290,7 +417,7 @@ void HotWireGame::Map::dumpToConsole()
             }
             else
             {
-                int num = tile.progress * 100;
+                int num = tile.progress * 100.f;
                 if (num < 10)
                 {
                     std::cout << "0";
@@ -322,7 +449,22 @@ void HotWireGame::Map::debugWireMapGeneration()
         do
         {
             attempts++;
-            auto result = map.generate(3, true);
+            auto result = map.generate(2, true);
+
+            // check for 2x2s
+            for (int x = 0; x < map.width - 1; x++)
+            {
+                for (int y = 0; y < map.height - 1; y++)
+                {
+                    if (map.getTile({ x, y }).isPassable() && map.getTile({ x + 1, y }).isPassable() && map.getTile({ x, y + 1 }).isPassable() && map.getTile({ x + 1, y + 1 }).isPassable())
+                    {
+                        std::cout << "SQARE @ " << x << "," << y << std::endl;
+                        best_map = map;
+                        goto found_square;
+                    }
+                }
+            }
+
             if (result.success)
             {
                 best_map = map;
@@ -334,8 +476,9 @@ void HotWireGame::Map::debugWireMapGeneration()
                 best_map = map;
             }
         } while (attempts < max_attempts);
+        found_square:
 
-        map = best_map->finalize(true);
+        map = *best_map;// ->finalize(true);
         std::cout << "Attempts: " << attempts;
         map.dumpToConsole();
         std::cin.get();
@@ -441,116 +584,196 @@ HotWireGame::Map::GenerationResult HotWireGame::Map::generate(int difficulty, bo
     // clear map
     std::fill(tiles.begin(), tiles.end(), Tile(Terrain::Wall));
 
-    // TODO: Labyrith mode support
-
-    auto tilewidth = 1.f / width;
-    auto tileheight = 1.f / height;
-
-    // pick random start
-    xy pos = { irandom(0, width - 1), irandom(0, height - 1) };
-
-    // set start
-    setTile(pos, Terrain::Road);
-    pawn = { tilewidth * (pos.x + 0.5f), tileheight * (pos.y + 0.5f) };
-
-    int remaining_bends = irandom(4, 6) + difficulty * 6;
-    int score = 0;
-
-    while (remaining_bends > 0)
+    auto createSnakeyPath = [this](int num_bends, xy& pos)
     {
-        // pick a random direction and move towards it, creating a bend
-        int num_directions_available = 0;
-        char move_mask = 0;
-        for (int i = 0; i < 4; i++)
+        while (num_bends > 0)
         {
-            // check if that direction has at least 1 travellable tile
-            xy probe = pos;
-            if (tryMoveCoords(&probe, i) && getTile(probe).terrain == Terrain::Wall)
+            // pick a random direction and move towards it, creating a bend
+            int num_directions_available = 0;
+            char move_mask = 0;
+            for (int i = 0; i < 4; i++)
             {
-                move_mask |= 1 << i;
-                num_directions_available++;
-            }
-        }
-
-        if (num_directions_available == 0)
-        {
-            // nowhere to go :(
-            break;
-        }
-
-        int direction = irandom(0, num_directions_available - 1);
-        for (int i = 0; i < 4; i++)
-        {
-            if (move_mask & (1 << i))
-            {
-                if (direction == 0)
+                // check if that direction has at least 1 travellable tile
+                xy probe = pos;
+                if (tryMoveCoords(&probe, i) && getTile(probe).terrain == Terrain::Wall)
                 {
-                    direction = i;
-                    break;
+                    move_mask |= 1 << i;
+                    num_directions_available++;
                 }
-                direction--;
             }
-        }
 
-        // check how far we could travel in that direction
-        int available_length = 0;
-        {
-            xy probe = pos;
-            while (tryMoveCoords(&probe, direction))
+            if (num_directions_available == 0)
             {
-                auto& tile = getTile(probe);
-                if (tile.terrain != Terrain::Wall)
-                {
-                    break;
-                }
-                available_length++;
+                // nowhere to go :(
+                break;
             }
-        }
 
-        // choose a length at random
-        int travel_length = irandom(1, available_length);
-
-        // Travel there, marking all surrounding wall tiles as "undesired" to avoid further connections.
-        // On the last tile, block the immediate front (if not at the map's edge).
-        while(--travel_length >= 0)
-        {
-            for (int i=0;i<4;i++)
+            int direction = irandom(0, num_directions_available - 1);
+            for (int i = 0; i < 4; i++)
             {
-                if (i == direction)
+                if (move_mask & (1 << i))
                 {
-                    // not in the direction that we travel (but backwards yes - so we block the start tile too)
-                    continue;
-                }
-                xy neighbour = pos;
-                if (tryMoveCoords(&neighbour, i))
-                {
-                    auto& tile = getTileRef(neighbour);
-                    if (tile.terrain == Terrain::Wall)
+                    if (direction == 0)
                     {
-                        tile = Terrain::Border;
+                        direction = i;
+                        break;
+                    }
+                    direction--;
+                }
+            }
+
+            // check how far we could travel in that direction
+            int available_length = 0;
+            {
+                xy probe = pos;
+                while (tryMoveCoords(&probe, direction))
+                {
+                    auto& tile = getTile(probe);
+                    if (tile.terrain != Terrain::Wall)
+                    {
+                        break;
+                    }
+                    available_length++;
+                }
+            }
+
+            // choose a length at random
+            int travel_length = irandom(1, available_length);
+
+            // Travel there, marking all surrounding wall tiles as "undesired" to avoid further connections.
+            // On the last tile, block the immediate front (if not at the map's edge).
+            while (--travel_length >= 0)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i == direction)
+                    {
+                        // not in the direction that we travel (but backwards yes - so we block the start tile too)
+                        continue;
+                    }
+                    xy neighbour = pos;
+                    if (tryMoveCoords(&neighbour, i))
+                    {
+                        auto& tile = getTileRef(neighbour);
+                        if (tile.terrain == Terrain::Wall)
+                        {
+                            tile = Terrain::Border;
+                        }
                     }
                 }
+                moveCoords(&pos, direction);
+                setTile(pos, Terrain::Road);
             }
-            moveCoords(&pos, direction);
-            setTile(pos, Terrain::Road);
+
+            // and past the end, mark a border, so we don't just continue that way
+            xy probe = pos;
+            if (tryMoveCoords(&probe, direction))
+            {
+                auto& tile_ref = getTileRef(probe);
+                if (tile_ref.terrain == Terrain::Wall)
+                {
+                    tile_ref.terrain = Terrain::Border;
+                }
+            }
+
+            num_bends--;
         }
 
-        // and past the end, mark a border, so we don't just continue that way
-        xy probe = pos;
-        if (tryMoveCoords(&probe, direction))
+        // mark all wall around the final tile as borders as well
+        for (int i = 0; i < 4; i++)
         {
-            setTile(probe, Terrain::Border);
+            xy neighbour = pos;
+            if (tryMoveCoords(&neighbour, i))
+            {
+                auto& tile = getTileRef(neighbour);
+                if (tile.terrain == Terrain::Wall)
+                {
+                    tile = Terrain::Border;
+                }
+            }
         }
 
-        remaining_bends--;
-        score++;
-    }
+        return num_bends;
+    };
+
+    // pick random start
+    xy cursor = { irandom(0, width - 1), irandom(0, height - 1) };
+
+    // set start
+    setTile(cursor, Terrain::Road);
+    setPawn(cursor);
+
+    int main_path_bends = irandom(4, 6) + difficulty * 6;
+    auto result = createSnakeyPath(main_path_bends, cursor);
+    auto score = main_path_bends - result;
+    auto success = result == 0;
 
     // last tile is the goal
-    setTile(pos, Terrain::Goal);
+    setTile(cursor, Terrain::Goal);
+
+    if (labyrinth)
+    {
+        std::vector<xy> starting_tiles;
+        while (true)
+        {
+            starting_tiles.clear();
+            // create additional branches, that never connect back into themselves (for now)
+            // First, find all eligible starting points.
+            // A starting point must be a border tile that has exactly 1 adjacent road.
+            for (int i = 0; i < length; i++)
+            {
+                auto& tile = tiles[i];
+                if (tile.terrain != Terrain::Border)
+                {
+                    continue;
+                }
+                int adjacentRoadDirection = -1;
+                xy cursor = getCoords(i);
+                for (int direction = 0; direction < 4; direction++)
+                {
+                    xy neighbour_pos = cursor;
+                    if (tryMoveCoords(&neighbour_pos, direction))
+                    {
+                        auto& neighbour = getTile(neighbour_pos);
+                        if (neighbour.terrain == Terrain::Goal)
+                        {
+                            // this tile is not good, it would connect into a goal
+                            adjacentRoadDirection = -1;
+                            break;
+                        }
+                        if (neighbour.terrain == Terrain::Road)
+                        {
+                            if (adjacentRoadDirection == -1)
+                            {
+                                adjacentRoadDirection = direction;
+                            }
+                            else
+                            {
+                                // this tile is not good, it would have more than 1 road connection
+                                adjacentRoadDirection = -1;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (adjacentRoadDirection != -1)
+                {
+                    starting_tiles.push_back(cursor);
+                }
+            }
+            if (starting_tiles.empty())
+            {
+                // map is full
+                break;
+            }
+            auto& starting_tile = starting_tiles[irandom(0, starting_tiles.size() - 1)];
+            setTile(starting_tile, Terrain::Road);
+            createSnakeyPath(irandom(1, main_path_bends), starting_tile);
+        }
+    }
 
     return {
-        remaining_bends == 0,
+        success,
         score
     };
 }

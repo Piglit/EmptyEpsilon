@@ -38,7 +38,7 @@ public:
         tiles.shrink_to_fit();
     }
 
-    const std::optional<xy> tryGetCoords(const int index)
+    const std::optional<xy> tryGetCoords(const int index) const
     {
         if (index < 0 || index >= length)
         {
@@ -47,7 +47,7 @@ public:
         return { {index % width, index / width } };
     }
 
-    const std::optional<int> tryGetIndex(const xy& coords)
+    const std::optional<int> tryGetIndex(const xy& coords) const
     {
         auto& [x, y] = coords;
         if (x < 0 || y < 0 || x >= width || y >= height)
@@ -57,7 +57,7 @@ public:
         return { x + y * width };
     }
 
-    const xy getCoords(const int index)
+    xy getCoords(const int index) const
     {
         if (index < 0 || index >= length)
         {
@@ -67,7 +67,7 @@ public:
         return {index % width, index / width };
     }
 
-    const int getIndex(const xy& coords)
+    int getIndex(const xy& coords) const
     {
         auto& [x, y] = coords;
         if (x < 0 || y < 0 || x >= width || y >= height)
@@ -78,12 +78,12 @@ public:
         return x + y * width;
     }
 
-    const bool tryMoveCoords(xy* coords, const int direction)
+    bool tryMoveCoords(xy* coords, const int direction) const
     {
         return coords->tryMove(direction, width, height);
     }
 
-    const void moveCoords(xy* coords, const int direction)
+    void moveCoords(xy* coords, const int direction) const
     {
         coords->move(direction);
     }
@@ -94,13 +94,23 @@ public:
         return tiles[index];
     }
 
-    const T& getTile(const xy& coords)
+    const T& getTile(const xy& coords) const
     {
         auto index = getIndex(coords);
         return tiles[index];
     }
 
-    const void setTile(const xy& coords, T terrain)
+    T* tryGetTile(const xy& coords)
+    {
+        auto index = tryGetIndex(coords);
+        if (!index)
+        {
+            return nullptr;
+        }
+        return &tiles[*index];
+    }
+
+    void setTile(const xy& coords, T terrain)
     {
         auto index = getIndex(coords);
         tiles[index] = terrain;

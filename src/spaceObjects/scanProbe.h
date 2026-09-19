@@ -15,6 +15,9 @@ private:
     glm::vec2 target_position{0, 0};
     // Whether the probe has arrived to the target_position.
     bool has_arrived;
+
+    string model_name = "";
+    string client_model_name = "";
 public:
     int owner_id;
 
@@ -41,6 +44,7 @@ public:
     glm::vec2 getTarget() { return target_position; }
     P<SpaceObject> getOwner() { return game_server ? game_server->getObjectById(owner_id) : nullptr; }
     void setOwner(P<SpaceObject> owner);
+    void setModel(const string name);
 
     void onArrival(ScriptSimpleCallback callback);
     void onExpiration(ScriptSimpleCallback callback);

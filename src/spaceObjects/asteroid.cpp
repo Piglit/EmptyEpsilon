@@ -32,10 +32,11 @@ AbstractAsteroid::AbstractAsteroid(string multiplayer_name)
     setRotation(random(0, 360));
     rotation_speed = random(0.1f, 0.8f);
     z = random(-50, 50);
-
-    model_number = irandom(1, 10); // no synced, lol
+    model_number = irandom(1, 10);
 
     registerMemberReplication(&z);
+    registerMemberReplication(&rotation_speed);
+    registerMemberReplication(&model_number);
 
     // if the subclasses ever get custom implementations for ANYTHING relating to setSize/radius/etc., this needs to be moved into their constructors!
     setSize(size);

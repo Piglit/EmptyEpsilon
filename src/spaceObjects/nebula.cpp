@@ -13,6 +13,7 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <random>
 
 struct VertexAndTexCoords
 {
@@ -43,7 +44,9 @@ Nebula::Nebula()
 
     nebula_list.push_back(this);
 
-    setSize(size);
+    // As we're involving the object's multiplayer ID in our nebula RNG seed, we have to do a little hack here:
+    // Clients do not have a multiplayerId at this point - we have to wait for the first update-triggered setSize(), so we set the size to 0.
+    setSize(getMultiplayerId() == -1 ? 0 : size);
 }
 
 void Nebula::draw3DTransparent()
@@ -93,6 +96,22 @@ void Nebula::draw3DTransparent()
 void Nebula::setSize(float size)
 {
     SpaceObjectWithSize::setSize(size);
+
+    // we sync the nebula look by making sure the RNG is synced
+    // TODO: could there be floating point differences between systems, resulting in unsynced nebulas?
+    unsigned long long seed = (((unsigned long long)(size * 10000)) << 32) | getMultiplayerId();
+    std::mt19937_64 random_engine(seed);
+    //LOG(Info, "Creating Nebula: size: ", size, " multiplayerid: ", getMultiplayerId());
+
+    auto random = [&random_engine](float fmin, float fmax)
+    {
+        return std::uniform_real_distribution<float>(fmin, fmax)(random_engine);
+    };
+
+    auto irandom = [&random_engine](int imin, int imax)
+    {
+        return std::uniform_int_distribution<>(imin, imax)(random_engine);
+    };
 
     // TODO: Maybe don't scale linearly?
     float relative_size = size / 5000.f;

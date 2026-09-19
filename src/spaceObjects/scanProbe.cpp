@@ -53,6 +53,9 @@ REGISTER_SCRIPT_SUBCLASS(ScanProbe, SpaceObject)
     /// Passes the probe and instigator as arguments to the function.
     /// Example: probe:onDestruction(function(this_probe, instigator) print("Probe destroyed!") end)
     REGISTER_SCRIPT_CLASS_FUNCTION(ScanProbe, onDestruction);
+    /// Sets the objects's model.
+    /// Example: probe:setModel("SensorBuoyMKIII")
+    REGISTER_SCRIPT_CLASS_FUNCTION(ScanProbe, setModel);
 }
 
 REGISTER_MULTIPLAYER_CLASS(ScanProbe, "ScanProbe");
@@ -78,19 +81,24 @@ ScanProbe::ScanProbe()
     {
         case 1:
         {
-            model_info.setData("SensorBuoyMKI");
+            model_name = "SensorBuoyMKI";
             break;
         }
         case 2:
         {
-            model_info.setData("SensorBuoyMKII");
+            model_name = "SensorBuoyMKII";
             break;
         }
         default:
         {
-            model_info.setData("SensorBuoyMKIII");
+            model_name = "SensorBuoyMKIII";
         }
     }
+    if (isServer())
+    {
+        setModel(model_name);
+    }
+    registerMemberReplication(&model_name);
 
     // Assign a generic callsign.
     setCallSign(string(getMultiplayerId()) + "P");
@@ -100,6 +108,13 @@ ScanProbe::ScanProbe()
 // defined.
 ScanProbe::~ScanProbe()
 {
+}
+
+void ScanProbe::setModel(const string name)
+{
+    model_name = name;
+    client_model_name = name;
+    model_info.setData(name);
 }
 
 void ScanProbe::setSpeed(float probe_speed)
@@ -124,6 +139,11 @@ float ScanProbe::getLifetime()
 
 void ScanProbe::update(float delta)
 {
+    if (model_name != client_model_name)
+    {
+        setModel(model_name);
+    }
+
     // Tick down lifetime until expiration, then destroy the probe.
     lifetime -= delta;
 

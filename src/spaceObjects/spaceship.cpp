@@ -974,6 +974,15 @@ void SpaceShip::drawOnGMRadar(sp::RenderTarget& renderer, glm::vec2 position, fl
     }
 }
 
+// Ships with this turn rate or higher have the best turn start/stop speed
+static const float MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED = 20.0f;
+// Even the most unmaneuverable ship will take at most this long to start/stop to fully turn (smoothing).
+static const float MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE = 1.0f;
+// Even the most maneuverable ship will take at least this long to start/stop to fully turn (smoothing).
+static const float MINIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE = 0.25f;
+// When stopping from a turn, we may want to allow ships to turn back to head-on faster (feels better to control)
+static const float TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER = 1.5f;
+
 void SpaceShip::update(float delta)
 {
     ShipTemplateBasedObject::update(delta);
@@ -1072,13 +1081,13 @@ void SpaceShip::update(float delta)
     float maximum_turn_speed = fabs(turn_speed * getSystemEffectiveness(SYS_Maneuver));
 
     // bulky ships must first "crank up" their turn rate, making small corrections slower than with maneuverable ones
-    float sec_from_0_to_1_turn_rate = std::clamp((1 - (maximum_turn_speed / MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED)) * MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE, 0.0f, MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE);
+    float sec_from_0_to_1_turn_rate = std::clamp(MINIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE + (1 - (maximum_turn_speed / MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED)) * (MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE-MINIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE), MINIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE, MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE);
     // this is frame-rate dependent:
     // - when delta is small (high FPS), this code runs more often in the same time, so we adjust it slower
     // - when delta is larger (low FPS), this code runs less often in the same time, so we adjust it faster
     // There is still a difference, we can never get the exact same result without doing some other things, but it should be reasonably similar.
     // (this is why a dynamic-rate update function for anything physics related is a rather bad idea!)
-    float maximum_turn_speed_change = maximum_turn_speed * (sec_from_0_to_1_turn_rate <= 0.0f ? 2 : std::min(delta / sec_from_0_to_1_turn_rate, 2.0f));
+    float maximum_turn_speed_change_this_frame = maximum_turn_speed * (sec_from_0_to_1_turn_rate <= 0.0f ? 2 : std::min(delta / sec_from_0_to_1_turn_rate, 2.0f));
 
     float desired_turn_speed;
     if (last_rotation_command_was_manual)
@@ -1097,11 +1106,63 @@ void SpaceShip::update(float delta)
     }
     else
     {
-        // use target_rotation
-        // x10 means that we're a bit less smooth, but much more responsive for small to medium changes
-        // TODO: Add more code to calculate when we need to downscale this x10 effect for the purposes of preventing overshooting while still wanting maximum responsiveness
-        // Right now there is some slight overshooting for slow-turning ships.
-        desired_turn_speed = angleDifference(getRotation(), target_rotation) * 10;
+        // use target_rotation -> "ship's computer" does the calculation when we need to stop turning so that we don't overshoot
+
+        // We ensure this by checking if we would overshoot, if we kept going and only started to slow down in the next frame.
+        // If we would overshoot, start slowing down right now.
+        // This is self-correcting. Once turn rate becomes low enough, we're no longer on course to overshoot and automatically increase turn rate again.
+
+        // For this, we calculate a few things:
+        // 1. Remaining rotational difference in degrees (pos or neg)
+        auto angle_difference = angleDifference(getRotation(), target_rotation);
+
+        if (fabsf(angle_difference) < 0.01f)
+        {
+            // simplified for small angles and for going straight ahead
+            desired_turn_speed = angle_difference;
+        }
+        else
+        {
+            // 2. How fast will we be going next frame, if we assume that we keep powering up our turn (or keep turning at the max rate) this frame?
+            // If we're still accelerating, we might turn faster on the next frame than on this frame!
+            auto positive_turn_needed = angle_difference > 0;
+            auto turn_speed_next_frame = positive_turn_needed
+                ? std::fminf(maximum_turn_speed, current_turn_speed + maximum_turn_speed_change_this_frame)
+                : std::fmaxf(-maximum_turn_speed, current_turn_speed - maximum_turn_speed_change_this_frame);
+
+            // 3. How long would it take us to come to a complete stop starting next frame?
+            // We calculate the "perfect" time, which uses school physics math - in reality, we will in fact stop FASTER, due to our discrete steps.
+            // Example: if we only had 1 frame per second, we would be able to come to a complete stop next frame, assuming stopping takes 1 second. 0 extra distance!
+
+            // How fast will we be turning, from -1 to 1?
+            auto turn_rate_percentage_next_frame = turn_speed_next_frame / maximum_turn_speed;
+
+            // How long would it take to reduce that to 0? (NOT in frames, but in seconds)
+            auto turn_back_to_0_rate = sec_from_0_to_1_turn_rate / TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER;
+            auto sec_to_fully_stop_starting_next_frame = fabsf(turn_rate_percentage_next_frame) * turn_back_to_0_rate;
+
+            // 4. How far would we have turned in total until turn rate reaches 0?
+            // For this, we just use the math formula dist=vel_start * time + 1/2 * time^2 * accel
+            auto deceleration = maximum_turn_speed / std::fmax(turn_back_to_0_rate, 0.00001f);
+            if (positive_turn_needed)
+            {
+                deceleration *= -1.f;
+            }
+            auto turn_until_turn_rate_0 = (turn_speed_next_frame * sec_to_fully_stop_starting_next_frame) + (0.5f * sec_to_fully_stop_starting_next_frame * sec_to_fully_stop_starting_next_frame * deceleration);
+
+            // 5. Check if we would overshoot
+            auto overshoot = turn_until_turn_rate_0 - angle_difference;
+            if (positive_turn_needed ? overshoot > 0 : overshoot < 0)
+            {
+                // we would overshoot! start slowing down our turn NOW
+                desired_turn_speed = 0;
+            }
+            else
+            {
+                // keep turning as fast as possible
+                desired_turn_speed = angle_difference * 10;
+            }
+        }
     }
 
     // the desired turn speed is still limited by our actual maximum turn speed
@@ -1111,21 +1172,21 @@ void SpaceShip::update(float delta)
     {
         if (current_turn_speed < 0)
         {
-			// we're going from -1 to [-1;0], that's faster than 0 to 1! but only for the part of our change where current_turn_speed is above 0!
-			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change), desired_turn_speed - current_turn_speed);
-			maximum_turn_speed_change += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
+			// we're going from -1 to [-1;0], that's faster than 0 to 1! but only for the part of our change where current_turn_speed is still below 0!
+			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change_this_frame), desired_turn_speed - current_turn_speed);
+            maximum_turn_speed_change_this_frame += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
 		}
-		current_turn_speed = std::min(current_turn_speed + maximum_turn_speed_change, desired_turn_speed);
+		current_turn_speed = std::min(current_turn_speed + maximum_turn_speed_change_this_frame, desired_turn_speed);
 	}
 	else
 	{
 		if (current_turn_speed > 0)
 		{
-			// we're going from 1 to [0;1], that's faster than 0 to -1! but only for the part of our change where current_turn_speed is below 0!
-			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change), current_turn_speed - desired_turn_speed);
-			maximum_turn_speed_change += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
+			// we're going from 1 to [0;1], that's faster than 0 to -1! but only for the part of our change where current_turn_speed is still above 0!
+			float faster_turn_speed_change = std::min(std::min(fabs(current_turn_speed), maximum_turn_speed_change_this_frame), current_turn_speed - desired_turn_speed);
+            maximum_turn_speed_change_this_frame += faster_turn_speed_change * (TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER - 1.0f);
 		}
-        current_turn_speed = std::max(current_turn_speed - maximum_turn_speed_change, desired_turn_speed);
+        current_turn_speed = std::max(current_turn_speed - maximum_turn_speed_change_this_frame, desired_turn_speed);
     }
     
     //string s = "TURN DEBUG: delta: {a} , max: {b} , sec: {c} , max_chg: {d} , desi: {e} , curr: {f}";

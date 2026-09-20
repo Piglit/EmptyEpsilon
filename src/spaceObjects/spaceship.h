@@ -77,13 +77,6 @@ public:
     }
 };
 
-// Ships with this turn rate or higher can change their turn speed instantly
-static const float MAXIMUM_TURN_RATE_RESPONSIVENESS_AT_TURN_SPEED = 20.0f;
-// Even the most unmaneuverable ship will take at most this long to start/stop to fully turn (smoothing).
-static const float MAXIMUM_DURATION_SEC_FOR_0_TO_1_TURN_RATE_CHANGE = 1.0f;
-// When stopping from a turn, we may want to allow ships to turn back to head-on faster
-static const float TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER = 2.0f;
-
 class SpaceShip : public ShipTemplateBasedObject
 {
 public:

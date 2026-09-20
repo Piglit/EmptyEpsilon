@@ -17,6 +17,7 @@ class Nebula : public SpaceObjectWithSize
     static const int cloud_count = 32;
 
     int radar_visual;
+    std::uint32_t random_seed;
     NebulaCloud clouds[cloud_count];
 
 public:

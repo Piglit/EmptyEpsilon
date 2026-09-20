@@ -99,7 +99,7 @@ void Nebula::setSize(float size)
 
     // we sync the nebula look by making sure the RNG is synced
     // TODO: could there be floating point differences between systems, resulting in unsynced nebulas?
-    std::uint64_t seed = (((std::uint64_t)(size * 10000)) << 32) | getMultiplayerId();
+    uint64_t seed = (((uint64_t)getMultiplayerId()) << 32) | ((std::uint64_t)(size * 1000.0));
     // We can't use any built-in RNGs or distributions here since they produce different results between Linux and Windows. Bummer.
     PCG32 rng(seed);
     //LOG(Info, "Creating Nebula: size: ", size, " multiplayerid: ", getMultiplayerId());

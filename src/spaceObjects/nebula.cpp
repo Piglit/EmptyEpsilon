@@ -99,19 +99,10 @@ void Nebula::setSize(float size)
 
     // we sync the nebula look by making sure the RNG is synced
     // TODO: could there be floating point differences between systems, resulting in unsynced nebulas?
-    unsigned long long seed = (((unsigned long long)(size * 10000)) << 32) | getMultiplayerId();
-    std::mt19937_64 random_engine(seed);
+    std::uint64_t seed = (((std::uint64_t)(size * 10000)) << 32) | getMultiplayerId();
+    // We can't use any built-in RNGs or distributions here since they produce different results between Linux and Windows. Bummer.
+    PCG32 rng(seed);
     //LOG(Info, "Creating Nebula: size: ", size, " multiplayerid: ", getMultiplayerId());
-
-    auto random = [&random_engine](float fmin, float fmax)
-    {
-        return std::uniform_real_distribution<float>(fmin, fmax)(random_engine);
-    };
-
-    auto irandom = [&random_engine](int imin, int imax)
-    {
-        return std::uniform_int_distribution<>(imin, imax)(random_engine);
-    };
 
     // TODO: Maybe don't scale linearly?
     float relative_size = size / 5000.f;
@@ -120,11 +111,11 @@ void Nebula::setSize(float size)
 
     for(int n=0; n<cloud_count; n++)
     {
-        clouds[n].size = random(512, 1024 * 2);
-        clouds[n].texture = irandom(1, 3);
+        clouds[n].size = rng.random(512, 1024 * 2);
+        clouds[n].texture = rng.irandom(1, 3);
         float dist_min = clouds[n].size / 2.0f;
         float dist_max = std::max(dist_min, getRadius() - clouds[n].size);
-        clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * random(dist_min, dist_max);
+        clouds[n].offset = vec2FromAngle(float(n * 360 / cloud_count)) * rng.random(dist_min, dist_max);
     }
 }
 

@@ -118,7 +118,7 @@ public:
 
     static std::optional<xy> tryGetCoords(const int width, const int height, const int index)
     {
-        if (index < 0 || index >= length)
+        if (index < 0 || index >= width*height)
         {
             return {};
         }

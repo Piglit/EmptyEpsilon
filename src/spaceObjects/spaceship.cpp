@@ -247,6 +247,10 @@ REGISTER_SCRIPT_SUBCLASS_NO_CREATE(SpaceShip, ShipTemplateBasedObject)
     /// ship:setAcceleration(5,3.5) -- sets the max forward acceleration to 5 and reverse to 3.5
     /// ship:setAcceleration(5) -- sets the max forward and reverse acceleration to 5
     REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setAcceleration);
+    /// Sets the SpaceShip's turn speed in degrees per second.
+    /// Examples:
+    /// ship:setTurnSpeed(1000) -- sets the max turnspeed to 1000 degrees per second. whee!
+    REGISTER_SCRIPT_CLASS_FUNCTION(SpaceShip, setTurnSpeed);
     /// Sets the SpaceShip's combat maneuvering capacities.
     /// The boost value sets the forward maneuver capacity, and the strafe value sets the lateral maneuver capacity.
     /// Example: ship:setCombatManeuver(400,250) -- sets boost capacity to 400 and lateral to 250
@@ -1116,19 +1120,44 @@ void SpaceShip::update(float delta)
         // 1. Remaining rotational difference in degrees (pos or neg)
         auto angle_difference = angleDifference(getRotation(), target_rotation);
 
-        if (fabsf(angle_difference) < 0.01f)
-        {
-            // simplified for small angles and for going straight ahead
-            desired_turn_speed = angle_difference;
-        }
-        else
+        // Basically we want to turn as fast as possible, but not so fast that we might overshoot our goal if delta and max turn speed is large.
+        // desired_turn_speed is in Degrees Per Second! Not per frame!
+        // Low delta = high FPS = many opportunities to slow down -> slow down only at the last moment
+        // High delta = low FPS = fewer opportunities to slow down -> gotta slow down sooner
+        // Examples:
+        // 1 FPS -> turn at max as much as our angle difference is
+        // 60 FPS -> turn faster than that, because we can slow down way before actually reaching the goal
+        desired_turn_speed = std::clamp(angle_difference / std::fmaxf(delta, 0.00001f), -maximum_turn_speed, maximum_turn_speed);
+
+        // Overshoot prevention only makes sense if we actually run the risk of overshooting, so when the desired turn_speed is larger than what we can change in 1 frame
+        if(fabsf(desired_turn_speed) > maximum_turn_speed_change_this_frame * TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER)
         {
             // 2. How fast will we be going next frame, if we assume that we keep powering up our turn (or keep turning at the max rate) this frame?
             // If we're still accelerating, we might turn faster on the next frame than on this frame!
             auto positive_turn_needed = angle_difference > 0;
-            auto turn_speed_next_frame = positive_turn_needed
-                ? std::fminf(maximum_turn_speed, current_turn_speed + maximum_turn_speed_change_this_frame)
-                : std::fmaxf(-maximum_turn_speed, current_turn_speed - maximum_turn_speed_change_this_frame);
+            float turn_speed_next_frame;
+            if (positive_turn_needed)
+            {
+                if (desired_turn_speed > current_turn_speed)
+                {
+                    turn_speed_next_frame = std::fminf(desired_turn_speed, current_turn_speed + maximum_turn_speed_change_this_frame);
+                }
+                else
+                {
+                    turn_speed_next_frame = std::fmaxf(desired_turn_speed, current_turn_speed - maximum_turn_speed_change_this_frame * TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER);
+                }
+            }
+            else
+            {
+                if (desired_turn_speed < current_turn_speed)
+                {
+                    turn_speed_next_frame = std::fmaxf(desired_turn_speed, current_turn_speed - maximum_turn_speed_change_this_frame);
+                }
+                else
+                {
+                    turn_speed_next_frame = std::fminf(desired_turn_speed, current_turn_speed + maximum_turn_speed_change_this_frame * TURN_RATE_BACK_TOWARDS_ZERO_MULTIPLIER);
+                }
+            }
 
             // 3. How long would it take us to come to a complete stop starting next frame?
             // We calculate the "perfect" time, which uses school physics math - in reality, we will in fact stop FASTER, due to our discrete steps.
@@ -1151,16 +1180,14 @@ void SpaceShip::update(float delta)
             auto turn_until_turn_rate_0 = (turn_speed_next_frame * sec_to_fully_stop_starting_next_frame) + (0.5f * sec_to_fully_stop_starting_next_frame * sec_to_fully_stop_starting_next_frame * deceleration);
 
             // 5. Check if we would overshoot
-            auto overshoot = turn_until_turn_rate_0 - angle_difference;
+            // We assume that the delta between this tick and the next tick is going to be the same as it was from last tick to this tick -> not always true, but good enough
+            auto additional_rotation_from_this_to_next_tick = delta * turn_speed_next_frame;
+            auto overshoot = turn_until_turn_rate_0 + additional_rotation_from_this_to_next_tick - angle_difference;
             if (positive_turn_needed ? overshoot > 0 : overshoot < 0)
             {
                 // we would overshoot! start slowing down our turn NOW
+                //LOG(Info, "Overshoot: ", turn_until_turn_rate_0, " + ", additional_rotation_from_this_to_next_tick, " - ", angle_difference, " = ", overshoot);
                 desired_turn_speed = 0;
-            }
-            else
-            {
-                // keep turning as fast as possible
-                desired_turn_speed = angle_difference * 10;
             }
         }
     }

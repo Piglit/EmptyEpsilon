@@ -257,7 +257,7 @@ GuiTweakShip::GuiTweakShip(GuiContainer* owner)
 
     (new GuiLabel(left_col, "", tr("Turn speed:"), 30))->setSize(GuiElement::GuiSizeMax, 50);
     turn_speed_slider = new GuiSlider(left_col, "", 0.0, 35, 0.0, [this](float value) {
-        target->turn_speed = value;
+        target->setTurnSpeed(value);
     });
     turn_speed_slider->addOverlay()->setSize(GuiElement::GuiSizeMax, 40);
 

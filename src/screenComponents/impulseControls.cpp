@@ -40,12 +40,14 @@ impulse_control_speed(PreferencesManager::get("impulse_control_speed", "0.75").t
 
 void GuiImpulseControls::onDraw(sp::RenderTarget& target)
 {
+    auto controllable = canControl();
+    slider->setEnable(controllable);
     if (my_spaceship)
     {
         label->setValue(string(static_cast<int>(std::round(my_spaceship->current_impulse * 100.0f))) + "%");
 
         // after a while of no player inputs, or while docking, use the server's value
-        auto use_server_value = sw_last_player_input + SEC_RESYNC_TO_SERVER_AFTER < engine->getElapsedTime() || !canControl();
+        auto use_server_value = sw_last_player_input + SEC_RESYNC_TO_SERVER_AFTER < engine->getElapsedTime() || !controllable;
         if (use_server_value)
         {
             slider->setValue(my_spaceship->impulse_request);

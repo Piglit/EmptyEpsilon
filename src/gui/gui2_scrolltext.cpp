@@ -45,6 +45,7 @@ void GuiScrollText::onDraw(sp::RenderTarget& renderer)
     case sp::Alignment::Center: compensated_text_alignment = sp::Alignment::TopCenter; break;
     case sp::Alignment::BottomRight:
     case sp::Alignment::CenterRight:  compensated_text_alignment = sp::Alignment::TopRight; break;
+    default: /* Not relevant when already top-aligned */ break;
     }
 
     auto prepared = sp::RenderTarget::getDefaultFont()->prepare(this->text, 32, text_size, text_rect.size, compensated_text_alignment, sp::Font::FlagClip | sp::Font::FlagLineWrap);
@@ -89,23 +90,27 @@ void GuiScrollText::onDraw(sp::RenderTarget& renderer)
         case sp::Alignment::BottomRight:
             offset.y = extra_height;
             break;
+        default: /* Not relevant when already top-aligned */ break;
         }
 
-        // When the text is horizontally centered and we have no scrollbar, distribute the gained extra space.
-        // We don't re-layout the text just for this, but still, it looks nicer.
         text_rect.size.x += scrollbar_size.x;
         switch (text_alignment)
         {
         case sp::Alignment::TopCenter:
         case sp::Alignment::Center:
         case sp::Alignment::BottomCenter:
-            offset.x = scrollbar_size.x * 0.5;
+            // When the text is horizontally centered and we have no scrollbar, distribute the gained extra space.
+            // We don't re-layout the text just for this, but still, it looks nicer.
+            offset.x = scrollbar_size.x * 0.5f;
             break;
         case sp::Alignment::TopRight:
         case sp::Alignment::CenterRight:
         case sp::Alignment::BottomRight:
+            // When the text is right-aligned and we have no scrollbar, the extra space goes to the left.
+            // We don't re-layout the text just for this, but still, it looks nicer.
             offset.x = scrollbar_size.x;
             break;
+        default: /* Not relevant when already left-aligned. No re-layouting, even though we gained some extra space. */ break;
         }
     }
 

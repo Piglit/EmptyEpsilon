@@ -24,6 +24,7 @@ public:
 
     GuiScrollText* setScrollbarWidth(float width);
     GuiScrollText* setTextAlignment(sp::Alignment alignment);
+    sp::Alignment getTextAlignment() { return text_alignment; };
 
     virtual void onDraw(sp::RenderTarget& renderer) override;
 };
